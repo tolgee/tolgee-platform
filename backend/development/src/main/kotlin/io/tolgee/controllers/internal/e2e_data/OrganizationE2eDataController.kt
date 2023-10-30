@@ -73,13 +73,13 @@ class OrganizationE2eDataController(
               }
             }
           }
-          traceLogMeasureTime("delete user ${it.owner.email}") {
-            userAccountService.findActive(it.owner.email)?.let { userAccount ->
-              if (userAccount.name != "admin") {
-                userAccountService.delete(userAccount)
-              }
-            }
+        }
+        traceLogMeasureTime("delete users") {
+          val owners = data.mapNotNull {
+            if (it.owner.name == "admin") return@mapNotNull null
+            it.owner.email
           }
+          userAccountService.deleteByUserNames(owners)
         }
       }
     }

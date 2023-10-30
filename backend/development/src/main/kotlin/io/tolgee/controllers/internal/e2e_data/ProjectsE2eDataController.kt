@@ -135,10 +135,9 @@ class ProjectsE2eDataController(
         }
       }
 
-      users.forEach {
-        userAccountService.findActive(username = it.email)?.let {
-          userAccountRepository.delete(it)
-        }
+      traceLogMeasureTime("deleteUsers") {
+        val usernames = users.map { it.email }
+        userAccountService.deleteByUserNames(usernames)
       }
     }
   }

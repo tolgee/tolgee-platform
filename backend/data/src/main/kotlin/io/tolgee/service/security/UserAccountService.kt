@@ -29,6 +29,7 @@ import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationEventPublisher
@@ -52,6 +53,7 @@ class UserAccountService(
   private val organizationService: OrganizationService,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
+  private val cacheManager: CacheManager
 ) : Logging {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -143,33 +145,45 @@ class UserAccountService(
       val toDelete =
         userAccountRepository.findWithFetchedEmailVerificationAndPermissions(userAccount.id)
           ?: throw NotFoundException()
+      deleteWithFetchedData(toDelete)
+    }
+  }
 
-      toDelete.emailVerification?.let {
-        entityManager.remove(it)
+  private fun deleteWithFetchedData(toDelete: UserAccount) {
+    toDelete.emailVerification?.let {
+      entityManager.remove(it)
+    }
+    toDelete.apiKeys?.forEach {
+      entityManager.remove(it)
+    }
+    toDelete.pats?.forEach {
+      entityManager.remove(it)
+    }
+    toDelete.permissions.forEach {
+      entityManager.remove(it)
+    }
+    toDelete.preferences?.let {
+      entityManager.remove(it)
+    }
+    organizationService.getAllSingleOwnedByUser(toDelete).forEach {
+      it.preferredBy.removeIf { preferences ->
+        preferences.userAccount.id == toDelete.id
       }
-      toDelete.apiKeys?.forEach {
-        entityManager.remove(it)
-      }
-      toDelete.pats?.forEach {
-        entityManager.remove(it)
-      }
-      toDelete.permissions.forEach {
-        entityManager.remove(it)
-      }
-      toDelete.preferences?.let {
-        entityManager.remove(it)
-      }
-      organizationService.getAllSingleOwnedByUser(toDelete).forEach {
-        it.preferredBy.removeIf { preferences ->
-          preferences.userAccount.id == userAccount.id
-        }
-        organizationService.delete(it)
-      }
-      toDelete.organizationRoles.forEach {
-        entityManager.remove(it)
-      }
-      userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
-      applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+      organizationService.delete(it)
+    }
+    toDelete.organizationRoles.forEach {
+      entityManager.remove(it)
+    }
+    userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
+    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+  }
+
+  @Transactional
+  fun deleteByUserNames(usernames: List<String>) {
+    val data = userAccountRepository.findActiveWithFetchedDataByUserNames(usernames)
+    data.forEach {
+      deleteWithFetchedData(it)
+      cacheManager.getCache(Caches.USER_ACCOUNTS)?.evict(it.id)
     }
   }
 
