@@ -107,8 +107,8 @@ enum class Scope(
         HierarchyItem(BATCH_JOBS_CANCEL),
         HierarchyItem(BATCH_PRE_TRANSLATE_BY_TM, listOf(translationsEdit)),
         HierarchyItem(BATCH_MACHINE_TRANSLATE, listOf(translationsEdit)),
-        HierarchyItem(CDN_MANAGE),
-        HierarchyItem(AUTOMATIONS_MANAGE)
+        HierarchyItem(CDN_MANAGE, listOf(HierarchyItem(CDN_PUBLISH))),
+        HierarchyItem(AUTOMATIONS_MANAGE),
       )
     )
 

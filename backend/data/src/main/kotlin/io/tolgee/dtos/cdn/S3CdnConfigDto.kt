@@ -1,4 +1,4 @@
-package io.tolgee.ee.data
+package io.tolgee.dtos.cdn
 
 import io.tolgee.model.cdn.S3Config
 import javax.validation.constraints.NotBlank

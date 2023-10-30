@@ -10,7 +10,7 @@ import com.azure.storage.blob.BlobContainerClient
 import io.tolgee.exceptions.FileStoreException
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 
-class AzureBlobFileStorage(
+open class AzureBlobFileStorage(
   private val client: BlobContainerClient,
 ) : FileStorage {
   override fun readFile(storageFilePath: String): ByteArray {

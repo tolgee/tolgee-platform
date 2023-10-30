@@ -2,9 +2,9 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.cdn.CdnStorageDto
 import io.tolgee.ee.api.v2.hateoas.cdnStorage.CdnStorageModel
 import io.tolgee.ee.api.v2.hateoas.cdnStorage.CdnStorageModelAssembler
-import io.tolgee.ee.data.CdnStorageDto
 import io.tolgee.ee.data.StorageTestResult
 import io.tolgee.ee.service.CdnStorageService
 import io.tolgee.model.cdn.CdnStorage
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
 
-@Suppress("MVCPathVariableInspection")
+@Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
@@ -56,7 +56,7 @@ class CdnStorageController(
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @AllowApiAccess
   fun update(@PathVariable cdnId: Long, @Valid @RequestBody dto: CdnStorageDto): CdnStorageModel {
-    val cdnStorage = cdnStorageService.update(cdnId, dto)
+    val cdnStorage = cdnStorageService.update(projectHolder.project.id, cdnId, dto)
     return cdnStorageModelAssembler.toModel(cdnStorage)
   }
 
@@ -74,7 +74,7 @@ class CdnStorageController(
   @Operation(description = "Delete CDN Storage")
   @AllowApiAccess
   fun delete(@PathVariable cdnId: Long) {
-    cdnStorageService.delete(cdnId)
+    cdnStorageService.delete(projectHolder.project.id, cdnId)
   }
 
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
@@ -82,11 +82,11 @@ class CdnStorageController(
   @Operation(description = "Get CDN Storage")
   @AllowApiAccess
   fun get(@PathVariable cdnId: Long): CdnStorageModel {
-    return cdnStorageModelAssembler.toModel(cdnStorageService.get(cdnId))
+    return cdnStorageModelAssembler.toModel(cdnStorageService.get(projectHolder.project.id, cdnId))
   }
 
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
-  @GetMapping("/test")
+  @PostMapping("/test")
   @Operation(description = "Test CDN Storage")
   @AllowApiAccess
   fun test(@Valid @RequestBody dto: CdnStorageDto): StorageTestResult {
