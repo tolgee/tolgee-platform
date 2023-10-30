@@ -165,11 +165,13 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   )
   fun findWithFetchedEmailVerificationAndPermissions(id: Long): UserAccount?
 
-  @Query("""
+  @Query(
+    """
     from UserAccount ua 
     left join fetch ua.emailVerification
     left join fetch ua.permissions
     where ua.username in :usernames and ua.deletedAt is null
-  """)
+  """
+  )
   fun findActiveWithFetchedDataByUserNames(usernames: List<String>): List<UserAccount>
 }
