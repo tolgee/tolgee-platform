@@ -1,4 +1,4 @@
-package io.tolgee.ee.data
+package io.tolgee.dtos.cdn
 
 import javax.validation.Valid
 

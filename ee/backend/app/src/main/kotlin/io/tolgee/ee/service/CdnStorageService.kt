@@ -2,18 +2,15 @@ package io.tolgee.ee.service
 
 import io.tolgee.component.cdn.CdnFileStorageProvider
 import io.tolgee.constants.Message
-import io.tolgee.ee.data.AzureCdnConfigDto
-import io.tolgee.ee.data.CdnStorageDto
-import io.tolgee.ee.data.S3CdnConfigDto
+import io.tolgee.dtos.cdn.CdnStorageDto
+import io.tolgee.ee.component.cdn.CdnConfigProcessor
 import io.tolgee.ee.data.StorageTestResult
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
-import io.tolgee.model.cdn.AzureCdnConfig
 import io.tolgee.model.cdn.CdnStorage
 import io.tolgee.model.cdn.CdnStorageType
-import io.tolgee.model.cdn.S3CdnConfig
 import io.tolgee.model.cdn.StorageConfig
 import io.tolgee.repository.cdn.CdnStorageRepository
 import org.springframework.data.domain.Page
@@ -27,7 +24,8 @@ import javax.transaction.Transactional
 class CdnStorageService(
   private val cdnStorageRepository: CdnStorageRepository,
   private val entityManager: EntityManager,
-  private val cdnFileStorageProvider: CdnFileStorageProvider
+  private val cdnFileStorageProvider: CdnFileStorageProvider,
+  private val cdnConfigProcessors: List<CdnConfigProcessor<*, *>>
 ) {
   @Transactional
   fun create(projectId: Long, dto: CdnStorageDto): CdnStorage {
@@ -45,17 +43,23 @@ class CdnStorageService(
   fun find(id: Long) = cdnStorageRepository.findById(id).orElse(null)
 
   @Transactional
-  fun update(id: Long, dto: CdnStorageDto): CdnStorage {
+  fun update(projectId: Long, id: Long, dto: CdnStorageDto): CdnStorage {
     validateStorage(dto)
     val cdnStorage = get(id)
-    cdnStorage.s3CdnConfig?.let { entityManager.remove(it) }
-    cdnStorage.azureCdnConfig?.let { entityManager.remove(it) }
+    clearOther(cdnStorage)
     dtoToEntity(dto, cdnStorage)
     return cdnStorageRepository.save(cdnStorage)
   }
 
-  fun delete(id: Long) {
-    cdnStorageRepository.deleteById(id)
+  private fun clearOther(cdnStorage: CdnStorage) {
+    CdnStorageType.entries.toTypedArray().forEach { getProcessor(it).clearParentEntity(cdnStorage, entityManager) }
+  }
+
+  @Transactional
+  fun delete(projectId: Long, id: Long) {
+    val storage = get(projectId, id)
+    cdnConfigProcessors.forEach { it.clearParentEntity(storage, entityManager) }
+    cdnStorageRepository.delete(storage)
   }
 
   fun getAllInProject(projectId: Long, pageable: Pageable): Page<CdnStorage> {
@@ -68,8 +72,8 @@ class CdnStorageService(
 
   fun testStorage(dto: CdnStorageDto): StorageTestResult {
     val config: StorageConfig = getNonNullConfig(dto)
-    val storage = cdnFileStorageProvider.getStorage(config)
     try {
+      val storage = cdnFileStorageProvider.getStorage(config)
       storage.test()
     } catch (e: Exception) {
       if (e is ExceptionWithMessage) {
@@ -82,6 +86,7 @@ class CdnStorageService(
 
   private fun validateStorage(dto: CdnStorageDto) {
     val result = testStorage(dto)
+    @Suppress("UNCHECKED_CAST")
     if (!result.pass) throw BadRequestException(
       Message.CDN_STORAGE_CONFIG_INVALID,
       listOf(result.message, result.params) as List<Serializable?>?
@@ -91,8 +96,8 @@ class CdnStorageService(
   private fun getNonNullConfig(dto: CdnStorageDto): StorageConfig {
     validateDto(dto)
     val config: StorageConfig = when {
-      dto.azureCdnConfig != null -> dto.azureCdnConfig
-      dto.s3CdnConfig != null -> dto.s3CdnConfig
+      dto.azureCdnConfig != null -> dto.azureCdnConfig!!
+      dto.s3CdnConfig != null -> dto.s3CdnConfig!!
       else -> throw BadRequestException(Message.CDN_STORAGE_CONFIG_REQUIRED)
     }
     return config
@@ -105,32 +110,19 @@ class CdnStorageService(
     if (!isSingleConfig) throw BadRequestException(Message.CDN_STORAGE_CONFIG_REQUIRED)
   }
 
-  private fun dtoToEntity(dto: CdnStorageDto, storage: CdnStorage) {
-    when (storage.type) {
-      CdnStorageType.AZURE -> {
-        dto.azureCdnConfig ?: throw BadRequestException(Message.AZURE_CONFIG_REQUIRED)
-        val azureCdnConfig = AzureCdnConfig(storage)
-        dtoToEntity(dto.azureCdnConfig, azureCdnConfig)
-      }
+  private fun dtoToEntity(dto: CdnStorageDto, storage: CdnStorage): Any {
+    return getProcessorForDto(dto).configDtoToEntity(dto, storage, entityManager)!!
+  }
 
-      CdnStorageType.S3 -> {
-        dto.s3CdnConfig ?: throw BadRequestException(Message.S3_CONFIG_REQUIRED)
-        val s3CdnConfig = S3CdnConfig(storage)
-        dtoToEntity(dto.s3CdnConfig, s3CdnConfig)
-      }
+  private fun getProcessorForDto(dto: CdnStorageDto): CdnConfigProcessor<*, *> {
+    return getProcessor(getStorageType(dto))
+  }
+
+  private val processorCache = mutableMapOf<CdnStorageType, CdnConfigProcessor<*, *>>()
+  fun getProcessor(type: CdnStorageType): CdnConfigProcessor<*, *> {
+    return processorCache.computeIfAbsent(type) {
+      cdnConfigProcessors.find { it.type == type }
+        ?: throw IllegalStateException("Cannot find processor for type $type")
     }
-  }
-
-  private fun dtoToEntity(s3CdnConfig: S3CdnConfigDto, s3CdnConfig1: S3CdnConfig) {
-    s3CdnConfig1.accessKey = s3CdnConfig.accessKey
-    s3CdnConfig1.secretKey = s3CdnConfig.secretKey
-    s3CdnConfig1.bucketName = s3CdnConfig.bucketName
-    s3CdnConfig1.signingRegion = s3CdnConfig.signingRegion
-    s3CdnConfig.endpoint = s3CdnConfig.endpoint
-  }
-
-  private fun dtoToEntity(dto: AzureCdnConfigDto, azureCdnConfig: AzureCdnConfig) {
-    azureCdnConfig.connectionString = dto.connectionString
-    azureCdnConfig.containerName = dto.containerName
   }
 }

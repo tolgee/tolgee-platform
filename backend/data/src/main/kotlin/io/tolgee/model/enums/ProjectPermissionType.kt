@@ -51,7 +51,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.TRANSLATIONS_STATE_EDIT,
       Scope.BATCH_PRE_TRANSLATE_BY_TM,
       Scope.BATCH_MACHINE_TRANSLATE,
-      Scope.BATCH_JOBS_VIEW
+      Scope.BATCH_JOBS_VIEW,
     )
   ),
   MANAGE(
@@ -61,7 +61,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
   companion object {
     fun getRoles(): Map<String, Array<Scope>> {
       val result = mutableMapOf<String, Array<Scope>>()
-      ProjectPermissionType.values().forEach { value -> result[value.name] = value.availableScopes }
+      entries.forEach { value -> result[value.name] = value.availableScopes }
       return result.toMap()
     }
   }

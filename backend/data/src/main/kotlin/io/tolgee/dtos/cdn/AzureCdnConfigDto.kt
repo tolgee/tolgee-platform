@@ -1,4 +1,4 @@
-package io.tolgee.ee.data
+package io.tolgee.dtos.cdn
 
 import io.tolgee.model.cdn.AzureBlobConfig
 import javax.validation.constraints.NotBlank
