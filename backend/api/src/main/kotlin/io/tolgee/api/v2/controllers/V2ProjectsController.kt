@@ -215,6 +215,7 @@ class V2ProjectsController(
   @Operation(summary = "Creates project with specified languages")
   @RequestActivity(ActivityType.CREATE_PROJECT)
   @IsGlobalRoute
+  @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
     organizationRoleService.checkUserIsOwner(dto.organizationId)
     val project = projectService.createProject(dto)
