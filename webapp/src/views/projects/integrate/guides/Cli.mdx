@@ -1,0 +1,28 @@
+import { GoToDocsButton } from '../component/GoToDocsButton';
+
+<GoToDocsButton
+  href="https://tolgee.io/tolgee-cli"
+  style={{ float: 'right' }}
+/>
+
+To read more about Tolgee CLI, please visit [CLI docs](https://tolgee.io/tolgee-cli).
+
+## Load translations with Tolgee CLI
+
+To install Tolgee CLI globally run:
+
+```sh
+npm install --global @tolgee/cli
+```
+
+Login with project API key:
+
+```sh
+tolgee login "{{{apiKey}}}"
+```
+
+Pull translations into desired folder:
+
+```sh
+tolgee pull --project-id={{{projectId}}} ./i18n
+```

@@ -13,6 +13,9 @@ import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
+const API_URL_PLACEHOLDER = '{{{apiUrl}}}';
+const PROJECT_ID = '{{{projectId}}}';
+
 export const IntegrateView: FunctionComponent = () => {
   const project = useProject();
 
@@ -79,7 +82,7 @@ export const IntegrateView: FunctionComponent = () => {
           <StepLabel>
             <T keyName="integrate_step_integrate" />
           </StepLabel>
-          <StepContent>
+          <StepContent sx={{ maxWidth: '100%' }}>
             <React.Suspense fallback={<FullPageLoading />}>
               {selectedWeapon && selectedApiKey && (
                 <Box data-cy="integrate-guide" mb={12}>
@@ -97,10 +100,11 @@ export const IntegrateView: FunctionComponent = () => {
                             })
                         )
                         .replace(
-                          '{{{apiUrl}}}',
+                          API_URL_PLACEHOLDER,
                           process.env.REACT_APP_API_URL ||
                             window.location.origin
-                        );
+                        )
+                        .replace(PROJECT_ID, String(project.id));
                     }}
                   >
                     {React.createElement(selectedWeapon.guide)}

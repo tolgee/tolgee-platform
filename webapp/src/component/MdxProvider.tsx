@@ -13,11 +13,11 @@ require('prismjs/components/prism-shell-session');
 require('prism-svelte');
 
 const StyledCode = styled('pre')`
-  border-radius: ${({ theme }) => theme.shape.borderRadius};
-  min-width: 700px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
   padding: 20px;
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace;
+  overflow: auto;
 `;
 
 const StyledInlineCode = styled('span')`
