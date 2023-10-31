@@ -1,6 +1,6 @@
 import { default as React } from 'react';
 import { Guide } from 'tg.views/projects/integrate/types';
-import { Code, Settings } from '@mui/icons-material';
+import { Code, Settings, Terminal } from '@mui/icons-material';
 
 const getTechnologyImgComponent = (imgName: string) => {
   return function TechnologyImage(props) {
@@ -69,6 +69,14 @@ export const guides = [
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/Js.mdx')
+    ),
+  },
+  {
+    name: 'Tolgee CLI',
+    icon: Terminal,
+    guide: React.lazy(
+      // @ts-ignore
+      () => import('!babel-loader!@mdx-js/loader!./guides/Cli.mdx')
     ),
   },
   {
