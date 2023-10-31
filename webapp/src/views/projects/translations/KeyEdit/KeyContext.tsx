@@ -16,7 +16,7 @@ const StyledContent = styled(Box)`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-radius: 4px;
   padding: 10px;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr 1fr;
 `;
 
 const StyledReference = styled(MuiLink)`
@@ -26,6 +26,9 @@ const StyledReference = styled(MuiLink)`
   padding: 0px 4px;
   border-radius: 4px;
   border: 1px solid ${({ theme }) => theme.palette.emphasis[100]};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 ` as typeof MuiLink;
 
 const StyledReferencePrefix = styled('span')`
@@ -42,6 +45,13 @@ const StyledReferenceText = styled('span')`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const StyledTranslation = styled('div')`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 `;
 
 type Props = {
@@ -92,7 +102,7 @@ export const KeyContext = ({ keyId }: Props) => {
                 )}
                 <StyledReferenceText>{name}</StyledReferenceText>
               </StyledReference>
-              <div>{baseTranslation}</div>
+              <StyledTranslation>{baseTranslation}</StyledTranslation>
             </React.Fragment>
           )
         )}
