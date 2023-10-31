@@ -1,3 +1,10 @@
+# [3.37.0](https://github.com/tolgee/tolgee-platform/compare/v3.36.2...v3.37.0) (2023-10-31)
+
+
+### Features
+
+* add tolgee CLI to integration section + fix overflow ([#1981](https://github.com/tolgee/tolgee-platform/issues/1981)) ([0967fb5](https://github.com/tolgee/tolgee-platform/commit/0967fb5460af2730f5e0f6422b0f1d75b29eace5)), closes [#1920](https://github.com/tolgee/tolgee-platform/issues/1920)
+
 ## [3.36.2](https://github.com/tolgee/tolgee-platform/compare/v3.36.1...v3.36.2) (2023-10-31)
 
 
