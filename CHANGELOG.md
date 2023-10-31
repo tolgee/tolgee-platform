@@ -1,3 +1,10 @@
+## [3.36.2](https://github.com/tolgee/tolgee-platform/compare/v3.36.1...v3.36.2) (2023-10-31)
+
+
+### Bug Fixes
+
+* improve context overflowing formatting ([#1980](https://github.com/tolgee/tolgee-platform/issues/1980)) ([b00831b](https://github.com/tolgee/tolgee-platform/commit/b00831b2ab9fd2beaa343c001554701264bd0321))
+
 ## [3.36.1](https://github.com/tolgee/tolgee-platform/compare/v3.36.0...v3.36.1) (2023-10-27)
 
 
