@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.cdn.CdnStorageDto
 import io.tolgee.ee.api.v2.hateoas.cdnStorage.CdnStorageModel
 import io.tolgee.ee.api.v2.hateoas.cdnStorage.CdnStorageModelAssembler
@@ -35,18 +37,23 @@ import javax.validation.Valid
     "/v2/projects/{projectId}/cdn-storages",
   ]
 )
-@Tag(name = "Cdn management", description = "Endpoints for CDN management")
+@Tag(name = "Cdn Storages management (EE)", description = "Endpoints for CDN Storages management")
 class CdnStorageController(
   private val cdnStorageService: CdnStorageService,
   private val projectHolder: ProjectHolder,
   private val cdnStorageModelAssembler: CdnStorageModelAssembler,
   private val pageModelAssembler: PagedResourcesAssembler<CdnStorage>,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider
 ) {
   @PostMapping("")
   @Operation(description = "Create CDN Storage")
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @AllowApiAccess
-  fun createCdnStorage(@Valid @RequestBody dto: CdnStorageDto): CdnStorageModel {
+  fun create(@Valid @RequestBody dto: CdnStorageDto): CdnStorageModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.PROJECT_LEVEL_CDN_STORAGES
+    )
     val cdnStorage = cdnStorageService.create(projectHolder.project.id, dto)
     return cdnStorageModelAssembler.toModel(cdnStorage)
   }
@@ -56,6 +63,10 @@ class CdnStorageController(
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @AllowApiAccess
   fun update(@PathVariable cdnId: Long, @Valid @RequestBody dto: CdnStorageDto): CdnStorageModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.PROJECT_LEVEL_CDN_STORAGES
+    )
     val cdnStorage = cdnStorageService.update(projectHolder.project.id, cdnId, dto)
     return cdnStorageModelAssembler.toModel(cdnStorage)
   }
@@ -90,6 +101,10 @@ class CdnStorageController(
   @Operation(description = "Test CDN Storage")
   @AllowApiAccess
   fun test(@Valid @RequestBody dto: CdnStorageDto): StorageTestResult {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.PROJECT_LEVEL_CDN_STORAGES
+    )
     return cdnStorageService.testStorage(dto)
   }
 }

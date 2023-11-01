@@ -8,4 +8,5 @@ import java.io.Serializable
 @Relation(collectionRelation = "cdnStorages", itemRelation = "cdnStorage")
 class CdnStorageModel(
   val id: Long,
+  val name: String
 ) : RepresentationModel<CdnStorageModel>(), Serializable

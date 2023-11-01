@@ -9,7 +9,6 @@ interface IExportParams {
   var languages: Set<String>?
   var format: ExportFormat
   var structureDelimiter: Char?
-
   var filterKeyId: List<Long>?
   var filterKeyIdNot: List<Long>?
   var filterTag: String?

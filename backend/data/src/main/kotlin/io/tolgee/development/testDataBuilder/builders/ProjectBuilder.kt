@@ -9,6 +9,8 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.automations.Automation
+import io.tolgee.model.cdn.CdnExporter
+import io.tolgee.model.cdn.CdnStorage
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
@@ -47,6 +49,8 @@ class ProjectBuilder(
     var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
     var screenshots = mutableListOf<ScreenshotBuilder>()
     var keyDistances = mutableListOf<KeysDistanceBuilder>()
+    var cdnStorages = mutableListOf<CdnStorageBuilder>()
+    var cdnExporters = mutableListOf<CdnExporterBuilder>()
   }
 
   var data = DATA()
@@ -70,8 +74,6 @@ class ProjectBuilder(
   fun addKey(keyName: String): KeyBuilder {
     return addKey(keyName, null)
   }
-
-  fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
 
   fun addKey(keyName: String, ft: (KeyBuilder.() -> Unit)?): KeyBuilder {
     return addKey {
@@ -151,6 +153,10 @@ class ProjectBuilder(
     data.keyDistances.add(builder)
     return builder
   }
+
+  fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
+  fun addCdnStorage(ft: FT<CdnStorage>) = addOperation(data.cdnStorages, ft)
+  fun addCdnExporter(ft: FT<CdnExporter>) = addOperation(data.cdnExporters, ft)
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
 }

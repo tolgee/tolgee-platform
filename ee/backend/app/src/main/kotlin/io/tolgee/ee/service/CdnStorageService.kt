@@ -31,7 +31,7 @@ class CdnStorageService(
   fun create(projectId: Long, dto: CdnStorageDto): CdnStorage {
     validateStorage(dto)
     val project = entityManager.getReference(Project::class.java, projectId)
-    val storage = CdnStorage(project, getStorageType(dto))
+    val storage = CdnStorage(project, dto.name)
     storage.project = project
     dtoToEntity(dto, storage)
     cdnStorageRepository.save(storage)
@@ -46,6 +46,7 @@ class CdnStorageService(
   fun update(projectId: Long, id: Long, dto: CdnStorageDto): CdnStorage {
     validateStorage(dto)
     val cdnStorage = get(id)
+    cdnStorage.name = dto.name
     clearOther(cdnStorage)
     dtoToEntity(dto, cdnStorage)
     return cdnStorageRepository.save(cdnStorage)

@@ -2957,4 +2957,12 @@
     <changeSet author="jenik (generated)" id="1696001960751-13">
         <dropTable tableName="cdn"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1698856123057-1">
+        <addColumn tableName="cdn_storage">
+            <column name="name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1698856123057-2">
+        <dropColumn columnName="type" tableName="cdn_storage"/>
+    </changeSet>
 </databaseChangeLog>

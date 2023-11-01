@@ -25,6 +25,10 @@ class CdnUploader(
   }
 
   private fun getStorage(cdnExporter: CdnExporter) = cdnExporter.cdnStorage
-    ?.let { cdnFileStorageProvider.getStorage(config = it.storageConfig) }
+    ?.let {
+      cdnFileStorageProvider.getStorage(
+        config = it.storageConfig ?: throw IllegalStateException("No storage config stored")
+      )
+    }
     ?: cdnFileStorageProvider.getCdnStorageWithDefaultClient()
 }
