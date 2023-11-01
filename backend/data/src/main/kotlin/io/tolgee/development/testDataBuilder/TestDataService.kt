@@ -12,6 +12,7 @@ import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.cdn.CdnExporterService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -72,7 +73,8 @@ class TestDataService(
   private val namespaceService: NamespaceService,
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
-  private val automationService: AutomationService
+  private val automationService: AutomationService,
+  private val cdnExporterService: CdnExporterService
 ) : Logging {
 
   @Transactional
@@ -203,6 +205,25 @@ class TestDataService(
     saveScreenshotData(builder)
     saveKeyDistances(builder)
     saveAutomations(builder)
+    saveCdnStorages(builder)
+    saveCdnExporters(builder)
+  }
+
+  private fun saveCdnExporters(builder: ProjectBuilder) {
+    builder.data.cdnExporters.forEach {
+      if (it.self.slug.isEmpty()) {
+        it.self.slug = cdnExporterService.generateSlug(it.projectBuilder.self.name, it.self.project.id)
+      }
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveCdnStorages(builder: ProjectBuilder) {
+    builder.data.cdnStorages.forEach {
+      it.self.azureCdnConfig?.let { entityManager.persist(it) }
+      it.self.s3CdnConfig?.let { entityManager.persist(it) }
+      entityManager.persist(it.self)
+    }
   }
 
   private fun saveAutomations(builder: ProjectBuilder) {

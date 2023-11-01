@@ -68,10 +68,21 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `returns single storage`() {
+    val (storage) = performCreate()
+    performProjectAuthGet("cdn-storages/${storage.id}").andIsOk.andAssertThatJson {
+      node("name").isEqualTo("Azure")
+    }
+  }
+
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `updates CDN storage`() {
     val (storage) = performCreate()
     performProjectAuthPut(
       "cdn-storages/${storage.id}", mapOf(
+        "name" to "S3",
         "s3CdnConfig" to mapOf(
           "bucketName" to "bucketName",
           "accessKey" to "accessKey",
@@ -80,7 +91,9 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           "signingRegion" to "signingRegion",
         )
       )
-    ).andIsOk
+    ).andIsOk.andAssertThatJson {
+      node("name").isEqualTo("S3")
+    }
 
     executeInNewTransaction {
       val updatedStorage = cdnStorageService.get(storage.id)
@@ -88,7 +101,6 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       updatedStorage.azureCdnConfig.assert.isNull()
     }
   }
-
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -119,6 +131,7 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "cdn-storages/test",
       mapOf(
+        "name" to "azure",
         "azureCdnConfig" to mapOf(
           "connectionString" to "fakeConnectionString",
           "containerName" to "fakeContainerName"
@@ -133,6 +146,7 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "cdn-storages/test",
       mapOf(
+        "name" to "s3",
         "s3CdnConfig" to mapOf(
           "bucketName" to "bucketName",
           "accessKey" to "accessKey",
@@ -154,6 +168,7 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val result = performProjectAuthPost(
       "cdn-storages",
       mapOf(
+        "name" to "Azure",
         "azureCdnConfig" to mapOf(
           "connectionString" to "fakeConnectionString",
           "containerName" to "fakeContainerName"

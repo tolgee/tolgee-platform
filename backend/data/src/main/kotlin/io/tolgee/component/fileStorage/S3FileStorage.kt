@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import java.io.ByteArrayInputStream
 
-class S3FileStorage(
+open class S3FileStorage(
   private val bucketName: String,
   private val s3: S3Client,
 ) : FileStorage {

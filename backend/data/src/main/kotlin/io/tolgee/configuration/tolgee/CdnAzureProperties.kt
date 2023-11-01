@@ -7,4 +7,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class CdnAzureProperties : AzureBlobConfig {
   override var connectionString: String? = null
   override var containerName: String? = null
+
+  fun clear() {
+    connectionString = null
+    containerName = null
+  }
 }
