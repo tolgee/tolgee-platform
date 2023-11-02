@@ -46,7 +46,6 @@ class CdnStorageService(
   fun update(projectId: Long, id: Long, dto: CdnStorageDto): CdnStorage {
     validateStorage(dto)
     val cdnStorage = get(id)
-    cdnStorage.name = dto.name
     clearOther(cdnStorage)
     dtoToEntity(dto, cdnStorage)
     return cdnStorageRepository.save(cdnStorage)
@@ -111,8 +110,10 @@ class CdnStorageService(
     if (!isSingleConfig) throw BadRequestException(Message.CDN_STORAGE_CONFIG_REQUIRED)
   }
 
-  private fun dtoToEntity(dto: CdnStorageDto, storage: CdnStorage): Any {
-    return getProcessorForDto(dto).configDtoToEntity(dto, storage, entityManager)!!
+  private fun dtoToEntity(dto: CdnStorageDto, entity: CdnStorage): Any {
+    entity.name = dto.name
+    entity.publicUrlPrefix = dto.publicUrlPrefix
+    return getProcessorForDto(dto).configDtoToEntity(dto, entity, entityManager)!!
   }
 
   private fun getProcessorForDto(dto: CdnStorageDto): CdnConfigProcessor<*, *> {
