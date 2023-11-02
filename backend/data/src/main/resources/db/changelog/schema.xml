@@ -2981,4 +2981,21 @@
     <changeSet author="jenik (generated)" id="1698933165360-4">
         <dropColumn columnName="params" tableName="automation_action"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1698940841119-1">
+        <addColumn tableName="cdn_storage">
+            <column name="public_url_prefix" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1698942589097-1">
+        <addColumn tableName="automation">
+            <column name="project_default" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1698940841119-2">
+        <sql>
+            create unique index on public.automation (project_id) where project_default is true;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
