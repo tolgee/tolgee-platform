@@ -14,7 +14,7 @@ class AutomationTrigger(
   var automation: Automation,
 ) : StandardAuditModel() {
   @Enumerated(STRING)
-  var type: AutomationTriggerType = AutomationTriggerType.MANUAL
+  var type: AutomationTriggerType = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION
 
   /**
    * only when type is ACTIVITY

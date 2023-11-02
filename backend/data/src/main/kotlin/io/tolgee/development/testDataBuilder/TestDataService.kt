@@ -204,9 +204,9 @@ class TestDataService(
     saveProjectAvatars(builder)
     saveScreenshotData(builder)
     saveKeyDistances(builder)
-    saveAutomations(builder)
     saveCdnStorages(builder)
     saveCdnExporters(builder)
+    saveAutomations(builder)
   }
 
   private fun saveCdnExporters(builder: ProjectBuilder) {
@@ -228,6 +228,10 @@ class TestDataService(
 
   private fun saveAutomations(builder: ProjectBuilder) {
     builder.data.automations.forEach {
+      it.self.actions.forEach {
+        entityManager.persist(it)
+      }
+      it.self.triggers.forEach { entityManager.persist(it) }
       automationService.save(it.self)
     }
   }

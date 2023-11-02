@@ -2,7 +2,7 @@ package io.tolgee.model.automations
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.StandardAuditModel
-import org.hibernate.annotations.Type
+import io.tolgee.model.cdn.CdnExporter
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import javax.persistence.Entity
@@ -19,6 +19,6 @@ class AutomationAction(
 ) : StandardAuditModel() {
   var type: AutomationActionType = AutomationActionType.CDN_PUBLISH
 
-  @Type(type = "jsonb")
-  var params: Any? = null
+  @ManyToOne
+  var cdnExporter: CdnExporter? = null
 }

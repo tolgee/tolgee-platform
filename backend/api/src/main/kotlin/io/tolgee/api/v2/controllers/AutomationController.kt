@@ -80,7 +80,7 @@ class AutomationController(
   @GetMapping("/{automationId}")
   @Operation(description = "Get Automation")
   @AllowApiAccess
-  fun get(@PathVariable id: Long): AutomationModel {
-    return automationModelAssembler.toModel(automationService.get(projectHolder.project.id, id))
+  fun get(@PathVariable automationId: Long): AutomationModel {
+    return automationModelAssembler.toModel(automationService.get(projectHolder.project.id, automationId))
   }
 }
