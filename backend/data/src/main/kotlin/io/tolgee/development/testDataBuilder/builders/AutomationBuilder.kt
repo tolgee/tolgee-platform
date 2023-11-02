@@ -6,5 +6,7 @@ import io.tolgee.model.automations.Automation
 class AutomationBuilder(
   val projectBuilder: ProjectBuilder,
 ) : EntityDataBuilder<Automation, AutomationBuilder> {
+
   override var self = Automation(projectBuilder.self)
+
 }

@@ -1,13 +1,18 @@
 package io.tolgee.dtos.request.automation
 
 import javax.validation.Valid
+import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
 
-class AutomationRequest {
+class AutomationRequest(
+  @NotBlank
+  var name: String,
+
   @Valid
   @NotEmpty
-  var triggers: List<AutomationTriggerRequest> = listOf()
+  var triggers: List<AutomationTriggerRequest>,
+
   @Valid
   @NotEmpty
-  var actions: List<AutomationActionRequest> = listOf()
-}
+  var actions: List<AutomationActionRequest>,
+)
