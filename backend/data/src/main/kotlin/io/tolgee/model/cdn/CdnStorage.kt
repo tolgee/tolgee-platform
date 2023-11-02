@@ -17,6 +17,8 @@ class CdnStorage(
   var name: String
 ) : StandardAuditModel() {
 
+  var publicUrlPrefix: String? = null
+
   @OneToOne(mappedBy = "cdnStorage", fetch = FetchType.LAZY, optional = true)
   var azureCdnConfig: AzureCdnConfig? = null
 

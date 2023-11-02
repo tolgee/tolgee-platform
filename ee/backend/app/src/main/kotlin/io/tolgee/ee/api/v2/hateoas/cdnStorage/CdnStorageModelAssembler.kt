@@ -10,6 +10,6 @@ class CdnStorageModelAssembler() : RepresentationModelAssemblerSupport<CdnStorag
   CdnStorageController::class.java, CdnStorageModel::class.java
 ) {
   override fun toModel(entity: CdnStorage): CdnStorageModel {
-    return CdnStorageModel(entity.id, entity.name)
+    return CdnStorageModel(entity.id, entity.name, entity.publicUrlPrefix)
   }
 }

@@ -9,5 +9,6 @@ data class CdnStorageDto(
   @field:Valid
   val azureCdnConfig: AzureCdnConfigDto?,
   @field:Valid
-  val s3CdnConfig: S3CdnConfigDto?
+  val s3CdnConfig: S3CdnConfigDto?,
+  val publicUrlPrefix: String? = null
 )
