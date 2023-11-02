@@ -192,8 +192,8 @@ task runStandardTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         excludeTags "contextRecreating", "websocket"
     }
-    jvmArgs "-Dspring.test.context.cache.maxSize=12"
-    maxHeapSize = "3000m"
+    jvmArgs "-Dspring.test.context.cache.maxSize=20"
+    maxHeapSize = "5000m"
 }
 
 task runWebsocketTests(type: Test, group: 'verification') {
