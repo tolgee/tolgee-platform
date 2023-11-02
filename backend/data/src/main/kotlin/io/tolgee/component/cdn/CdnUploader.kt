@@ -18,7 +18,7 @@ class CdnUploader(
 
     exportService.export(cdnExporter.project.id, cdnExporter).forEach {
       storage.storeFile(
-        storageFilePath = "${cdnExporter.project.id}/${cdnExporter.slug}/${it.key}",
+        storageFilePath = "${cdnExporter.slug}/${it.key}",
         bytes = it.value.readBytes()
       )
     }
