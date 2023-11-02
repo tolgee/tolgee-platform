@@ -2,15 +2,24 @@ package io.tolgee.service.automations
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Caches
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.automations.AutomationDto
+import io.tolgee.dtos.request.CdnExporterDto
+import io.tolgee.dtos.request.DefaultCdnDto
+import io.tolgee.dtos.request.automation.AutomationActionRequest
 import io.tolgee.dtos.request.automation.AutomationRequest
+import io.tolgee.dtos.request.automation.AutomationTriggerRequest
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.automations.AutomationAction
+import io.tolgee.model.automations.AutomationActionType
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
+import io.tolgee.model.cdn.CdnExporter
 import io.tolgee.repository.AutomationRepository
+import io.tolgee.service.cdn.CdnExporterService
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
@@ -26,7 +35,8 @@ class AutomationService(
   private val cacheManager: CacheManager,
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
-  private val automationRepository: AutomationRepository
+  private val automationRepository: AutomationRepository,
+  private val cdnExporterService: CdnExporterService
 ) {
   @Cacheable(value = [Caches.AUTOMATIONS], key = "{#projectId, #automationTriggerType, #activityType}")
   @Transactional
@@ -104,16 +114,17 @@ class AutomationService(
   }
 
   @Transactional
-  fun create(projectId: Long, dto: AutomationRequest): Automation {
+  fun create(projectId: Long, dto: AutomationRequest, projectDefault: Boolean = false): Automation {
     val automation = Automation(entityManager.getReference(Project::class.java, projectId))
     dtoToEntity(automation, dto)
     setNewTriggersAndActions(dto, automation)
+    automation.projectDefault = projectDefault
     return save(automation)
   }
 
   private fun dtoToEntity(
-      automation: Automation,
-      dto: AutomationRequest
+    automation: Automation,
+    dto: AutomationRequest
   ) {
     automation.name = dto.name
   }
@@ -235,5 +246,53 @@ class AutomationService(
 
     automation.actions.addAll(actions)
     automation.triggers.addAll(triggers)
+  }
+
+  @Transactional
+  fun createProjectDefaultCdn(projectId: Long, dto: DefaultCdnDto): Automation {
+    if (projectDefaultExists(projectId)) {
+      throw BadRequestException(Message.PROJECT_ALREADY_HAS_DEFAULT_CDN_CONFIGURED)
+    }
+    val exporter = getDefaultExporter(dto, projectId)
+
+    return this.create(
+      projectId = projectId,
+      dto = AutomationRequest(
+        name = "Default CDN Automation",
+        triggers = listOf(
+          AutomationTriggerRequest(
+            type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
+            activityType = null,
+            debounceDurationInMs = 5000
+          )
+        ),
+        actions = listOf(
+          AutomationActionRequest(
+            type = AutomationActionType.CDN_PUBLISH,
+            cdnExporterId = exporter.id
+          )
+        ),
+      ),
+      projectDefault = true
+    )
+  }
+
+  private fun getDefaultExporter(
+      dto: DefaultCdnDto,
+      projectId: Long
+  ): CdnExporter {
+    val exporterDto = CdnExporterDto()
+    exporterDto.copyPropsFrom(dto)
+    exporterDto.name = "Default Project CDN"
+    val exporter = cdnExporterService.create(projectId, exporterDto)
+    return exporter
+  }
+
+  private fun projectDefaultExists(projectId: Long): Boolean =
+    automationRepository.existsByProjectIdAndProjectDefault(projectId)
+
+  fun getDefaultProjectAutomation(projectId: Long): Automation? {
+    val id = automationRepository.getProjectDefaultId(projectId) ?: return null
+    return getAutomationWithFetchedData(id, projectId)
   }
 }

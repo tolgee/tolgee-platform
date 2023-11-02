@@ -13,7 +13,6 @@ class Automation(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
 ) : StandardAuditModel() {
-
   @NotBlank
   var name: String = ""
 
@@ -22,4 +21,6 @@ class Automation(
 
   @OneToMany(mappedBy = "automation", orphanRemoval = true)
   var actions: MutableList<AutomationAction> = mutableListOf()
+
+  var projectDefault: Boolean = false
 }

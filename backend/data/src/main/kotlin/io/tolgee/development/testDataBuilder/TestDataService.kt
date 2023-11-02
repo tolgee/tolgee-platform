@@ -212,7 +212,7 @@ class TestDataService(
   private fun saveCdnExporters(builder: ProjectBuilder) {
     builder.data.cdnExporters.forEach {
       if (it.self.slug.isEmpty()) {
-        it.self.slug = cdnExporterService.generateSlug(it.projectBuilder.self.name, it.self.project.id)
+        it.self.slug = cdnExporterService.generateSlug(it.projectBuilder.self.id)
       }
       entityManager.persist(it.self)
     }

@@ -7,6 +7,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.cdn.CdnExporter
 import io.tolgee.model.cdn.CdnStorage
 import io.tolgee.repository.cdn.CdnExporterRepository
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,6 +21,7 @@ class CdnExporterService(
   private val slugGenerator: SlugGenerator,
   private val entityManager: EntityManager,
   private val cdnStorageProvider: CdnStorageProvider,
+  private val projectService: ProjectService
 ) {
   @Transactional
   fun create(projectId: Long, dto: CdnExporterDto): CdnExporter {
@@ -27,13 +29,14 @@ class CdnExporterService(
     cdnExporter.name = dto.name
     cdnExporter.cdnStorage = getStorage(projectId, dto.cdnStorageId)
     cdnExporter.copyPropsFrom(dto)
-    cdnExporter.slug = generateSlug(dto.name, projectId)
+    cdnExporter.slug = generateSlug(projectId)
     return cdnExporterRepository.save(cdnExporter)
   }
 
-  fun generateSlug(projectName: String, projectId: Long): String {
-    return slugGenerator.generate(projectName, 3, 50) {
-      cdnExporterRepository.isSlugUnique(projectId, it)
+  fun generateSlug(projectId: Long): String {
+    val projectDto = projectService.getDto(projectId)
+    return slugGenerator.generate(projectDto.name, 3, 50) {
+      cdnExporterRepository.isSlugUnique(projectDto.id, it)
     }
   }
 
