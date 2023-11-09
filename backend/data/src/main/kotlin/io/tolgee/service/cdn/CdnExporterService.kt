@@ -7,6 +7,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.cdn.CdnExporter
 import io.tolgee.model.cdn.CdnStorage
 import io.tolgee.repository.cdn.CdnExporterRepository
+import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import org.springframework.data.domain.Page
@@ -21,7 +22,8 @@ class CdnExporterService(
   private val slugGenerator: SlugGenerator,
   private val entityManager: EntityManager,
   private val cdnStorageProvider: CdnStorageProvider,
-  private val projectService: ProjectService
+  private val projectService: ProjectService,
+  private val automationService: AutomationService
 ) {
   @Transactional
   fun create(projectId: Long, dto: CdnExporterDto): CdnExporter {
@@ -30,7 +32,11 @@ class CdnExporterService(
     cdnExporter.cdnStorage = getStorage(projectId, dto.cdnStorageId)
     cdnExporter.copyPropsFrom(dto)
     cdnExporter.slug = generateSlug(projectId)
-    return cdnExporterRepository.save(cdnExporter)
+    cdnExporterRepository.save(cdnExporter)
+    if (dto.autoPublish) {
+      automationService.createForCdn(cdnExporter)
+    }
+    return cdnExporter
   }
 
   fun generateSlug(projectId: Long): String {
@@ -55,7 +61,17 @@ class CdnExporterService(
     exporter.cdnStorage = getStorage(projectId, dto.cdnStorageId)
     exporter.name = dto.name
     exporter.copyPropsFrom(dto)
+    handleUpdateAutoPublish(dto, exporter)
     return cdnExporterRepository.save(exporter)
+  }
+
+  private fun handleUpdateAutoPublish(dto: CdnExporterDto, exporter: CdnExporter) {
+    if (dto.autoPublish && exporter.automationActions.isEmpty()) {
+      automationService.createForCdn(exporter)
+    }
+    if (!dto.autoPublish && exporter.automationActions.isNotEmpty()) {
+      automationService.removeForCdn(exporter)
+    }
   }
 
   fun delete(id: Long) {

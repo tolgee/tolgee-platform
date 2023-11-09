@@ -5,6 +5,7 @@ import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.enums.TranslationState
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
@@ -12,6 +13,7 @@ import org.hibernate.annotations.TypeDefs
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 
@@ -32,6 +34,9 @@ class CdnExporter(
 
   @ManyToOne
   var cdnStorage: CdnStorage? = null
+
+  @OneToMany(mappedBy = "cdnExporter")
+  var automationActions: MutableList<AutomationAction> = mutableListOf()
 
   @Type(type = "jsonb")
   override var languages: Set<String>? = null

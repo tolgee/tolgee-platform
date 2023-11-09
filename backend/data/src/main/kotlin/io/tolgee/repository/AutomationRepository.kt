@@ -40,12 +40,4 @@ interface AutomationRepository : JpaRepository<Automation?, Long?> {
   fun find(id: Long): Automation?
   fun deleteByIdAndProjectId(automationId: Long, projectId: Long): Long
   fun findByIdAndProjectId(automationId: Long, projectId: Long): Automation?
-  fun existsByProjectIdAndProjectDefault(projectId: Long, projectDefault: Boolean = true): Boolean
-
-  @Query(
-    """
-      select id from Automation where project.id = :projectId and projectDefault is true
-    """
-  )
-  fun getProjectDefaultId(projectId: Long): Long?
 }

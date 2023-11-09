@@ -12,6 +12,8 @@ class CdnExporterDto : IExportParams {
 
   var cdnStorageId: Long? = null
 
+  var autoPublish: Boolean = false
+
   @field:Parameter(
     description = """Languages to be contained in export.
                 
