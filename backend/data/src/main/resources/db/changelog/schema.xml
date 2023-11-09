@@ -2998,4 +2998,10 @@
             create unique index on public.automation (project_id) where project_default is true;
         </sql>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1699551584435-1">
+        <dropColumn columnName="name" tableName="automation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1699551584435-2">
+        <dropColumn columnName="project_default" tableName="automation"/>
+    </changeSet>
 </databaseChangeLog>

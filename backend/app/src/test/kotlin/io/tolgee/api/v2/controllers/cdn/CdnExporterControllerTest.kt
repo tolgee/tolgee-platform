@@ -69,9 +69,41 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("id").isValidId
       node("name").isEqualTo("Azure 2")
       node("format").isEqualTo("JSON")
+      node("autoPublish").isEqualTo(false)
       node("storage") {
         node("name").isEqualTo("Azure")
       }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creates exporter with auto publish`() {
+    var id: Long? = null
+    performProjectAuthPost(
+      "cdn-exporters",
+      mapOf("name" to "Azure 2", "cdnStorageId" to testData.azureCdnStorage.self.id, "autoPublish" to true)
+    ).andAssertThatJson {
+      node("id").isNumber.satisfies {
+        id = it.toLong()
+      }
+      node("autoPublish").isEqualTo(true)
+    }
+
+    executeInNewTransaction {
+      cdnExporterService.get(id!!).automationActions.assert.isNotEmpty
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `removes the automation on update`() {
+    performProjectAuthPut(
+      "cdn-exporters/${testData.defaultServerExporter.self.id}",
+      mapOf("name" to "DS", "autoPublish" to false)
+    )
+    executeInNewTransaction {
+      cdnExporterService.get(testData.defaultServerExporter.self.id).automationActions.assert.isEmpty()
     }
   }
 

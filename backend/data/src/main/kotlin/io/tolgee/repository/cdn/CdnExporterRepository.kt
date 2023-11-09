@@ -16,6 +16,27 @@ interface CdnExporterRepository : JpaRepository<CdnExporter?, Long?> {
     """
   )
   fun isSlugUnique(projectId: Long, slug: String): Boolean
+
+  @Query(
+    """
+    from CdnExporter e
+    left join fetch e.automationActions
+    where e.project.id in :projectId
+  """,
+    countQuery = """
+    select count(*)
+    from CdnExporter e
+    where e.project.id in :projectId
+  """
+  )
   fun findAllByProjectId(projectId: Long, pageable: Pageable): Page<CdnExporter>
+
+  @Query(
+    """
+    from CdnExporter e
+    left join fetch e.automationActions
+    where e.id = :cdnId and e.project.id = :projectId
+  """
+  )
   fun getByProjectIdAndId(projectId: Long, cdnId: Long): CdnExporter
 }

@@ -15,7 +15,8 @@ class CdnExporterModel(
   val name: String,
   val slug: String,
   val storage: CdnStorageModel?,
-  val publicUrl: String?
+  val publicUrl: String?,
+  val autoPublish: Boolean
 ) : RepresentationModel<CdnExporterModel>(), Serializable, IExportParams {
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON

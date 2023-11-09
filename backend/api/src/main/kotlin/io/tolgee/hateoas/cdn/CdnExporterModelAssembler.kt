@@ -20,7 +20,8 @@ class CdnExporterModelAssembler(
       name = entity.name,
       slug = entity.slug,
       storage = entity.cdnStorage?.let { cdnStorageModelAssembler.toModel(it) },
-      publicUrl = getPublicUrl(entity)
+      publicUrl = getPublicUrl(entity),
+      autoPublish = entity.automationActions.isNotEmpty()
     ).also {
       it.copyPropsFrom(entity)
     }
