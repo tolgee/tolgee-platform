@@ -14,7 +14,7 @@ import javax.xml.stream.events.StartElement
 
 class Xliff12FileProcessor(
   override val context: FileProcessorContext,
-  override val xmlEventReader: XMLEventReader
+  val xmlEventReader: XMLEventReader
 ) : ImportFileProcessor() {
 
   private val openElements = mutableListOf("xliff")
@@ -22,7 +22,7 @@ class Xliff12FileProcessor(
     get() = openElements.lastOrNull()
 
   private var sw = StringWriter()
-  private val of: XMLOutputFactory = XMLOutputFactory.newInstance()
+  private val of: XMLOutputFactory = XMLOutputFactory.newDefaultFactory()
   private var xw: XMLEventWriter? = null
 
   override fun process() {

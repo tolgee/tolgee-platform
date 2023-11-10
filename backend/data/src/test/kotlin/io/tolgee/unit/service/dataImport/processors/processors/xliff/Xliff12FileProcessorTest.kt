@@ -20,8 +20,14 @@ class Xliff12FileProcessorTest {
   private lateinit var importFile: ImportFile
   private lateinit var importFileDto: ImportFileDto
   private lateinit var fileProcessorContext: FileProcessorContext
-  private val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
+  private val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
   private lateinit var xmlStreamReader: XMLEventReader
+
+  private val xmlEventReader: XMLEventReader
+    get() {
+      val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
+      return inputFactory.createXMLEventReader(importFileDto.inputStream)
+    }
 
   @BeforeEach
   fun setup() {
@@ -32,13 +38,12 @@ class Xliff12FileProcessorTest {
       File("src/test/resources/import/xliff/example.xliff")
         .inputStream()
     )
-    xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 
   @Test
   fun `processes xliff 12 file correctly`() {
-    Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
+    Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
     assertThat(fileProcessorContext.languages).hasSize(2)
     assertThat(fileProcessorContext.translations).hasSize(176)
     assertThat(fileProcessorContext.translations["vpn.devices.removeA11Y"]!![0].text).isEqualTo("Remove %1")
@@ -75,7 +80,7 @@ class Xliff12FileProcessorTest {
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
     val start = System.currentTimeMillis()
-    Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
+    Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
     assertThat(System.currentTimeMillis() - start).isLessThan(4000)
   }
 
@@ -88,7 +93,7 @@ class Xliff12FileProcessorTest {
     )
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
-    Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
+    Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
     assertThat(fileProcessorContext.translations).hasSize(2)
     fileProcessorContext.fileEntity.issues.let { issues ->
       assertThat(issues).hasSize(4)
