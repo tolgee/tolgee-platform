@@ -156,7 +156,7 @@ class BatchJobConcurrentLauncher(
     }
     if (!executionItem.shouldNotBeDebounced()) {
       logger.trace(
-        """Execution ${executionItem.chunkExecutionId} not ready to execute (debouncing), adding back to queue""".trimMargin()
+        """Execution ${executionItem.chunkExecutionId} not ready to execute (debouncing), adding back to queue"""
       )
       addBackToQueue(executionItem)
       return false

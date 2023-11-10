@@ -214,11 +214,14 @@ class AutomationService(
       AutomationTrigger(automation).apply {
         this.type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION
         this.debounceDurationInMs = 5000
-      })
+      }
+    )
 
-    automation.actions.add(AutomationAction(automation).apply {
-      this.type = AutomationActionType.CDN_PUBLISH
-      this.cdnExporter = cdnExporter
-    })
+    automation.actions.add(
+      AutomationAction(automation).apply {
+        this.type = AutomationActionType.CDN_PUBLISH
+        this.cdnExporter = cdnExporter
+      }
+    )
   }
 }

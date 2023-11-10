@@ -46,7 +46,8 @@ class CdnExporterTestData : BaseTestData() {
   val automation = projectBuilder.addAutomation {
     this.triggers.add(
       AutomationTrigger(this)
-      .also { it.type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION })
+        .also { it.type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION }
+    )
     this.actions.add(AutomationAction(this).also { it.cdnExporter = defaultServerExporter.self })
   }
 }
