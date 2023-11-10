@@ -8,5 +8,4 @@ class AutomationBuilder(
 ) : EntityDataBuilder<Automation, AutomationBuilder> {
 
   override var self = Automation(projectBuilder.self)
-
 }

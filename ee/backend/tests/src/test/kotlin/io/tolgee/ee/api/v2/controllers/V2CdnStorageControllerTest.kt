@@ -75,13 +75,13 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `updates CDN storage`() {
     val (storage) = performCreate()
     performProjectAuthPut(
-      "cdn-storages/${storage.id}", mapOf(
+      "cdn-storages/${storage.id}",
+      mapOf(
         "name" to "S3",
         "s3CdnConfig" to mapOf(
           "bucketName" to "bucketName",
@@ -161,7 +161,7 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun performCreate(): Pair<CdnStorage, ResultActions> {
     doAnswer {
       mock<AzureBlobFileStorage>()
-    }.whenever(cdnFileStorageProvider).getStorage(any());
+    }.whenever(cdnFileStorageProvider).getStorage(any())
 
     var id: Long? = null
 
