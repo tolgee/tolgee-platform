@@ -6,6 +6,8 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import java.util.*
 import javax.xml.namespace.QName
+import javax.xml.stream.XMLEventReader
+import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.StartElement
 
 class XliffFileProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
@@ -18,6 +20,11 @@ class XliffFileProcessor(override val context: FileProcessorContext) : ImportFil
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message)
     }
+  }
+
+  private val xmlEventReader: XMLEventReader by lazy {
+    val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
+    inputFactory.createXMLEventReader(context.file.inputStream)
   }
 
   private val version: String by lazy {
