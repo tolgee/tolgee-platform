@@ -16,7 +16,7 @@ const getTechnologyImgComponent = (imgName: string) => {
 
 export const guides = [
   {
-    name: 'React (CRA)',
+    name: 'React (VITE)',
     icon: getTechnologyImgComponent('react'),
     guide: React.lazy(
       // @ts-ignore
