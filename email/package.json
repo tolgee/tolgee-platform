@@ -1,0 +1,36 @@
+{
+  "name": "@tolgee/email",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "email dev",
+    "build": "rimraf out && cross-env NODE_ENV=production email export",
+    "prettier": "prettier --write ./emails ./components",
+    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components"
+  },
+  "devDependencies": {
+    "@react-email/components": "0.0.7",
+    "@types/html-to-text": "^9.0.3",
+    "@types/node": "^20.8.7",
+    "@types/react": "^18.2.29",
+    "@types/react-dom": "^18.2.14",
+    "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "@typescript-eslint/parser": "^6.9.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.52.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.33.2",
+    "html-to-text": "^9.0.5",
+    "intl-messageformat": "^10.5.4",
+    "prettier": "^3.0.3",
+    "react": "18.2.0",
+    "react-dom": "^18.2.0",
+    "react-email": "1.9.5",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.2.2"
+  },
+  "exports": {
+    "./components/*.ts": "./components/*.ts",
+    "./components/*.tsx": "./components/*.tsx"
+  }
+}
