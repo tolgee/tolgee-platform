@@ -18,6 +18,7 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.core.io.ClassPathResource
 
 class ProjectBuilder(
@@ -51,6 +52,7 @@ class ProjectBuilder(
     var keyDistances = mutableListOf<KeysDistanceBuilder>()
     var cdnStorages = mutableListOf<CdnStorageBuilder>()
     var cdnExporters = mutableListOf<CdnExporterBuilder>()
+    var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
   }
 
   var data = DATA()
@@ -157,6 +159,7 @@ class ProjectBuilder(
   fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
   fun addCdnStorage(ft: FT<CdnStorage>) = addOperation(data.cdnStorages, ft)
   fun addCdnExporter(ft: FT<CdnExporter>) = addOperation(data.cdnExporters, ft)
+  fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
 }

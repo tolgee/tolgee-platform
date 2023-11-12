@@ -1,18 +1,24 @@
 package io.tolgee.automation
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.cdn.CdnFileStorageProvider
 import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.development.testDataBuilder.data.BaseTestData
-import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.development.testDataBuilder.data.CdnExporterTestData
+import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
+import io.tolgee.fixtures.verifyHeader
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import org.junit.jupiter.api.BeforeEach
+import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -22,12 +28,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import java.util.function.Consumer
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.client.RestTemplate
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
-  lateinit var testData: BaseTestData
 
   @MockBean
   @Autowired
@@ -35,23 +44,71 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var fileStorageMock: FileStorage
 
-  @BeforeEach
-  fun setup() {
-    testData = BaseTestData()
+  @MockBean
+  @Autowired
+  lateinit var restTemplate: RestTemplate
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cdn automation works`() {
+    val testData = CdnExporterTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     fileStorageMock = mock()
     doReturn(fileStorageMock).whenever(cdnClientProvider).getCdnStorageWithDefaultClient()
+    modifyTranslationData()
+    verifyCdnPublish()
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `user can create an cdn automation which works`() {
-    val cdnId = createCdn()
-    createAutomation(cdnId)
+  fun `it executes webhook`() {
+    val testData = WebhooksTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    this.projectSupplier = { testData.projectBuilder.self }
+    doAnswer {
+      ResponseEntity.status(HttpStatus.OK).build<Any>()
+    }.whenever(restTemplate)
+      .exchange(
+        any<String>(),
+        any<HttpMethod>(),
+        any<HttpEntity<*>>(),
+        any<Class<*>>()
+      )
+
     modifyTranslationData()
-    verifyCdnPublish()
+
+    verifyWebhookExecuted(testData)
+  }
+
+  private fun verifyWebhookExecuted(testData: WebhooksTestData) {
+    waitForNotThrowing {
+      val callArguments = Mockito.mockingDetails(restTemplate).invocations.single().arguments
+      callArguments[0].assert
+        .isEqualTo(testData.webhookConfig.self.url)
+      val httpEntity = callArguments[2] as HttpEntity<String>
+
+
+
+      verifyWebhookSignature(httpEntity, testData.webhookConfig.self.webhookSecret)
+
+      val body = jacksonObjectMapper().readValue<Map<String, Any?>>(httpEntity.body!!)
+      (callArguments[1]).assert.isEqualTo(HttpMethod.POST)
+      assertThatJson(body) {
+        node("webhookConfigId").isValidId
+        node("data") {
+          node("revisionId").isNumber
+        }
+      }
+      }
+  }
+
+  private fun verifyWebhookSignature(httpEntity: HttpEntity<String>, secret: String) {
+    val signature = httpEntity.headers["Tolgee-Signature"]
+    signature.assert.isNotNull
+    verifyHeader(httpEntity.body, signature!!.single(), secret, 300, currentDateProvider.date.time / 1000)
   }
 
   private fun verifyCdnPublish() {
@@ -72,34 +129,5 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
   }
 
-  private fun createAutomation(cdnId: Long) {
-    performProjectAuthPost(
-      "/automations",
-      mapOf(
-        "triggers" to listOf(mapOf("type" to "TRANSLATION_DATA_MODIFICATION")),
-        "actions" to listOf(
-          mapOf(
-            "type" to "CDN_PUBLISH",
-            "cdnPublishParams" to mapOf(
-              "cdnId" to cdnId
-            )
-          )
-        )
-      )
-    ).andIsOk
-  }
 
-  private fun createCdn(): Long {
-    var cdnId = 0L
-    performProjectAuthPost("/cdns", mapOf("name" to "Cool CDN", "exportParams" to mapOf("format" to "XLIFF")))
-      .andIsOk.andAssertThatJson {
-        node("id").isNumber.satisfies(
-          Consumer {
-            cdnId = it.toLong()
-          }
-        )
-      }
-    cdnId.assert.isNotEqualTo(0L)
-    return cdnId
-  }
 }

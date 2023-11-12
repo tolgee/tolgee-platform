@@ -1,7 +1,8 @@
 package io.tolgee.activity
 
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.activity.projectActivityView.ProjectActivityViewDataProvider
+import io.tolgee.activity.projectActivityView.ProjectActivityViewByPageableProvider
+import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityRevision
@@ -64,11 +65,19 @@ class ActivityService(
 
   @Transactional
   fun getProjectActivity(projectId: Long, pageable: Pageable): Page<ProjectActivityView> {
-    return ProjectActivityViewDataProvider(
+    return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
       pageable = pageable
-    ).getProjectActivity()
+    ).get()
+  }
+
+  @Transactional
+  fun getProjectActivity(revisionId: Long): ProjectActivityView? {
+    return ProjectActivityViewByRevisionProvider(
+      applicationContext = applicationContext,
+      revisionId
+    ).get()
   }
 
   @Transactional

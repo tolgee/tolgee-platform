@@ -333,7 +333,7 @@ class BatchJobTestUtil(
   fun runDebouncedJob(): BatchJob {
     return executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
-        request = AutomationBjRequest(1, 1),
+        request = AutomationBjRequest(1, 1, 1),
         project = testData.projectBuilder.self,
         author = testData.user,
         type = BatchJobType.AUTOMATION,

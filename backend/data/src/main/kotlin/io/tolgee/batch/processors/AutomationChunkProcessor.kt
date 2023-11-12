@@ -20,12 +20,12 @@ class AutomationChunkProcessor(
     onProgress: (Int) -> Unit
   ) {
     chunk.forEach {
-      automationRunner.run(it.actionId)
+      automationRunner.run(it.actionId, it.activityRevisionId)
     }
   }
 
   override fun getTarget(data: AutomationBjRequest): List<AutomationTargetItem> {
-    return listOf(AutomationTargetItem(data.triggerId, data.actionId))
+    return listOf(AutomationTargetItem(data.triggerId, data.actionId, data.activityRevisionId))
   }
 
   override fun getParamsType(): Class<AutomationBjParams> {
