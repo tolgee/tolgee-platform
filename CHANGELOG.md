@@ -1,3 +1,10 @@
+## [3.37.1](https://github.com/tolgee/tolgee-platform/compare/v3.37.0...v3.37.1) (2023-11-12)
+
+
+### Bug Fixes
+
+* use VITE instead of CRA in integrations ([#1985](https://github.com/tolgee/tolgee-platform/issues/1985)) ([aa7365a](https://github.com/tolgee/tolgee-platform/commit/aa7365a0b0f070a83501c3e69c30f797fcfa178e))
+
 # [3.37.0](https://github.com/tolgee/tolgee-platform/compare/v3.36.2...v3.37.0) (2023-10-31)
 
 
