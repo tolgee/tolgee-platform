@@ -39,10 +39,6 @@ class CdnExporterTestData : BaseTestData() {
     name = "S3"
   }
 
-  val keyWithTranslation = this.projectBuilder.addKey("key") {
-    addTranslation("en", "Hello")
-  }
-
   val automation = projectBuilder.addAutomation {
     this.triggers.add(
       AutomationTrigger(this)

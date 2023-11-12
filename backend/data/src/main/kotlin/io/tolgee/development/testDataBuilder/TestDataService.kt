@@ -206,7 +206,14 @@ class TestDataService(
     saveKeyDistances(builder)
     saveCdnStorages(builder)
     saveCdnExporters(builder)
+    saveCdnWebhookConfigs(builder)
     saveAutomations(builder)
+  }
+
+  private fun saveCdnWebhookConfigs(builder: ProjectBuilder) {
+    builder.data.webhookConfigs.forEach {
+      entityManager.persist(it.self)
+    }
   }
 
   private fun saveCdnExporters(builder: ProjectBuilder) {

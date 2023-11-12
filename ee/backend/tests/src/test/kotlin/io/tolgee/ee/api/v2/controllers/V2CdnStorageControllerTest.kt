@@ -3,7 +3,9 @@ package io.tolgee.ee.api.v2.controllers
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.cdn.CdnFileStorageProvider
 import io.tolgee.component.fileStorage.AzureBlobFileStorage
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.service.CdnStorageService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -12,6 +14,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.model.cdn.CdnStorage
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -35,13 +38,22 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var cdnFileStorageProvider: CdnFileStorageProvider
 
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeEach
   fun beforeEach() {
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CDN_STORAGES)
     val testData = BaseTestData()
     Mockito.reset(cdnFileStorageProvider)
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
+  }
+
+  @AfterEach
+  fun clenup() {
+    enabledFeaturesProvider.forceEnabled = listOf()
   }
 
   @Test

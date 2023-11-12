@@ -18,17 +18,14 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.EntityUtil
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import javax.persistence.EntityManager
 import javax.persistence.criteria.Predicate
 
-class ProjectActivityViewDataProvider(
+class ActivityViewByRevisionsProvider(
   private val applicationContext: ApplicationContext,
-  private val projectId: Long,
-  private val pageable: Pageable
+  private val revisions: Collection<ActivityRevision>,
 ) {
-
   val userAccountService: UserAccountService =
     applicationContext.getBean(UserAccountService::class.java)
 
@@ -41,7 +38,6 @@ class ProjectActivityViewDataProvider(
   private val entityUtil: EntityUtil =
     applicationContext.getBean(EntityUtil::class.java)
 
-  private lateinit var revisions: Page<ActivityRevision>
   private lateinit var authors: Map<Long, UserAccount>
   private lateinit var modifiedEntities: Map<Long, List<ModifiedEntityView>>
   private lateinit var revisionIds: MutableList<Long>
@@ -52,10 +48,10 @@ class ProjectActivityViewDataProvider(
   private lateinit var entityExistences: Map<Pair<String, Long>, Boolean>
   private lateinit var params: Map<Long, Any?>
 
-  fun getProjectActivity(): Page<ProjectActivityView> {
+  fun get(): List<ProjectActivityView> {
     prepareData()
 
-    val newContent = revisions.content.map { revision ->
+    return revisions.map { revision ->
       val author = authors[revision.authorId]
       ProjectActivityView(
         revisionId = revision.id,
@@ -72,13 +68,10 @@ class ProjectActivityViewDataProvider(
         params = params[revision.id]
       )
     }
-
-    return PageImpl(newContent, revisions.pageable, revisions.totalElements)
   }
 
   private fun prepareData() {
-    revisions = getProjectActivityRevisions(projectId, pageable)
-    revisionIds = revisions.map { it.id }.toList()
+    revisionIds = revisions.map { it.id }.toMutableList()
 
     allDataReturningEventTypes = ActivityType.values().filter { !it.onlyCountsInList }
 
@@ -127,9 +120,9 @@ class ProjectActivityViewDataProvider(
     return counts
   }
 
-  private fun getAuthors(revisions: Page<ActivityRevision>) =
+  private fun getAuthors(revisions: Collection<ActivityRevision>) =
     userAccountService.getAllByIdsIncludingDeleted(
-      revisions.content.mapNotNull { it.authorId }.toSet()
+      revisions.mapNotNull { it.authorId }.toSet()
     ).associateBy { it.id }
 
   private fun getAllowedRevisionRelations(

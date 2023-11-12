@@ -3,6 +3,7 @@ package io.tolgee.model.automations
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.cdn.CdnExporter
+import io.tolgee.model.webhook.WebhookConfig
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import javax.persistence.Entity
@@ -21,4 +22,7 @@ class AutomationAction(
 
   @ManyToOne
   var cdnExporter: CdnExporter? = null
+
+  @ManyToOne
+  var webhookConfig: WebhookConfig? = null
 }

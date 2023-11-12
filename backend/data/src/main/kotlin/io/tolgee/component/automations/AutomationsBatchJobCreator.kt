@@ -20,18 +20,24 @@ class AutomationsBatchJobCreator(
   val automationService: AutomationService,
   val entityManager: EntityManager
 ) {
-  fun executeActivityAutomation(projectId: Long, type: ActivityType) {
-    startBatchJobForAutomations(projectId, AutomationTriggerType.ACTIVITY, type)
+  fun executeActivityAutomation(projectId: Long, type: ActivityType, activityRevisionId: Long) {
+    startBatchJobForAutomations(projectId, AutomationTriggerType.ACTIVITY, type, activityRevisionId)
   }
 
-  fun executeTranslationDataModificationAutomation(projectId: Long) {
-    startBatchJobForAutomations(projectId, AutomationTriggerType.TRANSLATION_DATA_MODIFICATION)
+  fun executeTranslationDataModificationAutomation(projectId: Long, activityRevisionId: Long) {
+    startBatchJobForAutomations(
+      projectId,
+      AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
+      null,
+      activityRevisionId
+    )
   }
 
   fun startBatchJobForAutomations(
     projectId: Long,
     triggerType: AutomationTriggerType,
-    activityType: ActivityType? = null
+    activityType: ActivityType? = null,
+    activityRevisionId: Long
   ) {
     val automations =
       automationService.getProjectAutomations(projectId, triggerType, activityType)
@@ -41,7 +47,7 @@ class AutomationsBatchJobCreator(
 
     automationTriggersMap.forEach { (trigger, automation) ->
       automation.actions.forEach { action ->
-        startAutomationBatchJob(trigger, action, projectId)
+        startAutomationBatchJob(trigger, action, projectId, activityRevisionId)
       }
     }
   }
@@ -52,10 +58,11 @@ class AutomationsBatchJobCreator(
   private fun startAutomationBatchJob(
     trigger: AutomationTriggerDto,
     action: AutomationActionDto,
-    projectId: Long
+    projectId: Long,
+    activityRevisionId: Long
   ) {
     batchJobService.startJob(
-      AutomationBjRequest(trigger.id, action.id),
+      AutomationBjRequest(trigger.id, action.id, activityRevisionId),
       project = entityManager.getReference(Project::class.java, projectId),
       author = null,
       type = BatchJobType.AUTOMATION,

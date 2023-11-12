@@ -23,14 +23,14 @@ class AutomationActivityListener(
   private fun executeTranslationDataModificationAutomationIfShould(event: OnProjectActivityStoredEvent) {
     val projectId = event.activityRevision.projectId ?: return
     if (isTranslationDataModification(event)) {
-      automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId)
+      automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId, event.activityRevision.id)
     }
   }
 
   private fun executeActivityAutomationIfShould(event: OnProjectActivityStoredEvent) {
     val activityType = event.activityRevision.type ?: return
     val projectId = event.activityRevision.projectId ?: return
-    automationsBatchJobCreator.executeActivityAutomation(projectId, activityType)
+    automationsBatchJobCreator.executeActivityAutomation(projectId, activityType, event.activityRevision.id)
   }
 
   private fun isTranslationDataModification(event: OnProjectActivityStoredEvent): Boolean {
