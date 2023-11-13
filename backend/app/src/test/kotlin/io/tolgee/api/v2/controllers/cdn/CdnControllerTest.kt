@@ -7,13 +7,13 @@ import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.CdnExporterTestData
+import io.tolgee.development.testDataBuilder.data.CdnTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.service.cdn.CdnExporterService
+import io.tolgee.service.cdn.CdnService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -27,12 +27,12 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 
-class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
-  lateinit var testData: CdnExporterTestData
+  lateinit var testData: CdnTestData
 
   @Autowired
-  lateinit var cdnExporterService: CdnExporterService
+  lateinit var cdnService: CdnService
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
@@ -47,7 +47,7 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @BeforeEach
   fun setup() {
-    testData = CdnExporterTestData()
+    testData = CdnTestData()
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -63,7 +63,7 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `creates exporter`() {
     performProjectAuthPost(
-      "cdn-exporters",
+      "cdns",
       mapOf("name" to "Azure 2", "cdnStorageId" to testData.azureCdnStorage.self.id)
     ).andAssertThatJson {
       node("id").isValidId
@@ -81,7 +81,7 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `creates exporter with auto publish`() {
     var id: Long? = null
     performProjectAuthPost(
-      "cdn-exporters",
+      "cdns",
       mapOf("name" to "Azure 2", "cdnStorageId" to testData.azureCdnStorage.self.id, "autoPublish" to true)
     ).andAssertThatJson {
       node("id").isNumber.satisfies {
@@ -91,7 +91,7 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
 
     executeInNewTransaction {
-      cdnExporterService.get(id!!).automationActions.assert.isNotEmpty
+      cdnService.get(id!!).automationActions.assert.isNotEmpty
     }
   }
 
@@ -99,11 +99,11 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `removes the automation on update`() {
     performProjectAuthPut(
-      "cdn-exporters/${testData.defaultServerExporter.self.id}",
+      "cdns/${testData.defaultServerExporter.self.id}",
       mapOf("name" to "DS", "autoPublish" to false)
     )
     executeInNewTransaction {
-      cdnExporterService.get(testData.defaultServerExporter.self.id).automationActions.assert.isEmpty()
+      cdnService.get(testData.defaultServerExporter.self.id).automationActions.assert.isEmpty()
     }
   }
 
@@ -111,7 +111,7 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `updates exporter`() {
     performProjectAuthPut(
-      "cdn-exporters/${testData.s3Exporter.self.id}",
+      "cdns/${testData.s3Exporter.self.id}",
       mapOf("name" to "S3 2", "cdnStorageId" to testData.s3CdnStorage.self.id)
     ).andAssertThatJson {
       node("name").isEqualTo("S3 2")
@@ -124,7 +124,7 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `lists exporters`() {
-    performProjectAuthGet("cdn-exporters").andIsOk.andAssertThatJson {
+    performProjectAuthGet("cdns").andIsOk.andAssertThatJson {
       node("_embedded.exporters") {
         isArray.hasSize(3)
       }
@@ -134,7 +134,7 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `get single`() {
-    performProjectAuthGet("cdn-exporters/${testData.s3Exporter.self.id}").andIsOk
+    performProjectAuthGet("cdns/${testData.s3Exporter.self.id}").andIsOk
       .andAssertThatJson {
         node("name").isEqualTo("S3")
       }
@@ -144,16 +144,16 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `deletes exporter`() {
     performProjectAuthDelete(
-      "cdn-exporters/${testData.s3Exporter.self.id}"
+      "cdns/${testData.defaultServerExporter.self.id}"
     ).andIsOk
-    cdnExporterService.find(testData.s3Exporter.self.id).assert.isNull()
+    cdnService.find(testData.defaultServerExporter.self.id).assert.isNull()
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `publishes to s3`() {
     val mocked = mockS3FileStorage()
-    performProjectAuthPost("cdn-exporters/${testData.s3Exporter.self.id}")
+    performProjectAuthPost("cdns/${testData.s3Exporter.self.id}")
     assertStores(mocked)
   }
 
@@ -161,16 +161,16 @@ class CdnExporterControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `publishes to azure`() {
     val mocked = mockAzureFileStorage()
-    performProjectAuthPost("cdn-exporters/${testData.azureExporter.self.id}").andIsOk
+    performProjectAuthPost("cdns/${testData.azureExporter.self.id}").andIsOk
     assertStores(mocked)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `publishes to default server exporter`() {
+  fun `publishes to default server cdn`() {
     tolgeeProperties.cdn.s3.bucketName = "my-bucket"
     val mocked = mockS3FileStorage()
-    performProjectAuthPost("cdn-exporters/${testData.defaultServerExporter.self.id}").andIsOk
+    performProjectAuthPost("cdns/${testData.defaultServerExporter.self.id}").andIsOk
     assertStores(mocked)
   }
 

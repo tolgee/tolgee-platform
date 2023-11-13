@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.cdn.CdnFileStorageProvider
 import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.development.testDataBuilder.data.CdnExporterTestData
+import io.tolgee.development.testDataBuilder.data.CdnTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -51,7 +51,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `cdn automation works`() {
-    val testData = CdnExporterTestData()
+    val testData = CdnTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }

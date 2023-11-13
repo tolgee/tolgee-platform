@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.model.enums.TranslationState
 import javax.validation.constraints.NotBlank
 
-class CdnExporterDto : IExportParams {
+class CdnDto : IExportParams {
   @field:NotBlank
   var name: String = ""
 

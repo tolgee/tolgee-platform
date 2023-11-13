@@ -9,7 +9,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.automations.Automation
-import io.tolgee.model.cdn.CdnExporter
+import io.tolgee.model.cdn.Cdn
 import io.tolgee.model.cdn.CdnStorage
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
@@ -51,7 +51,7 @@ class ProjectBuilder(
     var screenshots = mutableListOf<ScreenshotBuilder>()
     var keyDistances = mutableListOf<KeysDistanceBuilder>()
     var cdnStorages = mutableListOf<CdnStorageBuilder>()
-    var cdnExporters = mutableListOf<CdnExporterBuilder>()
+    var cdns = mutableListOf<CdnBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
   }
 
@@ -158,7 +158,7 @@ class ProjectBuilder(
 
   fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
   fun addCdnStorage(ft: FT<CdnStorage>) = addOperation(data.cdnStorages, ft)
-  fun addCdnExporter(ft: FT<CdnExporter>) = addOperation(data.cdnExporters, ft)
+  fun addCdn(ft: FT<Cdn>) = addOperation(data.cdns, ft)
   fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user

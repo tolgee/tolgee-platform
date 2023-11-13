@@ -12,7 +12,7 @@ import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
-import io.tolgee.service.cdn.CdnExporterService
+import io.tolgee.service.cdn.CdnService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -74,7 +74,7 @@ class TestDataService(
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
   private val automationService: AutomationService,
-  private val cdnExporterService: CdnExporterService
+  private val cdnService: CdnService
 ) : Logging {
 
   @Transactional
@@ -205,7 +205,7 @@ class TestDataService(
     saveScreenshotData(builder)
     saveKeyDistances(builder)
     saveCdnStorages(builder)
-    saveCdnExporters(builder)
+    saveCdns(builder)
     saveCdnWebhookConfigs(builder)
     saveAutomations(builder)
   }
@@ -216,10 +216,10 @@ class TestDataService(
     }
   }
 
-  private fun saveCdnExporters(builder: ProjectBuilder) {
-    builder.data.cdnExporters.forEach {
+  private fun saveCdns(builder: ProjectBuilder) {
+    builder.data.cdns.forEach {
       if (it.self.slug.isEmpty()) {
-        it.self.slug = cdnExporterService.generateSlug(it.projectBuilder.self.id)
+        it.self.slug = cdnService.generateSlug(it.projectBuilder.self.id)
       }
       entityManager.persist(it.self)
     }

@@ -14,7 +14,7 @@ class CdnPublishProcessor(
   val projectHolder: ProjectHolder,
 ) : AutomationProcessor {
   override fun process(action: AutomationAction, activityRevisionId: Long?) {
-    val exporter = action.cdnExporter ?: throw IllegalStateException("Wrong params passed to cdn publish processor")
-    cdnUploader.upload(cdnExporterId = exporter.id)
+    val exporter = action.cdn ?: throw IllegalStateException("Wrong params passed to cdn publish processor")
+    cdnUploader.upload(cdnId = exporter.id)
   }
 }

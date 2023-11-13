@@ -1,12 +1,12 @@
 package io.tolgee.service.cdn
 
 import io.tolgee.component.CdnStorageProvider
-import io.tolgee.dtos.request.CdnExporterDto
+import io.tolgee.dtos.request.CdnDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
-import io.tolgee.model.cdn.CdnExporter
+import io.tolgee.model.cdn.Cdn
 import io.tolgee.model.cdn.CdnStorage
-import io.tolgee.repository.cdn.CdnExporterRepository
+import io.tolgee.repository.cdn.CdnRepository
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
@@ -17,8 +17,8 @@ import javax.persistence.EntityManager
 import javax.transaction.Transactional
 
 @Service
-class CdnExporterService(
-  private val cdnExporterRepository: CdnExporterRepository,
+class CdnService(
+  private val cdnRepository: CdnRepository,
   private val slugGenerator: SlugGenerator,
   private val entityManager: EntityManager,
   private val cdnStorageProvider: CdnStorageProvider,
@@ -26,23 +26,23 @@ class CdnExporterService(
   private val automationService: AutomationService
 ) {
   @Transactional
-  fun create(projectId: Long, dto: CdnExporterDto): CdnExporter {
-    val cdnExporter = CdnExporter(entityManager.getReference(Project::class.java, projectId))
-    cdnExporter.name = dto.name
-    cdnExporter.cdnStorage = getStorage(projectId, dto.cdnStorageId)
-    cdnExporter.copyPropsFrom(dto)
-    cdnExporter.slug = generateSlug(projectId)
-    cdnExporterRepository.save(cdnExporter)
+  fun create(projectId: Long, dto: CdnDto): Cdn {
+    val cdn = Cdn(entityManager.getReference(Project::class.java, projectId))
+    cdn.name = dto.name
+    cdn.cdnStorage = getStorage(projectId, dto.cdnStorageId)
+    cdn.copyPropsFrom(dto)
+    cdn.slug = generateSlug(projectId)
+    cdnRepository.save(cdn)
     if (dto.autoPublish) {
-      automationService.createForCdn(cdnExporter)
+      automationService.createForCdn(cdn)
     }
-    return cdnExporter
+    return cdn
   }
 
   fun generateSlug(projectId: Long): String {
     val projectDto = projectService.getDto(projectId)
     return slugGenerator.generate(projectDto.name, 3, 50) {
-      cdnExporterRepository.isSlugUnique(projectDto.id, it)
+      cdnRepository.isSlugUnique(projectDto.id, it)
     }
   }
 
@@ -53,19 +53,19 @@ class CdnExporterService(
 
   fun get(id: Long) = find(id) ?: throw NotFoundException()
 
-  fun find(id: Long) = cdnExporterRepository.findById(id).orElse(null)
+  fun find(id: Long) = cdnRepository.findById(id).orElse(null)
 
   @Transactional
-  fun update(projectId: Long, id: Long, dto: CdnExporterDto): CdnExporter {
+  fun update(projectId: Long, id: Long, dto: CdnDto): Cdn {
     val exporter = get(projectId, id)
     exporter.cdnStorage = getStorage(projectId, dto.cdnStorageId)
     exporter.name = dto.name
     exporter.copyPropsFrom(dto)
     handleUpdateAutoPublish(dto, exporter)
-    return cdnExporterRepository.save(exporter)
+    return cdnRepository.save(exporter)
   }
 
-  private fun handleUpdateAutoPublish(dto: CdnExporterDto, exporter: CdnExporter) {
+  private fun handleUpdateAutoPublish(dto: CdnDto, exporter: Cdn) {
     if (dto.autoPublish && exporter.automationActions.isEmpty()) {
       automationService.createForCdn(exporter)
     }
@@ -74,15 +74,19 @@ class CdnExporterService(
     }
   }
 
-  fun delete(id: Long) {
-    cdnExporterRepository.deleteById(id)
+  fun delete(projectId: Long, id: Long) {
+    val cdn = get(projectId, id)
+    cdn.automationActions.map { it.automation }.forEach {
+      automationService.delete(it)
+    }
+    cdnRepository.deleteById(cdn.id)
   }
 
-  fun getAllInProject(projectId: Long, pageable: Pageable): Page<CdnExporter> {
-    return cdnExporterRepository.findAllByProjectId(projectId, pageable)
+  fun getAllInProject(projectId: Long, pageable: Pageable): Page<Cdn> {
+    return cdnRepository.findAllByProjectId(projectId, pageable)
   }
 
-  fun get(projectId: Long, cdnId: Long): CdnExporter {
-    return cdnExporterRepository.getByProjectIdAndId(projectId, cdnId)
+  fun get(projectId: Long, cdnId: Long): Cdn {
+    return cdnRepository.getByProjectIdAndId(projectId, cdnId)
   }
 }

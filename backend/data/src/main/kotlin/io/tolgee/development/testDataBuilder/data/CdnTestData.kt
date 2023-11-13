@@ -6,7 +6,7 @@ import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.cdn.AzureCdnConfig
 import io.tolgee.model.cdn.S3CdnConfig
 
-class CdnExporterTestData : BaseTestData() {
+class CdnTestData : BaseTestData() {
   val azureCdnStorage = projectBuilder.addCdnStorage {
     this.azureCdnConfig = AzureCdnConfig(this).apply {
       connectionString = "fake"
@@ -25,16 +25,16 @@ class CdnExporterTestData : BaseTestData() {
     }
   }
 
-  val defaultServerExporter = projectBuilder.addCdnExporter {
+  val defaultServerExporter = projectBuilder.addCdn {
     name = "Default server"
   }
 
-  val azureExporter = projectBuilder.addCdnExporter {
+  val azureExporter = projectBuilder.addCdn {
     cdnStorage = azureCdnStorage.self
     name = "Azure"
   }
 
-  val s3Exporter = projectBuilder.addCdnExporter {
+  val s3Exporter = projectBuilder.addCdn {
     cdnStorage = s3CdnStorage.self
     name = "S3"
   }
@@ -44,6 +44,10 @@ class CdnExporterTestData : BaseTestData() {
       AutomationTrigger(this)
         .also { it.type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION }
     )
-    this.actions.add(AutomationAction(this).also { it.cdnExporter = defaultServerExporter.self })
+    this.actions.add(AutomationAction(this).also { it.cdn = defaultServerExporter.self })
+  }
+
+  val keyWithTranslation = this.projectBuilder.addKey("key") {
+    addTranslation("en", "Hello")
   }
 }

@@ -10,14 +10,14 @@ import java.io.Serializable
 
 @Suppress("unused")
 @Relation(collectionRelation = "exporters", itemRelation = "exporter")
-class CdnExporterModel(
+class CdnModel(
   val id: Long,
   val name: String,
   val slug: String,
   val storage: CdnStorageModel?,
   val publicUrl: String?,
   val autoPublish: Boolean
-) : RepresentationModel<CdnExporterModel>(), Serializable, IExportParams {
+) : RepresentationModel<CdnModel>(), Serializable, IExportParams {
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = null
