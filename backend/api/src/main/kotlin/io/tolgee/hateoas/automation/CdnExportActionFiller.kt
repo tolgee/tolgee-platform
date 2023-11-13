@@ -1,16 +1,16 @@
 package io.tolgee.hateoas.automation
 
-import io.tolgee.hateoas.cdn.CdnExporterModelAssembler
+import io.tolgee.hateoas.cdn.CdnModelAssembler
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationActionType
 import org.springframework.stereotype.Component
 
 @Component
 class CdnExportActionFiller(
-  private val cdnExporterModelAssembler: CdnExporterModelAssembler
+  private val cdnModelAssembler: CdnModelAssembler
 ) : AutomationActionModelFiller {
   override fun fill(model: AutomationActionModel, entity: AutomationAction) {
-    model.cdnExporter = entity.cdnExporter?.let { cdnExporterModelAssembler.toModel(it) }
+    model.cdn = entity.cdn?.let { cdnModelAssembler.toModel(it) }
       ?: throw IllegalStateException("Exporter not defined")
   }
 

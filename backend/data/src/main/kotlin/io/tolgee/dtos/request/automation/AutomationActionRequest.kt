@@ -9,5 +9,5 @@ data class AutomationActionRequest(
   var type: AutomationActionType,
 
   @Schema(description = """Applicable when type is CDN_PUBLISH""")
-  var cdnExporterId: Long?
+  var cdnId: Long?
 )

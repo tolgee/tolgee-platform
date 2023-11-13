@@ -10,7 +10,7 @@ import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationActionType
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
-import io.tolgee.model.cdn.CdnExporter
+import io.tolgee.model.cdn.Cdn
 import io.tolgee.repository.AutomationRepository
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
@@ -96,19 +96,19 @@ class AutomationService(
   }
 
   @Transactional
-  fun createForCdn(cdnExporter: CdnExporter): Automation {
-    val automation = Automation(entityManager.getReference(Project::class.java, cdnExporter.project.id))
-    addCdnTriggersAndActions(cdnExporter, automation)
-    cdnExporter.automationActions.addAll(automation.actions)
+  fun createForCdn(cdn: Cdn): Automation {
+    val automation = Automation(entityManager.getReference(Project::class.java, cdn.project.id))
+    addCdnTriggersAndActions(cdn, automation)
+    cdn.automationActions.addAll(automation.actions)
     return save(automation)
   }
 
   @Transactional
-  fun removeForCdn(cdnExporter: CdnExporter) {
-    cdnExporter.automationActions.forEach {
+  fun removeForCdn(cdn: Cdn) {
+    cdn.automationActions.forEach {
       delete(it.automation)
     }
-    cdnExporter.automationActions.clear()
+    cdn.automationActions.clear()
   }
 
   @Transactional
@@ -162,7 +162,7 @@ class AutomationService(
     val withActions = entityManager.createQuery(
       """from Automation a 
         left join fetch a.actions aa
-        left join fetch aa.cdnExporter ce
+        left join fetch aa.cdn ce
         left join fetch ce.cdnStorage
         where a.id = :automationId 
         and a.project.id = :projectId""",
@@ -207,7 +207,7 @@ class AutomationService(
     .resultList
 
   private fun addCdnTriggersAndActions(
-    cdnExporter: CdnExporter,
+    cdn: Cdn,
     automation: Automation
   ) {
     automation.triggers.add(
@@ -220,7 +220,7 @@ class AutomationService(
     automation.actions.add(
       AutomationAction(automation).apply {
         this.type = AutomationActionType.CDN_PUBLISH
-        this.cdnExporter = cdnExporter
+        this.cdn = cdn
       }
     )
   }

@@ -24,7 +24,7 @@ import javax.persistence.UniqueConstraint
 @TypeDefs(
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
-class CdnExporter(
+class Cdn(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
 ) : StandardAuditModel(), IExportParams {
@@ -35,7 +35,7 @@ class CdnExporter(
   @ManyToOne
   var cdnStorage: CdnStorage? = null
 
-  @OneToMany(mappedBy = "cdnExporter")
+  @OneToMany(mappedBy = "cdn")
   var automationActions: MutableList<AutomationAction> = mutableListOf()
 
   @Type(type = "jsonb")
