@@ -15,11 +15,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class RateLimitProperties(
   @DocProperty(
     description = "To turn all rate limits off, set this value to `false`.\n\n" +
-      ":::danger" +
+      ":::danger\n" +
       "This field is **deprecated** and will be removed with Tolgee 4. If set to `false`, it will take priority\n" +
       "over the more granular `global-limits`, `endpoint-limits` and `authentication-limits` and all limits\n" +
-      "will be disabled." +
-      ":::",
+      "will be disabled.\n" +
+      ":::\n\n",
   )
   @Deprecated(message = "Use `global-limits`, `endpoint-limits` and `authentication-limits` individually instead.")
   var enabled: Boolean = true,
@@ -37,8 +37,8 @@ class RateLimitProperties(
     description = "Control whether per-endpoint limits on authentication-related endpoints are enabled or not.\n" +
       ":::warning\n" +
       "It is **strongly** recommended to keep these limits enabled. They act as a protection layer against\n" +
-      "brute-force attacks on the login (and register) prompt." +
-      ":::"
+      "brute-force attacks on the login (and register) prompt.\n" +
+      ":::\n\n"
   )
   var authenticationLimits: Boolean = true,
 
@@ -58,5 +58,5 @@ class RateLimitProperties(
     description = "Size, in milliseconds, of the time window for user-based limiting.",
     defaultExplanation = "= 1 minute"
   )
-  var userRequestWindow: Long = 5 * 60 * 1000,
+  var userRequestWindow: Long = 1 * 60 * 1000,
 )

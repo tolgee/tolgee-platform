@@ -27,7 +27,7 @@ class CacheProperties(
       "You can find the properties Redisson expects [here]" +
       "(https://github.com/redisson/redisson/tree/56ea7f5/redisson-spring-boot-starter" +
       "#2-add-settings-into-applicationsettings-file).\n" +
-      ":::"
+      ":::\n\n"
   )
   var useRedis: Boolean = false,
 
