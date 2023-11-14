@@ -1,7 +1,5 @@
 package io.tolgee.automation
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.cdn.CdnFileStorageProvider
 import io.tolgee.component.fileStorage.FileStorage
@@ -94,11 +92,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
       verifyWebhookSignature(httpEntity, testData.webhookConfig.self.webhookSecret)
 
-      val body = jacksonObjectMapper().readValue<Map<String, Any?>>(httpEntity.body!!)
-      (callArguments[1]).assert.isEqualTo(HttpMethod.POST)
-      assertThatJson(body) {
+      assertThatJson(httpEntity.body!!) {
         node("webhookConfigId").isValidId
-        node("data") {
+        node("eventType").isEqualTo("PROJECT_ACTIVITY")
+        node("activityData") {
           node("revisionId").isNumber
         }
       }

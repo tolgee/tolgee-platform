@@ -9,7 +9,7 @@ import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
 
 @Suppress("unused")
-@Relation(collectionRelation = "exporters", itemRelation = "exporter")
+@Relation(collectionRelation = "cdns", itemRelation = "cdn")
 class CdnModel(
   val id: Long,
   val name: String,

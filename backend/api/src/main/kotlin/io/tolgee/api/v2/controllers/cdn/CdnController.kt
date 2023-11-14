@@ -85,7 +85,7 @@ class CdnController(
   @Operation(description = "Get CDN")
   @AllowApiAccess
   fun get(@PathVariable id: Long): CdnModel {
-    return cdnModelAssembler.toModel(cdnService.get(id))
+    return cdnModelAssembler.toModel(cdnService.get(projectHolder.project.id, id))
   }
 
   @RequiresProjectPermissions([Scope.CDN_PUBLISH])
@@ -93,7 +93,7 @@ class CdnController(
   @Operation(description = "Publish to CDN")
   @AllowApiAccess
   fun post(@PathVariable id: Long) {
-    val exporter = cdnService.get(id)
+    val exporter = cdnService.get(projectHolder.project.id, id)
     cdnUploader.upload(exporter.id)
   }
 }
