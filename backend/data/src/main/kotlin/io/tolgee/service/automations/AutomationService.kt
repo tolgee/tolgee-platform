@@ -11,12 +11,11 @@ import io.tolgee.model.automations.AutomationActionType
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.cdn.Cdn
+import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.AutomationRepository
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import javax.persistence.EntityManager
 import javax.transaction.Transactional
@@ -104,18 +103,70 @@ class AutomationService(
   }
 
   @Transactional
+  fun createForWebhookConfig(webhookConfig: WebhookConfig): Automation {
+    val automation = Automation(webhookConfig.project)
+    addWebhookTriggersAndActions(webhookConfig, automation)
+    webhookConfig.automationActions.addAll(automation.actions)
+    return save(automation)
+  }
+
+  @Transactional
+  fun updateForWebhookConfig(webhookConfig: WebhookConfig): Automation {
+    val automation = getAutomationForExistingWebhookConfig(webhookConfig)
+    updateWebhookTriggersAndActions(webhookConfig, automation)
+    webhookConfig.automationActions.clear()
+    webhookConfig.automationActions.addAll(automation.actions)
+    return save(automation)
+  }
+
+  private fun getAutomationForExistingWebhookConfig(
+    webhookConfig: WebhookConfig,
+  ): Automation {
+    val automations = webhookConfig.automationActions.map { it.automation }
+    if (automations.size == 1) {
+      return automations[0]
+    }
+    automations.forEach {
+      delete(it)
+    }
+    return createForWebhookConfig(webhookConfig)
+  }
+
+  private fun addWebhookTriggersAndActions(
+    webhookConfig: WebhookConfig,
+    automation: Automation,
+  ) {
+    automation.triggers.add(
+      AutomationTrigger(automation).apply {
+        this.type = AutomationTriggerType.ACTIVITY
+        this.activityType = null
+        this.debounceDurationInMs = 0
+      }
+    )
+
+    automation.actions.add(
+      AutomationAction(automation).apply {
+        this.type = AutomationActionType.WEBHOOK
+        this.webhookConfig = webhookConfig
+      }
+    )
+  }
+
+  private fun updateWebhookTriggersAndActions(
+    webhookConfig: WebhookConfig,
+    automation: Automation,
+  ) {
+    deleteTriggersAndActions(automation)
+    addWebhookTriggersAndActions(webhookConfig, automation)
+  }
+
+
+  @Transactional
   fun removeForCdn(cdn: Cdn) {
     cdn.automationActions.forEach {
       delete(it.automation)
     }
     cdn.automationActions.clear()
-  }
-
-  @Transactional
-  fun getProjectAutomations(projectId: Long, pageable: Pageable): Page<Automation> {
-    val automations = automationRepository.findAllInProject(projectId, pageable)
-    automationRepository.fetchTriggers(automations.content)
-    return automations
   }
 
   @Transactional
@@ -134,6 +185,13 @@ class AutomationService(
     if (deletedCunt == 0L) {
       throw NotFoundException()
     }
+  }
+
+  fun deleteForWebhookConfig(webhookConfig: WebhookConfig) {
+    webhookConfig.automationActions.forEach {
+      delete(it.automation)
+    }
+    webhookConfig.automationActions.clear()
   }
 
   @Transactional
@@ -155,35 +213,6 @@ class AutomationService(
     ).setParameter("automations", automations).resultList
   }
 
-  private fun getAutomationWithFetchedData(
-    automationId: Long,
-    projectId: Long
-  ): Automation {
-    val withActions = entityManager.createQuery(
-      """from Automation a 
-        left join fetch a.actions aa
-        left join fetch aa.cdn ce
-        left join fetch ce.cdnStorage
-        where a.id = :automationId 
-        and a.project.id = :projectId""",
-      Automation::class.java
-    )
-      .setParameter("automationId", automationId)
-      .setParameter("projectId", projectId)
-      .singleResult
-
-    val withTriggers = entityManager.createQuery(
-      """from Automation a 
-        join fetch a.triggers 
-        where a = :automation""",
-      Automation::class.java
-    )
-      .setParameter("automation", withActions)
-      .singleResult
-
-    return withTriggers
-  }
-
   private fun getAutomationsWithTriggerOfType(
     projectId: Long,
     automationTriggerType: AutomationTriggerType,
@@ -196,7 +225,7 @@ class AutomationService(
                 join a2.triggers at 
                   where a2.project.id = :projectId
                    and at.type = :automationTriggerType
-                   and (at.activityType = :activityType or (:activityType is null and at.activityType is null))
+                   and (at.activityType = :activityType or at.activityType is null)
             )
     """.trimIndent(),
     Automation::class.java

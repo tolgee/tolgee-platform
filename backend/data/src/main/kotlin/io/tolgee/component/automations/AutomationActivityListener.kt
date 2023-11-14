@@ -30,6 +30,9 @@ class AutomationActivityListener(
   private fun executeActivityAutomationIfShould(event: OnProjectActivityStoredEvent) {
     val activityType = event.activityRevision.type ?: return
     val projectId = event.activityRevision.projectId ?: return
+    if (event.activityRevision.modifiedEntities.isEmpty()) {
+      return
+    }
     automationsBatchJobCreator.executeActivityAutomation(projectId, activityType, event.activityRevision.id)
   }
 

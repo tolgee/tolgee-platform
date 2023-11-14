@@ -34,7 +34,7 @@ enum class Scope(
   BATCH_MACHINE_TRANSLATE("translations.batch-machine"),
   CDN_MANAGE("cdn.manage"),
   CDN_PUBLISH("cdn.publish"),
-  AUTOMATIONS_MANAGE("automations.manage"),
+  WEBHOOKS_MANAGE("webhooks.manage"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -108,7 +108,7 @@ enum class Scope(
         HierarchyItem(BATCH_PRE_TRANSLATE_BY_TM, listOf(translationsEdit)),
         HierarchyItem(BATCH_MACHINE_TRANSLATE, listOf(translationsEdit)),
         HierarchyItem(CDN_MANAGE, listOf(HierarchyItem(CDN_PUBLISH))),
-        HierarchyItem(AUTOMATIONS_MANAGE),
+        HierarchyItem(WEBHOOKS_MANAGE),
       )
     )
 

@@ -17,7 +17,7 @@ class AutomationTrigger(
   var type: AutomationTriggerType = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION
 
   /**
-   * only when type is ACTIVITY
+   * only when type is ACTIVITY, if type is ACTIVITY and this is null, it means all activity types
    */
   @Enumerated(STRING)
   var activityType: ActivityType? = null

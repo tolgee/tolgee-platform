@@ -8,14 +8,17 @@ import io.tolgee.model.automations.AutomationTriggerType
 class WebhooksTestData : BaseTestData() {
 
   val webhookConfig = projectBuilder.addWebhookConfig {
-    url = "https://lala.com/wh"
+    url = "https://this-will-hopefully-never-exist.com/wh"
     webhookSecret = "whsec_hello"
   }
 
   val automation = projectBuilder.addAutomation {
     this.triggers.add(
       AutomationTrigger(this)
-        .also { it.type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION }
+        .also {
+          it.type = AutomationTriggerType.ACTIVITY
+          it.activityType = null
+        }
     )
     this.actions.add(AutomationAction(this).also {
       it.type = AutomationActionType.WEBHOOK
