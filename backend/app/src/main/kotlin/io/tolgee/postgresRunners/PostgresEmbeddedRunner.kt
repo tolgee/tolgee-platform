@@ -82,7 +82,7 @@ class PostgresEmbeddedRunner(
 
   override val datasourceUrl by lazy {
     // It's not that easy to change port in embedded version, since there is no env prop for that
-    "jdbc:postgresql://localhost:$POSTGRES_PORT/${postgresAutostartProperties.databaseName}"
+    "jdbc:postgresql://localhost:$POSTGRES_PORT/${postgresAutostartProperties.databaseName}?reWriteBatchedInserts=true"
   }
 
   private fun isPostgresUp(): Boolean {
