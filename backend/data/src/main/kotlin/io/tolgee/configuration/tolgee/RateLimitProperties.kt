@@ -58,5 +58,5 @@ class RateLimitProperties(
     description = "Size, in milliseconds, of the time window for user-based limiting.",
     defaultExplanation = "= 1 minute"
   )
-  var userRequestWindow: Long = 5 * 60 * 1000,
+  var userRequestWindow: Long = 1 * 60 * 1000,
 )
