@@ -10,6 +10,16 @@ class CdnStorageModelAssembler() : RepresentationModelAssemblerSupport<CdnStorag
   CdnStorageController::class.java, CdnStorageModel::class.java
 ) {
   override fun toModel(entity: CdnStorage): CdnStorageModel {
-    return CdnStorageModel(entity.id, entity.name, entity.publicUrlPrefix)
+    return CdnStorageModel(
+      id = entity.id,
+      name = entity.name,
+      publicUrlPrefix = entity.publicUrlPrefix,
+      s3CdnConfig = entity.s3CdnConfig?.let {
+        S3CdnConfigModel(bucketName = it.bucketName, endpoint = it.endpoint, signingRegion = it.signingRegion)
+      },
+      azureCdnConfig = entity.azureCdnConfig?.let {
+        AzureCdnConfigModel(containerName = it.containerName)
+      }
+    )
   }
 }

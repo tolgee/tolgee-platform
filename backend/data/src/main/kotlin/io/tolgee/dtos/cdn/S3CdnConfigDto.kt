@@ -8,10 +8,10 @@ class S3CdnConfigDto : S3Config {
   override var bucketName: String = ""
 
   @field:NotBlank
-  override var accessKey: String = ""
+  override var accessKey: String? = ""
 
   @field:NotBlank
-  override var secretKey: String = ""
+  override var secretKey: String? = ""
 
   @field:NotBlank
   override var endpoint: String = ""

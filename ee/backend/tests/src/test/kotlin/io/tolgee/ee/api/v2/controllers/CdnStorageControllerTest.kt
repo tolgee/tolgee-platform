@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import java.util.function.Consumer
 
-class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   private lateinit var cdnStorageService: CdnStorageService
@@ -149,7 +149,26 @@ class V2CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           "containerName" to "fakeContainerName"
         )
       )
-    ).andIsOk
+    ).andAssertThatJson {
+      node("success").isBoolean.isFalse
+    }.andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `tests new configuration for existing azure storage`() {
+    val (storage) = performCreate()
+    performProjectAuthPost(
+      "cdn-storages/${storage.id}/test",
+      mapOf(
+        "name" to "azure",
+        "azureCdnConfig" to mapOf(
+          "containerName" to "fakeContainerName"
+        )
+      )
+    ).andAssertThatJson {
+      node("success").isBoolean.isTrue
+    }.andIsOk
   }
 
   @Test

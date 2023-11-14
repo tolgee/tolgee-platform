@@ -9,5 +9,7 @@ import java.io.Serializable
 class CdnStorageModel(
   val id: Long,
   val name: String,
-  val publicUrlPrefix: String?
+  val publicUrlPrefix: String?,
+  val azureCdnConfig: AzureCdnConfigModel?,
+  val s3CdnConfig: S3CdnConfigModel?
 ) : RepresentationModel<CdnStorageModel>(), Serializable

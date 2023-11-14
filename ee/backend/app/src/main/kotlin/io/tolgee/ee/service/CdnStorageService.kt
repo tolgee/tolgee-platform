@@ -2,7 +2,7 @@ package io.tolgee.ee.service
 
 import io.tolgee.component.cdn.CdnFileStorageProvider
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cdn.CdnStorageDto
+import io.tolgee.dtos.cdn.CdnStorageRequest
 import io.tolgee.ee.component.cdn.CdnConfigProcessor
 import io.tolgee.ee.data.StorageTestResult
 import io.tolgee.exceptions.BadRequestException
@@ -25,10 +25,10 @@ class CdnStorageService(
   private val cdnStorageRepository: CdnStorageRepository,
   private val entityManager: EntityManager,
   private val cdnFileStorageProvider: CdnFileStorageProvider,
-  private val cdnConfigProcessors: List<CdnConfigProcessor<*, *>>
+  private val cdnConfigProcessors: List<CdnConfigProcessor<*>>
 ) {
   @Transactional
-  fun create(projectId: Long, dto: CdnStorageDto): CdnStorage {
+  fun create(projectId: Long, dto: CdnStorageRequest): CdnStorage {
     validateStorage(dto)
     val project = entityManager.getReference(Project::class.java, projectId)
     val storage = CdnStorage(project, dto.name)
@@ -43,9 +43,10 @@ class CdnStorageService(
   fun find(id: Long) = cdnStorageRepository.findById(id).orElse(null)
 
   @Transactional
-  fun update(projectId: Long, id: Long, dto: CdnStorageDto): CdnStorage {
-    validateStorage(dto)
+  fun update(projectId: Long, id: Long, dto: CdnStorageRequest): CdnStorage {
     val cdnStorage = get(id)
+    getProcessor(getStorageType(dto)).fillDtoSecrets(cdnStorage, dto)
+    validateStorage(dto)
     clearOther(cdnStorage)
     dtoToEntity(dto, cdnStorage)
     return cdnStorageRepository.save(cdnStorage)
@@ -70,8 +71,12 @@ class CdnStorageService(
     return cdnStorageRepository.getByProjectIdAndId(projectId, cdnId)
   }
 
-  fun testStorage(dto: CdnStorageDto): StorageTestResult {
+  fun testStorage(dto: CdnStorageRequest, id: Long? = null): StorageTestResult {
     val config: StorageConfig = getNonNullConfig(dto)
+    if (id != null) {
+      val existing = get(id)
+      getProcessor(config.cdnStorageType).fillDtoSecrets(existing, dto)
+    }
     try {
       val storage = cdnFileStorageProvider.getStorage(config)
       storage.test()
@@ -84,44 +89,43 @@ class CdnStorageService(
     return StorageTestResult(true)
   }
 
-  private fun validateStorage(dto: CdnStorageDto) {
+  private fun validateStorage(dto: CdnStorageRequest) {
     val result = testStorage(dto)
     @Suppress("UNCHECKED_CAST")
-    if (!result.pass) throw BadRequestException(
+    if (!result.success) throw BadRequestException(
       Message.CDN_STORAGE_CONFIG_INVALID,
       listOf(result.message, result.params) as List<Serializable?>?
     )
   }
 
-  private fun getNonNullConfig(dto: CdnStorageDto): StorageConfig {
+  private fun getNonNullConfig(dto: CdnStorageRequest): StorageConfig {
     validateDto(dto)
-    val config: StorageConfig = when {
-      dto.azureCdnConfig != null -> dto.azureCdnConfig!!
-      dto.s3CdnConfig != null -> dto.s3CdnConfig!!
-      else -> throw BadRequestException(Message.CDN_STORAGE_CONFIG_REQUIRED)
-    }
-    return config
+    return cdnConfigProcessors.firstNotNullOfOrNull {
+      it.getItemFromDto(dto)
+    } ?: throw BadRequestException(Message.CDN_STORAGE_CONFIG_REQUIRED)
   }
 
-  fun getStorageType(dto: CdnStorageDto): CdnStorageType = getNonNullConfig(dto).cdnStorageType
+  fun getStorageType(dto: CdnStorageRequest): CdnStorageType = getNonNullConfig(dto).cdnStorageType
 
-  private fun validateDto(dto: CdnStorageDto) {
-    val isSingleConfig = (dto.azureCdnConfig != null) xor (dto.s3CdnConfig != null)
+  private fun validateDto(dto: CdnStorageRequest) {
+    val isSingleConfig = cdnConfigProcessors.count {
+      it.getItemFromDto(dto) != null
+    } == 1
     if (!isSingleConfig) throw BadRequestException(Message.CDN_STORAGE_CONFIG_REQUIRED)
   }
 
-  private fun dtoToEntity(dto: CdnStorageDto, entity: CdnStorage): Any {
+  private fun dtoToEntity(dto: CdnStorageRequest, entity: CdnStorage): Any {
     entity.name = dto.name
     entity.publicUrlPrefix = dto.publicUrlPrefix
     return getProcessorForDto(dto).configDtoToEntity(dto, entity, entityManager)!!
   }
 
-  private fun getProcessorForDto(dto: CdnStorageDto): CdnConfigProcessor<*, *> {
+  private fun getProcessorForDto(dto: CdnStorageRequest): CdnConfigProcessor<*> {
     return getProcessor(getStorageType(dto))
   }
 
-  private val processorCache = mutableMapOf<CdnStorageType, CdnConfigProcessor<*, *>>()
-  fun getProcessor(type: CdnStorageType): CdnConfigProcessor<*, *> {
+  private val processorCache = mutableMapOf<CdnStorageType, CdnConfigProcessor<*>>()
+  fun getProcessor(type: CdnStorageType): CdnConfigProcessor<*> {
     return processorCache.computeIfAbsent(type) {
       cdnConfigProcessors.find { it.type == type }
         ?: throw IllegalStateException("Cannot find processor for type $type")

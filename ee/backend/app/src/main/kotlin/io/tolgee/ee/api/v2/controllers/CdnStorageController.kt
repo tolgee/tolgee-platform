@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
-import io.tolgee.dtos.cdn.CdnStorageDto
+import io.tolgee.dtos.cdn.CdnStorageRequest
 import io.tolgee.ee.api.v2.hateoas.cdnStorage.CdnStorageModel
 import io.tolgee.ee.api.v2.hateoas.cdnStorage.CdnStorageModelAssembler
 import io.tolgee.ee.data.StorageTestResult
@@ -49,7 +49,7 @@ class CdnStorageController(
   @Operation(description = "Create CDN Storage")
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @AllowApiAccess
-  fun create(@Valid @RequestBody dto: CdnStorageDto): CdnStorageModel {
+  fun create(@Valid @RequestBody dto: CdnStorageRequest): CdnStorageModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
       Feature.PROJECT_LEVEL_CDN_STORAGES
@@ -62,7 +62,7 @@ class CdnStorageController(
   @Operation(description = "Updates CDN Storage")
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @AllowApiAccess
-  fun update(@PathVariable cdnId: Long, @Valid @RequestBody dto: CdnStorageDto): CdnStorageModel {
+  fun update(@PathVariable cdnId: Long, @Valid @RequestBody dto: CdnStorageRequest): CdnStorageModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
       Feature.PROJECT_LEVEL_CDN_STORAGES
@@ -100,11 +100,23 @@ class CdnStorageController(
   @PostMapping("/test")
   @Operation(description = "Test CDN Storage")
   @AllowApiAccess
-  fun test(@Valid @RequestBody dto: CdnStorageDto): StorageTestResult {
+  fun test(@Valid @RequestBody dto: CdnStorageRequest): StorageTestResult {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
       Feature.PROJECT_LEVEL_CDN_STORAGES
     )
     return cdnStorageService.testStorage(dto)
+  }
+
+  @RequiresProjectPermissions([Scope.CDN_MANAGE])
+  @PostMapping("/{id}/test")
+  @Operation(description = "Tests existing CDN Storage with new configuration. (Uses existing secrets, if nulls provided)")
+  @AllowApiAccess
+  fun testExisting(@Valid @RequestBody dto: CdnStorageRequest, @PathVariable id: Long): StorageTestResult {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.PROJECT_LEVEL_CDN_STORAGES
+    )
+    return cdnStorageService.testStorage(dto, id)
   }
 }
