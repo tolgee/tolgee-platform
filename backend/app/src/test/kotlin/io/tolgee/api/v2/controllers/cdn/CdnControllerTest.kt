@@ -168,7 +168,7 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `publishes to default server cdn`() {
-    tolgeeProperties.cdn.s3.bucketName = "my-bucket"
+    tolgeeProperties.cdn.storage.s3.bucketName = "my-bucket"
     val mocked = mockS3FileStorage()
     performProjectAuthPost("cdns/${testData.defaultServerExporter.self.id}").andIsOk
     assertStores(mocked)
@@ -180,8 +180,8 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun resetServerProperties() {
-    tolgeeProperties.cdn.s3.clear()
-    tolgeeProperties.cdn.azure.clear()
+    tolgeeProperties.cdn.storage.s3.clear()
+    tolgeeProperties.cdn.storage.azure.clear()
   }
 
   private fun mockS3FileStorage(): S3FileStorage {

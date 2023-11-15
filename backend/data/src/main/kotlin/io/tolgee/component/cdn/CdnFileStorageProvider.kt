@@ -42,18 +42,18 @@ class CdnFileStorageProvider(
 
   fun getDefaultStorageProperties(): StorageConfig {
     val isSingleSet =
-      (tolgeeProperties.cdn.s3.enabled) xor (tolgeeProperties.cdn.azure.enabled)
+      (tolgeeProperties.cdn.storage.s3.enabled) xor (tolgeeProperties.cdn.storage.azure.enabled)
 
     if (!isSingleSet) {
       throw RuntimeException("Exactly one of CDN storages must be set")
     }
 
-    if (tolgeeProperties.cdn.s3.enabled) {
-      return tolgeeProperties.cdn.s3
+    if (tolgeeProperties.cdn.storage.s3.enabled) {
+      return tolgeeProperties.cdn.storage.s3
     }
 
-    if (tolgeeProperties.cdn.azure.enabled) {
-      return tolgeeProperties.cdn.azure
+    if (tolgeeProperties.cdn.storage.azure.enabled) {
+      return tolgeeProperties.cdn.storage.azure
     }
 
     throw RuntimeException("No CDN storage is set")
