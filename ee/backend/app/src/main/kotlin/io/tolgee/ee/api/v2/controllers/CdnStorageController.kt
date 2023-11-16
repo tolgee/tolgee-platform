@@ -37,7 +37,7 @@ import javax.validation.Valid
     "/v2/projects/{projectId}/cdn-storages",
   ]
 )
-@Tag(name = "Cdn Storages management (EE)", description = "Endpoints for CDN Storages management")
+@Tag(name = "CDN Storages management (EE)")
 class CdnStorageController(
   private val cdnStorageService: CdnStorageService,
   private val projectHolder: ProjectHolder,

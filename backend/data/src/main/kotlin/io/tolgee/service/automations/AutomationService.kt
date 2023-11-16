@@ -30,10 +30,10 @@ class AutomationService(
   @Transactional
   fun getProjectAutomations(
     projectId: Long,
-    automationTriggerType: AutomationTriggerType,
+    triggerTypes: List<AutomationTriggerType>,
     activityType: ActivityType? = null
   ): List<AutomationDto> {
-    val automations = getAutomationWithFetchedData(projectId, automationTriggerType, activityType)
+    val automations = getAutomationWithFetchedData(projectId, triggerTypes, activityType)
     return automations.map { AutomationDto.fromEntity(it) }
   }
 
@@ -202,10 +202,14 @@ class AutomationService(
 
   private fun getAutomationWithFetchedData(
     projectId: Long,
-    automationTriggerType: AutomationTriggerType,
+    triggerTypes: List<AutomationTriggerType>,
     activityType: ActivityType? = null
   ): MutableList<Automation> {
-    val automations = getAutomationsWithTriggerOfType(projectId, automationTriggerType, activityType)
+    val automations = getAutomationsWithTriggerOfType(projectId, triggerTypes, activityType)
+
+    if (automations.isEmpty()) {
+      return mutableListOf()
+    }
 
     return entityManager.createQuery(
       """from Automation a join fetch a.actions where a in :automations""",
@@ -215,25 +219,27 @@ class AutomationService(
 
   private fun getAutomationsWithTriggerOfType(
     projectId: Long,
-    automationTriggerType: AutomationTriggerType,
+    triggerTypes: List<AutomationTriggerType>,
     activityType: ActivityType?
-  ): MutableList<Automation>? = entityManager.createQuery(
-    """
-            from Automation a join fetch a.triggers
-            where a.id in (
-                select a2.id from Automation a2 
-                join a2.triggers at 
-                  where a2.project.id = :projectId
-                   and at.type = :automationTriggerType
-                   and (at.activityType = :activityType or at.activityType is null)
-            )
-    """.trimIndent(),
-    Automation::class.java
-  )
-    .setParameter("projectId", projectId)
-    .setParameter("automationTriggerType", automationTriggerType)
-    .setParameter("activityType", activityType)
-    .resultList
+  ): MutableList<Automation> {
+    return entityManager.createQuery(
+      """
+              from Automation a join fetch a.triggers
+              where a.id in (
+                  select a2.id from Automation a2 
+                  join a2.triggers at 
+                    where a2.project.id = :projectId
+                     and at.type in :triggerTypes
+                     and (at.activityType = :activityType or at.activityType is null)
+              )
+      """.trimIndent(),
+      Automation::class.java
+    )
+      .setParameter("projectId", projectId)
+      .setParameter("triggerTypes", triggerTypes)
+      .setParameter("activityType", activityType)
+      .resultList
+  }
 
   private fun addCdnTriggersAndActions(
     cdn: Cdn,

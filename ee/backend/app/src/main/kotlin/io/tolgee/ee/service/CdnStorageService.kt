@@ -48,8 +48,10 @@ class CdnStorageService(
     getProcessor(getStorageType(dto)).fillDtoSecrets(cdnStorage, dto)
     validateStorage(dto)
     clearOther(cdnStorage)
+    entityManager.flush()
     dtoToEntity(dto, cdnStorage)
-    return cdnStorageRepository.save(cdnStorage)
+    entityManager.persist(cdnStorage)
+    return cdnStorage
   }
 
   private fun clearOther(cdnStorage: CdnStorage) {

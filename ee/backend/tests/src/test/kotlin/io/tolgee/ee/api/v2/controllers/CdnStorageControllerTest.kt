@@ -116,6 +116,24 @@ class CdnStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `updates CDN storage to the same type`() {
+    val (storage) = performCreate()
+    performProjectAuthPut(
+      "cdn-storages/${storage.id}",
+      mapOf(
+        "name" to "Azure",
+        "azureCdnConfig" to mapOf(
+          "connectionString" to "fakeConnectionString",
+          "containerName" to "fakeContainerName"
+        )
+      )
+    ).andIsOk.andAssertThatJson {
+      node("name").isEqualTo("Azure")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `validates Azure Config storage`() {
     performProjectAuthPost(
       "cdn-storages",

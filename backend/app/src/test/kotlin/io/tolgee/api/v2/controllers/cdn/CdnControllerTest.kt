@@ -14,6 +14,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.service.cdn.CdnService
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -27,6 +28,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 
+@ContextRecreatingTest
 class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: CdnTestData
@@ -61,13 +63,14 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `creates exporter`() {
+  fun `creates cdn`() {
     performProjectAuthPost(
       "cdns",
       mapOf("name" to "Azure 2", "cdnStorageId" to testData.azureCdnStorage.self.id)
     ).andAssertThatJson {
       node("id").isValidId
       node("name").isEqualTo("Azure 2")
+      node("slug").isString.hasSize(32)
       node("format").isEqualTo("JSON")
       node("autoPublish").isEqualTo(false)
       node("storage") {
@@ -78,7 +81,8 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `creates exporter with auto publish`() {
+  fun `creates cdn with auto publish`() {
+    val mock = mockAzureFileStorage()
     var id: Long? = null
     performProjectAuthPost(
       "cdns",
@@ -93,6 +97,8 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     executeInNewTransaction {
       cdnService.get(id!!).automationActions.assert.isNotEmpty
     }
+
+    assertStores(mock)
   }
 
   @Test
@@ -109,7 +115,7 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `updates exporter`() {
+  fun `updates cdn`() {
     performProjectAuthPut(
       "cdns/${testData.s3Exporter.self.id}",
       mapOf("name" to "S3 2", "cdnStorageId" to testData.s3CdnStorage.self.id)
@@ -123,9 +129,9 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `lists exporters`() {
+  fun `lists cdns`() {
     performProjectAuthGet("cdns").andIsOk.andAssertThatJson {
-      node("_embedded.exporters") {
+      node("_embedded.cdns") {
         isArray.hasSize(3)
       }
     }
@@ -142,7 +148,7 @@ class CdnControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `deletes exporter`() {
+  fun `deletes cdn`() {
     performProjectAuthDelete(
       "cdns/${testData.defaultServerExporter.self.id}"
     ).andIsOk
