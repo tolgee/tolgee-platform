@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component
 class CdnPurgingProvider(
   private val applicationContext: AbstractApplicationContext,
   private val configs: List<CdnPurgingConfig>,
-  private val factories: List<CdnCachePurgingFactory>
 ) {
-
   val defaultPurging by lazy {
     getDefaultFactory()
   }
@@ -18,7 +16,7 @@ class CdnPurgingProvider(
   private fun getDefaultFactory(): CdnCachePurging? {
     val purgings = configs.mapNotNull {
       if (!it.enabled) {
-        return null
+        return@mapNotNull null
       }
       applicationContext.getBean(it.cdnPurgingType.factory.java).create(it)
     }
