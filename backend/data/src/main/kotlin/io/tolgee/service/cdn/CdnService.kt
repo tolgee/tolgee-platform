@@ -2,7 +2,7 @@ package io.tolgee.service.cdn
 
 import io.tolgee.component.CdnStorageProvider
 import io.tolgee.component.cdn.CdnUploader
-import io.tolgee.dtos.request.CdnDto
+import io.tolgee.dtos.request.CdnRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.cdn.Cdn
@@ -31,7 +31,7 @@ class CdnService(
   private val cdnUploader: CdnUploader
 ) {
   @Transactional
-  fun create(projectId: Long, dto: CdnDto): Cdn {
+  fun create(projectId: Long, dto: CdnRequest): Cdn {
     val cdn = Cdn(entityManager.getReference(Project::class.java, projectId))
     cdn.name = dto.name
     cdn.cdnStorage = getStorage(projectId, dto.cdnStorageId)
@@ -67,7 +67,7 @@ class CdnService(
   fun find(id: Long) = cdnRepository.findById(id).orElse(null)
 
   @Transactional
-  fun update(projectId: Long, id: Long, dto: CdnDto): Cdn {
+  fun update(projectId: Long, id: Long, dto: CdnRequest): Cdn {
     val exporter = get(projectId, id)
     exporter.cdnStorage = getStorage(projectId, dto.cdnStorageId)
     exporter.name = dto.name
@@ -76,7 +76,7 @@ class CdnService(
     return cdnRepository.save(exporter)
   }
 
-  private fun handleUpdateAutoPublish(dto: CdnDto, exporter: Cdn) {
+  private fun handleUpdateAutoPublish(dto: CdnRequest, exporter: Cdn) {
     if (dto.autoPublish && exporter.automationActions.isEmpty()) {
       automationService.createForCdn(exporter)
     }
