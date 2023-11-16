@@ -10,8 +10,10 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.development.testDataBuilder.data.CdnTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
+import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.equalsPermissionType
@@ -205,6 +207,25 @@ class ProjectServiceTest : AbstractSpringTest() {
         testData.projectBuilder.self
       )
     }
+    executeInNewTransaction(platformTransactionManager) {
+      projectService.deleteProject(testData.projectBuilder.self.id)
+    }
+  }
+
+  @Test
+  fun `deletes project with CDNs`() {
+    val testData = CdnTestData()
+    testDataService.saveTestData(testData.root)
+    executeInNewTransaction(platformTransactionManager) {
+      projectService.deleteProject(testData.projectBuilder.self.id)
+    }
+  }
+
+
+  @Test
+  fun `deletes project with webhooks`() {
+    val testData = WebhooksTestData()
+    testDataService.saveTestData(testData.root)
     executeInNewTransaction(platformTransactionManager) {
       projectService.deleteProject(testData.projectBuilder.self.id)
     }

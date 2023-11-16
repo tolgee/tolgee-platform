@@ -2,9 +2,13 @@ package io.tolgee.model
 
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.automations.Automation
+import io.tolgee.model.cdn.Cdn
+import io.tolgee.model.cdn.CdnStorage
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.webhook.WebhookConfig
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -90,10 +94,22 @@ class Project(
   @Transient
   override var disableActivityLogging = false
 
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var automations: MutableList<Automation> = mutableListOf()
+
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var cdns: MutableList<Cdn> = mutableListOf()
+
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var cdnStorages: MutableList<CdnStorage> = mutableListOf()
+
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
+
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
-      this.organizationOwner = organizationOwner
-    }
+    this.organizationOwner = organizationOwner
+  }
 
   fun findLanguageOptional(tag: String): Optional<Language> {
     return languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()

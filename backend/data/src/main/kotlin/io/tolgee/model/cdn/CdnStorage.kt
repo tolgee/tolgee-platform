@@ -19,10 +19,10 @@ class CdnStorage(
 
   var publicUrlPrefix: String? = null
 
-  @OneToOne(mappedBy = "cdnStorage", fetch = FetchType.LAZY, optional = true)
+  @OneToOne(mappedBy = "cdnStorage", optional = true, orphanRemoval = true)
   var azureCdnConfig: AzureCdnConfig? = null
 
-  @OneToOne(mappedBy = "cdnStorage", fetch = FetchType.LAZY, optional = true)
+  @OneToOne(mappedBy = "cdnStorage", optional = true, orphanRemoval = true)
   var s3CdnConfig: S3CdnConfig? = null
 
   val storageConfig: StorageConfig?

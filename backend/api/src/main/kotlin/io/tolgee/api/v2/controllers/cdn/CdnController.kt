@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.cdn.CdnUploader
-import io.tolgee.dtos.request.CdnDto
+import io.tolgee.dtos.request.CdnRequest
 import io.tolgee.hateoas.cdn.CdnModel
 import io.tolgee.hateoas.cdn.CdnModelAssembler
 import io.tolgee.model.cdn.Cdn
@@ -49,7 +49,7 @@ class CdnController(
   @Operation(description = "Create CDN")
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @AllowApiAccess
-  fun create(@Valid @RequestBody dto: CdnDto): CdnModel {
+  fun create(@Valid @RequestBody dto: CdnRequest): CdnModel {
     val cdn = cdnService.create(projectHolder.project.id, dto)
     return cdnModelAssembler.toModel(cdn)
   }
@@ -58,7 +58,7 @@ class CdnController(
   @Operation(description = "Updates CDN")
   @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @AllowApiAccess
-  fun update(@PathVariable id: Long, @Valid @RequestBody dto: CdnDto): CdnModel {
+  fun update(@PathVariable id: Long, @Valid @RequestBody dto: CdnRequest): CdnModel {
     val cdn = cdnService.update(projectId = projectHolder.project.id, id, dto)
     return cdnModelAssembler.toModel(cdn)
   }
