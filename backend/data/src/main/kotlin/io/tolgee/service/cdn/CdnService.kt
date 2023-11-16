@@ -1,6 +1,7 @@
 package io.tolgee.service.cdn
 
 import io.tolgee.component.CdnStorageProvider
+import io.tolgee.component.cdn.CdnUploader
 import io.tolgee.dtos.request.CdnDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -10,11 +11,13 @@ import io.tolgee.repository.cdn.CdnRepository
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import javax.persistence.EntityManager
 import javax.transaction.Transactional
+import kotlin.random.Random
 
 @Service
 class CdnService(
@@ -23,7 +26,9 @@ class CdnService(
   private val entityManager: EntityManager,
   private val cdnStorageProvider: CdnStorageProvider,
   private val projectService: ProjectService,
-  private val automationService: AutomationService
+  private val automationService: AutomationService,
+  @Lazy
+  private val cdnUploader: CdnUploader
 ) {
   @Transactional
   fun create(projectId: Long, dto: CdnDto): Cdn {
@@ -35,15 +40,21 @@ class CdnService(
     cdnRepository.save(cdn)
     if (dto.autoPublish) {
       automationService.createForCdn(cdn)
+      cdnUploader.upload(cdn.id)
     }
     return cdn
   }
 
   fun generateSlug(projectId: Long): String {
     val projectDto = projectService.getDto(projectId)
-    return slugGenerator.generate(projectDto.name, 3, 50) {
+
+    return slugGenerator.generate(random32byteHexString(), 3, 50) {
       cdnRepository.isSlugUnique(projectDto.id, it)
     }
+  }
+
+  fun random32byteHexString(): String {
+    return (1..32).joinToString("") { Random.nextInt(0, 16).toString(16) }
   }
 
   private fun getStorage(projectId: Long, cdnStorageId: Long?): CdnStorage? {
