@@ -1,7 +1,6 @@
 package io.tolgee.component.cdn.cachePurging
 
 import com.azure.core.credential.TokenRequestContext
-import com.azure.identity.ClientSecretCredentialBuilder
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.model.cdn.AzureFrontDoorConfig
 import org.springframework.http.HttpEntity
@@ -13,6 +12,7 @@ import org.springframework.web.client.RestTemplate
 class AzureCdnCachePurging(
   private val config: AzureFrontDoorConfig,
   private val restTemplate: RestTemplate,
+  private val azureCredentialProvider: AzureCredentialProvider
 ) : CdnCachePurging {
   override fun purgeForPaths(paths: Set<String>) {
     val token = getAccessToken()
@@ -67,11 +67,7 @@ class AzureCdnCachePurging(
   }
 
   private fun getAccessToken(): String {
-    val credential = ClientSecretCredentialBuilder()
-      .clientId(config.clientId)
-      .clientSecret(config.clientSecret)
-      .tenantId(config.tenantId)
-      .build()
+    val credential = azureCredentialProvider.get(config)
 
     val context = TokenRequestContext()
       .addScopes("https://management.azure.com/.default")

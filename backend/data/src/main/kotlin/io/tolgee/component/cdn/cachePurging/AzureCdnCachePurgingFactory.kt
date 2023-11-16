@@ -9,6 +9,6 @@ class AzureCdnCachePurgingFactory(
   private val restTemplate: RestTemplate
 ) : CdnCachePurgingFactory {
   override fun create(config: Any): AzureCdnCachePurging {
-    return AzureCdnCachePurging(config as AzureFrontDoorConfig, restTemplate)
+    return AzureCdnCachePurging(config as AzureFrontDoorConfig, restTemplate, AzureCredentialProvider())
   }
 }

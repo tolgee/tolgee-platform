@@ -2,6 +2,8 @@ package io.tolgee.automation
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.cdn.CdnFileStorageProvider
+import io.tolgee.component.cdn.cachePurging.CdnCachePurging
+import io.tolgee.component.cdn.cachePurging.CdnPurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.development.testDataBuilder.data.CdnTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
@@ -44,17 +46,25 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @MockBean
   @Autowired
+  lateinit var cdnPurgingProvider: CdnPurgingProvider
+
+  lateinit var purgingMock: CdnCachePurging
+
+  @MockBean
+  @Autowired
   lateinit var restTemplate: RestTemplate
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `cdn automation works`() {
+  fun `publishes to CDN`() {
     val testData = CdnTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     fileStorageMock = mock()
     doReturn(fileStorageMock).whenever(cdnClientProvider).getCdnStorageWithDefaultClient()
+    purgingMock = mock()
+    doReturn(purgingMock).whenever(cdnPurgingProvider).defaultPurging
     modifyTranslationData()
     verifyCdnPublish()
   }
@@ -99,7 +109,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
           node("revisionId").isNumber
         }
       }
-      }
+    }
   }
 
   private fun verifyWebhookSignature(httpEntity: HttpEntity<String>, secret: String) {
@@ -111,8 +121,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun verifyCdnPublish() {
     waitForNotThrowing {
       verify(fileStorageMock, times(1)).storeFile(any(), any())
-      val invocations = Mockito.mockingDetails(fileStorageMock).invocations
-      invocations.size.assert.isEqualTo(1)
+      val fileStorageInvocations = Mockito.mockingDetails(fileStorageMock).invocations
+      fileStorageInvocations.size.assert.isEqualTo(1)
+      val purgingInvocations = Mockito.mockingDetails(fileStorageMock).invocations
+      purgingInvocations.size.assert.isEqualTo(1)
     }
   }
 

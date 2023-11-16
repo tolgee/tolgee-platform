@@ -1,10 +1,12 @@
 package io.tolgee.component.cdn
 
 import io.tolgee.component.cdn.cachePurging.CdnPurgingProvider
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.model.cdn.Cdn
 import io.tolgee.service.cdn.CdnService
 import io.tolgee.service.export.ExportService
 import org.springframework.stereotype.Component
+import java.io.InputStream
 
 
 @Component
@@ -21,13 +23,30 @@ class CdnUploader(
 
     val files = exportService.export(cdn.project.id, cdn)
     val withFullPaths = files.mapKeys { "${cdn.slug}/${it.key}" }
+    storeToStorage(withFullPaths, storage)
+    purgeCacheIfConfigured(cdn, withFullPaths)
+  }
+
+  private fun purgeCacheIfConfigured(
+    cdn: Cdn,
+    withFullPaths: Map<String, InputStream>
+  ) {
+    val isDefaultStorage = cdn.cdnStorage == null
+    if (isDefaultStorage) {
+      cdnPurgingProvider.defaultPurging?.purgeForPaths(withFullPaths.keys)
+    }
+  }
+
+  private fun storeToStorage(
+    withFullPaths: Map<String, InputStream>,
+    storage: FileStorage
+  ) {
     withFullPaths.forEach {
       storage.storeFile(
         storageFilePath = it.key,
         bytes = it.value.readBytes()
       )
     }
-    cdnPurgingProvider.defaultPurging?.purgeForPaths(withFullPaths.keys)
   }
 
   private fun getStorage(cdn: Cdn) = cdn.cdnStorage
