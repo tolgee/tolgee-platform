@@ -20,14 +20,27 @@ class AutomationsBatchJobCreator(
   val automationService: AutomationService,
   val entityManager: EntityManager
 ) {
-  fun executeAutomation(
+  fun executeActivityAutomation(projectId: Long, type: ActivityType, activityRevisionId: Long) {
+    startBatchJobForAutomations(projectId, AutomationTriggerType.ACTIVITY, type, activityRevisionId)
+  }
+
+  fun executeTranslationDataModificationAutomation(projectId: Long, activityRevisionId: Long) {
+    startBatchJobForAutomations(
+      projectId,
+      AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
+      null,
+      activityRevisionId
+    )
+  }
+
+  fun startBatchJobForAutomations(
     projectId: Long,
-    activityRevisionId: Long,
-    triggerTypes: List<AutomationTriggerType>,
-    activityType: ActivityType,
+    triggerType: AutomationTriggerType,
+    activityType: ActivityType? = null,
+    activityRevisionId: Long
   ) {
     val automations =
-      automationService.getProjectAutomations(projectId, triggerTypes, activityType)
+      automationService.getProjectAutomations(projectId, triggerType, activityType)
 
     val automationTriggersMap =
       getAutomationTriggersMap(automations)

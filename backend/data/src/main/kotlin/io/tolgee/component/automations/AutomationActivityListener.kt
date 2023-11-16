@@ -3,7 +3,6 @@ package io.tolgee.component.automations
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
-import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import org.springframework.context.event.EventListener
@@ -17,36 +16,24 @@ class AutomationActivityListener(
   @EventListener
   @Async
   fun listen(event: OnProjectActivityStoredEvent) {
-    executeAutomations(event)
+    executeActivityAutomationIfShould(event)
+    executeTranslationDataModificationAutomationIfShould(event)
   }
 
-  private fun executeAutomations(event: OnProjectActivityStoredEvent) {
+  private fun executeTranslationDataModificationAutomationIfShould(event: OnProjectActivityStoredEvent) {
+    val projectId = event.activityRevision.projectId ?: return
+    if (isTranslationDataModification(event)) {
+      automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId, event.activityRevision.id)
+    }
+  }
+
+  private fun executeActivityAutomationIfShould(event: OnProjectActivityStoredEvent) {
+    val activityType = event.activityRevision.type ?: return
     val projectId = event.activityRevision.projectId ?: return
     if (event.activityRevision.modifiedEntities.isEmpty()) {
       return
     }
-    val activityType = event.activityRevision.type ?: return
-
-    val translationModification = isTranslationDataModification(event)
-
-    val triggerTypes = automationTriggerTypes(translationModification)
-
-    automationsBatchJobCreator.executeAutomation(
-      projectId,
-      event.activityRevision.id,
-      triggerTypes,
-      activityType
-    )
-  }
-
-  private fun automationTriggerTypes(translationModification: Boolean): MutableList<AutomationTriggerType> {
-    val triggerTypes = mutableListOf(AutomationTriggerType.ACTIVITY)
-
-    if (translationModification) {
-      triggerTypes.add(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION)
-    }
-
-    return triggerTypes
+    automationsBatchJobCreator.executeActivityAutomation(projectId, activityType, event.activityRevision.id)
   }
 
   private fun isTranslationDataModification(event: OnProjectActivityStoredEvent): Boolean {

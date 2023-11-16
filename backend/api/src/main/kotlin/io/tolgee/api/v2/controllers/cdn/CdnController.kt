@@ -63,7 +63,7 @@ class CdnController(
     return cdnModelAssembler.toModel(cdn)
   }
 
-  @RequiresProjectPermissions([Scope.CDN_MANAGE])
+  @RequiresProjectPermissions([Scope.CDN_PUBLISH])
   @GetMapping("")
   @Operation(description = "List existing CDNs")
   @AllowApiAccess
@@ -80,7 +80,7 @@ class CdnController(
     cdnService.delete(projectHolder.project.id, id)
   }
 
-  @RequiresProjectPermissions([Scope.CDN_MANAGE])
+  @RequiresProjectPermissions([Scope.CDN_PUBLISH])
   @GetMapping("/{id}")
   @Operation(description = "Get CDN")
   @AllowApiAccess
