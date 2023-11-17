@@ -117,7 +117,9 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
       mapOf("name" to "DS", "autoPublish" to false)
     )
     executeInNewTransaction {
-      contentDeliveryConfigService.get(testData.defaultServerContentDeliveryConfig.self.id).automationActions.assert.isEmpty()
+      contentDeliveryConfigService
+        .get(testData.defaultServerContentDeliveryConfig.self.id)
+        .automationActions.assert.isEmpty()
     }
   }
 

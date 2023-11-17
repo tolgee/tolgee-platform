@@ -162,7 +162,6 @@ class AutomationService(
     addWebhookTriggersAndActions(webhookConfig, automation)
   }
 
-
   @Transactional
   fun removeForContentDelivery(contentDeliveryConfig: ContentDeliveryConfig) {
     contentDeliveryConfig.automationActions.forEach {

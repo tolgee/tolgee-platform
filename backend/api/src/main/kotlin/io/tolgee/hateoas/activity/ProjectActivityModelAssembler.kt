@@ -12,7 +12,8 @@ class ProjectActivityModelAssembler(
   private val avatarService: AvatarService
 ) : RepresentationModelAssemblerSupport<ProjectActivityView, ProjectActivityModel>(
   ApiKeyController::class.java, ProjectActivityModel::class.java
-), IProjectActivityModelAssembler {
+),
+  IProjectActivityModelAssembler {
   override fun toModel(view: ProjectActivityView): ProjectActivityModel {
     return ProjectActivityModel(
       revisionId = view.revisionId,

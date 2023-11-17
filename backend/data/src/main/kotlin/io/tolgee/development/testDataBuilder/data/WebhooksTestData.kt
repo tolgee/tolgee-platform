@@ -20,10 +20,11 @@ class WebhooksTestData : BaseTestData() {
           it.activityType = null
         }
     )
-    this.actions.add(AutomationAction(this).also {
-      it.type = AutomationActionType.WEBHOOK
-      it.webhookConfig = webhookConfig.self
-    }
+    this.actions.add(
+      AutomationAction(this).also {
+        it.type = AutomationActionType.WEBHOOK
+        it.webhookConfig = webhookConfig.self
+      }
     )
   }
 }

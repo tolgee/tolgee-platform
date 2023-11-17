@@ -4,5 +4,4 @@ interface ContentDeliveryPurgingConfig {
   val enabled: Boolean
 
   val contentDeliveryCachePurgingType: ContentDeliveryCachePurgingType
-
 }

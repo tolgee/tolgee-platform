@@ -55,7 +55,9 @@ class ContentStorageService(
   }
 
   private fun clearOther(contentStorage: ContentStorage) {
-    ContentStorageType.entries.toTypedArray().forEach { getProcessor(it).clearParentEntity(contentStorage, entityManager) }
+    ContentStorageType.entries.toTypedArray().forEach {
+      getProcessor(it).clearParentEntity(contentStorage, entityManager)
+    }
   }
 
   @Transactional

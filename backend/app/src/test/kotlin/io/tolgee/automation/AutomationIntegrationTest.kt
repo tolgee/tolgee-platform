@@ -145,8 +145,6 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         .isEqualTo(testData.webhookConfig.self.url)
       val httpEntity = callArguments[2] as HttpEntity<String>
 
-
-
       verifyWebhookSignature(httpEntity, testData.webhookConfig.self.webhookSecret)
 
       assertThatJson(httpEntity.body!!) {
@@ -186,6 +184,4 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       )
     ).andIsOk
   }
-
-
 }

@@ -221,7 +221,6 @@ class ProjectServiceTest : AbstractSpringTest() {
     }
   }
 
-
   @Test
   fun `deletes project with webhooks`() {
     val testData = WebhooksTestData()

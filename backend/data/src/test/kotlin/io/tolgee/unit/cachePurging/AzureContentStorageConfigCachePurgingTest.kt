@@ -37,7 +37,6 @@ class AzureContentStorageConfigCachePurgingTest() {
         get() = "fake-profile-name"
       override val resourceGroupName: String
         get() = "fake-resource-group-name"
-
     }
     val restTemplateMock: RestTemplate = mock()
     val azureCredentialProviderMock: AzureCredentialProvider = mock()
@@ -48,8 +47,8 @@ class AzureContentStorageConfigCachePurgingTest() {
     }
     whenever(responseMock.statusCode.is2xxSuccessful).thenReturn(true)
 
-
-    val credentialMck: ClientSecretCredential = Mockito.mock(ClientSecretCredential::class.java, Mockito.RETURNS_DEEP_STUBS)
+    val credentialMck: ClientSecretCredential =
+      Mockito.mock(ClientSecretCredential::class.java, Mockito.RETURNS_DEEP_STUBS)
     whenever(azureCredentialProviderMock.get(config)).thenReturn(credentialMck)
     whenever(credentialMck.getToken(any()).block().token).thenReturn("token")
 

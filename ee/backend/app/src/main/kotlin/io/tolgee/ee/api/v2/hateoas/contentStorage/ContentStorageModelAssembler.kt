@@ -15,7 +15,11 @@ class ContentStorageModelAssembler() : RepresentationModelAssemblerSupport<Conte
       name = entity.name,
       publicUrlPrefix = entity.publicUrlPrefix,
       s3ContentStorageConfig = entity.s3ContentStorageConfig?.let {
-        S3ContentStorageConfigModel(bucketName = it.bucketName, endpoint = it.endpoint, signingRegion = it.signingRegion)
+        S3ContentStorageConfigModel(
+          bucketName = it.bucketName,
+          endpoint = it.endpoint,
+          signingRegion = it.signingRegion
+        )
       },
       azureContentStorageConfig = entity.azureContentStorageConfig?.let {
         AzureContentStorageConfigModel(containerName = it.containerName)
