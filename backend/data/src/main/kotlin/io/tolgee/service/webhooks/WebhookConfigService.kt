@@ -27,6 +27,10 @@ class WebhookConfigService(
       ?: throw NotFoundException()
   }
 
+  fun get(id: Long): WebhookConfig {
+    return webhookConfigRepository.findById(id).orElseThrow { NotFoundException() }
+  }
+
   fun findAllInProject(projectId: Long, pageable: Pageable): Page<WebhookConfig> {
     return webhookConfigRepository.findByProjectId(projectId, pageable)
   }

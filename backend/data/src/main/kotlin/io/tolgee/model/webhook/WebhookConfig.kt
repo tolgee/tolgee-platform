@@ -3,6 +3,7 @@ package io.tolgee.model.webhook
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
+import java.util.*
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
@@ -22,4 +23,8 @@ class WebhookConfig(
 
   @OneToMany(mappedBy = "webhookConfig", orphanRemoval = true)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
+
+  var firstFailed: Date? = null
+
+  var lastExecuted: Date? = null
 }
