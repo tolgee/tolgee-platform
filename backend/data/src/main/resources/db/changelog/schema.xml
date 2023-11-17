@@ -2948,4 +2948,14 @@
     <changeSet author="jenik (generated)" id="1699886126205-25">
         <addForeignKeyConstraint baseColumnNames="cdn_id" baseTableName="automation_action" constraintName="FKqs3e77nqi1pg5wmuu9e9d5ui" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="cdn" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1700230794900-1">
+        <addColumn tableName="webhook_config">
+            <column name="first_failed" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700231778026-1">
+        <addColumn tableName="webhook_config">
+            <column name="last_executed" type="timestamp"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

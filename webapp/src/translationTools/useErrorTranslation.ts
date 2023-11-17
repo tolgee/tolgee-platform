@@ -101,6 +101,12 @@ export function useErrorTranslation() {
       case 'unexpected_error_while_publishing_to_cdn':
         return t('unexpected_error_while_publishing_to_cdn');
 
+      case 'webhook_responded_with_non_200_status':
+        return t('webhook_responded_with_non_200_status');
+
+      case 'unexpected_error_while_executing_webhook':
+        return t('unexpected_error_while_executing_webhook');
+
       default:
         return code;
     }

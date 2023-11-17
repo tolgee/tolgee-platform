@@ -12,9 +12,12 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.verifyHeader
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.service.webhooks.WebhookConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.util.addMinutes
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -33,6 +36,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
+import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,11 +58,22 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var restTemplate: RestTemplate
 
+  @Autowired
+  lateinit var webhookConfigService: WebhookConfigService
+
+  @AfterEach
+  fun after() {
+    currentDateProvider.forcedDate = null
+  }
+
+  var webhookInvocationCount = 0
+
   @Test
   @ProjectJWTAuthTestMethod
   fun `publishes to CDN`() {
     val testData = CdnTestData()
     testDataService.saveTestData(testData.root)
+    Mockito.reset(restTemplate)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     fileStorageMock = mock()
@@ -73,11 +88,45 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it executes webhook`() {
     val testData = WebhooksTestData()
+    currentDateProvider.forcedDate = currentDateProvider.date
+
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
+    mockWebhookResponse(HttpStatus.OK)
+
+    modifyTranslationData()
+
+    verifyWebhookExecuted(testData)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it updates config when failing`() {
+    val testData = WebhooksTestData()
+    currentDateProvider.forcedDate = currentDateProvider.date
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    this.projectSupplier = { testData.projectBuilder.self }
+    mockWebhookResponse(HttpStatus.BAD_REQUEST)
+
+    modifyTranslationData()
+
+    verifyWebhookExecuted(testData)
+    webhookConfigService.get(testData.webhookConfig.self.id).firstFailed!!
+      .time.assert.isEqualTo(currentDateProvider.date.time)
+
+    mockWebhookResponse(HttpStatus.OK)
+
+    currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(60)
+    modifyTranslationData()
+    verifyWebhookExecuted(testData)
+    webhookConfigService.get(testData.webhookConfig.self.id).firstFailed.assert.isNull()
+  }
+
+  private fun mockWebhookResponse(httpStatus: HttpStatus) {
     doAnswer {
-      ResponseEntity.status(HttpStatus.OK).build<Any>()
+      ResponseEntity.status(httpStatus).build<Any>()
     }.whenever(restTemplate)
       .exchange(
         any<String>(),
@@ -85,15 +134,13 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         any<HttpEntity<*>>(),
         any<Class<*>>()
       )
-
-    modifyTranslationData()
-
-    verifyWebhookExecuted(testData)
   }
 
   private fun verifyWebhookExecuted(testData: WebhooksTestData) {
+    val newExpectedInvocationsCount = ++webhookInvocationCount
     waitForNotThrowing {
-      val callArguments = Mockito.mockingDetails(restTemplate).invocations.single().arguments
+      Mockito.mockingDetails(restTemplate).invocations.count().assert.isEqualTo(newExpectedInvocationsCount)
+      val callArguments = Mockito.mockingDetails(restTemplate).invocations.last().arguments
       callArguments[0].assert
         .isEqualTo(testData.webhookConfig.self.url)
       val httpEntity = callArguments[2] as HttpEntity<String>
@@ -109,6 +156,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
           node("revisionId").isNumber
         }
       }
+      webhookConfigService.get(testData.webhookConfig.self.id)
+        .lastExecuted!!.time.assert.isEqualTo(currentDateProvider.date.time)
     }
   }
 
@@ -133,7 +182,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       "/translations",
       mapOf(
         "key" to "key",
-        "translations" to mapOf("en" to "text")
+        "translations" to mapOf("en" to UUID.randomUUID().toString())
       )
     ).andIsOk
   }

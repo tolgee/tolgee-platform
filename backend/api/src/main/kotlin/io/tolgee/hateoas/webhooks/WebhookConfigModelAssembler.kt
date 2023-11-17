@@ -13,7 +13,9 @@ class WebhookConfigModelAssembler() : RepresentationModelAssemblerSupport<Webhoo
     return WebhookConfigModel(
       id = entity.id,
       url = entity.url,
-      entity.webhookSecret
+      entity.webhookSecret,
+      entity.firstFailed?.time,
+      entity.lastExecuted?.time
     )
   }
 }
