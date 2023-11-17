@@ -15,4 +15,15 @@ class InternalProperties {
    * We need to apply the schema and then exit to run the schema generator.
    */
   var stopRightAfterStart: Boolean = false
+
+  @E2eRuntimeMutable
+  var webhookControllerStatus: Int = 200
+
+  /**
+   * When true it fakes storing to the content storage and pretends it's stored.
+   * When false it pretends error when storing to the content storage.
+   * When null, it doesn't bypass anything
+   */
+  @E2eRuntimeMutable
+  var e3eContentStorageBypassOk: Boolean? = null
 }
