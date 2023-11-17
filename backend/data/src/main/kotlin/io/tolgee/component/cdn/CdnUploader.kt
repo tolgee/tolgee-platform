@@ -2,6 +2,8 @@ package io.tolgee.component.cdn
 
 import io.tolgee.component.cdn.cachePurging.CdnPurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.exceptions.FileStoreException
 import io.tolgee.model.cdn.Cdn
 import io.tolgee.service.cdn.CdnService
 import io.tolgee.service.export.ExportService
@@ -14,9 +16,13 @@ class CdnUploader(
   private val cdnFileStorageProvider: CdnFileStorageProvider,
   private val exportService: ExportService,
   private val cdnService: CdnService,
-  private val cdnPurgingProvider: CdnPurgingProvider
+  private val cdnPurgingProvider: CdnPurgingProvider,
+  private val tolgeeProperties: TolgeeProperties
 ) {
   fun upload(cdnId: Long) {
+    if (tolgeeProperties.internal.e3eContentStorageBypassOk != null) {
+      return bypassForTesting()
+    }
     val cdn = cdnService.get(cdnId)
 
     val storage = getStorage(cdn)
@@ -56,4 +62,13 @@ class CdnUploader(
       )
     }
     ?: cdnFileStorageProvider.getCdnStorageWithDefaultClient()
+
+  private fun bypassForTesting() {
+    val shouldBeOk = tolgeeProperties.internal.e3eContentStorageBypassOk!!
+    if (shouldBeOk) {
+      return
+    }
+
+    throw FileStoreException("OMG! This is error!", "someFile.json", IllegalStateException("OMG!"))
+  }
 }
