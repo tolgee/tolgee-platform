@@ -10,7 +10,7 @@ import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationActionType
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
-import io.tolgee.model.cdn.Cdn
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.AutomationRepository
 import org.springframework.cache.Cache
@@ -97,10 +97,10 @@ class AutomationService(
   }
 
   @Transactional
-  fun createForCdn(cdn: Cdn): Automation {
-    val automation = Automation(entityManager.getReference(Project::class.java, cdn.project.id))
-    addCdnTriggersAndActions(cdn, automation)
-    cdn.automationActions.addAll(automation.actions)
+  fun createForContentDelivery(contentDeliveryConfig: ContentDeliveryConfig): Automation {
+    val automation = Automation(entityManager.getReference(Project::class.java, contentDeliveryConfig.project.id))
+    addContentDeliveryTriggersAndActions(contentDeliveryConfig, automation)
+    contentDeliveryConfig.automationActions.addAll(automation.actions)
     return save(automation)
   }
 
@@ -164,11 +164,11 @@ class AutomationService(
 
 
   @Transactional
-  fun removeForCdn(cdn: Cdn) {
-    cdn.automationActions.forEach {
+  fun removeForContentDelivery(contentDeliveryConfig: ContentDeliveryConfig) {
+    contentDeliveryConfig.automationActions.forEach {
       delete(it.automation)
     }
-    cdn.automationActions.clear()
+    contentDeliveryConfig.automationActions.clear()
   }
 
   @Transactional
@@ -237,8 +237,8 @@ class AutomationService(
     .setParameter("activityType", activityType)
     .resultList
 
-  private fun addCdnTriggersAndActions(
-    cdn: Cdn,
+  private fun addContentDeliveryTriggersAndActions(
+    contentDeliveryConfig: ContentDeliveryConfig,
     automation: Automation
   ) {
     automation.triggers.add(
@@ -250,8 +250,8 @@ class AutomationService(
 
     automation.actions.add(
       AutomationAction(automation).apply {
-        this.type = AutomationActionType.CDN_PUBLISH
-        this.cdn = cdn
+        this.type = AutomationActionType.CONTENT_DELIVERY_PUBLISH
+        this.contentDeliveryConfig = contentDeliveryConfig
       }
     )
   }

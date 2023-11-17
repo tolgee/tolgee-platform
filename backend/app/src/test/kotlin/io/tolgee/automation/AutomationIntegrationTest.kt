@@ -1,11 +1,11 @@
 package io.tolgee.automation
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.cdn.CdnFileStorageProvider
-import io.tolgee.component.cdn.cachePurging.CdnCachePurging
-import io.tolgee.component.cdn.cachePurging.CdnPurgingProvider
+import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
+import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurging
+import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.development.testDataBuilder.data.CdnTestData
+import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -44,15 +44,15 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @MockBean
   @Autowired
-  lateinit var cdnClientProvider: CdnFileStorageProvider
+  lateinit var contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider
 
   lateinit var fileStorageMock: FileStorage
 
   @MockBean
   @Autowired
-  lateinit var cdnPurgingProvider: CdnPurgingProvider
+  lateinit var contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider
 
-  lateinit var purgingMock: CdnCachePurging
+  lateinit var purgingMock: ContentDeliveryCachePurging
 
   @MockBean
   @Autowired
@@ -70,18 +70,18 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `publishes to CDN`() {
-    val testData = CdnTestData()
+  fun `publishes to Content Delivery`() {
+    val testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
     Mockito.reset(restTemplate)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     fileStorageMock = mock()
-    doReturn(fileStorageMock).whenever(cdnClientProvider).getCdnStorageWithDefaultClient()
+    doReturn(fileStorageMock).whenever(contentDeliveryFileStorageProvider).getContentStorageWithDefaultClient()
     purgingMock = mock()
-    doReturn(purgingMock).whenever(cdnPurgingProvider).defaultPurging
+    doReturn(purgingMock).whenever(contentDeliveryCachePurgingProvider).defaultPurging
     modifyTranslationData()
-    verifyCdnPublish()
+    verifyContentDeliveryPublish()
   }
 
   @Test
@@ -167,7 +167,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     verifyHeader(httpEntity.body, signature!!.single(), secret, 300, currentDateProvider.date.time / 1000)
   }
 
-  private fun verifyCdnPublish() {
+  private fun verifyContentDeliveryPublish() {
     waitForNotThrowing {
       verify(fileStorageMock, times(1)).storeFile(any(), any())
       val fileStorageInvocations = Mockito.mockingDetails(fileStorageMock).invocations

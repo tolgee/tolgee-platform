@@ -4,7 +4,7 @@ import com.azure.storage.blob.BlobServiceClientBuilder
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.InvalidConnectionStringException
-import io.tolgee.model.cdn.AzureBlobConfig
+import io.tolgee.model.contentDelivery.AzureBlobConfig
 import org.springframework.stereotype.Component
 
 @Component

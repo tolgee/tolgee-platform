@@ -79,22 +79,22 @@ export interface paths {
   "/v2/projects/{projectId}/invite": {
     put: operations["inviteUser"];
   };
-  "/v2/projects/{projectId}/cdns/{id}": {
-    /** Get CDN */
+  "/v2/projects/{projectId}/content-storages/{contentDeliveryConfigId}": {
+    /** Get Content Storage */
     get: operations["get_5"];
-    /** Updates CDN */
+    /** Updates Content Storage */
     put: operations["update_3"];
-    /** Publish to CDN */
-    post: operations["post"];
-    /** Delete CDN */
+    /** Delete Content Storage */
     delete: operations["delete_6"];
   };
-  "/v2/projects/{projectId}/cdn-storages/{cdnId}": {
-    /** Get CDN Storage */
+  "/v2/projects/{projectId}/content-delivery-configs/{id}": {
+    /** Get Content Delivery Config */
     get: operations["get_6"];
-    /** Updates CDN Storage */
+    /** Updates Content Delivery Config */
     put: operations["update_4"];
-    /** Delete CDN Storage */
+    /** Publish to Content Delivery */
+    post: operations["post"];
+    /** Delete Content Delivery Config */
     delete: operations["delete_7"];
   };
   "/v2/projects/{projectId}/auto-translation-settings": {
@@ -309,25 +309,25 @@ export interface paths {
     post: operations["create_2"];
     delete: operations["delete_4"];
   };
-  "/v2/projects/{projectId}/cdns": {
-    /** List existing CDNs */
+  "/v2/projects/{projectId}/content-storages": {
+    /** List existing Content Storages */
     get: operations["list_1"];
-    /** Create CDN */
+    /** Create Content Storage */
     post: operations["create_5"];
   };
-  "/v2/projects/{projectId}/cdn-storages": {
-    /** List existing CDNs Storages */
-    get: operations["list_2"];
-    /** Create CDN Storage */
-    post: operations["create_6"];
-  };
-  "/v2/projects/{projectId}/cdn-storages/{id}/test": {
-    /** Tests existing CDN Storage with new configuration. (Uses existing secrets, if nulls provided) */
+  "/v2/projects/{projectId}/content-storages/{id}/test": {
+    /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
     post: operations["testExisting"];
   };
-  "/v2/projects/{projectId}/cdn-storages/test": {
-    /** Test CDN Storage */
+  "/v2/projects/{projectId}/content-storages/test": {
+    /** Test Content Storage */
     post: operations["test_1"];
+  };
+  "/v2/projects/{projectId}/content-delivery-configs": {
+    /** List existing Content Delivery Configs */
+    get: operations["list_2"];
+    /** Create Content Delivery Config */
+    post: operations["create_6"];
   };
   "/v2/projects/{projectId}/start-batch-job/untag-keys": {
     post: operations["untagKeys"];
@@ -714,6 +714,14 @@ export interface components {
         | "NONE"
         | "SERVER_ADMIN";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -728,14 +736,6 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -764,8 +764,8 @@ export interface components {
         | "batch-jobs.cancel"
         | "translations.batch-by-tm"
         | "translations.batch-machine"
-        | "cdn.manage"
-        | "cdn.publish"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
         | "webhooks.manage"
       )[];
       /** @description The user's permission type. This field is null if uses granular permissions */
@@ -830,8 +830,8 @@ export interface components {
         | "batch-jobs.cancel"
         | "translations.batch-by-tm"
         | "translations.batch-machine"
-        | "cdn.manage"
-        | "cdn.publish"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
         | "webhooks.manage"
       )[];
       /** @description The user's permission type. This field is null if uses granular permissions */
@@ -893,6 +893,16 @@ export interface components {
       id: number;
       url: string;
       webhookSecret: string;
+      /**
+       * Format: int64
+       * @description Date of the first failed webhook request. If the last webhook request is successful, this value is set to null.
+       */
+      firstFailed?: number;
+      /**
+       * Format: int64
+       * @description Date of the last webhook request.
+       */
+      lastExecuted?: number;
     };
     AutoTranslationSettingsDto: {
       /** Format: int64 */
@@ -1227,14 +1237,49 @@ export interface components {
       invitedUserEmail?: string;
       permission: components["schemas"]["PermissionModel"];
     };
-    CdnRequest: {
+    AzureContentStorageConfigDto: {
+      connectionString?: string;
+      containerName: string;
+    };
+    ContentStorageRequest: {
+      name: string;
+      azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfigDto"];
+      s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigDto"];
+      publicUrlPrefix?: string;
+    };
+    S3ContentStorageConfigDto: {
+      bucketName: string;
+      accessKey: string;
+      secretKey: string;
+      endpoint: string;
+      signingRegion: string;
+      enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
+    };
+    AzureContentStorageConfigModel: {
+      containerName?: string;
+    };
+    ContentStorageModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      publicUrlPrefix?: string;
+      azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfigModel"];
+      s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigModel"];
+    };
+    S3ContentStorageConfigModel: {
+      bucketName: string;
+      endpoint: string;
+      signingRegion: string;
+    };
+    ContentDeliveryConfigRequest: {
       name: string;
       /**
        * Format: int64
-       * @description Id of custom storage to use for CDN. If null, default server storage is used. Tolgee Cloud provides CDN storage.
+       * @description Id of custom storage to use for content delivery. If null, default server storage is used. Tolgee Cloud provides default Content Storage.
        */
-      cdnStorageId?: number;
-      /** @description If true, data are published to the CDN automatically after each change. */
+      contentStorageId?: number;
+      /** @description If true, data are published to the content delivery automatically after each change. */
       autoPublish: boolean;
       /**
        * @description Languages to be contained in export.
@@ -1266,15 +1311,12 @@ export interface components {
       /** @description Select one ore multiple namespaces to export */
       filterNamespace?: string[];
     };
-    AzureCdnConfigModel: {
-      containerName?: string;
-    };
-    CdnModel: {
+    ContentDeliveryConfigModel: {
       /** Format: int64 */
       id: number;
       name: string;
       slug: string;
-      storage?: components["schemas"]["CdnStorageModel"];
+      storage?: components["schemas"]["ContentStorageModel"];
       publicUrl?: string;
       autoPublish: boolean;
       /**
@@ -1306,38 +1348,6 @@ export interface components {
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
       /** @description Select one ore multiple namespaces to export */
       filterNamespace?: string[];
-    };
-    CdnStorageModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      publicUrlPrefix?: string;
-      azureCdnConfig?: components["schemas"]["AzureCdnConfigModel"];
-      s3CdnConfig?: components["schemas"]["S3CdnConfigModel"];
-    };
-    S3CdnConfigModel: {
-      bucketName: string;
-      endpoint: string;
-      signingRegion: string;
-    };
-    AzureCdnConfigDto: {
-      connectionString?: string;
-      containerName: string;
-    };
-    CdnStorageRequest: {
-      name: string;
-      azureCdnConfig?: components["schemas"]["AzureCdnConfigDto"];
-      s3CdnConfig?: components["schemas"]["S3CdnConfigDto"];
-      publicUrlPrefix?: string;
-    };
-    S3CdnConfigDto: {
-      bucketName: string;
-      accessKey: string;
-      secretKey: string;
-      endpoint: string;
-      signingRegion: string;
-      cdnStorageType?: "S3" | "AZURE";
-      enabled?: boolean;
     };
     TagKeyDto: {
       name: string;
@@ -1481,14 +1491,14 @@ export interface components {
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      description: string;
-      /** Format: int64 */
       id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1553,7 +1563,7 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CDN_STORAGES"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
       )[];
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -1620,19 +1630,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      username?: string;
       projectName: string;
       userFullName?: string;
       scopes: string[];
-      description: string;
       /** Format: int64 */
       id: number;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1694,7 +1704,7 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CDN_STORAGES"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -2056,16 +2066,18 @@ export interface components {
         | "CANNOT_MODIFY_DISABLED_TRANSLATION"
         | "AZURE_CONFIG_REQUIRED"
         | "S3_CONFIG_REQUIRED"
-        | "CDN_STORAGE_CONFIG_REQUIRED"
-        | "CDN_STORAGE_TEST_FAILED"
-        | "CDN_STORAGE_CONFIG_INVALID"
+        | "CONTENT_STORAGE_CONFIG_REQUIRED"
+        | "CONTENT_STORAGE_TEST_FAILED"
+        | "CONTENT_STORAGE_CONFIG_INVALID"
         | "INVALID_CONNECTION_STRING"
         | "CANNOT_CREATE_AZURE_STORAGE_CLIENT"
         | "S3_ACCESS_KEY_REQUIRED"
         | "AZURE_CONNECTION_STRING_REQUIRED"
         | "S3_SECRET_KEY_REQUIRED"
         | "CANNOT_STORE_FILE_TO_CONTENT_STORAGE"
-        | "UNEXPECTED_ERROR_WHILE_PUBLISHING_TO_CDN";
+        | "UNEXPECTED_ERROR_WHILE_PUBLISHING_TO_CONTENT_STORAGE"
+        | "WEBHOOK_RESPONDED_WITH_NON_200_STATUS"
+        | "UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2424,8 +2436,8 @@ export interface components {
         | "batch-jobs.cancel"
         | "translations.batch-by-tm"
         | "translations.batch-machine"
-        | "cdn.manage"
-        | "cdn.publish"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
         | "webhooks.manage";
       requires: components["schemas"]["HierarchyItem"][];
     };
@@ -2483,24 +2495,24 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CDN_STORAGES"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
       )[];
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2533,8 +2545,8 @@ export interface components {
     };
     DocItem: {
       displayName?: string;
-      description?: string;
       name: string;
+      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -2605,18 +2617,18 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      namespace?: string;
-      baseTranslation?: string;
       translation?: string;
+      baseTranslation?: string;
+      namespace?: string;
       name: string;
       /** Format: int64 */
       id: number;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      namespace?: string;
-      baseTranslation?: string;
       translation?: string;
+      baseTranslation?: string;
+      namespace?: string;
       name: string;
       /** Format: int64 */
       id: number;
@@ -2633,15 +2645,15 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelCdnModel: {
+    PagedModelContentStorageModel: {
       _embedded?: {
-        cdns?: components["schemas"]["CdnModel"][];
+        contentStorages?: components["schemas"]["ContentStorageModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelCdnStorageModel: {
+    PagedModelContentDeliveryConfigModel: {
       _embedded?: {
-        cdnStorages?: components["schemas"]["CdnStorageModel"][];
+        contentDeliveryConfigs?: components["schemas"]["ContentDeliveryConfigModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -3120,14 +3132,14 @@ export interface components {
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      description: string;
-      /** Format: int64 */
       id: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3244,19 +3256,19 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      username?: string;
       projectName: string;
       userFullName?: string;
       scopes: string[];
-      description: string;
       /** Format: int64 */
       id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -4183,11 +4195,11 @@ export interface operations {
       };
     };
   };
-  /** Get CDN */
+  /** Get Content Storage */
   get_5: {
     parameters: {
       path: {
-        id: number;
+        contentDeliveryConfigId: number;
         projectId: number;
       };
     };
@@ -4195,7 +4207,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CdnModel"];
+          "*/*": components["schemas"]["ContentStorageModel"];
         };
       };
       /** Bad Request */
@@ -4212,11 +4224,11 @@ export interface operations {
       };
     };
   };
-  /** Updates CDN */
+  /** Updates Content Storage */
   update_3: {
     parameters: {
       path: {
-        id: number;
+        contentDeliveryConfigId: number;
         projectId: number;
       };
     };
@@ -4224,7 +4236,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CdnModel"];
+          "*/*": components["schemas"]["ContentStorageModel"];
         };
       };
       /** Bad Request */
@@ -4242,11 +4254,99 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CdnRequest"];
+        "application/json": components["schemas"]["ContentStorageRequest"];
       };
     };
   };
-  /** Publish to CDN */
+  /** Delete Content Storage */
+  delete_6: {
+    parameters: {
+      path: {
+        contentDeliveryConfigId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Get Content Delivery Config */
+  get_6: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ContentDeliveryConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Updates Content Delivery Config */
+  update_4: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ContentDeliveryConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContentDeliveryConfigRequest"];
+      };
+    };
+  };
+  /** Publish to Content Delivery */
   post: {
     parameters: {
       path: {
@@ -4271,99 +4371,11 @@ export interface operations {
       };
     };
   };
-  /** Delete CDN */
-  delete_6: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Get CDN Storage */
-  get_6: {
-    parameters: {
-      path: {
-        cdnId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CdnStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Updates CDN Storage */
-  update_4: {
-    parameters: {
-      path: {
-        cdnId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CdnStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CdnStorageRequest"];
-      };
-    };
-  };
-  /** Delete CDN Storage */
+  /** Delete Content Delivery Config */
   delete_7: {
     parameters: {
       path: {
-        cdnId: number;
+        id: number;
         projectId: number;
       };
     };
@@ -6590,7 +6602,7 @@ export interface operations {
       };
     };
   };
-  /** List existing CDNs */
+  /** List existing Content Storages */
   list_1: {
     parameters: {
       query: {
@@ -6609,7 +6621,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelCdnModel"];
+          "*/*": components["schemas"]["PagedModelContentStorageModel"];
         };
       };
       /** Bad Request */
@@ -6626,7 +6638,7 @@ export interface operations {
       };
     };
   };
-  /** Create CDN */
+  /** Create Content Storage */
   create_5: {
     parameters: {
       path: {
@@ -6637,7 +6649,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CdnModel"];
+          "*/*": components["schemas"]["ContentStorageModel"];
         };
       };
       /** Bad Request */
@@ -6655,80 +6667,11 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CdnRequest"];
+        "application/json": components["schemas"]["ContentStorageRequest"];
       };
     };
   };
-  /** List existing CDNs Storages */
-  list_2: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelCdnStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Create CDN Storage */
-  create_6: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CdnStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CdnStorageRequest"];
-      };
-    };
-  };
-  /** Tests existing CDN Storage with new configuration. (Uses existing secrets, if nulls provided) */
+  /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
   testExisting: {
     parameters: {
       path: {
@@ -6758,11 +6701,11 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CdnStorageRequest"];
+        "application/json": components["schemas"]["ContentStorageRequest"];
       };
     };
   };
-  /** Test CDN Storage */
+  /** Test Content Storage */
   test_1: {
     parameters: {
       path: {
@@ -6791,7 +6734,76 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CdnStorageRequest"];
+        "application/json": components["schemas"]["ContentStorageRequest"];
+      };
+    };
+  };
+  /** List existing Content Delivery Configs */
+  list_2: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelContentDeliveryConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Create Content Delivery Config */
+  create_6: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ContentDeliveryConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContentDeliveryConfigRequest"];
       };
     };
   };
@@ -8123,8 +8135,8 @@ export interface operations {
               | "batch-jobs.cancel"
               | "translations.batch-by-tm"
               | "translations.batch-machine"
-              | "cdn.manage"
-              | "cdn.publish"
+              | "content-delivery.manage"
+              | "content-delivery.publish"
               | "webhooks.manage"
             )[];
           };

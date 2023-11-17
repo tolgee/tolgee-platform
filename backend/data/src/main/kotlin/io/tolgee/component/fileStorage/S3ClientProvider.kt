@@ -1,6 +1,6 @@
 package io.tolgee.component.fileStorage
 
-import io.tolgee.model.cdn.S3Config
+import io.tolgee.model.contentDelivery.S3Config
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider

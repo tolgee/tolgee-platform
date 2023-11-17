@@ -32,7 +32,7 @@ class WebhooksControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CDN_STORAGES)
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
   }
 
   @AfterEach

@@ -10,7 +10,7 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
-import io.tolgee.development.testDataBuilder.data.CdnTestData
+import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
@@ -213,8 +213,8 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `deletes project with CDNs`() {
-    val testData = CdnTestData()
+  fun `deletes project with Content Delivery Configs`() {
+    val testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
     executeInNewTransaction(platformTransactionManager) {
       projectService.deleteProject(testData.projectBuilder.self.id)

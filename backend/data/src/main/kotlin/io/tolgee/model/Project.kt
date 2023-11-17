@@ -3,8 +3,8 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.automations.Automation
-import io.tolgee.model.cdn.Cdn
-import io.tolgee.model.cdn.CdnStorage
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
@@ -98,10 +98,10 @@ class Project(
   var automations: MutableList<Automation> = mutableListOf()
 
   @OneToMany(orphanRemoval = true, mappedBy = "project")
-  var cdns: MutableList<Cdn> = mutableListOf()
+  var contentDeliveryConfigs: MutableList<ContentDeliveryConfig> = mutableListOf()
 
   @OneToMany(orphanRemoval = true, mappedBy = "project")
-  var cdnStorages: MutableList<CdnStorage> = mutableListOf()
+  var contentStorages: MutableList<ContentStorage> = mutableListOf()
 
   @OneToMany(orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
