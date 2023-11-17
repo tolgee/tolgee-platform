@@ -75,6 +75,8 @@ class CdnFileStorageProvider(
     }
     Mockito.`when`(mock.test())
       .thenThrow(FileStoreException("Bypassed storage test exception", "test", IllegalStateException()))
+    Mockito.`when`(mock.storeFile(Mockito.any(), Mockito.any()))
+      .thenThrow(FileStoreException("Bypassed storage put exception", "test", IllegalStateException()))
     return mock
   }
 }
