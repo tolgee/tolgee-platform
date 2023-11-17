@@ -4,9 +4,12 @@ import io.tolgee.component.fileStorage.AzureFileStorageFactory
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.exceptions.FileStoreException
 import io.tolgee.model.cdn.AzureBlobConfig
 import io.tolgee.model.cdn.S3Config
 import io.tolgee.model.cdn.StorageConfig
+import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,11 +19,11 @@ class CdnFileStorageProvider(
   private val azureFileStorageFactory: AzureFileStorageFactory
 ) {
   fun getCdnStorageWithDefaultClient(): FileStorage {
-    return defaultStorage
+    return bypassForTesting() ?: defaultStorage
   }
 
   fun getStorage(config: StorageConfig): FileStorage {
-    return when (config) {
+    return bypassForTesting() ?: when (config) {
       is AzureBlobConfig -> {
         azureFileStorageFactory.create(config)
       }
@@ -57,5 +60,21 @@ class CdnFileStorageProvider(
     }
 
     throw RuntimeException("No CDN storage is set")
+  }
+
+  private fun bypassForTesting(): FileStorage? {
+    if (tolgeeProperties.internal.e3eContentStorageBypassOk == null) {
+      return null
+    }
+
+    val shouldBeOk = tolgeeProperties.internal.e3eContentStorageBypassOk!!
+    val mock = mock(FileStorage::class.java)
+
+    if (shouldBeOk) {
+      return mock
+    }
+    Mockito.`when`(mock.test())
+      .thenThrow(FileStoreException("Bypassed storage test exception", "test", IllegalStateException()))
+    return mock
   }
 }
