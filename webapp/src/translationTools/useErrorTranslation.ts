@@ -98,8 +98,8 @@ export function useErrorTranslation() {
       case 'cannot_store_file_to_content_storage':
         return t('cannot_store_file_to_content_storage');
 
-      case 'unexpected_error_while_publishing_to_cdn':
-        return t('unexpected_error_while_publishing_to_cdn');
+      case 'unexpected_error_while_publishing_to_content_storage':
+        return t('unexpected_error_while_publishing_to_content_storage');
 
       case 'webhook_responded_with_non_200_status':
         return t('webhook_responded_with_non_200_status');

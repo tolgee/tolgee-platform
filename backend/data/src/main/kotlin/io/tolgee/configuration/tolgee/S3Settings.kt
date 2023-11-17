@@ -5,7 +5,7 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import io.tolgee.model.cdn.S3Config
+import io.tolgee.model.contentDelivery.S3Config
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.file-storage.s3")

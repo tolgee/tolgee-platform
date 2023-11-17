@@ -12,7 +12,7 @@ import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
-import io.tolgee.service.cdn.CdnService
+import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -74,7 +74,7 @@ class TestDataService(
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
   private val automationService: AutomationService,
-  private val cdnService: CdnService
+  private val contentDeliveryConfigService: ContentDeliveryConfigService
 ) : Logging {
 
   @Transactional
@@ -204,31 +204,31 @@ class TestDataService(
     saveProjectAvatars(builder)
     saveScreenshotData(builder)
     saveKeyDistances(builder)
-    saveCdnStorages(builder)
-    saveCdns(builder)
-    saveCdnWebhookConfigs(builder)
+    saveContentStorages(builder)
+    saveContentDeliveryConfigs(builder)
+    saveWebhookConfigs(builder)
     saveAutomations(builder)
   }
 
-  private fun saveCdnWebhookConfigs(builder: ProjectBuilder) {
+  private fun saveWebhookConfigs(builder: ProjectBuilder) {
     builder.data.webhookConfigs.forEach {
       entityManager.persist(it.self)
     }
   }
 
-  private fun saveCdns(builder: ProjectBuilder) {
-    builder.data.cdns.forEach {
+  private fun saveContentDeliveryConfigs(builder: ProjectBuilder) {
+    builder.data.contentDeliveryConfigs.forEach {
       if (it.self.slug.isEmpty()) {
-        it.self.slug = cdnService.generateSlug(it.projectBuilder.self.id)
+        it.self.slug = contentDeliveryConfigService.generateSlug(it.projectBuilder.self.id)
       }
       entityManager.persist(it.self)
     }
   }
 
-  private fun saveCdnStorages(builder: ProjectBuilder) {
-    builder.data.cdnStorages.forEach {
-      it.self.azureCdnConfig?.let { entityManager.persist(it) }
-      it.self.s3CdnConfig?.let { entityManager.persist(it) }
+  private fun saveContentStorages(builder: ProjectBuilder) {
+    builder.data.contentStorages.forEach {
+      it.self.azureContentStorageConfig?.let { entityManager.persist(it) }
+      it.self.s3ContentStorageConfig?.let { entityManager.persist(it) }
       entityManager.persist(it.self)
     }
   }

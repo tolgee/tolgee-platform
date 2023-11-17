@@ -32,8 +32,8 @@ enum class Scope(
   BATCH_JOBS_CANCEL("batch-jobs.cancel"),
   BATCH_PRE_TRANSLATE_BY_TM("translations.batch-by-tm"),
   BATCH_MACHINE_TRANSLATE("translations.batch-machine"),
-  CDN_MANAGE("cdn.manage"),
-  CDN_PUBLISH("cdn.publish"),
+  CONTENT_DELIVERY_MANAGE("content-delivery.manage"),
+  CONTENT_DELIVERY_PUBLISH("content-delivery.publish"),
   WEBHOOKS_MANAGE("webhooks.manage"),
   ;
 
@@ -107,7 +107,7 @@ enum class Scope(
         HierarchyItem(BATCH_JOBS_CANCEL),
         HierarchyItem(BATCH_PRE_TRANSLATE_BY_TM, listOf(translationsEdit)),
         HierarchyItem(BATCH_MACHINE_TRANSLATE, listOf(translationsEdit)),
-        HierarchyItem(CDN_MANAGE, listOf(HierarchyItem(CDN_PUBLISH))),
+        HierarchyItem(CONTENT_DELIVERY_MANAGE, listOf(HierarchyItem(CONTENT_DELIVERY_PUBLISH))),
         HierarchyItem(WEBHOOKS_MANAGE),
       )
     )

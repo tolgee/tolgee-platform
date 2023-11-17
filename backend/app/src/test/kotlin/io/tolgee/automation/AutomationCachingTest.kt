@@ -2,7 +2,7 @@ package io.tolgee.automation
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Caches
-import io.tolgee.development.testDataBuilder.data.CdnTestData
+import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.testing.ContextRecreatingTest
@@ -27,7 +27,7 @@ import javax.persistence.EntityManager
 )
 class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
 
-  private lateinit var testData: CdnTestData
+  private lateinit var testData: ContentDeliveryConfigTestData
 
   @Autowired
   lateinit var automationService: AutomationService
@@ -39,7 +39,7 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @BeforeEach
   fun before() {
-    testData = CdnTestData()
+    testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }

@@ -9,8 +9,8 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.automations.Automation
-import io.tolgee.model.cdn.Cdn
-import io.tolgee.model.cdn.CdnStorage
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
@@ -50,8 +50,8 @@ class ProjectBuilder(
     var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
     var screenshots = mutableListOf<ScreenshotBuilder>()
     var keyDistances = mutableListOf<KeysDistanceBuilder>()
-    var cdnStorages = mutableListOf<CdnStorageBuilder>()
-    var cdns = mutableListOf<CdnBuilder>()
+    var contentStorages = mutableListOf<ContentStorageBuilder>()
+    var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
   }
 
@@ -157,8 +157,8 @@ class ProjectBuilder(
   }
 
   fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
-  fun addCdnStorage(ft: FT<CdnStorage>) = addOperation(data.cdnStorages, ft)
-  fun addCdn(ft: FT<Cdn>) = addOperation(data.cdns, ft)
+  fun addContentStorage(ft: FT<ContentStorage>) = addOperation(data.contentStorages, ft)
+  fun addContentDeliveryConfig(ft: FT<ContentDeliveryConfig>) = addOperation(data.contentDeliveryConfigs, ft)
   fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user

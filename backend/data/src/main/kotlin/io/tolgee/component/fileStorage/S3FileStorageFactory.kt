@@ -1,6 +1,6 @@
 package io.tolgee.component.fileStorage
 
-import io.tolgee.model.cdn.S3Config
+import io.tolgee.model.contentDelivery.S3Config
 import org.springframework.stereotype.Component
 
 @Component
