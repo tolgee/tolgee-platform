@@ -43,22 +43,23 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
+    cacheManager.getCache(Caches.AUTOMATIONS)!!.clear()
   }
-// práva - publish / manage
-// push - last event
-  // hlášky do zelena
-
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `caches the automation`() {
+    val zeroInvocations = getEntityManagerInvocationsCount()
     doGetAutomations()
+
     //first time - not cached
     val invocations = getEntityManagerInvocationsCount()
+    zeroInvocations.assert.isLessThan(invocations)
 
     //second time cached
     doGetAutomations()
-    getEntityManagerInvocationsCount().assert.isEqualTo(invocations)
+    val secondInvocations = getEntityManagerInvocationsCount()
+    secondInvocations.assert.isEqualTo(invocations)
     getFromCache().assert.isNotNull
   }
 
@@ -76,7 +77,9 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `save clears the cache`() {
     doGetAutomations()
     getFromCache().assert.isNotNull
-    automationService.save(automationService.get(testData.automation.self.id))
+    executeInNewTransaction {
+      automationService.save(automationService.get(testData.automation.self.id))
+    }
     getFromCache().assert.isNull()
   }
 
@@ -90,7 +93,11 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     getFromCache().assert.isNull()
   }
 
-  private fun getEntityManagerInvocationsCount() = Mockito.mockingDetails(entityManager).invocations.size
+  private fun getEntityManagerInvocationsCount() = Mockito.mockingDetails(entityManager)
+    .invocations.filter {
+      it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
+    }
+    .count()
 
   private fun doGetAutomations() {
     automationService.getProjectAutomations(
