@@ -52,11 +52,11 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     val zeroInvocations = getEntityManagerInvocationsCount()
     doGetAutomations()
 
-    //first time - not cached
+    // first time - not cached
     val invocations = getEntityManagerInvocationsCount()
     zeroInvocations.assert.isLessThan(invocations)
 
-    //second time cached
+    // second time cached
     doGetAutomations()
     val secondInvocations = getEntityManagerInvocationsCount()
     secondInvocations.assert.isEqualTo(invocations)
@@ -82,7 +82,6 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     }
     getFromCache().assert.isNull()
   }
-
 
   @Test
   @ProjectJWTAuthTestMethod

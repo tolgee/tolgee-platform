@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?, Long?> {
   @Query(
-      """
+    """
     select count(c) = 0 from ContentDeliveryConfig c
     where c.project.id = :projectId and c.slug = :slug
     """
@@ -18,7 +18,7 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
   fun isSlugUnique(projectId: Long, slug: String): Boolean
 
   @Query(
-      """
+    """
     from ContentDeliveryConfig e
     left join fetch e.automationActions
     where e.project.id in :projectId
@@ -32,7 +32,7 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
   fun findAllByProjectId(projectId: Long, pageable: Pageable): Page<ContentDeliveryConfig>
 
   @Query(
-      """
+    """
     from ContentDeliveryConfig e
     left join fetch e.automationActions
     where e.id = :contentDeliveryConfigId and e.project.id = :projectId

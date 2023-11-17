@@ -89,7 +89,7 @@ class WebhooksControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `get single webhook config`(){
+  fun `get single webhook config`() {
     performProjectAuthGet(
       "webhook-configs/${testData.webhookConfig.self.id}"
     ).andAssertThatJson {
@@ -101,7 +101,7 @@ class WebhooksControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `tests a config`(){
+  fun `tests a config`() {
     performProjectAuthPost(
       "webhook-configs/${testData.webhookConfig.self.id}/test",
       null

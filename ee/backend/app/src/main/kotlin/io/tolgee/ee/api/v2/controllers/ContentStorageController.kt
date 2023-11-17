@@ -58,16 +58,19 @@ class ContentStorageController(
     return contentStorageModelAssembler.toModel(contentStorage)
   }
 
-  @PutMapping("/{contentDeliveryConfigId}")
+  @PutMapping("/{contentStorageId}")
   @Operation(description = "Updates Content Storage")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
-  fun update(@PathVariable contentDeliveryConfigId: Long, @Valid @RequestBody dto: ContentStorageRequest): ContentStorageModel {
+  fun update(
+    @PathVariable contentStorageId: Long,
+    @Valid @RequestBody dto: ContentStorageRequest
+  ): ContentStorageModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
       Feature.PROJECT_LEVEL_CONTENT_STORAGES
     )
-    val contentStorage = contentStorageService.update(projectHolder.project.id, contentDeliveryConfigId, dto)
+    val contentStorage = contentStorageService.update(projectHolder.project.id, contentStorageId, dto)
     return contentStorageModelAssembler.toModel(contentStorage)
   }
 
@@ -81,19 +84,20 @@ class ContentStorageController(
   }
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
-  @DeleteMapping("/{contentDeliveryConfigId}")
+  @DeleteMapping("/{contentStorageId}")
   @Operation(description = "Delete Content Storage")
   @AllowApiAccess
-  fun delete(@PathVariable contentDeliveryConfigId: Long) {
-    contentStorageService.delete(projectHolder.project.id, contentDeliveryConfigId)
+  fun delete(@PathVariable contentStorageId: Long) {
+    contentStorageService.delete(projectHolder.project.id, contentStorageId)
   }
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
-  @GetMapping("/{contentDeliveryConfigId}")
+  @GetMapping("/{contentStorageId}")
   @Operation(description = "Get Content Storage")
   @AllowApiAccess
-  fun get(@PathVariable contentDeliveryConfigId: Long): ContentStorageModel {
-    return contentStorageModelAssembler.toModel(contentStorageService.get(projectHolder.project.id, contentDeliveryConfigId))
+  fun get(@PathVariable contentStorageId: Long): ContentStorageModel {
+    return contentStorageModelAssembler
+      .toModel(contentStorageService.get(projectHolder.project.id, contentStorageId))
   }
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
@@ -110,8 +114,10 @@ class ContentStorageController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @PostMapping("/{id}/test")
-  @Operation(description = "Tests existing Content Storage with new configuration." +
-    " (Uses existing secrets, if nulls provided)")
+  @Operation(
+    description = "Tests existing Content Storage with new configuration." +
+      " (Uses existing secrets, if nulls provided)"
+  )
   @AllowApiAccess
   fun testExisting(@Valid @RequestBody dto: ContentStorageRequest, @PathVariable id: Long): StorageTestResult {
     enabledFeaturesProvider.checkFeatureEnabled(

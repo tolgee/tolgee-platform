@@ -8,7 +8,6 @@ import io.tolgee.service.export.ExportService
 import org.springframework.stereotype.Component
 import java.io.InputStream
 
-
 @Component
 class ContentDeliveryUploader(
   private val contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider,

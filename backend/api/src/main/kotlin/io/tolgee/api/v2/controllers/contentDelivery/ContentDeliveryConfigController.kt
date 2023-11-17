@@ -58,7 +58,10 @@ class ContentDeliveryConfigController(
   @Operation(description = "Updates Content Delivery Config")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
-  fun update(@PathVariable id: Long, @Valid @RequestBody dto: ContentDeliveryConfigRequest): ContentDeliveryConfigModel {
+  fun update(
+    @PathVariable id: Long,
+    @Valid @RequestBody dto: ContentDeliveryConfigRequest
+  ): ContentDeliveryConfigModel {
     val contentDeliveryConfig = contentDeliveryService.update(projectId = projectHolder.project.id, id, dto)
     return contentDeliveryConfigModelAssembler.toModel(contentDeliveryConfig)
   }

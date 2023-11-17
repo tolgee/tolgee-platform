@@ -8,7 +8,11 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 fun verifyHeader(
-  payload: String, sigHeader: String, secret: String, tolerance: Long, currentTimeInSeconds: Long
+  payload: String,
+  sigHeader: String,
+  secret: String,
+  tolerance: Long,
+  currentTimeInSeconds: Long
 ): Boolean {
   // Get timestamp and signatures from header
   val timestamp: Long = getTimestamp(sigHeader)

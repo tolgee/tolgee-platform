@@ -24,7 +24,11 @@ class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentS
   override val type: ContentStorageType
     get() = ContentStorageType.S3
 
-  override fun configDtoToEntity(dto: ContentStorageRequest, storageEntity: ContentStorage, em: EntityManager): S3ContentStorageConfig {
+  override fun configDtoToEntity(
+    dto: ContentStorageRequest,
+    storageEntity: ContentStorage,
+    em: EntityManager
+  ): S3ContentStorageConfig {
     val s3dto = dto.s3ContentStorageConfig ?: throw BadRequestException(Message.S3_CONFIG_REQUIRED)
     val entity = S3ContentStorageConfig(storageEntity)
     entity.accessKey = s3dto.accessKey ?: throw BadRequestException(Message.S3_ACCESS_KEY_REQUIRED)
