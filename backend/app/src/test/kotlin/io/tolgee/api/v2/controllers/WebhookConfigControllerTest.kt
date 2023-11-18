@@ -34,7 +34,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.MULTIPLE_WEBHOOKS)
   }
 
   @AfterEach
@@ -54,6 +54,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesnt create multiple webhooks without feature enabled`() {
+    enabledFeaturesProvider.forceEnabled = listOf()
     createWebhook()
     createWebhook().andIsBadRequest
     enabledFeaturesProvider.forceEnabled = listOf(Feature.MULTIPLE_WEBHOOKS)
@@ -61,7 +62,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun createWebhook(): ResultActions {
-   return performProjectAuthPost(
+    return performProjectAuthPost(
       "webhook-configs",
       mapOf("url" to "https://hello.com")
     )

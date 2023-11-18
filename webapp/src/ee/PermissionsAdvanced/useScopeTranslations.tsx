@@ -36,6 +36,9 @@ export const useScopeTranslations = () => {
     'translations.batch-machine': t(
       'permissions_item_batch_jobs_batch_translate_by_machine'
     ),
+    'webhooks.manage': t('permissions_item_webhooks_manage'),
+    'content-delivery.manage': t('permissions_item_content_delivery_manage'),
+    'content-delivery.publish': t('permissions_item_content_delivery_publish'),
   };
 
   return {
