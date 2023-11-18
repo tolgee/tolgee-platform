@@ -1,5 +1,6 @@
 package io.tolgee.repository.contentDelivery
 
+import io.tolgee.model.Project
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -39,4 +40,5 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
   """
   )
   fun getByProjectIdAndId(projectId: Long, contentDeliveryConfigId: Long): ContentDeliveryConfig
+  fun countByProject(project: Project): Int
 }

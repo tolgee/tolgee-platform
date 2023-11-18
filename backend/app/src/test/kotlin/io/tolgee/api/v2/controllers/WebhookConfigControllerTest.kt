@@ -5,6 +5,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
@@ -15,8 +16,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.web.servlet.ResultActions
 
-class WebhooksControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: WebhooksTestData
 
@@ -37,18 +39,32 @@ class WebhooksControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @AfterEach
   fun after() {
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `creates webhook config`() {
-    performProjectAuthPost(
-      "webhook-configs",
-      mapOf("url" to "https://hello.com")
-    ).andAssertThatJson {
+    createWebhook().andAssertThatJson {
       node("id").isValidId
       node("url").isEqualTo("https://hello.com")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `doesnt create multiple webhooks without feature enabled`() {
+    createWebhook()
+    createWebhook().andIsBadRequest
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.MULTIPLE_WEBHOOKS)
+    createWebhook().andIsOk
+  }
+
+  private fun createWebhook(): ResultActions {
+   return performProjectAuthPost(
+      "webhook-configs",
+      mapOf("url" to "https://hello.com")
+    )
   }
 
   @Test
