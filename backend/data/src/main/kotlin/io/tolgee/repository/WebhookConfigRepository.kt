@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.model.Project
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -26,4 +27,6 @@ interface WebhookConfigRepository : JpaRepository<WebhookConfig, Long> {
   """
   )
   fun findByProjectId(projectId: Long, pageable: Pageable): Page<WebhookConfig>
+
+  fun countByProject(project: Project): Int
 }

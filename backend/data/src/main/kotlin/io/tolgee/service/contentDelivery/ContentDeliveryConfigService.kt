@@ -2,6 +2,8 @@ package io.tolgee.service.contentDelivery
 
 import io.tolgee.component.ContentStorageProvider
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.ContentDeliveryConfigRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -28,11 +30,14 @@ class ContentDeliveryConfigService(
   private val projectService: ProjectService,
   private val automationService: AutomationService,
   @Lazy
-  private val contentDeliveryUploader: ContentDeliveryUploader
+  private val contentDeliveryUploader: ContentDeliveryUploader,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider
 ) {
   @Transactional
   fun create(projectId: Long, dto: ContentDeliveryConfigRequest): ContentDeliveryConfig {
-    val contentDeliveryConfig = ContentDeliveryConfig(entityManager.getReference(Project::class.java, projectId))
+    val project = entityManager.getReference(Project::class.java, projectId)
+    checkMultipleConfigsFeature(project)
+    val contentDeliveryConfig = ContentDeliveryConfig(project)
     contentDeliveryConfig.name = dto.name
     contentDeliveryConfig.contentStorage = getStorage(projectId, dto.contentStorageId)
     contentDeliveryConfig.copyPropsFrom(dto)
@@ -43,6 +48,15 @@ class ContentDeliveryConfigService(
       contentDeliveryUploader.upload(contentDeliveryConfig.id)
     }
     return contentDeliveryConfig
+  }
+
+  private fun checkMultipleConfigsFeature(project: Project) {
+    if (contentDeliveryConfigRepository.countByProject(project) > 0) {
+      enabledFeaturesProvider.checkFeatureEnabled(
+        project.organizationOwner.id,
+        Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS
+      )
+    }
   }
 
   fun generateSlug(projectId: Long): String {

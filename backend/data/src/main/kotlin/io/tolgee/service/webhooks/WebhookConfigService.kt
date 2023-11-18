@@ -4,6 +4,8 @@ import io.tolgee.component.automations.processors.WebhookEventType
 import io.tolgee.component.automations.processors.WebhookException
 import io.tolgee.component.automations.processors.WebhookExecutor
 import io.tolgee.component.automations.processors.WebhookRequest
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.WebhookConfigRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -21,6 +23,7 @@ class WebhookConfigService(
   private val webhookConfigRepository: WebhookConfigRepository,
   private val webhookExecutor: WebhookExecutor,
   private val automationService: AutomationService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider
 ) {
   fun get(projectId: Long, id: Long): WebhookConfig {
     return webhookConfigRepository.findByIdAndProjectId(id, projectId)
@@ -36,10 +39,17 @@ class WebhookConfigService(
   }
 
   fun create(project: Project, dto: WebhookConfigRequest): WebhookConfig {
+    checkMultipleWebhooksFeature(project)
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
     return webhookConfigRepository.save(webhookConfig)
+  }
+
+  private fun checkMultipleWebhooksFeature(project: Project) {
+    if (webhookConfigRepository.countByProject(project) > 0) {
+      enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, Feature.MULTIPLE_WEBHOOKS)
+    }
   }
 
   fun test(projectId: Long, webhookConfigId: Long): Boolean {

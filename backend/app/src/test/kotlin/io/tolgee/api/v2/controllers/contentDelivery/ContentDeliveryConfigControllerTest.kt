@@ -11,6 +11,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
@@ -28,6 +29,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.web.servlet.ResultActions
 
 @ContextRecreatingTest
 class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -67,15 +69,13 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
   fun after() {
     resetServerProperties()
     batchJobConcurrentLauncher.pause = false
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `creates content delivery config`() {
-    performProjectAuthPost(
-      "content-delivery-configs",
-      mapOf("name" to "Azure 2", "contentStorageId" to testData.azureContentStorage.self.id)
-    ).andAssertThatJson {
+    createAzureConfig().andAssertThatJson {
       node("id").isValidId
       node("name").isEqualTo("Azure 2")
       node("slug").isString.hasSize(32)
@@ -85,6 +85,23 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
         node("name").isEqualTo("Azure")
       }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `doesnt create when feature not enabled`() {
+    createAzureConfig().andIsBadRequest
+    enabledFeaturesProvider.forceEnabled =
+      listOf(Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS, Feature.PROJECT_LEVEL_CONTENT_STORAGES)
+    createAzureConfig().andIsOk
+
+  }
+
+  private fun createAzureConfig(): ResultActions {
+    return performProjectAuthPost(
+      "content-delivery-configs",
+      mapOf("name" to "Azure 2", "contentStorageId" to testData.azureContentStorage.self.id)
+    )
   }
 
   @Test
