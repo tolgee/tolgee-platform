@@ -149,6 +149,9 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -191,6 +194,9 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -263,6 +269,9 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesRequest"];
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
@@ -292,6 +301,9 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -313,6 +325,9 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesRequest"];
@@ -343,6 +358,9 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -523,6 +541,13 @@ export interface components {
         | "keys.view"
         | "keys.delete"
         | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
       )[];
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
@@ -1533,6 +1558,9 @@ export interface operations {
             | "TEAM_TRAINING"
             | "ACCOUNT_MANAGER"
             | "STANDARD_SUPPORT"
+            | "PROJECT_LEVEL_CONTENT_STORAGES"
+            | "MULTIPLE_WEBHOOKS"
+            | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
           )[];
         };
       };

@@ -79,7 +79,7 @@ export interface paths {
   "/v2/projects/{projectId}/invite": {
     put: operations["inviteUser"];
   };
-  "/v2/projects/{projectId}/content-storages/{contentDeliveryConfigId}": {
+  "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
     /** Get Content Storage */
     get: operations["get_5"];
     /** Updates Content Storage */
@@ -1564,6 +1564,8 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -1705,6 +1707,8 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -2496,6 +2500,8 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "MULTIPLE_WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       basePermissions: components["schemas"]["PermissionModel"];
       /**
@@ -4199,7 +4205,7 @@ export interface operations {
   get_5: {
     parameters: {
       path: {
-        contentDeliveryConfigId: number;
+        contentStorageId: number;
         projectId: number;
       };
     };
@@ -4228,7 +4234,7 @@ export interface operations {
   update_3: {
     parameters: {
       path: {
-        contentDeliveryConfigId: number;
+        contentStorageId: number;
         projectId: number;
       };
     };
@@ -4262,7 +4268,7 @@ export interface operations {
   delete_6: {
     parameters: {
       path: {
-        contentDeliveryConfigId: number;
+        contentStorageId: number;
         projectId: number;
       };
     };

@@ -60,7 +60,9 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
+    enabledFeaturesProvider.forceEnabled = listOf(
+      Feature.PROJECT_LEVEL_CONTENT_STORAGES, Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS
+    )
     Mockito.reset(s3FileStorageFactory)
     Mockito.reset(azureFileStorageFactory)
   }
@@ -90,11 +92,11 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesnt create when feature not enabled`() {
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
     createAzureConfig().andIsBadRequest
     enabledFeaturesProvider.forceEnabled =
       listOf(Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS, Feature.PROJECT_LEVEL_CONTENT_STORAGES)
     createAzureConfig().andIsOk
-
   }
 
   private fun createAzureConfig(): ResultActions {
