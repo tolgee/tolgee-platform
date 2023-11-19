@@ -17,35 +17,137 @@
 package io.tolgee.notifications.listeners
 
 import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.events.OnBatchJobFailed
-import io.tolgee.model.Notification
-import io.tolgee.notifications.NotificationService
-import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.UserAccountService
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.events.*
+import io.tolgee.model.Project
+import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.notifications.dto.NotificationCreateDto
+import io.tolgee.notifications.events.NotificationCreateEvent
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import javax.persistence.EntityManager
 
 @Component
 class BatchJobListener(
-  private val userAccountService: UserAccountService,
-  private val projectService: ProjectService,
+  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val entityManager: EntityManager,
   private val batchJobService: BatchJobService,
-  private val notificationService: NotificationService,
-) {
+) : Logging {
   @EventListener
-  fun onBatchJobError(e: OnBatchJobFailed) {
-    val userId = e.job.authorId ?: return
-    val projectId = e.job.projectId
-
-    val user = userAccountService.get(userId)
-    val project = projectService.get(projectId)
-    val job = batchJobService.getJobEntity(e.job.id)
-
-    val notification = Notification(
-      project,
-      job,
+  fun onBatchEventQueued(e: OnBatchJobCreated) {
+    logger.trace(
+      "Received batch job created event - job#{} on proj#{}",
+      e.job.id,
+      e.job.project.id,
     )
 
-    notificationService.dispatchNotification(notification, user)
+    val notification = createNotificationBase(e.job)
+    notification.meta["status"] = BatchJobStatus.PENDING
+
+    applicationEventPublisher.publishEvent(
+      NotificationCreateEvent(notification, e)
+    )
+  }
+
+  @EventListener
+  fun onBatchEventStarted(e: OnBatchJobStarted) {
+    logger.trace(
+      "Received batch job started event - job#{} on proj#{}",
+      e.job.id,
+      e.job.projectId,
+    )
+
+    val notification = createNotificationBase(e.job)
+    notification.meta["status"] = BatchJobStatus.RUNNING
+    notification.meta["processed"] = 0
+    notification.meta["total"] = e.job.totalChunks
+
+    applicationEventPublisher.publishEvent(
+      NotificationCreateEvent(notification, e)
+    )
+  }
+
+  @EventListener
+  fun onBatchEventProgress(e: OnBatchJobProgress) {
+    logger.trace(
+      "Received batch job progress event - job#{} on proj#{} ({}/{})",
+      e.job.id,
+      e.job.projectId,
+      e.processed,
+      e.total,
+    )
+
+    val notification = createNotificationBase(e.job)
+    notification.meta["status"] = BatchJobStatus.RUNNING
+    notification.meta["processed"] = e.processed
+    notification.meta["total"] = e.total
+
+    applicationEventPublisher.publishEvent(
+      NotificationCreateEvent(notification, e)
+    )
+  }
+
+  @EventListener
+  fun onBatchEventSuccess(e: OnBatchJobSucceeded) {
+    logger.trace(
+      "Received batch job success event - job#{} on proj#{}",
+      e.job.id,
+      e.job.projectId,
+    )
+
+    val notification = createNotificationBase(e.job)
+    notification.meta["status"] = BatchJobStatus.SUCCESS
+
+    applicationEventPublisher.publishEvent(
+      NotificationCreateEvent(notification, e)
+    )
+  }
+
+  @EventListener
+  fun onBatchEventSuccess(e: OnBatchJobCancelled) {
+    logger.trace(
+      "Received batch job cancel event - job#{} on proj#{}",
+      e.job.id,
+      e.job.projectId,
+    )
+
+    val notification = createNotificationBase(e.job)
+    notification.meta["status"] = BatchJobStatus.CANCELLED
+
+    applicationEventPublisher.publishEvent(
+      NotificationCreateEvent(notification, e)
+    )
+  }
+
+  @EventListener
+  fun onBatchJobError(e: OnBatchJobFailed) {
+    logger.trace(
+      "Received batch job failure event - job#{} on proj#{}",
+      e.job.id,
+      e.job.projectId,
+    )
+
+    val notification = createNotificationBase(e.job)
+    notification.meta["status"] = BatchJobStatus.FAILED
+
+    applicationEventPublisher.publishEvent(
+      NotificationCreateEvent(notification, e)
+    )
+  }
+
+  private fun createNotificationBase(batchJob: BatchJob): NotificationCreateDto {
+    return NotificationCreateDto(
+      project = batchJob.project,
+      batchJob = batchJob
+    )
+  }
+
+  private fun createNotificationBase(batchJobDto: BatchJobDto): NotificationCreateDto {
+    val job = batchJobService.getJobEntity(batchJobDto.id)
+    return createNotificationBase(job)
   }
 }

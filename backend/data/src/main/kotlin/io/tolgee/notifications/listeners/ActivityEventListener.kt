@@ -17,34 +17,41 @@
 package io.tolgee.notifications.listeners
 
 import io.tolgee.events.OnProjectActivityStoredEvent
-import io.tolgee.model.Notification
-import io.tolgee.model.UserAccount
-import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.notifications.NotificationService
-import io.tolgee.service.project.ProjectService
+import io.tolgee.model.Project
+import io.tolgee.notifications.dto.NotificationCreateDto
+import io.tolgee.notifications.events.NotificationCreateEvent
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import javax.persistence.EntityManager
 
 @Component
 class ActivityEventListener(
-  private val projectService: ProjectService,
-  private val notificationService: NotificationService,
-) {
+  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val entityManager: EntityManager,
+) : Logging {
   @EventListener
   fun onActivityRevision(e: OnProjectActivityStoredEvent) {
-    val id = e.activityRevision.projectId ?: return
+    // Using the Stored variant so `modifiedEntities` is populated.
 
-    val users = getUsersConcernedByRevision(e.activityRevision)
-    val notification = Notification(
-      projectService.get(id),
-      e.activityRevision,
+    logger.trace(
+      "Received project activity event - {} on proj#{} ({} entities modified)",
+      e.activityRevision.type,
+      e.activityRevision.projectId,
+      e.activityRevision.modifiedEntities.size
     )
 
-    notificationService.dispatchNotification(notification, users)
-  }
+    val projectId = e.activityRevision.projectId ?: return
+    val project = entityManager.getReference(Project::class.java, projectId)
+    val notificationDto = NotificationCreateDto(
+      project = project,
+      activityRevision = e.activityRevision
+    )
 
-  private fun getUsersConcernedByRevision(revision: ActivityRevision): Set<UserAccount> {
-    // TODO!!
-    return emptySet()
+    applicationEventPublisher.publishEvent(
+      NotificationCreateEvent(notificationDto, e)
+    )
   }
 }

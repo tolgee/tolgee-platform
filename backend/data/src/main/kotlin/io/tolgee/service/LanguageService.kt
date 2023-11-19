@@ -163,6 +163,10 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
+  fun findLanguageIdsOfTranslations(translationIds: List<Long>): List<Long> {
+    return languageRepository.findLanguageIdsOfTranslations(translationIds)
+  }
+
   fun deleteAllByProject(projectId: Long) {
     findAll(projectId).forEach {
       deleteLanguage(it.id)

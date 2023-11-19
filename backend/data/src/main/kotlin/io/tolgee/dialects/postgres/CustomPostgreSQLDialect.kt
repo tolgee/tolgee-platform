@@ -14,7 +14,7 @@ import java.sql.Types
 @Suppress("unused")
 class CustomPostgreSQLDialect : PostgreSQL10Dialect() {
   init {
-    registerHibernateType(2003, StringArrayType::class.java.name)
+    registerHibernateType(Types.ARRAY, StringArrayType::class.java.name)
   }
 
   override fun renderOrderByElement(

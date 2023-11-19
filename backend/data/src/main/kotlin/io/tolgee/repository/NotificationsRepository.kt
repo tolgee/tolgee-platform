@@ -21,44 +21,53 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
 interface NotificationsRepository : JpaRepository<Notification, Long> {
-  fun findAllByMarkedDoneAtNullAndRecipient(recipient: UserAccount, pageable: Pageable): Collection<Notification>
+  fun findAllByMarkedDoneAtNullAndRecipient(recipient: UserAccount, pageable: Pageable): List<Notification>
 
-  fun findAllByMarkedDoneAtNotNullAndRecipient(recipient: UserAccount, pageable: Pageable): Collection<Notification>
+  fun findAllByMarkedDoneAtNotNullAndRecipient(recipient: UserAccount, pageable: Pageable): List<Notification>
 
   fun findAllByUnreadTrueAndTypeAndProjectAndRecipientIn(
     type: Notification.NotificationType,
     project: Project,
     recipients: Collection<UserAccount>,
-  ): Collection<Notification>
+  ): List<Notification>
 
   fun countNotificationsByRecipientAndUnreadTrue(recipient: UserAccount): Int
 
+  @Modifying
   @Query("UPDATE Notification n SET n.unread = false WHERE n.recipient = ?1 AND n.id IN ?2")
   fun markAsRead(recipient: UserAccount, notifications: Collection<Long>)
 
+  @Modifying
   @Query("UPDATE Notification n SET n.unread = false WHERE n.recipient = ?1")
   fun markAllAsRead(recipient: UserAccount)
 
+  @Modifying
   @Query("UPDATE Notification n SET n.unread = true WHERE n.recipient = ?1 AND n.id IN ?2")
   fun markAsUnread(recipient: UserAccount, notifications: Collection<Long>)
 
+  @Modifying
   @Query("UPDATE Notification n SET n.unread = true WHERE n.recipient = ?1")
   fun markAllAsUnread(recipient: UserAccount)
 
+  @Modifying
   @Query("UPDATE Notification n SET n.unread = false, n.markedDoneAt = NOW() WHERE n.recipient = ?1 AND n.id IN ?2")
   fun markAsDone(recipient: UserAccount, notifications: Collection<Long>)
 
+  @Modifying
   @Query("UPDATE Notification n SET n.unread = false, n.markedDoneAt = NOW() WHERE n.recipient = ?1")
   fun markAllAsDone(recipient: UserAccount)
 
+  @Modifying
   @Query("UPDATE Notification n SET n.markedDoneAt = null WHERE n.recipient = ?1 AND n.id IN ?2")
   fun unmarkAsDone(recipient: UserAccount, notifications: Collection<Long>)
 
-  @Query("DELETE FROM notifications WHERE marked_done_at < NOW() - INTERVAL '30 DAY'", nativeQuery = true)
+  @Modifying
+  @Query("DELETE FROM notifications WHERE marked_done_at < NOW() - INTERVAL '90 DAY'", nativeQuery = true)
   fun pruneOldNotifications() // Native query since HQL can't do "INTERVAL"
 }

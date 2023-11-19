@@ -4,6 +4,7 @@ import io.tolgee.model.Language
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
 
@@ -18,4 +19,13 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   fun deleteAllByProjectId(projectId: Long?)
   fun countByIdInAndProjectId(languageIds: Set<Long>, projectId: Long): Int
   fun findAllByProjectIdAndIdInOrderById(projectId: Long, languageIds: List<Long>): List<Language>
+
+  @Query(
+    """
+      SELECT t.language.id
+      FROM Translation t
+      WHERE t.id IN :translationIds
+    """
+  )
+  fun findLanguageIdsOfTranslations(translationIds: List<Long>): List<Long>
 }

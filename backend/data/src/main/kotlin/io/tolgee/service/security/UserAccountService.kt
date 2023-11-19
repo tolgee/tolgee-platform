@@ -19,6 +19,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
+import io.tolgee.model.views.UserAccountProjectPermissionDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
@@ -299,6 +300,17 @@ class UserAccountService(
         avatarHash = it.avatarHash
       )
     }
+  }
+
+  /**
+   * Returns a view of all users ids who are allowed to see at least one language of [languageIds]
+   * (or all permitted users if null) and their permissions.
+   */
+  fun getAllPermissionInformationOfPermittedUsersInProject(
+    projectId: Long,
+    languageIds: List<Long>? = null,
+  ): List<UserAccountProjectPermissionDataView> {
+    return userAccountRepository.findAllPermittedUsersProjectPermissionView(projectId, languageIds)
   }
 
   @Transactional

@@ -21,6 +21,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.UserAccountProjectPermissionDataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.LanguageService
@@ -185,6 +186,38 @@ class PermissionService(
     return userRole?.let {
       computed.getAdminPermissions(userRole)
     } ?: computed
+  }
+
+  fun computeProjectPermission(
+    projectPermissionDataView: UserAccountProjectPermissionDataView
+  ): ComputedPermissionDto {
+    val basePermissions = ComputedPermissionDto.getEmptyPermission(
+      type = projectPermissionDataView.basePermissionsBasic,
+      scopes = projectPermissionDataView.basePermissionsGranular?.toTypedArray()
+        ?: projectPermissionDataView.basePermissionsBasic?.availableScopes
+        ?: emptyArray(),
+    )
+
+    if (projectPermissionDataView.permissionsBasic == null && projectPermissionDataView.permissionsGranular == null) {
+      return computeProjectPermission(
+        projectPermissionDataView.organizationRole,
+        basePermissions,
+        directPermission = null,
+      )
+    }
+
+    val directPermissions = ComputedPermissionDto.getEmptyPermission(
+      type = projectPermissionDataView.permissionsBasic,
+      scopes = projectPermissionDataView.permissionsGranular?.toTypedArray()
+        ?: projectPermissionDataView.permissionsBasic?.availableScopes
+        ?: emptyArray()
+    )
+
+    return computeProjectPermission(
+      projectPermissionDataView.organizationRole,
+      basePermissions,
+      directPermissions,
+    )
   }
 
   fun createForInvitation(

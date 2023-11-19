@@ -16,60 +16,90 @@
 
 package io.tolgee.model
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.batch.BatchJob
-import org.hibernate.annotations.Check
-import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
+import org.hibernate.annotations.TypeDefs
 import org.hibernate.annotations.UpdateTimestamp
 import java.util.*
 import javax.persistence.*
 
 @Entity
+@TypeDefs(
+  value = [
+    TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
+  ]
+)
 class Notification private constructor(
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   val type: NotificationType,
 
-  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.ALL ]) // We most definitely need this to show the notification: eager
+  @ManyToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.REMOVE ]) // This data is very likely to be useless: lazy
+  @JoinColumn(nullable = false)
+  val recipient: UserAccount,
+
+  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ]) // We most definitely need this to show the notification: eager
   @JoinColumn(nullable = false)
   val project: Project,
 
-  @Check(constraints = "activity_revision IS NULL OR type == \"ACTIVITY\"")
-  @ManyToMany(fetch = FetchType.EAGER, cascade = [ CascadeType.ALL ]) // We most definitely need this to show the notification: eager
+  @ManyToMany(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ]) // We most definitely need this to show the notification: eager
   @JoinTable(name = "notification_activity_revisions")
   val activityRevisions: MutableList<ActivityRevision>? = null,
 
-  @Check(constraints = "batch_job IS NULL OR type == \"BATCH_JOB_FAILURE\"")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.ALL ]) // We most definitely need this to show the notification: eager
-  @Column(name = "batch_job")
+  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ]) // We most definitely need this to show the notification: eager
   val batchJob: BatchJob? = null,
+
+  @Type(type = "jsonb")
+  val meta: MutableMap<String, Any?>
 ) {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @SequenceGenerator(name = "notification_seq", sequenceName = "sequence_notifications")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_seq")
   val id: Long = 0
 
   @Column(nullable = false)
-  var unread: Boolean = false
+  @ColumnDefault("true")
+  var unread: Boolean = true
 
-  // It is a `lateinit` since during notification creation, the user is provided externally.
-  // However, because it's non-nullable in DB it'll never actually be `null` besides during creation.
-  // It allows not polluting the entire code with a nullable type.
-  @ManyToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.ALL ]) // This data is very likely to be useless: lazy
-  @JoinColumn(nullable = false)
-  lateinit var recipient: UserAccount
-
+  @Temporal(TemporalType.TIMESTAMP)
   var markedDoneAt: Date? = null
 
-  @CreationTimestamp
-  @UpdateTimestamp
   @OrderBy
+  @UpdateTimestamp
+  @Temporal(TemporalType.TIMESTAMP)
   val lastUpdated: Date = Date()
 
-  constructor(project: Project, activityRevision: ActivityRevision) :
-    this(NotificationType.ACTIVITY, project, activityRevisions = mutableListOf(activityRevision))
+  constructor(
+    recipient: UserAccount,
+    project: Project,
+    activityRevision: ActivityRevision,
+    meta: Map<String, Any?>? = null,
+  ) :
+    this(
+      NotificationType.ACTIVITY,
+      recipient,
+      project,
+      activityRevisions = mutableListOf(activityRevision),
+      meta = meta?.toMutableMap() ?: mutableMapOf(),
+    )
 
-  constructor(project: Project, batchJob: BatchJob) :
-    this(NotificationType.BATCH_JOB_FAILURE, project, batchJob = batchJob)
+  constructor(
+    recipient: UserAccount,
+    project: Project,
+    batchJob: BatchJob,
+    meta: Map<String, Any?>? = null,
+  ) :
+    this(
+      NotificationType.BATCH_JOB_FAILURE,
+      recipient,
+      project,
+      batchJob = batchJob,
+      meta = meta?.toMutableMap() ?: mutableMapOf(),
+    )
 
   enum class NotificationType {
     ACTIVITY,

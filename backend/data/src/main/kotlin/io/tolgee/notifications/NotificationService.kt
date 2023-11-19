@@ -18,6 +18,8 @@ package io.tolgee.notifications
 
 import io.tolgee.model.Notification
 import io.tolgee.model.UserAccount
+import io.tolgee.notifications.dto.NotificationCreateDto
+import io.tolgee.notifications.events.NotificationUserPushEvent
 import io.tolgee.repository.NotificationsRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Pageable
@@ -25,50 +27,40 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.EnumSet
+import javax.persistence.EntityManager
 
 @Service
 class NotificationService(
   private val notificationsRepository: NotificationsRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
+  private val entityManager: EntityManager,
 ) {
   @Async
   @Transactional
-  fun dispatchNotification(notification: Notification, user: UserAccount) =
-    dispatchNotification(notification, setOf(user))
+  fun dispatchNotificationToUserId(notificationDto: NotificationCreateDto, user: Long) {
+    val userReference = entityManager.getReference(UserAccount::class.java, user)
+    return dispatchNotificationToUser(notificationDto, userReference)
+  }
 
   @Async
   @Transactional
-  fun dispatchNotification(notification: Notification, users: Set<UserAccount>) {
-    val localUsers = users.toMutableSet()
+  fun dispatchNotificationToUserIds(notificationDto: NotificationCreateDto, users: List<Long>) {
+    val usersReferences = users.map { entityManager.getReference(UserAccount::class.java, it) }
+    dispatchNotificationToUsers(notificationDto, usersReferences)
+  }
+
+  @Async
+  @Transactional
+  fun dispatchNotificationToUser(notificationDto: NotificationCreateDto, user: UserAccount) =
+    dispatchNotificationToUsers(notificationDto, listOf(user))
+
+  @Async
+  @Transactional
+  fun dispatchNotificationToUsers(notificationDto: NotificationCreateDto, users: List<UserAccount>) {
     val notificationObjects = mutableSetOf<Notification>()
 
-    if (debouncedNotificationTypes.contains(notification.type)) {
-      val existingNotifications = notificationsRepository.findAllByUnreadTrueAndTypeAndProjectAndRecipientIn(
-        notification.type,
-        notification.project,
-        users,
-      )
-
-      existingNotifications.forEach {
-        localUsers.remove(it.recipient)
-
-        when (notification.type) {
-          Notification.NotificationType.ACTIVITY ->
-            it.activityRevisions!!.addAll(notification.activityRevisions!!)
-          else ->
-            throw RuntimeException("Cannot debounce notification type ${notification.type}")
-        }
-      }
-
-      // Push modifications
-      notificationObjects.addAll(
-        notificationsRepository.saveAll(existingNotifications)
-      )
-    }
-
-    // Create notifications
-    localUsers.forEach {
-      notification.recipient = it
+    users.forEach {
+      val notification = notificationDto.toNotificationEntity(it)
       notificationObjects.add(
         notificationsRepository.save(notification)
       )
@@ -76,7 +68,7 @@ class NotificationService(
 
     // Dispatch event
     applicationEventPublisher.publishEvent(
-      NotificationPushEvent(notificationObjects)
+      NotificationUserPushEvent(notificationObjects)
     )
   }
 

@@ -2,6 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
+import io.tolgee.model.views.UserAccountProjectPermissionDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -135,7 +136,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     value = """
-    select ua from UserAccount ua where id in (:ids)
+    select ua from UserAccount ua where ua.id in (:ids)
   """
   )
   fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount>
@@ -153,4 +154,45 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """
   )
   fun findDisabled(id: Long): UserAccount
+
+  @Query(
+    """
+      SELECT DISTINCT new io.tolgee.model.views.UserAccountProjectPermissionDataView(
+        ua.id,
+        p.id,
+        org_r.type,
+        perm_org.type,
+        perm_org._scopes,
+        perm.type,
+        perm._scopes
+      )
+      FROM UserAccount ua, Project p
+      LEFT JOIN OrganizationRole org_r ON
+        org_r.user = ua AND
+        org_r.organization = p.organizationOwner
+      LEFT JOIN Permission perm ON
+        perm.user = ua AND
+        perm.project = p
+      LEFT JOIN Permission perm_org ON
+        org_r.user = ua AND
+        org_r.organization = p.organizationOwner AND
+        perm_org.organization = p.organizationOwner
+      LEFT JOIN Language l ON l IN elements(perm.viewLanguages)
+      WHERE
+        p.id = :projectId AND
+        ua.deletedAt IS NULL AND (
+            (perm._scopes IS NOT NULL AND perm._scopes != '{}') OR perm.type IS NOT NULL OR
+            (perm_org._scopes IS NOT NULL AND perm_org._scopes != '{}') OR perm_org.type IS NOT NULL
+        ) AND (
+          (:languageIds) IS NULL OR
+          l.id IS NULL OR
+          l.id IN (:languageIds)
+        )
+    """
+  )
+  fun findAllPermittedUsersProjectPermissionView(
+    projectId: Long,
+    languageIds: List<Long>?
+  ): List<UserAccountProjectPermissionDataView>
 }
+

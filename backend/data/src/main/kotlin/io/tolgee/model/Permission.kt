@@ -94,6 +94,7 @@ class Permission(
    * When specified, user is restricted to edit specific language translations.
    */
   @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "permission_view_languages")
   var viewLanguages: MutableSet<Language> = mutableSetOf()
 
   /**

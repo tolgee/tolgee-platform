@@ -13,7 +13,8 @@ spring:
     properties:
       hibernate:
         jdbc:
-          batch_size: 1000
+          batch_size: 50
+          batch_versioned_data: true
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
@@ -25,6 +26,8 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
+  datasource:
+    auto-commit: false
 #  main:
 #    lazy-initialization: true
 tolgee:

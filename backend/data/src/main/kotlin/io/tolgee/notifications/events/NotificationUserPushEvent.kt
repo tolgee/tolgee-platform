@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package io.tolgee.notifications
+package io.tolgee.notifications.events
 
 import io.tolgee.model.Notification
 
-data class NotificationPushEvent(val notifications: Set<Notification>)
+/**
+ * Event sent when a set of users received a new notification.
+ */
+data class NotificationUserPushEvent(val notifications: Set<Notification>)
