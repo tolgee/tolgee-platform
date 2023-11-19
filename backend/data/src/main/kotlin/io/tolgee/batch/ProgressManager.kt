@@ -1,11 +1,7 @@
 package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
-import io.tolgee.batch.events.OnBatchJobCancelled
-import io.tolgee.batch.events.OnBatchJobFailed
-import io.tolgee.batch.events.OnBatchJobProgress
-import io.tolgee.batch.events.OnBatchJobStatusUpdated
-import io.tolgee.batch.events.OnBatchJobSucceeded
+import io.tolgee.batch.events.*
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.batch.state.ExecutionState
 import io.tolgee.constants.Message
@@ -115,7 +111,6 @@ class ProgressManager(
   private fun onJobCompletedCommitted(execution: BatchJobChunkExecution) {
     batchJobStateProvider.removeJobState(execution.batchJob.id)
     val jobDto = batchJobService.getJobDto(execution.batchJob.id)
-    eventPublisher.publishEvent(OnBatchJobStatusUpdated(jobDto.id, jobDto.projectId, jobDto.status))
     cachingBatchJobService.evictJobCache(execution.batchJob.id)
     batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId, jobDto.id)
     batchJobStateProvider.removeJobState(execution.batchJob.id)
@@ -187,6 +182,7 @@ class ProgressManager(
       if (job.status == BatchJobStatus.PENDING) {
         logger.debug("""Updating job state to running ${job.id}""")
         cachingBatchJobService.setRunningState(job.id)
+        eventPublisher.publishEvent(OnBatchJobStarted(job))
       }
     }
   }

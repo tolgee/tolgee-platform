@@ -207,7 +207,7 @@ class BatchJobConcurrentLauncher(
   }
 
   private fun addBackToQueue(executionItem: ExecutionQueueItem) {
-    logger.trace("Adding execution $executionItem back to queue")
+    logger.trace("Adding execution {} back to queue", executionItem)
     batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
   }
 
