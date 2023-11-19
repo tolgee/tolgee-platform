@@ -29,10 +29,10 @@ data class NotificationCreateDto(
 ) {
   val meta: MutableMap<String, Any?> = mutableMapOf()
 
-  constructor(project: Project, activityRevision: ActivityRevision):
+  constructor(project: Project, activityRevision: ActivityRevision) :
     this(project, activityRevision = activityRevision, batchJob = null)
 
-  constructor(project: Project, batchJob: BatchJob):
+  constructor(project: Project, batchJob: BatchJob) :
     this(project, activityRevision = null, batchJob = batchJob)
 
   init {

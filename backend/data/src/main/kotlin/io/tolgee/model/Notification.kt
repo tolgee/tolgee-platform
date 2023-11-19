@@ -38,19 +38,23 @@ class Notification private constructor(
   @Enumerated(EnumType.STRING)
   val type: NotificationType,
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.REMOVE ]) // This data is very likely to be useless: lazy
+  // This data is very likely to be useless: lazy
+  @ManyToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.REMOVE ])
   @JoinColumn(nullable = false)
   val recipient: UserAccount,
 
-  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ]) // We most definitely need this to show the notification: eager
+  // We most definitely need this to show the notification: eager
+  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ])
   @JoinColumn(nullable = false)
   val project: Project,
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ]) // We most definitely need this to show the notification: eager
+  // We most definitely need this to show the notification: eager
+  @ManyToMany(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ])
   @JoinTable(name = "notification_activity_revisions")
   val activityRevisions: MutableList<ActivityRevision>? = null,
 
-  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ]) // We most definitely need this to show the notification: eager
+  // We most definitely need this to show the notification: eager
+  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ])
   val batchJob: BatchJob? = null,
 
   @Type(type = "jsonb")

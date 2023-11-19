@@ -19,7 +19,6 @@ package io.tolgee.notifications.listeners
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.*
-import io.tolgee.model.Project
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.notifications.dto.NotificationCreateDto

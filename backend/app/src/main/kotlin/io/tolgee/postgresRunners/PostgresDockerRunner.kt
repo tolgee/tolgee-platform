@@ -41,7 +41,8 @@ class PostgresDockerRunner(
   }
 
   override val datasourceUrl by lazy {
-    "jdbc:postgresql://localhost:${postgresAutostartProperties.port}/${postgresAutostartProperties.databaseName}?reWriteBatchedInserts=true"
+    "jdbc:postgresql://localhost:${postgresAutostartProperties.port}/${postgresAutostartProperties.databaseName}" +
+      "?reWriteBatchedInserts=true"
   }
 
   @PreDestroy

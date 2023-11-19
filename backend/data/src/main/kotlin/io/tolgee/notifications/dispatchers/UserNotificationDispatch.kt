@@ -16,26 +16,20 @@
 
 package io.tolgee.notifications.dispatchers
 
-import io.tolgee.activity.ModifiedEntitiesType
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.events.OnProjectActivityEvent
-import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 import io.tolgee.notifications.NotificationService
-import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.events.NotificationCreateEvent
 import io.tolgee.service.LanguageService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class UserNotificationDispatch(

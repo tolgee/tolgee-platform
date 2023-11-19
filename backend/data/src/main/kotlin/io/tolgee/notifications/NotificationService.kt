@@ -101,7 +101,7 @@ class NotificationService(
   }
 
   companion object {
-    val debouncedNotificationTypes: EnumSet<Notification.NotificationType>
-      = EnumSet.of(Notification.NotificationType.ACTIVITY)
+    val debouncedNotificationTypes: EnumSet<Notification.NotificationType> =
+      EnumSet.of(Notification.NotificationType.ACTIVITY)
   }
 }

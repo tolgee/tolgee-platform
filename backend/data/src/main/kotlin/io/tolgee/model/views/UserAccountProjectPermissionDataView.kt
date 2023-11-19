@@ -30,6 +30,6 @@ class UserAccountProjectPermissionDataView(
   permissionsGranular: Array<Enum<Scope>>?,
 ) {
   // I hate Hibernate - it *requires* an Array<Enum<?>> or complains...
-  val basePermissionsGranular: List<Scope>? = basePermissionsGranular?.map { enumValueOf(it.name)  }
-  val permissionsGranular: List<Scope>? = permissionsGranular?.map { enumValueOf(it.name)  }
+  val basePermissionsGranular: List<Scope>? = basePermissionsGranular?.map { enumValueOf(it.name) }
+  val permissionsGranular: List<Scope>? = permissionsGranular?.map { enumValueOf(it.name) }
 }

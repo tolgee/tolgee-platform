@@ -195,4 +195,3 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     languageIds: List<Long>?
   ): List<UserAccountProjectPermissionDataView>
 }
-
