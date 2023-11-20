@@ -7,12 +7,12 @@ import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurg
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
+import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.verifyHeader
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.service.webhooks.WebhookConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addMinutes
