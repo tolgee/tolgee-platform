@@ -4,10 +4,12 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
 import io.tolgee.component.fileStorage.AzureBlobFileStorage
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.constants.Message
+import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.service.ContentStorageService
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -31,6 +33,8 @@ import java.util.function.Consumer
 
 class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
+  private lateinit var testData: ContentDeliveryConfigTestData
+
   @Autowired
   private lateinit var contentStorageService: ContentStorageService
 
@@ -44,7 +48,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   @BeforeEach
   fun beforeEach() {
     enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
-    val testData = BaseTestData()
+    testData = ContentDeliveryConfigTestData()
     Mockito.reset(contentDeliveryFileStorageProvider)
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
@@ -61,9 +65,9 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   fun `creates Content Storage`() {
     performCreate()
     executeInNewTransaction {
-      val all = contentStorageService.getAllInProject(project.id, Pageable.ofSize(100))
-      all.assert.hasSize(1)
-      val azureContentStorageConfig = all.content.single().azureContentStorageConfig!!
+      val all = contentStorageService.getAllInProject(project.id, Pageable.ofSize(100)).sortedBy { it.id }
+      all.assert.hasSize(3)
+      val azureContentStorageConfig = all.last().azureContentStorageConfig!!
       azureContentStorageConfig.connectionString.assert.isEqualTo("fakeConnectionString")
       azureContentStorageConfig.containerName.assert.isEqualTo("fakeContainerName")
     }
@@ -74,7 +78,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   fun `lists storages`() {
     performCreate()
     performProjectAuthGet("content-storages").andAssertThatJson {
-      node("_embedded.contentStorages").isArray.hasSize(1)
+      node("_embedded.contentStorages").isArray.hasSize(3)
     }
   }
 
@@ -154,6 +158,15 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "content-storages/${storage.id}"
     ).andIsOk
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `deletes not delete when in use`() {
+    performProjectAuthDelete(
+      "content-storages/${testData.azureContentStorage.self.id}"
+    ).andIsBadRequest.andHasErrorMessage(Message.CONTENT_STORAGE_IS_IN_USE)
+  }
+
 
   @Test
   @ProjectJWTAuthTestMethod
