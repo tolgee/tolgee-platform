@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.tolgee.notifications.events
+package io.tolgee.notifications.dto
 
 import io.tolgee.model.UserAccount
-import io.tolgee.notifications.dto.NotificationCreateDto
+import io.tolgee.model.activity.ActivityModifiedEntity
 
-data class NotificationCreateEvent(
-  val notification: NotificationCreateDto,
-  val responsibleUser: UserAccount?,
-  val source: Any? = null
+data class NotificationDispatchParamsDto(
+  val recipient: UserAccount,
+  val activityModifiedEntities: List<ActivityModifiedEntity> = emptyList(),
+  val meta: MutableMap<String, Any?> = mutableMapOf(),
 )

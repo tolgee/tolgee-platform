@@ -2760,18 +2760,21 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700392205399-1">
+    <changeSet author="cynthia (generated)" id="1700488039756-1">
+        <createSequence incrementBy="50" sequenceName="sequence_notifications" startValue="1"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1700488039756-2">
         <createTable tableName="notification">
-            <column autoIncrement="true" name="id" type="BIGINT">
+            <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="notificationPK"/>
             </column>
             <column name="last_updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="marked_done_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
-            <column name="meta" type="JSONB"/>
+            <column name="meta" type="UUID"/>
             <column name="type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="unread" type="BOOLEAN">
+            <column defaultValueBoolean="true" name="unread" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
             <column name="batch_job_id" type="BIGINT"/>
@@ -2783,35 +2786,51 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700392205399-2">
-        <createTable tableName="notification_activity_revisions">
+    <changeSet author="cynthia (generated)" id="1700488039756-3">
+        <createTable tableName="notification_activity_modified_entities">
             <column name="notification_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="activity_revisions_id" type="BIGINT">
-                <constraints nullable="false"/>
+            <column name="activity_modified_entities_activity_revision_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="activity_modified_entities_entity_class" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="activity_modified_entities_entity_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700392205399-3">
+    <changeSet author="cynthia (generated)" id="1700488039756-4">
+        <createTable tableName="notification_activity_revisions">
+            <column name="notification_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="activity_revisions_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1700488039756-5">
         <addForeignKeyConstraint baseColumnNames="activity_revisions_id" baseTableName="notification_activity_revisions" constraintName="FK3j9w4t7grnktkwm13ki8evf0p" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700392205399-4">
+    <changeSet author="cynthia (generated)" id="1700488039756-6">
+        <addForeignKeyConstraint baseColumnNames="notification_id" baseTableName="notification_activity_modified_entities" constraintName="FK9fb5wjv3k23orh9o89i6saihk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="notification" validate="true"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1700488039756-7">
         <addForeignKeyConstraint baseColumnNames="notification_id" baseTableName="notification_activity_revisions" constraintName="FKao7bnehb277pi2nacmxlsi675" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="notification" validate="true"/>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700392205399-5">
+    <changeSet author="cynthia (generated)" id="1700488039756-8">
         <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="notification" constraintName="FKd9kw17i2kde4cteinf3lnqiio" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tolgee_batch_job" validate="true"/>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700392205399-6">
+    <changeSet author="cynthia (generated)" id="1700488039756-9">
         <addForeignKeyConstraint baseColumnNames="recipient_id" baseTableName="notification" constraintName="FKeoy48jr2euexf3ulaewfrydvv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700392205399-7">
+    <changeSet author="cynthia (generated)" id="1700488039756-10">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="notification" constraintName="FKi35sfx0x08fonfxf2l8cp2xcp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
-    <changeSet author="cynthia (generated)" id="1700395658038-2">
-        <createSequence incrementBy="50" sequenceName="sequence_notifications" startValue="1"/>
-    </changeSet>
-    <changeSet author="cynthia (generated)" id="1700395658038-1">
-        <addDefaultValue columnDataType="boolean" columnName="unread" defaultValueBoolean="true" tableName="notification"/>
+    <changeSet author="cynthia (generated)" id="1700488039756-11">
+        <addForeignKeyConstraint baseColumnNames="activity_modified_entities_activity_revision_id,activity_modified_entities_entity_class,activity_modified_entities_entity_id" baseTableName="notification_activity_modified_entities" constraintName="FKn2bci4gj7g0u677pdsahcd5gb" deferrable="false" initiallyDeferred="false" referencedColumnNames="activity_revision_id,entity_class,entity_id" referencedTableName="activity_modified_entity" validate="true"/>
     </changeSet>
 </databaseChangeLog>

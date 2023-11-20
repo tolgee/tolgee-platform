@@ -17,6 +17,7 @@
 package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.batch.BatchJob
 import org.hibernate.annotations.ColumnDefault
@@ -25,7 +26,22 @@ import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import org.hibernate.annotations.UpdateTimestamp
 import java.util.*
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
+import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
+import javax.persistence.OrderBy
+import javax.persistence.SequenceGenerator
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
 @Entity
 @TypeDefs(
@@ -33,28 +49,33 @@ import javax.persistence.*
     TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
   ]
 )
-class Notification private constructor(
+class Notification(
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   val type: NotificationType,
 
   // This data is very likely to be useless: lazy
-  @ManyToOne(fetch = FetchType.LAZY, cascade = [ CascadeType.REMOVE ])
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   val recipient: UserAccount,
 
   // We most definitely need this to show the notification: eager
-  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ])
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(nullable = false)
   val project: Project,
 
   // We most definitely need this to show the notification: eager
-  @ManyToMany(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ])
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "notification_activity_revisions")
-  val activityRevisions: MutableList<ActivityRevision>? = null,
+  val activityRevisions: MutableSet<ActivityRevision> = mutableSetOf(),
 
   // We most definitely need this to show the notification: eager
-  @ManyToOne(fetch = FetchType.EAGER, cascade = [ CascadeType.REMOVE ])
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "notification_activity_modified_entities")
+  val activityModifiedEntities: MutableSet<ActivityModifiedEntity> = mutableSetOf(),
+
+  // We most definitely need this to show the notification: eager
+  @ManyToOne(fetch = FetchType.EAGER)
   val batchJob: BatchJob? = null,
 
   @Type(type = "jsonb")
@@ -76,34 +97,6 @@ class Notification private constructor(
   @UpdateTimestamp
   @Temporal(TemporalType.TIMESTAMP)
   val lastUpdated: Date = Date()
-
-  constructor(
-    recipient: UserAccount,
-    project: Project,
-    activityRevision: ActivityRevision,
-    meta: Map<String, Any?>? = null,
-  ) :
-    this(
-      NotificationType.ACTIVITY,
-      recipient,
-      project,
-      activityRevisions = mutableListOf(activityRevision),
-      meta = meta?.toMutableMap() ?: mutableMapOf(),
-    )
-
-  constructor(
-    recipient: UserAccount,
-    project: Project,
-    batchJob: BatchJob,
-    meta: Map<String, Any?>? = null,
-  ) :
-    this(
-      NotificationType.BATCH_JOB_FAILURE,
-      recipient,
-      project,
-      batchJob = batchJob,
-      meta = meta?.toMutableMap() ?: mutableMapOf(),
-    )
 
   enum class NotificationType {
     ACTIVITY,

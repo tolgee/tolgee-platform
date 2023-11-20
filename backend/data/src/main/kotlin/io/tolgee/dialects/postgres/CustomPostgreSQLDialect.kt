@@ -5,9 +5,11 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import org.hibernate.NullPrecedence
 import org.hibernate.dialect.PostgreSQL10Dialect
 import org.hibernate.dialect.function.SQLFunction
+import org.hibernate.dialect.function.StandardSQLFunction
 import org.hibernate.engine.spi.Mapping
 import org.hibernate.engine.spi.SessionFactoryImplementor
 import org.hibernate.type.FloatType
+import org.hibernate.type.StandardBasicTypes
 import org.hibernate.type.Type
 import java.sql.Types
 
@@ -15,6 +17,7 @@ import java.sql.Types
 class CustomPostgreSQLDialect : PostgreSQL10Dialect() {
   init {
     registerHibernateType(Types.ARRAY, StringArrayType::class.java.name)
+    registerFunction("array_to_string", StandardSQLFunction("array_to_string", StandardBasicTypes.STRING))
   }
 
   override fun renderOrderByElement(

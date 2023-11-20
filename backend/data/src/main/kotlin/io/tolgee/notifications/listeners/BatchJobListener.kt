@@ -28,12 +28,10 @@ import io.tolgee.util.logger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobListener(
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val entityManager: EntityManager,
   private val batchJobService: BatchJobService,
 ) : Logging {
   @EventListener
@@ -46,10 +44,7 @@ class BatchJobListener(
 
     val notification = createNotificationBase(e.job)
     notification.meta["status"] = BatchJobStatus.PENDING
-
-    applicationEventPublisher.publishEvent(
-      NotificationCreateEvent(notification, e)
-    )
+    doDispatch(notification, e)
   }
 
   @EventListener
@@ -64,10 +59,7 @@ class BatchJobListener(
     notification.meta["status"] = BatchJobStatus.RUNNING
     notification.meta["processed"] = 0
     notification.meta["total"] = e.job.totalChunks
-
-    applicationEventPublisher.publishEvent(
-      NotificationCreateEvent(notification, e)
-    )
+    doDispatch(notification, e)
   }
 
   @EventListener
@@ -84,10 +76,7 @@ class BatchJobListener(
     notification.meta["status"] = BatchJobStatus.RUNNING
     notification.meta["processed"] = e.processed
     notification.meta["total"] = e.total
-
-    applicationEventPublisher.publishEvent(
-      NotificationCreateEvent(notification, e)
-    )
+    doDispatch(notification, e)
   }
 
   @EventListener
@@ -100,10 +89,7 @@ class BatchJobListener(
 
     val notification = createNotificationBase(e.job)
     notification.meta["status"] = BatchJobStatus.SUCCESS
-
-    applicationEventPublisher.publishEvent(
-      NotificationCreateEvent(notification, e)
-    )
+    doDispatch(notification, e)
   }
 
   @EventListener
@@ -116,10 +102,7 @@ class BatchJobListener(
 
     val notification = createNotificationBase(e.job)
     notification.meta["status"] = BatchJobStatus.CANCELLED
-
-    applicationEventPublisher.publishEvent(
-      NotificationCreateEvent(notification, e)
-    )
+    doDispatch(notification, e)
   }
 
   @EventListener
@@ -132,9 +115,16 @@ class BatchJobListener(
 
     val notification = createNotificationBase(e.job)
     notification.meta["status"] = BatchJobStatus.FAILED
+    doDispatch(notification, e)
+  }
 
+  private fun doDispatch(notification: NotificationCreateDto, source: Any) {
     applicationEventPublisher.publishEvent(
-      NotificationCreateEvent(notification, e)
+      NotificationCreateEvent(
+        notification,
+        source = source,
+        responsibleUser = null,
+      )
     )
   }
 

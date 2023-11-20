@@ -22,10 +22,10 @@ interface LanguageRepository : JpaRepository<Language, Long> {
 
   @Query(
     """
-      SELECT t.language.id
+      SELECT new map(t.id, t.language.id)
       FROM Translation t
       WHERE t.id IN :translationIds
     """
   )
-  fun findLanguageIdsOfTranslations(translationIds: List<Long>): List<Long>
+  fun findLanguageIdsOfTranslations(translationIds: List<Long>): Map<Long, Long>
 }

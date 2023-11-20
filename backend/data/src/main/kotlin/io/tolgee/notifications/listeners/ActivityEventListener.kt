@@ -18,6 +18,7 @@ package io.tolgee.notifications.listeners
 
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.events.NotificationCreateEvent
 import io.tolgee.util.Logging
@@ -45,13 +46,21 @@ class ActivityEventListener(
 
     val projectId = e.activityRevision.projectId ?: return
     val project = entityManager.getReference(Project::class.java, projectId)
+    val responsibleUser = e.activityRevision.authorId?.let {
+      entityManager.getReference(UserAccount::class.java, it)
+    }
+
     val notificationDto = NotificationCreateDto(
       project = project,
       activityRevision = e.activityRevision
     )
 
     applicationEventPublisher.publishEvent(
-      NotificationCreateEvent(notificationDto, e)
+      NotificationCreateEvent(
+        notificationDto,
+        responsibleUser,
+        source = e,
+      )
     )
   }
 }

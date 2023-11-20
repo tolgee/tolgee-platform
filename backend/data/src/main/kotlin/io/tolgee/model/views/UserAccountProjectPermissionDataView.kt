@@ -28,8 +28,16 @@ class UserAccountProjectPermissionDataView(
   basePermissionsGranular: Array<Enum<Scope>>?,
   val permissionsBasic: ProjectPermissionType?,
   permissionsGranular: Array<Enum<Scope>>?,
+  viewLanguageIdsConcatenated: String,
 ) {
   // I hate Hibernate - it *requires* an Array<Enum<?>> or complains...
   val basePermissionsGranular: List<Scope>? = basePermissionsGranular?.map { enumValueOf(it.name) }
   val permissionsGranular: List<Scope>? = permissionsGranular?.map { enumValueOf(it.name) }
+
+  // And don't get me started on its array support ^^
+  val permittedViewLanguages = viewLanguageIdsConcatenated
+    .split(',')
+    .filter { it.isNotEmpty() }
+    .map { it.toLong() }
+    .ifEmpty { null }
 }

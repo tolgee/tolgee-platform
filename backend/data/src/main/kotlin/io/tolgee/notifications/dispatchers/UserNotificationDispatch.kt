@@ -17,11 +17,13 @@
 package io.tolgee.notifications.dispatchers
 
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.notifications.NotificationService
+import io.tolgee.notifications.dto.NotificationDispatchParamsDto
 import io.tolgee.notifications.events.NotificationCreateEvent
 import io.tolgee.service.LanguageService
 import io.tolgee.service.security.PermissionService
@@ -30,6 +32,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import javax.persistence.EntityManager
 
 @Component
 class UserNotificationDispatch(
@@ -37,6 +40,7 @@ class UserNotificationDispatch(
   private val permissionService: PermissionService,
   private val languageService: LanguageService,
   private val notificationService: NotificationService,
+  private val entityManager: EntityManager,
 ) : Logging {
   @EventListener
   fun onNotificationCreate(e: NotificationCreateEvent) {
@@ -50,24 +54,7 @@ class UserNotificationDispatch(
   }
 
   private fun handleActivityNotification(e: NotificationCreateEvent) {
-    val revision = e.notification.activityRevision!!
-    val users = getUsersConcernedByRevision(revision)
-    if (users.isEmpty()) return
-
-    notificationService.dispatchNotificationToUserIds(e.notification, users)
-  }
-
-  private fun handleBatchJobNotification(e: NotificationCreateEvent) {
-    // Only send a full notification for job failures. The rest will be ephemeral WebSocket based.
-    if (e.notification.meta["status"] != BatchJobStatus.FAILED) return
-
-    val batchJob = e.notification.batchJob!!
-    val author = batchJob.author ?: return
-    notificationService.dispatchNotificationToUser(e.notification, author)
-  }
-
-  private fun getUsersConcernedByRevision(revision: ActivityRevision): List<Long> {
-    return when (revision.type) {
+    when (e.notification.activityRevision!!.type) {
       ActivityType.CREATE_LANGUAGE,
       ActivityType.KEY_TAGS_EDIT,
       ActivityType.KEY_NAME_EDIT,
@@ -75,8 +62,12 @@ class UserNotificationDispatch(
       ActivityType.NAMESPACE_EDIT,
       ActivityType.BATCH_TAG_KEYS,
       ActivityType.BATCH_UNTAG_KEYS,
-      ActivityType.BATCH_SET_KEYS_NAMESPACE
-      -> getAllUsersOfProject(revision)
+      ActivityType.BATCH_SET_KEYS_NAMESPACE,
+      ActivityType.COMPLEX_EDIT ->
+        handleGenericActivityNotification(e)
+
+      ActivityType.SCREENSHOT_ADD ->
+        handleScreenshotActivityNotification(e)
 
       ActivityType.SET_TRANSLATION_STATE,
       ActivityType.SET_TRANSLATIONS,
@@ -90,16 +81,14 @@ class UserNotificationDispatch(
       ActivityType.AUTO_TRANSLATE,
       ActivityType.BATCH_CLEAR_TRANSLATIONS,
       ActivityType.BATCH_COPY_TRANSLATIONS,
-      ActivityType.BATCH_SET_TRANSLATION_STATE
-      -> getUsersConcernedByTranslationChange(revision)
+      ActivityType.BATCH_SET_TRANSLATION_STATE ->
+        handleTranslationActivityNotification(e)
 
-      ActivityType.SCREENSHOT_ADD
-      -> getUsersConcernedByScreenshotChange(revision)
-
-      ActivityType.IMPORT -> TODO()
-      ActivityType.COMPLEX_EDIT -> TODO()
+      ActivityType.IMPORT ->
+        handleImportActivityNotification(e)
 
       // Do not show a notification about those type of events
+      // Intentionally not done as an else block to make this not compile if new activities are added
       ActivityType.EDIT_PROJECT,
       ActivityType.EDIT_LANGUAGE,
       ActivityType.DELETE_LANGUAGE,
@@ -108,40 +97,129 @@ class UserNotificationDispatch(
       ActivityType.SCREENSHOT_DELETE,
       ActivityType.CREATE_PROJECT,
       ActivityType.UNKNOWN,
-      null -> emptyList()
+      null -> {}
     }
   }
 
-  private fun getAllUsersOfProject(activityRevision: ActivityRevision): List<Long> {
-    return userAccountService.getAllPermissionInformationOfPermittedUsersInProject(activityRevision.projectId!!)
-      .map { it.id }
+  private fun handleBatchJobNotification(e: NotificationCreateEvent) {
+    // Only send a full notification for job failures. The rest will be ephemeral WebSocket based.
+    if (e.notification.meta["status"] != BatchJobStatus.FAILED) return
+
+    val batchJob = e.notification.batchJob!!
+    val author = batchJob.author ?: return
+    notificationService.dispatchNotification(
+      e.notification,
+      NotificationDispatchParamsDto(author)
+    )
   }
 
-  private fun getUsersConcernedByScreenshotChange(activityRevision: ActivityRevision): List<Long> {
-    return userAccountService.getAllPermissionInformationOfPermittedUsersInProject(activityRevision.projectId!!)
+  private fun handleGenericActivityNotification(e: NotificationCreateEvent) {
+    val revision = e.notification.activityRevision!!
+    val users = userAccountService.getAllPermissionInformationOfPermittedUsersInProject(revision.projectId!!)
+
+    val dispatches = users
+      .filter { it.id != e.responsibleUser?.id }
+      .map {
+        NotificationDispatchParamsDto(
+          recipient = entityManager.getReference(UserAccount::class.java, it.id),
+          activityModifiedEntities = revision.modifiedEntities,
+        )
+      }
+
+    notificationService.dispatchNotifications(e.notification, dispatches)
+  }
+
+  private fun handleScreenshotActivityNotification(e: NotificationCreateEvent) {
+    val revision = e.notification.activityRevision!!
+    val users = userAccountService.getAllPermissionInformationOfPermittedUsersInProject(revision.projectId!!)
+
+    val dispatches = users
       .filter {
+        if (it.id == e.responsibleUser?.id) return@filter false
         val computedPermissions = permissionService.computeProjectPermission(it)
         computedPermissions.expandedScopes.contains(Scope.SCREENSHOTS_VIEW)
       }
-      .map { it.id }
+      .map {
+        NotificationDispatchParamsDto(
+          recipient = entityManager.getReference(UserAccount::class.java, it.id),
+          activityModifiedEntities = revision.modifiedEntities,
+        )
+      }
+
+    notificationService.dispatchNotifications(e.notification, dispatches)
   }
 
-  private fun getUsersConcernedByTranslationChange(activityRevision: ActivityRevision): List<Long> {
-    val translationIds = activityRevision.modifiedEntities
+  private fun handleTranslationActivityNotification(e: NotificationCreateEvent) {
+    val revision = e.notification.activityRevision!!
+    val users = userAccountService.getAllPermissionInformationOfPermittedUsersInProject(revision.projectId!!)
+
+    val translationEntities = revision.modifiedEntities
+      .filter { it.entityClass == Translation::class.simpleName }
+
+    val translationIds = translationEntities.map { it.entityId }
+    val translationToLangMap = languageService.findLanguageIdsOfTranslations(translationIds)
+
+    val dispatches = users
+      .filter {
+        if (it.id == e.responsibleUser?.id) return@filter false
+        val computedPermissions = permissionService.computeProjectPermission(it)
+        computedPermissions.expandedScopes.contains(Scope.TRANSLATIONS_VIEW)
+      }
+      .map {
+        val visibleModifiedEntities = translationEntities.filter { entity ->
+          val languageId = translationToLangMap[entity.entityId] ?: return@filter false
+          it.permittedViewLanguages?.contains(languageId) != false
+        }
+
+        NotificationDispatchParamsDto(
+          recipient = entityManager.getReference(UserAccount::class.java, it.id),
+          activityModifiedEntities = visibleModifiedEntities,
+        )
+      }
+
+    notificationService.dispatchNotifications(e.notification, dispatches)
+  }
+
+  private fun handleImportActivityNotification(e: NotificationCreateEvent) {
+    val revision = e.notification.activityRevision!!
+
+    val keysCount = revision.modifiedEntities.count { it.entityClass == Key::class.simpleName }
+
+    // Count translations per locale
+    val translationIds = revision.modifiedEntities
       .filter { it.entityClass == Translation::class.simpleName }
       .map { it.entityId }
 
-    val langIds = languageService.findLanguageIdsOfTranslations(translationIds)
-    return userAccountService.getAllPermissionInformationOfPermittedUsersInProject(
-      activityRevision.projectId!!,
-      langIds
-    )
+    val translationToLangMap = languageService.findLanguageIdsOfTranslations(translationIds)
+
+    val importedTranslationsPerLocale = mutableMapOf<Long, Int>()
+    translationToLangMap.values.forEach {
+      importedTranslationsPerLocale.merge(it, 1) { a, b -> a + b }
+    }
+
+    // Filter users
+    val users = userAccountService.getAllPermissionInformationOfPermittedUsersInProject(revision.projectId!!)
+
+    val dispatches = users
       .filter {
+        if (it.id == e.responsibleUser?.id) return@filter false
         val computedPermissions = permissionService.computeProjectPermission(it)
-        println("--")
-        println(computedPermissions.expandedScopes.joinToString(", "))
         computedPermissions.expandedScopes.contains(Scope.TRANSLATIONS_VIEW)
       }
-      .map { it.id }
+      .map {
+        val userVisibleTranslationCount = importedTranslationsPerLocale
+          .filterKeys { l -> it.permittedViewLanguages?.contains(l) != false }
+          .values.reduce { acc, i -> acc + i }
+
+        NotificationDispatchParamsDto(
+          recipient = entityManager.getReference(UserAccount::class.java, it.id),
+          meta = mutableMapOf("keysCount" to keysCount, "translationsCount" to userVisibleTranslationCount)
+        )
+      }
+      .filter {
+        it.meta["translationsCount"] != 0
+      }
+
+    notificationService.dispatchNotifications(e.notification, dispatches)
   }
 }

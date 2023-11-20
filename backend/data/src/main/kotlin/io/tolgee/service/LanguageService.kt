@@ -8,7 +8,6 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
-import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
@@ -34,10 +33,6 @@ class LanguageService(
   @set:Autowired
   @set:Lazy
   lateinit var translationService: TranslationService
-
-  @set:Autowired
-  @set:Lazy
-  lateinit var mtServiceConfigService: MtServiceConfigService
 
   @Transactional
   fun createLanguage(dto: LanguageDto?, project: Project): Language {
@@ -163,10 +158,11 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
-  fun findLanguageIdsOfTranslations(translationIds: List<Long>): List<Long> {
+  fun findLanguageIdsOfTranslations(translationIds: List<Long>): Map<Long, Long> {
     return languageRepository.findLanguageIdsOfTranslations(translationIds)
   }
 
+  @Transactional
   fun deleteAllByProject(projectId: Long) {
     findAll(projectId).forEach {
       deleteLanguage(it.id)

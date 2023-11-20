@@ -31,13 +31,24 @@ interface NotificationsRepository : JpaRepository<Notification, Long> {
 
   fun findAllByMarkedDoneAtNotNullAndRecipient(recipient: UserAccount, pageable: Pageable): List<Notification>
 
-  fun findAllByUnreadTrueAndTypeAndProjectAndRecipientIn(
+  fun countNotificationsByRecipientAndUnreadTrue(recipient: UserAccount): Int
+
+  @Query(
+    """
+      SELECT new map(n.recipient.id, n)
+      FROM Notification n
+      WHERE
+        n.unread = true AND
+        n.type = :type AND
+        n.project = :project AND
+        n.recipient IN :recipients
+    """
+  )
+  fun findNotificationsToDebounceMappedByUser(
     type: Notification.NotificationType,
     project: Project,
     recipients: Collection<UserAccount>,
-  ): List<Notification>
-
-  fun countNotificationsByRecipientAndUnreadTrue(recipient: UserAccount): Int
+  ): Map<Long, Notification>
 
   @Modifying
   @Query("UPDATE Notification n SET n.unread = false WHERE n.recipient = ?1 AND n.id IN ?2")

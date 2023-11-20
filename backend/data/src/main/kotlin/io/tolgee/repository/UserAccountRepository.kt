@@ -157,14 +157,15 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-      SELECT DISTINCT new io.tolgee.model.views.UserAccountProjectPermissionDataView(
+      SELECT new io.tolgee.model.views.UserAccountProjectPermissionDataView(
         ua.id,
         p.id,
         org_r.type,
         perm_org.type,
         perm_org._scopes,
         perm.type,
-        perm._scopes
+        perm._scopes,
+        array_to_string(array_agg(l.id), ',')
       )
       FROM UserAccount ua, Project p
       LEFT JOIN OrganizationRole org_r ON
@@ -181,17 +182,11 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       WHERE
         p.id = :projectId AND
         ua.deletedAt IS NULL AND (
-            (perm._scopes IS NOT NULL AND perm._scopes != '{}') OR perm.type IS NOT NULL OR
-            (perm_org._scopes IS NOT NULL AND perm_org._scopes != '{}') OR perm_org.type IS NOT NULL
-        ) AND (
-          (:languageIds) IS NULL OR
-          l.id IS NULL OR
-          l.id IN (:languageIds)
+          (perm._scopes IS NOT NULL AND perm._scopes != '{}') OR perm.type IS NOT NULL OR
+          (perm_org._scopes IS NOT NULL AND perm_org._scopes != '{}') OR perm_org.type IS NOT NULL
         )
+      GROUP BY ua.id, p.id, org_r.type, perm_org.type, perm_org._scopes, perm.type, perm._scopes
     """
   )
-  fun findAllPermittedUsersProjectPermissionView(
-    projectId: Long,
-    languageIds: List<Long>?
-  ): List<UserAccountProjectPermissionDataView>
+  fun findAllPermittedUsersProjectPermissionView(projectId: Long): List<UserAccountProjectPermissionDataView>
 }

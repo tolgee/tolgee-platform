@@ -302,15 +302,10 @@ class UserAccountService(
     }
   }
 
-  /**
-   * Returns a view of all users ids who are allowed to see at least one language of [languageIds]
-   * (or all permitted users if null) and their permissions.
-   */
   fun getAllPermissionInformationOfPermittedUsersInProject(
-    projectId: Long,
-    languageIds: List<Long>? = null,
+    projectId: Long
   ): List<UserAccountProjectPermissionDataView> {
-    return userAccountRepository.findAllPermittedUsersProjectPermissionView(projectId, languageIds)
+    return userAccountRepository.findAllPermittedUsersProjectPermissionView(projectId)
   }
 
   @Transactional
