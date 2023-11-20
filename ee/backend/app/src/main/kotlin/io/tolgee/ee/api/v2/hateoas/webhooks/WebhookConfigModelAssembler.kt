@@ -1,6 +1,6 @@
-package io.tolgee.hateoas.webhooks
+package io.tolgee.ee.api.v2.hateoas.webhooks
 
-import io.tolgee.api.v2.controllers.webhook.WebhookConfigController
+import io.tolgee.ee.api.v2.controllers.WebhookConfigController
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component

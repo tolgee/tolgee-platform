@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.webhooks
+package io.tolgee.ee.api.v2.hateoas.webhooks
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel

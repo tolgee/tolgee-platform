@@ -1,15 +1,15 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.service.webhooks.WebhookConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -34,7 +34,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.MULTIPLE_WEBHOOKS)
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.WEBHOOKS)
   }
 
   @AfterEach
@@ -57,7 +57,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     enabledFeaturesProvider.forceEnabled = listOf()
     createWebhook()
     createWebhook().andIsBadRequest
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.MULTIPLE_WEBHOOKS)
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.WEBHOOKS)
     createWebhook().andIsOk
   }
 

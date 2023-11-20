@@ -1,17 +1,19 @@
-package io.tolgee.api.v2.controllers.webhook
+package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.WebhookConfigRequest
-import io.tolgee.dtos.response.WebhookTestResponse
-import io.tolgee.hateoas.webhooks.WebhookConfigModel
-import io.tolgee.hateoas.webhooks.WebhookConfigModelAssembler
+import io.tolgee.ee.api.v2.hateoas.webhooks.WebhookConfigModel
+import io.tolgee.ee.api.v2.hateoas.webhooks.WebhookConfigModelAssembler
+import io.tolgee.ee.data.WebhookTestResponse
+import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.webhooks.WebhookConfigService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -35,19 +37,24 @@ import javax.validation.Valid
     "/v2/projects/{projectId}/webhook-configs",
   ]
 )
-@Tag(name = "Webhooks", description = "Webhooks management")
+@Tag(name = "Webhooks configuration (EE)")
 class WebhookConfigController(
   private val webhookConfigService: WebhookConfigService,
   private val webhookConfigModelAssembler: WebhookConfigModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pageModelAssembler: PagedResourcesAssembler<WebhookConfig>,
-  private val projectHolder: ProjectHolder
+  private val projectHolder: ProjectHolder,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider
 ) {
   @PostMapping("")
   @Operation(description = "Creates new webhook configuration")
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @AllowApiAccess
   fun create(@Valid @RequestBody dto: WebhookConfigRequest): WebhookConfigModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.WEBHOOKS
+    )
     val config = webhookConfigService.create(projectHolder.projectEntity, dto)
     return webhookConfigModelAssembler.toModel(config)
   }
@@ -57,6 +64,10 @@ class WebhookConfigController(
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @AllowApiAccess
   fun update(@PathVariable id: Long, @Valid @RequestBody dto: WebhookConfigRequest): WebhookConfigModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.WEBHOOKS
+    )
     val webhookConfig = webhookConfigService.update(projectId = projectHolder.project.id, id, dto)
     return webhookConfigModelAssembler.toModel(webhookConfig)
   }
@@ -91,6 +102,10 @@ class WebhookConfigController(
   @Operation(description = "Tests webhook configuration")
   @AllowApiAccess
   fun test(@PathVariable id: Long): WebhookTestResponse {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.WEBHOOKS
+    )
     val success = webhookConfigService.test(projectHolder.project.id, id)
     return WebhookTestResponse(success)
   }

@@ -82,6 +82,7 @@ class ContentDeliveryConfigService(
 
   @Transactional
   fun update(projectId: Long, id: Long, dto: ContentDeliveryConfigRequest): ContentDeliveryConfig {
+    checkMultipleConfigsFeature(projectService.get(projectId))
     val exporter = get(projectId, id)
     exporter.contentStorage = getStorage(projectId, dto.contentStorageId)
     exporter.name = dto.name
