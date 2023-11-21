@@ -167,7 +167,6 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
     ).andIsBadRequest.andHasErrorMessage(Message.CONTENT_STORAGE_IS_IN_USE)
   }
 
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `tests azure storage`() {

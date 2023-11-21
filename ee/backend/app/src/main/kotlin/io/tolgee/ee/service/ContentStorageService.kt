@@ -64,7 +64,7 @@ class ContentStorageService(
   fun delete(projectId: Long, id: Long) {
     val storage = get(projectId, id)
     contentStorageConfigProcessors.forEach { it.clearParentEntity(storage, entityManager) }
-    if(contentStorageRepository.isStorageInUse(storage)){
+    if (contentStorageRepository.isStorageInUse(storage)) {
       throw BadRequestException(Message.CONTENT_STORAGE_IS_IN_USE)
     }
     contentStorageRepository.delete(storage)

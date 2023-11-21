@@ -1319,6 +1319,8 @@ export interface components {
       storage?: components["schemas"]["ContentStorageModel"];
       publicUrl?: string;
       autoPublish: boolean;
+      /** Format: int64 */
+      lastPublished?: number;
       /**
        * @description Languages to be contained in export.
        *
@@ -1496,9 +1498,9 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1564,7 +1566,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       /** Format: int64 */
@@ -1632,6 +1634,8 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
+      projectName: string;
+      userFullName?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
@@ -1639,12 +1643,10 @@ export interface components {
       /** Format: int64 */
       projectId: number;
       username?: string;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1707,7 +1709,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
@@ -2081,7 +2083,8 @@ export interface components {
         | "CANNOT_STORE_FILE_TO_CONTENT_STORAGE"
         | "UNEXPECTED_ERROR_WHILE_PUBLISHING_TO_CONTENT_STORAGE"
         | "WEBHOOK_RESPONDED_WITH_NON_200_STATUS"
-        | "UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK";
+        | "UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK"
+        | "CONTENT_STORAGE_IS_IN_USE";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2500,7 +2503,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       basePermissions: components["schemas"]["PermissionModel"];
@@ -2513,12 +2516,12 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2551,8 +2554,8 @@ export interface components {
     };
     DocItem: {
       displayName?: string;
-      name: string;
       description?: string;
+      name: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -3143,9 +3146,9 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3262,6 +3265,8 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
+      projectName: string;
+      userFullName?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
@@ -3269,12 +3274,10 @@ export interface components {
       /** Format: int64 */
       projectId: number;
       username?: string;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {

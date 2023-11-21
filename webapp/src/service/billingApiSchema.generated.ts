@@ -150,7 +150,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
@@ -195,7 +195,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
@@ -270,7 +270,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesRequest"];
@@ -302,7 +302,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
@@ -326,7 +326,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
@@ -359,7 +359,7 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
         | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "MULTIPLE_WEBHOOKS"
+        | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
@@ -1559,7 +1559,7 @@ export interface operations {
             | "ACCOUNT_MANAGER"
             | "STANDARD_SUPPORT"
             | "PROJECT_LEVEL_CONTENT_STORAGES"
-            | "MULTIPLE_WEBHOOKS"
+            | "WEBHOOKS"
             | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
           )[];
         };
