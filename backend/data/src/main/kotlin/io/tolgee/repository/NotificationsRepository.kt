@@ -27,6 +27,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface NotificationsRepository : JpaRepository<Notification, Long> {
+  fun findAllByRecipient(recipient: UserAccount): List<Notification>
+
   fun findAllByMarkedDoneAtNullAndRecipient(recipient: UserAccount, pageable: Pageable): List<Notification>
 
   fun findAllByMarkedDoneAtNotNullAndRecipient(recipient: UserAccount, pageable: Pageable): List<Notification>

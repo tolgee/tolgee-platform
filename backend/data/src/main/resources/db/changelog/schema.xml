@@ -2770,7 +2770,7 @@
             </column>
             <column name="last_updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="marked_done_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
-            <column name="meta" type="UUID"/>
+            <column name="meta" type="JSONB"/>
             <column name="type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>

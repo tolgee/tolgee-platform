@@ -102,7 +102,7 @@ class UserNotificationDispatch(
   }
 
   private fun handleBatchJobNotification(e: NotificationCreateEvent) {
-    // Only send a full notification for job failures. The rest will be ephemeral WebSocket based.
+    // Only send a full notification for job failures.
     if (e.notification.meta["status"] != BatchJobStatus.FAILED) return
 
     val batchJob = e.notification.batchJob!!

@@ -27,5 +27,5 @@ interface LanguageRepository : JpaRepository<Language, Long> {
       WHERE t.id IN :translationIds
     """
   )
-  fun findLanguageIdsOfTranslations(translationIds: List<Long>): Map<Long, Long>
+  fun findLanguageIdsOfTranslations(translationIds: List<Long>): List<Map<Long, Long>>
 }

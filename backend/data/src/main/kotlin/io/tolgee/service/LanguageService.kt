@@ -160,6 +160,7 @@ class LanguageService(
 
   fun findLanguageIdsOfTranslations(translationIds: List<Long>): Map<Long, Long> {
     return languageRepository.findLanguageIdsOfTranslations(translationIds)
+      .reduce { acc, map -> acc.plus(map) }
   }
 
   @Transactional
