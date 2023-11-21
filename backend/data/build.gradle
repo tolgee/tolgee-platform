@@ -170,7 +170,7 @@ dependencies {
     implementation 'com.eatthepath:java-otp:0.4.0'
     implementation libs.postHog
     implementation libs.micrometerPrometheus
-    implementation 'dom4j:dom4j:2.1.4'
+    implementation 'org.dom4j:dom4j:2.1.4'
     implementation libs.jacksonKotlin
 
     /**
