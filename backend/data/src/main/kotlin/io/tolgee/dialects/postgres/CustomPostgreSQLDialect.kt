@@ -6,7 +6,7 @@ import org.hibernate.dialect.PostgreSQLDialect
 import org.hibernate.type.StandardBasicTypes
 
 @Suppress("unused")
-class CustomPostgreSQLDialect : PostgreSQLDialect(DatabaseVersion.make(10)) {
+class CustomPostgreSQLDialect : PostgreSQLDialect(DatabaseVersion.make(13)) {
 
   override fun contributeFunctions(functionContributions: FunctionContributions) {
     super.contributeFunctions(functionContributions)
