@@ -21,7 +21,8 @@ class ContentDeliveryConfigModelAssembler(
       slug = entity.slug,
       storage = entity.contentStorage?.let { contentStorageModelAssembler.toModel(it) },
       publicUrl = getPublicUrl(entity),
-      autoPublish = entity.automationActions.isNotEmpty()
+      autoPublish = entity.automationActions.isNotEmpty(),
+      lastPublished = entity.lastPublished?.time
     ).also {
       it.copyPropsFrom(entity)
     }

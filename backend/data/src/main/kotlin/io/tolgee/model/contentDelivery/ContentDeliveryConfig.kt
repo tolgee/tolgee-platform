@@ -10,6 +10,7 @@ import io.tolgee.model.enums.TranslationState
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
+import java.util.*
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
@@ -37,6 +38,8 @@ class ContentDeliveryConfig(
 
   @OneToMany(mappedBy = "contentDeliveryConfig")
   var automationActions: MutableList<AutomationAction> = mutableListOf()
+
+  var lastPublished: Date? = null
 
   @Type(type = "jsonb")
   override var languages: Set<String>? = null

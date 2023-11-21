@@ -83,12 +83,12 @@ class ContentDeliveryConfigService(
   @Transactional
   fun update(projectId: Long, id: Long, dto: ContentDeliveryConfigRequest): ContentDeliveryConfig {
     checkMultipleConfigsFeature(projectService.get(projectId))
-    val exporter = get(projectId, id)
-    exporter.contentStorage = getStorage(projectId, dto.contentStorageId)
-    exporter.name = dto.name
-    exporter.copyPropsFrom(dto)
-    handleUpdateAutoPublish(dto, exporter)
-    return contentDeliveryConfigRepository.save(exporter)
+    val config = get(projectId, id)
+    config.contentStorage = getStorage(projectId, dto.contentStorageId)
+    config.name = dto.name
+    config.copyPropsFrom(dto)
+    handleUpdateAutoPublish(dto, config)
+    return save(config)
   }
 
   private fun handleUpdateAutoPublish(dto: ContentDeliveryConfigRequest, exporter: ContentDeliveryConfig) {
@@ -114,5 +114,9 @@ class ContentDeliveryConfigService(
 
   fun get(projectId: Long, contentDeliveryConfigId: Long): ContentDeliveryConfig {
     return contentDeliveryConfigRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
+  }
+
+  fun save(config: ContentDeliveryConfig): ContentDeliveryConfig {
+    return contentDeliveryConfigRepository.save(config)
   }
 }

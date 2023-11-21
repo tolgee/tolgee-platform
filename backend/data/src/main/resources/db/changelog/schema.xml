@@ -2950,4 +2950,9 @@
     <changeSet author="jenik (generated)" id="1700240298831-25">
         <addForeignKeyConstraint baseColumnNames="content_delivery_config_id" baseTableName="automation_action" constraintName="FKo3yk4abys4p5q00ij7meuqtl5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="content_delivery_config" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1700563209635-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="last_published" type="timestamp"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
