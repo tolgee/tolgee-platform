@@ -1,6 +1,7 @@
 package io.tolgee.util
 
 import org.springframework.dao.CannotAcquireLockException
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
@@ -45,13 +46,13 @@ fun <T> executeInNewRepeatableTransaction(
       return executeInNewTransaction(
         transactionManager,
         propagationBehavior = propagationBehavior,
-        isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE
+        isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED
       ) {
         fn()
       }
     } catch (e: Exception) {
       when (e) {
-        is OptimisticLockException, is CannotAcquireLockException -> {
+        is OptimisticLockException, is CannotAcquireLockException, is DataIntegrityViolationException -> {
           exception = e
           repeats++
         }
