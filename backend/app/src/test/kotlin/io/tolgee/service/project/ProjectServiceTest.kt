@@ -25,6 +25,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.executeInNewRepeatableTransaction
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -216,7 +217,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun `deletes project with Content Delivery Configs`() {
     val testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
-    executeInNewTransaction(platformTransactionManager) {
+    executeInNewRepeatableTransaction(platformTransactionManager) {
       projectService.deleteProject(testData.projectBuilder.self.id)
     }
   }
