@@ -13,6 +13,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.verifyHeader
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addMinutes
@@ -61,6 +62,9 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var webhookConfigService: WebhookConfigService
 
+  @Autowired
+  lateinit var contentDeliveryConfigService: ContentDeliveryConfigService
+
   @AfterEach
   fun after() {
     currentDateProvider.forcedDate = null
@@ -71,8 +75,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `publishes to Content Delivery`() {
+    currentDateProvider.forcedDate = currentDateProvider.date
     val testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
+
     Mockito.reset(restTemplate)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
@@ -80,8 +86,16 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     doReturn(fileStorageMock).whenever(contentDeliveryFileStorageProvider).getContentStorageWithDefaultClient()
     purgingMock = mock()
     doReturn(purgingMock).whenever(contentDeliveryCachePurgingProvider).defaultPurging
+
     modifyTranslationData()
     verifyContentDeliveryPublish()
+
+    waitForNotThrowing {
+      contentDeliveryConfigService
+        .get(testData.defaultServerContentDeliveryConfig.self.id)
+        .lastPublished!!.time
+        .assert.isEqualTo(currentDateProvider.date.time)
+    }
   }
 
   @Test

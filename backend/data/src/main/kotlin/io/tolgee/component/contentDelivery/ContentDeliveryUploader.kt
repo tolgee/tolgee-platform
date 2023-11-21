@@ -1,5 +1,6 @@
 package io.tolgee.component.contentDelivery
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -14,6 +15,7 @@ class ContentDeliveryUploader(
   private val exportService: ExportService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider,
+  private val currentDateProvider: CurrentDateProvider
 ) {
   fun upload(contentDeliveryConfigId: Long) {
     val config = contentDeliveryConfigService.get(contentDeliveryConfigId)
@@ -23,6 +25,8 @@ class ContentDeliveryUploader(
     val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
     storeToStorage(withFullPaths, storage)
     purgeCacheIfConfigured(config, withFullPaths)
+    config.lastPublished = currentDateProvider.date
+    contentDeliveryConfigService.save(config)
   }
 
   private fun purgeCacheIfConfigured(
