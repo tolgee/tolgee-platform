@@ -50,8 +50,8 @@ class ContentDeliveryConfigService(
     return contentDeliveryConfig
   }
 
-  private fun checkMultipleConfigsFeature(project: Project) {
-    if (contentDeliveryConfigRepository.countByProject(project) > 0) {
+  private fun checkMultipleConfigsFeature(project: Project, maxCurrentAllowed: Int = 0) {
+    if (contentDeliveryConfigRepository.countByProject(project) > maxCurrentAllowed) {
       enabledFeaturesProvider.checkFeatureEnabled(
         project.organizationOwner.id,
         Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS
@@ -82,7 +82,7 @@ class ContentDeliveryConfigService(
 
   @Transactional
   fun update(projectId: Long, id: Long, dto: ContentDeliveryConfigRequest): ContentDeliveryConfig {
-    checkMultipleConfigsFeature(projectService.get(projectId))
+    checkMultipleConfigsFeature(projectService.get(projectId), maxCurrentAllowed = 1)
     val config = get(projectId, id)
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
     config.name = dto.name
