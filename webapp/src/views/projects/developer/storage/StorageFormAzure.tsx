@@ -61,8 +61,8 @@ export const StorageFormAzure = ({
       }}
       validationSchema={
         data
-          ? Validation.STORAGE_FORM_AZURE_CREATE
-          : Validation.STORAGE_FORM_AZURE_UPDATE
+          ? Validation.STORAGE_FORM_AZURE_UPDATE
+          : Validation.STORAGE_FORM_AZURE_CREATE
       }
     >
       {({ submitForm, values, validateForm, setTouched }) => (
