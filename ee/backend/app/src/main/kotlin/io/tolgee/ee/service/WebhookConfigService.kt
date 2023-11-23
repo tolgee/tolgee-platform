@@ -13,7 +13,6 @@ import io.tolgee.service.automations.AutomationService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.util.*
 import javax.transaction.Transactional
 
 @Service
@@ -71,9 +70,8 @@ class WebhookConfigService(
   }
 
   private fun generateRandomWebhookSecret(): String {
-    val bytes = ByteArray(32)
-    java.security.SecureRandom().nextBytes(bytes)
-    return "whsec_" + Base64.getEncoder().encodeToString(bytes)
+    val hex = (1..32).joinToString("") { (0..15).random().toString(16) }
+    return "whsec_$hex"
   }
 
   fun find(id: Long): WebhookConfig? {
