@@ -25,9 +25,9 @@ export const DeveloperView = () => {
   const canManageCd = satisfiesPermission('content-delivery.manage');
   const canManageWebhooks = satisfiesPermission('webhooks.manage');
 
-  const pageCd = useRouteMatch(LINKS.PROJECT_DEVELOPER.template);
-  const pageStorage = useRouteMatch(LINKS.PROJECT_DEVELOPER_STORAGE.template);
-  const pageWebhooks = useRouteMatch(LINKS.PROJECT_DEVELOPER_WEBHOOKS.template);
+  const pageCd = useRouteMatch(LINKS.PROJECT_CONTENT_STORAGE.template);
+  const pageStorage = useRouteMatch(LINKS.PROJECT_STORAGE.template);
+  const pageWebhooks = useRouteMatch(LINKS.PROJECT_WEBHOOKS.template);
 
   return (
     <BaseProjectView
@@ -59,7 +59,7 @@ export const DeveloperView = () => {
             <Tab
               value="content-delivery"
               component={Link}
-              to={LINKS.PROJECT_DEVELOPER.build({
+              to={LINKS.PROJECT_CONTENT_STORAGE.build({
                 [PARAMS.PROJECT_ID]: project.id,
               })}
               label={t('developer_menu_content_delivery')}
@@ -70,7 +70,7 @@ export const DeveloperView = () => {
             <Tab
               value="storage"
               component={Link}
-              to={LINKS.PROJECT_DEVELOPER_STORAGE.build({
+              to={LINKS.PROJECT_STORAGE.build({
                 [PARAMS.PROJECT_ID]: project.id,
               })}
               label={t('developer_menu_storage')}
@@ -81,7 +81,7 @@ export const DeveloperView = () => {
             <Tab
               value="webhooks"
               component={Link}
-              to={LINKS.PROJECT_DEVELOPER_WEBHOOKS.build({
+              to={LINKS.PROJECT_WEBHOOKS.build({
                 [PARAMS.PROJECT_ID]: project.id,
               })}
               label={t('developer_menu_webhooks')}

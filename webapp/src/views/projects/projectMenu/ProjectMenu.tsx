@@ -124,8 +124,8 @@ export const ProjectMenu = ({ id }) => {
       {canViewDeveloper && (
         <SideMenuItem
           linkTo={(canPublishCd
-            ? LINKS.PROJECT_DEVELOPER
-            : LINKS.PROJECT_DEVELOPER_WEBHOOKS
+            ? LINKS.PROJECT_CONTENT_STORAGE
+            : LINKS.PROJECT_WEBHOOKS
           ).build({
             [PARAMS.PROJECT_ID]: id,
           })}
