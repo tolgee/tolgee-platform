@@ -11,7 +11,7 @@ import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.fixtures.verifyHeader
+import io.tolgee.fixtures.verifyWebhookSignatureHeader
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -176,7 +176,13 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun verifyWebhookSignature(httpEntity: HttpEntity<String>, secret: String) {
     val signature = httpEntity.headers["Tolgee-Signature"]
     signature.assert.isNotNull
-    verifyHeader(httpEntity.body, signature!!.single(), secret, 300, currentDateProvider.date.time / 1000)
+    verifyWebhookSignatureHeader(
+      httpEntity.body,
+      signature!!.single(),
+      secret,
+      300000,
+      currentDateProvider.date.time
+    )
   }
 
   private fun verifyContentDeliveryPublish() {

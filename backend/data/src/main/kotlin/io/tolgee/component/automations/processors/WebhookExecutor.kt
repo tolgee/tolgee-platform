@@ -2,6 +2,7 @@ package io.tolgee.component.automations.processors
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.fixtures.computeHmacSha256
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -10,9 +11,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.nio.charset.StandardCharsets
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 @Component
 class WebhookExecutor(
@@ -30,8 +28,8 @@ class WebhookExecutor(
     val request = HttpEntity(stringData, headers)
 
     try {
-      val responseEntity: ResponseEntity<Any> =
-        restTemplate.exchange(config.url, HttpMethod.POST, request, Any::class.java)
+      val responseEntity: ResponseEntity<String> =
+        restTemplate.exchange(config.url, HttpMethod.POST, request, String::class.java)
       if (!responseEntity.statusCode.is2xxSuccessful) {
         throw WebhookRespondedWithNon200Status(responseEntity.statusCode, responseEntity.body)
       }
@@ -41,21 +39,8 @@ class WebhookExecutor(
   }
 
   private fun generateSigHeader(payload: String, key: String): String {
-    val timestamp = currentDateProvider.date.time / 1000
-    val payloadToSign = String.format("%d.%s", timestamp, payload)
-    val signature = computeHmacSha256(key, payloadToSign)
-
-    return String.format("t=%d,%s=%s", timestamp, "v1", signature)
-  }
-
-  fun computeHmacSha256(key: String, message: String): String {
-    val hasher = Mac.getInstance("HmacSHA256")
-    hasher.init(SecretKeySpec(key.toByteArray(StandardCharsets.UTF_8), "HmacSHA256"))
-    val hash = hasher.doFinal(message.toByteArray(StandardCharsets.UTF_8))
-    var result = ""
-    for (b in hash) {
-      result += ((b.toInt() and 0xff) + 0x100).toString(16).substring(1)
-    }
-    return result
+    val timestamp = currentDateProvider.date.time
+    val signature = computeHmacSha256(key, "$timestamp.$payload")
+    return String.format("""{"timestamp": $timestamp, "signature": "$signature"}""")
   }
 }
