@@ -329,6 +329,55 @@ export class Validation {
       then: Yup.array().min(1),
     }),
   });
+
+  static readonly STORAGE_FORM_AZURE_CREATE = Yup.object({
+    name: Yup.string().required().max(100),
+    publicUrlPrefix: Yup.string().required().max(255),
+    azureContentStorageConfig: Yup.object({
+      connectionString: Yup.string().required().max(255),
+      containerName: Yup.string().required().max(255),
+    }),
+  });
+
+  static readonly STORAGE_FORM_AZURE_UPDATE = Yup.object().shape({
+    name: Yup.string().required().max(100),
+    publicUrlPrefix: Yup.string().required().max(255),
+    azureContentStorageConfig: Yup.object({
+      containerName: Yup.string().required().max(255),
+    }),
+  });
+
+  static readonly STORAGE_FORM_S3_CREATE = Yup.object().shape({
+    name: Yup.string().required().max(100),
+    publicUrlPrefix: Yup.string().required().max(255),
+    s3ContentStorageConfig: Yup.object({
+      bucketName: Yup.string().required().max(255),
+      accessKey: Yup.string().required().max(255),
+      secretKey: Yup.string().required().max(255),
+      endpoint: Yup.string().required().max(255),
+      signingRegion: Yup.string().required().max(255),
+    }),
+  });
+
+  static readonly STORAGE_FORM_S3_UPDATE = Yup.object().shape({
+    name: Yup.string().required().max(100),
+    publicUrlPrefix: Yup.string().required().max(255),
+    s3ContentStorageConfig: Yup.object({
+      bucketName: Yup.string().required().max(255),
+      endpoint: Yup.string().required().max(255),
+      signingRegion: Yup.string().required().max(255),
+    }),
+  });
+
+  static readonly CONTENT_DELIVERY_FORM = Yup.object().shape({
+    name: Yup.string().required().max(100),
+    languages: Yup.array().min(1),
+    states: Yup.array().min(1),
+  });
+
+  static readonly WEBHOOK_FORM = Yup.object().shape({
+    url: Yup.string().required().max(255),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

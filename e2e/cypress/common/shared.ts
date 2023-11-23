@@ -126,7 +126,7 @@ export const toggleInMultiselect = (
         }
       });
   });
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
   waitForGlobalLoading();
 };
 
@@ -174,4 +174,16 @@ export const visitProjectMembers = (projectId: number) => {
 
 export const visitProjectDashboard = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}`);
+};
+
+export const visitProjectDeveloper = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/developer`);
+};
+
+export const visitProjectDeveloperStorage = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/developer/storage`);
+};
+
+export const visitProjectDeveloperHooks = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/developer/webhooks`);
 };

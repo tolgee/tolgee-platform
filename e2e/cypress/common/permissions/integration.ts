@@ -6,5 +6,5 @@ export function testIntegration({ project }: ProjectInfo) {
   cy.gcy('integrate-api-key-selector-select').click();
   cy.gcy('integrate-api-key-selector-create-new-item').click();
   cy.gcy('permissions-advanced-checkbox').should('exist');
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
 }

@@ -125,6 +125,7 @@ const getTheme = (mode: PaletteMode) => {
       primaryText: c.primaryText,
       secondary: createColor(c.secondary),
       default: createColor(c.default),
+      info: createColor(c.info),
       common: {
         white: c.white,
       },
@@ -228,6 +229,13 @@ const getTheme = (mode: PaletteMode) => {
         styleOverrides: {
           paper: {
             backgroundImage: 'none',
+          },
+        },
+      },
+      MuiDialogActions: {
+        styleOverrides: {
+          root: {
+            padding: '8px 24px 16px 24px',
           },
         },
       },

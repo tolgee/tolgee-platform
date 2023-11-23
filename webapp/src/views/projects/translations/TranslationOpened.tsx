@@ -5,7 +5,10 @@ import { T } from '@tolgee/react';
 import { ControlsEditor } from './cell/ControlsEditor';
 import { Editor } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
-import { StateInType, translationStates } from 'tg.constants/translationStates';
+import {
+  StateInType,
+  TRANSLATION_STATES,
+} from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
 import { getMeta, IS_MAC } from 'tg.fixtures/isMac';
 import {
@@ -129,7 +132,7 @@ export const TranslationOpened: React.FC<Props> = ({
   const { setTranslationState, updateEdit } = useTranslationsActions();
   const theme = useTheme();
 
-  const nextState = translationStates[state]?.next;
+  const nextState = TRANSLATION_STATES[state]?.next;
 
   const handleStateChange = () => {
     if (nextState) {

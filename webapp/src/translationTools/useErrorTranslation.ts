@@ -4,7 +4,11 @@ export function useErrorTranslation() {
   const { t } = useTranslate();
 
   return (code: string) => {
-    switch (code) {
+    switch (code.toLocaleLowerCase()) {
+      // from 'ApiHttpService.tsx'
+      case 'authentication_cancelled':
+        return t('authentication_cancelled');
+
       case 'bad_credentials':
         return t('bad_credentials');
       case 'invalid_otp_code':
@@ -87,23 +91,22 @@ export function useErrorTranslation() {
         return t('formality_not_supported_by_service');
       case 'cannot_modify_disabled_translation':
         return t('cannot_modify_disabled_translation');
-
-      // from 'ApiHttpService.tsx'
-      case 'authentication_cancelled':
-        return t('authentication_cancelled');
-
+      case 'invalid_connection_string':
+        return t('invalid_connection_string');
+      case 'content_storage_config_invalid':
+        return t('content_storage_config_invalid');
+      case 'content_storage_test_failed':
+        return t('content_storage_test_failed');
+      case 'content_storage_is_in_use':
+        return t('content_storage_is_in_use');
       case 'plan_has_subscribers':
         return t('plan_has_subscribers');
-
       case 'cannot_store_file_to_content_storage':
         return t('cannot_store_file_to_content_storage');
-
       case 'unexpected_error_while_publishing_to_content_storage':
         return t('unexpected_error_while_publishing_to_content_storage');
-
       case 'webhook_responded_with_non_200_status':
         return t('webhook_responded_with_non_200_status');
-
       case 'unexpected_error_while_executing_webhook':
         return t('unexpected_error_while_executing_webhook');
 

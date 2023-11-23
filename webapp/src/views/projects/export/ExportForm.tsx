@@ -5,22 +5,23 @@ import { Box, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { EXPORTABLE_STATES, StateType } from 'tg.constants/translationStates';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { StateSelector } from './StateSelector';
-import { LanguageSelector } from './LanguageSelector';
-import { FORMATS, FormatSelector } from './FormatSelector';
+import { StateSelector } from 'tg.views/projects/export/components/StateSelector';
+import { LanguageSelector } from 'tg.views/projects/export/components/LanguageSelector';
+import {
+  FORMATS,
+  FormatSelector,
+} from 'tg.views/projects/export/components/FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { NsSelector } from './NsSelector';
-import { NestedSelector } from './NestedSelector';
+import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
+import { NestedSelector } from 'tg.views/projects/export/components/NestedSelector';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { SpinnerProgress } from 'tg.component/SpinnerProgress';
-
-export const exportableStates = Object.keys(translationStates);
+import { BoxLoading } from 'tg.component/common/BoxLoading';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
-    (a, b) => exportableStates.indexOf(a) - exportableStates.indexOf(b)
+    (a, b) => EXPORTABLE_STATES.indexOf(a) - EXPORTABLE_STATES.indexOf(b)
   );
 
 const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
@@ -139,8 +140,8 @@ export const ExportForm = () => {
 
   if (languagesLoadable.isFetching || namespacesLoadable.isFetching) {
     return (
-      <Box mt={2} justifyContent="center" display="flex">
-        <SpinnerProgress />
+      <Box mt={6}>
+        <BoxLoading />
       </Box>
     );
   }

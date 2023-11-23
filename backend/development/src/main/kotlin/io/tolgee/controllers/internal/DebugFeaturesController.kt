@@ -42,7 +42,7 @@ class DebugFeaturesController(
     }
 
     if (enabled) {
-      provider.forceEnabled = provider.forceEnabled?.plus(feature) ?: listOf(feature)
+      provider.forceEnabled = provider.forceEnabled?.plus(feature) ?: setOf(feature)
     } else {
       provider.forceEnabled = provider.forceEnabled?.minus(feature)
     }

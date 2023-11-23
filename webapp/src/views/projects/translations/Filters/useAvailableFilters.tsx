@@ -1,7 +1,7 @@
 import { useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
-import { translationStates } from 'tg.constants/translationStates';
+import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { encodeFilter, GroupType } from './tools';
@@ -116,7 +116,7 @@ export const useAvailableFilters = (selectedLanguages?: string[]) => {
             return {
               label: language,
               value: null,
-              submenu: Object.entries(translationStates)
+              submenu: Object.entries(TRANSLATION_STATES)
                 // MACHINE_TRANSLATED is not supported yet
                 .filter(([key]) => key !== 'MACHINE_TRANSLATED')
                 .map(([key, value]) => {

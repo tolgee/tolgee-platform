@@ -49,7 +49,7 @@ export function testKeys(info: ProjectInfo) {
     }
     // close popup
     cy.waitForDom();
-    cy.get('body').click(0, 0);
+    cy.get('body').type('{esc}');
   }
 
   if (

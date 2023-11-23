@@ -1,6 +1,9 @@
 import { T } from '@tolgee/react';
 
-import { StateInType, translationStates } from 'tg.constants/translationStates';
+import {
+  StateInType,
+  TRANSLATION_STATES,
+} from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
 import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
 import { ControlsButton } from './ControlsButton';
@@ -21,7 +24,7 @@ export const StateTransitionButtons: React.FC<Props> = ({
 }) => {
   const translateState = useStateTranslation();
 
-  const nextState = state && translationStates[state]?.next;
+  const nextState = state && TRANSLATION_STATES[state]?.next;
 
   return (
     <>

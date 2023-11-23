@@ -34,7 +34,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.WEBHOOKS)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.WEBHOOKS)
   }
 
   @AfterEach
@@ -54,10 +54,10 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesnt create multiple webhooks without feature enabled`() {
-    enabledFeaturesProvider.forceEnabled = listOf()
+    enabledFeaturesProvider.forceEnabled = setOf()
     createWebhook()
     createWebhook().andIsBadRequest
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.WEBHOOKS)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.WEBHOOKS)
     createWebhook().andIsOk
   }
 
