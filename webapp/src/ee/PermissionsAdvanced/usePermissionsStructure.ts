@@ -112,6 +112,20 @@ export const usePermissionsStructure = (options?: Scope[]) => {
         ],
       },
       {
+        label: t('permissions_content_delivery'),
+        children: [
+          {
+            value: 'content-delivery.publish',
+          },
+          {
+            value: 'content-delivery.manage',
+          },
+        ],
+      },
+      {
+        value: 'webhooks.manage',
+      },
+      {
         value: 'project.edit',
       },
       {

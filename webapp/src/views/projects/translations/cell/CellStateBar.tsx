@@ -1,6 +1,6 @@
 import { styled, Tooltip } from '@mui/material';
 
-import { translationStates } from 'tg.constants/translationStates';
+import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -35,16 +35,16 @@ export const CellStateBar: React.FC<Props> = ({ state, onResize }) => {
         onMouseUp={stopAndPrevent()}
         style={{
           borderLeft: `4px solid ${
-            translationStates[state || 'UNTRANSLATED']?.color ||
-            translationStates['UNTRANSLATED'].color
+            TRANSLATION_STATES[state || 'UNTRANSLATED']?.color ||
+            TRANSLATION_STATES['UNTRANSLATED'].color
           }`,
         }}
       />
     </StyledStateHover>
   );
 
-  return state && translationStates[state] ? (
-    <Tooltip title={translationStates[state].translation}>
+  return state && TRANSLATION_STATES[state] ? (
+    <Tooltip title={TRANSLATION_STATES[state].translation}>
       {getContent()}
     </Tooltip>
   ) : (

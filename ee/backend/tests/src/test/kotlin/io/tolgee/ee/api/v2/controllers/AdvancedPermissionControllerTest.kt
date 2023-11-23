@@ -27,7 +27,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.GRANULAR_PERMISSIONS)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.GRANULAR_PERMISSIONS)
   }
 
   @Test
@@ -51,7 +51,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `fails to set user's permission when feature disabled`() {
-    enabledFeaturesProvider.forceEnabled = listOf()
+    enabledFeaturesProvider.forceEnabled = setOf()
     permissionTestUtil.performSetPermissions(
       ""
     ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
@@ -130,7 +130,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `cannot set organization base permission with scopes when disabled`() {
-    enabledFeaturesProvider.forceEnabled = listOf()
+    enabledFeaturesProvider.forceEnabled = setOf()
     permissionTestUtil.withPermissionsTestData { project, user ->
       val org = project.organizationOwner
       performSetScopesBaseOrganization(org).andIsBadRequest.andHasErrorMessage(

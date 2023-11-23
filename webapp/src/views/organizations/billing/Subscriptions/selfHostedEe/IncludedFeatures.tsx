@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { components } from 'tg.service/billingApiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 import { T } from '@tolgee/react';
 import { Box, Typography, styled } from '@mui/material';
 import { PlanFeature } from './PlanFeature';
@@ -13,7 +13,7 @@ const StyledListWrapper = styled(Box)`
 `;
 
 export const IncludedFeatures: FC<{
-  features: components['schemas']['SelfHostedEePlanModel']['enabledFeatures'];
+  features: components['schemas']['EeSubscriptionModel']['enabledFeatures'];
 }> = ({ features }) => {
   const translateFeature = useFeatureTranslation();
 

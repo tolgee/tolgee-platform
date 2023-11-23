@@ -379,6 +379,7 @@ export const enableAuthentication = () =>
   setProperty('authentication.enabled', true);
 export const disableAuthentication = () =>
   setProperty('authentication.enabled', false);
+
 export const setProperty = (name: string, value: any) =>
   internalFetch('properties/set', {
     method: 'PUT',
@@ -409,3 +410,9 @@ export const forceDate = (timestamp: number) => {
 export const releaseForcedDate = () => {
   internalFetch(`time`, { method: 'DELETE' });
 };
+
+export const setContentStorageBypass = (value: boolean) =>
+  setProperty('internal.e3eContentStorageBypassOk', value);
+
+export const setWebhookControllerStatus = (value: number) =>
+  setProperty('internal.webhookControllerStatus', value);

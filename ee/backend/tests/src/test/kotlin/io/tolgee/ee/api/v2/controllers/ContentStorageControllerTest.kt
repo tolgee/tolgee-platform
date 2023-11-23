@@ -47,7 +47,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @BeforeEach
   fun beforeEach() {
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
     testData = ContentDeliveryConfigTestData()
     Mockito.reset(contentDeliveryFileStorageProvider)
     testDataService.saveTestData(testData.root)
@@ -57,7 +57,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @AfterEach
   fun clenup() {
-    enabledFeaturesProvider.forceEnabled = listOf()
+    enabledFeaturesProvider.forceEnabled = setOf()
   }
 
   @Test

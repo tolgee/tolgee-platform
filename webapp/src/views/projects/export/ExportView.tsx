@@ -1,5 +1,6 @@
-import { useTranslate } from '@tolgee/react';
 import { FunctionComponent } from 'react';
+import { Route } from 'react-router-dom';
+import { useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
@@ -25,7 +26,9 @@ export const ExportView: FunctionComponent = () => {
       md={9}
       containerMaxWidth="lg"
     >
-      <ExportForm />
+      <Route exact path={LINKS.PROJECT_EXPORT.template}>
+        <ExportForm />
+      </Route>
     </BaseProjectView>
   );
 };

@@ -3,9 +3,9 @@ import clsx from 'clsx';
 import { Box, styled, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
 
-import { translationStates } from 'tg.constants/translationStates';
+import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 
-type State = keyof typeof translationStates;
+type State = keyof typeof TRANSLATION_STATES;
 
 const HEIGHT = 8;
 const BORDER_RADIUS = HEIGHT / 2;
@@ -16,7 +16,7 @@ const StyledContainer = styled('div')`
 
   & .bar {
     height: ${HEIGHT}px;
-    background-color: ${translationStates.UNTRANSLATED.color};
+    background-color: ${TRANSLATION_STATES.UNTRANSLATED.color};
     border-radius: ${BORDER_RADIUS}px;
     width: 100%;
     overflow: hidden;
@@ -101,10 +101,10 @@ export function TranslationStatesBar(props: {
           mr={1}
           className="legendDot"
           style={{
-            backgroundColor: translationStates[legendItemProps.state].color,
+            backgroundColor: TRANSLATION_STATES[legendItemProps.state].color,
           }}
         />
-        {translationStates[legendItemProps.state].translation}:&nbsp;
+        {TRANSLATION_STATES[legendItemProps.state].translation}:&nbsp;
         {percent >= 1 ? (
           <T
             keyName="project_dashboard_translations_percent"
@@ -121,7 +121,7 @@ export function TranslationStatesBar(props: {
 
   const visibleStates = STATES_ORDER.filter(
     (state) => props.stats.translationStatePercentages[state]
-  ).filter((state) => translationStates[state]);
+  ).filter((state) => TRANSLATION_STATES[state]);
 
   return (
     <StyledContainer data-cy="project-states-bar-root">
@@ -129,7 +129,7 @@ export function TranslationStatesBar(props: {
         {visibleStates.map((state, idx) => (
           <Tooltip
             key={idx}
-            title={translationStates[state].translation}
+            title={TRANSLATION_STATES[state].translation}
             open={props.hideTooltips ? false : undefined}
           >
             <Box
@@ -141,7 +141,7 @@ export function TranslationStatesBar(props: {
               style={{
                 zIndex: 5 - idx,
                 width: `calc(max(${props.stats.translationStatePercentages[state]}%, 8px) + ${BORDER_RADIUS}px)`,
-                backgroundColor: translationStates[state].color,
+                backgroundColor: TRANSLATION_STATES[state].color,
               }}
             />
           </Tooltip>

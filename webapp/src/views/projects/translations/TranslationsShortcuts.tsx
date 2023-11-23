@@ -17,7 +17,7 @@ import clsx from 'clsx';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { getMetaName, IS_MAC } from 'tg.fixtures/isMac';
-import { translationStates } from 'tg.constants/translationStates';
+import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { getCurrentlyFocused } from './context/shortcuts/tools';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
@@ -203,7 +203,7 @@ export const TranslationsShortcuts = () => {
       const state = translations?.find((t) => t.keyId === keyId)?.translations[
         language
       ]?.state;
-      return state && translationStates[state]?.next;
+      return state && TRANSLATION_STATES[state]?.next;
     }
   };
 
@@ -214,7 +214,7 @@ export const TranslationsShortcuts = () => {
         const nextState =
           focusedCell &&
           getCellNextState(focusedCell.keyId, focusedCell.language);
-        return nextState && translationStates[nextState]?.translation;
+        return nextState && TRANSLATION_STATES[nextState]?.translation;
       }
       case 'MOVE':
         return <T keyName="translations_shortcuts_move" />;
@@ -238,7 +238,7 @@ export const TranslationsShortcuts = () => {
     {
       name:
         cursorKeyIdNextState &&
-        translationStates[cursorKeyIdNextState]?.translation,
+        TRANSLATION_STATES[cursorKeyIdNextState]?.translation,
       formula: formatShortcut(`${getMetaName()} + E`),
     },
     {

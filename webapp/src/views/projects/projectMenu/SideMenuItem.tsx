@@ -40,7 +40,7 @@ type Props = {
   icon: React.ReactElement;
   text: string;
   selected?: boolean;
-  matchAsPrefix?: boolean;
+  matchAsPrefix?: boolean | string;
   hidden?: boolean;
   'data-cy': string;
 };
@@ -59,7 +59,9 @@ export function SideMenuItem({
   const isSelected = selected
     ? true
     : matchAsPrefix
-    ? match.pathname.startsWith(String(linkTo))
+    ? match.pathname.startsWith(
+        typeof matchAsPrefix === 'string' ? matchAsPrefix : String(linkTo)
+      )
     : match.pathname === linkTo;
 
   return (

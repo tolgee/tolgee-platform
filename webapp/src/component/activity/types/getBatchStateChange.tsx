@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { StateType, TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { DiffValue } from '../types';
 
 const StyledState = styled('div')`
@@ -23,7 +23,7 @@ const StyledDot = styled('div')`
 `;
 
 const getTranslation = (state: StateType) => {
-  const translationState = translationStates[state];
+  const translationState = TRANSLATION_STATES[state];
 
   return translationState ? (
     <StyleWrapper>

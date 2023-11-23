@@ -17,7 +17,7 @@
 // Import commands.js using ES2015 syntax:
 import './commands';
 import 'cypress-promise/register';
-import { internalFetch } from '../common/apiCalls/common';
+import { setFeature } from '../common/features';
 
 require('cypress-xpath');
 
@@ -42,8 +42,9 @@ Cypress.on('window:before:load', (win) => {
 });
 
 before(() => {
-  // turn on GRANULAR_PERMISSIONS
-  internalFetch('features/toggle?feature=GRANULAR_PERMISSIONS&enabled=true', {
-    method: 'put',
-  });
+  // turn on all features
+  setFeature('GRANULAR_PERMISSIONS', true);
+  setFeature('WEBHOOKS', true);
+  setFeature('PROJECT_LEVEL_CONTENT_STORAGES', true);
+  setFeature('MULTIPLE_CONTENT_DELIVERY_CONFIGS', true);
 });
