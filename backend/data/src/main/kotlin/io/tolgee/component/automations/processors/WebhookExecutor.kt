@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.fixtures.computeHmacSha256
 import io.tolgee.model.webhook.WebhookConfig
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -12,14 +13,17 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
+
 @Component
 class WebhookExecutor(
+  @Qualifier("webhookRestTemplate")
   private val restTemplate: RestTemplate,
   private val currentDateProvider: CurrentDateProvider
 ) {
   fun signAndExecute(config: WebhookConfig, data: WebhookRequest) {
-    val stringData = jacksonObjectMapper().writeValueAsString(data)
 
+
+    val stringData = jacksonObjectMapper().writeValueAsString(data)
     val headers = HttpHeaders()
     @Suppress("UastIncorrectHttpHeaderInspection")
     headers.add("Tolgee-Signature", generateSigHeader(stringData, config.webhookSecret))
@@ -37,6 +41,9 @@ class WebhookExecutor(
       throw WebhookExecutionFailed(e)
     }
   }
+
+
+
 
   private fun generateSigHeader(payload: String, key: String): String {
     val timestamp = currentDateProvider.date.time
