@@ -104,4 +104,3 @@ object DemoProjectData {
     val height: Int
   )
 }
-

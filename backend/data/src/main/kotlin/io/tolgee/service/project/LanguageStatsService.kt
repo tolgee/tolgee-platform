@@ -74,9 +74,9 @@ class LanguageStatsService(
           }
           logger.debug {
             "Language stats refreshed for project $projectId: ${
-              languageStats.values.joinToString("\n") {
-                "${it.language.id} reviewed words: ${it.reviewedWords} translated words:${it.translatedWords}"
-              }
+            languageStats.values.joinToString("\n") {
+              "${it.language.id} reviewed words: ${it.reviewedWords} translated words:${it.translatedWords}"
+            }
             }"
           }
         } catch (e: NotFoundException) {
