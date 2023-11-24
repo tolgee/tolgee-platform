@@ -151,6 +151,7 @@
   "administration_user_role_admin" : "Administrateur",
   "administration_user_role_user" : "Utilisateur",
   "administration_users" : "Utilisateurs",
+  "announcement_feature_content_delivery_and_webhooks" : "Accélérez votre localisation avec la <link-delivery>Livraison de contenu</link-delivery> et les <link-webhooks>Webhooks</link-webhooks>!",
   "api-key-delete-button" : "Supprimer",
   "api-key-deleted-message" : "Clé API supprimée",
   "api-key-delete-token-confirmation-message" : "Voulez-vous vraiment supprimer cette clé API ?",

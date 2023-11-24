@@ -76,6 +76,7 @@
   "administration_user_role_admin" : "Administrador",
   "administration_user_role_user" : "Usuário",
   "administration_users" : "Usuários",
+  "announcement_feature_content_delivery_and_webhooks" : "Acelere sua localização com <link-delivery>Entrega de Conteúdo</link-delivery> e <link-webhooks>Webhooks</link-webhooks>!",
   "api-key-delete-button" : "Excluir",
   "api-key-deleted-message" : "Chave de API excluída",
   "api-key-delete-token-confirmation-message" : "Deseja realmente excluir esta chave de API?",

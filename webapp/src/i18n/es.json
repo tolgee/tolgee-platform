@@ -77,6 +77,7 @@
   "administration_user_role_admin" : "Administrador",
   "administration_user_role_user" : "Usuario",
   "administration_users" : "Usuarios",
+  "announcement_feature_content_delivery_and_webhooks" : "¡Acelera tu localización con <link-delivery>Entrega de contenido</link-delivery> y <link-webhooks>Webhooks</link-webhooks>!",
   "announcement_feature_mt_formality" : "Las traducciones automáticas ahora admiten formalidad",
   "api-key-delete-button" : "Eliminar",
   "api-key-deleted-message" : "Clave API eliminada",
