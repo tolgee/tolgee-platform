@@ -1,0 +1,22 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - name: Build cache
+    init: |
+      ./gradlew build
+
+      pushd webapp
+      npm ci
+      popd
+  
+  - name: Backend
+    command: ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
+    openMode: split-left
+  - name: Frontend
+    command: npm run start
+    openMode: split-right
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
