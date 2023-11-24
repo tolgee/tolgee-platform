@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-
 @Component
 class WebhookExecutor(
   @Qualifier("webhookRestTemplate")
@@ -21,8 +20,6 @@ class WebhookExecutor(
   private val currentDateProvider: CurrentDateProvider
 ) {
   fun signAndExecute(config: WebhookConfig, data: WebhookRequest) {
-
-
     val stringData = jacksonObjectMapper().writeValueAsString(data)
     val headers = HttpHeaders()
     @Suppress("UastIncorrectHttpHeaderInspection")
@@ -41,9 +38,6 @@ class WebhookExecutor(
       throw WebhookExecutionFailed(e)
     }
   }
-
-
-
 
   private fun generateSigHeader(payload: String, key: String): String {
     val timestamp = currentDateProvider.date.time
