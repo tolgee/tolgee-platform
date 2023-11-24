@@ -11,16 +11,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 )
 class ImportProperties {
   @DocProperty(
-    description = "File path of the directory where the files to import are located.\n"+
-    "\n"+
-    ":::info\n"+
-    "Your folder structure should look like:\n"+
-    "importDir\n"+
-    "└─Project # the foler name is the project name\n"+
-    "  └─validation # the foler name is namespace\n"+
-    "    ├─ en.json # the file name is the target language\n"+
-    "    └─ de.json # second project language\n"+
-    ":::\n\n"
+    description = "File path of the directory where the files to import are located.\n" +
+      "\n" +
+      ":::info\n" +
+      "Your folder structure should look like:\n" +
+      "importDir\n" +
+      "└─Project # the foler name is the project name\n" +
+      "  └─validation # the foler name is namespace\n" +
+      "    ├─ en.json # the file name is the target language\n" +
+      "    └─ de.json # second project language\n" +
+      ":::\n\n"
   )
   var dir: String? = null
 
