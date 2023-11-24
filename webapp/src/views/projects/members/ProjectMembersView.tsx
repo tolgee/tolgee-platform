@@ -67,7 +67,7 @@ export const ProjectMembersView: FunctionComponent = () => {
           }),
         ],
       ]}
-      maxWidth={900}
+      maxWidth="normal"
       loading={invitationsLoadable.isLoading}
     >
       <Box display="grid">

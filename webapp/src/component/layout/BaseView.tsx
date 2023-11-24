@@ -11,7 +11,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const widthMap = {
   wide: 1200,
-  normal: 800,
+  normal: 900,
   narrow: 600,
 };
 
