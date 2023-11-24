@@ -10,8 +10,10 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
+import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.equalsPermissionType
@@ -23,6 +25,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.executeInNewRepeatableTransaction
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -205,6 +208,24 @@ class ProjectServiceTest : AbstractSpringTest() {
         testData.projectBuilder.self
       )
     }
+    executeInNewTransaction(platformTransactionManager) {
+      projectService.deleteProject(testData.projectBuilder.self.id)
+    }
+  }
+
+  @Test
+  fun `deletes project with Content Delivery Configs`() {
+    val testData = ContentDeliveryConfigTestData()
+    testDataService.saveTestData(testData.root)
+    executeInNewRepeatableTransaction(platformTransactionManager) {
+      projectService.deleteProject(testData.projectBuilder.self.id)
+    }
+  }
+
+  @Test
+  fun `deletes project with webhooks`() {
+    val testData = WebhooksTestData()
+    testDataService.saveTestData(testData.root)
     executeInNewTransaction(platformTransactionManager) {
       projectService.deleteProject(testData.projectBuilder.self.id)
     }

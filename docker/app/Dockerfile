@@ -18,3 +18,8 @@ COPY BOOT-INF/classes /app
 
 ENV spring_profiles_active docker
 CMD ["ash", "-c", "java -cp app:app/lib/* io.tolgee.Application"]
+
+ENV HEALTHCHECK_PORT=8080
+
+HEALTHCHECK --interval=10s --timeout=3s --retries=20 \
+    CMD [[ "$(wget -q -O -  http://127.0.0.1:$HEALTHCHECK_PORT/actuator/health)" == *"UP"* ]] || exit 1

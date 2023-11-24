@@ -194,6 +194,13 @@ dependencies {
      * MISC MODULE
      */
     implementation(project(':misc'))
+
+
+    /**
+     * AZURE
+     */
+    implementation 'com.azure:azure-storage-blob:12.12.0'
+    implementation 'com.azure:azure-identity:1.10.4'
 }
 
 test {

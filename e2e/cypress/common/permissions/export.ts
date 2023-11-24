@@ -20,5 +20,5 @@ export function testExport({ project, languages }: ProjectInfo) {
         .should('not.exist');
     }
   });
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
 }

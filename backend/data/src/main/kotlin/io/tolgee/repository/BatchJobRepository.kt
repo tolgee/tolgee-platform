@@ -95,4 +95,13 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     jobIds: MutableSet<Long>,
     before: Date,
   ): List<BatchJob>
+
+  @Query(
+    """
+    from BatchJob j
+    where j.debouncingKey = :debouncingKey
+    and j.status = 'PENDING'
+  """
+  )
+  fun findBatchJobByDebouncingKey(debouncingKey: String?): BatchJob?
 }

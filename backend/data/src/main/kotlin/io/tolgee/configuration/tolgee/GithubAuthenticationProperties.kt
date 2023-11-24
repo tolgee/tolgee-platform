@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @DocProperty(
   description = ":::info\n" +
     "GitHub authentication can be used in combination with native authentication.\n" +
-    ":::",
+    ":::\n\n",
   displayName = "GitHub"
 )
 class GithubAuthenticationProperties {

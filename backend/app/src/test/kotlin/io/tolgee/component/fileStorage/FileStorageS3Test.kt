@@ -13,10 +13,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.S3Exception
 
 @ContextRecreatingTest
@@ -39,10 +37,11 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
     const val BUCKET_NAME = "testbucket"
   }
 
-  @Autowired
-  lateinit var s3: S3Client
-
   lateinit var s3Mock: S3Mock
+
+  val s3 by lazy {
+    S3ClientProvider(tolgeeProperties.fileStorage.s3).provide()
+  }
 
   @BeforeAll
   fun setup() {

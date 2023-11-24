@@ -82,7 +82,7 @@ class GitHubAuthUtil(
 
     return authMvc!!.perform(
       MockMvcRequestBuilders.get("/api/public/authorize_oauth/github?code=$receivedCode")
-        .accept(MediaType.ALL)
+        .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
     )
       .andReturn()

@@ -112,6 +112,12 @@ class ProjectService(
     }
   }
 
+  @Transactional
+  @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
+  fun getDto(id: Long): ProjectDto {
+    return findDto(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+  }
+
   fun get(id: Long): Project {
     return projectRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
   }

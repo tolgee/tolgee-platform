@@ -29,6 +29,7 @@ describe('Translations Websockets', () => {
       body: { key: 'A key', translations: { de: updatedValue } },
     });
     cy.contains(updatedValue).should('be.visible');
+    cy.waitForDom();
     v2apiFetch(`projects/${projectId}/keys/${keyId}`, {
       method: 'delete',
     });

@@ -1,3 +1,17 @@
+## [3.38.1](https://github.com/tolgee/tolgee-platform/compare/v3.38.0...v3.38.1) (2023-11-24)
+
+
+### Bug Fixes
+
+* Fix wrong content type ([#1998](https://github.com/tolgee/tolgee-platform/issues/1998)) ([24878ee](https://github.com/tolgee/tolgee-platform/commit/24878ee1cace5d891b4c30a507b7c9d1d053b4dc))
+
+# [3.38.0](https://github.com/tolgee/tolgee-platform/compare/v3.37.1...v3.38.0) (2023-11-24)
+
+
+### Features
+
+* Automations, CDN, Webhooks ([#1905](https://github.com/tolgee/tolgee-platform/issues/1905)) ([a9809ba](https://github.com/tolgee/tolgee-platform/commit/a9809bac89daaaffabfe22be4f984bc11172feb7))
+
 ## [3.37.1](https://github.com/tolgee/tolgee-platform/compare/v3.37.0...v3.37.1) (2023-11-12)
 
 

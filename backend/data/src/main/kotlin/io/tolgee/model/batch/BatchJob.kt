@@ -11,10 +11,12 @@ import io.tolgee.model.activity.ActivityRevision
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
+import java.util.*
 import javax.persistence.Entity
 import javax.persistence.EnumType.STRING
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
+import javax.persistence.Index
 import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 import javax.persistence.Table
@@ -23,7 +25,7 @@ import javax.persistence.Table
 @TypeDefs(
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
-@Table(name = "tolgee_batch_job")
+@Table(name = "tolgee_batch_job", indexes = [Index(columnList = "debouncingKey")])
 class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -62,6 +64,15 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   var hidden: Boolean = false
 
   val dto get() = BatchJobDto.fromEntity(this)
+
+  var debounceDurationInMs: Long? = null
+
+  var debounceMaxWaitTimeInMs: Long? = null
+
+  var lastDebouncingEvent: Date? = null
+
+  @Type(type = "text")
+  var debouncingKey: String? = null
 
   companion object {
     fun <T> chunkTarget(chunkSize: Int, target: List<T>): List<List<T>> =

@@ -322,4 +322,13 @@ export class LINKS {
   );
 
   static PROJECT_IMPORT = Link.ofParent(LINKS.PROJECT, 'import');
+
+  static PROJECT_DEVELOPER = Link.ofParent(LINKS.PROJECT, 'developer');
+
+  static PROJECT_CONTENT_STORAGE = Link.ofParent(
+    LINKS.PROJECT_DEVELOPER,
+    'content-delivery'
+  );
+  static PROJECT_STORAGE = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'storage');
+  static PROJECT_WEBHOOKS = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'webhooks');
 }

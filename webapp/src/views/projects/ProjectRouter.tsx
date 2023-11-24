@@ -17,6 +17,7 @@ import React from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
+import { DeveloperView } from './developer/DeveloperView';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -66,7 +67,7 @@ export const ProjectRouter = () => {
               <ImportView />
             </PrivateRoute>
 
-            <Route exact path={LINKS.PROJECT_EXPORT.template}>
+            <Route path={LINKS.PROJECT_EXPORT.template}>
               <ExportView />
             </Route>
 
@@ -76,6 +77,10 @@ export const ProjectRouter = () => {
 
             <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
               <DashboardView />
+            </Route>
+
+            <Route path={LINKS.PROJECT_DEVELOPER.template}>
+              <DeveloperView />
             </Route>
 
             {/*

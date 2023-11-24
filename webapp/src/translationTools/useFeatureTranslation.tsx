@@ -1,6 +1,6 @@
 import { useTranslate } from '@tolgee/react';
-import { LiteralUnion } from 'tg.fixtures/typescript';
-import { components } from 'tg.service/billingApiSchema.generated';
+import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
+import { components } from 'tg.service/apiSchema.generated';
 
 type Feature =
   components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
@@ -8,7 +8,7 @@ type Feature =
 export function useFeatureTranslation() {
   const { t } = useTranslate();
 
-  return (value: LiteralUnion<Feature, string>) => {
+  return (value: Feature) => {
     switch (value) {
       case 'GRANULAR_PERMISSIONS':
         return t('billing_subscriptions_granular_permissions_feature');
@@ -30,7 +30,14 @@ export function useFeatureTranslation() {
         return t('billing_subscriptions_team_training');
       case 'STANDARD_SUPPORT':
         return t('billing_subscriptions_standard_support');
+      case 'PROJECT_LEVEL_CONTENT_STORAGES':
+        return t('billing_subscriptions_project_level_content_storages');
+      case 'MULTIPLE_CONTENT_DELIVERY_CONFIGS':
+        return t('billing_subscriptions_multiple_content_delivery_configs');
+      case 'WEBHOOKS':
+        return t('billing_subscriptions_webhooks');
       default:
+        exhaustiveMatchingGuard(value);
         return value;
     }
   };

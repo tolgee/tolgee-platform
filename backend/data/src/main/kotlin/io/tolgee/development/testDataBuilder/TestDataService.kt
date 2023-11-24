@@ -10,7 +10,9 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.LanguageService
+import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -70,7 +72,9 @@ class TestDataService(
   private val patService: PatService,
   private val namespaceService: NamespaceService,
   private val bigMetaService: BigMetaService,
-  private val activityHolder: ActivityHolder
+  private val activityHolder: ActivityHolder,
+  private val automationService: AutomationService,
+  private val contentDeliveryConfigService: ContentDeliveryConfigService
 ) : Logging {
 
   @Transactional
@@ -200,6 +204,43 @@ class TestDataService(
     saveProjectAvatars(builder)
     saveScreenshotData(builder)
     saveKeyDistances(builder)
+    saveContentStorages(builder)
+    saveContentDeliveryConfigs(builder)
+    saveWebhookConfigs(builder)
+    saveAutomations(builder)
+  }
+
+  private fun saveWebhookConfigs(builder: ProjectBuilder) {
+    builder.data.webhookConfigs.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveContentDeliveryConfigs(builder: ProjectBuilder) {
+    builder.data.contentDeliveryConfigs.forEach {
+      if (it.self.slug.isEmpty()) {
+        it.self.slug = contentDeliveryConfigService.generateSlug(it.projectBuilder.self.id)
+      }
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveContentStorages(builder: ProjectBuilder) {
+    builder.data.contentStorages.forEach {
+      it.self.azureContentStorageConfig?.let { entityManager.persist(it) }
+      it.self.s3ContentStorageConfig?.let { entityManager.persist(it) }
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveAutomations(builder: ProjectBuilder) {
+    builder.data.automations.forEach {
+      it.self.actions.forEach {
+        entityManager.persist(it)
+      }
+      it.self.triggers.forEach { entityManager.persist(it) }
+      automationService.save(it.self)
+    }
   }
 
   private fun saveKeyDistances(builder: ProjectBuilder) {

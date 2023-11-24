@@ -32,6 +32,14 @@ export function useFeatureMissingExplanation() {
     }
   }
 
+  if (billingEnabled) {
+    return {
+      message: t('feature-explanation-plan-not-sufficient'),
+      actionTitle: ifOrgOwner(t('feature-explanation-upgrade-subscription')),
+      link: ifOrgOwner(LINKS.GO_TO_CLOUD_BILLING.build()),
+    };
+  }
+
   if (subscription && subscription.status === 'ACTIVE') {
     return {
       message: t('feature-explanation-license-not-sufficient'),
@@ -53,14 +61,6 @@ export function useFeatureMissingExplanation() {
       message: t('feature-explanation-no-license'),
       actionTitle: ifAdmin(t('feature-explanation-setup-license')),
       link: ifAdmin(LINKS.ADMINISTRATION_EE_LICENSE.build()),
-    };
-  }
-
-  if (billingEnabled) {
-    return {
-      message: t('feature-explanation-plan-not-sufficient'),
-      actionTitle: ifOrgOwner(t('feature-explanation-upgrade-subscription')),
-      link: ifOrgOwner(LINKS.GO_TO_CLOUD_BILLING.build()),
     };
   }
 

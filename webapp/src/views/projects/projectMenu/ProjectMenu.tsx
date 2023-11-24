@@ -1,4 +1,4 @@
-import { Devices, PersonOutline, VpnKey } from '@mui/icons-material';
+import { Devices, PersonOutline, VpnKey, Code } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import LanguageIcon from '@mui/icons-material/Language';
 import {
@@ -30,6 +30,9 @@ export const ProjectMenu = ({ id }) => {
     config.authentication && satisfiesPermission('members.view');
   const canImport = canViewKeys && satisfiesPermission('translations.edit');
   const canIntegrate = canViewKeys;
+  const canPublishCd = satisfiesPermission('content-delivery.publish');
+  const canManageWebhooks = satisfiesPermission('webhooks.manage');
+  const canViewDeveloper = canPublishCd || canManageWebhooks;
 
   const { t } = useTranslate();
 
@@ -116,6 +119,22 @@ export const ProjectMenu = ({ id }) => {
           icon={<ExportIcon />}
           text={t('project_menu_export')}
           data-cy="project-menu-item-export"
+        />
+      )}
+      {canViewDeveloper && (
+        <SideMenuItem
+          linkTo={(canPublishCd
+            ? LINKS.PROJECT_CONTENT_STORAGE
+            : LINKS.PROJECT_WEBHOOKS
+          ).build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<Code />}
+          text={t('project_menu_developer')}
+          data-cy="project-menu-item-developer"
+          matchAsPrefix={LINKS.PROJECT_DEVELOPER.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
         />
       )}
       {canIntegrate && (

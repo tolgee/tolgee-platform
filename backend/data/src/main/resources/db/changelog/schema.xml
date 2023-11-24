@@ -2760,6 +2760,201 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-1">
+        <createTable tableName="automation">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="automationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-2">
+        <createTable tableName="automation_action">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="automation_actionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="INTEGER"/>
+            <column name="automation_id" type="BIGINT"/>
+            <column name="content_delivery_config_id" type="BIGINT"/>
+            <column name="webhook_config_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-3">
+        <createTable tableName="automation_trigger">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="automation_triggerPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_type" type="VARCHAR(255)"/>
+            <column name="debounce_duration_in_ms" type="BIGINT"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="automation_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-4">
+        <createTable tableName="azure_content_storage_config">
+            <column name="content_storage_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="azure_content_storage_configPK"/>
+            </column>
+            <column name="connection_string" type="VARCHAR(255)"/>
+            <column name="container_name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-5">
+        <createTable tableName="content_delivery_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="content_delivery_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="filter_key_id" type="JSONB"/>
+            <column name="filter_key_id_not" type="JSONB"/>
+            <column name="filter_key_prefix" type="VARCHAR(255)"/>
+            <column name="filter_namespace" type="JSONB"/>
+            <column name="filter_state" type="JSONB"/>
+            <column name="filter_tag" type="VARCHAR(255)"/>
+            <column name="format" type="INTEGER"/>
+            <column name="languages" type="JSONB"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="slug" type="VARCHAR(255)"/>
+            <column name="structure_delimiter" type="CHAR(1)"/>
+            <column name="content_storage_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-6">
+        <createTable tableName="content_storage">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="content_storagePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="public_url_prefix" type="VARCHAR(255)"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-7">
+        <createTable tableName="s3content_storage_config">
+            <column name="content_storage_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="s3content_storage_configPK"/>
+            </column>
+            <column name="access_key" type="VARCHAR(255)"/>
+            <column name="bucket_name" type="VARCHAR(255)"/>
+            <column name="endpoint" type="VARCHAR(255)"/>
+            <column name="secret_key" type="VARCHAR(255)"/>
+            <column name="signing_region" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-8">
+        <createTable tableName="webhook_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="webhook_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_failed" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_executed" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="url" type="VARCHAR(255)"/>
+            <column name="webhook_secret" type="VARCHAR(255)"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-9">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="debounce_duration_in_ms" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-10">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="debounce_max_wait_time_in_ms" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-11">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="debouncing_key" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-12">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="last_debouncing_event" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-13">
+        <addUniqueConstraint columnNames="project_id, slug" constraintName="UKof8ghdfcmo45f5tkkknt4voiv" tableName="content_delivery_config"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-14">
+        <createIndex indexName="IDX3me47efrnb9cl4yp7y3iw3so7" tableName="tolgee_batch_job">
+            <column name="debouncing_key"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-15">
+        <addForeignKeyConstraint baseColumnNames="content_storage_id" baseTableName="s3content_storage_config" constraintName="FK41t245hy5tb8ckex6mhnnpocr" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="content_storage" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-16">
+        <addForeignKeyConstraint baseColumnNames="content_storage_id" baseTableName="content_delivery_config" constraintName="FK4ylk6g6qa2elb7k7y3fwsktjs" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="content_storage" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-17">
+        <addForeignKeyConstraint baseColumnNames="automation_id" baseTableName="automation_action" constraintName="FK6xrtt8p6hxmnq6obmb7rspxw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="automation" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-18">
+        <addForeignKeyConstraint baseColumnNames="content_storage_id" baseTableName="azure_content_storage_config" constraintName="FK747q6hibma6w48bll8qtt2nsa" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="content_storage" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-19">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="content_delivery_config" constraintName="FKcsjkoy9s1i86e15k16t1hkq4l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-20">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="webhook_config" constraintName="FKdatchev9n7hhuchdljdc5w692" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-21">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="content_storage" constraintName="FKhe036glusylkxbowu3jlr05af" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-22">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="automation" constraintName="FKjb13s5bve410o2v8qinwgnpmc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-23">
+        <addForeignKeyConstraint baseColumnNames="automation_id" baseTableName="automation_trigger" constraintName="FKkwhuv2sdsacybp49ixx5x7oee" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="automation" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-24">
+        <addForeignKeyConstraint baseColumnNames="webhook_config_id" baseTableName="automation_action" constraintName="FKnv2fmi95daen174mxfe6tyxp3" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="webhook_config" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700240298831-25">
+        <addForeignKeyConstraint baseColumnNames="content_delivery_config_id" baseTableName="automation_action" constraintName="FKo3yk4abys4p5q00ij7meuqtl5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="content_delivery_config" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1700563209635-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="last_published" type="timestamp"/>
+        </addColumn>
+    </changeSet>
     <changeSet author="cynthia (generated)" id="1700488039756-1">
         <createSequence incrementBy="50" sequenceName="sequence_notifications" startValue="1"/>
     </changeSet>

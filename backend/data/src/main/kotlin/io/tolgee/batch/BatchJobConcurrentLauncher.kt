@@ -154,6 +154,13 @@ class BatchJobConcurrentLauncher(
       addBackToQueue(executionItem)
       return false
     }
+    if (!executionItem.shouldNotBeDebounced()) {
+      logger.trace(
+        """Execution ${executionItem.chunkExecutionId} not ready to execute (debouncing), adding back to queue"""
+      )
+      addBackToQueue(executionItem)
+      return false
+    }
     if (!canRunJobWithCharacter(executionItem.jobCharacter)) {
       logger.trace(
         """Execution ${executionItem.chunkExecutionId} cannot run concurrent job 
@@ -222,6 +229,19 @@ class BatchJobConcurrentLauncher(
   fun ExecutionQueueItem.isTimeToExecute(): Boolean {
     val executeAfter = this.executeAfter ?: return true
     return executeAfter <= currentDateProvider.date.time
+  }
+
+  fun ExecutionQueueItem.shouldNotBeDebounced(): Boolean {
+    val dto = batchJobService.getJobDto(this.jobId)
+    val lastEventTime = dto.lastDebouncingEvent ?: dto.createdAt ?: return true
+    val debounceDuration = dto.debounceDurationInMs ?: return true
+    val executeAfter = lastEventTime + debounceDuration
+    if (executeAfter <= currentDateProvider.date.time) {
+      return true
+    }
+    val createdAt = dto.createdAt ?: return true
+    val debounceMaxWaitTimeInMs = dto.debounceMaxWaitTimeInMs ?: return true
+    return createdAt + debounceMaxWaitTimeInMs <= currentDateProvider.date.time
   }
 
   private fun canRunJobWithCharacter(character: JobCharacter): Boolean {

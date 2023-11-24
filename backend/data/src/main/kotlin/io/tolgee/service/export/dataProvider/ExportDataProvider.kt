@@ -1,6 +1,6 @@
 package io.tolgee.service.export.dataProvider
 
-import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.dtos.IExportParams
 import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
@@ -28,8 +28,9 @@ import javax.persistence.criteria.SetJoin
 
 class ExportDataProvider(
   private val entityManager: EntityManager,
-  private val exportParams: ExportParams,
-  private val projectId: Long
+  private val exportParams: IExportParams,
+  private val projectId: Long,
+  private val overrideLanguageTag: List<String>? = null
 ) {
   private val cb: CriteriaBuilder = entityManager.criteriaBuilder
   val query: CriteriaQuery<ExportDataView> = cb.createQuery(ExportDataView::class.java)
@@ -161,8 +162,9 @@ class ExportDataProvider(
   private fun joinLanguage(): SetJoin<Project, Language> {
     val language = projectJoin.join(Project_.languages)
 
-    if (exportParams.languages != null) {
-      language.on(language.get(Language_.tag).`in`(exportParams.languages))
+    val languageTagsToFilter = overrideLanguageTag ?: exportParams.languages
+    if (languageTagsToFilter != null) {
+      language.on(language.get(Language_.tag).`in`(languageTagsToFilter))
     }
     return language
   }

@@ -23,7 +23,7 @@ class ImportProperties {
       "While this is useful for tests, make sure to keep this **disabled** " +
       "if you're importing projects on a production server as trying this predictable key " +
       "may be the first thing an attacker will attempt to gain unauthorized access!\n" +
-      ":::"
+      ":::\n\n"
   )
   var createImplicitApiKey: Boolean = false
 

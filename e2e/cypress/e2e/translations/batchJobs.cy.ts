@@ -142,6 +142,6 @@ function selectLanguage(language = 'German') {
     .findDcy('translations-language-select-form-control')
     .click();
   cy.gcy('translations-language-select-item').contains(language).click();
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
   cy.gcy('translations-language-select-item').should('not.exist');
 }

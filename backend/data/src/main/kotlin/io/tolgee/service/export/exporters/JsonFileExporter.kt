@@ -1,15 +1,15 @@
 package io.tolgee.service.export.exporters
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
-import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.helpers.TextHelper
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import java.io.InputStream
 
 class JsonFileExporter(
   override val translations: List<ExportTranslationView>,
-  override val exportParams: ExportParams
+  override val exportParams: IExportParams
 ) : FileExporter {
 
   override val fileExtension: String = ExportFormat.JSON.extension

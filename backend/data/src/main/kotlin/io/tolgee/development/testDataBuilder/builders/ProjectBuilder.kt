@@ -8,6 +8,9 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.automations.Automation
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
@@ -15,6 +18,7 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.core.io.ClassPathResource
 
 class ProjectBuilder(
@@ -37,6 +41,7 @@ class ProjectBuilder(
     val imports = mutableListOf<ImportBuilder>()
     val keys = mutableListOf<KeyBuilder>()
     val translations = mutableListOf<TranslationBuilder>()
+    val automations = mutableListOf<AutomationBuilder>()
     val apiKeys = mutableListOf<ApiKeyBuilder>()
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
     var autoTranslationConfigBuilders = mutableListOf<AutoTranslationConfigBuilder>()
@@ -45,6 +50,9 @@ class ProjectBuilder(
     var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
     var screenshots = mutableListOf<ScreenshotBuilder>()
     var keyDistances = mutableListOf<KeysDistanceBuilder>()
+    var contentStorages = mutableListOf<ContentStorageBuilder>()
+    var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
+    var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
   }
 
   var data = DATA()
@@ -147,6 +155,11 @@ class ProjectBuilder(
     data.keyDistances.add(builder)
     return builder
   }
+
+  fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
+  fun addContentStorage(ft: FT<ContentStorage>) = addOperation(data.contentStorages, ft)
+  fun addContentDeliveryConfig(ft: FT<ContentDeliveryConfig>) = addOperation(data.contentDeliveryConfigs, ft)
+  fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
 }

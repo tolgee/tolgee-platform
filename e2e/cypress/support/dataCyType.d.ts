@@ -114,9 +114,24 @@ declare namespace DataCy {
         "comment-menu-needs-resolution" |
         "comment-resolve" |
         "comment-text" |
+        "content-delivery-add-button" |
+        "content-delivery-auto-publish-checkbox" |
+        "content-delivery-delete-button" |
+        "content-delivery-form-name" |
+        "content-delivery-form-save" |
+        "content-delivery-item-edit" |
+        "content-delivery-item-publish" |
+        "content-delivery-item-type" |
+        "content-delivery-list-item" |
+        "content-delivery-storage-selector" |
+        "content-delivery-storage-selector-item" |
+        "content-delivery-subtitle" |
         "create-project-language-add-button" |
         "dashboard-projects-list-item" |
         "delete-user-button" |
+        "developer-menu-content-delivery" |
+        "developer-menu-storage" |
+        "developer-menu-webhooks" |
         "dropzone" |
         "dropzone-inner" |
         "edit-pat-dialog-content" |
@@ -345,6 +360,7 @@ declare namespace DataCy {
         "project-menu-item" |
         "project-menu-item-api-keys" |
         "project-menu-item-dashboard" |
+        "project-menu-item-developer" |
         "project-menu-item-export" |
         "project-menu-item-import" |
         "project-menu-item-integrate" |
@@ -390,6 +406,24 @@ declare namespace DataCy {
         "settings-menu-item" |
         "sign-up-submit-button" |
         "spending-limit-exceeded-popover" |
+        "storage-add-item-button" |
+        "storage-form-azure-connection-string" |
+        "storage-form-azure-container-name" |
+        "storage-form-delete" |
+        "storage-form-name" |
+        "storage-form-public-url-prefix" |
+        "storage-form-s3-access-key" |
+        "storage-form-s3-bucket-name" |
+        "storage-form-s3-endpoint" |
+        "storage-form-s3-secret-key" |
+        "storage-form-s3-signing-region" |
+        "storage-form-save" |
+        "storage-form-test" |
+        "storage-form-type-azure" |
+        "storage-form-type-s3" |
+        "storage-item-edit" |
+        "storage-list-item" |
+        "storage-subtitle" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "top-banner" |
@@ -459,5 +493,15 @@ declare namespace DataCy {
         "user-menu-organization-switch" |
         "user-menu-server-administration" |
         "user-menu-user-settings" |
-        "user-profile"
+        "user-profile" |
+        "webhook-form-cancel" |
+        "webhook-form-delete" |
+        "webhook-form-save" |
+        "webhook-form-url" |
+        "webhooks-add-item-button" |
+        "webhooks-item-edit" |
+        "webhooks-item-show-secret" |
+        "webhooks-item-test" |
+        "webhooks-list-item" |
+        "webhooks-subtitle"
 }

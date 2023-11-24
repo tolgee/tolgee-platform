@@ -127,6 +127,7 @@ export const colors = {
       background: '#ffffff',
       text: '#111111',
     },
+    info: '#009B85',
     topBanner: {
       background: '#BEF4E9',
       mainText: '#004437',
@@ -198,6 +199,7 @@ export const colors = {
       background: '#394556',
       text: '#efefef',
     },
+    info: '#6db2a4',
     topBanner: {
       background: '#008371',
       mainText: '#BEF4E9',

@@ -9,7 +9,8 @@ import kotlin.reflect.KClass
 enum class ActivityType(
   val onlyCountsInList: Boolean = false,
   val restrictEntitiesInList: Array<KClass<out EntityWithId>>? = null,
-  val paramsProvider: KClass<out PublicParamsProvider>? = null
+  val paramsProvider: KClass<out PublicParamsProvider>? = null,
+  val hideInList: Boolean = false
 ) {
   UNKNOWN,
   SET_TRANSLATION_STATE,
@@ -34,7 +35,7 @@ enum class ActivityType(
   CREATE_PROJECT,
   EDIT_PROJECT,
   NAMESPACE_EDIT,
-  BATCH_PRE_TRANSLATE_BY_TM(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_PRE_TRANSLATE_BY_TM(onlyCountsInList = true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_MACHINE_TRANSLATE(true, paramsProvider = BatchActivityParamsProvider::class),
   AUTO_TRANSLATE(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_CLEAR_TRANSLATIONS(true, paramsProvider = BatchActivityParamsProvider::class),
@@ -42,6 +43,7 @@ enum class ActivityType(
   BATCH_SET_TRANSLATION_STATE(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_TAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_UNTAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
-  BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class)
+  BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class),
+  AUTOMATION(onlyCountsInList = true, hideInList = true)
   ;
 }

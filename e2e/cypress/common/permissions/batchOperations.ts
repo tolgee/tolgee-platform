@@ -14,7 +14,7 @@ function checkSourceLanguages(languages: number[], projectInfo: ProjectInfo) {
       .contains(getLanguageName(projectInfo.languages, langId))
       .should('exist');
   });
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
 }
 
 function checkTargetLanguages(languages: number[], projectInfo: ProjectInfo) {
@@ -26,7 +26,7 @@ function checkTargetLanguages(languages: number[], projectInfo: ProjectInfo) {
       .contains(getLanguageName(projectInfo.languages, langId))
       .should('exist');
   });
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
 }
 
 function checkOperationsAccessibility(
@@ -95,6 +95,6 @@ export function testBatchOperations(projectInfo: ProjectInfo) {
     projectInfo
   );
 
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
   cy.waitForDom();
 }

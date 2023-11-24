@@ -27,7 +27,7 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
 
   @BeforeEach
   fun setup() {
-    enabledFeaturesProvider.forceEnabled = listOf(Feature.GRANULAR_PERMISSIONS)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.GRANULAR_PERMISSIONS)
   }
 
   @Test
@@ -44,7 +44,7 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
   @Test
   @ProjectJWTAuthTestMethod
   fun `fails when feature disabled`() {
-    enabledFeaturesProvider.forceEnabled = listOf()
+    enabledFeaturesProvider.forceEnabled = setOf()
     invitationTestUtil.perform {
       scopes = setOf("translations.edit")
     }.andIsBadRequest

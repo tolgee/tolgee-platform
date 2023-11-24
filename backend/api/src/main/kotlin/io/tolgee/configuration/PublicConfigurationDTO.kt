@@ -33,6 +33,7 @@ class PublicConfigurationDTO(
   val ga4Tag = properties.ga4Tag
   val postHogApiKey: String? = properties.postHog.apiKey
   val postHogHost: String? = properties.postHog.host
+  val contentDeliveryConfigured: Boolean = properties.contentDelivery.publicUrlPrefix != null
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,

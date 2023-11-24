@@ -1,7 +1,6 @@
 package io.tolgee.websocket
 
 import io.tolgee.fixtures.RedisRunner
-import io.tolgee.testing.ContextRecreatingTest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
@@ -9,7 +8,6 @@ import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ContextConfiguration
 
-@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "spring.redis.port=56379",

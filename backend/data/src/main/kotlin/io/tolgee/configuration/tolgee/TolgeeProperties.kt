@@ -129,5 +129,7 @@ open class TolgeeProperties(
   @DocProperty(hidden = true)
   var postHog: PostHogProperties = PostHogProperties(),
 
-  var telemetry: TelemetryProperties = TelemetryProperties()
+  var telemetry: TelemetryProperties = TelemetryProperties(),
+
+  var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
 )
