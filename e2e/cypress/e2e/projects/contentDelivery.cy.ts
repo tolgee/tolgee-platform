@@ -2,7 +2,7 @@ import {
   assertMessage,
   confirmStandard,
   gcyAdvanced,
-  visitProjectDeveloper,
+  visitProjectDeveloperContentDelivery,
 } from '../../common/shared';
 import { contentDelivery } from '../../common/apiCalls/testData/testData';
 import { login, setContentStorageBypass } from '../../common/apiCalls/common';
@@ -18,7 +18,7 @@ describe('Content delivery', () => {
     contentDelivery.generateStandard().then((response) => {
       login();
       projectId = response.body.projects[0].id;
-      visitProjectDeveloper(projectId);
+      visitProjectDeveloperContentDelivery(projectId);
     });
   });
 

@@ -73,7 +73,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var contentDeliveryConfigService: ContentDeliveryConfigService
 
   @BeforeEach
-  fun before(){
+  fun before() {
     Mockito.reset(restTemplate, webhookRestTemplate)
     webhookInvocationCount = 0
   }
