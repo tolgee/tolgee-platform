@@ -8,10 +8,12 @@ import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.data.SetLicenseKeyDto
 import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -33,7 +35,7 @@ class EeLicenseController(
   @PostMapping("prepare-set-license-key")
   @Operation(summary = "Returns info about the upcoming EE subscription")
   @RequiresSuperAuthentication
-  fun prepareSetLicenseKey(@RequestBody body: SetLicenseKeyDto): PrepareSetEeLicenceKeyModel {
+  fun prepareSetLicenseKey(@RequestBody body: SetLicenseKeyDto, @RequestHeader headers: HttpHeaders): PrepareSetEeLicenceKeyModel {
     return eeSubscriptionService.prepareSetLicenceKey(body.licenseKey)
   }
 

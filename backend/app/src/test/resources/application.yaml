@@ -15,8 +15,7 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-    converters:
-      preferred-json-mapper: jackson
+    default-content-type: application/json
   data:
     redis:
       repositories:
