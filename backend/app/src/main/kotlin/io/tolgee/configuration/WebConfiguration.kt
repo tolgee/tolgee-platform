@@ -4,22 +4,24 @@
 
 package io.tolgee.configuration
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import org.apache.http.impl.client.HttpClientBuilder
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.CacheControl
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.unit.DataSize
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.servlet.config.annotation.*
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 import javax.servlet.MultipartConfigElement
@@ -60,22 +62,13 @@ class WebConfiguration(
   }
 
   @Bean
-  fun restTemplate(): RestTemplate {
-    return RestTemplate(
-      HttpComponentsClientHttpRequestFactory().apply {
-        this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
-      }
-    )
-  }
-
-  @Bean
   fun secureRandom(): SecureRandom {
     return SecureRandom()
   }
 
   @Bean
   fun objectMapper(): ObjectMapper {
-    return jacksonObjectMapper()
+    return jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   }
 
   @Bean

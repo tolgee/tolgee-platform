@@ -2,9 +2,9 @@
 import { getAnyContainingAriaLabelAttribute, getInput } from './xPath';
 import { Scope } from './types';
 import { waitForGlobalLoading } from './loading';
+import { HOST } from './constants';
 import Value = DataCy.Value;
 import Chainable = Cypress.Chainable;
-import { HOST } from './constants';
 
 export const allScopes: Scope[] = [
   'keys.edit',
@@ -126,7 +126,7 @@ export const toggleInMultiselect = (
         }
       });
   });
-  cy.get('body').click(0, 0);
+  cy.get('body').type('{esc}');
   waitForGlobalLoading();
 };
 
@@ -174,4 +174,16 @@ export const visitProjectMembers = (projectId: number) => {
 
 export const visitProjectDashboard = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}`);
+};
+
+export const visitProjectDeveloperContentDelivery = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/developer/content-delivery`);
+};
+
+export const visitProjectDeveloperStorage = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/developer/storage`);
+};
+
+export const visitProjectDeveloperHooks = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/developer/webhooks`);
 };

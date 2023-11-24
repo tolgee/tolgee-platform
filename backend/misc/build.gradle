@@ -28,6 +28,7 @@ kotlin {
 
 dependencies {
     implementation libs.kotlinCoroutines
+    implementation libs.jacksonModuleKotlin
 }
 
 sourceSets {

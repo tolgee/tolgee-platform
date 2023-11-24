@@ -39,7 +39,6 @@ class TolgeeTranslateApiService(
   @OptIn(ExperimentalTime::class)
   fun translate(params: TolgeeTranslateParams): MtValueProvider.MtResult {
     val headers = HttpHeaders()
-    headers.add("Something", null)
 
     val closeItems =
       params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }

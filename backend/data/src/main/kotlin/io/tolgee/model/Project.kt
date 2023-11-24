@@ -2,9 +2,13 @@ package io.tolgee.model
 
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.automations.Automation
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.webhook.WebhookConfig
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -89,6 +93,18 @@ class Project(
 
   @Transient
   override var disableActivityLogging = false
+
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var automations: MutableList<Automation> = mutableListOf()
+
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var contentDeliveryConfigs: MutableList<ContentDeliveryConfig> = mutableListOf()
+
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var contentStorages: MutableList<ContentStorage> = mutableListOf()
+
+  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {

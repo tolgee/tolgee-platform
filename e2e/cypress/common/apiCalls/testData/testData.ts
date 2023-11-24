@@ -51,6 +51,8 @@ export const languagePermissionsData = generateTestDataObject(
   'language-permissions'
 );
 
+export const contentDelivery = generateTestDataObject('content-delivery');
+
 export const generateExampleKeys = (
   projectId: number,
   numberOfExamples: number

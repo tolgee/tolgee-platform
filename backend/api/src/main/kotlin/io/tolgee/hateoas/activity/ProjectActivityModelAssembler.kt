@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.activity
 
+import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.api.v2.controllers.ApiKeyController
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.service.AvatarService
@@ -11,7 +12,8 @@ class ProjectActivityModelAssembler(
   private val avatarService: AvatarService
 ) : RepresentationModelAssemblerSupport<ProjectActivityView, ProjectActivityModel>(
   ApiKeyController::class.java, ProjectActivityModel::class.java
-) {
+),
+  IProjectActivityModelAssembler {
   override fun toModel(view: ProjectActivityView): ProjectActivityModel {
     return ProjectActivityModel(
       revisionId = view.revisionId,

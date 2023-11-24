@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
 
-import { translationStates } from 'tg.constants/translationStates';
+import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { getEventAction } from 'tg.fixtures/shortcuts';
 import {
   ARROWS,
@@ -137,7 +137,7 @@ export const useTranslationsShortcuts = () => {
       )?.translations[focused.language];
 
       const newState =
-        translation?.state && translationStates[translation.state]?.next;
+        translation?.state && TRANSLATION_STATES[translation.state]?.next;
 
       if (translation && newState) {
         return (e: KeyboardEvent) => {

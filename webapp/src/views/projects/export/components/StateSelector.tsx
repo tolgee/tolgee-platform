@@ -10,9 +10,8 @@ import {
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { StateType } from 'tg.constants/translationStates';
-import { exportableStates } from './ExportForm';
 import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
+import { StateType, EXPORTABLE_STATES } from 'tg.constants/translationStates';
 
 type Props = {
   className: string;
@@ -41,7 +40,7 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
               }
               multiple
             >
-              {exportableStates.map((state) => (
+              {EXPORTABLE_STATES.map((state) => (
                 <MenuItem
                   key={state}
                   value={state}

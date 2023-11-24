@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.constants.Message
@@ -51,6 +52,10 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Autowired
   @SpyBean
   lateinit var batchJobProjectLockingManager: BatchJobProjectLockingManager
+
+  @Autowired
+  @SpyBean
+  lateinit var automationChunkProcessor: AutomationChunkProcessor
 
   @Autowired
   @SpyBean
@@ -256,5 +261,35 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     util.assertStatusReported(BatchJobStatus.FAILED)
     util.assertJobStateCacheCleared(job)
     util.assertJobUnlocked()
+  }
+
+  @Test
+  fun `debounces job`() {
+    currentDateProvider.forcedDate = currentDateProvider.date
+    util.makeAutomationChunkProcessorPass()
+    val firstJobId = util.runDebouncedJob().id
+
+    repeat(2) {
+      util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
+    }
+    currentDateProvider.move(Duration.ofSeconds(5))
+    repeat(2) {
+      util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
+    }
+    currentDateProvider.move(Duration.ofSeconds(10))
+    Thread.sleep(500)
+
+    val anotherJobId = util.runDebouncedJob().id
+    anotherJobId.assert.isNotEqualTo(firstJobId)
+
+    // test it debounces for max time (10 sec * 4 = 40)
+    repeat(7) {
+      currentDateProvider.move(Duration.ofSeconds(5))
+      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+    }
+
+    currentDateProvider.move(Duration.ofSeconds(5))
+    Thread.sleep(500)
+    util.runDebouncedJob().id.assert.isNotEqualTo(anotherJobId)
   }
 }

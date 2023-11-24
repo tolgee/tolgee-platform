@@ -3,21 +3,29 @@ import { useTranslate } from '@tolgee/react';
 import { useFeatureMissingExplanation } from './useFeatureMissingExplanation';
 import { Link } from 'react-router-dom';
 
-export const PaidFeatureBanner = () => {
+type Props = {
+  customTitle?: string;
+  customMessage?: string;
+};
+
+export const PaidFeatureBanner = ({ customTitle, customMessage }: Props) => {
   const { t } = useTranslate();
 
   const { message, actionTitle, link } = useFeatureMissingExplanation();
 
+  const combinedMessage = customMessage ?? message;
+
   return (
     <Alert
-      severity="warning"
+      severity="info"
       action={
         actionTitle && link ? (
           <Button
             component={Link}
-            color="inherit"
+            color="info"
             size="small"
-            variant="outlined"
+            variant="contained"
+            disableElevation
             to={link}
           >
             {actionTitle}
@@ -25,8 +33,8 @@ export const PaidFeatureBanner = () => {
         ) : undefined
       }
     >
-      <AlertTitle>{t('paid-feature-banner-title')}</AlertTitle>
-      {message && <Box>{message}</Box>}
+      <AlertTitle>{customTitle ?? t('paid-feature-banner-title')}</AlertTitle>
+      {combinedMessage && <Box>{combinedMessage}</Box>}
     </Alert>
   );
 };

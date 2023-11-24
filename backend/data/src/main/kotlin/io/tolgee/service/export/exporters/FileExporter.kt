@@ -1,12 +1,12 @@
 package io.tolgee.service.export.exporters
 
-import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.dtos.IExportParams
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import java.io.InputStream
 
 interface FileExporter {
   val translations: List<ExportTranslationView>
-  val exportParams: ExportParams
+  val exportParams: IExportParams
   val fileExtension: String
 
   fun produceFiles(): Map<String, InputStream>

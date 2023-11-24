@@ -1,9 +1,10 @@
-import { styled, Link as MuiLink } from '@mui/material';
+import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { TadaIcon } from 'tg.component/CustomIcons';
+import { BannerLink } from './BannerLink';
 
 type Props = {
-  content: string;
+  content: React.ReactNode;
   link?: string;
 };
 
@@ -20,11 +21,6 @@ const StyledWrappableContent = styled('div')`
   flex-wrap: wrap;
 `;
 
-const StyledMuiLink = styled(MuiLink)`
-  color: ${({ theme }) => theme.palette.topBanner.linkText};
-  text-decoration: underline;
-`;
-
 export const Announcement = ({ content, link }: Props) => {
   const { t } = useTranslate();
   return (
@@ -34,9 +30,9 @@ export const Announcement = ({ content, link }: Props) => {
         <div>{content}</div>
       </StyledContent>
       {link && (
-        <StyledMuiLink href={link} rel="noopener noreferrer" target="_blank">
+        <BannerLink href={link}>
           {t('announcement_general_link_text')}
-        </StyledMuiLink>
+        </BannerLink>
       )}
     </StyledWrappableContent>
   );

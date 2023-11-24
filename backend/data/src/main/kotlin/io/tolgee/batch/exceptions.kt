@@ -18,7 +18,7 @@ open class FailedDontRequeueException(
 
 open class RequeueWithDelayException(
   message: Message,
-  successfulTargets: List<Any>,
+  successfulTargets: List<Any> = listOf(),
   cause: Throwable,
   val delayInMs: Int = 100,
   val increaseFactor: Int = 10,

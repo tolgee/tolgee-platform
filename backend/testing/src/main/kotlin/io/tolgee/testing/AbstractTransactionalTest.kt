@@ -21,7 +21,7 @@ import javax.persistence.EntityManager
 @ActiveProfiles(profiles = ["local"])
 abstract class AbstractTransactionalTest {
   @Autowired
-  protected lateinit var entityManager: EntityManager
+  protected open lateinit var entityManager: EntityManager
 
   protected fun commitTransaction() {
     TestTransaction.flagForCommit()

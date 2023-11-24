@@ -1,8 +1,5 @@
 package io.tolgee.service.dataImport.processors
 
-import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
-
 abstract class ImportFileProcessor {
   abstract val context: FileProcessorContext
   abstract fun process()
@@ -20,10 +17,5 @@ abstract class ImportFileProcessor {
 
     context.languageNameGuesses = result
     result
-  }
-
-  open val xmlEventReader: XMLEventReader by lazy {
-    val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
-    inputFactory.createXMLEventReader(context.file.inputStream)
   }
 }

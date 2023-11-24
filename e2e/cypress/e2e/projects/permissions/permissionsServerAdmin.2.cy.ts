@@ -19,6 +19,7 @@ describe('Permissions admin 2', () => {
         'project-menu-item-members': SKIP,
         'project-menu-item-import': SKIP,
         'project-menu-item-export': SKIP,
+        'project-menu-item-developer': SKIP,
         'project-menu-item-integrate': SKIP,
       });
     });

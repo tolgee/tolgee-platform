@@ -48,6 +48,8 @@ tolgee:
   recaptcha:
     site-key: 6Le0X08dAAAAALfQQk1NeWd-kXqvzLVk8HqoZpRw
     secret-key: dummy_secret_key
+  content-delivery:  
+    public-url-prefix: https://cdndev.tolg.ee/i18n
   machine-translation:
     free-credits-amount: 1000000000
     google:

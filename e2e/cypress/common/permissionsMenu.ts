@@ -17,7 +17,7 @@ export const permissionsMenuSelectRole = (role: string, options?: Options) => {
       cy.gcy('search-select-item').contains(lang).click();
     });
 
-    cy.get('body').click(0, 0);
+    cy.get('body').type('{esc}');
   }
 
   cy.gcy('permissions-menu-save').click();

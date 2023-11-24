@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Checkbox, ListItemText, Menu, MenuItem, styled } from '@mui/material';
 import { ArrowRight } from '@mui/icons-material';
 
-import { translationStates } from 'tg.constants/translationStates';
+import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { decodeFilter, OptionType } from './tools';
 import { CompactMenuItem } from './FiltersComponents';
 
@@ -83,7 +83,7 @@ export const SubmenuStates: React.FC<Props> = ({
               <ListItemText primary={item.label} />
               <StyledDot
                 style={{
-                  background: translationStates[state]?.color,
+                  background: TRANSLATION_STATES[state]?.color,
                 }}
               />
             </MenuItem>

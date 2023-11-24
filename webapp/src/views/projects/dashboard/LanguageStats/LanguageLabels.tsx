@@ -2,7 +2,7 @@ import React from 'react';
 import { T } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { StateType, TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
 import { PercentFormat } from '../PercentFormat';
 
@@ -76,10 +76,10 @@ export const LanguageLabels: React.FC<Props> = ({ data }) => {
             <React.Fragment key={item.status}>
               <StyledDot
                 gridColumn={1}
-                sx={{ background: translationStates[item.status].color }}
+                sx={{ background: TRANSLATION_STATES[item.status].color }}
               />
               <Box data-cy="project-dashboard-language-label-state">
-                {translationStates[item.status].translation}
+                {TRANSLATION_STATES[item.status].translation}
               </Box>
               <Box ml={2} data-cy="project-dashboard-language-label-percentage">
                 <PercentFormat number={item.percent} />
