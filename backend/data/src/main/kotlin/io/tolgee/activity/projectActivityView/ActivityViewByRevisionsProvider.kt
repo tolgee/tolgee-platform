@@ -17,8 +17,6 @@ import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.EntityUtil
 import org.springframework.context.ApplicationContext
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import javax.persistence.EntityManager
 import javax.persistence.criteria.Predicate
 
@@ -131,10 +129,6 @@ class ActivityViewByRevisionsProvider(
   ): Map<Long, List<ActivityDescribingEntity>> {
     return activityRevisionRepository.getRelationsForRevisions(revisionIds, allowedTypes)
       .groupBy { it.activityRevision.id }
-  }
-
-  private fun getProjectActivityRevisions(projectId: Long, pageable: Pageable): Page<ActivityRevision> {
-    return activityRevisionRepository.getForProject(projectId, pageable)
   }
 
   private fun getModifiedEntities(): Map<Long, List<ModifiedEntityView>> {

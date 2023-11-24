@@ -131,6 +131,5 @@ open class TolgeeProperties(
 
   var telemetry: TelemetryProperties = TelemetryProperties(),
 
-  @DocProperty(hidden = true)
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
 )

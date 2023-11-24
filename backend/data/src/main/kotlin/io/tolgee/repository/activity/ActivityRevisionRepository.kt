@@ -14,10 +14,10 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   @Query(
     """
     from ActivityRevision ar
-    where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null
+    where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
   """
   )
-  fun getForProject(projectId: Long, pageable: Pageable): Page<ActivityRevision>
+  fun getForProject(projectId: Long, pageable: Pageable, types: List<ActivityType>): Page<ActivityRevision>
 
   @Query(
     """

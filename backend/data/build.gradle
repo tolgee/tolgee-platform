@@ -168,7 +168,6 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation libs.jacksonModuleKotlin
-    implementation libs.jacksonDataFormatXml
     implementation 'net.datafaker:datafaker:1.5.0'
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
