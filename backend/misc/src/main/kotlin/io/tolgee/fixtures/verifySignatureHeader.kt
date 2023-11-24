@@ -25,7 +25,7 @@ fun verifyWebhookSignatureHeader(
     )
   }
 
-  val signedPayload = "$timestamp+$payload"
+  val signedPayload = "$timestamp.$payload"
   val expectedSignature: String = try {
     computeHmacSha256(secret, signedPayload)
   } catch (e: Exception) {

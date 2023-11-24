@@ -19,6 +19,7 @@ import io.tolgee.testing.assert
 import io.tolgee.util.addMinutes
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -29,6 +30,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -59,11 +61,22 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var restTemplate: RestTemplate
 
+  @MockBean
+  @Autowired
+  @Qualifier("webhookRestTemplate")
+  lateinit var webhookRestTemplate: RestTemplate
+
   @Autowired
   lateinit var webhookConfigService: WebhookConfigService
 
   @Autowired
   lateinit var contentDeliveryConfigService: ContentDeliveryConfigService
+
+  @BeforeEach
+  fun before(){
+    Mockito.reset(restTemplate, webhookRestTemplate)
+    webhookInvocationCount = 0
+  }
 
   @AfterEach
   fun after() {
@@ -78,8 +91,6 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     currentDateProvider.forcedDate = currentDateProvider.date
     val testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
-
-    Mockito.reset(restTemplate)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     fileStorageMock = mock()
@@ -116,7 +127,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it updates config when failing`() {
+  fun `it updates webhook config when failing`() {
     val testData = WebhooksTestData()
     currentDateProvider.forcedDate = currentDateProvider.date
     testDataService.saveTestData(testData.root)
@@ -141,7 +152,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun mockWebhookResponse(httpStatus: HttpStatus) {
     doAnswer {
       ResponseEntity.status(httpStatus).build<Any>()
-    }.whenever(restTemplate)
+    }.whenever(webhookRestTemplate)
       .exchange(
         any<String>(),
         any<HttpMethod>(),
@@ -153,8 +164,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun verifyWebhookExecuted(testData: WebhooksTestData) {
     val newExpectedInvocationsCount = ++webhookInvocationCount
     waitForNotThrowing {
-      Mockito.mockingDetails(restTemplate).invocations.count().assert.isEqualTo(newExpectedInvocationsCount)
-      val callArguments = Mockito.mockingDetails(restTemplate).invocations.last().arguments
+      Mockito.mockingDetails(webhookRestTemplate).invocations.count().assert.isEqualTo(newExpectedInvocationsCount)
+      val callArguments = Mockito.mockingDetails(webhookRestTemplate).invocations.last().arguments
       callArguments[0].assert
         .isEqualTo(testData.webhookConfig.self.url)
       val httpEntity = callArguments[2] as HttpEntity<String>
