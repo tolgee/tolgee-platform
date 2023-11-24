@@ -14,7 +14,7 @@ class ImportProperties {
     description = "File path of the directory where the files to import are located.\n"+
     "\n"+
     ":::info\n"+
-    "Your folder structure should like:\n"+
+    "Your folder structure should look like:\n"+
     "importDir\n"+
     "└─Project # the foler name is the project name\n"+
     "  └─validation # the foler name is namespace\n"+
