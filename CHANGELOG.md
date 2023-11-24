@@ -1,3 +1,11 @@
+## [3.38.2](https://github.com/tolgee/tolgee-platform/compare/v3.38.1...v3.38.2) (2023-11-24)
+
+
+### Bug Fixes
+
+* Licencing test ([2170b1d](https://github.com/tolgee/tolgee-platform/commit/2170b1d54fe5ac9f8b281fda29989ee44448eb44))
+* Wrong HTTP client content-type and accept headers ([4d4b51c](https://github.com/tolgee/tolgee-platform/commit/4d4b51cbac7a74efe05eda9dcc838c742ad41148))
+
 ## [3.38.1](https://github.com/tolgee/tolgee-platform/compare/v3.38.0...v3.38.1) (2023-11-24)
 
 
