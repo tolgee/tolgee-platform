@@ -33,7 +33,7 @@ export const DeveloperView = () => {
     <BaseProjectView
       windowTitle={t('automation_view_title')}
       title={t('automation_view_title')}
-      containerMaxWidth="lg"
+      maxWidth="normal"
       navigation={[
         [
           t('automation_view_title'),
