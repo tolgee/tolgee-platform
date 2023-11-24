@@ -365,7 +365,7 @@
   "feature-explanation-license-not-sufficient" : "Votre licence ne contient pas cette fonctionnalité",
   "feature-explanation-no-license" : "Vous avez besoin d'une licence Tolgee",
   "feature-explanation-plan-not-sufficient" : "Votre plan actuel n'inclut pas cette fonction",
-  "feature-explanation-setup-license" : "Mettre à niveau le plan",
+  "feature-explanation-setup-license" : "Augmenter le plan",
   "feature-explanation-upgrade-subscription" : "Mettre à niveau",
   "feature_not_enabled" : "Fonctionnalité non activée",
   "Field should have at least n chars" : "Ce champ doit contenir au moins {min} caractères",

@@ -1,3 +1,10 @@
+## [3.38.1](https://github.com/tolgee/tolgee-platform/compare/v3.38.0...v3.38.1) (2023-11-24)
+
+
+### Bug Fixes
+
+* Fix wrong content type ([#1998](https://github.com/tolgee/tolgee-platform/issues/1998)) ([24878ee](https://github.com/tolgee/tolgee-platform/commit/24878ee1cace5d891b4c30a507b7c9d1d053b4dc))
+
 # [3.38.0](https://github.com/tolgee/tolgee-platform/compare/v3.37.1...v3.38.0) (2023-11-24)
 
 
