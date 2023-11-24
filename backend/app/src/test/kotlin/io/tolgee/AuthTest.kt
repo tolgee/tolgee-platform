@@ -1,6 +1,7 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Message
 import io.tolgee.controllers.PublicController
 import io.tolgee.fixtures.andAssertThatJson
@@ -223,7 +224,7 @@ class AuthTest : AbstractControllerTest() {
   @Test
   fun authorizesGithubUser() {
     val response = gitHubAuthUtil.authorizeGithubUser().response.contentAsString
-    val result = ObjectMapper().readValue(response, HashMap::class.java)
+    val result = jacksonObjectMapper().readValue(response, HashMap::class.java)
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")
   }
@@ -231,7 +232,7 @@ class AuthTest : AbstractControllerTest() {
   @Test
   fun authorizesGoogleUser() {
     val response = googleAuthUtil.authorizeGoogleUser().response.contentAsString
-    val result = ObjectMapper().readValue(response, HashMap::class.java)
+    val result = jacksonObjectMapper().readValue(response, HashMap::class.java)
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")
   }

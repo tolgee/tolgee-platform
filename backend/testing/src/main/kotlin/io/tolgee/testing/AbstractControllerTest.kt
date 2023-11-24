@@ -2,8 +2,8 @@ package io.tolgee.testing
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JavaType
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.TypeFactory
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.AbstractSpringTest
 import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.NotFoundException
@@ -34,7 +34,7 @@ abstract class AbstractControllerTest :
   protected lateinit var requestPerformer: RequestPerformer
 
   fun <T> decodeJson(json: String?, clazz: Class<T>?): T {
-    val mapper = ObjectMapper()
+    val mapper = jacksonObjectMapper()
     return try {
       mapper.readValue(json, clazz)
     } catch (e: JsonProcessingException) {

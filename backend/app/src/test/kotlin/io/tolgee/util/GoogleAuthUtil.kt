@@ -64,7 +64,7 @@ class GoogleAuthUtil(
 
     return authMvc!!.perform(
       MockMvcRequestBuilders.get("/api/public/authorize_oauth/google?code=$receivedCode")
-        .accept(MediaType.ALL)
+        .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
     )
       .andReturn()
