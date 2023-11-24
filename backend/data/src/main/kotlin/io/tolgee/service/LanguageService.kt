@@ -159,7 +159,11 @@ class LanguageService(
   }
 
   fun findLanguageIdsOfTranslations(translationIds: List<Long>): Map<Long, Long> {
-    return languageRepository.findLanguageIdsOfTranslations(translationIds)
+    val maps = languageRepository.findLanguageIdsOfTranslations(translationIds)
+    if (maps.isEmpty()) return emptyMap()
+
+    return maps
+      .map { mapOf(it["translationId"]!! to it["languageId"]!!) }
       .reduce { acc, map -> acc.plus(map) }
   }
 

@@ -24,7 +24,6 @@ import io.tolgee.notifications.events.NotificationUserPushEvent
 import io.tolgee.repository.NotificationsRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Pageable
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -34,13 +33,11 @@ class NotificationService(
   private val notificationsRepository: NotificationsRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
-  @Async
   @Transactional
   fun dispatchNotification(notificationDto: NotificationCreateDto, params: NotificationDispatchParamsDto) {
     return dispatchNotifications(notificationDto, listOf(params))
   }
 
-  @Async
   @Transactional
   fun dispatchNotifications(notificationDto: NotificationCreateDto, params: List<NotificationDispatchParamsDto>) {
     val notificationObjects = mutableSetOf<Notification>()

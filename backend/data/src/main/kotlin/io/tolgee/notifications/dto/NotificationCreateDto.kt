@@ -77,8 +77,10 @@ data class NotificationCreateDto(
     if (activityRevision == null)
       throw IllegalArgumentException("Tried to merge notifications of incompatible type")
     if (notification.recipient.id != params.recipient.id)
-      throw IllegalArgumentException("Tried to merge a notification for user#${notification.recipient.id}, " +
-        "but specified ${params.recipient.id} as recipient in notification dispatch parameters")
+      throw IllegalArgumentException(
+        "Tried to merge a notification for user#${notification.recipient.id}, " +
+          "but specified ${params.recipient.id} as recipient in notification dispatch parameters"
+      )
 
     notification.activityRevisions.add(activityRevision)
     params.activityModifiedEntities.forEach {

@@ -203,10 +203,14 @@ class NotificationsTestData {
           }
 
           // --- --- ---
+          addPermission {
+            user = projectManager
+            type = ProjectPermissionType.MANAGE
+          }
 
           addPermission {
             user = frenchTranslator
-            type = ProjectPermissionType.REVIEW
+            type = ProjectPermissionType.EDIT
             viewLanguages.add(en.self)
             viewLanguages.add(fr.self)
             translateLanguages.add(en.self)
@@ -217,7 +221,7 @@ class NotificationsTestData {
 
           addPermission {
             user = czechTranslator
-            type = ProjectPermissionType.REVIEW
+            type = ProjectPermissionType.EDIT
             viewLanguages.add(en.self)
             viewLanguages.add(cz.self)
             translateLanguages.add(en.self)
@@ -228,7 +232,7 @@ class NotificationsTestData {
 
           addPermission {
             user = germanTranslator
-            type = ProjectPermissionType.REVIEW
+            type = ProjectPermissionType.EDIT
             viewLanguages.add(en.self)
             viewLanguages.add(de.self)
             translateLanguages.add(en.self)
@@ -239,7 +243,7 @@ class NotificationsTestData {
 
           addPermission {
             user = frenchCzechTranslator
-            type = ProjectPermissionType.REVIEW
+            type = ProjectPermissionType.EDIT
             viewLanguages.add(en.self)
             viewLanguages.add(fr.self)
             viewLanguages.add(cz.self)

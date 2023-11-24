@@ -31,6 +31,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import javax.persistence.EntityManager
 
@@ -42,6 +43,7 @@ class UserNotificationDispatch(
   private val notificationService: NotificationService,
   private val entityManager: EntityManager,
 ) : Logging {
+  @Async
   @EventListener
   fun onNotificationCreate(e: NotificationCreateEvent) {
     logger.trace("Received notification creation event {}", e)
@@ -175,6 +177,9 @@ class UserNotificationDispatch(
           recipient = entityManager.getReference(UserAccount::class.java, it.id),
           activityModifiedEntities = visibleModifiedEntities,
         )
+      }
+      .filter {
+        it.activityModifiedEntities.isNotEmpty()
       }
 
     notificationService.dispatchNotifications(e.notification, dispatches)
