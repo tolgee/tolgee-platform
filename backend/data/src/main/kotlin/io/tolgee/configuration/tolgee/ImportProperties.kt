@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 )
 class ImportProperties {
   @DocProperty(
-    description = "File path of the directory where the file to import are located.\n"+
+    description = "File path of the directory where the files to import are located.\n"+
     "\n"+
     ":::info\n"+
     "Your folder structure should like:\n"+
