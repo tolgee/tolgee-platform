@@ -40,7 +40,7 @@ tasks:
       # Schedule auto-refresh for the webapp preview window after backend is fully up,
       # as the webapp will probably have an error on the first render.
       (
-        curl -s -o /dev/null http://localhost:3000
+        until curl -s -o /dev/null http://localhost:3000; do continue; done
         echo "> GITPOD-INFO: Backend server might not be ready at port 8080 yet, expect error on webapp/frontend preview"
         (while true; do sleep 1; echo -n .; done) &
         gp ports await 8080 && kill $!
