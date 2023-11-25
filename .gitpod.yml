@@ -7,15 +7,17 @@ tasks:
   - name: Build cache
     openMode: tab-before
     init: |
-      rm -f /workspace/.f
-      # Frontend cache
-      pushd webapp
-      npm ci
-      popd
-      touch /workspace/.f
+      (
+        # Frontend cache
+        rm -f /workspace/.f
+        pushd webapp
+        npm ci
+        popd
+        touch /workspace/.f
+      ) &
 
-      rm -f /workspace/.b
       # Backend cache
+      rm -f /workspace/.b
       ./gradlew server-app:unpack
       touch /workspace/.b
 
@@ -30,7 +32,7 @@ tasks:
     openMode: split-right
     command: |
       # Fix API server address for Gitpod VSCode Web
-      echo "REACT_APP_API_URL=$(gp url 8080)" > .env.local
+      echo "REACT_APP_API_URL=$(gp url 8080)" > webapp/.env.local
 
       until test -e /workspace/.f; do sleep 1; done
       cd webapp && BROWSER='' npm run start
