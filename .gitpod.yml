@@ -6,6 +6,8 @@ image:
 tasks:
   - name: Build cache
     init: |
+      rm -f /workspace/.r
+
       # Frontend cache
       pushd webapp
       npm ci
@@ -16,14 +18,17 @@ tasks:
 
       # Backend cache
       ./gradlew server-app:unpack
+
+      touch /workspace/.r
     openMode: tab-before
   
   - name: Backend
     command: |
+      until test -e /workspace/.r; do sleep 1; done
       ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
     openMode: split-left
   - name: Frontend
-    command: cd webapp && npm ci && npm run start
+    command: until test -e /workspace/.r; do sleep 1; done && cd webapp && npm run start
     openMode: split-right
 
 vscode:
