@@ -34,6 +34,10 @@ tasks:
       # Fix API server address for Gitpod VSCode Web
       echo "REACT_APP_API_URL=$(gp url 8080)" > webapp/.env.local
 
+      # Schedule auto-refresh for the webapp preview window after backend is fully up,
+      # as the webapp will probably have an error on the first render.
+      (gp ports await 8080 && gp preview "$(gp url 3000)") &
+
       until test -e /workspace/.f; do sleep 1; done
       cd webapp && BROWSER='' npm run start
 
@@ -41,6 +45,7 @@ ports:
   - name: Backend
     port: 8080
     visibility: public
+    onOpen: ignore
   
   - name: Frontend
     port: 3000
