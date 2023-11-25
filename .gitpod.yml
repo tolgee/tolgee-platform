@@ -36,7 +36,13 @@ tasks:
 
       # Schedule auto-refresh for the webapp preview window after backend is fully up,
       # as the webapp will probably have an error on the first render.
-      (gp ports await 8080 && gp preview "$(gp url 3000)") &
+      (
+        echo "> GITPOD-INFO: Backend server might not be ready at port 8080 yet, expect error on webapp/frontend preview"
+        (while true; do sleep 1; echo -n .; done) &
+        gp ports await 8080 && kill $!
+        echo "> GITPOD-INFO: Refreshing webapp/frontend preview at port 3000"
+        gp preview "$(gp url 3000)"
+      ) &
 
       until test -e /workspace/.f; do sleep 1; done
       cd webapp && BROWSER='' npm run start
