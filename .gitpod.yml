@@ -4,17 +4,23 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  # - name: Build cache
-  #   init: |
-  #     pushd webapp
-  #     npm ci
-  #     popd
+  - name: Build cache
+    init: |
+      # Frontend cache
+      pushd webapp
+      npm ci
+      popd
 
-  #     ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
-  #   openMode: tab-before
+      # Fix API server address for Gitpod VSCode Web
+      echo "REACT_APP_API_URL=$(gp url 8080)" > webapp/.env.local
+
+      # Backend cache
+      ./gradlew server-app:unpack
+    openMode: tab-before
   
   - name: Backend
-    command: ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
+    command: |
+      ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
     openMode: split-left
   - name: Frontend
     command: cd webapp && npm ci && npm run start
