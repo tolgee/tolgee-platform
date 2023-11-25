@@ -1,20 +1,23 @@
+# See https://www.gitpod.io/docs/introduction/languages/java
+
 image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - name: Build cache
-    init: |
-      ./gradlew build
+  # - name: Build cache
+  #   init: |
+  #     pushd webapp
+  #     npm ci
+  #     popd
 
-      pushd webapp
-      npm ci
-      popd
+  #     ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
+  #   openMode: tab-before
   
   - name: Backend
     command: ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
     openMode: split-left
   - name: Frontend
-    command: npm run start
+    command: cd webapp && npm ci && npm run start
     openMode: split-right
 
 vscode:
