@@ -1,7 +1,7 @@
 # See https://www.gitpod.io/docs/introduction/languages/java
 
 image:
-  file: .gitpod.Dockerfile
+  file: docker/gitpod.Dockerfile
 
 tasks:
   - name: Build cache
