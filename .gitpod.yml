@@ -5,31 +5,49 @@ image:
 
 tasks:
   - name: Build cache
+    openMode: tab-before
     init: |
-      rm -f /workspace/.r
-
+      rm -f /workspace/.f
       # Frontend cache
       pushd webapp
       npm ci
       popd
+      touch /workspace/.f
 
-      # Fix API server address for Gitpod VSCode Web
-      echo "REACT_APP_API_URL=$(gp url 8080)" > webapp/.env.local
-
+      rm -f /workspace/.b
       # Backend cache
       ./gradlew server-app:unpack
+      touch /workspace/.b
 
-      touch /workspace/.r
-    openMode: tab-before
   
   - name: Backend
-    command: |
-      until test -e /workspace/.r; do sleep 1; done
-      ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
     openMode: split-left
+    command: |
+      until test -e /workspace/.b; do sleep 1; done
+      ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
+
   - name: Frontend
-    command: until test -e /workspace/.r; do sleep 1; done && cd webapp && npm run start
     openMode: split-right
+    command: |
+      # Fix API server address for Gitpod VSCode Web
+      echo "REACT_APP_API_URL=$(gp url 8080)" > .env.local
+
+      until test -e /workspace/.f; do sleep 1; done
+      cd webapp && BROWSER='' npm run start
+
+ports:
+  - name: Backend
+    port: 8080
+    visibility: public
+  
+  - name: Frontend
+    port: 3000
+    visibility: public
+    onOpen: open-preview
+
+  - port: 15000-50000
+    onOpen: ignore
+    description: Misc.
 
 vscode:
   extensions:
