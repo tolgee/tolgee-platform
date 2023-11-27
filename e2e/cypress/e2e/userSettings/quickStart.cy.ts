@@ -71,6 +71,12 @@ describe('Quick start guide', () => {
     getHighlightOkButton('integrate_form').click();
     assertStepComplete('use');
 
+    // production
+    gcy('quick-start-action').contains('Content delivery').click();
+    getHighlight('menu_developer').click();
+    getHighlightOkButton('content_delivery_page').click();
+    assertStepComplete('production');
+
     // export
     gcy('quick-start-action').contains('Export').click();
     getHighlight('menu_export').click();
