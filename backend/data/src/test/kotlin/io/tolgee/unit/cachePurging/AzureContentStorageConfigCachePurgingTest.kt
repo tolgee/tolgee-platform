@@ -64,7 +64,7 @@ class AzureContentStorageConfigCachePurgingTest() {
     val httpEntity = invocation.arguments[2] as HttpEntity<*>
     val headers = httpEntity.headers
     headers["Authorization"].assert.isEqualTo(listOf("Bearer token"))
-    assertThatJson(httpEntity.body){
+    assertThatJson(httpEntity.body) {
       node("contentPaths").isArray.containsExactly("/fake-content-root/fake-slug/*")
     }
     url.assert.isEqualTo(
@@ -74,7 +74,5 @@ class AzureContentStorageConfigCachePurgingTest() {
         "/afdEndpoints/${config.endpointName}" +
         "/purge?api-version=2023-05-01"
     )
-
-
   }
 }
