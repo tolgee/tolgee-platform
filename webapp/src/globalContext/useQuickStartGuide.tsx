@@ -12,6 +12,7 @@ import type { useInitialDataService } from './useInitialDataService';
 export const useQuickStartGuide = (
   initialData: ReturnType<typeof useInitialDataService>
 ) => {
+  console.log(initialData);
   const [active, setActive] = useState<HighlightItem[]>([]);
   const [activeStep, setActiveStep] = useState<ItemStep>();
   const floating = useMediaQuery(`@media (max-width: ${1200}px)`);

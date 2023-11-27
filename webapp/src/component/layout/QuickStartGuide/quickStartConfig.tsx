@@ -69,6 +69,17 @@ export const items: ItemType[] = [
         label: <T keyName="guide_use_integrate" />,
         highlightItems: ['menu_integrate', 'integrate_form'],
       },
+    ],
+  },
+  {
+    step: 'production',
+    name: <T keyName="guide_production" />,
+    needsProject: true,
+    actions: () => [
+      {
+        label: <T keyName="guide_production_content_delivery" />,
+        highlightItems: ['menu_developer', 'content_delivery_page'],
+      },
       {
         label: <T keyName="guide_use_export" />,
         highlightItems: ['menu_export', 'export_form'],

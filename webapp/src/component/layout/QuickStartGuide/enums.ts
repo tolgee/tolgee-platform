@@ -5,6 +5,7 @@ export type HighlightItem =
   | 'menu_settings'
   | 'menu_import'
   | 'menu_export'
+  | 'menu_developer'
   | 'menu_integrate'
   | 'add_project'
   | 'add_language'
@@ -16,6 +17,13 @@ export type HighlightItem =
   | 'add_project_submit'
   | 'export_form'
   | 'integrate_form'
-  | 'demo_project';
+  | 'demo_project'
+  | 'content_delivery_page';
 
-export type ItemStep = 'new_project' | 'languages' | 'members' | 'keys' | 'use';
+export type ItemStep =
+  | 'new_project'
+  | 'languages'
+  | 'members'
+  | 'keys'
+  | 'use'
+  | 'production';

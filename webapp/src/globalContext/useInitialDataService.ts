@@ -34,6 +34,10 @@ export const useInitialDataService = () => {
       cacheTime: Infinity,
       keepPreviousData: true,
       staleTime: Infinity,
+      onSuccess(data) {
+        setQuickStart(data.preferredOrganization?.quickStart);
+        setAnnouncement(data.announcement);
+      },
     },
   });
 

@@ -142,6 +142,7 @@ export const ProjectMenu = ({ id }) => {
           icon={<Code />}
           text={t('project_menu_developer')}
           data-cy="project-menu-item-developer"
+          quickStart={{ itemKey: 'menu_developer' }}
           matchAsPrefix={LINKS.PROJECT_DEVELOPER.build({
             [PARAMS.PROJECT_ID]: id,
           })}
