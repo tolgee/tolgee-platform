@@ -14,18 +14,17 @@ const StyledContainer = styled(Box)`
   display: flex;
   margin: 0px 8px;
   border-radius: 8px;
-  padding: 8px;
+  padding: 10px 8px;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   gap: 8px;
   align-items: center;
   &.disabled {
     color: ${({ theme }) => theme.palette.emphasis[500]};
-  }
-  &.active {
-    background: ${({ theme }) => theme.palette.quickStart.successBackground};
+    border: none;
   }
   &.done {
-    background: ${({ theme }) => theme.palette.quickStart.successBackground};
+    background: ${({ theme }) => theme.palette.quickStart.highlight};
+    border: none;
   }
 `;
 
@@ -38,6 +37,7 @@ const StyledIndex = styled(Box)`
   justify-content: center;
   background: ${({ theme }) => theme.palette.quickStart.circleNormal};
   border-radius: 50%;
+  font-size: 14px;
   &.done {
     background: ${({ theme }) => theme.palette.quickStart.circleSuccess};
     color: ${({ theme }) => theme.palette.emphasis[50]};
@@ -53,26 +53,18 @@ type Props = {
 
 export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
   const projectRoute = useRouteMatch(LINKS.PROJECT.template);
-  const actions = item.actions?.({ projectId });
   const { quickStartBegin, setQuickStartOpen } = useGlobalActions();
   const quickStartFloating = useGlobalContext(
     (c) => c.quickStartGuide.floating
   );
-  const links = actions
-    ?.map((i) => i.link)
-    .filter((i) => Boolean(i)) as string[];
 
   const isInProject = !isNaN(Number(projectRoute?.params[PARAMS.PROJECT_ID]));
-
-  const route = useRouteMatch(links);
-  const active = Boolean(route && links?.length);
 
   const disabled = item.needsProject && projectId === undefined;
   return (
     <StyledContainer
       className={clsx({
         disabled,
-        active,
         done,
       })}
       data-cy="quick-start-step"
@@ -81,7 +73,7 @@ export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
       <StyledIndex className={clsx({ done })}>
         {done ? <Check fontSize="small" /> : <span>{index}</span>}
       </StyledIndex>
-      <Box display="grid" gap={0.5}>
+      <Box display="grid">
         <div>{item.name}</div>
         <Box display="flex" gap={2}>
           {item.actions?.({ projectId }).map((action, i) => {

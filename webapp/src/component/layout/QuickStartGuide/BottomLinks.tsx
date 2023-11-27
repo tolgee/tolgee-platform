@@ -4,7 +4,7 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { StyledLink } from './StyledComponents';
 
 const StyledContainer = styled(Box)`
-  background: ${({ theme }) => theme.palette.emphasis[50]};
+  background: ${({ theme }) => theme.palette.quickStart.highlight};
   padding: 10px 18px;
 `;
 

@@ -27,7 +27,7 @@ const StyledContent = styled(Box)`
 
 const StyledHeader = styled(Box)`
   display: flex;
-  background: ${({ theme }) => theme.palette.emphasis[50]};
+  background: ${({ theme }) => theme.palette.quickStart.highlight};
   border-radius: 0px 0px 16px 16px;
   font-size: 23px;
   font-weight: 400;
@@ -44,7 +44,7 @@ const StyledArrow = styled(Box)`
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-bottom: 10px solid ${({ theme }) => theme.palette.emphasis[50]};
+  border-bottom: 10px solid ${({ theme }) => theme.palette.quickStart.highlight};
   transition: opacity 0.2s ease-in-out;
 `;
 
