@@ -24,18 +24,18 @@ class ContentDeliveryUploader(
     val files = exportService.export(config.project.id, config)
     val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
     storeToStorage(withFullPaths, storage)
-    purgeCacheIfConfigured(config, withFullPaths)
+    purgeCacheIfConfigured(config, files.keys)
     config.lastPublished = currentDateProvider.date
     contentDeliveryConfigService.save(config)
   }
 
   private fun purgeCacheIfConfigured(
     contentDeliveryConfig: ContentDeliveryConfig,
-    withFullPaths: Map<String, InputStream>
+    paths: Set<String>
   ) {
     val isDefaultStorage = contentDeliveryConfig.contentStorage == null
     if (isDefaultStorage) {
-      contentDeliveryCachePurgingProvider.defaultPurging?.purgeForPaths(withFullPaths.keys)
+      contentDeliveryCachePurgingProvider.defaultPurging?.purgeForPaths(contentDeliveryConfig, paths)
     }
   }
 

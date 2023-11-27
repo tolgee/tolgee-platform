@@ -3,6 +3,7 @@ package io.tolgee.component.contentDelivery.cachePurging
 import com.azure.core.credential.TokenRequestContext
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -14,15 +15,17 @@ class AzureContentDeliveryCachePurging(
   private val restTemplate: RestTemplate,
   private val azureCredentialProvider: AzureCredentialProvider
 ) : ContentDeliveryCachePurging {
-  override fun purgeForPaths(paths: Set<String>) {
+  override fun purgeForPaths(contentDeliveryConfig: ContentDeliveryConfig, paths: Set<String>) {
     val token = getAccessToken()
-    purgeWithToken(paths, token)
+    purgeWithToken(contentDeliveryConfig, token)
   }
 
-  private fun purgeWithToken(paths: Set<String>, token: String) {
+  private fun purgeWithToken(
+    contentDeliveryConfig: ContentDeliveryConfig,
+    token: String
+  ) {
     val contentRoot = config.contentRoot?.removeSuffix("/") ?: ""
-    val fullPaths = paths.map { contentRoot + "/" + it.removePrefix("/") }
-    val body = mapOf("contentPaths" to fullPaths)
+    val body = mapOf("contentPaths" to listOf("$contentRoot/${contentDeliveryConfig.slug}/*"))
     executePurgeRequest(token, body, config)
   }
 
