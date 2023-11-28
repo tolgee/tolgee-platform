@@ -175,7 +175,7 @@ When null, resulting file will be a flat key-value object.
   @AllowApiAccess
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
-    securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
+    securityService.checkLanguageTranslatePermissionsByTag(dto.translations.keys, projectHolder.project.id)
 
     val modifiedTranslations = translationService.setForKey(key, dto.translations)
 

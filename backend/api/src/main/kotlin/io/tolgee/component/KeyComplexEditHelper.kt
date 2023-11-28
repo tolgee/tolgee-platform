@@ -2,12 +2,16 @@ package io.tolgee.component
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyWithDataModel
 import io.tolgee.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
@@ -40,14 +44,30 @@ class KeyComplexEditHelper(
     applicationContext.getBean(PlatformTransactionManager::class.java)
 
   private lateinit var key: Key
-  private var modifiedTranslations: Map<String, String?>? = null
+  private var modifiedTranslations: Map<Long, String?>? = null
+  private var modifiedStates: Map<Long, TranslationState>? = mapOf()
   private val dtoTags = dto.tags
 
   private var areTranslationsModified by Delegates.notNull<Boolean>()
+  private var areStatesModified by Delegates.notNull<Boolean>()
   private var areTagsModified by Delegates.notNull<Boolean>()
   private var isKeyModified by Delegates.notNull<Boolean>()
   private var isScreenshotDeleted by Delegates.notNull<Boolean>()
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
+
+  private val languages by lazy {
+    dto.translations?.keys?.let { dtoTranslations ->
+      languageService.findByTags(dtoTranslations, projectHolder.project.id)
+    } ?: setOf()
+  }
+
+  private val existingTranslations: MutableMap<String, Translation> by lazy {
+    translationService.getKeyTranslations(
+      languages,
+      projectHolder.projectEntity,
+      key
+    ).associateBy { it.language.tag }.toMutableMap()
+  }
 
   fun doComplexUpdate(): KeyWithDataModel {
     return executeInNewTransaction(transactionManager = transactionManager) {
@@ -57,8 +77,34 @@ class KeyComplexEditHelper(
 
       if (modifiedTranslations != null && areTranslationsModified) {
         projectHolder.projectEntity.checkTranslationsEditPermission()
-        securityService.checkLanguageTagPermissions(modifiedTranslations!!.keys, projectHolder.project.id)
-        translationService.setForKey(key, translations = modifiedTranslations!!)
+        securityService.checkLanguageTranslatePermissionsByLanguageId(
+          modifiedTranslations!!.keys,
+          projectHolder.project.id
+        )
+        val translations = translationService.setForKey(
+          key,
+          oldTranslations = existingTranslations.map { languageByTag(it.key) to it.value.text }.toMap(),
+          translations = modifiedTranslations!!.map { languageById(it.key) to it.value }.toMap()
+        )
+
+        translations.forEach {
+          if (existingTranslations[it.key.tag] == null) {
+            existingTranslations[it.key.tag] = it.value
+          }
+        }
+      }
+
+      if (areStatesModified) {
+        securityService.checkLanguageChangeStatePermissionsByLanguageId(modifiedStates!!.keys, projectHolder.project.id)
+        translationService.setStateBatch(
+          states = modifiedStates!!.map {
+            val translation = existingTranslations[languageById(it.key).tag] ?: throw NotFoundException(
+              Message.TRANSLATION_NOT_FOUND
+            )
+
+            translation to it.value
+          }.toMap()
+        )
       }
 
       if (dtoTags !== null && areTagsModified) {
@@ -127,11 +173,13 @@ class KeyComplexEditHelper(
   private fun prepareData() {
     key = keyService.get(keyId)
     key.checkInProject()
-    modifiedTranslations = dto.translations?.let { dtoTranslations -> filterModifiedOnly(dtoTranslations, key) }
+    prepareModifiedTranslations()
+    prepareModifiedStates()
   }
 
   private fun prepareConditions() {
     areTranslationsModified = !modifiedTranslations.isNullOrEmpty()
+    areStatesModified = !modifiedStates.isNullOrEmpty()
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
     isKeyModified = key.name != dto.name || getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
@@ -149,18 +197,22 @@ class KeyComplexEditHelper(
     return !currentTagsContainAllNewTags || !newTagsContainAllCurrentTags
   }
 
-  private fun filterModifiedOnly(
-    dtoTranslations: Map<String, String?>,
-    key: Key?
-  ): Map<String, String?> {
-    val languages = languageService.findByTags(dtoTranslations.keys, projectHolder.project.id)
-    val existingTranslations = translationService.getKeyTranslations(
-      languages,
-      projectHolder.projectEntity,
-      key
-    ).associate { it.language.tag to it.text }
+  private fun prepareModifiedTranslations() {
+    modifiedTranslations = dto.translations?.filter { it.value != existingTranslations[it.key]?.text }
+      ?.mapKeys { languageByTag(it.key).id }
+  }
 
-    return dtoTranslations.filter { it.value != existingTranslations[it.key] }
+  private fun prepareModifiedStates() {
+    modifiedStates = dto.states?.filter { it.value.translationState != existingTranslations[it.key]?.state }
+      ?.map { languageByTag(it.key).id to it.value.translationState }?.toMap()
+  }
+
+  private fun languageByTag(tag: String): io.tolgee.model.Language {
+    return languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  private fun languageById(id: Long): io.tolgee.model.Language {
+    return languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
   private fun updateScreenshotsWithPermissionCheck(dto: ComplexEditKeyDto, key: Key) {
