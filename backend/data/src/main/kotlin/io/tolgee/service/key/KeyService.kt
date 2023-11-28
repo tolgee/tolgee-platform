@@ -91,12 +91,18 @@ class KeyService(
   @Transactional
   fun create(project: Project, dto: CreateKeyDto): Key {
     val key = create(project, dto.name, dto.namespace)
-    dto.translations?.let {
+    val created = dto.translations?.let {
       if (it.isEmpty()) {
-        return@let
+        return@let null
       }
       translationService.setForKey(key, it)
     }
+
+    dto.states?.map {
+      val translation = created?.get(it.key)
+        ?: throw BadRequestException(Message.CANNOT_SET_STATE_FOR_MISSING_TRANSLATION)
+      translation to it.value.translationState
+    }?.toMap()?.let { translationService.setStateBatch(it) }
 
     dto.tags?.forEach {
       tagService.tagKey(key, it)

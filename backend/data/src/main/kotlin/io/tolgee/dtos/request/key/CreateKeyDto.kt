@@ -3,6 +3,7 @@ package io.tolgee.dtos.request.key
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.util.getSafeNamespace
 import org.hibernate.validator.constraints.Length
 import org.springframework.validation.annotation.Validated
@@ -24,6 +25,9 @@ class CreateKeyDto(
   var namespace: String? = null,
 
   val translations: Map<String, String?>? = null,
+
+  @Schema(description = "Translation states to update, if not provided states won't be modified")
+  val states: Map<String, AssignableTranslationState>? = null,
 
   val tags: List<String>? = null,
 

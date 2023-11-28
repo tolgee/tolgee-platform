@@ -194,7 +194,7 @@ class SecurityService(
     this.checkLanguageTranslatePermission(projectId, languageIds)
   }
 
-  fun checkLanguageStateChangePermissionsByTag(tags: Collection<String>, projectId: Long) {
+  fun checkLanguageStateChangePermissionsByTag(projectId: Long, tags: Collection<String>) {
     val languages = languageService.findByTags(tags, projectId)
     this.checkLanguageStateChangePermission(projectId, languages.map { it.id })
   }
