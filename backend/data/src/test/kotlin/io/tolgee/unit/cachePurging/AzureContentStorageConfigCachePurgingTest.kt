@@ -4,7 +4,9 @@ import com.azure.identity.ClientSecretCredential
 import io.tolgee.component.contentDelivery.cachePurging.AzureContentDeliveryCachePurging
 import io.tolgee.component.contentDelivery.cachePurging.AzureCredentialProvider
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.testing.assert
+import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -52,13 +54,19 @@ class AzureContentStorageConfigCachePurgingTest() {
     whenever(azureCredentialProviderMock.get(config)).thenReturn(credentialMck)
     whenever(credentialMck.getToken(any()).block().token).thenReturn("token")
 
-    purging.purgeForPaths(setOf("fake-path"))
+    val contentDeliveryConfig = mock<ContentDeliveryConfig>()
+    whenever(contentDeliveryConfig.slug).thenReturn("fake-slug")
+
+    purging.purgeForPaths(contentDeliveryConfig, setOf("fake-path"))
 
     val invocation = Mockito.mockingDetails(restTemplateMock).invocations.single()
     val url = invocation.arguments[0]
-    val headers = (invocation.arguments[2] as HttpEntity<*>).headers
+    val httpEntity = invocation.arguments[2] as HttpEntity<*>
+    val headers = httpEntity.headers
     headers["Authorization"].assert.isEqualTo(listOf("Bearer token"))
-
+    assertThatJson(httpEntity.body) {
+      node("contentPaths").isArray.containsExactly("/fake-content-root/fake-slug/*")
+    }
     url.assert.isEqualTo(
       "https://management.azure.com/subscriptions/${config.subscriptionId}" +
         "/resourceGroups/${config.resourceGroupName}" +
