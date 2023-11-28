@@ -1,3 +1,10 @@
+## [3.38.3](https://github.com/tolgee/tolgee-platform/compare/v3.38.2...v3.38.3) (2023-11-28)
+
+
+### Bug Fixes
+
+* CDN purging ([#2002](https://github.com/tolgee/tolgee-platform/issues/2002)) ([5f04aeb](https://github.com/tolgee/tolgee-platform/commit/5f04aebfbaeb286d3984e37dc71d2c44f102322b))
+
 ## [3.38.2](https://github.com/tolgee/tolgee-platform/compare/v3.38.1...v3.38.2) (2023-11-24)
 
 
