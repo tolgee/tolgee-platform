@@ -1,0 +1,69 @@
+# See https://www.gitpod.io/docs/introduction/languages/java
+
+image:
+  file: docker/gitpod.Dockerfile
+
+tasks:
+  - name: Build cache
+    openMode: tab-before
+    init: |
+      (
+        # Frontend cache
+        rm -f /workspace/.f
+        pushd webapp
+        npm ci
+        popd
+        touch /workspace/.f
+      ) &
+
+      # Backend cache
+      rm -f /workspace/.b
+      ./gradlew server-app:unpack
+      touch /workspace/.b
+
+  
+  - name: Backend
+    openMode: split-left
+    command: |
+      until test -e /workspace/.b; do sleep 1; done
+      ./gradlew server-app:bootRun --args='--spring.profiles.active=dev'
+
+  - name: Frontend
+    openMode: split-right
+    command: |
+      printf "\033[3J\033c\033[3J"
+
+      # Fix API server address for Gitpod VSCode Web
+      echo "REACT_APP_API_URL=$(gp url 8080)" > webapp/.env.local
+
+      until test -e /workspace/.f; do sleep 1; done
+      # Schedule auto-refresh for the webapp preview window after backend is fully up,
+      # as the webapp will probably have an error on the first render.
+      (
+        until curl -s -o /dev/null http://localhost:3000; do continue; done
+        echo "> GITPOD-INFO: Backend server might not be ready at port 8080 yet, expect error on webapp/frontend preview"
+        (while true; do sleep 1; echo -n .; done) &
+        gp ports await 8080 && kill $!
+        echo "> GITPOD-INFO: Refreshing webapp/frontend preview at port 3000"
+        gp preview "$(gp url 3000)"
+      ) &
+      cd webapp && BROWSER='' npm run start
+
+ports:
+  - name: Backend
+    port: 8080
+    visibility: public
+    onOpen: ignore
+  
+  - name: Frontend
+    port: 3000
+    visibility: public
+    onOpen: open-preview
+
+  - port: 15000-50000
+    onOpen: ignore
+    description: Misc.
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
