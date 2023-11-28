@@ -298,8 +298,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       )
     ).andIsForbidden
 
-
-    //this works, because TRANSLATED is the initial state, so we are not changing anytning
+    // this works, because TRANSLATED is the initial state, so we are not changing anytning
     performProjectAuthPost(
       "keys",
       CreateKeyDto(
