@@ -10,6 +10,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.util.Logging
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,18 +30,20 @@ class BigMetaController(
   private val bigMetaService: BigMetaService,
   private val projectHolder: ProjectHolder,
   private val keyWithBaseTranslationModelAssembler: KeyWithBaseTranslationModelAssembler,
-) {
+) : Logging {
   @PostMapping("/big-meta")
   @Operation(summary = "Stores a bigMeta for a project")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun store(@RequestBody @Valid data: BigMetaDto) {
-    bigMetaService.store(data, projectHolder.projectEntity)
+    logger.traceMeasureTime("BigMetaController.store") {
+      bigMetaService.store(data, projectHolder.projectEntity)
+    }
   }
 
   @GetMapping("/keys/{id}/big-meta")
   @Operation(summary = "Returns a bigMeta for given key")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getBigMeta(
     @PathVariable("id") id: Long

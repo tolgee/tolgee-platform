@@ -2652,7 +2652,7 @@
             SET is_initial_user = true
             WHERE id = (
                 SELECT id FROM user_account WHERE username != '___implicit_user' ORDER BY id LIMIT 1
-            );
+                );
         </sql>
     </changeSet>
     <changeSet author="cynthia" id="1693517732527-3">
@@ -2888,25 +2888,25 @@
     <changeSet author="jenik" id="1694597673945-1">
         <preConditions onFail="MARK_RAN">
             <and>
-            <sqlCheck expectedResult="false">
-                SELECT CASE
-                           WHEN EXISTS (SELECT 1
-                                        FROM information_schema.columns
-                                        WHERE table_name = 'batch_job_execution_params'
-                                          AND column_name = 'parameter_value')
-                           THEN 'true'
-                           ELSE 'false'
-                       END;
-            </sqlCheck>
-            <sqlCheck expectedResult="true">
-                SELECT CASE
-                            WHEN EXISTS (SELECT 1
-                                        FROM information_schema.columns
-                                        WHERE table_name = 'batch_job_execution_params')
-                            THEN 'true'
-                            ELSE 'false'
-                       END;
-            </sqlCheck>
+                <sqlCheck expectedResult="false">
+                    SELECT CASE
+                    WHEN EXISTS (SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'batch_job_execution_params'
+                    AND column_name = 'parameter_value')
+                    THEN 'true'
+                    ELSE 'false'
+                    END;
+                </sqlCheck>
+                <sqlCheck expectedResult="true">
+                    SELECT CASE
+                    WHEN EXISTS (SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'batch_job_execution_params')
+                    THEN 'true'
+                    ELSE 'false'
+                    END;
+                </sqlCheck>
             </and>
         </preConditions>
         <sql>
@@ -2957,5 +2957,15 @@
         <sql>
             CREATE INDEX import_deleted_at_null ON import((deleted_at IS NULL));
         </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1701253506661-1">
+        <createIndex indexName="IDX3vbfxy7bbtb4am22kbxdu8q01" tableName="keys_distance">
+            <column name="key2id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1701253506661-2">
+        <createIndex indexName="IDX9k594pjm6edcigab7mu2hq0s0" tableName="keys_distance">
+            <column name="key1id"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>
