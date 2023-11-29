@@ -44,14 +44,18 @@ class BigMetaService(
 
   @Transactional
   fun store(data: BigMetaDto, project: Project) {
-    storeRelatedKeysInOrder(data.relatedKeysInOrder, project)
+    store(data.relatedKeysInOrder, project)
   }
 
   @Transactional
-  fun storeRelatedKeysInOrder(
-    relatedKeysInOrder: MutableList<RelatedKeyDto>,
+  fun store(
+    relatedKeysInOrder: MutableList<RelatedKeyDto>?,
     project: Project
   ) {
+    if (relatedKeysInOrder.isNullOrEmpty()) {
+      return
+    }
+
     val distances =
       logger.traceMeasureTime("storeRelatedKeysInOrder -> get new distances") {
         KeysDistanceUtil(relatedKeysInOrder, project, this).newDistances

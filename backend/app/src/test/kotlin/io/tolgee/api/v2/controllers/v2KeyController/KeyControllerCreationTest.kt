@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
+import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
@@ -17,6 +18,7 @@ import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.ImageUploadService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -25,6 +27,7 @@ import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
@@ -35,6 +38,9 @@ import java.math.BigDecimal
 class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: KeysTestData
+
+  @Autowired
+  lateinit var bigMetaService: BigMetaService
 
   val screenshotFile: InputStreamSource by lazy {
     generateImage(2000, 3000)
@@ -230,6 +236,28 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         assertThat(position.y).isEqualTo(85)
         assertThat(position.width).isEqualTo(141)
         assertThat(position.height).isEqualTo(212)
+      }
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates key with big meta`() {
+    val keyName = "super_key"
+
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = keyName,
+        translations = mapOf("en" to "EN", "de" to "DE"),
+        relatedKeysInOrder = mutableListOf(
+          RelatedKeyDto(null, "first_key"),
+          RelatedKeyDto(null, "super_key")
+        )
+      )
+    ).andIsCreated.andAssertThatJson {
+      node("id").isNumber.satisfies { it ->
+        bigMetaService.getCloseKeyIds(it.toLong()).assert.hasSize(1)
       }
     }
   }
