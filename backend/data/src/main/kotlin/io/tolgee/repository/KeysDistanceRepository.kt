@@ -10,14 +10,16 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
-  @Query("""
+  @Query(
+    """
         from KeysDistance kd
         where kd.key1Id in (
             select kd2.key1Id from KeysDistance kd2 where kd2.key1Id in :data or kd2.key2Id in :data
         ) or kd.key2Id in (
             select kd3.key2Id from KeysDistance kd3 where kd3.key1Id in :data or kd3.key2Id in :data
         )
- """)
+ """
+  )
   fun findForKeyIdsWithRelations(data: Collection<Long>): List<KeysDistance>
 
   @Query(

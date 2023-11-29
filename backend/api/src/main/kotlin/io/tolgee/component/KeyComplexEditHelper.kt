@@ -45,7 +45,6 @@ class KeyComplexEditHelper(
     applicationContext.getBean(PlatformTransactionManager::class.java)
   private val bigMetaService = applicationContext.getBean(BigMetaService::class.java)
 
-
   private lateinit var key: Key
   private var modifiedTranslations: Map<Long, String?>? = null
   private var modifiedStates: Map<Long, TranslationState>? = mapOf()

@@ -42,7 +42,7 @@ data class ComplexEditKeyDto(
   val screenshotsToAdd: List<KeyScreenshotDto>? = null,
 
   override var relatedKeysInOrder: MutableList<RelatedKeyDto>? = null
-): WithRelatedKeysInOrder {
+) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {
     this.namespace = getSafeNamespace(namespace)

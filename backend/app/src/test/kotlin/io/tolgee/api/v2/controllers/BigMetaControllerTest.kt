@@ -72,7 +72,6 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
       storeLogOfBigMeta(keys, 500, 100)
     }
 
-
     logger.infoMeasureTime("it performs well time 3") {
       storeLogOfBigMeta(keys, 10, 200)
     }
