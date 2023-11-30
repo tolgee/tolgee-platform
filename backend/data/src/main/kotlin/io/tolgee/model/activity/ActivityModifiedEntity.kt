@@ -1,5 +1,6 @@
 package io.tolgee.model.activity
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
@@ -8,8 +9,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
 import jakarta.persistence.ManyToOne
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
+import org.hibernate.annotations.Type
 import java.io.Serializable
 
 /**
@@ -39,20 +39,20 @@ class ActivityModifiedEntity(
   /**
    * Map of field to object containing old and new values
    */
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   var modifications: MutableMap<String, PropertyModification> = mutableMapOf()
 
   /**
    * Data, which are discribing the entity, but are not modified by the change
    */
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   var describingData: Map<String, Any?>? = null
 
   /**
    * Relations describing the entity.
    * e.g. For translation, we would also need key and language data
    */
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   var describingRelations: Map<String, EntityDescriptionRef>? = null
 
   @Enumerated
