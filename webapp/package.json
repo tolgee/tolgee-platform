@@ -43,7 +43,7 @@
     "react-list": "^0.8.16",
     "react-markdown": "^8.0.4",
     "react-qr-code": "^2.0.7",
-    "react-query": "^3.39.2",
+    "react-query": "^4.0.0",
     "react-redux": "^7.2.6",
     "react-router-dom": "^5.2.0",
     "recharts": "2.1.9",
