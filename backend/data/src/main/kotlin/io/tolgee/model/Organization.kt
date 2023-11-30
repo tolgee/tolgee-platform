@@ -16,7 +16,6 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 
 @Entity
 @Table(

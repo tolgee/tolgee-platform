@@ -16,6 +16,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
@@ -43,11 +44,11 @@ class AzureContentStorageConfigCachePurgingTest() {
     val restTemplateMock: RestTemplate = mock()
     val azureCredentialProviderMock: AzureCredentialProvider = mock()
     val purging = AzureContentDeliveryCachePurging(config, restTemplateMock, azureCredentialProviderMock)
-    val responseMock: ResponseEntity<*> = Mockito.mock(ResponseEntity::class.java, Mockito.RETURNS_DEEP_STUBS)
+    val responseMock: ResponseEntity<*> = Mockito.mock(ResponseEntity::class.java)
     whenever(restTemplateMock.exchange(any<String>(), any<HttpMethod>(), any(), eq(String::class.java))).doAnswer {
       responseMock as ResponseEntity<String>
     }
-    whenever(responseMock.statusCode.is2xxSuccessful).thenReturn(true)
+    whenever(responseMock.statusCode).thenReturn(HttpStatusCode.valueOf(200))
 
     val credentialMck: ClientSecretCredential =
       Mockito.mock(ClientSecretCredential::class.java, Mockito.RETURNS_DEEP_STUBS)

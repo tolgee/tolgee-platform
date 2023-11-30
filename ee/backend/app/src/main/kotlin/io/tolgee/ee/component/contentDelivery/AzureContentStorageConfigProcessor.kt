@@ -7,8 +7,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.contentDelivery.AzureContentStorageConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.ContentStorageType
-import org.springframework.stereotype.Component
 import jakarta.persistence.EntityManager
+import org.springframework.stereotype.Component
 
 @Component
 class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureContentStorageConfig> {
