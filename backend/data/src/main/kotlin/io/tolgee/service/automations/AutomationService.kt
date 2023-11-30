@@ -17,8 +17,8 @@ import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
-import javax.transaction.Transactional
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 
 @Service
 class AutomationService(

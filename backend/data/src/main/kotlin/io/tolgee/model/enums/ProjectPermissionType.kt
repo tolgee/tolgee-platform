@@ -59,6 +59,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
   );
 
   companion object {
+    @OptIn(ExperimentalStdlibApi::class)
     fun getRoles(): Map<String, Array<Scope>> {
       val result = mutableMapOf<String, Array<Scope>>()
       entries.forEach { value -> result[value.name] = value.availableScopes }

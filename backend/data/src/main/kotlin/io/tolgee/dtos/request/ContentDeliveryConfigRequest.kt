@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.model.enums.TranslationState
-import javax.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotBlank
 
 class ContentDeliveryConfigRequest : IExportParams {
   @field:NotBlank

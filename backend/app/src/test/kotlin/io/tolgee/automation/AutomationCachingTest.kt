@@ -16,7 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
-import javax.persistence.EntityManager
+import jakarta.persistence.EntityManager
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest

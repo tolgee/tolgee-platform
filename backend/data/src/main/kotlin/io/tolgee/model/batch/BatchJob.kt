@@ -17,8 +17,6 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
 import java.util.*
 
 @Entity
@@ -68,7 +66,6 @@ class BatchJob : StandardAuditModel(), IBatchJob {
 
   var lastDebouncingEvent: Date? = null
 
-  @Type(type = "text")
   var debouncingKey: String? = null
 
   companion object {

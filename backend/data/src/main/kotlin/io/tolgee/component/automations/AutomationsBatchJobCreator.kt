@@ -12,7 +12,7 @@ import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.service.automations.AutomationService
 import org.springframework.stereotype.Component
 import java.time.Duration
-import javax.persistence.EntityManager
+import jakarta.persistence.EntityManager
 
 @Component
 class AutomationsBatchJobCreator(

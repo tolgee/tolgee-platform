@@ -1,8 +1,8 @@
 package io.tolgee.dtos.contentDelivery
 
 import io.tolgee.model.contentDelivery.AzureBlobConfig
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 class AzureContentStorageConfigDto : AzureBlobConfig {
   @field:Size(max = 255)

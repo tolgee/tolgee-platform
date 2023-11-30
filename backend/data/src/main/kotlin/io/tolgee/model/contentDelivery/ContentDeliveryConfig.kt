@@ -1,29 +1,24 @@
 package io.tolgee.model.contentDelivery
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.enums.TranslationState
-import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 
-@Entity()
+@Entity
 @Table(
   uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "slug"])]
-)
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
@@ -41,26 +36,26 @@ class ContentDeliveryConfig(
 
   var lastPublished: Date? = null
 
-  @Type(type = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
   override var languages: Set<String>? = null
 
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
 
-  @Type(type = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
   override var filterKeyId: List<Long>? = null
 
-  @Type(type = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
   override var filterKeyIdNot: List<Long>? = null
   override var filterTag: String? = null
   override var filterKeyPrefix: String? = null
 
-  @Type(type = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
   override var filterState: List<TranslationState>? = listOf(
     TranslationState.TRANSLATED,
     TranslationState.REVIEWED,
   )
 
-  @Type(type = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
   override var filterNamespace: List<String?>? = null
 }

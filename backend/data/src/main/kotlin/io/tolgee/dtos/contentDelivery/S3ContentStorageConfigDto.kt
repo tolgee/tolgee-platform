@@ -1,8 +1,8 @@
 package io.tolgee.dtos.contentDelivery
 
 import io.tolgee.model.contentDelivery.S3Config
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 class S3ContentStorageConfigDto : S3Config {
   @field:NotBlank

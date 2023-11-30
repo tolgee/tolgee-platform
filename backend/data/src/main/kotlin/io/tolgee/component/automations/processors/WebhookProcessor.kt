@@ -10,7 +10,7 @@ import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.security.ProjectHolder
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
+import jakarta.persistence.EntityManager
 
 @Component
 class WebhookProcessor(

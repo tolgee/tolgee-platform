@@ -4,11 +4,11 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.validation.constraints.NotBlank
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.validation.constraints.NotBlank
 
 @Entity
 class WebhookConfig(

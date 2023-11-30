@@ -8,7 +8,7 @@ import io.tolgee.model.contentDelivery.AzureContentStorageConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.ContentStorageType
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
+import jakarta.persistence.EntityManager
 
 @Component
 class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureContentStorageConfig> {
