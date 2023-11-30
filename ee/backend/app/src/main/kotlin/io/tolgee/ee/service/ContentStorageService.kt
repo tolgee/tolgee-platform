@@ -17,8 +17,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.io.Serializable
-import javax.persistence.EntityManager
-import javax.transaction.Transactional
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 
 @Service
 class ContentStorageService(
@@ -54,6 +54,7 @@ class ContentStorageService(
     return contentStorage
   }
 
+  @OptIn(ExperimentalStdlibApi::class)
   private fun clearOther(contentStorage: ContentStorage) {
     ContentStorageType.entries.toTypedArray().forEach {
       getProcessor(it).clearParentEntity(contentStorage, entityManager)

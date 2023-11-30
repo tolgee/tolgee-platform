@@ -17,8 +17,8 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
-import javax.transaction.Transactional
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 import kotlin.random.Random
 
 @Service

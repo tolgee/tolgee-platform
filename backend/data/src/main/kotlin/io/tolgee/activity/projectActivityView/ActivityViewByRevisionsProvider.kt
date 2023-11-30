@@ -19,11 +19,6 @@ import io.tolgee.util.EntityUtil
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
-import javax.persistence.EntityManager
-import javax.persistence.criteria.Predicate
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
 
 class ActivityViewByRevisionsProvider(
   private val applicationContext: ApplicationContext,

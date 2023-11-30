@@ -24,6 +24,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
+import org.apache.commons.codec.digest.DigestUtils.sha256Hex
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -32,7 +33,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
-import java.math.BigInteger
 import java.time.Duration
 import java.util.*
 

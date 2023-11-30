@@ -8,7 +8,7 @@ import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.ContentStorageType
 import io.tolgee.model.contentDelivery.S3ContentStorageConfig
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
+import jakarta.persistence.EntityManager
 
 @Component
 class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentStorageConfig> {
