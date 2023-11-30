@@ -3,12 +3,12 @@ package io.tolgee.model.webhook
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
-import java.util.*
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.NotBlank
+import java.util.*
 
 @Entity
 class WebhookConfig(

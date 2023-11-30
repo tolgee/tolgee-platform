@@ -13,12 +13,12 @@ import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.AutomationRepository
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import jakarta.persistence.EntityManager
-import jakarta.transaction.Transactional
 
 @Service
 class AutomationService(

@@ -8,6 +8,7 @@ import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.webhook.WebhookConfig
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -27,13 +28,6 @@ import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import io.tolgee.model.webhook.WebhookConfig
-import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.ParamDef
-import org.hibernate.annotations.SQLDelete
-import org.hibernate.annotations.Where
 import java.util.*
 
 @Entity
@@ -115,8 +109,8 @@ class Project(
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
-    this.organizationOwner = organizationOwner
-  }
+      this.organizationOwner = organizationOwner
+    }
 
   fun findLanguageOptional(tag: String): Optional<Language> {
     return languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()

@@ -10,10 +10,10 @@ import io.tolgee.model.Project
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.WebhookConfigRepository
 import io.tolgee.service.automations.AutomationService
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import jakarta.transaction.Transactional
 
 @Service
 class WebhookConfigService(

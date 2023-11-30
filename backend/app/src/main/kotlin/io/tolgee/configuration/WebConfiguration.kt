@@ -11,16 +11,13 @@ import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.servlet.MultipartConfigElement
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.CacheControl
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.unit.DataSize
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry

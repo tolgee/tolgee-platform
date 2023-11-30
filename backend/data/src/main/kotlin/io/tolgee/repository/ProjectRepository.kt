@@ -79,10 +79,12 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   )
   fun findAllByName(name: String): List<Project>
 
-  @Query("""
+  @Query(
+    """
     from Project p 
     where p.name = :name and p.organizationOwner = :organization and p.deletedAt is null
-  """)
+  """
+  )
   fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project>
 
   @Query(
