@@ -54,9 +54,8 @@ class ContentStorageService(
     return contentStorage
   }
 
-  @OptIn(ExperimentalStdlibApi::class)
   private fun clearOther(contentStorage: ContentStorage) {
-    ContentStorageType.entries.toTypedArray().forEach {
+    ContentStorageType.values().forEach {
       getProcessor(it).clearParentEntity(contentStorage, entityManager)
     }
   }

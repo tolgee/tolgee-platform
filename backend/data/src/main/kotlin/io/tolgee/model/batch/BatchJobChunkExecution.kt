@@ -1,5 +1,6 @@
 package io.tolgee.model.batch
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.constants.Message
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.activity.ActivityRevision
@@ -12,8 +13,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
+import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
@@ -33,7 +33,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   var chunkNumber: Int = 0
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   var successTargets: List<Any> = listOf()
 
   @Column(columnDefinition = "text")

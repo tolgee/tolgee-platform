@@ -1,5 +1,6 @@
 package io.tolgee.model.contentDelivery
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.model.Project
@@ -12,8 +13,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
+import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
@@ -36,26 +36,26 @@ class ContentDeliveryConfig(
 
   var lastPublished: Date? = null
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   override var languages: Set<String>? = null
 
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   override var filterKeyId: List<Long>? = null
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   override var filterKeyIdNot: List<Long>? = null
   override var filterTag: String? = null
   override var filterKeyPrefix: String? = null
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   override var filterState: List<TranslationState>? = listOf(
     TranslationState.TRANSLATED,
     TranslationState.REVIEWED,
   )
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType::class)
   override var filterNamespace: List<String?>? = null
 }
