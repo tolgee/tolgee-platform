@@ -2,6 +2,7 @@ package io.tolgee.service.project
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.BatchJobService
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -63,7 +64,8 @@ class ProjectService(
   @Lazy
   private val projectHolder: ProjectHolder,
   @Lazy
-  private val batchJobService: BatchJobService
+  private val batchJobService: BatchJobService,
+  private val currentDateProvider: CurrentDateProvider
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -208,10 +210,13 @@ class ProjectService(
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
   }
 
-  fun addPermittedLanguagesToProjects(projectsPage: Page<ProjectView>): Page<ProjectWithLanguagesView> {
+  private fun addPermittedLanguagesToProjects(
+    projectsPage: Page<ProjectView>,
+    userId: Long
+  ): Page<ProjectWithLanguagesView> {
     val projectLanguageMap = permissionService.getPermittedTranslateLanguagesForProjectIds(
       projectsPage.content.map { it.id },
-      authenticationFacade.authenticatedUser.id
+      userId
     )
     val newContent = projectsPage.content.map {
       ProjectWithLanguagesView.fromProjectView(it, projectLanguageMap[it.id])
@@ -223,6 +228,14 @@ class ProjectService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
+    val project = get(id)
+    project.deletedAt = currentDateProvider.date
+    save(project)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
+  fun hardDeleteProject(id: Long) {
     traceLogMeasureTime("deleteProject") {
       val project = get(id)
 
@@ -329,13 +342,27 @@ class ProjectService(
     search: String?,
     organizationId: Long? = null
   ): Page<ProjectWithLanguagesView> {
+    return findPermittedInOrganizationPaged(
+      pageable = pageable,
+      search = search,
+      organizationId = organizationId,
+      userAccountId = authenticationFacade.authenticatedUser.id
+    )
+  }
+
+  fun findPermittedInOrganizationPaged(
+    pageable: Pageable,
+    search: String?,
+    organizationId: Long? = null,
+    userAccountId: Long
+  ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages = projectRepository.findAllPermitted(
-      authenticationFacade.authenticatedUser.id,
+      userAccountId,
       pageable,
       search,
       organizationId
     )
-    return addPermittedLanguagesToProjects(withoutPermittedLanguages)
+    return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)

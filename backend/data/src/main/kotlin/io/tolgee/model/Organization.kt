@@ -15,6 +15,8 @@ import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.Filter
+import org.hibernate.annotations.FilterDef
 
 @Entity
 @Table(
@@ -48,6 +50,10 @@ class Organization(
   var memberRoles: MutableList<OrganizationRole> = mutableListOf()
 
   @OneToMany(mappedBy = "organizationOwner")
+  @field:Filter(
+    name = "deletedFilter",
+    condition = "(deleted_at IS NULL)"
+  )
   var projects: MutableList<Project> = mutableListOf()
 
   @OneToMany(mappedBy = "preferredOrganization")

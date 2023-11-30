@@ -2933,4 +2933,9 @@
             ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME STRING_VAL TO PARAMETER_VALUE;
         </sql>
     </changeSet>
+    <changeSet id="1693517732528-0" author="jenik">
+        <addColumn tableName="project">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
