@@ -1,6 +1,5 @@
 package io.tolgee.model.activity
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJob
@@ -22,7 +21,8 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -61,7 +61,7 @@ class ActivityRevision : java.io.Serializable {
    */
   var authorId: Long? = null
 
-  @Type(JsonBinaryType::class)
+  @JdbcTypeCode(SqlTypes.JSON)
   var meta: MutableMap<String, Any?>? = null
 
   @Enumerated(EnumType.STRING)

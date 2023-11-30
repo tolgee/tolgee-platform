@@ -1,6 +1,5 @@
 package io.tolgee.model.batch
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
@@ -15,18 +14,12 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.EnumType.STRING
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.Index
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
-import javax.persistence.Table
 
 @Entity
 @Table(name = "tolgee_batch_job")
@@ -37,7 +30,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   var author: UserAccount? = null
 
-  @Type(JsonBinaryType::class)
+  @JdbcTypeCode(SqlTypes.JSON)
   var target: List<Any> = listOf()
 
   var totalItems: Int = 0
@@ -55,7 +48,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
   var activityRevision: ActivityRevision? = null
 
-  @Type(JsonBinaryType::class)
+  @JdbcTypeCode(SqlTypes.JSON)
   var params: Any? = null
 
   val chunkedTarget get() = chunkTarget(chunkSize, target)
