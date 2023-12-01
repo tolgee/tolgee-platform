@@ -63,7 +63,7 @@ class ProjectsE2eDataController(
 
     userAccountRepository.saveAll(createdUsers.values)
 
-    organizations.forEach {
+    val createdOrganizations = organizations.map {
       val organization = Organization(
         name = it.name,
         slug = organizationService.generateSlug(it.name),
@@ -85,16 +85,19 @@ class ProjectsE2eDataController(
           organizationRoleService.grantMemberRoleToUser(user, organization)
         }
       }
+      organization
     }
 
     projects.forEach { projectData ->
-      val organizationOwner = organizationService.get(projectData.organizationOwner)
+      val organizationOwner = createdOrganizations.find {
+        it.name.lowercase().replace("[^A-Za-z0-9]".toRegex(), "-") == projectData.organizationOwner.lowercase()
+      }
 
       val project = projectRepository.save(
         Project(
           name = projectData.name,
           slug = projectService.generateSlug(projectData.name),
-          organizationOwner = organizationOwner
+          organizationOwner = organizationOwner!!
         )
       )
 
