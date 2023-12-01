@@ -284,11 +284,11 @@ class OrganizationService(
   }
 
   /**
-   * Checks address part uniqueness
+   * Checks slug uniqueness
    * @return Returns true if valid
    */
   fun validateSlugUniqueness(slug: String): Boolean {
-    return organizationRepository.countAllBySlug(slug) < 1
+    return !organizationRepository.organizationWithSlugExists(slug)
   }
 
   fun isThereAnotherOwner(id: Long): Boolean {
