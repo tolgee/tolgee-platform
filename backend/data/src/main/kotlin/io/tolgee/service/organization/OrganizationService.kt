@@ -1,5 +1,6 @@
 package io.tolgee.service.organization
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -32,7 +33,6 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
@@ -52,6 +52,7 @@ class OrganizationService(
   private val tolgeeProperties: TolgeeProperties,
   private val permissionService: PermissionService,
   private val cacheManager: CacheManager,
+  private val currentDateProvider: CurrentDateProvider
 ) : Logging {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
@@ -162,15 +163,15 @@ class OrganizationService(
   }
 
   fun get(id: Long): Organization {
-    return organizationRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    return organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
   fun find(id: Long): Organization? {
-    return organizationRepository.findByIdOrNull(id)
+    return organizationRepository.find(id)
   }
 
   fun get(slug: String): Organization {
-    return organizationRepository.findBySlug(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    return find(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
   fun find(slug: String): Organization? {
@@ -215,6 +216,12 @@ class OrganizationService(
     ]
   )
   fun delete(organization: Organization) {
+    organization.deletedAt = currentDateProvider.date
+    save(organization)
+  }
+
+  @Transactional
+  fun deleteHard(organization: Organization) {
     traceLogMeasureTime("deleteProjects") {
       projectService.findAllInOrganization(organization.id).forEach {
         projectService.deleteProject(it.id)

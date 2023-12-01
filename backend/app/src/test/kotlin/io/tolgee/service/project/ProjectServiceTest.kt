@@ -137,7 +137,7 @@ class ProjectServiceTest : AbstractSpringTest() {
       testData.generateVeryLotOfData()
       testDataService.saveTestData(testData.root)
       val start = System.currentTimeMillis()
-      projectService.deleteProject(testData.projectBuilder.self.id)
+      projectService.hardDeleteProject(testData.projectBuilder.self.id)
       entityManager.flush()
       entityManager.clear()
       val time = System.currentTimeMillis() - start
@@ -155,7 +155,7 @@ class ProjectServiceTest : AbstractSpringTest() {
       return@executeInNewTransaction testData
     }
     executeInNewTransaction(platformTransactionManager) {
-      projectService.deleteProject(testData.projectBuilder.self.id)
+      projectService.hardDeleteProject(testData.projectBuilder.self.id)
     }
   }
 
@@ -181,7 +181,7 @@ class ProjectServiceTest : AbstractSpringTest() {
     }
 
     executeInNewTransaction(platformTransactionManager) {
-      projectService.deleteProject(testData.projectBuilder.self.id)
+      projectService.hardDeleteProject(testData.projectBuilder.self.id)
     }
 
     executeInNewTransaction {
@@ -209,7 +209,7 @@ class ProjectServiceTest : AbstractSpringTest() {
       )
     }
     executeInNewTransaction(platformTransactionManager) {
-      projectService.deleteProject(testData.projectBuilder.self.id)
+      projectService.hardDeleteProject(testData.projectBuilder.self.id)
     }
   }
 
@@ -218,7 +218,7 @@ class ProjectServiceTest : AbstractSpringTest() {
     val testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
     executeInNewRepeatableTransaction(platformTransactionManager) {
-      projectService.deleteProject(testData.projectBuilder.self.id)
+      projectService.hardDeleteProject(testData.projectBuilder.self.id)
     }
   }
 
@@ -227,7 +227,7 @@ class ProjectServiceTest : AbstractSpringTest() {
     val testData = WebhooksTestData()
     testDataService.saveTestData(testData.root)
     executeInNewTransaction(platformTransactionManager) {
-      projectService.deleteProject(testData.projectBuilder.self.id)
+      projectService.hardDeleteProject(testData.projectBuilder.self.id)
     }
   }
 }

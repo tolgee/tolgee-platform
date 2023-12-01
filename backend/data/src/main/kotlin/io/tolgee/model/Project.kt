@@ -52,7 +52,7 @@ class Project(
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
-) : AuditModel(), ModelWithAvatar, EntityWithId {
+) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()
@@ -105,7 +105,7 @@ class Project(
   @OneToMany(orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
-  var deletedAt: Date? = null
+  override var deletedAt: Date? = null
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
