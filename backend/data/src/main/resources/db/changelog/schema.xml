@@ -2917,4 +2917,15 @@
             <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </addColumn>
     </changeSet>
+    <changeSet id="1693517732528-1" author="jenik">
+        <addColumn tableName="organization">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1693517732528-2" author="jenik">
+        <sql>
+            CREATE INDEX project_deleted_at_null ON project((deleted_at IS NULL));
+            CREATE INDEX organization_deleted_at_null ON organization((deleted_at IS NULL));
+        </sql>
+    </changeSet>
 </databaseChangeLog>

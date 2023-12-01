@@ -16,6 +16,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Filter
+import java.util.*
 
 @Entity
 @Table(
@@ -39,7 +40,7 @@ class Organization(
 
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null
-) : ModelWithAvatar, AuditModel() {
+) : ModelWithAvatar, AuditModel(), SoftDeletable {
 
   @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true)
   lateinit var basePermission: Permission
@@ -59,4 +60,6 @@ class Organization(
   var preferredBy: MutableList<UserPreferences> = mutableListOf()
 
   override var avatarHash: String? = null
+
+  override var deletedAt: Date? = null
 }
