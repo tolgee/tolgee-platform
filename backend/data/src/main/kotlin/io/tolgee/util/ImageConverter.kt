@@ -24,13 +24,13 @@ class ImageConverter(
     Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
 
-  fun getImage(compressionQuality: Float = 0.5f, targetDimension: Dimension? = null): ByteArrayOutputStream {
+  fun getImage(compressionQuality: Float = 0.8f, targetDimension: Dimension? = null): ByteArrayOutputStream {
     val resultingTargetDimension = targetDimension ?: this.targetDimension
     val resizedImage = getScaledImage(resultingTargetDimension)
     return writeImage(resizedImage, compressionQuality)
   }
 
-  fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
+  fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.8f): ByteArrayOutputStream {
     val originalWidth = sourceBufferedImage.width
     val originalHeight = sourceBufferedImage.height
     val newWidth: Int
@@ -71,12 +71,6 @@ class ImageConverter(
   }
 
   private fun getScaledImage(targetDimension: Dimension): BufferedImage {
-//    return sourceBufferedImage.getScaledInstance(
-//      targetDimension.width,
-//      targetDimension.height,
-//      Image.SCALE_SMOOTH
-//    )
-
     val resized = BufferedImage(targetDimension.width, targetDimension.height, sourceBufferedImage.type)
     val g = resized.createGraphics()
     g.setRenderingHint(
