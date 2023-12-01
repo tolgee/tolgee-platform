@@ -46,7 +46,6 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
@@ -110,7 +109,7 @@ class ProjectService(
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun findDto(id: Long): ProjectDto? {
-    return projectRepository.findById(id).orElse(null)?.let {
+    return projectRepository.find(id)?.let {
       ProjectDto.fromEntity(it)
     }
   }
@@ -122,11 +121,11 @@ class ProjectService(
   }
 
   fun get(id: Long): Project {
-    return projectRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    return find(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
   }
 
   fun find(id: Long): Project? {
-    return projectRepository.findByIdOrNull(id)
+    return projectRepository.find(id)
   }
 
   @Transactional
