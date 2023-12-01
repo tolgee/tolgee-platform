@@ -114,4 +114,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   """
   )
   fun getProjectsWithDirectPermissions(organizationId: Long, userIds: List<Long>): List<Array<Any>>
+
+  @Query(
+    """
+    from Project where id = :id and deletedAt is null
+  """
+  )
+  fun find(id: Long): Project?
 }

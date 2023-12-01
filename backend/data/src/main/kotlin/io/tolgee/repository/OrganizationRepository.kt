@@ -96,7 +96,6 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   @Query(
     """
-    select count(o)
     from Organization o
     where o.name = :name and o.deletedAt is null
   """
