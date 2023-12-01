@@ -109,9 +109,9 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     project.organizationOwner = Organization()
     whenever(projectRepository.findById(project.id)).then { Optional.of(project) }
     projectService.findDto(project.id)
-    Mockito.verify(projectRepository, times(1)).findById(project.id)
+    Mockito.verify(projectRepository, times(1)).find(project.id)
     projectService.findDto(project.id)
-    Mockito.verify(projectRepository, times(1)).findById(project.id)
+    Mockito.verify(projectRepository, times(1)).find(project.id)
   }
 
   @Test

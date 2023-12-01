@@ -87,12 +87,12 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   @Query(
     """
-    select count(o)
+    select count(o) > 0
     from Organization o
-    where o.slug = :slug and o.deletedAt is null
+    where o.slug = :slug
   """
   )
-  fun countAllBySlug(slug: String): Long
+  fun organizationWithSlugExists(slug: String): Boolean
 
   @Query(
     """
