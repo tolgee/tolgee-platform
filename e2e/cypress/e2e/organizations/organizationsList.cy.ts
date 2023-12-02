@@ -47,7 +47,7 @@ describe('Organization List', () => {
       cy.get('input').type('What a nice organization')
     );
     gcy('organization-address-part-field').within(() =>
-      cy.get('input').should('contain.text', 'what-a-nice-organization')
+      cy.get('input').should('contain.value', 'what-a-nice-organization')
     );
     clickGlobalSave();
     assertMessage('Organization created');

@@ -10,6 +10,7 @@ import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -266,13 +267,18 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Test
   fun `debounces job`() {
     currentDateProvider.forcedDate = currentDateProvider.date
+    val startTie = currentDateProvider.date
+
     util.makeAutomationChunkProcessorPass()
     val firstJobId = util.runDebouncedJob().id
 
     repeat(2) {
+      Thread.sleep(500)
       util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
     }
     currentDateProvider.move(Duration.ofSeconds(5))
+
+    Thread.sleep(500)
     repeat(2) {
       util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
     }
@@ -285,6 +291,12 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     // test it debounces for max time (10 sec * 4 = 40)
     repeat(7) {
       currentDateProvider.move(Duration.ofSeconds(5))
+      logger.info(
+        "Time: ${currentDateProvider.date.time} " +
+          "Time offset: ${currentDateProvider.date.time - startTie.time}"
+      )
+      // give the other thread time to run
+      Thread.sleep(200)
       util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
     }
 
