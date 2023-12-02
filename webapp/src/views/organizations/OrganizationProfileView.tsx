@@ -45,11 +45,13 @@ export const OrganizationProfileView: FunctionComponent = () => {
   const editOrganization = useApiMutation({
     url: '/v2/organizations/{id}',
     method: 'put',
+    invalidatePrefix: '/v2/organizations',
   });
 
   const deleteOrganization = useApiMutation({
     url: '/v2/organizations/{id}',
     method: 'delete',
+    invalidatePrefix: '/v2/organizations',
   });
 
   const isAdmin = useIsAdmin();
