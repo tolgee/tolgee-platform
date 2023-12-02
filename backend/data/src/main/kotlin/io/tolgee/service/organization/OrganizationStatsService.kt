@@ -40,12 +40,12 @@ class OrganizationStatsService(
           from (select p.id as projectId, count(l.id) as languageCount
                 from project as p
                          join language as l on l.project_id = p.id
-                where p.organization_owner_id = :organizationId and p.deletedAt is null
+                where p.organization_owner_id = :organizationId and p.deleted_at is null
                 group by p.id) as languageCounts
                    join (select p.id as projectId, count(k.id) as keyCount
                          from project as p
                                   join key as k on k.project_id = p.id
-                         where p.organization_owner_id = :organizationId and p.deletedAt is null
+                         where p.organization_owner_id = :organizationId and p.deleted_at is null
                          group by p.id) as keyCounts on keyCounts.projectId = languageCounts.projectId)
       """.trimIndent()
     ).setParameter("organizationId", organizationId).singleResult as BigDecimal? ?: 0
