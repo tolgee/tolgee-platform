@@ -34,12 +34,10 @@ class ProjectTransferringTestData {
       addOrganization {
         name = "Not owned organization"
         notOwnedOrganization = this
-        slug = "not-owned-organization"
       }
 
       addOrganization {
         name = "Another organization"
-        slug = "another-organization"
         anotherOrganization = this
       }.build {
         addRole {
@@ -51,7 +49,6 @@ class ProjectTransferringTestData {
       addOrganization {
         name = "Owned organization"
         organization = this
-        slug = "owned-organization"
       }.build organizationBuilder@{
         addRole {
           type = OrganizationRoleType.OWNER

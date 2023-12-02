@@ -38,16 +38,17 @@ class OrganizationE2eDataController(
       )
     }
 
-    data.forEach {
-      val organization = organizationService.find(it.dto.slug!!)
-      it.members.forEach { memberUserName ->
-        val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
-        organizationRoleService.grantMemberRoleToUser(user, organization!!)
-      }
+    data.forEach { dataItem ->
+      organizationService.findAllByName(dataItem.dto.name).forEach { organization ->
+        dataItem.members.forEach { memberUserName ->
+          val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
+          organizationRoleService.grantMemberRoleToUser(user, organization)
+        }
 
-      it.otherOwners.forEach { memberUserName ->
-        val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
-        organizationRoleService.grantOwnerRoleToUser(user, organization!!)
+        dataItem.otherOwners.forEach { memberUserName ->
+          val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
+          organizationRoleService.grantOwnerRoleToUser(user, organization)
+        }
       }
     }
   }
@@ -57,17 +58,17 @@ class OrganizationE2eDataController(
     traceLogMeasureTime("cleanupOrganizations") {
       executeInNewRepeatableTransaction(transactionManager) {
         traceLogMeasureTime("delete what-a-nice-organization") {
-          organizationService.find("what-a-nice-organization")?.let {
+          organizationService.findAllByName("What a nice organization").forEach {
             organizationService.delete(it)
           }
         }
         data.forEach {
           traceLogMeasureTime("delete organization ${it.dto.slug}") {
-            val org =
+            val orgs =
               traceLogMeasureTime("find organization") {
-                organizationService.find(it.dto.slug!!)
+                organizationService.findAllByName(it.dto.name)
               }
-            org?.let { organization ->
+            orgs.forEach { organization ->
               traceLogMeasureTime("delete organization") {
                 organizationService.delete(organization)
               }
@@ -103,7 +104,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Google",
           description = "An organization made by google company",
-          slug = "google"
         ),
         owner = UserData("admin")
       ),
@@ -111,7 +111,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Netsuite",
           description = "A system for everything",
-          slug = "netsuite"
         ),
         owner = UserData("evan@netsuite.com", "Evan Goldberg")
       ),
@@ -119,7 +118,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Microsoft",
           description = "A first software company ever or something like that.",
-          slug = "microsoft"
         ),
         owner = UserData("gates@microsoft.com", "Bill Gates"),
         members = mutableListOf("admin")
@@ -128,7 +126,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Tolgee",
           description = "This is us",
-          slug = "tolgee"
         ),
         owner = UserData("admin"),
         otherOwners = mutableListOf("evan@netsuite.com"),
@@ -142,7 +139,6 @@ class OrganizationE2eDataController(
                             |They also develop amazing things like react and other open source stuff.
                             |However, they sell our data to companies.
                         """.trimMargin(),
-          slug = "facebook"
         ),
         owner = UserData("cukrberg@facebook.com", "Mark Cukrberg"),
         otherOwners = mutableListOf("admin")
@@ -151,7 +147,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Unknown company",
           description = "We are very unknown.",
-          slug = "unknown-company"
         ),
         owner = UserData("admin")
       ),
@@ -159,7 +154,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Techfides solutions s.r.o",
           description = "Lets develop the future",
-          slug = "techfides-solutions"
 
         ),
         owner = UserData("admin")
@@ -174,13 +168,12 @@ class OrganizationE2eDataController(
             dto = OrganizationDto(
               name = "ZZZ Cool company $number",
               description = "We are Z Cool company $number. What a nice day!",
-              slug = "zzz-cool-company-$number"
             ),
             otherOwners = mutableListOf("admin"),
             owner = UserData(email),
           )
         )
-        data.find { item -> item.dto.slug == "facebook" }!!.otherOwners.add(email)
+        data.find { item -> item.dto.name == "Facebook" }!!.otherOwners.add(email)
       }
     }
   }
