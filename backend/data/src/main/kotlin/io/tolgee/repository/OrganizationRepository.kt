@@ -28,7 +28,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
         join fetch o.basePermission as bp
         left join OrganizationRole r on r.user.id = :userId
           and r.organization = o and (r.type = :roleType or :roleType is null)
-        left join o.projects p
+        left join o.projects p on p.deletedAt is null
         left join p.permissions perm on perm.user.id = :userId
         where (perm is not null or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
@@ -39,7 +39,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
         from Organization o 
         left join OrganizationRole r on r.user.id = :userId
           and r.organization = o and (r.type = :roleType or :roleType is null)
-        left join o.projects p
+        left join o.projects p on p.deletedAt is null
         left join p.permissions perm on perm.user.id = :userId
         where (perm is not null or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
@@ -60,7 +60,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     from Organization o
     left join fetch o.basePermission bp
     left join o.memberRoles mr on mr.user.id = :userId
-    left join o.projects p
+    left join o.projects p on p.deletedAt is null
     left join p.permissions perm on perm.user.id = :userId
     where (perm is not null or mr is not null) and o.id <> :exceptOrganizationId and o.deletedAt is null
     group by mr.id, o.id, bp.id
@@ -78,7 +78,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     select count(o) > 0
     from Organization o
     left join o.memberRoles mr on mr.user.id = :userId
-    left join o.projects p
+    left join o.projects p on p.deletedAt is null
     left join p.permissions perm on perm.user.id = :userId
     where (perm is not null or mr is not null) and o.id = :organizationId and o.deletedAt is null
   """
@@ -147,7 +147,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   @Query(
     """
     from Organization o 
-    join o.projects p on p.id = :projectId
+    join o.projects p on p.id = :projectId and p.deletedAt is null
     join fetch o.basePermission
     where o.deletedAt is null
   """

@@ -10,11 +10,19 @@ import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
 describe('Organization Members', () => {
+  let organizationData: Record<string, { slug: string }>;
+
   beforeEach(() => {
     login();
     organizationTestData.clean();
-    organizationTestData.generate();
-    visit();
+    organizationTestData
+      .generate()
+      .then((res) => {
+        return (organizationData = res.body as any);
+      })
+      .then(() => {
+        visit('Tolgee');
+      });
   });
 
   afterEach(() => {
@@ -91,7 +99,7 @@ describe('Organization Members', () => {
   });
 
   it('Paginates', () => {
-    cy.visit(`${HOST}/organizations/facebook/members`);
+    visit('Facebook');
     gcy('global-paginated-list').contains('Cukrberg').should('be.visible');
     gcy('global-paginated-list')
       .contains('owner@zzzcool16.com')
@@ -102,8 +110,9 @@ describe('Organization Members', () => {
       .should('be.visible');
   });
 
-  const visit = () => {
-    cy.visit(`${HOST}/organizations/tolgee/members`);
+  const visit = (name: string) => {
+    const slug = organizationData[name].slug;
+    cy.visit(`${HOST}/organizations/${slug}/members`);
   };
 
   const setGoldbergMember = () => {

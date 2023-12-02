@@ -30,9 +30,9 @@ class OrganizationE2eDataController(
 ) : Logging {
   @GetMapping(value = ["/generate"])
   @Transactional
-  fun createOrganizations() {
-    data.forEach {
-      val organization = organizationService.create(
+  fun createOrganizations(): Map<String, Map<String, String>> {
+    val organizations = data.map {
+      organizationService.create(
         it.dto,
         this.dbPopulatorReal.createUserIfNotExists(it.owner.email, null, it.owner.name)
       )
@@ -51,6 +51,7 @@ class OrganizationE2eDataController(
         }
       }
     }
+    return organizations.map { it.name to mapOf("slug" to it.slug) }.toMap()
   }
 
   @GetMapping(value = ["/clean"])
