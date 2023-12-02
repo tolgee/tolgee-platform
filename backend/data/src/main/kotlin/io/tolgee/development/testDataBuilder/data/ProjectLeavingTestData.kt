@@ -43,13 +43,11 @@ class ProjectLeavingTestData : BaseTestData() {
       addOrganization {
         name = "Not owned organization"
         notOwnedOrganization = this
-        slug = "not-owned-organization"
       }
 
       addOrganization {
         name = "Owned organization"
         organization = this
-        slug = "owned-organization"
       }.apply {
         addRole {
           type = OrganizationRoleType.OWNER
