@@ -237,11 +237,20 @@ class BatchJobConcurrentLauncher(
     val debounceDuration = dto.debounceDurationInMs ?: return true
     val executeAfter = lastEventTime + debounceDuration
     if (executeAfter <= currentDateProvider.date.time) {
+      logger.debug(
+        "Debouncing duration reached for job ${dto.id}, " +
+          "execute after $executeAfter, " +
+          "now ${currentDateProvider.date.time}"
+      )
       return true
     }
     val createdAt = dto.createdAt ?: return true
     val debounceMaxWaitTimeInMs = dto.debounceMaxWaitTimeInMs ?: return true
-    return createdAt + debounceMaxWaitTimeInMs <= currentDateProvider.date.time
+    val maxTimeReached = createdAt + debounceMaxWaitTimeInMs <= currentDateProvider.date.time
+    if (maxTimeReached) {
+      logger.debug("Debouncing max wait time reached for job ${dto.id}")
+    }
+    return maxTimeReached
   }
 
   private fun canRunJobWithCharacter(character: JobCharacter): Boolean {
@@ -257,7 +266,8 @@ class BatchJobConcurrentLauncher(
 
   private fun ExecutionQueueItem.trySetRunningState(): Boolean {
     return progressManager.trySetExecutionRunning(this.chunkExecutionId, this.jobId) {
-      val count = it.values.count { executionState -> executionState.status == BatchJobChunkExecutionStatus.RUNNING }
+      val count =
+        it.values.count { executionState -> executionState.status == BatchJobChunkExecutionStatus.RUNNING }
       if (count == 0) {
         return@trySetExecutionRunning true
       }
