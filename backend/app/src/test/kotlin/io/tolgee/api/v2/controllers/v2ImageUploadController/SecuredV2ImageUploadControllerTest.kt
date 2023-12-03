@@ -4,11 +4,17 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfies
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -16,7 +22,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
 import java.time.Duration
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextRecreatingTest

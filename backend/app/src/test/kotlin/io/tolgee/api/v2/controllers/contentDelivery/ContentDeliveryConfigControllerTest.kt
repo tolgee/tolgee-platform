@@ -19,6 +19,7 @@ import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.testing.satisfies
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

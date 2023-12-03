@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfies
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -72,7 +73,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
       node("id").asNumber().satisfies {
         projectService.get(it.toLong()).let {
-          assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
+          assertThat(it.organizationOwner.id).isEqualTo(organization.id)
         }
       }
     }

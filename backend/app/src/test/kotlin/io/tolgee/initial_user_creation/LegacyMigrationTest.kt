@@ -16,7 +16,10 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.security.SecurityService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.junit.jupiter.api.*
+import io.tolgee.testing.satisfies
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional

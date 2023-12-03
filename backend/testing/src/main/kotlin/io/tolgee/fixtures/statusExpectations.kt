@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.ErrorResponseAssert
 import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -77,14 +78,14 @@ fun ResultActions.tryPrettyPrinting(fn: ResultActions.() -> ResultActions): Resu
   }
 }
 
-val ResultActions.andGetContentAsString
+val ResultActions.andGetContentAsString: String
   get() = this.andReturn().response.getContentAsString(StandardCharsets.UTF_8)
 
 val ResultActions.andGetContentAsJsonMap
   @Suppress("UNCHECKED_CAST")
   get() = jacksonObjectMapper().readValue(andGetContentAsString, MutableMap::class.java) as MutableMap<String, Any?>
 
-val ResultActions.andAssertError
+val ResultActions.andAssertError: ErrorResponseAssert
   get() = assertThat(this.andReturn()).error()
 
 val ResultActions.andPrettyPrint: ResultActions
