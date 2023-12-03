@@ -16,14 +16,10 @@
 
 package io.tolgee.model
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.activity.ActivityModifiedEntity
-import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.notifications.NotificationType
 import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
 import org.hibernate.annotations.UpdateTimestamp
 import java.util.*
 import javax.persistence.Column
@@ -44,17 +40,12 @@ import javax.persistence.Temporal
 import javax.persistence.TemporalType
 
 @Entity
-@TypeDefs(
-  value = [
-    TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
-  ]
-)
-class Notification(
+class UserNotification(
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   val type: NotificationType,
 
-  // This data is very likely to be useless: lazy
+  // This data is very likely to be useless when consuming the entity: lazy
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   val recipient: UserAccount,
@@ -66,20 +57,12 @@ class Notification(
 
   // We most definitely need this to show the notification: eager
   @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "notification_activity_revisions")
-  val activityRevisions: MutableSet<ActivityRevision> = mutableSetOf(),
-
-  // We most definitely need this to show the notification: eager
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "notification_activity_modified_entities")
-  val activityModifiedEntities: MutableSet<ActivityModifiedEntity> = mutableSetOf(),
+  @JoinTable(name = "user_notification_modified_entities")
+  val modifiedEntities: MutableSet<ActivityModifiedEntity> = mutableSetOf(),
 
   // We most definitely need this to show the notification: eager
   @ManyToOne(fetch = FetchType.EAGER)
-  val batchJob: BatchJob? = null,
-
-  @Type(type = "jsonb")
-  val meta: MutableMap<String, Any?>
+  val batchJob: BatchJob? = null
 ) {
   @Id
   @SequenceGenerator(name = "notification_seq", sequenceName = "sequence_notifications")
@@ -97,9 +80,4 @@ class Notification(
   @UpdateTimestamp
   @Temporal(TemporalType.TIMESTAMP)
   val lastUpdated: Date = Date()
-
-  enum class NotificationType {
-    ACTIVITY,
-    BATCH_JOB_FAILURE,
-  }
 }

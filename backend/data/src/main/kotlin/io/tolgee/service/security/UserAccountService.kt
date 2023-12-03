@@ -19,7 +19,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
-import io.tolgee.model.views.UserAccountProjectPermissionDataView
+import io.tolgee.model.views.UserAccountProjectNotificationDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
@@ -304,7 +304,7 @@ class UserAccountService(
 
   fun getAllPermissionInformationOfPermittedUsersInProject(
     projectId: Long
-  ): List<UserAccountProjectPermissionDataView> {
+  ): List<UserAccountProjectNotificationDataView> {
     return userAccountRepository.findAllPermittedUsersProjectPermissionView(projectId)
   }
 

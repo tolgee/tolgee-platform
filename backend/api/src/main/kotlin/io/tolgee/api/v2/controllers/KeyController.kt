@@ -107,7 +107,7 @@ class KeyController(
   }
 
   @PutMapping(value = ["/{id}/complex-update"])
-  @Operation(summary = "More")
+  @Operation(summary = "Performs more complex updates on multiple key properties and its translations at once")
   @UseDefaultPermissions // Security: key permissions are checked separately in method body
   @AllowApiAccess
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {

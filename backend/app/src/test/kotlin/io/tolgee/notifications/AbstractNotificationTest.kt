@@ -16,7 +16,8 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.repository.NotificationsRepository
+import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.repository.UserNotificationRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.addMilliseconds
@@ -34,19 +35,23 @@ import java.util.concurrent.TimeUnit
 
 abstract class AbstractNotificationTest : AuthorizedControllerTest() {
   @Autowired
-  lateinit var notificationService: NotificationService
+  lateinit var userNotificationService: UserNotificationService
 
   @Autowired
   lateinit var taskScheduler: TaskScheduler
 
   @SpyBean
   @Autowired
-  lateinit var notificationsRepository: NotificationsRepository
+  lateinit var userNotificationRepository: UserNotificationRepository
+  lateinit var testData: NotificationsTestData
 
   lateinit var semaphore: Semaphore
 
   @BeforeEach
-  fun setupWatcher() {
+  fun setupTests() {
+    testData = NotificationsTestData()
+    testDataService.saveTestData(testData.root)
+
     semaphore = Semaphore(0)
 
     doAnswer {
@@ -63,22 +68,39 @@ abstract class AbstractNotificationTest : AuthorizedControllerTest() {
       )
 
       it.arguments[0]
-    }.`when`(notificationsRepository).save(any())
+    }.`when`(userNotificationRepository).save(any())
+
+    doAnswer {
+      val list = it.arguments[0] as List<*>
+      for (entity in list) entityManager.persist(entity)
+      entityManager.flush()
+
+      for (entity in it.arguments[0] as List<*>) entityManager.refresh(entity)
+
+      // Wait a bit to make sure everything's *actually* persisted
+      // Kind of an ugly way to synchronize everything, but it is what it is
+      taskScheduler.schedule(
+        { semaphore.release(list.size) },
+        Date().addMilliseconds(100)
+      )
+
+      it.arguments[0]
+    }.`when`(userNotificationRepository).saveAll(Mockito.anyList())
   }
 
   @AfterEach
   fun clearWatcher() {
-    Mockito.reset(notificationsRepository)
+    Mockito.reset(userNotificationRepository)
   }
 
-  fun waitUntilNotificationDispatch(count: Int = 1) {
+  fun waitUntilUserNotificationDispatch(count: Int = 1) {
     val dispatched = semaphore.tryAcquire(count, 2L, TimeUnit.SECONDS)
     dispatched.assert
       .withFailMessage("Expected at least $count notification(s) to be dispatched.")
       .isTrue()
   }
 
-  fun ensureNoNotificationDispatch() {
+  fun ensureNoUserNotificationDispatch() {
     val dispatched = semaphore.tryAcquire(2L, TimeUnit.SECONDS)
     dispatched.assert
       .withFailMessage("Expected no notifications to be dispatched.")

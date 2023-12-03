@@ -20,7 +20,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 
-class UserAccountProjectPermissionDataView(
+class UserAccountProjectNotificationDataView(
   val id: Long,
   val projectId: Long,
   val organizationRole: OrganizationRoleType?,
@@ -28,16 +28,15 @@ class UserAccountProjectPermissionDataView(
   basePermissionsGranular: Array<Enum<Scope>>?,
   val permissionsBasic: ProjectPermissionType?,
   permissionsGranular: Array<Enum<Scope>>?,
-  viewLanguageIdsConcatenated: String,
+  permittedViewLanguages: String?,
 ) {
-  // I hate Hibernate - it *requires* an Array<Enum<?>> or complains...
-  val basePermissionsGranular: List<Scope>? = basePermissionsGranular?.map { enumValueOf(it.name) }
-  val permissionsGranular: List<Scope>? = permissionsGranular?.map { enumValueOf(it.name) }
-
-  // And don't get me started on its array support ^^
-  val permittedViewLanguages = viewLanguageIdsConcatenated
-    .split(',')
-    .filter { it.isNotEmpty() }
-    .map { it.toLong() }
-    .ifEmpty { null }
+  // My love for Hibernate have no limit 🥰🥰🥰
+  val basePermissionsGranular = basePermissionsGranular?.map { enumValueOf<Scope>(it.name) }
+  val permissionsGranular = permissionsGranular?.map { enumValueOf<Scope>(it.name) }
+  val permittedViewLanguages = permittedViewLanguages?.let {
+    it.split(',')
+      .filter { part -> part.isNotEmpty() }
+      .map { part -> part.toLong() }
+      .ifEmpty { null }
+  }
 }

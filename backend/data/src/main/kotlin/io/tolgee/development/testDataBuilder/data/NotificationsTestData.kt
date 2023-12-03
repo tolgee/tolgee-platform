@@ -17,6 +17,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -44,6 +45,7 @@ class NotificationsTestData {
 
   lateinit var project1: Project
   lateinit var project2: Project
+  lateinit var calmProject: Project // A project with only Alice in it for less notification noise
 
   lateinit var keyProject1: Key
   lateinit var key1EnTranslation: Translation
@@ -52,6 +54,11 @@ class NotificationsTestData {
 
   lateinit var keyProject2: Key
   lateinit var key2EnTranslation: Translation
+
+  lateinit var keyCalmProject: Key
+  lateinit var keyCalmEnTranslation: Translation
+
+  lateinit var calmProjectFr: Language
 
   val root: TestDataBuilder = TestDataBuilder()
 
@@ -120,6 +127,33 @@ class NotificationsTestData {
         username = "alice"
 
         alice = this
+      }.build {
+        defaultOrganizationBuilder.let {
+          addProject {
+            name = "Calm project"
+            slug = "keep-it-cool"
+            organizationOwner = it.self
+
+            calmProject = this
+          }.build {
+            val en = addEnglish()
+            calmProjectFr = addFrench().self
+
+            val key = addKey {
+              name = "some-key"
+
+              this@NotificationsTestData.keyCalmProject = this@addKey
+            }
+
+            addTranslation {
+              this.key = key.self
+              language = en.self
+              text = "Some translation"
+
+              this@NotificationsTestData.keyCalmEnTranslation = this@addTranslation
+            }
+          }
+        }
       }
 
       addOrganization {

@@ -88,7 +88,7 @@ class Project(
   var namespaces: MutableList<Namespace> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
-  var notifications: MutableList<Notification> = mutableListOf()
+  var userNotifications: MutableList<UserNotification> = mutableListOf()
 
   @ActivityLoggedProp
   override var avatarHash: String? = null

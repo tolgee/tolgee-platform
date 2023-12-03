@@ -19,8 +19,7 @@ package io.tolgee.notifications.dto
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
 
-data class NotificationDispatchParamsDto(
+data class UserNotificationParamsDto(
   val recipient: UserAccount,
-  val activityModifiedEntities: List<ActivityModifiedEntity> = emptyList(),
-  val meta: MutableMap<String, Any?> = mutableMapOf(),
+  val modifiedEntities: Set<ActivityModifiedEntity> = emptySet()
 )

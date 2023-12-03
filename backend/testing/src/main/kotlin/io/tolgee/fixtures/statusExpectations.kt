@@ -80,12 +80,16 @@ fun ResultActions.tryPrettyPrinting(fn: ResultActions.() -> ResultActions): Resu
 val ResultActions.andGetContentAsString
   get() = this.andReturn().response.getContentAsString(StandardCharsets.UTF_8)
 
+val ResultActions.andGetContentAsJsonMap
+  @Suppress("UNCHECKED_CAST")
+  get() = jacksonObjectMapper().readValue(andGetContentAsString, MutableMap::class.java) as MutableMap<String, Any?>
+
 val ResultActions.andAssertError
   get() = assertThat(this.andReturn()).error()
 
 val ResultActions.andPrettyPrint: ResultActions
   get() = jacksonObjectMapper().let { mapper ->
-    val parsed = mapper.readValue<Any>(this.andGetContentAsString)
+    val parsed = mapper.readValue<Any>(andGetContentAsString)
     println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed))
     return this
   }

@@ -95,7 +95,7 @@ data class UserAccount(
   var passwordChanged: Boolean = true
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "recipient")
-  var notifications: MutableList<Notification> = mutableListOf()
+  var userNotifications: MutableList<UserNotification> = mutableListOf()
 
   val isDeletable: Boolean
     get() = this.accountType != AccountType.MANAGED && !this.isInitialUser

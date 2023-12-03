@@ -16,9 +16,9 @@
 
 package io.tolgee.notifications.events
 
-import io.tolgee.model.Notification
+import io.tolgee.model.UserNotification
 
 /**
  * Event sent when a set of users received a new notification.
  */
-data class NotificationUserPushEvent(val notifications: Set<Notification>)
+data class UserNotificationPushEvent(val notifications: Set<UserNotification>)

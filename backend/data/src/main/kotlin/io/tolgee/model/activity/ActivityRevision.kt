@@ -45,7 +45,6 @@ import javax.persistence.TemporalType
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
 class ActivityRevision : java.io.Serializable {
-
   @Id
   @SequenceGenerator(
     name = "activitySequenceGenerator",

@@ -2,7 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
-import io.tolgee.model.views.UserAccountProjectPermissionDataView
+import io.tolgee.model.views.UserAccountProjectNotificationDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -157,7 +157,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-      SELECT new io.tolgee.model.views.UserAccountProjectPermissionDataView(
+      SELECT new io.tolgee.model.views.UserAccountProjectNotificationDataView(
         ua.id,
         p.id,
         org_r.type,
@@ -188,5 +188,5 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       GROUP BY ua.id, p.id, org_r.type, perm_org.type, perm_org._scopes, perm.type, perm._scopes
     """
   )
-  fun findAllPermittedUsersProjectPermissionView(projectId: Long): List<UserAccountProjectPermissionDataView>
+  fun findAllPermittedUsersProjectPermissionView(projectId: Long): List<UserAccountProjectNotificationDataView>
 }
