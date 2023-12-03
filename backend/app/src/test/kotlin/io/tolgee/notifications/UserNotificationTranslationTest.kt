@@ -16,14 +16,26 @@
 
 package io.tolgee.notifications
 
+import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UserNotificationTranslationTest : AbstractNotificationTest() {
+  lateinit var testData: NotificationsTestData
+
+  @BeforeEach
+  override fun setupTests() {
+    testData = NotificationsTestData()
+    testDataService.saveTestData(testData.root)
+
+    super.setupTests()
+  }
+
   @Test
   fun `it does not dispatch the same type of notification for source strings and translated strings`() {
     performAuthPut(
@@ -92,9 +104,6 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
 
     userNotificationRepository.findAllByRecipient(testData.alice).assert
       .noneMatch { it.type == NotificationType.ACTIVITY_TRANSLATION_OUTDATED }
-      .satisfiesOnlyOnce {
-        it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
-        it.modifiedEntities.assert.noneSatisfy { e -> e.modifications.assert.hasOnlyFields("outdated") }
-      }
+      .noneMatch { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }
   }
 }

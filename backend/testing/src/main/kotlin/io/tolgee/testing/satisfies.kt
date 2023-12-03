@@ -21,11 +21,11 @@ import org.assertj.core.api.Condition
 import org.assertj.core.api.ThrowingConsumer
 
 // https://github.com/assertj/assertj/issues/2357
-fun <S : AbstractAssert<S, E> , E> AbstractAssert<S, E>.satisfies(fn: (actual: E) -> Unit): S {
+fun <S : AbstractAssert<S, E>, E> AbstractAssert<S, E>.satisfies(fn: (actual: E) -> Unit): S {
   return satisfies(ThrowingConsumer { fn(it) })
 }
 
-fun <S : AbstractAssert<S, E> , E> AbstractAssert<S, E>.satisfiesIf(fn: (actual: E) -> Boolean): S {
+fun <S : AbstractAssert<S, E>, E> AbstractAssert<S, E>.satisfiesIf(fn: (actual: E) -> Boolean): S {
   return satisfies(object : Condition<E>() {
     override fun matches(value: E): Boolean = fn(value)
   })

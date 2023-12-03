@@ -18,13 +18,13 @@ package io.tolgee.notifications
 
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.UserNotification
 import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.notifications.UserNotification
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.dto.UserNotificationParamsDto
-import io.tolgee.repository.UserNotificationRepository
+import io.tolgee.repository.notifications.UserNotificationRepository
 import org.springframework.stereotype.Component
 import java.util.*
 

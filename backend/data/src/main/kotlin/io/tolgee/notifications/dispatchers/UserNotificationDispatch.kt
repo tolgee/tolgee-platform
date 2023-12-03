@@ -61,16 +61,22 @@ class UserNotificationDispatch(
 
   private fun handleActivityNotification(e: NotificationCreateEvent) {
     val users = userAccountService.getAllPermissionInformationOfPermittedUsersInProject(e.notification.project.id)
+      .filter {
+        println(it.notificationPreferences?.userAccount?.id)
+        println(it.notificationPreferences?.project?.id)
+        println(it.notificationPreferences?.disabledNotifications)
+        println("--")
+        it.notificationPreferences?.disabledNotifications?.contains(e.notification.type) != true &&
+          it.id != e.responsibleUser?.id
+      }
+
     val translationToLanguageMap = e.notification.modifiedEntities!!
       .filter { it.entityClass == Translation::class.simpleName }
       .map { it.entityId }
       .let { if (it.isEmpty()) emptyMap() else languageService.findLanguageIdsOfTranslations(it) }
 
     val notifications = users.mapNotNull {
-      if (it.id != e.responsibleUser?.id)
-        handleActivityNotificationForUser(e, translationToLanguageMap, it)
-      else
-        null
+      handleActivityNotificationForUser(e, translationToLanguageMap, it)
     }
 
     userNotificationService.dispatchNotifications(e.notification, notifications)

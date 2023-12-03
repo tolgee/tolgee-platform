@@ -16,10 +16,10 @@
 
 package io.tolgee.model.views
 
-import io.tolgee.model.NotificationPreferences
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.notifications.NotificationPreferences
 
 class UserAccountProjectPermissionsNotificationPreferencesDataView(
   val id: Long,

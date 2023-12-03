@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.tolgee.repository
+package io.tolgee.repository.notifications
 
-import io.tolgee.model.NotificationPreferences
+import io.tolgee.model.notifications.NotificationPreferences
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

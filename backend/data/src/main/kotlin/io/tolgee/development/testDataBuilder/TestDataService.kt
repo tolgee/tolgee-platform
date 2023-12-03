@@ -76,7 +76,6 @@ class TestDataService(
   private val automationService: AutomationService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService
 ) : Logging {
-
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
     val builder = TestDataBuilder()
@@ -108,6 +107,14 @@ class TestDataService(
 
     executeInNewTransaction(transactionManager) {
       saveProjectData(builder)
+
+      // These depend on users and projects, so they must be stored only after all the projects have been stored.
+      builder.data.userAccounts.forEach {
+        it.data.notificationPreferences.forEach { entityBuilder ->
+          entityManager.persist(entityBuilder.self)
+        }
+      }
+
       finalize()
     }
 

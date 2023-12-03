@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.tolgee.repository
+package io.tolgee.repository.notifications
 
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.UserNotification
+import io.tolgee.model.notifications.UserNotification
 import io.tolgee.notifications.NotificationType
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository

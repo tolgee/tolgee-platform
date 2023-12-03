@@ -16,7 +16,7 @@
 
 package io.tolgee.notifications.events
 
-import io.tolgee.model.UserNotification
+import io.tolgee.model.notifications.UserNotification
 
 /**
  * Event sent when a set of users received a new notification.

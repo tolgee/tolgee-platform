@@ -310,9 +310,8 @@ class UserAccountService(
     }
   }
 
-  fun getAllPermissionInformationOfPermittedUsersInProject(
-    projectId: Long
-  ): List<UserAccountProjectPermissionsNotificationPreferencesDataView> {
+  fun getAllPermissionInformationOfPermittedUsersInProject(projectId: Long):
+    List<UserAccountProjectPermissionsNotificationPreferencesDataView> {
     return userAccountRepository.findAllPermittedUsersProjectPermissionNotificationPreferencesView(projectId)
   }
 
@@ -426,9 +425,6 @@ class UserAccountService(
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
-
-  val isAnyUserAccount: Boolean
-    get() = userAccountRepository.count() > 0
 
   private fun transferLegacyNoAuthUser() {
     val legacyImplicitUser = findActive("___implicit_user")

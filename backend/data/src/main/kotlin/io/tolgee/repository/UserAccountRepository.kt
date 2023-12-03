@@ -157,7 +157,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-      SELECT new io.tolgee.model.views.UserAccountProjectNotificationDataView(
+      SELECT new io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView(
         ua.id,
         p.id,
         org_r.type,
@@ -181,15 +181,15 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         org_r.organization = p.organizationOwner AND
         perm_org.organization = p.organizationOwner
       LEFT JOIN Language l ON l IN elements(perm.viewLanguages)
-      LEFT JOIN NotificationPreferences np_global ON np_global.userAccount = ua AND np_global.project IS NULL
-      LEFT JOIN NotificationPreferences np_project ON np_global.userAccount = ua AND np_global.project = p
+      LEFT JOIN FETCH NotificationPreferences np_global ON np_global.userAccount = ua AND np_global.project IS NULL
+      LEFT JOIN FETCH NotificationPreferences np_project ON np_project.userAccount = ua AND np_project.project = p
       WHERE
         p.id = :projectId AND
         ua.deletedAt IS NULL AND (
           (perm._scopes IS NOT NULL AND perm._scopes != '{}') OR perm.type IS NOT NULL OR
           (perm_org._scopes IS NOT NULL AND perm_org._scopes != '{}') OR perm_org.type IS NOT NULL
         )
-      GROUP BY ua.id, p.id, org_r.type, perm_org.type, perm_org._scopes, perm.type, perm._scopes
+      GROUP BY ua.id, p.id, org_r.type, perm_org.type, perm_org._scopes, perm.type, perm._scopes, np_global, np_project
     """
   )
   fun findAllPermittedUsersProjectPermissionNotificationPreferencesView(projectId: Long):

@@ -17,11 +17,11 @@
 package io.tolgee.notifications
 
 import io.tolgee.model.UserAccount
-import io.tolgee.model.UserNotification
+import io.tolgee.model.notifications.UserNotification
 import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.dto.UserNotificationParamsDto
 import io.tolgee.notifications.events.UserNotificationPushEvent
-import io.tolgee.repository.UserNotificationRepository
+import io.tolgee.repository.notifications.UserNotificationRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service

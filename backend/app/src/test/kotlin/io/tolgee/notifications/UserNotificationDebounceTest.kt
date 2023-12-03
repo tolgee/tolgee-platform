@@ -16,15 +16,27 @@
 
 package io.tolgee.notifications
 
+import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UserNotificationDebounceTest : AbstractNotificationTest() {
+  lateinit var testData: NotificationsTestData
+
+  @BeforeEach
+  override fun setupTests() {
+    testData = NotificationsTestData()
+    testDataService.saveTestData(testData.root)
+
+    super.setupTests()
+  }
+
   @Test
   fun `it debounces notifications of the same type`() {
     performAuthPost(

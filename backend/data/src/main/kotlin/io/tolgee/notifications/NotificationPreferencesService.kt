@@ -16,7 +16,7 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.repository.NotificationPreferencesRepository
+import io.tolgee.repository.notifications.NotificationPreferencesRepository
 import org.springframework.stereotype.Service
 
 @Service

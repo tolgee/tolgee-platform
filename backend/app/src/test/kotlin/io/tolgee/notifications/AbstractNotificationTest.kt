@@ -16,8 +16,7 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.development.testDataBuilder.data.NotificationsTestData
-import io.tolgee.repository.UserNotificationRepository
+import io.tolgee.repository.notifications.UserNotificationRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.addMilliseconds
@@ -43,15 +42,11 @@ abstract class AbstractNotificationTest : AuthorizedControllerTest() {
   @SpyBean
   @Autowired
   lateinit var userNotificationRepository: UserNotificationRepository
-  lateinit var testData: NotificationsTestData
 
   lateinit var semaphore: Semaphore
 
   @BeforeEach
   fun setupTests() {
-    testData = NotificationsTestData()
-    testDataService.saveTestData(testData.root)
-
     semaphore = Semaphore(0)
 
     doAnswer {

@@ -14,34 +14,68 @@
  * limitations under the License.
  */
 
-package io.tolgee.model
+package io.tolgee.model.notifications
 
 import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.notifications.NotificationType
+import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
-import java.io.Serializable
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.Index
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.Table
 
 @Entity
-@TypeDef(name = "enum-array", typeClass = EnumArrayType::class)
+@TypeDef(
+  name = "enum-array",
+  typeClass = EnumArrayType::class,
+  parameters = [
+    Parameter(
+      name = EnumArrayType.SQL_ARRAY_TYPE,
+      value = "varchar"
+    )
+  ]
+)
+@Table(
+  indexes = [
+    Index(
+      name = "notification_preferences_user_project",
+      columnList = "user_account_id, project_id",
+      unique = true,
+    ),
+    Index(
+      name = "notification_preferences_user",
+      columnList = "user_account_id"
+    ),
+    Index(
+      name = "notification_preferences_project",
+      columnList = "project_id",
+    )
+  ]
+)
 class NotificationPreferences(
-  @Id
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   val userAccount: UserAccount,
 
-  @Id
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = true)
-  val project: Project?,
+  var project: Project?,
 
   @Type(type = "enum-array")
   @Column(nullable = false, columnDefinition = "varchar[]")
-  val disabledNotifications: Array<NotificationType>,
-) : Serializable
+  var disabledNotifications: Array<NotificationType>,
+) {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  val id: Long = 0L
+}

@@ -17,9 +17,9 @@
 package io.tolgee.notifications.dto
 
 import io.tolgee.model.Project
-import io.tolgee.model.UserNotification
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.notifications.UserNotification
 import io.tolgee.notifications.NotificationType
 
 data class NotificationCreateDto(

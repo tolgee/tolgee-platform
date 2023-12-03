@@ -16,16 +16,28 @@
 
 package io.tolgee.notifications
 
+import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.assert
 import io.tolgee.util.generateImage
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockMultipartFile
 
 class UserNotificationDispatchTest : AbstractNotificationTest() {
+  lateinit var testData: NotificationsTestData
+
+  @BeforeEach
+  override fun setupTests() {
+    testData = NotificationsTestData()
+    testDataService.saveTestData(testData.root)
+
+    super.setupTests()
+  }
+
   @Test
   fun `it dispatches notifications to everyone in project`() {
     performAuthPost(

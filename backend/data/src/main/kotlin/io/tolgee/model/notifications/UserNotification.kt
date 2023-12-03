@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package io.tolgee.model
+package io.tolgee.model.notifications
 
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.notifications.NotificationType

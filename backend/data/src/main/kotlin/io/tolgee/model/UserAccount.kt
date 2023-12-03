@@ -1,6 +1,8 @@
 package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.array.ListArrayType
+import io.tolgee.model.notifications.NotificationPreferences
+import io.tolgee.model.notifications.UserNotification
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
