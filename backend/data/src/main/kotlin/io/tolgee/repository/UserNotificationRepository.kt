@@ -39,9 +39,11 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
   @Query(
     """
       FROM UserNotification un
+      INNER JOIN un.modifiedEntities me
+      INNER JOIN ActivityDescribingEntity de ON de.activityRevision = me.activityRevision
       WHERE
-        un.unread = true AND
         un.type = :type AND
+        un.unread = true AND
         un.project = :project AND
         un.recipient IN :recipients
     """
@@ -52,9 +54,30 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
     recipients: Collection<UserAccount>,
   ): List<UserNotification>
 
-  @Modifying
-  @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient = ?1 AND un.id IN ?2")
-  fun markAsRead(recipient: UserAccount, notifications: Collection<Long>)
+  @Query(
+    """
+      SELECT un
+      FROM UserNotification un
+      INNER JOIN un.modifiedEntities me
+      WHERE
+        un.unread = true AND
+        un.project = :project AND
+        un.recipient IN :recipients AND (
+          un.type = :type OR (
+            un.type = io.tolgee.notifications.NotificationType.ACTIVITY_KEYS_CREATED AND
+            me.entityClass = 'Key' AND
+            me.entityId = :keyId
+          )
+        )
+      ORDER BY un.type DESC
+    """
+  )
+  fun findCandidatesForTranslationUpdateNotificationDebouncing(
+    type: NotificationType,
+    project: Project,
+    recipients: Collection<UserAccount>,
+    keyId: Long,
+  ): List<UserNotification>
 
   @Query(
     """
@@ -64,15 +87,15 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
       INNER JOIN ActivityDescribingEntity de ON de.activityRevision = me.activityRevision
       WHERE
         un.unread = true AND
-        un.type IN (
-            io.tolgee.notifications.NotificationType.ACTIVITY_NEW_COMMENTS,
-            io.tolgee.notifications.NotificationType.ACTIVITY_COMMENTS_MENTION
-        ) AND
         me.entityClass = 'TranslationComment' AND
         de.entityClass = 'Translation' AND
         de.entityId = :translationId AND
         un.project = :project AND
-        un.recipient IN :recipients
+        un.recipient IN :recipients AND
+        un.type IN (
+          io.tolgee.notifications.NotificationType.ACTIVITY_NEW_COMMENTS,
+          io.tolgee.notifications.NotificationType.ACTIVITY_COMMENTS_MENTION
+        )
     """
   )
   fun findCandidatesForCommentNotificationDebouncing(
@@ -80,6 +103,10 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
     recipients: Collection<UserAccount>,
     translationId: Long,
   ): List<UserNotification>
+
+  @Modifying
+  @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient = ?1 AND un.id IN ?2")
+  fun markAsRead(recipient: UserAccount, notifications: Collection<Long>)
 
   @Modifying
   @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient = ?1")

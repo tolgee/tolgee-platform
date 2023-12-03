@@ -49,7 +49,7 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
 
     performAuthPut("/v2/projects/${testData.project1.id}/import/apply?forceMode=OVERRIDE", null).andIsOk
 
-    waitUntilUserNotificationDispatch(14)
+    waitUntilUserNotificationDispatch(12)
     val acmeChiefNotifications = userNotificationRepository.findAllByRecipient(testData.orgAdmin)
     val projectManagerNotifications = userNotificationRepository.findAllByRecipient(testData.projectManager)
     val frenchTranslatorNotifications = userNotificationRepository.findAllByRecipient(testData.frenchTranslator)
@@ -62,45 +62,81 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
     acmeChiefNotifications.assert.hasSize(2)
     projectManagerNotifications.assert.hasSize(2)
     frenchTranslatorNotifications.assert.hasSize(2)
-    czechTranslatorNotifications.assert.hasSize(2)
-    germanTranslatorNotifications.assert.hasSize(2)
+    czechTranslatorNotifications.assert.hasSize(1)
+    germanTranslatorNotifications.assert.hasSize(1)
     frenchCzechTranslatorNotifications.assert.hasSize(2)
     bobNotifications.assert.hasSize(2)
 
-    acmeChiefNotifications.find { it.type == NotificationType.ACTIVITY_KEYS_CREATED }!!
-      .modifiedEntities.assert.hasSize(2)
-    acmeChiefNotifications.find { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }!!
-      .modifiedEntities.assert.hasSize(7)
+    acmeChiefNotifications.assert
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
+        it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
+      }
 
-    projectManagerNotifications.find { it.type == NotificationType.ACTIVITY_KEYS_CREATED }!!
-      .modifiedEntities.assert.hasSize(2)
-    projectManagerNotifications.find { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }!!
-      .modifiedEntities.assert.hasSize(7)
+    projectManagerNotifications.assert
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
+        it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
+      }
 
-    frenchTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_KEYS_CREATED }!!
-      .modifiedEntities.assert.hasSize(2)
-    frenchTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }!!
-      .modifiedEntities.assert.hasSize(5)
+    frenchTranslatorNotifications.assert
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
+        it.modifiedEntities.assert.hasSize(6) // 2 keys + 4 translations
+      }
 
-    czechTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_KEYS_CREATED }!!
-      .modifiedEntities.assert.hasSize(2)
-    czechTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }!!
-      .modifiedEntities.assert.hasSize(4)
+    czechTranslatorNotifications.assert
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED) }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
+        it.modifiedEntities.assert.hasSize(6) // 2 keys + 4 translations
+      }
 
-    germanTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_KEYS_CREATED }!!
-      .modifiedEntities.assert.hasSize(2)
-    germanTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }!!
-      .modifiedEntities.assert.hasSize(2)
+    germanTranslatorNotifications.assert
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED) }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
+        it.modifiedEntities.assert.hasSize(4) // 2 keys + 2 translations
+      }
 
-    frenchCzechTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_KEYS_CREATED }!!
-      .modifiedEntities.assert.hasSize(2)
-    frenchCzechTranslatorNotifications.find { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }!!
-      .modifiedEntities.assert.hasSize(7)
+    frenchCzechTranslatorNotifications.assert
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
+        it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
+      }
 
-    bobNotifications.find { it.type == NotificationType.ACTIVITY_KEYS_CREATED }!!
-      .modifiedEntities.assert.hasSize(2)
-    bobNotifications.find { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED }!!
-      .modifiedEntities.assert.hasSize(7)
+    bobNotifications.assert
+      .noneSatisfy { it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED) }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_CREATED)
+        it.modifiedEntities.assert.hasSize(8) // 2 keys + 6 translations
+      }
 
     ensureNoUserNotificationDispatch()
   }
@@ -115,7 +151,7 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
           generateImage(100, 100).inputStream.readAllBytes()
         )
       )
-    ).andIsCreated.andGetContentAsJsonMap["id"] as Long
+    ).andIsCreated.andGetContentAsJsonMap["id"].let { (it as Int).toLong() }
 
     performAuthPut(
       "/v2/projects/${testData.project1.id}/keys/${testData.keyProject1.id}/complex-update",
@@ -129,25 +165,46 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
       )
     ).andIsOk
 
-    waitUntilUserNotificationDispatch(20)
+    waitUntilUserNotificationDispatch(25)
     val acmeChiefNotifications = userNotificationRepository.findAllByRecipient(testData.orgAdmin)
     val czechTranslatorNotifications = userNotificationRepository.findAllByRecipient(testData.czechTranslator)
     val bobNotifications = userNotificationRepository.findAllByRecipient(testData.bob)
 
     bobNotifications.assert
-      .hasSize(2)
-      .noneMatch { it.type == NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED }
+      .hasSize(3)
+      .noneSatisfy {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED)
+      }
 
     acmeChiefNotifications.assert
-      .hasSize(3)
-      .anyMatch { it.type == NotificationType.ACTIVITY_KEYS_UPDATED }
-      .anyMatch { it.type == NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED }
-      .anyMatch { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED && it.modifiedEntities.size == 2 }
+      .hasSize(4)
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_UPDATED)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
 
-    czechTranslatorNotifications.assert.hasSize(3)
-      .anyMatch { it.type == NotificationType.ACTIVITY_KEYS_UPDATED }
-      .anyMatch { it.type == NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED }
-      .anyMatch { it.type == NotificationType.ACTIVITY_TRANSLATIONS_UPDATED && it.modifiedEntities.size == 1 }
+    czechTranslatorNotifications.assert
+      .hasSize(3)
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_UPDATED)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED)
+      }
+      .satisfiesOnlyOnce {
+        it.type.assert.isEqualTo(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED)
+        it.modifiedEntities.assert.hasSize(1)
+      }
 
     ensureNoUserNotificationDispatch()
   }

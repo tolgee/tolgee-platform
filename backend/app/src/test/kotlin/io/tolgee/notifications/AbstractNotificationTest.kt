@@ -94,14 +94,14 @@ abstract class AbstractNotificationTest : AuthorizedControllerTest() {
   }
 
   fun waitUntilUserNotificationDispatch(count: Int = 1) {
-    val dispatched = semaphore.tryAcquire(count, 2L, TimeUnit.SECONDS)
+    val dispatched = semaphore.tryAcquire(count, 1L, TimeUnit.SECONDS)
     dispatched.assert
       .withFailMessage("Expected at least $count notification(s) to be dispatched.")
       .isTrue()
   }
 
   fun ensureNoUserNotificationDispatch() {
-    val dispatched = semaphore.tryAcquire(2L, TimeUnit.SECONDS)
+    val dispatched = semaphore.tryAcquire(1L, TimeUnit.SECONDS)
     dispatched.assert
       .withFailMessage("Expected no notifications to be dispatched.")
       .isFalse()

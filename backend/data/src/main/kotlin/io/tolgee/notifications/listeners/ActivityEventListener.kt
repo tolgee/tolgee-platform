@@ -86,10 +86,9 @@ class ActivityEventListener(
       ActivityType.SCREENSHOT_ADD ->
         processScreenshotUpdate(project, responsibleUser, e)
 
-      // ACTIVITY_TRANSLATIONS_*, ACTIVITY_MARKED_AS_OUTDATED, ACTIVITY_MARKED_AS_(UN)REVIEWED
+      // ACTIVITY_TRANSLATIONS_*
       ActivityType.SET_TRANSLATIONS,
       ActivityType.SET_TRANSLATION_STATE,
-      ActivityType.SET_OUTDATED_FLAG,
       ActivityType.BATCH_PRE_TRANSLATE_BY_TM,
       ActivityType.BATCH_MACHINE_TRANSLATE,
       ActivityType.AUTO_TRANSLATE,
@@ -98,11 +97,14 @@ class ActivityEventListener(
       ActivityType.BATCH_SET_TRANSLATION_STATE ->
         processSetTranslations(project, responsibleUser, e)
 
+      ActivityType.SET_OUTDATED_FLAG ->
+        processOutdatedFlagUpdate(project, responsibleUser, e)
+
       // ACTIVITY_NEW_COMMENTS (ACTIVITY_COMMENTS_MENTION is user-specific and not computed here)
       ActivityType.TRANSLATION_COMMENT_ADD ->
         processSimpleActivity(NotificationType.ACTIVITY_NEW_COMMENTS, project, responsibleUser, e)
 
-      // ACTIVITY_DATA_IMPORTED
+      // ACTIVITY_KEYS_CREATED, ACTIVITY_TRANSLATIONS_*
       ActivityType.IMPORT ->
         processImport(project, responsibleUser, e)
 
@@ -197,8 +199,13 @@ class ActivityEventListener(
     project: Project,
     responsibleUser: UserAccount?,
     e: OnProjectActivityStoredEvent,
+    modifiedEntities: List<ActivityModifiedEntity> = e.activityRevision.modifiedEntities
   ) {
-    val sortedTranslations = sortTranslations(e.activityRevision.modifiedEntities)
+    val sortedTranslations = sortTranslations(
+      modifiedEntities,
+      baseLanguage = project.baseLanguage?.id ?: 0L
+    )
+
     for ((type, translations) in sortedTranslations) {
       if (translations.isNotEmpty()) {
         applicationEventPublisher.publishEvent(
@@ -212,10 +219,9 @@ class ActivityEventListener(
     }
   }
 
-  private fun sortTranslations(entities: List<ActivityModifiedEntity>): SortedTranslations {
+  private fun sortTranslations(entities: List<ActivityModifiedEntity>, baseLanguage: Long): SortedTranslations {
+    val updatedSourceTranslations = mutableListOf<ActivityModifiedEntity>()
     val updatedTranslations = mutableListOf<ActivityModifiedEntity>()
-    val deletedTranslations = mutableListOf<ActivityModifiedEntity>()
-    val outdatedTranslations = mutableListOf<ActivityModifiedEntity>()
     val reviewedTranslations = mutableListOf<ActivityModifiedEntity>()
     val unreviewedTranslations = mutableListOf<ActivityModifiedEntity>()
 
@@ -224,26 +230,50 @@ class ActivityEventListener(
 
       val text = it.modifications["text"]
       val state = it.modifications["state"]
-      val outdated = it.modifications["outdated"]
 
       if (text != null) {
-        if (text.new == null) deletedTranslations.add(it)
-        else updatedTranslations.add(it)
+        val languageId = it.describingRelations?.get("language")?.entityId
+        if (languageId == baseLanguage)
+          updatedSourceTranslations.add(it)
+        else
+          updatedTranslations.add(it)
       }
 
-      if (outdated?.new == true) outdatedTranslations.add(it)
-      if (state?.new == TranslationState.REVIEWED.name) outdatedTranslations.add(it)
+      if (state?.new == TranslationState.REVIEWED.name)
+        reviewedTranslations.add(it)
       if (state?.new == TranslationState.TRANSLATED.name && state.old == TranslationState.REVIEWED.name)
         unreviewedTranslations.add(it)
     }
 
     return listOf(
+      Pair(NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED, updatedSourceTranslations),
       Pair(NotificationType.ACTIVITY_TRANSLATIONS_UPDATED, updatedTranslations),
-      Pair(NotificationType.ACTIVITY_TRANSLATIONS_DELETED, deletedTranslations),
-      Pair(NotificationType.ACTIVITY_MARKED_AS_OUTDATED, outdatedTranslations),
-      Pair(NotificationType.ACTIVITY_MARKED_AS_REVIEWED, reviewedTranslations),
-      Pair(NotificationType.ACTIVITY_MARKED_AS_UNREVIEWED, unreviewedTranslations),
+      Pair(NotificationType.ACTIVITY_TRANSLATION_REVIEWED, reviewedTranslations),
+      Pair(NotificationType.ACTIVITY_TRANSLATION_UNREVIEWED, unreviewedTranslations),
     )
+  }
+
+  private fun processOutdatedFlagUpdate(
+    project: Project,
+    responsibleUser: UserAccount?,
+    e: OnProjectActivityStoredEvent,
+  ) {
+    val outdatedTranslations = e.activityRevision.modifiedEntities
+      .filter { it.modifications["outdated"]?.new == true }
+
+    if (outdatedTranslations.isNotEmpty()) {
+      applicationEventPublisher.publishEvent(
+        NotificationCreateEvent(
+          NotificationCreateDto(
+            type = NotificationType.ACTIVITY_TRANSLATION_OUTDATED,
+            project = project,
+            modifiedEntities = outdatedTranslations.toMutableList()
+          ),
+          responsibleUser,
+          source = e,
+        )
+      )
+    }
   }
 
   private fun processScreenshotUpdate(
@@ -276,9 +306,17 @@ class ActivityEventListener(
   ) {
     val createdKeys = e.activityRevision.modifiedEntities
       .filter { it.entityClass == Key::class.simpleName && it.revisionType == RevisionType.ADD }
+      .toMutableList()
+
+    val keyIds = createdKeys.map { it.entityId }.toSet()
+    val updatedTranslations = e.activityRevision.modifiedEntities
+      .filter {
+        val isFromNewKey = keyIds.contains(it.describingRelations?.get("key")?.entityId ?: 0L)
+        if (isFromNewKey) createdKeys.add(it)
+        !isFromNewKey
+      }
 
     if (createdKeys.isNotEmpty()) {
-      println("new keys")
       applicationEventPublisher.publishEvent(
         NotificationCreateEvent(
           NotificationCreateDto(NotificationType.ACTIVITY_KEYS_CREATED, project, createdKeys.toMutableList()),
@@ -288,6 +326,8 @@ class ActivityEventListener(
       )
     }
 
-    processSetTranslations(project, responsibleUser, e)
+    if (updatedTranslations.isNotEmpty()) {
+      processSetTranslations(project, responsibleUser, e, updatedTranslations)
+    }
   }
 }
