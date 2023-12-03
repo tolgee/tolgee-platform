@@ -16,11 +16,12 @@
 
 package io.tolgee.model.views
 
+import io.tolgee.model.NotificationPreferences
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 
-class UserAccountProjectNotificationDataView(
+class UserAccountProjectPermissionsNotificationPreferencesDataView(
   val id: Long,
   val projectId: Long,
   val organizationRole: OrganizationRoleType?,
@@ -29,6 +30,8 @@ class UserAccountProjectNotificationDataView(
   val permissionsBasic: ProjectPermissionType?,
   permissionsGranular: Array<Enum<Scope>>?,
   permittedViewLanguages: String?,
+  globalNotificationPreferences: NotificationPreferences?,
+  projectNotificationPreferences: NotificationPreferences?
 ) {
   // My love for Hibernate have no limit 🥰🥰🥰
   val basePermissionsGranular = basePermissionsGranular?.map { enumValueOf<Scope>(it.name) }
@@ -39,4 +42,6 @@ class UserAccountProjectNotificationDataView(
       .map { part -> part.toLong() }
       .ifEmpty { null }
   }
+
+  val notificationPreferences = projectNotificationPreferences ?: globalNotificationPreferences
 }

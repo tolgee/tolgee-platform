@@ -21,7 +21,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.views.UserAccountProjectNotificationDataView
+import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.notifications.NotificationType
 import io.tolgee.notifications.UserNotificationService
 import io.tolgee.notifications.dto.UserNotificationParamsDto
@@ -91,7 +91,7 @@ class UserNotificationDispatch(
   private fun handleActivityNotificationForUser(
     e: NotificationCreateEvent,
     translationToLanguageMap: Map<Long, Long>,
-    userPermissionData: UserAccountProjectNotificationDataView,
+    userPermissionData: UserAccountProjectPermissionsNotificationPreferencesDataView,
   ): UserNotificationParamsDto? {
     val permissions = permissionService.computeProjectPermission(userPermissionData).expandedScopes
 

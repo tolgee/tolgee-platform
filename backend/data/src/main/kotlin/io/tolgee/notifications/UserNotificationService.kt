@@ -87,4 +87,12 @@ class UserNotificationService(
   fun markAllAsDone(user: UserAccount) {
     return userNotificationRepository.markAllAsDone(user)
   }
+
+  fun deleteAllByUserId(userId: Long) {
+    userNotificationRepository.deleteAllByUserId(userId)
+  }
+
+  fun deleteAllByProjectId(projectId: Long) {
+    userNotificationRepository.deleteAllByProjectId(projectId)
+  }
 }

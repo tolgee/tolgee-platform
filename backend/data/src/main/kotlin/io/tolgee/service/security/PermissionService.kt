@@ -21,7 +21,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.views.UserAccountProjectNotificationDataView
+import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.LanguageService
@@ -189,7 +189,7 @@ class PermissionService(
   }
 
   fun computeProjectPermission(
-    projectPermissionDataView: UserAccountProjectNotificationDataView
+    projectPermissionDataView: UserAccountProjectPermissionsNotificationPreferencesDataView
   ): ComputedPermissionDto {
     val basePermissions = ComputedPermissionDto.getEmptyPermission(
       type = projectPermissionDataView.basePermissionsBasic,

@@ -2,7 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
-import io.tolgee.model.views.UserAccountProjectNotificationDataView
+import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -165,7 +165,9 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         perm_org._scopes,
         perm.type,
         perm._scopes,
-        array_to_string(array_agg(l.id), ',')
+        array_to_string(array_agg(l.id), ','),
+        np_global,
+        np_project
       )
       FROM UserAccount ua, Project p
       LEFT JOIN OrganizationRole org_r ON
@@ -179,6 +181,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         org_r.organization = p.organizationOwner AND
         perm_org.organization = p.organizationOwner
       LEFT JOIN Language l ON l IN elements(perm.viewLanguages)
+      LEFT JOIN NotificationPreferences np_global ON np_global.userAccount = ua AND np_global.project IS NULL
+      LEFT JOIN NotificationPreferences np_project ON np_global.userAccount = ua AND np_global.project = p
       WHERE
         p.id = :projectId AND
         ua.deletedAt IS NULL AND (
@@ -188,5 +192,6 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       GROUP BY ua.id, p.id, org_r.type, perm_org.type, perm_org._scopes, perm.type, perm._scopes
     """
   )
-  fun findAllPermittedUsersProjectPermissionView(projectId: Long): List<UserAccountProjectNotificationDataView>
+  fun findAllPermittedUsersProjectPermissionNotificationPreferencesView(projectId: Long):
+    List<UserAccountProjectPermissionsNotificationPreferencesDataView>
 }

@@ -137,4 +137,12 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
   @Modifying
   @Query("DELETE FROM user_notification WHERE marked_done_at < NOW() - INTERVAL '90 DAY'", nativeQuery = true)
   fun pruneOldNotifications() // Native query since HQL can't do "INTERVAL"
+
+  @Modifying
+  @Query("DELETE FROM UserNotification WHERE recipient.id = :userId")
+  fun deleteAllByUserId(userId: Long)
+
+  @Modifying
+  @Query("DELETE FROM UserNotification WHERE project.id = :projectId")
+  fun deleteAllByProjectId(projectId: Long)
 }

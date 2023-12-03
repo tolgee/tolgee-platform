@@ -4,6 +4,7 @@ import com.vladmihalcea.hibernate.type.array.ListArrayType
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
+import org.hibernate.annotations.Where
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -94,8 +95,19 @@ data class UserAccount(
   @ColumnDefault("true")
   var passwordChanged: Boolean = true
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "recipient")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "recipient")
   var userNotifications: MutableList<UserNotification> = mutableListOf()
+
+  @Where(clause = "project IS NOT NULL")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
+  var projectNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
+  @Where(clause = "project IS NULL")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
+  private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
+  val globalNotificationPreferences: NotificationPreferences?
+    get() = _globalNotificationPreferences.firstOrNull()
 
   val isDeletable: Boolean
     get() = this.accountType != AccountType.MANAGED && !this.isInitialUser
@@ -105,26 +117,6 @@ data class UserAccount(
 
   val needsSuperJwt: Boolean
     get() = this.accountType != AccountType.THIRD_PARTY || isMfaEnabled
-
-  constructor(
-    id: Long?,
-    username: String?,
-    password: String?,
-    name: String?,
-    permissions: MutableSet<Permission>,
-    role: Role = Role.USER,
-    accountType: AccountType = AccountType.LOCAL,
-    thirdPartyAuthType: String?,
-    thirdPartyAuthId: String?,
-    resetPasswordCode: String?
-  ) : this(id = 0L, username = "", password, name = "") {
-    this.permissions = permissions
-    this.role = role
-    this.accountType = accountType
-    this.thirdPartyAuthType = thirdPartyAuthType
-    this.thirdPartyAuthId = thirdPartyAuthId
-    this.resetPasswordCode = resetPasswordCode
-  }
 
   enum class Role {
     USER, ADMIN

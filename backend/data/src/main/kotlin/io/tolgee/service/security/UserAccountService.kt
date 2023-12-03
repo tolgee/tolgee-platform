@@ -19,8 +19,10 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
-import io.tolgee.model.views.UserAccountProjectNotificationDataView
+import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.notifications.NotificationPreferencesService
+import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -52,6 +54,8 @@ class UserAccountService(
   private val organizationService: OrganizationService,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
+  @Lazy private val userNotificationService: UserNotificationService,
+  @Lazy private val notificationPreferencesService: NotificationPreferencesService,
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -163,6 +167,10 @@ class UserAccountService(
     userAccount.organizationRoles.forEach {
       entityManager.remove(it)
     }
+
+    userNotificationService.deleteAllByUserId(userAccount.id)
+    notificationPreferencesService.deleteAllByUserId(userAccount.id)
+
     userAccountRepository.softDeleteUser(userAccount)
     applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
@@ -304,8 +312,8 @@ class UserAccountService(
 
   fun getAllPermissionInformationOfPermittedUsersInProject(
     projectId: Long
-  ): List<UserAccountProjectNotificationDataView> {
-    return userAccountRepository.findAllPermittedUsersProjectPermissionView(projectId)
+  ): List<UserAccountProjectPermissionsNotificationPreferencesDataView> {
+    return userAccountRepository.findAllPermittedUsersProjectPermissionNotificationPreferencesView(projectId)
   }
 
   @Transactional

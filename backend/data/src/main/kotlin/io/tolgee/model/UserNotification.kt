@@ -52,8 +52,8 @@ class UserNotification(
 
   // We most definitely need this to show the notification: eager
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(nullable = false)
-  val project: Project,
+  @JoinColumn(nullable = true)
+  val project: Project?,
 
   // We most definitely need this to show the notification: eager
   @ManyToMany(fetch = FetchType.EAGER)
