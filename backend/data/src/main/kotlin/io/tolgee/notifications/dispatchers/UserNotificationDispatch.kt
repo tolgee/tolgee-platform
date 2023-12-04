@@ -62,10 +62,6 @@ class UserNotificationDispatch(
   private fun handleActivityNotification(e: NotificationCreateEvent) {
     val users = userAccountService.getAllPermissionInformationOfPermittedUsersInProject(e.notification.project.id)
       .filter {
-        println(it.notificationPreferences?.userAccount?.id)
-        println(it.notificationPreferences?.project?.id)
-        println(it.notificationPreferences?.disabledNotifications)
-        println("--")
         it.notificationPreferences?.disabledNotifications?.contains(e.notification.type) != true &&
           it.id != e.responsibleUser?.id
       }

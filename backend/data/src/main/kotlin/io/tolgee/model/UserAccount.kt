@@ -100,11 +100,11 @@ data class UserAccount(
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "recipient")
   var userNotifications: MutableList<UserNotification> = mutableListOf()
 
-  @Where(clause = "project IS NOT NULL")
+  @Where(clause = "project_id IS NOT NULL")
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
   var projectNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
 
-  @Where(clause = "project IS NULL")
+  @Where(clause = "project_id IS NULL")
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
   private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
 

@@ -3025,7 +3025,7 @@
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="user_notification" constraintName="FK2gliribr7nknr0qms15ks64hd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
     <changeSet author="cynthia (generated)" id="1701635886941-9">
-        <addForeignKeyConstraint baseColumnNames="modified_entities_activity_revision_id,modified_entities_entity_class,modified_entities_entity_id" baseTableName="user_notification_modified_entities" constraintName="FK4ag04pw1ppym8n7hprpbpp560" deferrable="false" initiallyDeferred="false" referencedColumnNames="activity_revision_id,entity_class,entity_id" referencedTableName="activity_modified_entity" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="modified_entities_activity_revision_id,modified_entities_entity_class,modified_entities_entity_id" baseTableName="user_notification_modified_entities" constraintName="FK4ag04pw1ppym8n7hprpbpp560" deferrable="false" initiallyDeferred="false" referencedColumnNames="activity_revision_id,entity_class,entity_id" referencedTableName="activity_modified_entity" validate="true" onUpdate="CASCADE"/>
     </changeSet>
     <changeSet author="cynthia (generated)" id="1701635886941-10">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="notification_preferences" constraintName="FK6uqc1xgpn1cxipa5bd0pixne4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
