@@ -60,14 +60,14 @@ fun ResultActions.andAssertThatJson(jsonAssert: JsonAssert.ConfigurableJsonAsser
   tryPrettyPrinting {
     jsonAssert(
       assertThatJson(this.andGetContentAsString)
-      // https://github.com/lukas-krecan/JsonUnit?tab=readme-ov-file#numerical-comparison
-      // We only care about the numeric value, not the precision. Not the business of doing physics (...yet)! :p
-      .withConfiguration {
-        it.withNumberComparator { a, b, tolerance ->
-          val diff = if (a > b) a - b else b - a
-          diff <= (tolerance ?: BigDecimal.ZERO)
+        // https://github.com/lukas-krecan/JsonUnit?tab=readme-ov-file#numerical-comparison
+        // We only care about the numeric value, not the precision. Not the business of doing physics (...yet)! :p
+        .withConfiguration {
+          it.withNumberComparator { a, b, tolerance ->
+            val diff = if (a > b) a - b else b - a
+            diff <= (tolerance ?: BigDecimal.ZERO)
+          }
         }
-      }
     )
 
     this
