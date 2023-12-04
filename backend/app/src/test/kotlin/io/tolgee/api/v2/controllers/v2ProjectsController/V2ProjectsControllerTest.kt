@@ -3,7 +3,14 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.isPermissionScopes
+import io.tolgee.fixtures.node
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
@@ -75,24 +82,26 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
           node("[0].organizationOwner.name").isEqualTo("test_username")
           node("[0].directPermission.scopes").isPermissionScopes(ProjectPermissionType.MANAGE)
           node("[0].computedPermission.scopes").isPermissionScopes(ProjectPermissionType.MANAGE)
-          node("[0].stats.translationStatePercentages").isEqualTo(
-            """
-        {
-          "UNTRANSLATED": 100.0,
-          "TRANSLATED": 0,
-          "REVIEWED": 0
-        }
-      """
-          )
-          node("[1].stats.translationStatePercentages").isEqualTo(
-            """
-        {
-          "UNTRANSLATED": 25.0,
-          "TRANSLATED": 75.0,
-          "REVIEWED": 0.0
-        }
-      """
-          )
+          node("[0].stats.translationStatePercentages")
+            .isEqualTo(
+              """
+                {
+                  "UNTRANSLATED": 100.0,
+                  "TRANSLATED": 0,
+                  "REVIEWED": 0
+                }
+              """
+            )
+          node("[1].stats.translationStatePercentages")
+            .isEqualTo(
+              """
+                {
+                  "UNTRANSLATED": 25.0,
+                  "TRANSLATED": 75.0,
+                  "REVIEWED": 0
+                }
+              """
+            )
         }
       }
   }
