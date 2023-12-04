@@ -7,6 +7,7 @@ import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.Where
+import org.springframework.data.annotation.AccessType
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -26,6 +27,7 @@ import javax.validation.constraints.NotBlank
 @TypeDef(name = "string-array", typeClass = ListArrayType::class)
 data class UserAccount(
   @Id
+  @AccessType(AccessType.Type.PROPERTY)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
 

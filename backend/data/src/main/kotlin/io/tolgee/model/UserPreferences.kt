@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import org.springframework.data.annotation.AccessType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -26,6 +27,7 @@ class UserPreferences(
   var preferredOrganization: Organization? = null
 
   @Id
+  @AccessType(AccessType.Type.PROPERTY)
   @Column(name = "user_account_id")
   var id: Long = 0
 }

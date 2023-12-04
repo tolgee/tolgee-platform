@@ -23,6 +23,7 @@ import io.tolgee.notifications.NotificationType
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
+import org.springframework.data.annotation.AccessType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -76,6 +77,7 @@ class NotificationPreferences(
   var disabledNotifications: Array<NotificationType>,
 ) {
   @Id
+  @AccessType(AccessType.Type.PROPERTY)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long = 0L
 }

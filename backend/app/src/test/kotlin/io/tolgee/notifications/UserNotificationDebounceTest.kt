@@ -17,8 +17,8 @@
 package io.tolgee.notifications
 
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
@@ -55,11 +55,12 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
     waitUntilUserNotificationDispatch()
     userNotificationRepository.findAllByRecipient(testData.alice).assert.hasSize(1)
 
-    performAuthPut(
-      url = "/v2/projects/${testData.calmProject.id}/translations",
-      content = SetTranslationsWithKeyDto(
-        key = testData.keyCalmProject.name,
-        translations = mapOf("fr" to "Superb French translation!")
+    performAuthPost(
+      url = "/v2/projects/${testData.calmProject.id}/languages",
+      content = LanguageDto(
+        name = "Meow",
+        originalName = "meow",
+        tag = "meow-en",
       )
     ).andIsOk
 

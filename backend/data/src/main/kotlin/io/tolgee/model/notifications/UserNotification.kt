@@ -23,6 +23,7 @@ import io.tolgee.model.batch.BatchJob
 import io.tolgee.notifications.NotificationType
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.UpdateTimestamp
+import org.springframework.data.annotation.AccessType
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -67,6 +68,7 @@ class UserNotification(
   val batchJob: BatchJob? = null
 ) {
   @Id
+  @AccessType(AccessType.Type.PROPERTY)
   @SequenceGenerator(name = "notification_seq", sequenceName = "sequence_notifications")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_seq")
   val id: Long = 0

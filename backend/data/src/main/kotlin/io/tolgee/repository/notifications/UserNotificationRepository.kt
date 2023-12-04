@@ -39,11 +39,9 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
   @Query(
     """
       FROM UserNotification un
-      INNER JOIN un.modifiedEntities me
-      INNER JOIN ActivityDescribingEntity de ON de.activityRevision = me.activityRevision
       WHERE
-        un.type = :type AND
         un.unread = true AND
+        un.type = :type AND
         un.project = :project AND
         un.recipient IN :recipients
     """

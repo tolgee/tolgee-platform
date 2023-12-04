@@ -7,6 +7,7 @@ import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.notifications.listeners.ActivityEventListener
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import java.time.Duration
 import java.util.*
@@ -60,6 +62,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Autowired
   @SpyBean
   lateinit var progressManager: ProgressManager
+
+  @Autowired
+  @MockBean
+  @Suppress("unused") // -- Used to avoid notification from being dispatched
+  lateinit var notificationActivityEventListener: ActivityEventListener
 
   lateinit var util: BatchJobTestUtil
 

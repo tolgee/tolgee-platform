@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import org.springframework.data.annotation.AccessType
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotBlank
 @Table(uniqueConstraints = [])
 data class EmailVerification(
   @Id
+  @AccessType(AccessType.Type.PROPERTY)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null,
 

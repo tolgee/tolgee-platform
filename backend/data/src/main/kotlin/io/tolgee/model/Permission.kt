@@ -8,6 +8,7 @@ import io.tolgee.model.enums.Scope
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
+import org.springframework.data.annotation.AccessType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -40,6 +41,7 @@ import javax.persistence.PreUpdate
 @EntityListeners(Permission.Companion.PermissionListeners::class)
 class Permission(
   @Id
+  @AccessType(AccessType.Type.PROPERTY)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
 
