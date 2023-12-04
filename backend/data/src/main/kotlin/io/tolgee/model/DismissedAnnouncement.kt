@@ -1,7 +1,6 @@
 package io.tolgee.model
 
 import io.tolgee.model.enums.Announcement
-import org.springframework.data.annotation.AccessType
 import java.io.Serializable
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -15,12 +14,10 @@ import javax.persistence.ManyToOne
 @IdClass(DismissedAnnouncementId::class)
 class DismissedAnnouncement(
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @ManyToOne(fetch = FetchType.LAZY)
   var user: UserAccount,
 
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @Enumerated(EnumType.STRING)
   var announcement: Announcement
 ) : Serializable

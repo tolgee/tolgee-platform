@@ -12,6 +12,7 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -192,5 +193,10 @@ class LanguageService(
 
   fun getLanguageIdsByTags(projectId: Long, languageTags: Collection<String>): Map<String, Language> {
     return languageRepository.findAllByTagInAndProjectId(languageTags, projectId).associateBy { it.tag }
+  }
+
+  fun getBaseLanguageForProject(project: Project): Long? {
+    if (Hibernate.isInitialized(project)) return project.baseLanguage?.id
+    return languageRepository.getBaseLanguageForProject(project)
   }
 }

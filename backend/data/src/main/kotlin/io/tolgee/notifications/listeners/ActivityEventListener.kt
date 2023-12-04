@@ -30,11 +30,13 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.notifications.NotificationType
 import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.events.NotificationCreateEvent
+import io.tolgee.service.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 
 private typealias SortedTranslations = List<Pair<NotificationType, MutableList<ActivityModifiedEntity>>>
@@ -43,8 +45,10 @@ private typealias SortedTranslations = List<Pair<NotificationType, MutableList<A
 class ActivityEventListener(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val entityManager: EntityManager,
+  private val languageService: LanguageService,
 ) : Logging {
   @EventListener
+  @Transactional
   fun onActivityRevision(e: OnProjectActivityStoredEvent) {
     // Using the Stored variant so `modifiedEntities` is populated.
 
@@ -201,9 +205,10 @@ class ActivityEventListener(
     e: OnProjectActivityStoredEvent,
     modifiedEntities: List<ActivityModifiedEntity> = e.activityRevision.modifiedEntities
   ) {
+    val baseLanguageId = languageService.getBaseLanguageForProject(project)
     val sortedTranslations = sortTranslations(
       modifiedEntities,
-      baseLanguage = project.baseLanguage?.id ?: 0L
+      baseLanguage = baseLanguageId ?: 0L
     )
 
     for ((type, translations) in sortedTranslations) {

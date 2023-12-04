@@ -1,6 +1,5 @@
 package io.tolgee.model.contentDelivery
 
-import org.springframework.data.annotation.AccessType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -18,7 +17,6 @@ class AzureContentStorageConfig(
   var contentStorage: ContentStorage,
 ) : AzureBlobConfig {
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @Column(name = "content_storage_id")
   private val id: Long? = null
 

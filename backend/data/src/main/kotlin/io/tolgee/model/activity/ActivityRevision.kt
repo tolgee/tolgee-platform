@@ -13,7 +13,6 @@ import org.hibernate.annotations.TypeDefs
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.data.annotation.AccessType
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -47,7 +46,6 @@ import javax.persistence.TemporalType
 )
 class ActivityRevision : java.io.Serializable {
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @SequenceGenerator(
     name = "activitySequenceGenerator",
     sequenceName = "activity_sequence",

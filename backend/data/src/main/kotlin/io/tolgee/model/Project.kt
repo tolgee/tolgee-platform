@@ -9,7 +9,6 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.webhook.WebhookConfig
-import org.springframework.data.annotation.AccessType
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -36,7 +35,6 @@ import javax.validation.constraints.Size
 @EntityListeners(Project.Companion.ProjectListener::class)
 class Project(
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
 
@@ -95,16 +93,16 @@ class Project(
   @Transient
   override var disableActivityLogging = false
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var automations: MutableList<Automation> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var contentDeliveryConfigs: MutableList<ContentDeliveryConfig> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var contentStorages: MutableList<ContentStorage> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :

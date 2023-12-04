@@ -1,7 +1,6 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import org.springframework.data.annotation.AccessType
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -25,7 +24,6 @@ import javax.validation.constraints.Size
 )
 class Organization(
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
 

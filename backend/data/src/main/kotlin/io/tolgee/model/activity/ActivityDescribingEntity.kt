@@ -8,7 +8,6 @@ import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
-import org.springframework.data.annotation.AccessType
 import java.io.Serializable
 import javax.persistence.Entity
 import javax.persistence.Enumerated
@@ -24,16 +23,13 @@ import javax.persistence.ManyToOne
 class ActivityDescribingEntity(
   @ManyToOne
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @NotFound(action = NotFoundAction.IGNORE)
   val activityRevision: ActivityRevision,
 
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   val entityClass: String,
 
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   val entityId: Long
 ) : Serializable {
 

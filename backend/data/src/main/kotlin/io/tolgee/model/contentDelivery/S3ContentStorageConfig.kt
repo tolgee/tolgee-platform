@@ -1,6 +1,5 @@
 package io.tolgee.model.contentDelivery
 
-import org.springframework.data.annotation.AccessType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -18,7 +17,6 @@ class S3ContentStorageConfig(
   var contentStorage: ContentStorage,
 ) : S3Config {
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @Column(name = "content_storage_id")
   private val id: Long? = null
 

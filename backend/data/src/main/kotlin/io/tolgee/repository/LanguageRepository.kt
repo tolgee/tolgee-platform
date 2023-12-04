@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Language
+import io.tolgee.model.Project
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -10,8 +11,8 @@ import java.util.*
 
 @Repository
 interface LanguageRepository : JpaRepository<Language, Long> {
-  fun findByTagAndProject(abbreviation: String, project: io.tolgee.model.Project): Optional<Language>
-  fun findByNameAndProject(name: String?, project: io.tolgee.model.Project): Optional<Language>
+  fun findByTagAndProject(abbreviation: String, project: Project): Optional<Language>
+  fun findByNameAndProject(name: String?, project: Project): Optional<Language>
   fun findByTagAndProjectId(abbreviation: String?, projectId: Long): Optional<Language>
   fun findAllByProjectId(projectId: Long?): Set<Language>
   fun findAllByProjectId(projectId: Long?, pageable: Pageable): Page<Language>
@@ -28,4 +29,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     """
   )
   fun findLanguageIdsOfTranslations(translationIds: List<Long>): List<Map<String, Long>>
+
+  @Query("SELECT l.id FROM Language l, Project p WHERE p = :project AND l = p.baseLanguage")
+  fun getBaseLanguageForProject(project: Project): Long?
 }

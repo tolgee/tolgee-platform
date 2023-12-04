@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import org.springframework.data.annotation.AccessType
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -19,7 +18,6 @@ import javax.validation.constraints.NotBlank
 )
 class Invitation(
   @Id
-  @AccessType(AccessType.Type.PROPERTY)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null,
   var code: @NotBlank String
