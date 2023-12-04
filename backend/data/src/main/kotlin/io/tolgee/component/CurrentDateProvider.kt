@@ -2,7 +2,9 @@ package io.tolgee.component
 
 import io.tolgee.development.OnDateForced
 import io.tolgee.model.ForcedServerDateTime
+import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.ApplicationEventPublisher
@@ -26,7 +28,7 @@ class CurrentDateProvider(
   private val entityManager: EntityManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val transactionManager: PlatformTransactionManager
-) : DateTimeProvider {
+) : Logging, DateTimeProvider {
   private fun getServerTimeEntity(): ForcedServerDateTime? =
     entityManager.createQuery(
       "select st from ForcedServerDateTime st where st.id = 1",
@@ -35,9 +37,12 @@ class CurrentDateProvider(
 
   var forcedDate: Date? = null
     set(value) {
-      field = value
-      updateEntity(field)
-      applicationEventPublisher.publishEvent(OnDateForced(this, value))
+      if (field != value) {
+        logger.debug("Forcing date to: {} (old value: {})", value, field)
+        field = value
+        updateEntity(field)
+        applicationEventPublisher.publishEvent(OnDateForced(this, value))
+      }
     }
 
   private fun updateEntity(forcedDate: Date?) {

@@ -10,7 +10,6 @@ import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
-import io.tolgee.util.logger
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -290,13 +289,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     // test it debounces for max time (10 sec * 4 = 40)
     repeat(7) {
-      currentDateProvider.move(Duration.ofSeconds(5))
-      logger.info(
-        "Time: ${currentDateProvider.date.time} " +
-          "Time offset: ${currentDateProvider.date.time - startTie.time}"
-      )
-      // give the other thread time to run
-      Thread.sleep(200)
+      currentDateProvider.move(Duration.ofSeconds(2))
+      Thread.sleep(20)
+      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+      currentDateProvider.move(Duration.ofSeconds(3))
+      Thread.sleep(20)
       util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
     }
 
