@@ -40,6 +40,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
   @BeforeEach
   fun setup() {
     testData = KeysTestData()
+    testData.projectBuilder.addCzech()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.project }
@@ -83,7 +84,8 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
       )
     ).andIsOk
 
-    assertKeyWithReferencesState(TranslationState.REVIEWED)
+    assertKeyWithReferencesState("en", TranslationState.REVIEWED)
+    assertKeyWithReferencesState("de", TranslationState.TRANSLATED)
 
     // existing translation
     performProjectAuthPut(
@@ -91,18 +93,33 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
       ComplexEditKeyDto(
         name = "key_with_referecnces",
         translations = mapOf("en" to "EN", "de" to "DE"),
-        states = mapOf("en" to AssignableTranslationState.TRANSLATED),
+        states = mapOf("de" to AssignableTranslationState.REVIEWED),
       )
     ).andIsOk
 
-    assertKeyWithReferencesState(TranslationState.TRANSLATED)
+    assertKeyWithReferencesState("en", TranslationState.REVIEWED)
+    assertKeyWithReferencesState("de", TranslationState.REVIEWED)
+
+
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = "key_with_referecnces",
+        translations = mapOf("cs" to "CS"),
+        states = mapOf(),
+      )
+    ).andIsOk
+
+    assertKeyWithReferencesState("en", TranslationState.REVIEWED)
+    assertKeyWithReferencesState("de", TranslationState.REVIEWED)
+    assertKeyWithReferencesState("cs", TranslationState.TRANSLATED)
   }
 
-  private fun assertKeyWithReferencesState(state: TranslationState) {
+  private fun assertKeyWithReferencesState(laguageTag: String, state: TranslationState) {
     executeInNewTransaction {
       val key = keyService.find(testData.keyWithReferences.id)
       assertThat(key).isNotNull
-      val enTranslationState = key!!.translations.find { it.language.tag == "en" }!!.state
+      val enTranslationState = key!!.translations.find { it.language.tag == laguageTag }!!.state
       assertThat(enTranslationState).isEqualTo(state)
     }
   }

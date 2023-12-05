@@ -56,9 +56,14 @@ class KeyComplexEditHelper(
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
 
   private val languages by lazy {
-    dto.translations?.keys?.let { dtoTranslations ->
-      languageService.findByTags(dtoTranslations, projectHolder.project.id)
-    } ?: setOf()
+    val translationLanguages = dto.translations?.keys ?: setOf()
+    val stateLanguages = dto.states?.keys ?: setOf()
+
+    val all = (translationLanguages + stateLanguages)
+    if (all.isEmpty()) {
+      return@lazy setOf()
+    }
+    languageService.findByTags(all, projectHolder.project.id)
   }
 
   private val existingTranslations: MutableMap<String, Translation> by lazy {
