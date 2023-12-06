@@ -80,57 +80,87 @@ class KeyComplexEditHelper(
       prepareConditions()
       setActivityHolder()
 
-      if (modifiedTranslations != null && areTranslationsModified) {
-        projectHolder.projectEntity.checkTranslationsEditPermission()
-        securityService.checkLanguageTranslatePermissionsByLanguageId(
-          modifiedTranslations!!.keys,
-          projectHolder.project.id
-        )
-        val translations = translationService.setForKey(
-          key,
-          oldTranslations = existingTranslations.map { languageByTag(it.key) to it.value.text }.toMap(),
-          translations = modifiedTranslations!!.map { languageById(it.key) to it.value }.toMap()
-        )
-
-        translations.forEach {
-          if (existingTranslations[it.key.tag] == null) {
-            existingTranslations[it.key.tag] = it.value
-          }
-        }
-      }
-
-      if (areStatesModified) {
-        securityService.checkLanguageChangeStatePermissionsByLanguageId(modifiedStates!!.keys, projectHolder.project.id)
-        translationService.setStateBatch(
-          states = modifiedStates!!.map {
-            val translation = existingTranslations[languageById(it.key).tag] ?: throw NotFoundException(
-              Message.TRANSLATION_NOT_FOUND
-            )
-
-            translation to it.value
-          }.toMap()
-        )
-      }
-
-      if (dtoTags !== null && areTagsModified) {
-        key.project.checkKeysEditPermission()
-        tagService.updateTags(key, dtoTags)
-      }
-
-      if (isScreenshotAdded || isScreenshotDeleted) {
-        updateScreenshotsWithPermissionCheck(dto, key)
-      }
-
-      var edited = key
-
-      if (isKeyModified) {
-        key.project.checkKeysEditPermission()
-        edited = keyService.edit(key, dto.name, dto.namespace)
-      }
-
-      keyWithDataModelAssembler.toModel(edited)
+      doTranslationUpdate()
+      doStateUpdate()
+      doUpdateTags()
+      doUpdateScreenshots()
+      doUpdateKey()
     }
   }
+
+  private fun doUpdateKey(): KeyWithDataModel {
+    var edited = key
+
+    if (isKeyModified) {
+      key.project.checkKeysEditPermission()
+      edited = keyService.edit(key, dto.name, dto.namespace)
+    }
+
+    return keyWithDataModelAssembler.toModel(edited)
+  }
+
+  private fun doUpdateScreenshots() {
+    if (isScreenshotAdded || isScreenshotDeleted) {
+      updateScreenshotsWithPermissionCheck(dto, key)
+    }
+  }
+
+  private fun doUpdateTags() {
+    if (dtoTags !== null && areTagsModified) {
+      key.project.checkKeysEditPermission()
+      tagService.updateTags(key, dtoTags)
+    }
+  }
+
+  private fun doStateUpdate() {
+    if (areStatesModified) {
+      securityService.checkLanguageChangeStatePermissionsByLanguageId(modifiedStates!!.keys, projectHolder.project.id)
+      translationService.setStateBatch(
+        states = modifiedStates!!.map {
+          val translation = existingTranslations[languageById(it.key).tag] ?: throw NotFoundException(
+            Message.TRANSLATION_NOT_FOUND
+          )
+
+          translation to it.value
+        }.toMap()
+      )
+    }
+  }
+
+  private fun doTranslationUpdate() {
+    if (modifiedTranslations != null && areTranslationsModified) {
+      projectHolder.projectEntity.checkTranslationsEditPermission()
+      securityService.checkLanguageTranslatePermissionsByLanguageId(
+        modifiedTranslations!!.keys,
+        projectHolder.project.id
+      )
+
+      val modifiedTranslations = getModifiedTranslationsByTag()
+      val existingTranslationsByTag = getExistingTranslationsByTag()
+      val oldTranslations = modifiedTranslations.map {
+        it.key to existingTranslationsByTag[it.key]
+      }.toMap()
+
+      val translations = translationService.setForKey(
+        key,
+        oldTranslations = oldTranslations,
+        translations = modifiedTranslations
+      )
+
+      translations.forEach {
+        if (existingTranslations[it.key.tag] == null) {
+          existingTranslations[it.key.tag] = it.value
+        }
+      }
+    }
+  }
+
+  private fun getExistingTranslationsByTag() =
+    existingTranslations.map { languageByTag(it.key) to it.value.text }.toMap()
+
+  private fun getModifiedTranslationsByTag() = modifiedTranslations!!
+    .map { languageById(it.key) to it.value }
+    .toMap()
 
   private fun setActivityHolder() {
     if (!isSingleOperation) {
@@ -140,6 +170,11 @@ class KeyComplexEditHelper(
 
     if (areTranslationsModified) {
       activityHolder.activity = ActivityType.SET_TRANSLATIONS
+      return
+    }
+
+    if (areStatesModified) {
+      activityHolder.activity = ActivityType.SET_TRANSLATION_STATE
       return
     }
 
@@ -168,6 +203,7 @@ class KeyComplexEditHelper(
     get() {
       return arrayOf(
         areTranslationsModified,
+        areStatesModified,
         areTagsModified,
         isKeyModified,
         isScreenshotAdded,

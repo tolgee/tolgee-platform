@@ -75,53 +75,108 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `complex edit modifies state`() {
     // new translation
-    performProjectAuthPut(
-      "keys/${testData.keyWithReferences.id}/complex-update",
-      ComplexEditKeyDto(
-        name = "key_with_referecnces",
-        translations = mapOf("en" to "EN", "de" to "DE"),
-        states = mapOf("en" to AssignableTranslationState.REVIEWED),
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "EN", "de" to "DE"),
+      states = mapOf("en" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.TRANSLATED)
+    )
+
+    //existing translation
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "EN", "de" to "DE"),
+      states = mapOf("de" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.REVIEWED)
+    )
+
+    doUpdateAndVerifyStates(
+      translations = mapOf("cs" to "CS"),
+      states = mapOf(),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.TRANSLATED,
+        "en" to TranslationState.REVIEWED,
+        "de" to TranslationState.REVIEWED
       )
-    ).andIsOk
+    )
 
-    assertKeyWithReferencesState("en", TranslationState.REVIEWED)
-    assertKeyWithReferencesState("de", TranslationState.TRANSLATED)
-
-    // existing translation
-    performProjectAuthPut(
-      "keys/${testData.keyWithReferences.id}/complex-update",
-      ComplexEditKeyDto(
-        name = "key_with_referecnces",
-        translations = mapOf("en" to "EN", "de" to "DE"),
-        states = mapOf("de" to AssignableTranslationState.REVIEWED),
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "Test", "cs" to "Test"),
+      states = mapOf("en" to AssignableTranslationState.REVIEWED, "cs" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.REVIEWED,
+        "en" to TranslationState.REVIEWED,
+        // we modified the base, so it resets the state for the value, which is not modified
+        "de" to TranslationState.TRANSLATED
       )
-    ).andIsOk
-
-    assertKeyWithReferencesState("en", TranslationState.REVIEWED)
-    assertKeyWithReferencesState("de", TranslationState.REVIEWED)
-
-
-    performProjectAuthPut(
-      "keys/${testData.keyWithReferences.id}/complex-update",
-      ComplexEditKeyDto(
-        name = "key_with_referecnces",
-        translations = mapOf("cs" to "CS"),
-        states = mapOf(),
-      )
-    ).andIsOk
-
-    assertKeyWithReferencesState("en", TranslationState.REVIEWED)
-    assertKeyWithReferencesState("de", TranslationState.REVIEWED)
-    assertKeyWithReferencesState("cs", TranslationState.TRANSLATED)
+    )
   }
 
-  private fun assertKeyWithReferencesState(laguageTag: String, state: TranslationState) {
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_CREATE,
+      Scope.TRANSLATIONS_EDIT,
+      Scope.TRANSLATIONS_STATE_EDIT
+    ]
+  )
+  @Test
+  fun `complex edit modifies state correctly when new translation created`() {
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "Test", "cs" to "Test"),
+      states = mapOf("en" to AssignableTranslationState.REVIEWED, "cs" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.REVIEWED,
+        "en" to TranslationState.REVIEWED,
+      )
+    )
+
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "Test", "cs" to "Test", "de" to "Hello"),
+      states = mapOf(
+        "en" to AssignableTranslationState.REVIEWED,
+        "cs" to AssignableTranslationState.REVIEWED,
+        "de" to AssignableTranslationState.REVIEWED
+      ),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.REVIEWED,
+        "en" to TranslationState.REVIEWED,
+        "de" to TranslationState.REVIEWED
+      )
+    )
+  }
+
+  private fun doUpdateAndVerifyStates(
+    translations: Map<String, String>,
+    states: Map<String, AssignableTranslationState>,
+    statesToVerify: Map<String, TranslationState>
+  ) {
+    doUpdate(translations, states)
+    verifyStates(statesToVerify)
+  }
+
+  private fun verifyStates(statesToVerify: Map<String, TranslationState>) {
     executeInNewTransaction {
       val key = keyService.find(testData.keyWithReferences.id)
       assertThat(key).isNotNull
-      val enTranslationState = key!!.translations.find { it.language.tag == laguageTag }!!.state
-      assertThat(enTranslationState).isEqualTo(state)
+      statesToVerify.forEach {
+        val state = key!!.translations.find { translation -> translation.language.tag == it.key }!!.state
+        assertThat(state)
+          .describedAs("State for ${it.key} is not ${it.value}")
+          .isEqualTo(it.value)
+      }
     }
+  }
+
+  private fun doUpdate(
+    translations: Map<String, String>,
+    states: Map<String, AssignableTranslationState>
+  ) {
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = "key_with_referecnces",
+        translations = translations,
+        states = states,
+      )
+    ).andIsOk
   }
 
   @ProjectApiKeyAuthTestMethod(
