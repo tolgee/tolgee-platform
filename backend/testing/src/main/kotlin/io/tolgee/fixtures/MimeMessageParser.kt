@@ -89,7 +89,7 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     get() {
       val recipients: Array<jakarta.mail.Address> =
         mimeMessage.getRecipients(jakarta.mail.Message.RecipientType.TO)
-      return if (recipients != null) Arrays.asList<jakarta.mail.Address>(*recipients) else ArrayList<jakarta.mail.Address>()
+      return if (recipients != null) listOf(*recipients) else ArrayList<jakarta.mail.Address>()
     }
 
   @get:Throws(Exception::class)
@@ -101,7 +101,7 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     get() {
       val recipients: Array<jakarta.mail.Address> =
         mimeMessage.getRecipients(jakarta.mail.Message.RecipientType.CC)
-      return if (recipients != null) Arrays.asList<jakarta.mail.Address>(*recipients) else ArrayList<jakarta.mail.Address>()
+      return if (recipients != null) listOf(*recipients) else ArrayList<jakarta.mail.Address>()
     }
 
   @get:Throws(Exception::class)
@@ -113,7 +113,7 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     get() {
       val recipients: Array<jakarta.mail.Address> =
         mimeMessage.getRecipients(jakarta.mail.Message.RecipientType.BCC)
-      return if (recipients != null) Arrays.asList<jakarta.mail.Address>(*recipients) else ArrayList<jakarta.mail.Address>()
+      return if (recipients != null) listOf(*recipients) else ArrayList<jakarta.mail.Address>()
     }
 
   @get:Throws(Exception::class)
