@@ -7,7 +7,8 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "permissions", itemRelation = "permissions")
 open class ApiKeyPermissionsModel(
-  projectId: Long,
+  @Schema(description = """The API key's project id or the one provided as query param""")
+  val projectId: Long,
 
   @Schema(description = """Languages user can translate to""")
   val translateLanguageIds: Set<Long>?,

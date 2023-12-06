@@ -129,7 +129,9 @@ class ApiKeyController(
   @GetMapping(path = ["/api-keys/current-permissions"])
   @Operation(summary = "Returns current PAK or PAT permissions for current user, api-key and project")
   @AllowApiAccess()
-  fun getCurrent(@Parameter(description = "Required when using with PAT") projectId: Long?): ApiKeyPermissionsModel {
+  fun getCurrentPermissions(
+    @Parameter(description = "Required when using with PAT") projectId: Long?
+  ): ApiKeyPermissionsModel {
     val projectIdNotNull = when {
       authenticationFacade.isProjectApiKeyAuth ->
         authenticationFacade.projectApiKey.projectId
