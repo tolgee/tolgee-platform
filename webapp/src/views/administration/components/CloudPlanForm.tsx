@@ -60,7 +60,7 @@ export function CloudPlanForm({
     method: 'get',
   });
 
-  const products = productsLoadable.data?._embedded?.stripeProductModels;
+  const products = productsLoadable.data?._embedded?.stripeProducts;
 
   const typeOptions = [
     { value: 'PAY_AS_YOU_GO', label: 'Pay as you go' },

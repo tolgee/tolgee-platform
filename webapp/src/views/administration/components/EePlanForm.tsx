@@ -52,7 +52,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
     method: 'get',
   });
 
-  const products = productsLoadable.data?._embedded?.stripeProductModels;
+  const products = productsLoadable.data?._embedded?.stripeProducts;
 
   return (
     <Formik

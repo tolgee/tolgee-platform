@@ -491,7 +491,7 @@ export interface components {
     };
     CollectionModelStripeProductModel: {
       _embedded?: {
-        stripeProductModels?: components["schemas"]["StripeProductModel"][];
+        stripeProducts?: components["schemas"]["StripeProductModel"][];
       };
     };
     StripeProductModel: {
