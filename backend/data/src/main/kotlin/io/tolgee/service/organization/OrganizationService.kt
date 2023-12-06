@@ -7,6 +7,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
@@ -29,6 +30,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -52,7 +54,8 @@ class OrganizationService(
   private val tolgeeProperties: TolgeeProperties,
   private val permissionService: PermissionService,
   private val cacheManager: CacheManager,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val eventPublisher: ApplicationEventPublisher
 ) : Logging {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
@@ -218,6 +221,7 @@ class OrganizationService(
   fun delete(organization: Organization) {
     organization.deletedAt = currentDateProvider.date
     save(organization)
+    eventPublisher.publishEvent(BeforeOrganizationDeleteEvent(organization))
     organization.preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
       .forEach {
