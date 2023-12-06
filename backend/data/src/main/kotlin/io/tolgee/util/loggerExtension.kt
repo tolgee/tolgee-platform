@@ -19,6 +19,12 @@ interface Logging {
 
 val <T : Logging> T.logger: Logger get() = LoggerFactory.getLogger(javaClass)
 
+fun Logger.trace(message: () -> String) {
+  if (this.isTraceEnabled) {
+    this.trace(message())
+  }
+}
+
 fun Logger.debug(message: () -> String) {
   if (this.isDebugEnabled) {
     this.debug(message())
