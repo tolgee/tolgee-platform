@@ -9,6 +9,7 @@ import io.tolgee.fixtures.waitFor
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import io.tolgee.util.trace
 import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -147,10 +148,10 @@ class BatchJobConcurrentLauncher(
   ): Boolean {
     logger.trace("Trying to run execution ${executionItem.chunkExecutionId}")
     if (!executionItem.isTimeToExecute()) {
-      logger.trace(
-        """Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:
-                    | Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""".trimMargin()
-      )
+      logger.trace {
+        "Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:" +
+          " Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}"
+      }
       addBackToQueue(executionItem)
       return false
     }

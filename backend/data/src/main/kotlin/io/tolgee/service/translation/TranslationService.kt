@@ -260,7 +260,7 @@ class TranslationService(
   }
 
   fun saveAll(entities: Iterable<Translation>) {
-    entities.map { save(it) }
+    entities.forEach { save(it) }
   }
 
   fun setStateBatch(translation: Translation, state: TranslationState): Translation {
