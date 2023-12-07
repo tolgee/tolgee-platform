@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 
-
 /**
  * This interceptor validates the user authentication for use in the authorization phase.
  */

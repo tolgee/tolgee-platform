@@ -24,7 +24,6 @@ import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 
-
 abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (handler !is HandlerMethod || DispatcherType.ASYNC == request.dispatcherType) {
