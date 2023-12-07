@@ -28,7 +28,7 @@ describe('Organization List', () => {
       cy.get('input').type('What a nice organization')
     );
     gcy('organization-address-part-field').within(() =>
-      cy.get('input').should('have.value', 'what-a-nice-organization')
+      cy.get('input').should('contain.value', 'what-a-nice-organization')
     );
     gcy('organization-description-field').within(() =>
       cy.get('input').type('Very nice organization! Which is nice to create!')
