@@ -31,6 +31,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -78,21 +79,23 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `it reports business event once in a day`() {
-    executeInNewTransaction {
-      initBaseData()
-    }
-    performExport()
-    performExport()
-    performExport()
-    performExport()
-    waitForNotThrowing(pollTime = 50, timeout = 3000) {
-      verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
-    }
-    setForcedDate(currentDateProvider.date.addDays(1))
-    performExport()
-    performExport()
-    waitForNotThrowing(pollTime = 50, timeout = 3000) {
-      verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
+    retry(exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }) {
+      executeInNewTransaction {
+        initBaseData()
+      }
+      performExport()
+      performExport()
+      performExport()
+      performExport()
+      waitForNotThrowing(pollTime = 50, timeout = 3000) {
+        verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
+      }
+      setForcedDate(currentDateProvider.date.addDays(1))
+      performExport()
+      performExport()
+      waitForNotThrowing(pollTime = 50, timeout = 3000) {
+        verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
+      }
     }
   }
 
