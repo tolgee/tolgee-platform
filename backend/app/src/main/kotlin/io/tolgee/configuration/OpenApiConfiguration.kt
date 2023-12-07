@@ -208,7 +208,6 @@ class OpenApiConfiguration {
           val oldPathItem = pathEntry.value
           val oldOperations = oldPathItem.readOperations()
           oldOperations.forEach { operation ->
-            val handlers = operationHandlers
             val handler = operationHandlers[operation.operationId]
             val annotation = handler?.getMethodAnnotation(AllowApiAccess::class.java)
 
@@ -217,7 +216,7 @@ class OpenApiConfiguration {
                 .contains("{$PROJECT_ID_PARAMETER}")
               if (!pathEntry.key.matches("^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex())) {
                 if (!containsProjectIdParam) {
-                  operation.parameters.removeIf { it.name == PROJECT_ID_PARAMETER }
+                  operation.parameters.removeIf { it.name == PROJECT_ID_PARAMETER && it.`in` != "query" }
                 }
                 operations.add(operation)
               }

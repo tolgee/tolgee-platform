@@ -46,19 +46,16 @@ class KeysTestData {
       project = this
     }.build {
       english = addLanguage {
-
         name = "English"
         tag = "en"
       }.self
 
       german = addLanguage {
-
         name = "German"
         tag = "de"
       }.self
 
       addPermission {
-
         user = this@KeysTestData.user
         type = ProjectPermissionType.MANAGE
       }

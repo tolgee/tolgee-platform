@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
+import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
@@ -12,10 +13,13 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
@@ -228,5 +232,93 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         assertThat(position.height).isEqualTo(212)
       }
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates key with translation state`() {
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "super_key",
+        translations = mapOf("en" to "EN"),
+        states = mapOf("en" to AssignableTranslationState.REVIEWED)
+      )
+    ).andIsCreated.andAssertThatJson {
+      node("id").isNumber.satisfies { id ->
+        executeInNewTransaction {
+          val key = keyService.get(id.toLong())
+          key.translations.find { it.language.tag == "en" }!!.state.assert.isEqualTo(TranslationState.REVIEWED)
+        }
+      }
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `checks state change language permissions`() {
+    prepareTestData(
+      scopes = listOf(Scope.KEYS_CREATE, Scope.TRANSLATIONS_EDIT, Scope.TRANSLATIONS_STATE_EDIT),
+      stateChangeTags = listOf("cs")
+    )
+
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "super_key",
+        translations = mapOf("en" to "EN"),
+        states = mapOf("en" to AssignableTranslationState.REVIEWED)
+      )
+    ).andIsForbidden
+
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "super_key",
+        translations = mapOf("cs" to "CS"),
+        states = mapOf("cs" to AssignableTranslationState.REVIEWED)
+      )
+    ).andIsCreated
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `checks state change permissions (missing scope)`() {
+    prepareTestData(
+      scopes = listOf(Scope.KEYS_CREATE, Scope.TRANSLATIONS_EDIT),
+      stateChangeTags = null
+    )
+
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "super_key",
+        translations = mapOf("cs" to "CS"),
+        states = mapOf("cs" to AssignableTranslationState.REVIEWED)
+      )
+    ).andIsForbidden
+
+    // this works, because TRANSLATED is the initial state, so we are not changing anytning
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "super_key",
+        translations = mapOf("cs" to "CS"),
+        states = mapOf("cs" to AssignableTranslationState.TRANSLATED)
+      )
+    ).andIsCreated
+  }
+
+  private fun prepareTestData(scopes: List<Scope>, stateChangeTags: List<String>?) {
+    val testData = PermissionsTestData()
+    val user = testData.addUserWithPermissions(
+      scopes = scopes,
+      type = null,
+      stateChangeLanguageTags = stateChangeTags,
+      translateLanguageTags = listOf("en", "cs")
+    )
+    testDataService.saveTestData(testData.root)
+    userAccount = user
+    this.projectSupplier = { testData.projectBuilder.self }
   }
 }

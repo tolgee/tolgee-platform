@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -14,6 +15,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.apiKey.ApiKeyModel
 import io.tolgee.hateoas.apiKey.ApiKeyModelAssembler
+import io.tolgee.hateoas.apiKey.ApiKeyPermissionsModel
 import io.tolgee.hateoas.apiKey.ApiKeyWithLanguagesModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModelAssembler
@@ -109,27 +111,72 @@ class ApiKeyController(
     }
 
     val apiKey = authenticationFacade.projectApiKeyEntity
+
+    val permissionData = permissionService.getProjectPermissionData(
+      apiKey.project.id,
+      authenticationFacade.authenticatedUser.id
+    )
+
+    val translateLanguageIds =
+      permissionData.computedPermissions.translateLanguageIds.toNormalizedPermittedLanguageSet()
+
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
-      permittedLanguageIds = getProjectPermittedLanguages(
-        apiKey.project.id,
-        authenticationFacade.authenticatedUser.id
-      )?.toList()
+      permittedLanguageIds = translateLanguageIds
     )
   }
 
-  private fun getProjectPermittedLanguages(projectId: Long, userId: Long): Set<Long>? {
-    val data = permissionService.getProjectPermissionData(projectId, userId)
-    val languageIds = data.computedPermissions.translateLanguageIds
-    if (languageIds.isNullOrEmpty()) {
+  @GetMapping(path = ["/api-keys/current-permissions"])
+  @Operation(summary = "Returns current PAK or PAT permissions for current user, api-key and project")
+  @AllowApiAccess()
+  fun getCurrentPermissions(
+    @RequestParam
+    @Parameter(description = "Required when using with PAT") projectId: Long?
+  ): ApiKeyPermissionsModel {
+    val apiKeyAuthentication = authenticationFacade.isProjectApiKeyAuth
+    val personalAccessTokenAuth = authenticationFacade.isPersonalAccessTokenAuth
+
+    val projectIdNotNull = when {
+      apiKeyAuthentication ->
+        authenticationFacade.projectApiKey.projectId
+
+      personalAccessTokenAuth ->
+        projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
+
+      else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+    }
+
+    val permissionData = permissionService.getProjectPermissionData(
+      projectIdNotNull,
+      authenticationFacade.authenticatedUser.id
+    )
+
+    val computed = permissionData.computedPermissions
+    val scopes = when {
+      apiKeyAuthentication -> authenticationFacade.projectApiKey.scopes.toTypedArray()
+      else -> computed.scopes
+    }
+
+    return ApiKeyPermissionsModel(
+      projectIdNotNull,
+      type = if (apiKeyAuthentication) null else computed.type,
+      translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
+      viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
+      stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
+      scopes = scopes
+    )
+  }
+
+  fun Set<Long>?.toNormalizedPermittedLanguageSet(): Set<Long>? {
+    if (this.isNullOrEmpty()) {
       return null
     }
-    return languageIds.toSet()
+    return this.toSet()
   }
 
   @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])
   @Operation(summary = "Returns all API keys for project")
-  @RequiresProjectPermissions([ Scope.ADMIN ])
+  @RequiresProjectPermissions([Scope.ADMIN])
   fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
     return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }

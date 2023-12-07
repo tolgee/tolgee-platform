@@ -185,9 +185,22 @@ class SecurityService(
     checkLanguageStateChangePermission(language.project.id, listOf(language.id))
   }
 
-  fun checkLanguageTagPermissions(tags: Set<String>, projectId: Long) {
+  fun checkLanguageTranslatePermissionsByTag(tags: Set<String>, projectId: Long) {
     val languages = languageService.findByTags(tags, projectId)
     this.checkLanguageTranslatePermission(projectId, languages.map { it.id })
+  }
+
+  fun checkLanguageTranslatePermissionsByLanguageId(languageIds: Collection<Long>, projectId: Long) {
+    this.checkLanguageTranslatePermission(projectId, languageIds)
+  }
+
+  fun checkLanguageStateChangePermissionsByTag(projectId: Long, tags: Collection<String>) {
+    val languages = languageService.findByTags(tags, projectId)
+    this.checkLanguageStateChangePermission(projectId, languages.map { it.id })
+  }
+
+  fun checkLanguageChangeStatePermissionsByLanguageId(languageIds: Collection<Long>, projectId: Long) {
+    this.checkLanguageStateChangePermission(projectId, languageIds)
   }
 
   fun checkApiKeyScopes(scopes: Set<Scope>, project: Project?, user: UserAccount? = null) {

@@ -88,7 +88,7 @@ When no languages provided, it translates only untranslated languages."""
 
   private fun checkPermissions(key: Key, languagesToTranslate: Set<String>) {
     keyService.checkInProject(key, projectHolder.project.id)
-    securityService.checkLanguageTagPermissions(languagesToTranslate, projectHolder.project.id)
+    securityService.checkLanguageTranslatePermissionsByTag(languagesToTranslate, projectHolder.project.id)
   }
 
   private fun getAllLanguagesToTranslate(): Set<String> {

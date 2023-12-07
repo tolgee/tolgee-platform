@@ -140,7 +140,7 @@ class TranslationService(
     return setTranslation(key, language, text)
   }
 
-  fun setTranslation(key: Key, language: Language, text: String?): Translation? {
+  fun setTranslation(key: Key, language: Language, text: String?): Translation {
     val translation = getOrCreate(key, language)
     setTranslation(translation, text)
     key.translations.add(translation)
@@ -175,22 +175,48 @@ class TranslationService(
 
   @Transactional
   fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
-    val myKey = keyService.get(key.id)
     val languages = languageService.findByTags(translations.keys, key.project.id)
-    val oldTranslations = getKeyTranslations(languages, key.project, key).associate { it.language.tag to it.text }
-
-    return translations.entries.associate { (languageTag, value) ->
-      languageTag to setTranslation(key, languageTag, value)
-    }.filterValues { it != null }.mapValues { it.value as Translation }.also {
-      applicationEventPublisher.publishEvent(
-        OnTranslationsSet(
-          source = this,
-          key = myKey,
-          oldValues = oldTranslations,
-          translations = it.values.toList()
-        )
-      )
+    val oldTranslations = getKeyTranslations(languages, key.project, key).associate {
+      languageByIdFromLanguages(
+        it.language.id,
+        languages
+      ) to it.text
     }
+
+    return setForKey(
+      key,
+      translations.map { languageByTagFromLanguages(it.key, languages) to it.value }
+        .toMap(),
+      oldTranslations
+    ).mapKeys { it.key.tag }
+  }
+
+  private fun languageByTagFromLanguages(tag: String, languages: Collection<Language>) =
+    languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+
+  private fun languageByIdFromLanguages(id: Long, languages: Collection<Language>) =
+    languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+
+  @Transactional
+  fun setForKey(
+    key: Key,
+    translations: Map<Language, String?>,
+    oldTranslations: Map<Language, String?>
+  ): Map<Language, Translation> {
+    val result = translations.entries.associate { (language, value) ->
+      language to setTranslation(key, language, value)
+    }.filterValues { it != null }.mapValues { it.value }
+
+    applicationEventPublisher.publishEvent(
+      OnTranslationsSet(
+        source = this,
+        key = key,
+        oldValues = oldTranslations.map { it.key.tag to it.value }.toMap(),
+        translations = result.values.toList()
+      )
+    )
+
+    return result
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -241,6 +267,14 @@ class TranslationService(
     translation.state = state
     translation.resetFlags()
     return this.save(translation)
+  }
+
+  fun setStateBatch(states: Map<Translation, TranslationState>) {
+    states.forEach { (translation, newState) ->
+      translation.state = newState
+      translation.resetFlags()
+      this.save(translation)
+    }
   }
 
   fun findBaseTranslation(key: Key): Translation? {
