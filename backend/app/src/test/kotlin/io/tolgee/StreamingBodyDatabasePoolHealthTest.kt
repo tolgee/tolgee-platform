@@ -19,6 +19,7 @@ package io.tolgee
 import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.retry
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -52,11 +53,13 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `streaming responses do not cause a database connection pool exhaustion`() {
-    val hikariDataSource = dataSource as HikariDataSource
-    val pool = hikariDataSource.hikariPoolMXBean
+    retry(exceptionMatcher = { it is ConcurrentModificationException }) {
+      val hikariDataSource = dataSource as HikariDataSource
+      val pool = hikariDataSource.hikariPoolMXBean
 
-    pool.idleConnections.assert.isGreaterThan(90)
-    repeat(50) { performProjectAuthGet("export").andIsOk }
-    pool.idleConnections.assert.isGreaterThan(90)
+      pool.idleConnections.assert.isGreaterThan(90)
+      repeat(50) { performProjectAuthGet("export").andIsOk }
+      pool.idleConnections.assert.isGreaterThan(90)
+    }
   }
 }
