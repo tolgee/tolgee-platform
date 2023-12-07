@@ -227,8 +227,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       node("projectId").isNotNull
       node("scopes").isArray.isNotEmpty
       node("translateLanguageIds").isNull()
-      node("viewLanguages").isNull()
-      node("stateChangeLanguages").isNull()
+      node("viewLanguageIds").isNull()
+      node("stateChangeLanguageIds").isNull()
     }
   }
 
@@ -239,10 +239,11 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", headers)
       .andIsOk.andAssertThatJson {
         node("projectId").isNotNull
+        node("type").isEqualTo("MANAGE")
         node("scopes").isArray.isNotEmpty
         node("translateLanguageIds").isNull()
-        node("viewLanguages").isNull()
-        node("stateChangeLanguages").isNull()
+        node("viewLanguageIds").isNull()
+        node("stateChangeLanguageIds").isNull()
       }
   }
 

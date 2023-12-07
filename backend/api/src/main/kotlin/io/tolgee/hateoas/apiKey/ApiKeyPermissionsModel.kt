@@ -1,37 +1,29 @@
 package io.tolgee.hateoas.apiKey
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.hateoas.permission.IPermissionModel
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
 @Suppress("unused")
 @Relation(collectionRelation = "permissions", itemRelation = "permissions")
-open class ApiKeyPermissionsModel(
+class ApiKeyPermissionsModel(
   @Schema(description = """The API key's project id or the one provided as query param""")
   val projectId: Long,
 
-  @Schema(description = """Languages user can translate to""")
-  val translateLanguageIds: Set<Long>?,
+  override var viewLanguageIds: Set<Long>?,
 
-  @Schema(deprecated = true, description = "Languages user can view")
-  var viewLanguages: Set<Long>?,
+  override val translateLanguageIds: Set<Long>?,
 
-  @Schema(deprecated = true, description = "Languages user can change translation state (review)")
-  var stateChangeLanguages: Set<Long>?,
+  override var stateChangeLanguageIds: Set<Long>?,
 
-  @Schema(
-    description = "Api key's permission scopes",
-    example =
-    """
-      [
-        "screenshots.upload",
-        "screenshots.delete",
-        "translations.edit", 
-        "screenshots.view", 
-        "translations.view", 
-        "keys.edit"
-        ]
-  """
+  override var scopes: Array<Scope> = arrayOf(),
+
+  @get:Schema(
+    description = "The user's permission type. This field is null if user has assigned " +
+      "granular permissions or if returning API key's permissions",
   )
-  var scopes: Set<String> = setOf()
-) : RepresentationModel<ApiKeyPermissionsModel>()
+  override val type: ProjectPermissionType?
+) : RepresentationModel<ApiKeyPermissionsModel>(), IPermissionModel

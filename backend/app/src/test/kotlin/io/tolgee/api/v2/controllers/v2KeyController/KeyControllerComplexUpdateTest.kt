@@ -81,7 +81,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
       statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.TRANSLATED)
     )
 
-    //existing translation
+    // existing translation
     doUpdateAndVerifyStates(
       translations = mapOf("en" to "EN", "de" to "DE"),
       states = mapOf("de" to AssignableTranslationState.REVIEWED),

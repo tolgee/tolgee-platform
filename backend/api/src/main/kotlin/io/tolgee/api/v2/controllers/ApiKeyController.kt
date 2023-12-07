@@ -133,11 +133,14 @@ class ApiKeyController(
     @RequestParam
     @Parameter(description = "Required when using with PAT") projectId: Long?
   ): ApiKeyPermissionsModel {
+    val apiKeyAuthentication = authenticationFacade.isProjectApiKeyAuth
+    val personalAccessTokenAuth = authenticationFacade.isPersonalAccessTokenAuth
+
     val projectIdNotNull = when {
-      authenticationFacade.isProjectApiKeyAuth ->
+      apiKeyAuthentication ->
         authenticationFacade.projectApiKey.projectId
 
-      authenticationFacade.isPersonalAccessTokenAuth ->
+      personalAccessTokenAuth ->
         projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
 
       else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
@@ -150,25 +153,19 @@ class ApiKeyController(
 
     val computed = permissionData.computedPermissions
     val scopes = when {
-      authenticationFacade.isProjectApiKeyAuth ->
-        authenticationFacade.projectApiKey.scopes.toSet()
-
-      authenticationFacade.isPersonalAccessTokenAuth ->
-        computed.scopes.toSet()
-
-      else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+      apiKeyAuthentication -> authenticationFacade.projectApiKey.scopes.toTypedArray()
+      else -> computed.scopes
     }
-
 
     return ApiKeyPermissionsModel(
       projectIdNotNull,
+      type = if (apiKeyAuthentication) null else computed.type,
       translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
-      viewLanguages = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
-      stateChangeLanguages = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
-      scopes.map { it.value }.toSet()
+      viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
+      stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
+      scopes = scopes
     )
   }
-
 
   fun Set<Long>?.toNormalizedPermittedLanguageSet(): Set<Long>? {
     if (this.isNullOrEmpty()) {

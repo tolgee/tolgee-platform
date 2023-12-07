@@ -18,15 +18,6 @@ interface IPermissionModel {
   val type: ProjectPermissionType?
 
   @get:Schema(
-    description = """Deprecated (use translateLanguageIds). 
-
-List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.""",
-    deprecated = true,
-    example = "[200001, 200004]"
-  )
-  val permittedLanguageIds: Collection<Long>?
-
-  @get:Schema(
     description = """List of languages user can translate to. If null, all languages editing is permitted.""",
     example = "[200001, 200004]"
   )
