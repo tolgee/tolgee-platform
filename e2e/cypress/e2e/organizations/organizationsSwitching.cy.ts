@@ -13,7 +13,9 @@ describe('Organization switching', () => {
 
   beforeEach(() => {
     login();
-    organizationTestData.clean();
+    organizationTestData.clean({
+      timeout: 120000,
+    });
     organizationTestData.generate().then((res) => {
       organizationData = res.body as any;
       visit();
