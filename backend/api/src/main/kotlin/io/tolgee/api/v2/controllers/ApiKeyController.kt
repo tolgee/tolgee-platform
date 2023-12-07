@@ -130,6 +130,7 @@ class ApiKeyController(
   @Operation(summary = "Returns current PAK or PAT permissions for current user, api-key and project")
   @AllowApiAccess()
   fun getCurrentPermissions(
+    @RequestParam
     @Parameter(description = "Required when using with PAT") projectId: Long?
   ): ApiKeyPermissionsModel {
     val projectIdNotNull = when {
