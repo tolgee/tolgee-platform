@@ -174,7 +174,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
     testLogging {
         events = ["passed", "failed", "skipped"]
     }
@@ -184,23 +184,21 @@ task runContextRecreatingTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
-    jvmArgs "-Dspring.test.context.cache.maxSize=16"
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
 }
 
 task runStandardTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         excludeTags "contextRecreating", "websocket"
     }
-    jvmArgs "-Dspring.test.context.cache.maxSize=16"
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
 }
 
 task runWebsocketTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         includeTags "websocket"
     }
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
 }
 
 springBoot {
