@@ -1,3 +1,10 @@
+# [3.39.0](https://github.com/tolgee/tolgee-platform/compare/v3.38.4...v3.39.0) (2023-12-07)
+
+
+### Features
+
+* Enable state change in complex edit ([#2003](https://github.com/tolgee/tolgee-platform/issues/2003)) ([bf78816](https://github.com/tolgee/tolgee-platform/commit/bf788161cabf9234c8920fe507270f2f302cd539))
+
 ## [3.38.4](https://github.com/tolgee/tolgee-platform/compare/v3.38.3...v3.38.4) (2023-12-07)
 
 
