@@ -10,6 +10,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewRepeatableTransaction
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -57,7 +58,10 @@ class OrganizationE2eDataController(
   @GetMapping(value = ["/clean"])
   fun cleanupOrganizations() {
     traceLogMeasureTime("cleanupOrganizations") {
-      executeInNewRepeatableTransaction(transactionManager) {
+      executeInNewRepeatableTransaction(
+        transactionManager,
+        isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE
+      ) {
         traceLogMeasureTime("delete what-a-nice-organization") {
           organizationService.findAllByName("What a nice organization").forEach {
             organizationService.delete(it)
