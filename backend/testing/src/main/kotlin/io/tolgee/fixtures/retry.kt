@@ -1,6 +1,10 @@
 package io.tolgee.fixtures
 
-fun retry(retries: Int = 3, exceptionMatcher: (Throwable) -> Boolean = { true }, fn: () -> Unit) {
+fun retry(
+  retries: Int = 3,
+  exceptionMatcher: (Throwable) -> Boolean = { true },
+  fn: () -> Unit
+) {
   val thrown = mutableListOf<Throwable>()
   var passed = false
   while (thrown.size < retries + 1) {
