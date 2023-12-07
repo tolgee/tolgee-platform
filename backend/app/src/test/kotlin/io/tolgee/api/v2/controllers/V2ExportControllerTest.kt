@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.retry
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -84,12 +85,15 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performExport()
     performExport()
     performExport()
-    Thread.sleep(2000)
-    verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
+    waitForNotThrowing(pollTime = 50, timeout = 3000) {
+      verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
+    }
     setForcedDate(currentDateProvider.date.addDays(1))
     performExport()
     performExport()
-    verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
+    waitForNotThrowing(pollTime = 50, timeout = 3000) {
+      verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
+    }
   }
 
   @Test
