@@ -687,7 +687,7 @@
   "organization_users_projects_description" : "User has direct access to these projects:",
   "organization_users_projects_title" : "User projects",
   "organization_users_remove_user" : "Remove",
-  "organization_your_address_to_access_organization" : "This will be URL of your organization: {address}",
+  "organization_your_address_to_access_organization" : "This will be the URL of your organization: {address}",
   "out_of_credits" : "Out of credits for machine translation",
   "paid-feature-banner-title" : "Your plan doesn't include this feature.",
   "parser_duplicate_plural_argument_selector" : "Duplicate option",

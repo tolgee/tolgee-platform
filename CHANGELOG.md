@@ -1,3 +1,10 @@
+## [3.38.4](https://github.com/tolgee/tolgee-platform/compare/v3.38.3...v3.38.4) (2023-12-07)
+
+
+### Bug Fixes
+
+* handle async dispatch in security interceptors ([#2012](https://github.com/tolgee/tolgee-platform/issues/2012)) ([ba5aa3a](https://github.com/tolgee/tolgee-platform/commit/ba5aa3ac659b549892e3b11a5c89a2f725c3e5b5))
+
 ## [3.38.3](https://github.com/tolgee/tolgee-platform/compare/v3.38.2...v3.38.3) (2023-11-28)
 
 
