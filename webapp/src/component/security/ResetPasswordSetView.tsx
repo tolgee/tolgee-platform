@@ -3,12 +3,10 @@ import { useTranslate } from '@tolgee/react';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -18,12 +16,11 @@ import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { DashboardPage } from '../layout/DashboardPage';
 import { useLogout } from 'tg.hooks/useLogout';
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 const PasswordFieldWithValidation = React.lazy(
   () => import('tg.component/security/PasswordFieldWithValidation')
 );
-
-const globalActions = container.resolve(GlobalActions);
 
 type ValueType = {
   password: string;

@@ -1,5 +1,6 @@
 import { CompatClient, Stomp } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+// @ts-ignore
+import SockJS from 'sockjs-client/dist/sockjs';
 import { components } from 'tg.service/apiSchema.generated';
 
 type BatchJobModelStatus = components['schemas']['BatchJobModel']['status'];

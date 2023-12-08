@@ -1,9 +1,6 @@
-import { singleton } from 'tsyringe';
-
 import { AbstractActions } from './AbstractActions';
 import { Action, ActionType, PromiseAction } from './Action';
 
-@singleton()
 export class ImplicitReducer {
   create =
     <StateType>(actions: AbstractActions<StateType>, appState?) =>
@@ -41,3 +38,5 @@ export class ImplicitReducer {
       return actions.customReducer(state, action, appState);
     };
 }
+
+export const implicitReducer = new ImplicitReducer();

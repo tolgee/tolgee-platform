@@ -2,6 +2,7 @@
   "name": "webapp",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@dicebear/avatars": "4.10.2",
     "@dicebear/avatars-identicon-sprites": "4.10.2",
@@ -33,7 +34,7 @@
     "prism-react-renderer": "1.2.1",
     "prism-svelte": "0.4.7",
     "react": "^17.0.1",
-    "react-codemirror2-react-17": "^1.0.0",
+    "react-codemirror2": "^7.3.0",
     "react-cropper": "2.1.8",
     "react-dnd": "^14.0.2",
     "react-dnd-html5-backend": "^14.0.0",
@@ -57,7 +58,7 @@
     "sockjs-client": "^1.6.1",
     "tsyringe": "^4.6.0",
     "use-context-selector": "^1.3.9",
-    "use-debounce": "^7.0.1",
+    "use-debounce": "^10.0.0",
     "uuid": "9.0.0",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.2.2",
@@ -67,10 +68,10 @@
     "zxcvbn": "^4.4.2"
   },
   "scripts": {
-    "start": "NODE_OPTIONS=--openssl-legacy-provider craco start",
+    "start": "vite",
     "develop": "start",
-    "startConcurrently": "NODE_OPTIONS=--openssl-legacy-provider concurrently \"npm run start\"",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider craco build",
+    "startConcurrently": "concurrently \"npm run start\"",
+    "build": "tsc && vite build",
     "test": "craco test",
     "schema": "node ./scripts/generate-schemas.js public",
     "billing-schema": "node ./scripts/generate-schemas.js billing",
@@ -103,6 +104,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@craco/craco": "^6.4.5",
+    "@emotion/babel-plugin": "^11.11.0",
     "@mdx-js/loader": "1.6.22",
     "@sentry/types": "^6.5.1",
     "@testing-library/jest-dom": "^5.14.1",

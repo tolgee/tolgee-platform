@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
-import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
@@ -18,7 +17,7 @@ import { Select } from 'tg.component/common/form/fields/Select';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
 import { redirect } from 'tg.hooks/redirect';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService, MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -38,8 +37,6 @@ interface Props {
   project?: components['schemas']['ProjectModel'];
   initialDescriptionValue?: string;
 }
-
-const messageService = container.resolve(MessageService);
 
 const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));

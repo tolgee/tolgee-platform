@@ -1,19 +1,16 @@
 import { useState } from 'react';
-import { container } from 'tsyringe';
 import { useTranslate } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
-import { MessageService } from 'tg.service/MessageService';
 import { useDeleteKeys } from 'tg.service/TranslationHooks';
 import { useTranslationsService } from './useTranslationsService';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { messageService } from 'tg.service/MessageService';
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
 };
-
-const messaging = container.resolve(MessageService);
 
 export const useSelectionService = ({ translations }: Props) => {
   const { refetchUsage } = useGlobalActions();
@@ -54,7 +51,7 @@ export const useSelectionService = ({ translations }: Props) => {
               onSuccess() {
                 translations.refetchTranslations();
                 refetchUsage();
-                messaging.success(
+                messageService.success(
                   t('Translation grid - Successfully deleted!')
                 );
                 resolve();

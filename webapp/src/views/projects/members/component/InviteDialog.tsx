@@ -11,27 +11,25 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
 
 import { useProject } from 'tg.hooks/useProject';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { MessageService } from 'tg.service/MessageService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { PermissionsSettings } from 'tg.component/PermissionsSettings/PermissionsSettings';
 import {
   PermissionModel,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { messageService } from 'tg.service/MessageService';
+
 import {
   CreateInvitationData,
   useCreateInvitation,
 } from './useCreateInvitation';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
-
-const messaging = container.resolve(MessageService);
 
 const StyledContent = styled('div')`
   display: flex;
@@ -75,9 +73,13 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
           [PARAMS.INVITATION_CODE]: result.code,
         })
       );
-      messaging.success(<T keyName="invite_user_invitation_copy_success" />);
+      messageService.success(
+        <T keyName="invite_user_invitation_copy_success" />
+      );
     } else {
-      messaging.success(<T keyName="invite_user_invitation_email_success" />);
+      messageService.success(
+        <T keyName="invite_user_invitation_email_success" />
+      );
     }
     onClose();
   }

@@ -2,12 +2,9 @@ import { Dialog, DialogContent, IconButton, styled } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
-import { container } from 'tsyringe';
-import { ErrorActions } from 'tg.store/global/ErrorActions';
 
 import GlobalError from './common/GlobalError';
-
-const errorActions = container.resolve(ErrorActions);
+import { errorActions } from 'tg.store/global/ErrorActions';
 
 const CloseIcon = styled('div')`
   position: absolute;

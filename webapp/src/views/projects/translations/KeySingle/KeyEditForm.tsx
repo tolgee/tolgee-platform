@@ -1,4 +1,3 @@
-import { container } from 'tsyringe';
 import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
@@ -6,7 +5,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService, MessageService } from 'tg.service/MessageService';
 
 import { CellKey } from '../CellKey';
 import {
@@ -23,8 +22,6 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-
-const messaging = container.resolve(MessageService);
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -151,7 +148,7 @@ export const KeyEditForm: React.FC = () => {
           },
           {
             onSuccess() {
-              messaging.success(
+              messageService.success(
                 <T keyName="translation_single_delete_success" />
               );
               history.push(

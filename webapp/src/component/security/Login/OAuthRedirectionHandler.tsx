@@ -1,18 +1,15 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { GlobalActions, GlobalState } from 'tg.store/global/GlobalActions';
+import { globalActions, GlobalState } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
-
-const actions = container.resolve(GlobalActions);
 
 export const OAuthRedirectionHandler: FunctionComponent<
   OAuthRedirectionHandlerProps
@@ -41,7 +38,10 @@ export const OAuthRedirectionHandler: FunctionComponent<
     }
 
     if (code && !security.allowPrivate) {
-      actions.oAuthSuccessful.dispatch(match.params[PARAMS.SERVICE_TYPE], code);
+      globalActions.oAuthSuccessful.dispatch(
+        match.params[PARAMS.SERVICE_TYPE],
+        code
+      );
     }
   }, [security.allowPrivate]);
 

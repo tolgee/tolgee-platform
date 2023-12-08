@@ -1,12 +1,10 @@
-import React, { FunctionComponent, useRef, useState } from 'react';
+import { FunctionComponent, useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Alert, useMediaQuery } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { Redirect, useHistory } from 'react-router-dom';
-import { container } from 'tsyringe';
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { SecurityService } from 'tg.service/SecurityService';
 import { AppState } from 'tg.store/index';
 
 import { LoginCredentialsForm } from './LoginCredentialsForm';
@@ -17,10 +15,9 @@ import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { LoginMoreInfo } from './LoginMoreInfo';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
+import { securityService } from 'tg.service/SecurityService';
 
 interface LoginProps {}
-
-const securityServiceIns = container.resolve(SecurityService);
 
 // noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {
@@ -41,7 +38,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
   );
 
   if (history.location.state && (history.location.state as any).from) {
-    securityServiceIns.saveAfterLoginLink((history.location.state as any).from);
+    securityService.saveAfterLoginLink((history.location.state as any).from);
   }
 
   if (!remoteConfig.authentication || security.allowPrivate) {

@@ -3,15 +3,14 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProjectContextOptional } from './useProject';
 import { AnonymousIdService } from 'tg.service/AnonymousIdService';
 import { useEffect } from 'react';
-import { container } from 'tsyringe';
-import { TokenService } from 'tg.service/TokenService';
+import { tokenService } from 'tg.service/TokenService';
 
 export const useReportEvent = () => {
   const reportMutation = useApiMutation({
     url: '/v2/public/business-events/report',
     method: 'post',
   });
-  const isAuthenticated = container.resolve(TokenService).getToken() !== null;
+  const isAuthenticated = tokenService.getToken() !== null;
   const storedPreferredOrganization = usePreferredOrganization();
 
   const preferredOrganization = isAuthenticated

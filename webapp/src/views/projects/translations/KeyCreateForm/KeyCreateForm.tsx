@@ -2,25 +2,21 @@ import { useEffect } from 'react';
 import { T } from '@tolgee/react';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { container } from 'tsyringe';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { LINKS } from 'tg.constants/links';
-import { MessageService } from 'tg.service/MessageService';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { FormBody } from './FormBody';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useTranslationsWebsocketBlocker } from '../context/useTranslationsWebsocketBlocker';
+import { messageService } from 'tg.service/MessageService';
+import { redirectionActions } from 'tg.store/global/RedirectionActions';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
-
-const messaging = container.resolve(MessageService);
-const redirectionActions = container.resolve(RedirectionActions);
 
 export type ValuesCreateType = {
   name: string;
@@ -65,7 +61,7 @@ export const KeyCreateForm: React.FC<Props> = ({
       },
       {
         onSuccess(data) {
-          messaging.success(<T keyName="translations_key_created" />);
+          messageService.success(<T keyName="translations_key_created" />);
           onSuccess?.(data);
           refetchUsage();
         },
@@ -82,7 +78,9 @@ export const KeyCreateForm: React.FC<Props> = ({
   useEffect(() => {
     if (!canCreateKeys) {
       redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
-      messaging.error(<T keyName="translation_single_no_permission_create" />);
+      messageService.error(
+        <T keyName="translation_single_no_permission_create" />
+      );
     }
   }, [canCreateKeys]);
 

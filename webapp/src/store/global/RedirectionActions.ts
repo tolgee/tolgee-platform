@@ -1,5 +1,3 @@
-import { singleton } from 'tsyringe';
-
 import { AbstractActions } from '../AbstractActions';
 
 export class RedirectionState {
@@ -7,7 +5,6 @@ export class RedirectionState {
   redirecting = false;
 }
 
-@singleton()
 export class RedirectionActions extends AbstractActions<RedirectionState> {
   constructor() {
     super(new RedirectionState());
@@ -27,3 +24,5 @@ export class RedirectionActions extends AbstractActions<RedirectionState> {
     return 'REDIRECT';
   }
 }
+
+export const redirectionActions = new RedirectionActions();

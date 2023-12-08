@@ -21,7 +21,7 @@ import {
   useTranslationsSelector,
 } from './context/TranslationsContext';
 import { stopBubble } from 'tg.fixtures/eventHandler';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebounce } from 'use-debounce';
 import { ControlsEditor } from './cell/ControlsEditor';
 import { ControlsKey } from './cell/ControlsKey';
 import { TagAdd } from './Tags/TagAdd';

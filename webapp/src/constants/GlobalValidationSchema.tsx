@@ -1,10 +1,9 @@
 import { DefaultParamType, T, TFnType, TranslationKey } from '@tolgee/react';
-import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { OrganizationService } from '../service/OrganizationService';
-import { SignUpService } from '../service/SignUpService';
+import { organizationService } from '../service/OrganizationService';
+import { signUpService } from '../service/SignUpService';
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -58,7 +57,7 @@ export class Validation {
       } catch (e) {
         return false;
       }
-    }, container.resolve(SignUpService).validateEmail);
+    }, signUpService.validateEmail);
 
   static readonly SIGN_UP = (t: TFunType, orgRequired: boolean) =>
     Yup.object().shape({
@@ -238,7 +237,7 @@ export class Validation {
             return false;
           }
         },
-        (v) => container.resolve(OrganizationService).validateSlug(v)
+        (v) => organizationService.validateSlug(v)
       )(v);
     };
     return Yup.object().shape({

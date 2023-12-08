@@ -1,10 +1,8 @@
-import { singleton } from 'tsyringe';
 import { AnonymousIdService } from './AnonymousIdService';
 
 export const JWT_LOCAL_STORAGE_KEY = 'jwtToken';
 export const ADMIN_JWT_LOCAL_STORAGE_KEY = 'adminJwtToken';
 
-@singleton()
 export class TokenService {
   getToken() {
     const token = localStorage.getItem(JWT_LOCAL_STORAGE_KEY);
@@ -54,3 +52,5 @@ export class TokenService {
     return JSON.parse(jsonPayload);
   }
 }
+
+export const tokenService = new TokenService();

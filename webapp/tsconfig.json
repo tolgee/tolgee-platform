@@ -1,12 +1,9 @@
 {
   "extends": "./tsconfig.extend.json",
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ESNext",
+    "types": ["vite/client"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -20,14 +17,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
     "noImplicitAny": false,
     "experimentalDecorators": true,
     "downlevelIteration": true,
     "preserveSymlinks": true,
     "emitDecoratorMetadata": true
   },
-  "include": [
-    "src",
-    "tolgee.dev.d.ts"
-  ]
+  "include": ["src", "tolgee.dev.d.ts", "vite-env.d.ts"]
 }

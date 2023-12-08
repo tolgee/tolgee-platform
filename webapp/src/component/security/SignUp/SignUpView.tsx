@@ -15,13 +15,12 @@ import { SignUpForm } from './SignUpForm';
 import { SignUpProviders } from './SignUpProviders';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { TokenService } from 'tg.service/TokenService';
-import { container } from 'tsyringe';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useRecaptcha } from './useRecaptcha';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
+import { tokenService } from 'tg.service/TokenService';
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 export type SignUpType = {
   name: string;
@@ -30,9 +29,6 @@ export type SignUpType = {
   organizationName: string;
   invitationCode?: string;
 };
-
-const tokenService = container.resolve(TokenService);
-const globalActions = container.resolve(GlobalActions);
 
 const StyledRightPart = styled('div')`
   display: grid;

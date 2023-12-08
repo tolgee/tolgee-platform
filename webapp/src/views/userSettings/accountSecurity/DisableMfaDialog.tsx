@@ -1,11 +1,8 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { SecurityService } from 'tg.service/SecurityService';
-
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS } from 'tg.constants/links';
 import { redirect } from 'tg.hooks/redirect';
@@ -15,10 +12,9 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { securityService } from 'tg.service/SecurityService';
 
 type TotpDisableDto = components['schemas']['UserTotpDisableRequestDto'];
-
-const securityService = container.resolve(SecurityService);
 
 export const DisableMfaDialog: FunctionComponent = () => {
   const onDialogClose = () => {

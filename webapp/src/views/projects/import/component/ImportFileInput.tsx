@@ -2,10 +2,9 @@ import React, { FunctionComponent, ReactNode, useState } from 'react';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { Box, Button, styled, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { useConfig } from 'tg.globalContext/helpers';
-import { MessageActions } from 'tg.store/global/MessageActions';
+import { messageActions } from 'tg.store/global/MessageActions';
 import { Message } from 'tg.store/global/types';
 
 import { ImportFileDropzone } from './ImportFileDropzone';
@@ -55,7 +54,6 @@ const StyledRoot = styled(Box)(({ theme }) => ({
   marginTop: '16px',
 }));
 
-const messageActions = container.resolve(MessageActions);
 const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   const { t } = useTranslate();
   const fileRef = React.createRef<HTMLInputElement>();

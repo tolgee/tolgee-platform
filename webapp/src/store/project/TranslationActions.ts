@@ -1,5 +1,4 @@
 import { useSelector } from 'react-redux';
-import { singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
@@ -26,7 +25,6 @@ export class TranslationsState extends StateWithLoadables<TranslationActions> {
   } | null = null;
 }
 
-@singleton()
 export class TranslationActions extends AbstractLoadableActions<TranslationsState> {
   constructor() {
     super(new TranslationsState());
@@ -50,3 +48,5 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     return 'TRANSLATIONS';
   }
 }
+
+export const translationActions = new TranslationActions();

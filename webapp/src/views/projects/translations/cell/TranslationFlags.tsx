@@ -38,7 +38,7 @@ const StyledContainer = styled('div')`
   margin-left: -4px;
   border-radius: 10px;
 
-  &:hover ${StyledClearButton} {
+  &:hover .clearButton {
     display: block;
   }
   &:hover {
@@ -122,6 +122,7 @@ export const TranslationFlags: React.FC<Props> = ({
               role="button"
               onClick={handleClearAutoTranslated}
               data-cy="translations-auto-translated-clear-button"
+              className="clearButton"
             />
           </StyledContainer>
         )}

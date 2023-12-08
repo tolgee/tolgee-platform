@@ -31,7 +31,7 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       if (jwtToken) {
         const newClient = WebsocketClient({
           authentication: { jwtToken: jwtToken },
-          serverUrl: process.env.REACT_APP_API_URL,
+          serverUrl: import.meta.env.VITE_APP_API_URL,
           onConnected: () => setClientConnected(true),
           onConnectionClose: () => setClientConnected(false),
         });
