@@ -165,7 +165,7 @@ class XliffFileExporterTest {
     ).produceFiles()
 
     val validator: Validator
-    val xsdInputStream4 = javaClass.classLoader.getResourceAsStream("xliff/xliff-core-1.2-transitional.xsd")
+    javaClass.classLoader.getResourceAsStream("xliff/xliff-core-1.2-transitional.xsd")
       .use { xsdInputStream ->
         validator = try {
           val factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
