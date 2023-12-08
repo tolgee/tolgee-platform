@@ -149,4 +149,8 @@ class BatchJobChunkExecutionQueue(
   override fun afterPropertiesSet() {
     metrics.registerJobQueue(queue)
   }
+
+  fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> {
+    return queue.filter { it.jobId == jobId }
+  }
 }

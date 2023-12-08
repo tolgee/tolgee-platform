@@ -22,6 +22,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.retry
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,7 +54,7 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `streaming responses do not cause a database connection pool exhaustion`() {
-    retry(exceptionMatcher = { it is ConcurrentModificationException }) {
+    retry(exceptionMatcher = { getRootCause(it) is ConcurrentModificationException }) {
       val hikariDataSource = dataSource as HikariDataSource
       val pool = hikariDataSource.hikariPoolMXBean
 
