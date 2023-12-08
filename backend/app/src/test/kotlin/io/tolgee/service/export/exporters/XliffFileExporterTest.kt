@@ -174,7 +174,7 @@ class XliffFileExporterTest {
           val schema = factory.newSchema(schemaFile)
           schema.newValidator()
         } catch (e: Exception) {
-          throw e;
+          throw e
         }
       }
 
