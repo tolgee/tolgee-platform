@@ -5,7 +5,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { messageService, MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 
 import { CellKey } from '../CellKey';
 import {

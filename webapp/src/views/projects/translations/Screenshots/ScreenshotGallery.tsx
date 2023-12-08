@@ -14,7 +14,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { messageService, MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { ScreenshotDetail } from './ScreenshotDetail';
