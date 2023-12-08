@@ -13,6 +13,7 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.util.Logging
+import io.tolgee.util.debug
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import org.springframework.context.ApplicationEventPublisher
@@ -106,7 +107,16 @@ class ProgressManager(
       it
     }
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
-    logger.debug("Is job ${execution.batchJob.id} completed: $isJobCompleted (execution: ${execution.id})")
+    logger.debug {
+      val incompleteExecutions =
+        state.filter { !(it.value.transactionCommitted && it.value.status.completed) }
+          .map { it.key }
+          .joinToString(", ")
+      "Is job ${execution.batchJob.id} " +
+        "completed: $isJobCompleted " +
+        "(current execution: ${execution.id}), " +
+        "incomplete executions: $incompleteExecutions"
+    }
     if (isJobCompleted) {
       onJobCompletedCommitted(execution)
     }
