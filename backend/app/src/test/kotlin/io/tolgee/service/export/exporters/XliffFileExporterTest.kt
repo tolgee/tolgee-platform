@@ -7,14 +7,21 @@ import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.w3c.dom.Attr
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
+import org.xml.sax.SAXParseException
 import java.io.StringReader
+import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.Source
+import javax.xml.transform.stream.StreamSource
+import javax.xml.validation.SchemaFactory
+import javax.xml.validation.Validator
 import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
@@ -139,5 +146,50 @@ class XliffFileExporterTest {
 
   private fun Element.attribute(name: String): Attr {
     return this.getAttributeNode(name)
+  }
+
+  /**
+   * Validate the xml file output against the xliff 1.2 Schema.
+   */
+  @Test
+  fun `validate xml output`() {
+    val translations = getBaseTranslations()
+    val params = ExportParams()
+    val baseProvider = { translations.filter { it.languageTag == "en" } }
+
+    val files = XliffFileExporter(
+      translations,
+      exportParams = params,
+      baseTranslationsProvider = baseProvider,
+      baseLanguage = Language().apply { tag = "en" }
+    ).produceFiles()
+
+    val validator: Validator
+    javaClass.classLoader.getResourceAsStream("xliff/xliff-core-1.2-transitional.xsd")
+      .use { xsdInputStream ->
+        validator = try {
+          val factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+          val schemaFile: Source = StreamSource(xsdInputStream)
+
+          val schema = factory.newSchema(schemaFile)
+          schema.newValidator()
+        } catch (e: Exception) {
+          throw e
+        }
+      }
+
+    assertThat(files).hasSize(2)
+
+    // de.xlf is invalid because of a missing a "source" element inside the "trans-unit". Should throw a SAXParseException.
+    files["de.xlf"].use { invalidFileContent ->
+      assertThrows<SAXParseException> {
+        validator.validate(StreamSource(invalidFileContent))
+      }
+    }
+
+    // en.xlf is valid
+    files["en.xlf"].use { validFileContent ->
+      validator.validate(StreamSource(validFileContent))
+    }
   }
 }
