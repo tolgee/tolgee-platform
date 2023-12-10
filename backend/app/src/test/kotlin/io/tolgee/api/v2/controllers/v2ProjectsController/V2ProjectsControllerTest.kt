@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -22,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+open class V2ProjectsControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {
     executeInNewTransaction {

@@ -1,12 +1,12 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.lang3.time.DateUtils
 import org.junit.jupiter.api.AfterEach
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class V2ImportControllerResultTest : AuthorizedControllerTest() {
+class V2ImportControllerResultTest : AbstractServerAppAuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     setForcedDate(Date())

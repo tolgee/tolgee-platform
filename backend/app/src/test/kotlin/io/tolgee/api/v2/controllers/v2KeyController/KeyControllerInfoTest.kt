@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysInfoTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -16,7 +16,7 @@ import kotlin.properties.Delegates
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerInfoTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: KeysInfoTestData
   var uploadedImageId by Delegates.notNull<Long>()

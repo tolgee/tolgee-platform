@@ -6,7 +6,7 @@ package io.tolgee.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.TelemetryReportRequest
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
 import org.springframework.web.client.RestTemplate
 
@@ -28,9 +27,8 @@ import org.springframework.web.client.RestTemplate
     "tolgee.telemetry.enabled=false"
   ]
 )
-class TelemetryServiceTest : AbstractSpringTest() {
+class TelemetryServiceTest : AbstractServerAppTest() {
 
-  @MockBean
   @Autowired
   lateinit var restTemplate: RestTemplate
 

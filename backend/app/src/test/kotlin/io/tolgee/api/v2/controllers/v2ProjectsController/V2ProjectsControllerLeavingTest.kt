@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.development.testDataBuilder.data.ProjectLeavingTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2ProjectsControllerLeavingTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod

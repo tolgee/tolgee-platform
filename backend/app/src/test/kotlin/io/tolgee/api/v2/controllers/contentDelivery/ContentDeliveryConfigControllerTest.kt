@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.contentDelivery
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.batch.BatchJobConcurrentLauncher
 import io.tolgee.component.fileStorage.AzureBlobFileStorage
 import io.tolgee.component.fileStorage.AzureFileStorageFactory
@@ -32,7 +32,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.web.servlet.ResultActions
 
 @ContextRecreatingTest
-class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class ContentDeliveryConfigControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: ContentDeliveryConfigTestData
 

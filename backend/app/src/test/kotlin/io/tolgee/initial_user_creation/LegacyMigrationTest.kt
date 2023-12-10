@@ -4,7 +4,7 @@
 
 package io.tolgee.initial_user_creation
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
 @CleanDbBeforeClass
-class LegacyMigrationTest : AbstractSpringTest() {
+class LegacyMigrationTest : AbstractServerAppTest() {
   @Autowired
   lateinit var userAccountRepository: UserAccountRepository
 

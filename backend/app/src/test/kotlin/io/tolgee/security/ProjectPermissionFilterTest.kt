@@ -1,14 +1,14 @@
 package io.tolgee.security
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
-import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
-class ProjectPermissionFilterTest : AuthorizedControllerTest() {
+class ProjectPermissionFilterTest : AbstractServerAppAuthorizedControllerTest() {
   @Test
   fun allowsAccessToPrivilegedUser() {
     val base = dbPopulator.createBase(generateUniqueString())

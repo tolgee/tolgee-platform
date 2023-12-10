@@ -1,10 +1,10 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.constants.Caches
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
@@ -29,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration
 )
 @ContextConfiguration(initializers = [RedisRateLimitsTest.Companion.Initializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class RedisRateLimitsTest : AuthorizedControllerTest() {
+class RedisRateLimitsTest : AbstractServerAppAuthorizedControllerTest() {
   companion object {
     val redisRunner = RedisRunner()
 

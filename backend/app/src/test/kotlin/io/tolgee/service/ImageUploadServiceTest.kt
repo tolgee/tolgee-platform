@@ -4,7 +4,7 @@
 
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
@@ -20,7 +20,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-class ImageUploadServiceTest : AbstractSpringTest() {
+class ImageUploadServiceTest : AbstractServerAppTest() {
   val screenshotFile: InputStreamSource by lazy {
     generateImage(100, 100)
   }

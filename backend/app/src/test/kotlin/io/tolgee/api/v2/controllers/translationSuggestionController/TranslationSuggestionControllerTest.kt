@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
@@ -51,7 +51,7 @@ import java.util.*
 import kotlin.system.measureTimeMillis
 import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
-class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationSuggestionControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 
   @Autowired

@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.translationSuggestionController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -16,7 +16,7 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 
-class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationSuggestionControllerStreamingTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @SpyBean

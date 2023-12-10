@@ -4,7 +4,7 @@
 
 package io.tolgee.service.project
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class ProjectServiceTest : AbstractSpringTest() {
+class ProjectServiceTest : AbstractServerAppTest() {
 
   @Autowired
   private lateinit var batchJobService: BatchJobService

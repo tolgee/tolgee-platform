@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
@@ -23,7 +23,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationCommentControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationCommentsTestData
 

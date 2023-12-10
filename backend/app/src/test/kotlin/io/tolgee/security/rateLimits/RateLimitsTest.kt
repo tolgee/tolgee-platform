@@ -1,10 +1,10 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.constants.Caches
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
     "tolgee.rate-limits.user-request-window=10000",
   ]
 )
-class RateLimitsTest : AuthorizedControllerTest() {
+class RateLimitsTest : AbstractServerAppAuthorizedControllerTest() {
   @BeforeEach
   fun clearCache() {
     cacheManager.getCache(Caches.RATE_LIMITS)?.clear()

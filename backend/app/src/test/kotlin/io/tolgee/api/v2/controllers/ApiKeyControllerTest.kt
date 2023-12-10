@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
@@ -12,7 +13,6 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.Scope
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +25,7 @@ import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ApiKeyControllerTest : AuthorizedControllerTest() {
+class ApiKeyControllerTest : AbstractServerAppAuthorizedControllerTest() {
 
   lateinit var testData: ApiKeysTestData
 

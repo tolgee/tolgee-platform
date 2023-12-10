@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.dtos.request.ImageUploadInfoDto
 import io.tolgee.fixtures.andAssertThatJson
@@ -22,7 +22,7 @@ import kotlin.properties.Delegates
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerResolvableImportTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: ResolvableImportTestData
   var uploadedImageId by Delegates.notNull<Long>()

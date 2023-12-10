@@ -1,9 +1,9 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.development.testDataBuilder.data.MtCreditsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class MtCreditsControllerTest : AuthorizedControllerTest() {
+class MtCreditsControllerTest : AbstractServerAppAuthorizedControllerTest() {
   lateinit var testData: MtCreditsTestData
 
   @BeforeEach

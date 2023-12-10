@@ -1,6 +1,6 @@
 package io.tolgee.repository.dataImport
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.model.dataImport.Import
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class ImportRepositoryTest : AbstractSpringTest() {
+class ImportRepositoryTest : AbstractServerAppTest() {
 
   @Autowired
   lateinit var importRepository: ImportRepository

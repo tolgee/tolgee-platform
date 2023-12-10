@@ -1,6 +1,6 @@
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.export.ExportParams
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class ExportServiceTest : AbstractSpringTest() {
+class ExportServiceTest : AbstractServerAppTest() {
   @Test
   fun `returns correct export data`() {
     val testData = TranslationsTestData()

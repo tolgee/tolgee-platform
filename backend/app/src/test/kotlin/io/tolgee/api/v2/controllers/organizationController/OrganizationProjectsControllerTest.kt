@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.organizationController
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -8,14 +9,13 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
-import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
+class OrganizationProjectsControllerTest : AbstractServerAppAuthorizedControllerTest() {
 
   @Test
   fun `get all projects with slug`() {

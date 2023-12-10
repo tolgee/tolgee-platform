@@ -1,6 +1,6 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class StoredDataImporterTest : AbstractSpringTest() {
+class StoredDataImporterTest : AbstractServerAppTest() {
   lateinit var storedDataImporter: StoredDataImporter
   lateinit var importTestData: ImportTestData
 

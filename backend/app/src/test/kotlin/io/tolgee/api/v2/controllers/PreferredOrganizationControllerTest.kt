@@ -1,15 +1,15 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
+class PreferredOrganizationControllerTest : AbstractServerAppAuthorizedControllerTest() {
 
   lateinit var testData: OrganizationTestData
 

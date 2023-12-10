@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ProjectTransferringTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2ProjectsControllerTransferringTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesn't transfer to organization when not permitted`() {

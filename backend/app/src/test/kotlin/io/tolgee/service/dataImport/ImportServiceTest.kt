@@ -1,6 +1,6 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class ImportServiceTest : AbstractSpringTest() {
+class ImportServiceTest : AbstractServerAppTest() {
   lateinit var importTestData: ImportTestData
 
   @BeforeEach

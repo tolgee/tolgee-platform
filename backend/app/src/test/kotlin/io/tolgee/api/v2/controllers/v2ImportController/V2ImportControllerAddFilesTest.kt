@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportCleanTestData
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
@@ -11,7 +12,6 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
-class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
+class V2ImportControllerAddFilesTest : AbstractServerAppAuthorizedControllerTest() {
   @Value("classpath:import/zipOfJsons.zip")
   lateinit var zipOfJsons: Resource
 

@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.fixtures.EmailTestUtil
@@ -11,7 +12,6 @@ import io.tolgee.model.Invitation
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class V2InvitationControllerTest : AuthorizedControllerTest() {
+class V2InvitationControllerTest : AbstractServerAppAuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {

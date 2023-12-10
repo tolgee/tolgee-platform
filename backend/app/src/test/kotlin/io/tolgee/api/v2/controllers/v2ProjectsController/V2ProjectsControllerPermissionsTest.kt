@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.fixtures.andHasErrorMessage
@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2ProjectsControllerPermissionsTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }
 

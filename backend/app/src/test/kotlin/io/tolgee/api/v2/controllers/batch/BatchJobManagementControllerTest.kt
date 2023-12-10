@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.batch
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
+class BatchJobManagementControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/"), Logging {
 
   lateinit var testData: BatchJobsTestData
 

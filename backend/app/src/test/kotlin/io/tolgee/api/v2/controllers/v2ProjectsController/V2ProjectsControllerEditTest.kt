@@ -1,18 +1,18 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
+class V2ProjectsControllerEditTest : AbstractServerAppAuthorizedControllerTest() {
   @Test
   fun `edits project`() {
     val base = dbPopulator.createBase("What a project")

@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   companion object {
     val MAX_OK_NAME = (1..2000).joinToString("") { "a" }
     val LONGER_NAME = (1..2001).joinToString("") { "a" }

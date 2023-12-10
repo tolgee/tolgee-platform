@@ -1,6 +1,6 @@
 package io.tolgee.service.query_builders
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class TranslationViewDataProviderTest : AbstractSpringTest() {
+class TranslationViewDataProviderTest : AbstractServerAppTest() {
 
   @Autowired
   private lateinit var translationViewDataProvider: TranslationViewDataProvider

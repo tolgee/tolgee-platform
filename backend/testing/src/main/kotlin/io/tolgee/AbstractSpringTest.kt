@@ -8,7 +8,13 @@ import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.*
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
@@ -43,6 +49,8 @@ import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
+import io.tolgee.testing.TestOverridesConfiguration
+import io.tolgee.testing.TestsConfiguration
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -57,20 +65,7 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
-//  exclude = [
-//    CompositeMeterRegistryAutoConfiguration::class,
-//    DataSourcePoolMetricsAutoConfiguration::class,
-//    DiskSpaceHealthContributorAutoConfiguration::class,
-//    InfoContributorAutoConfiguration::class,
-//    JmxAutoConfiguration::class,
-//    JvmMetricsAutoConfiguration::class,
-//    JmxEndpointAutoConfiguration::class,
-//    LdapAutoConfiguration::class,
-//    LiquibaseEndpointAutoConfiguration::class,
-//    MetricsEndpointAutoConfiguration::class,
-//    StartupTimeMetricsListenerAutoConfiguration::class,
-//    TomcatMetricsAutoConfiguration::class,
-//  ]
+  classes = [Application::class, TestsConfiguration::class, TestOverridesConfiguration::class]
 )
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired

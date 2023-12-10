@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 
-class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
+class MachineTranslationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   @MockBean
   lateinit var googleTranslate: Translate

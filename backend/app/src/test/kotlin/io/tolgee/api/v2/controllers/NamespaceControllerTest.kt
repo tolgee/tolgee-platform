@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class NamespaceControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: NamespacesTestData
 

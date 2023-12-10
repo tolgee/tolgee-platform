@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.posthog.java.PostHog
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
@@ -44,7 +44,7 @@ import kotlin.system.measureTimeMillis
     "tolgee.cache.enabled=true"
   ]
 )
-class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 
   @MockBean

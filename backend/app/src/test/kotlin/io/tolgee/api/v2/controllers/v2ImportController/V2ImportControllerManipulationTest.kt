@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -11,7 +11,7 @@ import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2ImportControllerManipulationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `it deletes import`() {
     val testData = ImportTestData()

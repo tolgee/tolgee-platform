@@ -1,6 +1,6 @@
 package io.tolgee.websocket
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -20,7 +20,7 @@ import org.springframework.boot.test.web.server.LocalServerPort
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WebsocketTest
-abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/") {
+abstract class AbstractWebsocketTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BaseTestData
   lateinit var translation: Translation
   lateinit var key: Key

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationSourceChangeStateTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
@@ -19,7 +19,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerFilterTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData
 

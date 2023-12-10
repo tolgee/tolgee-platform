@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
@@ -32,7 +32,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerCreationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: KeysTestData
 

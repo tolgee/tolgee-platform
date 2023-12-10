@@ -1,0 +1,3 @@
+package io.tolgee
+
+class ServerAppTestOverridesConfiguration

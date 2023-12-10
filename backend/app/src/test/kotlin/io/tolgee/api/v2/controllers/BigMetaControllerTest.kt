@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BigMetaTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
-class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class BigMetaControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: BigMetaTestData
 

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andAssertThatJson
@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2LanguageControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   private val languageDTO = LanguageDto("en", "en", "en")
   private val languageDTOBlank = LanguageDto("", "")
   private val languageDTOCorrect = LanguageDto("Spanish", "Espanol", "es")

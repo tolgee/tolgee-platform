@@ -1,12 +1,12 @@
 package io.tolgee.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.configuration.tolgee.SendInBlueProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.GitHubAuthUtil
 import org.junit.jupiter.api.AfterEach
@@ -33,7 +33,7 @@ import sibModel.UpdateContact
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class MarketingEmailingTest : AuthorizedControllerTest() {
+class MarketingEmailingTest : AbstractServerAppAuthorizedControllerTest() {
 
   @Autowired
   lateinit var sendInBlueProperties: SendInBlueProperties

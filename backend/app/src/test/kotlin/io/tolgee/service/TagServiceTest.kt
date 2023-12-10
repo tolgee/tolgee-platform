@@ -4,7 +4,7 @@
 
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class TagServiceTest : AbstractSpringTest() {
+class TagServiceTest : AbstractServerAppTest() {
   @Test
   fun `deletes just unused tags on batch delete`() {
     val tagsTestData = TagsTestData()

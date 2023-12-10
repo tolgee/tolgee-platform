@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 
-class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class ProjectStatsControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   private lateinit var testData: TranslationsTestData
 

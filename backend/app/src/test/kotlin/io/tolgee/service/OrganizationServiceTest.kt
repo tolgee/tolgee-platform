@@ -1,13 +1,13 @@
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
-class OrganizationServiceTest : AbstractSpringTest() {
+class OrganizationServiceTest : AbstractServerAppTest() {
 
   @Test
   fun `deletes organization with preferences`() {

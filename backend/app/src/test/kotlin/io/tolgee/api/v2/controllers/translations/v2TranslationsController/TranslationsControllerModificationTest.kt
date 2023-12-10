@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -23,7 +23,7 @@ import org.springframework.http.HttpHeaders
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerModificationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData
 

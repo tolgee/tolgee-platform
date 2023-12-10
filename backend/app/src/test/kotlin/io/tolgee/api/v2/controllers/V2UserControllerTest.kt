@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
@@ -12,7 +13,6 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -31,7 +31,7 @@ import java.util.*
     "tolgee.front-end-url=https://fake.frontend.url"
   ]
 )
-class V2UserControllerTest : AuthorizedControllerTest() {
+class V2UserControllerTest : AbstractServerAppAuthorizedControllerTest() {
 
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties

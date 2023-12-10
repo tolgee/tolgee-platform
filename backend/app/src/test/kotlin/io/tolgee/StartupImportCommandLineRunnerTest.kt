@@ -20,7 +20,7 @@ import org.springframework.core.io.Resource
 
 @Suppress("LateinitVarOverridesLateinitVar")
 @CleanDbBeforeClass
-class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
+class StartupImportCommandLineRunnerTest : AbstractServerAppTest() {
 
   private lateinit var base: Base
 

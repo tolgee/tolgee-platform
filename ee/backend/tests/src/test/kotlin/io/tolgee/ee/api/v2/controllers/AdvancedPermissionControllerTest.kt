@@ -8,7 +8,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.Scope
-import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.AbstractAuthorizedControllerTest
 import io.tolgee.testing.PermissionTestUtil
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 
-class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
+class AdvancedPermissionControllerTest : AbstractAuthorizedControllerTest() {
 
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }
 

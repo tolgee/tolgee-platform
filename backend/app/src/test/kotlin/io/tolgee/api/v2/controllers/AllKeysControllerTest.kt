@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class AllKeysControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: KeysTestData
 
   @BeforeEach

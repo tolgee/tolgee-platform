@@ -1,7 +1,7 @@
 package io.tolgee.activity
 
 import com.posthog.java.PostHog
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import java.util.function.Consumer
 
-class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
+class ActivityLogTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   private lateinit var testData: BaseTestData
 

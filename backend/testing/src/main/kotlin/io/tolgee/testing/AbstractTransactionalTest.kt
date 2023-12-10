@@ -15,7 +15,8 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
     TransactionalTestExecutionListener::class,
     DependencyInjectionTestExecutionListener::class,
     CleanDbTestListener::class,
-    DirtiesContextTestExecutionListener::class
+    DirtiesContextTestExecutionListener::class,
+//    MockWrappedBeanResetTestExecutionListener::class
   ]
 )
 @ActiveProfiles(profiles = ["local"])

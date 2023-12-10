@@ -1,6 +1,6 @@
 package io.tolgee.batch
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
@@ -21,7 +21,7 @@ import java.util.*
 import kotlin.math.ceil
 
 @WebsocketTest
-abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
+abstract class AbstractBatchJobsGeneralTest : AbstractServerAppTest(), Logging {
 
   private lateinit var testData: BatchJobsTestData
 

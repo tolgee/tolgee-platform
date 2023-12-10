@@ -1,13 +1,13 @@
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.ProjectStatsTestData
 import io.tolgee.service.project.ProjectStatsService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class ProjectStatsServiceTest : AbstractSpringTest() {
+internal class ProjectStatsServiceTest : AbstractServerAppTest() {
 
   @Autowired
   lateinit var projectStatsService: ProjectStatsService

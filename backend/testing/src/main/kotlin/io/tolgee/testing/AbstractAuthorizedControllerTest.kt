@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.time.Duration
 import java.util.*
 
-abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
+abstract class AbstractAuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
 
   var userAccount: UserAccount?

@@ -1,6 +1,6 @@
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -11,7 +11,7 @@ import java.util.*
 
 @SpringBootTest
 @Transactional
-class TranslationServiceTest : AbstractSpringTest() {
+class TranslationServiceTest : AbstractServerAppTest() {
 
   @Transactional
   @Test

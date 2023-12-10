@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
@@ -7,14 +8,13 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.retry
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.codec.binary.Base32
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
-class UserMfaControllerTest : AuthorizedControllerTest() {
+class UserMfaControllerTest : AbstractServerAppAuthorizedControllerTest() {
   companion object {
     private const val TOTP_KEY = "meowmeowmeowmeow"
   }

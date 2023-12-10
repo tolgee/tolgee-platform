@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.organizationController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
@@ -14,7 +15,6 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
+class OrganizationControllerInvitingTest : AbstractServerAppAuthorizedControllerTest() {
 
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"

@@ -1,14 +1,14 @@
 package io.tolgee.api.v2.controllers.organizationController
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.BeforeEach
 
-class BaseOrganizationControllerTest : AuthorizedControllerTest() {
+class BaseOrganizationControllerTest : AbstractServerAppAuthorizedControllerTest() {
   protected lateinit var dummyDto: OrganizationDto
   protected lateinit var dummyDto2: OrganizationDto
 

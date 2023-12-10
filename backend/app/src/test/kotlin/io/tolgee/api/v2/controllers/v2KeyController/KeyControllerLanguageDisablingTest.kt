@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.KeyLanguageDisablingTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerLanguageDisablingTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerLanguageDisablingTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: KeyLanguageDisablingTestData
 

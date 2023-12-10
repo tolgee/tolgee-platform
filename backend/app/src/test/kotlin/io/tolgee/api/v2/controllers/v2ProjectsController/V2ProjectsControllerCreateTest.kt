@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.fixtures.AuthorizedRequestFactory
@@ -9,7 +10,6 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
+class V2ProjectsControllerCreateTest : AbstractServerAppAuthorizedControllerTest() {
   private val languageDTO = LanguageDto(
     "English",
     "Original English", "en", "\uD83C\uDDEC\uD83C\uDDE7"

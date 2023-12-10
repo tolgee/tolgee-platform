@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import com.posthog.java.PostHog
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andIsOk
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 
-class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class BusinessEventControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
   @MockBean

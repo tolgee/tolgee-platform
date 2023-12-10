@@ -36,7 +36,7 @@ import javax.sql.DataSource
     "tolgee.rate-limits.authentication-limits = false",
   ]
 )
-class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/projects/") {
+class StreamingBodyDatabasePoolHealthTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 
   @Autowired

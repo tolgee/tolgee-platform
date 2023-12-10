@@ -1,6 +1,6 @@
 // package io.tolgee.jobs.migration.translationStats
 //
-// import io.tolgee.AbstractSpringTest
+// import io.tolgee.AbstractServerAppTest
 // import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 // import io.tolgee.repository.TranslationRepository
 // import io.tolgee.testing.assertions.Assertions.assertThat
@@ -12,7 +12,7 @@
 // import org.springframework.transaction.annotation.Transactional
 //
 // @SpringBootTest
-// class TranslationStatsJobTest : AbstractSpringTest() {
+// class TranslationStatsJobTest : io.tolgee.AbstractServerAppTest() {
 //
 //  @Autowired
 //  lateinit var translationsStatsUpdateJobRunner: TranslationsStatsUpdateJobRunner

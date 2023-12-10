@@ -1,14 +1,14 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.dtos.request.GenerateSlugDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
-import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 
-class SlugControllerTest : AuthorizedControllerTest() {
+class SlugControllerTest : AbstractServerAppAuthorizedControllerTest() {
 
   @Test
   fun testValidateOrganizationSlug() {

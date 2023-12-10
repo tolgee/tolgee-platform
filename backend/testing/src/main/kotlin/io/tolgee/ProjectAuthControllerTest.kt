@@ -6,7 +6,7 @@ import io.tolgee.fixtures.ProjectApiKeyAuthRequestPerformer
 import io.tolgee.fixtures.ProjectAuthRequestPerformer
 import io.tolgee.fixtures.ProjectJwtAuthRequestPerformer
 import io.tolgee.model.Project
-import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.AbstractAuthorizedControllerTest
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.ResultActions
 
 abstract class ProjectAuthControllerTest(
   val projectUrlPrefix: String = "/api/project/"
-) : AuthorizedControllerTest(), AuthRequestPerformer {
+) : AbstractAuthorizedControllerTest(), AuthRequestPerformer {
 
   // for api key auth methods
   val apiKey: ApiKeyDTO

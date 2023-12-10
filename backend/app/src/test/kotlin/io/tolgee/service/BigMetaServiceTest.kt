@@ -1,6 +1,6 @@
 package io.tolgee.service
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BigMetaTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class BigMetaServiceTest : ProjectAuthControllerTest("/v2/projects/") {
+class BigMetaServiceTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: BigMetaTestData
 

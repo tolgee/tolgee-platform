@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -15,7 +15,7 @@ import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerDeleteManyKeysTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
 

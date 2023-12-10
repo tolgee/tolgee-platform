@@ -1,6 +1,6 @@
 package io.tolgee.repository
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class UserAccountRepositoryTest : AbstractSpringTest() {
+class UserAccountRepositoryTest : AbstractServerAppTest() {
 
   @Autowired
   lateinit var userAccountRepository: UserAccountRepository

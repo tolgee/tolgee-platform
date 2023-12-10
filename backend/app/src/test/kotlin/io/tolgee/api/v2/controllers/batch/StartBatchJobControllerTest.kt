@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.batch
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -28,7 +28,7 @@ import java.util.function.Consumer
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
-class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class StartBatchJobControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BatchJobsTestData
   var fakeBefore = false
 

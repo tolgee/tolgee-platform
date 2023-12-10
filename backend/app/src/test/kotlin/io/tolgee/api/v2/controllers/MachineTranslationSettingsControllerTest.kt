@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.dtos.request.MachineTranslationLanguagePropsDto
@@ -23,7 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
+class MachineTranslationSettingsControllerTest : AbstractServerAppProjectAuthControllerTest() {
 
   lateinit var testData: MtSettingsTestData
 

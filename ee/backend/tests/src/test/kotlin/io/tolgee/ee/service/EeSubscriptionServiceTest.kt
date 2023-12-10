@@ -14,27 +14,25 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Suppress("SpringBootApplicationProperties")
-@SpringBootTest(properties = ["tolgee.ee.check-period-ms=500"])
+@SpringBootTest(
+  properties = ["tolgee.ee.check-period-ms=500"],
+  classes = [
+    io.tolgee.Application::class,
+    io.tolgee.testing.TestsConfiguration::class,
+    io.tolgee.testing.TestOverridesConfiguration::class
+  ]
+)
 class EeSubscriptionServiceTest : AbstractSpringTest() {
 
   @Autowired
-  @MockBean
-  lateinit var restTemplate: RestTemplate
-
-  @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
-
-  @Autowired
-  private lateinit var eeLicensingMockRequestUtil: EeLicensingMockRequestUtil
 
   @Autowired
   private lateinit var eeLicenseMockRequestUtil: EeLicensingMockRequestUtil

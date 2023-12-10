@@ -4,7 +4,7 @@
 
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.ProjectPermissionData
 import io.tolgee.model.UserAccount
@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
-class LanguageDeletePermissionTest : AbstractSpringTest() {
+class LanguageDeletePermissionTest : AbstractServerAppTest() {
 
   lateinit var testData: LanguagePermissionsTestData
 

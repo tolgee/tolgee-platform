@@ -1,6 +1,6 @@
 package io.tolgee.automation
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.constants.Caches
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.model.automations.AutomationTriggerType
@@ -25,7 +25,7 @@ import org.springframework.cache.Cache
     "tolgee.cache.enabled=true",
   ]
 )
-class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
+class AutomationCachingTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   private lateinit var testData: ContentDeliveryConfigTestData
 

@@ -1,14 +1,14 @@
 package io.tolgee.security
 
+import io.tolgee.AbstractServerAppAuthorizedControllerTest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
-import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
-class ServerAdminFilterTest : AuthorizedControllerTest() {
+class ServerAdminFilterTest : AbstractServerAppAuthorizedControllerTest() {
   @Test
   fun deniesAccessToRegularUser() {
     loginAsUserIfNotLogged()

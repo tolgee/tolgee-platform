@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
@@ -33,7 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2ProjectsControllerInvitationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"

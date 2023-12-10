@@ -1,12 +1,12 @@
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Pageable
 
-class SoftDeleteTest : AbstractSpringTest() {
+class SoftDeleteTest : AbstractServerAppTest() {
 
   @Test
   fun `project is soft deleted`() {

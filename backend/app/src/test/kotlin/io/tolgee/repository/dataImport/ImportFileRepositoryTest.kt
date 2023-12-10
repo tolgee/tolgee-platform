@@ -1,6 +1,6 @@
 package io.tolgee.repository.dataImport
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 @SpringBootTest
-class ImportFileRepositoryTest : AbstractSpringTest() {
+class ImportFileRepositoryTest : AbstractServerAppTest() {
 
   @Autowired
   lateinit var importFileRepository: ImportFileRepository

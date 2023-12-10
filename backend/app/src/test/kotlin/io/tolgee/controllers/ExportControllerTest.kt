@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -19,7 +19,7 @@ import java.util.function.Consumer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-class ExportControllerTest : ProjectAuthControllerTest() {
+class ExportControllerTest : AbstractServerAppProjectAuthControllerTest() {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod

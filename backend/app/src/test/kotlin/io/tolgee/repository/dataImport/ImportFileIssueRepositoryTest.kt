@@ -1,6 +1,6 @@
 package io.tolgee.repository.dataImport
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.Application
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest(classes = [Application::class])
 @Transactional
-class ImportFileIssueRepositoryTest : AbstractSpringTest() {
+class ImportFileIssueRepositoryTest : AbstractServerAppTest() {
 
   @Autowired
   lateinit var importFileIssueRepository: ImportFileIssueRepository

@@ -17,7 +17,7 @@ typealias LangByTag = (tag: String) -> Long
 
 @Component
 class PermissionTestUtil(
-  private val test: AuthorizedControllerTest,
+  private val test: AbstractAuthorizedControllerTest,
   private val applicationContext: ApplicationContext
 ) {
 

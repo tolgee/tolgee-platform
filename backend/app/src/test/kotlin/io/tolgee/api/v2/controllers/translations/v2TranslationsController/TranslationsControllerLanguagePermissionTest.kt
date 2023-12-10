@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerLanguagePermissionTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: LanguagePermissionsTestData
 

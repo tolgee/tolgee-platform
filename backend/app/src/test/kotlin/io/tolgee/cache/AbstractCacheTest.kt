@@ -1,6 +1,6 @@
 package io.tolgee.cache
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
 import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
@@ -33,7 +33,7 @@ import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class AbstractCacheTest : AbstractSpringTest() {
+abstract class AbstractCacheTest : AbstractServerAppTest() {
   // Mocking this is necessary to avoid entering org creation logic
   // Otherwise, the org creation during initial user creation will cause everything to fail
   @Suppress("LateinitVarOverridesLateinitVar")

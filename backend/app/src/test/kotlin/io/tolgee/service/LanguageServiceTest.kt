@@ -4,7 +4,7 @@
 
 package io.tolgee.service
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
-class LanguageServiceTest : AbstractSpringTest() {
+class LanguageServiceTest : AbstractServerAppTest() {
   @Test
   @Transactional
   fun `remove of language removes existing language reference from import language`() {

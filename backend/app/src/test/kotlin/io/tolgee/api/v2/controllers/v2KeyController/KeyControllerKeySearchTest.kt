@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeySearchTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
@@ -19,7 +19,7 @@ import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
+class KeyControllerKeySearchTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/"), Logging {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
 

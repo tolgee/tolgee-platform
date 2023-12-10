@@ -21,7 +21,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -37,9 +36,8 @@ class AuthTest : AbstractControllerTest() {
   @Autowired
   private val publicController: PublicController? = null
 
-  @MockBean
   @Autowired
-  private val restTemplate: RestTemplate? = null
+  private lateinit var restTemplate: RestTemplate
 
   @Autowired
   private var authMvc: MockMvc? = null

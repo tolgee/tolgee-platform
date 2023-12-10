@@ -4,7 +4,7 @@
 
 package io.tolgee.service.recaptchaValidation
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.ReCaptchaValidationService.Companion
 import io.tolgee.testing.ContextRecreatingTest
@@ -19,7 +19,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
@@ -31,13 +30,12 @@ import java.util.*
     "tolgee.recaptcha.secretKey=dummy_key",
   ]
 )
-class RecaptchaValidationTest : AbstractSpringTest() {
+class RecaptchaValidationTest : AbstractServerAppTest() {
 
   @Autowired
   lateinit var reCaptchaValidationService: ReCaptchaValidationService
 
   @Autowired
-  @MockBean
   lateinit var restTemplate: RestTemplate
 
   @BeforeEach

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.AbstractServerAppProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.ResultActions
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerLanguagePermissionTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: LanguagePermissionsTestData
 

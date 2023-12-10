@@ -1,6 +1,6 @@
 package io.tolgee.jobs.migration.allOrganizationOwner
 
-import io.tolgee.AbstractSpringTest
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.development.testDataBuilder.data.AllOrganizationOwnerMigrationTestData
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -16,7 +16,7 @@ import org.springframework.batch.core.Job
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 
-class AllOrganizationOwnerJobTest : AbstractSpringTest() {
+class AllOrganizationOwnerJobTest : AbstractServerAppTest() {
 
   @Autowired
   @Qualifier("translationStatsJob")
