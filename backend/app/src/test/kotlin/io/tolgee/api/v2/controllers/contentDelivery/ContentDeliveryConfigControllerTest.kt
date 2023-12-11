@@ -28,7 +28,6 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.web.servlet.ResultActions
 
 @ContextRecreatingTest
@@ -43,11 +42,9 @@ class ContentDeliveryConfigControllerTest : AbstractServerAppProjectAuthControll
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @Autowired
-  @SpyBean
   private lateinit var s3FileStorageFactory: S3FileStorageFactory
 
   @Autowired
-  @SpyBean
   private lateinit var azureFileStorageFactory: AzureFileStorageFactory
 
   @Autowired

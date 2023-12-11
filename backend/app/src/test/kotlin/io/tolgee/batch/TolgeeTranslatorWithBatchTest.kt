@@ -20,7 +20,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -31,13 +30,12 @@ import org.springframework.web.client.RestTemplate
 
 class TolgeeTranslatorWithBatchTest {
   @Autowired
-  @SpyBean
   lateinit var restTemplate: RestTemplate
 
   @Autowired
   lateinit var tolgeeTranslateApiService: TolgeeTranslateApiService
 
-  @SpyBean
+  @Autowired
   lateinit var tokenBucketManager: TokenBucketManager
 
   @Autowired

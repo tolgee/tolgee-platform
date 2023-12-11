@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.io.InputStreamSource
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -25,7 +24,6 @@ class ImageUploadServiceTest : AbstractServerAppTest() {
     generateImage(100, 100)
   }
 
-  @SpyBean
   @Autowired
   lateinit var dateProvider: CurrentDateProvider
 

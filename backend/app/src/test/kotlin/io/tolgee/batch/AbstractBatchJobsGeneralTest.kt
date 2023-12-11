@@ -1,8 +1,6 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractServerAppTest
-import io.tolgee.batch.processors.AutomationChunkProcessor
-import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -15,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import java.time.Duration
 import java.util.*
 import kotlin.math.ceil
@@ -28,14 +25,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractServerAppTest(), Logging {
   @Autowired
   lateinit var batchJobService: BatchJobService
 
-  @SpyBean
   @Autowired
   lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
-
-  @Suppress("unused") // Used to instrument it in other places via @SpyBean
-  @SpyBean
-  @Autowired
-  lateinit var deleteKeysChunkProcessor: DeleteKeysChunkProcessor
 
   @Autowired
   lateinit var batchJobActionService: BatchJobActionService
@@ -50,15 +41,9 @@ abstract class AbstractBatchJobsGeneralTest : AbstractServerAppTest(), Logging {
   lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
 
   @Autowired
-  @SpyBean
   lateinit var batchJobProjectLockingManager: BatchJobProjectLockingManager
 
   @Autowired
-  @SpyBean
-  lateinit var automationChunkProcessor: AutomationChunkProcessor
-
-  @Autowired
-  @SpyBean
   lateinit var progressManager: ProgressManager
 
   lateinit var util: BatchJobTestUtil

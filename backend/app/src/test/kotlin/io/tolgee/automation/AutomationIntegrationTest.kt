@@ -31,7 +31,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -41,7 +40,6 @@ import java.util.*
 
 class AutomationIntegrationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
-  @MockBean
   @Autowired
   lateinit var contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider
 

@@ -6,6 +6,7 @@ import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration.Companion.JOB_QUEUE_TOPIC
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -34,6 +35,7 @@ import org.springframework.test.context.ContextConfiguration
 )
 @ContextConfiguration(initializers = [BatchJobsGeneralWithRedisTest.Companion.Initializer::class])
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextRecreatingTest
 class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   companion object {
     val redisRunner = RedisRunner()
@@ -54,8 +56,8 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   @Autowired
   lateinit var jobConcurrentLauncher: BatchJobConcurrentLauncher
 
-  @SpyBean
   @Autowired
+  @SpyBean
   lateinit var redisTemplate: StringRedisTemplate
 
   @AfterEach

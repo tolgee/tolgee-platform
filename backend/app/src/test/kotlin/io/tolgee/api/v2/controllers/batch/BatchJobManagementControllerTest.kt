@@ -41,7 +41,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -57,11 +56,9 @@ class BatchJobManagementControllerTest : AbstractServerAppProjectAuthControllerT
   lateinit var batchJobService: BatchJobService
 
   @Autowired
-  @SpyBean
   lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
 
   @Autowired
-  @SpyBean
   lateinit var machineTranslationChunkProcessor: MachineTranslationChunkProcessor
 
   @Autowired
@@ -75,17 +72,14 @@ class BatchJobManagementControllerTest : AbstractServerAppProjectAuthControllerT
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
-  @SpyBean
   override lateinit var mtCreditBucketService: MtCreditBucketService
 
   @Autowired
   lateinit var throwingService: ThrowingService
 
   @Autowired
-  @SpyBean
   lateinit var autoTranslationService: AutoTranslationService
 
-  @SpyBean
   @Autowired
   lateinit var batchJobActivityFinalizer: BatchJobActivityFinalizer
 

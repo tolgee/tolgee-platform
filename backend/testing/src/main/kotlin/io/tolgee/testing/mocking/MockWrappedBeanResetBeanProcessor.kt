@@ -74,13 +74,8 @@ class MockWrappedBeanResetBeanProcessor : BeanFactoryPostProcessor {
       }
 
       check(realImplCandidateNames.size == 1) {
-        (
-          "We've tried to naively autowire real impl for bean factory '%s', " +
-            "which turned up %s, but we need exactly one candidate."
-          ).formatted(
-          mockWrapperBeanName,
-          realImplCandidateNames
-        )
+        "We've tried to naively autowire real impl for bean factory '$mockWrapperBeanName', " +
+          "which turned up $realImplCandidateNames, but we need exactly one candidate."
       }
 
       return realImplCandidateNames.iterator().next()
