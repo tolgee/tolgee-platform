@@ -3,6 +3,7 @@ package io.tolgee.util
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpMethod
@@ -16,8 +17,8 @@ import org.springframework.web.client.RestTemplate
 
 class GoogleAuthUtil(
   private val tolgeeProperties: TolgeeProperties,
-  private var authMvc: MockMvc? = null,
-  private val restTemplate: RestTemplate? = null
+  private var authMvc: MockMvc,
+  private val restTemplate: RestTemplate
 ) {
 
   private val defaultUserResponse: GoogleOAuthDelegate.GoogleUserResponse
@@ -50,19 +51,20 @@ class GoogleAuthUtil(
     val receivedCode = "ThiS_Is_Fake_valid_COde"
     val googleConf = tolgeeProperties.authentication.google
 
-    whenever(restTemplate!!.postForObject<Map<*, *>>(eq(googleConf.authorizationUrl), any(), any()))
-      .thenReturn(tokenResponse)
+    doReturn(tokenResponse).whenever(restTemplate)
+      .postForObject<Map<*, *>>(eq(googleConf.authorizationUrl), any(), any())
 
-    whenever(
-      restTemplate.exchange(
-        eq(googleConf.userUrl),
-        eq(HttpMethod.GET),
-        any(),
-        eq(GoogleOAuthDelegate.GoogleUserResponse::class.java)
-      )
-    ).thenReturn(userResponse)
+    doReturn(userResponse).whenever(
+      restTemplate
+    ).exchange(
+      eq(googleConf.userUrl),
+      eq(HttpMethod.GET),
+      any(),
+      eq(GoogleOAuthDelegate.GoogleUserResponse::class.java)
 
-    return authMvc!!.perform(
+    )
+
+    return authMvc.perform(
       MockMvcRequestBuilders.get("/api/public/authorize_oauth/google?code=$receivedCode")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)

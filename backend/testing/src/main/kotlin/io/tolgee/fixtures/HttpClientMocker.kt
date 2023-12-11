@@ -8,6 +8,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.mockito.stubbing.Stubber
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -31,18 +32,22 @@ class HttpClientMocker(private val restTemplate: RestTemplate) {
   private val verifyTools: VerifyTools = VerifyTools()
 
   private fun updateWhenever() {
+    fun Stubber.finishStub() {
+      this.whenever(restTemplate).exchange(
+        argThat<String> { definition.url(this) },
+        argThat { definition.method(this) },
+        verifyTools.captor.capture(),
+        eq(String::class.java)
+      )
+    }
+
     if (toThrow != null)
-      doThrow(toThrow!!)
+      doThrow(toThrow!!).finishStub()
     else if (answer != null)
-      doAnswer { answer!!() }
+      doAnswer { answer!!() }.finishStub()
     else {
       throw RuntimeException("You must specify answer or throw")
-    }.whenever(restTemplate).exchange(
-      argThat<String> { definition.url(this) },
-      argThat { definition.method(this) },
-      verifyTools.captor.capture(),
-      eq(String::class.java)
-    )
+    }
   }
 
   fun whenReq(fn: Definition.() -> Unit) {

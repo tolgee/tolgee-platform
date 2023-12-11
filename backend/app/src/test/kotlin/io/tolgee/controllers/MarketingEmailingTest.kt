@@ -42,13 +42,13 @@ class MarketingEmailingTest : AbstractServerAppAuthorizedControllerTest() {
   lateinit var updateContactArgumentCaptor: ArgumentCaptor<UpdateContact>
 
   @Autowired
-  private val restTemplate: RestTemplate? = null
+  private lateinit var restTemplate: RestTemplate
 
   @Autowired
   private lateinit var emailTestUtil: EmailTestUtil
 
   @Autowired
-  private var authMvc: MockMvc? = null
+  private lateinit var authMvc: MockMvc
 
   private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
 

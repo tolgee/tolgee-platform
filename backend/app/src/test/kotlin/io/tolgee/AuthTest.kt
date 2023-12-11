@@ -12,7 +12,6 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
-import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.util.GitHubAuthUtil
 import io.tolgee.util.GoogleAuthUtil
 import io.tolgee.util.OAuth2AuthUtil
@@ -32,7 +31,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Transactional
-class AuthTest : AbstractControllerTest() {
+class AuthTest : AbstractServerAppControllerTest() {
   @Autowired
   private val publicController: PublicController? = null
 
@@ -40,21 +39,21 @@ class AuthTest : AbstractControllerTest() {
   private lateinit var restTemplate: RestTemplate
 
   @Autowired
-  private var authMvc: MockMvc? = null
+  private lateinit var mockMvc: MockMvc
 
   @Autowired
   private lateinit var jwtService: JwtService
 
-  private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
-  private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
-  private val oAuth2AuthUtil: OAuth2AuthUtil by lazy { OAuth2AuthUtil(tolgeeProperties, authMvc, restTemplate) }
+  private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, mockMvc, restTemplate) }
+  private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, mockMvc, restTemplate) }
+  private val oAuth2AuthUtil: OAuth2AuthUtil by lazy { OAuth2AuthUtil(tolgeeProperties, mockMvc, restTemplate) }
 
   private lateinit var project: Project
 
   @BeforeEach
   fun setup() {
     project = dbPopulator.createBase(generateUniqueString()).project
-    authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
+    mockMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
   }
 
   @AfterEach
