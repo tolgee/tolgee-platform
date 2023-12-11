@@ -86,6 +86,15 @@ jobs:
           java-version: 17
           distribution: adopt
 
+      - name: Increase swapfile
+        run: |
+          sudo swapoff -a
+          sudo fallocate -l 15G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          sudo swapon --show
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:

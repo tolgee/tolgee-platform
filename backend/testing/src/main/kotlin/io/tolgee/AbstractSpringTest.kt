@@ -51,6 +51,7 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.TestOverridesConfiguration
 import io.tolgee.testing.TestsConfiguration
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.CacheManager
@@ -65,6 +66,7 @@ import java.util.*
 @SpringBootTest(
   classes = [Application::class, TestsConfiguration::class, TestOverridesConfiguration::class]
 )
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
