@@ -2,7 +2,6 @@ package io.tolgee.websocket
 
 import io.tolgee.fixtures.RedisRunner
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
@@ -11,12 +10,14 @@ import org.springframework.test.context.ContextConfiguration
 @SpringBootTest(
   properties = [
     "spring.redis.port=56379",
-    "tolgee.websocket.use-redis=true"
+    "tolgee.websocket.use-redis=true",
+    "is-test-with-random-port=true"
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(initializers = [WebsocketWithRedisTest.Companion.Initializer::class])
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(
+  initializers = [WebsocketWithRedisTest.Companion.Initializer::class],
+)
 class WebsocketWithRedisTest : AbstractWebsocketTest() {
   companion object {
     val redisRunner = RedisRunner()

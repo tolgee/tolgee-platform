@@ -6,7 +6,6 @@ import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration.Companion.JOB_QUEUE_TOPIC
-import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -30,12 +29,12 @@ import org.springframework.test.context.ContextConfiguration
     "tolgee.cache.enabled=true",
     "tolgee.websocket.use-redis=true",
     "spring.redis.port=56379",
+    "is-test-with-random-port=true"
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ContextConfiguration(initializers = [BatchJobsGeneralWithRedisTest.Companion.Initializer::class])
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextRecreatingTest
 class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   companion object {
     val redisRunner = RedisRunner()

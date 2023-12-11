@@ -36,12 +36,16 @@ import io.tolgee.testing.mocking.MockWrappedBean
 import jakarta.persistence.EntityManager
 import org.mockito.AdditionalAnswers
 import org.mockito.Mockito
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import sibApi.ContactsApi
 import software.amazon.awssdk.services.translate.TranslateClient
 
+// For some reason, Spring Fails to initialize mocked classes when we use web environment with random port
+// So for such tests, we need to fallback to good old @MockBean
+@ConditionalOnProperty("is-test-with-random-port", havingValue = "false", matchIfMissing = true)
 class ServerAppTestOverridesConfiguration {
   @MockWrappedBean
   @Bean

@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.AbstractSpringTest
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.OrganizationRole
@@ -12,10 +13,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
-class ProjectRepositoryTest {
-
-  @Autowired
-  lateinit var projectRepository: ProjectRepository
+class ProjectRepositoryTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var dbPopulatorReal: DbPopulatorReal
