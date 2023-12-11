@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpEntity
@@ -29,22 +31,18 @@ class HttpClientMocker(private val restTemplate: RestTemplate) {
   private val verifyTools: VerifyTools = VerifyTools()
 
   private fun updateWhenever() {
-    whenever(
-      restTemplate.exchange(
-        argThat<String> { definition.url(this) },
-        argThat { definition.method(this) },
-        verifyTools.captor.capture(),
-        eq(String::class.java)
-      )
-    ).apply {
-      if (toThrow != null) {
-        thenThrow(toThrow!!)
-      }
-
-      if (answer != null) {
-        thenAnswer { answer!!() }
-      }
-    }
+    if (toThrow != null)
+      doThrow(toThrow!!)
+    else if (answer != null)
+      doAnswer { answer!!() }
+    else {
+      throw RuntimeException("You must specify answer or throw")
+    }.whenever(restTemplate).exchange(
+      argThat<String> { definition.url(this) },
+      argThat { definition.method(this) },
+      verifyTools.captor.capture(),
+      eq(String::class.java)
+    )
   }
 
   fun whenReq(fn: Definition.() -> Unit) {
