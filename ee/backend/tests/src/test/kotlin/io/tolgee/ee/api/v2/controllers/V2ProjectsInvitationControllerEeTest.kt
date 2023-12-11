@@ -63,6 +63,7 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
   }
 
   @Test
+  @ProjectJWTAuthTestMethod
   fun `validates permissions (type vs scopes)`() {
     invitationTestUtil.perform {
       scopes = setOf("translations.edit")
@@ -72,6 +73,7 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
   }
 
   @Test
+  @ProjectJWTAuthTestMethod
   fun `validates language permissions`() {
     invitationTestUtil.perform { getLang ->
       scopes = setOf("translations.view")
