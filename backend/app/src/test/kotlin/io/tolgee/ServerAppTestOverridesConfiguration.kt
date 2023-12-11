@@ -182,7 +182,7 @@ class ServerAppTestOverridesConfiguration {
   @Bean
   @Primary
   fun contactsApiMock(
-    real: ContactsApi
+    real: ContactsApi?
   ): ContactsApi {
     return Mockito.mock(ContactsApi::class.java, AdditionalAnswers.delegatesTo<Any>(real))
   }

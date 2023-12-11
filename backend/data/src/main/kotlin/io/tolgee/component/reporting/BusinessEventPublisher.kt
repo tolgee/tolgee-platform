@@ -103,7 +103,7 @@ class BusinessEventPublisher(
     return try {
       applicationContext.getBean(ActivityHolder::class.java).utmData
     } catch (e: Throwable) {
-      logger.error("Could not get utm data from activity holder", e)
+      logger.debug("Could not get utm data from activity holder", e)
       Sentry.captureException(e)
       null
     }

@@ -16,13 +16,11 @@ import io.tolgee.testing.assertions.Assertions
 import io.tolgee.testing.assertions.UserApiAppAction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
-@AutoConfigureMockMvc
 class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
   @Autowired
   private lateinit var jwtService: JwtService
