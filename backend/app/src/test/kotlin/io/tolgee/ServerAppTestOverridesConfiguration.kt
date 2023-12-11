@@ -242,7 +242,7 @@ class ServerAppTestOverridesConfiguration {
   fun batchJobActivityFinalizerMock(
     real: BatchJobActivityFinalizer
   ): BatchJobActivityFinalizer {
-    return Mockito.mock(BatchJobActivityFinalizer::class.java, AdditionalAnswers.delegatesTo<Any>(real))
+    return Mockito.spy(real)
   }
 
   @MockWrappedBean

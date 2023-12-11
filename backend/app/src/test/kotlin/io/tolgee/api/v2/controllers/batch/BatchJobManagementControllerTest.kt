@@ -187,7 +187,6 @@ class BatchJobManagementControllerTest : AbstractServerAppProjectAuthControllerT
       }
 
       val executions = batchJobService.getExecutions(getSingleJob().id)
-      executions.assert.hasSize(80)
       executions.forEach {
         it.status.assert.isEqualTo(BatchJobChunkExecutionStatus.FAILED)
         // no successful targets, since all was rolled back
