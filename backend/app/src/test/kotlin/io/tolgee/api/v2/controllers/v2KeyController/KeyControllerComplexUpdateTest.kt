@@ -27,7 +27,7 @@ import org.springframework.core.io.InputStreamSource
 import java.math.BigDecimal
 
 @AutoConfigureMockMvc
-class KeyControllerUpdateTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerComplexUpdateTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: KeysTestData
 
