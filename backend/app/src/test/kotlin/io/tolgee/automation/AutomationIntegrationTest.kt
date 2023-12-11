@@ -14,6 +14,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.fixtures.verifyWebhookSignatureHeader
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addMinutes
@@ -35,9 +36,12 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@ContextRecreatingTest
 class AutomationIntegrationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired

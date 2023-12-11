@@ -25,6 +25,7 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.translation.AutoTranslationService
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.BatchDumper
@@ -42,12 +43,14 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@ContextRecreatingTest
 class BatchJobManagementControllerTest :
   AbstractServerAppProjectAuthControllerTest("/v2/projects/"), Logging {
 

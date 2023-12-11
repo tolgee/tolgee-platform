@@ -1,7 +1,7 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.component.CurrentDateProvider
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.component.machineTranslation.providers.TolgeeTranslateApiService
@@ -28,7 +28,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
-class TolgeeTranslatorWithBatchTest {
+class TolgeeTranslatorWithBatchTest : AbstractServerAppTest() {
   @Autowired
   lateinit var restTemplate: RestTemplate
 
@@ -37,9 +37,6 @@ class TolgeeTranslatorWithBatchTest {
 
   @Autowired
   lateinit var tokenBucketManager: TokenBucketManager
-
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
 
   @BeforeEach
   fun setup() {

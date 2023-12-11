@@ -1,6 +1,6 @@
 package io.tolgee.component.bucket
 
-import io.tolgee.component.CurrentDateProvider
+import io.tolgee.AbstractServerAppTest
 import io.tolgee.testing.assert
 import io.tolgee.util.addMinutes
 import kotlinx.coroutines.launch
@@ -12,12 +12,9 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
-abstract class AbstractTokenBucketManagerTest {
+abstract class AbstractTokenBucketManagerTest : AbstractServerAppTest() {
   @Autowired
   lateinit var tokenBucketManager: TokenBucketManager
-
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
 
   @BeforeEach
   fun setup() {

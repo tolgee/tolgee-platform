@@ -1,6 +1,7 @@
 package io.tolgee.controllers
 
 import com.posthog.java.PostHog
+import io.tolgee.AbstractServerAppControllerTest
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
@@ -9,7 +10,6 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -22,13 +22,11 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
 import kotlin.properties.Delegates
 
-@AutoConfigureMockMvc
 class PublicControllerTest :
-  AbstractControllerTest() {
+  AbstractServerAppControllerTest() {
 
   private var canCreateOrganizations by Delegates.notNull<Boolean>()
 
