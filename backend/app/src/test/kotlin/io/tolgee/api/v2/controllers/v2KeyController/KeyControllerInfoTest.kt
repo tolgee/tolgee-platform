@@ -11,10 +11,8 @@ import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import kotlin.properties.Delegates
 
-@SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerInfoTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 

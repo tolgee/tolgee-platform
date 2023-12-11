@@ -12,10 +12,8 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
 
-@SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerNamespacesTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 

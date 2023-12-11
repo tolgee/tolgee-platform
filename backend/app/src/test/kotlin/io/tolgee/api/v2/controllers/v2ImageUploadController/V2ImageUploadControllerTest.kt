@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import java.io.File
@@ -41,7 +40,6 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
     tolgeeProperties.fileStorageUrl = initialFileStorageUrl
   }
 
-  @MockBean
   @Autowired
   lateinit var maxUploadedFilesByUserProvider: MaxUploadedFilesByUserProvider
 

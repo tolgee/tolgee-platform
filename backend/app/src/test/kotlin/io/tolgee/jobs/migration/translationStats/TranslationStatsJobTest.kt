@@ -11,8 +11,7 @@
 // import org.springframework.test.context.transaction.TestTransaction
 // import org.springframework.transaction.annotation.Transactional
 //
-// @SpringBootTest
-// class TranslationStatsJobTest : io.tolgee.AbstractServerAppTest() {
+// // class TranslationStatsJobTest : io.tolgee.AbstractServerAppTest() {
 //
 //  @Autowired
 //  lateinit var translationsStatsUpdateJobRunner: TranslationsStatsUpdateJobRunner

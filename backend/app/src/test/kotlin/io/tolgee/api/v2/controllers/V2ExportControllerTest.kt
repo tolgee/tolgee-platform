@@ -30,7 +30,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
@@ -38,16 +37,15 @@ import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
 import kotlin.system.measureTimeMillis
 
-@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true"
   ]
 )
+@ContextRecreatingTest
 class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 
-  @MockBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -79,7 +77,7 @@ class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/p
   @Test
   @ProjectJWTAuthTestMethod
   fun `it reports business event once in a day`() {
-    retry(exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }) {
+    retryOnIssue {
       executeInNewTransaction {
         initBaseData()
       }
@@ -218,18 +216,20 @@ class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/p
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to json with namespaces`() {
-    val namespacesTestData = NamespacesTestData()
-    testDataService.saveTestData(namespacesTestData.root)
-    projectSupplier = { namespacesTestData.projectBuilder.self }
-    userAccount = namespacesTestData.user
+    retryOnIssue {
+      val namespacesTestData = NamespacesTestData()
+      testDataService.saveTestData(namespacesTestData.root)
+      projectSupplier = { namespacesTestData.projectBuilder.self }
+      userAccount = namespacesTestData.user
 
-    val parsed = performExport()
+      val parsed = performExport()
 
-    assertThatJson(parsed["ns-1/en.json"]!!) {
-      node("key").isEqualTo("hello")
-    }
-    assertThatJson(parsed["en.json"]!!) {
-      node("key").isEqualTo("hello")
+      assertThatJson(parsed["ns-1/en.json"]!!) {
+        node("key").isEqualTo("hello")
+      }
+      assertThatJson(parsed["en.json"]!!) {
+        node("key").isEqualTo("hello")
+      }
     }
   }
 
@@ -295,5 +295,19 @@ class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/p
   private fun prepareUserAndProject(testData: TranslationsTestData) {
     userAccount = testData.user
     projectSupplier = { testData.project }
+  }
+
+  /**
+   * There is a bug in spring mock mvc that sometimes throws ConcurrentModificationException,
+   * can be removed when fixed later
+   */
+  private fun retryOnIssue(fn: () -> Unit) {
+    retry(exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }) {
+      try {
+        fn()
+      } finally {
+        testDataService.cleanTestData(testData.root)
+      }
+    }
   }
 }

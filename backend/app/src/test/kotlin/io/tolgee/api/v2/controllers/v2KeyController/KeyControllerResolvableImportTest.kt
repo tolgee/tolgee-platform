@@ -16,11 +16,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.Resource
 import kotlin.properties.Delegates
 
-@SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerResolvableImportTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 

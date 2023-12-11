@@ -31,7 +31,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -40,7 +39,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-@AutoConfigureMockMvc
 class AutomationIntegrationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
   @MockBean
@@ -49,7 +47,6 @@ class AutomationIntegrationTest : AbstractServerAppProjectAuthControllerTest("/v
 
   lateinit var fileStorageMock: FileStorage
 
-  @MockBean
   @Autowired
   lateinit var contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider
 

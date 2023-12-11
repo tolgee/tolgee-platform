@@ -67,8 +67,10 @@ class MockWrappedBeanResetBeanProcessor : BeanFactoryPostProcessor {
         return it
       }
 
-      realImplCandidateNames.removeIf {
-        !beanFactory.getBeanDefinition(it).isPrimary
+      if (realImplCandidateNames.size > 1) {
+        realImplCandidateNames.removeIf {
+          !beanFactory.getBeanDefinition(it).isPrimary
+        }
       }
 
       check(realImplCandidateNames.size == 1) {
@@ -91,14 +93,6 @@ class MockWrappedBeanResetBeanProcessor : BeanFactoryPostProcessor {
     ): String? {
       val exactQualifier =
         beanFactory.findAnnotationOnBean(mockWrapperBeanName, MockWrappedBean::class.java)?.`for`
-//      val exactQualifier = Class.forName(mockWrapperBeanDefinition.resourceDescription)
-//        .methods
-//        .mapNotNull { method ->
-//          if (method.name != mockWrapperBeanDefinition.factoryMethodName) {
-//            return@mapNotNull null
-//          }
-//          method.getAnnotation(MockWrappedBean::class.java)?.`for`
-//        }.singleOrNull()
 
       if (exactQualifier.isNullOrBlank()) {
         return null

@@ -26,11 +26,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
 import java.math.BigDecimal
 
-@SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerCreationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 

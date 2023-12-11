@@ -40,7 +40,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
@@ -55,36 +54,28 @@ class TranslationSuggestionControllerTest : AbstractServerAppProjectAuthControll
   lateinit var testData: SuggestionTestData
 
   @Autowired
-  @MockBean
   lateinit var mtBucketSizeProvider: MtBucketSizeProvider
 
   @Autowired
-  @MockBean
   lateinit var googleTranslate: Translate
 
   @Autowired
-  @MockBean
   lateinit var amazonTranslate: TranslateClient
 
   @Autowired
-  @MockBean
   lateinit var deeplApiService: DeeplApiService
 
   @Autowired
-  @MockBean
   lateinit var azureCognitiveApiService: AzureCognitiveApiService
 
   @Autowired
-  @MockBean
   lateinit var baiduApiService: BaiduApiService
 
   @Autowired
-  @MockBean
   lateinit var tolgeeTranslateApiService: TolgeeTranslateApiService
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
-  @MockBean
   override lateinit var cacheManager: CacheManager
 
   lateinit var cacheMock: Cache

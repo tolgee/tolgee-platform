@@ -18,9 +18,7 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
 @AutoConfigureMockMvc
 open class V2ProjectsControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   @Test

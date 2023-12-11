@@ -7,12 +7,10 @@ import io.tolgee.model.Project
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.transaction.annotation.Transactional
 
-@SpringBootTest
 @Transactional
 class ProjectRepositoryTest {
 

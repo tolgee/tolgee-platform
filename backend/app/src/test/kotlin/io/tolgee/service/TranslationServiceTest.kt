@@ -5,11 +5,9 @@ import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
-@SpringBootTest
 @Transactional
 class TranslationServiceTest : AbstractServerAppTest() {
 

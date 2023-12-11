@@ -10,11 +10,9 @@ import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
-@SpringBootTest
 @Transactional
 class ImportServiceTest : AbstractServerAppTest() {
   lateinit var importTestData: ImportTestData

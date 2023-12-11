@@ -11,9 +11,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
 @AutoConfigureMockMvc
 class V2ProjectsControllerLeavingTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 

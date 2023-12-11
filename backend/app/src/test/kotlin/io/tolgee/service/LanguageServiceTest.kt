@@ -11,10 +11,8 @@ import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
-@SpringBootTest
 class LanguageServiceTest : AbstractServerAppTest() {
   @Test
   @Transactional

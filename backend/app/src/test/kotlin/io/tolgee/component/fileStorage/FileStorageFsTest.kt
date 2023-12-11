@@ -7,10 +7,8 @@ package io.tolgee.component.fileStorage
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
 
-@SpringBootTest
 class FileStorageFsTest : AbstractFileStorageServiceTest() {
 
   lateinit var file: File

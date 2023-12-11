@@ -23,7 +23,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import kotlin.properties.Delegates
 
@@ -44,7 +43,6 @@ class PublicControllerTest :
     tolgeeProperties.authentication.userCanCreateOrganizations = canCreateOrganizations
   }
 
-  @MockBean
   @Autowired
   lateinit var postHog: PostHog
 

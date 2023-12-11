@@ -7,11 +7,9 @@ import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDa
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 
-@SpringBootTest
 @Transactional
 class TranslationViewDataProviderTest : AbstractServerAppTest() {
 

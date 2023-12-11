@@ -1,6 +1,7 @@
 package io.tolgee.testing
 
 import io.tolgee.CleanDbTestListener
+import io.tolgee.testing.mocking.MockWrappedBeanResetTestExecutionListener
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
@@ -16,7 +17,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
     DependencyInjectionTestExecutionListener::class,
     CleanDbTestListener::class,
     DirtiesContextTestExecutionListener::class,
-//    MockWrappedBeanResetTestExecutionListener::class
+    MockWrappedBeanResetTestExecutionListener::class
   ]
 )
 @ActiveProfiles(profiles = ["local"])

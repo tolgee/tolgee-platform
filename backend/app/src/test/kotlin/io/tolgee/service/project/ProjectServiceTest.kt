@@ -29,9 +29,7 @@ import io.tolgee.util.executeInNewRepeatableTransaction
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
 class ProjectServiceTest : AbstractServerAppTest() {
 
   @Autowired

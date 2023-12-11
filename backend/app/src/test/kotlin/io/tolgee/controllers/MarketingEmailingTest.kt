@@ -21,8 +21,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -31,7 +29,6 @@ import sibApi.ContactsApi
 import sibModel.CreateContact
 import sibModel.UpdateContact
 
-@SpringBootTest
 @AutoConfigureMockMvc
 class MarketingEmailingTest : AbstractServerAppAuthorizedControllerTest() {
 
@@ -39,13 +36,11 @@ class MarketingEmailingTest : AbstractServerAppAuthorizedControllerTest() {
   lateinit var sendInBlueProperties: SendInBlueProperties
 
   @Autowired
-  @MockBean
   lateinit var contactsApi: ContactsApi
 
   lateinit var createContactArgumentCaptor: ArgumentCaptor<CreateContact>
   lateinit var updateContactArgumentCaptor: ArgumentCaptor<UpdateContact>
 
-  @MockBean
   @Autowired
   private val restTemplate: RestTemplate? = null
 
