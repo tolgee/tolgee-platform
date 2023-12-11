@@ -23,7 +23,7 @@ class MachineTranslationTest : AbstractServerAppProjectAuthControllerTest("/v2/p
   @Autowired
   lateinit var amazonTranslate: TranslateClient
 
-  fun initMachineTranslationMocks(translateDelay: Long = 0) {
+  fun initMachineTranslationMocks() {
     internalProperties.fakeMtProviders = false
     Mockito.reset(googleTranslate)
     Mockito.reset(amazonTranslate)
@@ -41,7 +41,6 @@ class MachineTranslationTest : AbstractServerAppProjectAuthControllerTest("/v2/p
     ).thenReturn(googleTranslationMock)
 
     whenever(googleTranslationMock.translatedText).then {
-      Thread.sleep(translateDelay)
       return@then "Translated with Google"
     }
 

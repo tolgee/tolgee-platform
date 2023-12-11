@@ -48,7 +48,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-class BatchJobManagementControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/"), Logging {
+class BatchJobManagementControllerTest :
+  AbstractServerAppProjectAuthControllerTest("/v2/projects/"), Logging {
 
   lateinit var testData: BatchJobsTestData
 
