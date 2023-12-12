@@ -6,20 +6,31 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
+import io.tolgee.testing.ContextRecreatingTest
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.web.servlet.ResultActions
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 
+@ContextRecreatingTest
+@SpringBootTest(
+  properties = [
+    "disable-server-app-test-mock-overrides=true"
+  ]
+)
 class MachineTranslationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   @Autowired
+  @MockBean
   lateinit var googleTranslate: Translate
 
   @Autowired
+  @MockBean
   lateinit var amazonTranslate: TranslateClient
 
   fun initMachineTranslationMocks() {

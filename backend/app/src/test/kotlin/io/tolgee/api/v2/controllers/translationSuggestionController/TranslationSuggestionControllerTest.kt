@@ -35,6 +35,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -50,6 +51,7 @@ import java.util.*
 import kotlin.system.measureTimeMillis
 import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class TranslationSuggestionControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 
@@ -154,16 +156,16 @@ class TranslationSuggestionControllerTest : AbstractServerAppProjectAuthControll
 
     tolgeeTranslateParamsCaptor = argumentCaptor()
 
-    whenever(
-      tolgeeTranslateApiService.translate(
-        tolgeeTranslateParamsCaptor.capture(),
-      )
-    ).thenAnswer {
+    doAnswer {
       MtValueProvider.MtResult(
         "Translated with Tolgee Translator",
         ((it.arguments[0] as? TolgeeTranslateApiService.Companion.TolgeeTranslateParams)?.text?.length ?: 0) * 100
       )
-    }
+    }.whenever(
+      tolgeeTranslateApiService
+    ).translate(
+      tolgeeTranslateParamsCaptor.capture(),
+    )
   }
 
   private fun initTestData() {

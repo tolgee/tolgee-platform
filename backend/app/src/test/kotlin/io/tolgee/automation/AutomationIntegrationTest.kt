@@ -32,6 +32,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -42,21 +44,30 @@ import java.util.*
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ContextRecreatingTest
+@SpringBootTest(
+  properties = [
+    "disable-server-app-test-mock-overrides=true"
+  ]
+)
 class AutomationIntegrationTest : AbstractServerAppProjectAuthControllerTest("/v2/projects/") {
 
+  @MockBean
   @Autowired
   lateinit var contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider
 
   lateinit var fileStorageMock: FileStorage
 
+  @MockBean
   @Autowired
   lateinit var contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider
 
   lateinit var purgingMock: ContentDeliveryCachePurging
 
+  @MockBean
   @Autowired
   lateinit var restTemplate: RestTemplate
 
+  @MockBean
   @Autowired
   @Qualifier("webhookRestTemplate")
   lateinit var webhookRestTemplate: RestTemplate
