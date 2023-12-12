@@ -11,7 +11,7 @@ import org.springframework.test.context.ContextConfiguration
   properties = [
     "spring.redis.port=56379",
     "tolgee.websocket.use-redis=true",
-    "is-test-with-random-port=true"
+    "disable-server-app-test-mock-overrides=true"
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )

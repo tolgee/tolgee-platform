@@ -45,7 +45,7 @@ import software.amazon.awssdk.services.translate.TranslateClient
 
 // For some reason, Spring Fails to initialize mocked classes when we use web environment with random port
 // So for such tests, we need to fallback to good old @MockBean
-@ConditionalOnProperty("is-test-with-random-port", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty("disable-server-app-test-mock-overrides", havingValue = "false", matchIfMissing = true)
 class ServerAppTestOverridesConfiguration {
   @MockWrappedBean
   @Bean

@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest(
   properties = [
     "tolgee.websocket.use-redis=false",
-    "is-test-with-random-port=true"
+    "disable-server-app-test-mock-overrides=true"
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )

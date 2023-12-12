@@ -26,6 +26,8 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.CacheManager
 import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
 import java.util.*
@@ -36,22 +38,28 @@ abstract class AbstractCacheTest : AbstractServerAppTest() {
   // Otherwise, the org creation during initial user creation will cause everything to fail
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
+  @MockBean
   override lateinit var organizationService: OrganizationService
 
   @Autowired
+  @MockBean
   lateinit var userAccountRepository: UserAccountRepository
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
+  @MockBean
   override lateinit var projectRepository: ProjectRepository
 
   @Autowired
+  @MockBean
   lateinit var permissionRepository: PermissionRepository
 
   @Autowired
+  @SpyBean
   lateinit var googleTranslationProvider: GoogleTranslationProvider
 
   @Autowired
+  @SpyBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
   val unwrappedCacheManager

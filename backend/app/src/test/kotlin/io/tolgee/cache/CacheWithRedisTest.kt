@@ -15,11 +15,12 @@ import org.springframework.test.context.ContextConfiguration
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
-    "spring.redis.port=56379",
+    "spring.data.redis.port=56379",
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
     "tolgee.internal.fake-mt-providers=false",
-    "tolgee.machine-translation.free-credits-amount=10000000"
+    "tolgee.machine-translation.free-credits-amount=10000000",
+    "disable-server-app-test-mock-overrides=true"
   ]
 )
 @ContextConfiguration(initializers = [CacheWithRedisTest.Companion.Initializer::class])
