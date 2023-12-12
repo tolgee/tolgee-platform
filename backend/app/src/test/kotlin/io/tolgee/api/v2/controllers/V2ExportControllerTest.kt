@@ -77,10 +77,15 @@ class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/p
   @Test
   @ProjectJWTAuthTestMethod
   fun `it reports business event once in a day`() {
-    retryOnIssue {
-      executeInNewTransaction {
-        initBaseData()
-      }
+    retryOnIssue(
+      testDataProvider = {
+        executeInNewTransaction {
+          initBaseData()
+        }
+        testData
+      },
+      testDataRootProvider = { it.root }
+    ) {
       performExport()
       performExport()
       performExport()
@@ -216,8 +221,12 @@ class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/p
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to json with namespaces`() {
-    retryOnIssue {
-      val namespacesTestData = NamespacesTestData()
+    retryOnIssue(
+      testDataProvider = {
+        NamespacesTestData()
+      },
+      testDataRootProvider = { it.root }
+    ) { namespacesTestData ->
       testDataService.saveTestData(namespacesTestData.root)
       projectSupplier = { namespacesTestData.projectBuilder.self }
       userAccount = namespacesTestData.user
@@ -301,12 +310,17 @@ class V2ExportControllerTest : AbstractServerAppProjectAuthControllerTest("/v2/p
    * There is a bug in spring mock mvc that sometimes throws ConcurrentModificationException,
    * can be removed when fixed later
    */
-  private fun retryOnIssue(fn: () -> Unit) {
+  private inline fun <reified TestData : Any> retryOnIssue(
+    crossinline testDataProvider: () -> TestData,
+    crossinline testDataRootProvider: (TestData) -> TestDataBuilder,
+    crossinline fn: (TestData) -> Unit
+  ) {
     retry(exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }) {
+      val testData = testDataProvider()
       try {
-        fn()
+        fn(testData)
       } finally {
-        testDataService.cleanTestData(testData.root)
+        testDataService.cleanTestData(testDataRootProvider(testData))
       }
     }
   }

@@ -98,7 +98,7 @@ class ServerAppTestOverridesConfiguration {
   fun tolgeeTranslateApiServiceMock(
     real: TolgeeTranslateApiService
   ): TolgeeTranslateApiService {
-    return Mockito.mock(TolgeeTranslateApiService::class.java)
+    return Mockito.mock(TolgeeTranslateApiService::class.java, AdditionalAnswers.delegatesTo<Any>(real))
   }
 
   @MockWrappedBean

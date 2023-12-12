@@ -1,19 +1,13 @@
 package io.tolgee.dialects.postgres
 
+import io.tolgee.AbstractSpringTest
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.assertions.Assertions.assertThat
-import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
-class CustomPostgreSQLDialectTest {
-
-  @Autowired
-  lateinit var entityManager: EntityManager
+class CustomPostgreSQLDialectTest : AbstractSpringTest() {
 
   @Test
   fun `similarity function works`() {

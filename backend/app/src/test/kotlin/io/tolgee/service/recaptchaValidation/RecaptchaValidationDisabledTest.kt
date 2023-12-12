@@ -10,6 +10,7 @@ import io.tolgee.service.security.ReCaptchaValidationService.Companion
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -30,9 +31,7 @@ class RecaptchaValidationDisabledTest : AbstractServerAppTest() {
 
   @Test
   fun `does not validate`() {
-    whenever(
-      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>())
-    ).then {
+    doReturn(
       ResponseEntity(
         Companion.Response().apply {
           success = false
@@ -42,7 +41,8 @@ class RecaptchaValidationDisabledTest : AbstractServerAppTest() {
         },
         HttpStatus.OK
       )
-    }
+    ).whenever(restTemplate)
+      .postForEntity(any<String>(), any(), any<Class<Companion.Response>>())
 
     assertThat(reCaptchaValidationService.validate("dummy_token", "10.10.10.10")).isEqualTo(true)
 
