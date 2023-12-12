@@ -35,7 +35,6 @@ class MtServicesConfiguration(
   }
 
   @Bean
-  @Lazy(false)
   fun getAwsTranslationService(): TranslateClient? {
     val chain = when (
       awsMachineTranslationProperties.accessKey.isNullOrEmpty() ||

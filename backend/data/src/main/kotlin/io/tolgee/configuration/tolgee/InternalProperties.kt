@@ -26,4 +26,6 @@ class InternalProperties {
    */
   @E2eRuntimeMutable
   var e3eContentStorageBypassOk: Boolean? = null
+
+  var disableInitialUserCreation: Boolean = false
 }

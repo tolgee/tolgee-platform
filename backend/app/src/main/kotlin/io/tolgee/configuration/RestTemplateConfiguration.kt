@@ -2,6 +2,7 @@ package io.tolgee.configuration
 
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.client.SimpleClientHttpRequestFactory
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate
 class RestTemplateConfiguration {
 
   @Bean
+  @Lazy
   @Primary
   fun restTemplate(): RestTemplate {
     return RestTemplate(
