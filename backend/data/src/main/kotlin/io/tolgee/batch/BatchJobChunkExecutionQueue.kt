@@ -3,6 +3,7 @@ package io.tolgee.batch
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.Metrics
 import io.tolgee.batch.data.ExecutionQueueItem
+import io.tolgee.batch.data.BatchJobChunkExecutionDto
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
@@ -48,26 +49,49 @@ class BatchJobChunkExecutionQueue(
   @Scheduled(fixedRate = 60000)
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
+
+//    val data1 = entityManager.createQuery(
+//      """
+//          select bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter
+//          from BatchJobChunkExecution bjce
+//          join bjce.batchJob bk
+//          where bjce.status = :executionStatus
+//          order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
+//      """.trimIndent(),
+//      Array<Any>::class.java
+//    ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
+//      .setHint(
+//        "javax.persistence.lock.timeout",
+//        LockOptions.SKIP_LOCKED
+//      ).resultList
+
+//    for (result in data) {
+//      println(
+//        "bjce.i: " + result[0] + ", bk.id: " + result[1] + ", executeAfter " + result[2] + ", jobCharacter " + result[3])
+//    }
+
     val data = entityManager.createQuery(
       """
+          select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
           from BatchJobChunkExecution bjce
-          join fetch bjce.batchJob bk
+          join bjce.batchJob bk
           where bjce.status = :executionStatus
           order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
       """.trimIndent(),
-      BatchJobChunkExecution::class.java
+      BatchJobChunkExecutionDto::class.java
     ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
       .setHint(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
-    if (data.size > 0) {
-      logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
-    }
-    addExecutionsToLocalQueue(data)
-  }
 
-  fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecution>) {
+    if (data.size > 0) {
+      logger.info("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
+      addExecutionsToLocalQueue(data)
+    }
+  }
+  
+  fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
     val ids = queue.map { it.chunkExecutionId }.toSet()
     data.forEach {
       if (!ids.contains(it.id)) {
@@ -120,6 +144,14 @@ class BatchJobChunkExecutionQueue(
     jobCharacter: JobCharacter? = null
   ) =
     ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
+
+  private fun BatchJobChunkExecutionDto.toItem(
+    // Yes. jobCharacter is part of the batchJob entity.
+    // However, we don't want to fetch it here, because it would be a waste of resources.
+    // So we can provide the jobCharacter here.
+    providedJobCharacter: JobCharacter? = null
+  ) =
+    ExecutionQueueItem(id, batchJobId, executeAfter?.time, providedJobCharacter ?: jobCharacter)
 
   val size get() = queue.size
 
