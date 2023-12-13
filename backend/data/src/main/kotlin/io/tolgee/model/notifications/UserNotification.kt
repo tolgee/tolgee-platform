@@ -60,7 +60,7 @@ class UserNotification(
   // We most definitely need this to show the notification: eager
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "user_notification_modified_entities")
-  val modifiedEntities: MutableSet<ActivityModifiedEntity> = mutableSetOf(),
+  val modifiedEntities: MutableList<ActivityModifiedEntity> = mutableListOf(),
 
   // We most definitely need this to show the notification: eager
   @ManyToOne(fetch = FetchType.EAGER)

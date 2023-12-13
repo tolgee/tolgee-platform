@@ -16,7 +16,6 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.model.UserAccount
 import io.tolgee.model.notifications.UserNotification
 import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.dto.UserNotificationParamsDto
@@ -40,52 +39,64 @@ class UserNotificationService(
 
   @Transactional
   fun dispatchNotifications(notificationDto: NotificationCreateDto, params: List<UserNotificationParamsDto>) {
-    val userNotificationObjects = mutableSetOf<UserNotification>()
+    val createdUserNotificationObjects = mutableSetOf<UserNotification>()
+    val updatedUserNotificationObjects = mutableSetOf<UserNotification>()
 
     val (processed, remaining) = userNotificationDebouncer.debounce(notificationDto, params)
-    userNotificationObjects.addAll(
+    updatedUserNotificationObjects.addAll(
       userNotificationRepository.saveAll(processed)
     )
 
     remaining.forEach {
       val notification = notificationDto.toUserNotificationEntity(it)
-      userNotificationObjects.add(
+      createdUserNotificationObjects.add(
         userNotificationRepository.save(notification)
       )
     }
 
     // Dispatch event
     applicationEventPublisher.publishEvent(
-      UserNotificationPushEvent(userNotificationObjects)
+      UserNotificationPushEvent(
+        createdUserNotificationObjects,
+        updatedUserNotificationObjects,
+      )
     )
   }
 
-  fun getNotificationsNotDone(user: UserAccount, pageable: Pageable): Collection<UserNotification> {
-    return userNotificationRepository.findAllByMarkedDoneAtNullAndRecipient(user, pageable)
+  fun findNotificationsOfUserFilteredPaged(
+    user: Long,
+    status: Set<NotificationStatus>,
+    pageable: Pageable,
+  ): List<UserNotification> {
+    return userNotificationRepository.findNotificationsOfUserFilteredPaged(user, status, pageable)
   }
 
-  fun getNotificationsDone(user: UserAccount, pageable: Pageable): Collection<UserNotification> {
-    return userNotificationRepository.findAllByMarkedDoneAtNotNullAndRecipient(user, pageable)
+  fun getUnreadNotificationsCount(user: Long): Int {
+    return userNotificationRepository.countNotificationsByRecipientIdAndUnreadTrue(user)
   }
 
-  fun getUnreadNotificationsCount(user: UserAccount): Int {
-    return userNotificationRepository.countNotificationsByRecipientAndUnreadTrue(user)
+  fun markAsRead(user: Long, notifications: Collection<Long>) {
+    return userNotificationRepository.markAsRead(user, notifications)
   }
 
-  fun markAsRead(user: UserAccount, notifications: Set<Long>) {
+  fun markAllAsRead(user: Long) {
     return userNotificationRepository.markAllAsRead(user)
   }
 
-  fun markAllAsRead(user: UserAccount) {
-    return userNotificationRepository.markAllAsRead(user)
+  fun markAsUnread(user: Long, notifications: Collection<Long>) {
+    return userNotificationRepository.markAsUnread(user, notifications)
   }
 
-  fun markAsDone(user: UserAccount, notifications: Set<Long>) {
+  fun markAsDone(user: Long, notifications: Collection<Long>) {
+    return userNotificationRepository.markAsDone(user, notifications)
+  }
+
+  fun markAllAsDone(user: Long) {
     return userNotificationRepository.markAllAsDone(user)
   }
 
-  fun markAllAsDone(user: UserAccount) {
-    return userNotificationRepository.markAllAsDone(user)
+  fun unmarkAsDone(user: Long, notifications: Collection<Long>) {
+    return userNotificationRepository.unmarkAsDone(user, notifications)
   }
 
   fun deleteAllByUserId(userId: Long) {

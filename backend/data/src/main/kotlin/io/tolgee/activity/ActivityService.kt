@@ -1,8 +1,8 @@
 package io.tolgee.activity
 
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.activity.projectActivityView.ProjectActivityViewByPageableProvider
-import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
+import io.tolgee.activity.views.ProjectActivityViewByPageableProvider
+import io.tolgee.activity.views.ProjectActivityViewByRevisionProvider
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityRevision

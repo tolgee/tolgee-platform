@@ -6,6 +6,7 @@ import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.hateoas.InitialDataModel
+import io.tolgee.notifications.UserNotificationService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -30,6 +31,7 @@ class InitialDataController(
   private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler,
   private val eeSubscriptionService: EeSubscriptionService,
   private val announcementController: AnnouncementController,
+  private val userNotificationService: UserNotificationService,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(description = "Returns initial data always required by frontend")
@@ -46,6 +48,7 @@ class InitialDataController(
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()
+      data.unreadNotifications = userNotificationService.getUnreadNotificationsCount(userAccount.id)
     }
 
     return data

@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-package io.tolgee.notifications.events
+package io.tolgee.notifications
 
-import io.tolgee.model.notifications.UserNotification
-
-/**
- * Event sent when a set of users received a new notification.
- */
-data class UserNotificationPushEvent(
-  val createdNotifications: Set<UserNotification>,
-  val updatedNotifications: Set<UserNotification>,
-)
+enum class NotificationStatus {
+  UNREAD, READ, DONE
+}

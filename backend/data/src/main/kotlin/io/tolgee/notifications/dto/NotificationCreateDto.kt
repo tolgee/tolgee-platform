@@ -33,7 +33,7 @@ data class NotificationCreateDto(
       type = type,
       recipient = params.recipient,
       project = project,
-      modifiedEntities = params.modifiedEntities.toMutableSet()
+      modifiedEntities = params.modifiedEntities.toMutableList()
     )
   }
 

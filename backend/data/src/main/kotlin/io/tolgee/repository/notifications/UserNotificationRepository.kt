@@ -19,6 +19,7 @@ package io.tolgee.repository.notifications
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.notifications.UserNotification
+import io.tolgee.notifications.NotificationStatus
 import io.tolgee.notifications.NotificationType
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -30,11 +31,24 @@ import org.springframework.stereotype.Repository
 interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
   fun findAllByRecipient(recipient: UserAccount): List<UserNotification>
 
-  fun findAllByMarkedDoneAtNullAndRecipient(recipient: UserAccount, pageable: Pageable): List<UserNotification>
+  fun countNotificationsByRecipientIdAndUnreadTrue(recipient: Long): Int
 
-  fun findAllByMarkedDoneAtNotNullAndRecipient(recipient: UserAccount, pageable: Pageable): List<UserNotification>
-
-  fun countNotificationsByRecipientAndUnreadTrue(recipient: UserAccount): Int
+  @Query(
+    """
+      FROM UserNotification un WHERE
+        (io.tolgee.notifications.NotificationStatus.UNREAD IN :status AND
+          un.unread = true AND un.markedDoneAt IS NULL) OR
+        (io.tolgee.notifications.NotificationStatus.READ IN :status AND
+          un.unread = false AND un.markedDoneAt IS NULL) OR
+        (io.tolgee.notifications.NotificationStatus.DONE IN :status AND
+          un.markedDoneAt IS NOT NULL)
+    """
+  )
+  fun findNotificationsOfUserFilteredPaged(
+    recipient: Long,
+    status: Set<NotificationStatus>,
+    pageable: Pageable,
+  ): List<UserNotification>
 
   @Query(
     """
@@ -103,34 +117,34 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
   ): List<UserNotification>
 
   @Modifying
-  @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient = ?1 AND un.id IN ?2")
-  fun markAsRead(recipient: UserAccount, notifications: Collection<Long>)
+  @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient.id = ?1 AND un.id IN ?2")
+  fun markAsRead(recipient: Long, notifications: Collection<Long>)
 
   @Modifying
-  @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient = ?1")
-  fun markAllAsRead(recipient: UserAccount)
+  @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient.id = ?1")
+  fun markAllAsRead(recipient: Long)
 
   @Modifying
-  @Query("UPDATE UserNotification un SET un.unread = true WHERE un.recipient = ?1 AND un.id IN ?2")
-  fun markAsUnread(recipient: UserAccount, notifications: Collection<Long>)
-
-  @Modifying
-  @Query("UPDATE UserNotification un SET un.unread = true WHERE un.recipient = ?1")
-  fun markAllAsUnread(recipient: UserAccount)
+  @Query("UPDATE UserNotification un SET un.unread = true WHERE un.recipient.id = ?1 AND un.id IN ?2")
+  fun markAsUnread(recipient: Long, notifications: Collection<Long>)
 
   @Modifying
   @Query(
-    "UPDATE UserNotification un SET un.unread = false, un.markedDoneAt = NOW() WHERE un.recipient = ?1 AND un.id IN ?2"
+    """
+      UPDATE UserNotification un
+      SET un.unread = false, un.markedDoneAt = NOW()
+      WHERE un.recipient.id = ?1 AND un.id IN ?2
+    """
   )
-  fun markAsDone(recipient: UserAccount, notifications: Collection<Long>)
+  fun markAsDone(recipient: Long, notifications: Collection<Long>)
 
   @Modifying
-  @Query("UPDATE UserNotification un SET un.unread = false, un.markedDoneAt = NOW() WHERE un.recipient = ?1")
-  fun markAllAsDone(recipient: UserAccount)
+  @Query("UPDATE UserNotification un SET un.unread = false, un.markedDoneAt = NOW() WHERE un.recipient.id = ?1")
+  fun markAllAsDone(recipient: Long)
 
   @Modifying
-  @Query("UPDATE UserNotification un SET un.markedDoneAt = null WHERE un.recipient = ?1 AND un.id IN ?2")
-  fun unmarkAsDone(recipient: UserAccount, notifications: Collection<Long>)
+  @Query("UPDATE UserNotification un SET un.markedDoneAt = null WHERE un.recipient.id = ?1 AND un.id IN ?2")
+  fun unmarkAsDone(recipient: Long, notifications: Collection<Long>)
 
   @Modifying
   @Query("DELETE FROM user_notification WHERE marked_done_at < NOW() - INTERVAL '90 DAY'", nativeQuery = true)

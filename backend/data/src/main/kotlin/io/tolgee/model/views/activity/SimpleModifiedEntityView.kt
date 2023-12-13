@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package io.tolgee.notifications.events
+package io.tolgee.model.views.activity
 
-import io.tolgee.model.notifications.UserNotification
+import io.tolgee.activity.data.ExistenceEntityDescription
+import io.tolgee.activity.data.PropertyModification
 
-/**
- * Event sent when a set of users received a new notification.
- */
-data class UserNotificationPushEvent(
-  val createdNotifications: Set<UserNotification>,
-  val updatedNotifications: Set<UserNotification>,
+data class SimpleModifiedEntityView(
+  val entityClass: String,
+  val entityId: Long,
+  val exists: Boolean?,
+  var modifications: Map<String, PropertyModification> = mutableMapOf(),
+  var description: Map<String, Any?>? = null,
+  var describingRelations: Map<String, ExistenceEntityDescription>? = null,
 )

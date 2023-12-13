@@ -24,6 +24,12 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface NotificationPreferencesRepository : JpaRepository<NotificationPreferences, Long> {
+  fun findAllByUserAccountId(user: Long): List<NotificationPreferences>
+
+  fun findByUserAccountIdAndProjectId(user: Long, project: Long?): NotificationPreferences?
+
+  fun deleteByUserAccountIdAndProjectId(user: Long, project: Long)
+
   @Modifying
   @Query("DELETE FROM NotificationPreferences WHERE userAccount.id = :userId")
   fun deleteAllByUserId(userId: Long)

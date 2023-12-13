@@ -1,4 +1,4 @@
-package io.tolgee.activity.projectActivityView
+package io.tolgee.activity.views
 
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.EntityDescriptionWithRelations
