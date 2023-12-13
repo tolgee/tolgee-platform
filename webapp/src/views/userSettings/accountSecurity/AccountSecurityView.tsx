@@ -47,7 +47,6 @@ export const AccountSecurityView: FunctionComponent = () => {
             LINKS.USER_ACCOUNT_SECURITY.build(),
           ],
         ]}
-        containerMaxWidth="md"
       >
         <Typography mb={2}>
           <T keyName="account-security-set-password-third-party-info" />
@@ -88,7 +87,6 @@ export const AccountSecurityView: FunctionComponent = () => {
       navigation={[
         [t('user-account-security-title'), LINKS.USER_ACCOUNT_SECURITY.build()],
       ]}
-      containerMaxWidth="md"
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>

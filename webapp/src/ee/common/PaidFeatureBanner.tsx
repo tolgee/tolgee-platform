@@ -27,6 +27,7 @@ export const PaidFeatureBanner = ({ customTitle, customMessage }: Props) => {
             variant="contained"
             disableElevation
             to={link}
+            sx={{ whiteSpace: 'nowrap' }}
           >
             {actionTitle}
           </Button>

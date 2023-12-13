@@ -7,7 +7,7 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
-import { assertMessage } from './shared';
+import { assertMessage, dismissMenu } from './shared';
 import Chainable = Cypress.Chainable;
 import { selectNamespace } from './namespace';
 
@@ -120,7 +120,7 @@ export const toggleLang = (lang) => {
     .contains(lang)
     .should('be.visible')
     .click();
-  cy.get('body').click();
+  dismissMenu();
   // wait for loading to disappear
   waitForGlobalLoading();
 };

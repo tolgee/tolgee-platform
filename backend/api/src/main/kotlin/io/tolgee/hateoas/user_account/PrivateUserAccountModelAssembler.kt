@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class PrivateUserAccountModelAssembler(
   private val avatarService: AvatarService,
-  private val mfaService: MfaService
+  private val mfaService: MfaService,
 ) : RepresentationModelAssemblerSupport<UserAccount, PrivateUserAccountModel>(
   V2UserController::class.java, PrivateUserAccountModel::class.java
 ) {
@@ -27,7 +27,7 @@ class PrivateUserAccountModelAssembler(
       accountType = entity.accountType ?: UserAccount.AccountType.LOCAL,
       globalServerRole = entity.role ?: UserAccount.Role.USER,
       deletable = entity.isDeletable,
-      needsSuperJwtToken = entity.needsSuperJwt
+      needsSuperJwtToken = entity.needsSuperJwt,
     )
   }
 }

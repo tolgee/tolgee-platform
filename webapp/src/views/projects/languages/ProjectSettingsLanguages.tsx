@@ -1,12 +1,10 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { useQueryClient } from 'react-query';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 
 import { SettingsIconButton } from 'tg.component/common/buttons/SettingsIconButton';
-import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -21,6 +19,9 @@ import {
   TABLE_TOP_ROW,
 } from './tableStyles';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
+import { useQueryClient } from 'react-query';
 
 export const ProjectSettingsLanguages = () => {
   const queryClient = useQueryClient();
@@ -46,78 +47,94 @@ export const ProjectSettingsLanguages = () => {
 
   return (
     <Box mb={6}>
-      {canEditLanguages && (
-        <>
-          <Box mt={4}>
-            <Typography variant="h5">
-              <T keyName="create_language_title" />
-            </Typography>
-          </Box>
-          <Box mb={2}>
-            <CreateSingleLanguage
-              autoFocus={false}
-              onCancel={() => {}}
-              onCreated={() => {
-                invalidateUrlPrefix(queryClient, '/v2/project');
-              }}
-            />
-          </Box>
-        </>
-      )}
-      <StyledLanguageTable
-        style={{ gridTemplateColumns: '1fr auto auto' }}
-        data-cy="project-settings-languages"
+      <QuickStartHighlight
+        itemKey="add_language"
+        message={t('quick_start_item_add_language_hint')}
+        borderRadius="5px"
+        offset={10}
       >
-        <div className={TABLE_TOP_ROW} />
-        <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
-          {t('project_languages_base_language')}
-        </div>
-        <div className={TABLE_TOP_ROW} />
-
-        {languagesLoadable.data?._embedded?.languages?.map((l) => (
-          <React.Fragment key={l.id}>
-            <div
-              className={TABLE_FIRST_CELL}
-              data-cy="project-settings-languages-list-name"
-            >
-              <LanguageItem language={l} />
-            </div>
-            <div className={TABLE_CENTERED}>{l?.base ? '✓' : ''}</div>
-            {canEditLanguages && (
-              <Box
-                className={TABLE_LAST_CELL}
-                mt={1}
-                mb={1}
-                data-cy="project-settings-languages-list-edit-button"
-                data-cy-language={l.tag}
-              >
-                <Link
-                  to={LINKS.PROJECT_EDIT_LANGUAGE.build({
-                    [PARAMS.PROJECT_ID]: project.id,
-                    [PARAMS.LANGUAGE_ID]: l.id,
-                  })}
-                >
-                  <SettingsIconButton
-                    disabled={!canEditLanguages}
-                    size="small"
-                    aria-label={`Settings ${l.name}`}
-                  />
-                </Link>
+        <Box>
+          {canEditLanguages && (
+            <>
+              <Box mt={4}>
+                <Typography variant="h5">
+                  <T keyName="create_language_title" />
+                </Typography>
               </Box>
-            )}
-          </React.Fragment>
-        ))}
-      </StyledLanguageTable>
+              <Box mb={2}>
+                <CreateSingleLanguage
+                  autoFocus={false}
+                  onCancel={() => {}}
+                  onCreated={() => {
+                    invalidateUrlPrefix(queryClient, '/v2/project');
+                  }}
+                />
+              </Box>
+            </>
+          )}
+          <StyledLanguageTable
+            style={{ gridTemplateColumns: '1fr auto auto' }}
+            data-cy="project-settings-languages"
+          >
+            <div className={TABLE_TOP_ROW} />
+            <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
+              {t('project_languages_base_language')}
+            </div>
+            <div className={TABLE_TOP_ROW} />
+
+            {languagesLoadable.data?._embedded?.languages?.map((l) => (
+              <React.Fragment key={l.id}>
+                <div
+                  className={TABLE_FIRST_CELL}
+                  data-cy="project-settings-languages-list-name"
+                >
+                  <LanguageItem language={l} />
+                </div>
+                <div className={TABLE_CENTERED}>{l?.base ? '✓' : ''}</div>
+                {canEditLanguages && (
+                  <Box
+                    className={TABLE_LAST_CELL}
+                    mt={1}
+                    mb={1}
+                    data-cy="project-settings-languages-list-edit-button"
+                    data-cy-language={l.tag}
+                  >
+                    <Link
+                      to={LINKS.PROJECT_EDIT_LANGUAGE.build({
+                        [PARAMS.PROJECT_ID]: project.id,
+                        [PARAMS.LANGUAGE_ID]: l.id,
+                      })}
+                    >
+                      <SettingsIconButton
+                        disabled={!canEditLanguages}
+                        size="small"
+                        aria-label={`Settings ${l.name}`}
+                      />
+                    </Link>
+                  </Box>
+                )}
+              </React.Fragment>
+            ))}
+          </StyledLanguageTable>
+        </Box>
+      </QuickStartHighlight>
 
       {mtEnabled && (
-        <>
-          <Box mt={4} mb={2}>
-            <Typography variant="h5">
-              <T keyName="machine_translation_title" />
-            </Typography>
+        <QuickStartHighlight
+          itemKey="machine_translation"
+          message={t('quick_start_item_machine_translation_hint')}
+          borderRadius="5px"
+          offset={10}
+        >
+          <Box>
+            <Box mt={4} mb={2}>
+              <Typography variant="h5">
+                <T keyName="machine_translation_title" />
+              </Typography>
+            </Box>
+            <MachineTranslation />
           </Box>
-          <MachineTranslation />
-        </>
+        </QuickStartHighlight>
       )}
     </Box>
   );

@@ -1,5 +1,6 @@
 import { HOST } from '../../common/constants';
 import {
+  dismissMenu,
   gcy,
   getInputByName,
   getPopover,
@@ -13,6 +14,7 @@ import {
 } from '../../common/languages';
 import { languagesTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
+import { waitForGlobalLoading } from '../../common/loading';
 
 describe('Language creation in new project', () => {
   beforeEach(() => {
@@ -79,7 +81,7 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').click();
     getPopover().contains('English').should('be.visible');
     getPopover().contains('Azerbaijani').should('be.visible');
-    cy.get('body').click();
+    dismissMenu();
     addLanguage('Deutsch');
     gcy('base-language-select').click();
     getPopover().contains('German').should('be.visible');
@@ -90,7 +92,7 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').click();
     getPopover().contains('English').should('be.visible');
     getPopover().contains('Azerbaijani').should('be.visible');
-    cy.get('body').click();
+    dismissMenu();
     removeLanguage('Azerbaijani');
     gcy('base-language-select').click();
     getPopover().contains('Azerbaijani').should('not.exist');
@@ -101,7 +103,7 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').click();
     getPopover().contains('English').should('be.visible');
     getPopover().contains('Azerbaijani').should('be.visible');
-    cy.get('body').click();
+    dismissMenu();
     removeLanguage('English');
     gcy('base-language-select').contains('Azerbaijani').should('be.visible');
   });
@@ -124,11 +126,7 @@ describe('Language creation in new project', () => {
     getInputByName('name').type('Super project');
     selectInSelect(gcy('base-language-select'), 'German');
     gcy('global-form-save-button').click();
-    cy.contains('Super project')
-      .closestDcy('dashboard-projects-list-item')
-      .findDcy('project-list-more-button')
-      .click();
-    gcy('project-settings-button').click();
+    waitForGlobalLoading();
     selectInProjectMenu('Languages');
     languagesToAdd.forEach((l) =>
       gcy('project-settings-languages').contains(l).should('be.visible')

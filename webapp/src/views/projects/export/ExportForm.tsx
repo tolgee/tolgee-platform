@@ -18,6 +18,7 @@ import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
 import { NestedSelector } from 'tg.views/projects/export/components/NestedSelector';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -215,29 +216,35 @@ export const ExportForm = () => {
       }}
     >
       {({ isSubmitting, handleSubmit, isValid, values }) => (
-        <StyledForm onSubmit={handleSubmit}>
-          <StateSelector className="states" />
-          <LanguageSelector className="langs" languages={allowedLanguages} />
-          <FormatSelector className="format" />
-          {values.format === 'JSON' && (
-            <StyledOptions className="options">
-              <NestedSelector />
-            </StyledOptions>
-          )}
-          <NsSelector className="ns" namespaces={allNamespaces} />
-          <div className="submit">
-            <LoadingButton
-              data-cy="export-submit-button"
-              loading={isSubmitting}
-              variant="contained"
-              color="primary"
-              type="submit"
-              disabled={!isValid}
-            >
-              {t('export_translations_export_label')}
-            </LoadingButton>
-          </div>
-        </StyledForm>
+        <QuickStartHighlight
+          itemKey="export_form"
+          offset={10}
+          message={t('quick_start_item_export_form_hint')}
+        >
+          <StyledForm onSubmit={handleSubmit}>
+            <StateSelector className="states" />
+            <LanguageSelector className="langs" languages={allowedLanguages} />
+            <FormatSelector className="format" />
+            {values.format === 'JSON' && (
+              <StyledOptions className="options">
+                <NestedSelector />
+              </StyledOptions>
+            )}
+            <NsSelector className="ns" namespaces={allNamespaces} />
+            <div className="submit">
+              <LoadingButton
+                data-cy="export-submit-button"
+                loading={isSubmitting}
+                variant="contained"
+                color="primary"
+                type="submit"
+                disabled={!isValid}
+              >
+                {t('export_translations_export_label')}
+              </LoadingButton>
+            </div>
+          </StyledForm>
+        </QuickStartHighlight>
       )}
     </Formik>
   );

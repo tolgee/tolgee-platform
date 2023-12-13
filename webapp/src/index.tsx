@@ -20,7 +20,6 @@ import { container } from 'tsyringe';
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
 import { BottomPanelProvider } from 'tg.component/bottomPanel/BottomPanelContext';
-import { TopBarProvider } from 'tg.component/layout/TopBar/TopBarContext';
 import { GlobalProvider } from 'tg.globalContext/GlobalContext';
 import { App } from './component/App';
 import ErrorBoundary from './component/ErrorBoundary';
@@ -85,12 +84,10 @@ const MainWrapper = () => {
                       <SnackbarProvider data-cy="global-snackbars">
                         <GlobalProvider>
                           <BottomPanelProvider>
-                            <TopBarProvider>
-                              <MuiLocalizationProvider>
-                                <App />
-                              </MuiLocalizationProvider>
-                              <GlobalErrorModal />
-                            </TopBarProvider>
+                            <MuiLocalizationProvider>
+                              <App />
+                            </MuiLocalizationProvider>
+                            <GlobalErrorModal />
                           </BottomPanelProvider>
                         </GlobalProvider>
                       </SnackbarProvider>

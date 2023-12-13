@@ -390,6 +390,12 @@ declare namespace DataCy {
         "project-transfer-autocomplete-suggested-option" |
         "project-transfer-confirmation-field" |
         "project-transfer-dialog" |
+        "quick-start-action" |
+        "quick-start-dialog" |
+        "quick-start-finish" |
+        "quick-start-highlight" |
+        "quick-start-highlight-ok" |
+        "quick-start-step" |
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
         "screenshot-image" |

@@ -9,6 +9,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.InvitationService
+import io.tolgee.service.QuickStartService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,6 +22,7 @@ class SignUpService(
   private val jwtService: JwtService,
   private val emailVerificationService: EmailVerificationService,
   private val organizationService: OrganizationService,
+  private val quickStartService: QuickStartService
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
@@ -43,7 +45,8 @@ class SignUpService(
     val canCreateOrganization = tolgeeProperties.authentication.userCanCreateOrganizations
     if (canCreateOrganization && (invitation == null || !dto.organizationName.isNullOrBlank())) {
       val name = if (dto.organizationName.isNullOrBlank()) user.name else dto.organizationName!!
-      organizationService.createPreferred(user, name)
+      val organization = organizationService.createPreferred(user, name)
+      quickStartService.create(user, organization)
     }
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {

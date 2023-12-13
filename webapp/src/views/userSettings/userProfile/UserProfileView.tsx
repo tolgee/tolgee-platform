@@ -123,7 +123,6 @@ export const UserProfileView: FunctionComponent = () => {
       windowTitle={t('user_profile_title')}
       title={t('user_profile_title')}
       navigation={[[t('user_profile_title'), LINKS.USER_PROFILE.build()]]}
-      containerMaxWidth="md"
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>

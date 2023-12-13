@@ -65,6 +65,11 @@ export type TopBanner = {
   linkText: string;
 };
 
+export type Tile = {
+  background: string;
+  backgroundHover: string;
+};
+
 export type Cell = {
   hover: string;
   selected: string;
@@ -75,6 +80,15 @@ export type Navbar = {
   background: string;
   text: string;
   logo: string;
+};
+
+export type QuickStart = {
+  highlight: string;
+  circleNormal: string;
+  circleSuccess: string;
+  topBorder: string;
+  progressBackground: string;
+  itemBorder: string;
 };
 
 export const colors = {
@@ -90,6 +104,10 @@ export const colors = {
     background: '#FDFDFF',
     backgroundPaper: '#ffffff',
     emphasis: customGrey,
+    tile: {
+      background: '#F7F8FB',
+      backgroundHover: '#f4f4f6',
+    },
     cell: {
       hover: '#f7f7f7',
       selected: '#EEEFF1',
@@ -133,6 +151,14 @@ export const colors = {
       mainText: '#004437',
       linkText: '#009B85',
     },
+    quickStart: {
+      highlight: '#F7F8FB',
+      circleNormal: '#E7EBF5',
+      circleSuccess: '#0ea459',
+      topBorder: '#e9ecef',
+      progressBackground: '#bcbcbc70',
+      itemBorder: '#EDF0F7',
+    } as QuickStart,
   },
   dark: {
     white: '#dddddd',
@@ -145,12 +171,15 @@ export const colors = {
     divider1: '#2c3c52',
     background: '#1f2d40',
     backgroundPaper: '#1e2b3e',
+    tile: {
+      background: '#233043',
+      backgroundHover: '#253245',
+    },
     cell: {
       hover: '#233043',
       selected: '#243245',
       inside: '#283a53',
     },
-    cellSelected2: '#283a53',
     navbar: {
       background: '#182230',
       text: '#dddddd',
@@ -205,5 +234,12 @@ export const colors = {
       mainText: '#BEF4E9',
       linkText: '#dddddd',
     },
+    quickStart: {
+      highlight: '#233043',
+      circleNormal: '#2c3c52',
+      circleSuccess: '#3bac21',
+      topBorder: '#2a384c',
+      progressBackground: '#2c3c52',
+    } as QuickStart,
   },
 } as const;

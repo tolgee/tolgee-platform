@@ -126,7 +126,7 @@ export const toggleInMultiselect = (
         }
       });
   });
-  cy.get('body').type('{esc}');
+  dismissMenu();
   waitForGlobalLoading();
 };
 
@@ -186,4 +186,8 @@ export const visitProjectDeveloperStorage = (projectId: number) => {
 
 export const visitProjectDeveloperHooks = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/developer/webhooks`);
+};
+
+export const dismissMenu = () => {
+  cy.focused().type('{esc}');
 };

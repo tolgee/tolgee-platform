@@ -70,7 +70,6 @@ export const AdministrationCloudPlansView = () => {
             LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
           ],
         ]}
-        containerMaxWidth="lg"
         allCentered
         hideChildrenOnLoading={false}
         addLinkTo={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE.build()}

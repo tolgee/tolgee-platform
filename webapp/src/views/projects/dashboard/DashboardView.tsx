@@ -5,6 +5,7 @@ import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 import { ProjectTotals } from './ProjectTotals';
 import { LanguageStats } from './LanguageStats/LanguageStats';
@@ -12,7 +13,6 @@ import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectDescription } from './ProjectDescription';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -27,7 +27,7 @@ const StyledContainer = styled(Box)`
   gap: 16px 16px;
   padding-bottom: 60px;
 
-  @media (max-width: 1000px) {
+  @container main-container (max-width: 1000px) {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto;
     grid-template-areas:
@@ -108,7 +108,7 @@ export const DashboardView = () => {
     <ProjectLanguagesProvider>
       <BaseProjectView
         windowTitle={t('project_dashboard_title')}
-        containerMaxWidth="xl"
+        maxWidth="wide"
         navigationRight={
           <StyledProjectId>
             <T

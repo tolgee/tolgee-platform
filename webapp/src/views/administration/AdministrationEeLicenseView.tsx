@@ -40,7 +40,6 @@ export const AdministrationEeLicenseView = () => {
               LINKS.ADMINISTRATION_EE_LICENSE.build(),
             ],
           ]}
-          containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={infoLoadable.isFetching}

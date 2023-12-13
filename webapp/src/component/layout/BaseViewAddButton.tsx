@@ -4,8 +4,9 @@ import { Add } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 export const BaseViewAddButton = (props: {
-  addLinkTo: string | undefined;
-  onClick: (() => void) | undefined;
+  addLinkTo?: string;
+  onClick?: () => void;
+  label?: string;
 }) => (
   <Button
     data-cy="global-plus-button"
@@ -18,6 +19,6 @@ export const BaseViewAddButton = (props: {
     aria-label="add"
     onClick={props.onClick}
   >
-    <T keyName="global_add_button" />
+    {props.label ?? <T keyName="global_add_button" />}
   </Button>
 );

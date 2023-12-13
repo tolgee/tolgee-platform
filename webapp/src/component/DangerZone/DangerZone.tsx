@@ -1,11 +1,6 @@
-import {
-  useMediaQuery,
-  useTheme,
-  Box,
-  Typography,
-  styled,
-} from '@mui/material';
+import { useMediaQuery, Box, Typography, styled } from '@mui/material';
 import { ReactNode } from 'react';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledDangerZone = styled(Box)`
   display: grid;
@@ -29,9 +24,10 @@ type Props = {
 };
 
 export const DangerZone: React.FC<Props> = ({ actions }) => {
-  const theme = useTheme();
-  const isSmOrLower = useMediaQuery(theme.breakpoints.down('md'));
-
+  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const isSmOrLower = useMediaQuery(
+    `@container (max-width: ${899 + rightPanelWidth}px)`
+  );
   return (
     <StyledDangerZone p={2}>
       {actions.map((action, i) => (

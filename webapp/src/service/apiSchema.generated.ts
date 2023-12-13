@@ -30,6 +30,15 @@ export interface paths {
   "/v2/user-preferences/set-language/{languageTag}": {
     put: operations["setLanguage"];
   };
+  "/v2/quick-start/steps/{step}/complete": {
+    put: operations["completeGuideStep"];
+  };
+  "/v2/quick-start/set-open/{open}": {
+    put: operations["setOpenState"];
+  };
+  "/v2/quick-start/set-finished/{finished}": {
+    put: operations["setFinishedState"];
+  };
   "/v2/projects/{projectId}": {
     get: operations["get_3"];
     put: operations["editProject"];
@@ -676,6 +685,11 @@ export interface components {
     };
     UserMfaRecoveryRequestDto: {
       password: string;
+    };
+    QuickStartModel: {
+      finished: boolean;
+      completedSteps: string[];
+      open: boolean;
     };
     EditProjectDTO: {
       name: string;
@@ -1471,15 +1485,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1617,14 +1631,14 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
+      description: string;
+      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      username?: string;
-      description: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -2427,19 +2441,20 @@ export interface components {
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
       )[];
+      quickStart?: components["schemas"]["QuickStartModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /** @example btforg */
       slug: string;
       avatar?: components["schemas"]["Avatar"];
@@ -2551,18 +2566,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      namespace?: string;
       translation?: string;
       baseTranslation?: string;
-      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
+      namespace?: string;
       translation?: string;
       baseTranslation?: string;
-      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2753,7 +2768,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       /** Format: int64 */
       id: number;
       type:
@@ -2767,6 +2781,7 @@ export interface components {
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG"
         | "KEY_IS_BLANK";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -3062,15 +3077,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3191,14 +3206,14 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
+      description: string;
+      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      username?: string;
-      description: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {
@@ -3515,6 +3530,87 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  completeGuideStep: {
+    parameters: {
+      path: {
+        step: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setOpenState: {
+    parameters: {
+      path: {
+        open: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setFinishedState: {
+    parameters: {
+      path: {
+        finished: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -6017,6 +6113,7 @@ export interface operations {
     };
   };
   createProject: {
+    parameters: {};
     responses: {
       /** OK */
       200: {

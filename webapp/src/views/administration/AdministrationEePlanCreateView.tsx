@@ -33,7 +33,6 @@ export const AdministrationEePlanCreateView = () => {
             LINKS.ADMINISTRATION_BILLING_EE_PLAN_CREATE.build(),
           ],
         ]}
-        containerMaxWidth="lg"
         allCentered
         hideChildrenOnLoading={false}
       >

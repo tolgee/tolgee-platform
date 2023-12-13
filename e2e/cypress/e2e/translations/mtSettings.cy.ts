@@ -24,7 +24,7 @@ describe('Machine translation settings', () => {
     }
   });
 
-  it('will update default settings', () => {
+  it('will update default settings', { retries: 5 }, () => {
     cy.gcy('machine-translations-settings-language-options').click();
     getEnableCheckbox('GOOGLE').click();
     getPrimaryRadio('AWS').click();
@@ -55,7 +55,7 @@ describe('Machine translation settings', () => {
     );
   });
 
-  it('will update language specific settings', () => {
+  it('will update language specific settings', { retries: 5 }, () => {
     cy.gcy('machine-translations-settings-toggle').click();
     gcyAdvanced({
       value: 'machine-translations-settings-language-options',

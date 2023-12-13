@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Add } from '@mui/icons-material';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Link, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
@@ -58,60 +59,81 @@ export const CdList = () => {
   }
 
   return (
-    <Box mt={4}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        flexWrap="wrap"
-        gap={2}
-        pb={1.5}
-      >
-        <Typography
-          component="h5"
-          variant="h5"
-          data-cy="content-delivery-subtitle"
+    <QuickStartHighlight
+      itemKey="content_delivery_page"
+      message={t('content_delivery_page_hint')}
+      offset={6}
+      borderRadius="6px"
+    >
+      <Box mt={4}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          flexWrap="wrap"
+          gap={2}
+          pb={1.5}
         >
-          {t('content_delivery_subtitle')}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setFormOpen(true)}
-          disabled={!canAdd}
-          startIcon={<Add />}
-          data-cy="content-delivery-add-button"
-        >
-          {t('content_delivery_add_button')}
-        </Button>
-      </Box>
+          <Typography
+            component="h5"
+            variant="h5"
+            data-cy="content-delivery-subtitle"
+          >
+            {t('content_delivery_subtitle')}
+          </Typography>
 
-      <Box pb={5}>{t('content_delivery_description')}</Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setFormOpen(true)}
+            disabled={!canAdd}
+            startIcon={<Add />}
+            data-cy="content-delivery-add-button"
+          >
+            {t('content_delivery_add_button')}
+          </Button>
+        </Box>
 
-      <PaginatedHateoasList
-        loadable={exportersLoadable}
-        renderItem={(item) => <CdItem data={item} />}
-        onPageChange={(val) => setPage(val)}
-        emptyPlaceholder={
-          <Box display="flex" justifyContent="center">
-            <T keyName="global_empty_list_message" />
-          </Box>
-        }
-      />
-
-      {!isPaid && !listEmpty && (
-        <Box mt={6}>
-          <PaidFeatureBanner
-            customTitle={
-              listSize === 1
-                ? t('content_delivery_not_enabled_title')
-                : t('content_delivery_over_limit_title')
-            }
-            customMessage={t('content_delivery_not_enabled_message')}
+        <Box pb={5}>
+          <T
+            keyName="content_delivery_hint"
+            params={{
+              link: (
+                <Link
+                  href="https://tolgee.io/platform/projects_and_organizations/content_delivery"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                />
+              ),
+            }}
           />
         </Box>
-      )}
-      {formOpen && <CdEditDialog onClose={() => setFormOpen(false)} />}
-    </Box>
+
+        <PaginatedHateoasList
+          loadable={exportersLoadable}
+          renderItem={(item) => <CdItem data={item} />}
+          onPageChange={(val) => setPage(val)}
+          emptyPlaceholder={
+            <Box display="flex" justifyContent="center">
+              <T keyName="global_empty_list_message" />
+            </Box>
+          }
+        />
+
+        {!isPaid && !listEmpty && (
+          <Box mt={6}>
+            <PaidFeatureBanner
+              customTitle={
+                listSize === 1
+                  ? t('content_delivery_not_enabled_title')
+                  : t('content_delivery_over_limit_title')
+              }
+              customMessage={t('content_delivery_not_enabled_message')}
+            />
+          </Box>
+        )}
+        {formOpen && <CdEditDialog onClose={() => setFormOpen(false)} />}
+      </Box>
+    </QuickStartHighlight>
   );
 };

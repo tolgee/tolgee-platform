@@ -136,7 +136,7 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
         key: 'organization-menu-billing-test-clock',
         noWrap: true,
       })}
-      containerMaxWidth="xl"
+      maxWidth="normal"
     >
       {info && (
         <>

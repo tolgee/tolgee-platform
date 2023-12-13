@@ -33,7 +33,6 @@ export const AdministrationCloudPlanCreateView = () => {
             LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE.build(),
           ],
         ]}
-        containerMaxWidth="lg"
         allCentered
         hideChildrenOnLoading={false}
       >

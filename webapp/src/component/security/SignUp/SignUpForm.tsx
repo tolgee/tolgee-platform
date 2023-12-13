@@ -12,7 +12,6 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { SetPasswordFields } from '../SetPasswordFields';
 import { useConfig } from 'tg.globalContext/helpers';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
-import { default as React, FC } from 'react';
 import { Alert } from '../../common/Alert';
 import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
 
@@ -30,7 +29,7 @@ type Props = {
   loadable: LoadableType;
 };
 
-const Error: FC<{ loadable: LoadableType }> = ({ loadable }) => {
+const Error: React.FC<{ loadable: LoadableType }> = ({ loadable }) => {
   if (loadable.error?.code === 'seats_spending_limit_exceeded') {
     return (
       <Alert severity="error">
@@ -79,7 +78,7 @@ export const SignUpForm = (props: Props) => {
             color="primary"
             type="submit"
             variant="contained"
-            loading={props.loadable.loading}
+            loading={props.loadable.isLoading}
           >
             <T keyName="sign_up_submit_button" />
           </LoadingButton>
