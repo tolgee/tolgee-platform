@@ -128,12 +128,7 @@ class BatchJobChunkExecutionQueue(
   ) =
     ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
 
-  private fun BatchJobChunkExecutionDto.toItem(
-    // Yes. jobCharacter is part of the batchJob entity.
-    // However, we don't want to fetch it here, because it would be a waste of resources.
-    // So we can provide the jobCharacter here.
-    providedJobCharacter: JobCharacter? = null
-  ) =
+  private fun BatchJobChunkExecutionDto.toItem(providedJobCharacter: JobCharacter? = null) =
     ExecutionQueueItem(id, batchJobId, executeAfter?.time, providedJobCharacter ?: jobCharacter)
 
   val size get() = queue.size
