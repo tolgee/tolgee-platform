@@ -216,8 +216,35 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     headers["x-api-key"] = testData.usersKey.key!!
     performGet("/v2/api-keys/current", headers).andPrettyPrint.andAssertThatJson {
       node("id").isValidId
-      node("key").isAbsent()
     }
+  }
+
+  @Test
+  fun `returns correct current permissions PAK`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = testData.usersKey.key!!
+    performGet("/v2/api-keys/current-permissions", headers).andPrettyPrint.andAssertThatJson {
+      node("projectId").isNotNull
+      node("scopes").isArray.isNotEmpty
+      node("translateLanguageIds").isNull()
+      node("viewLanguageIds").isNull()
+      node("stateChangeLanguageIds").isNull()
+    }
+  }
+
+  @Test
+  fun `returns correct current permissions PAT`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", headers)
+      .andIsOk.andAssertThatJson {
+        node("projectId").isNotNull
+        node("type").isEqualTo("MANAGE")
+        node("scopes").isArray.isNotEmpty
+        node("translateLanguageIds").isNull()
+        node("viewLanguageIds").isNull()
+        node("stateChangeLanguageIds").isNull()
+      }
   }
 
   @Test

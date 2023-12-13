@@ -7,11 +7,14 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -26,7 +29,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: KeysTestData
 
@@ -37,9 +40,143 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     testData = KeysTestData()
+    testData.projectBuilder.addCzech()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.project }
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.TRANSLATIONS_EDIT
+    ]
+  )
+  @Test
+  fun `complex edit validates change state permissions`() {
+    val keyName = "super_key"
+
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = keyName,
+        translations = mapOf("en" to "EN", "de" to "DE"),
+        states = mapOf("en" to AssignableTranslationState.REVIEWED),
+      )
+    ).andIsForbidden
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_CREATE,
+      Scope.TRANSLATIONS_EDIT,
+      Scope.TRANSLATIONS_STATE_EDIT
+    ]
+  )
+  @Test
+  fun `complex edit modifies state`() {
+    // new translation
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "EN", "de" to "DE"),
+      states = mapOf("en" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.TRANSLATED)
+    )
+
+    // existing translation
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "EN", "de" to "DE"),
+      states = mapOf("de" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.REVIEWED)
+    )
+
+    doUpdateAndVerifyStates(
+      translations = mapOf("cs" to "CS"),
+      states = mapOf(),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.TRANSLATED,
+        "en" to TranslationState.REVIEWED,
+        "de" to TranslationState.REVIEWED
+      )
+    )
+
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "Test", "cs" to "Test"),
+      states = mapOf("en" to AssignableTranslationState.REVIEWED, "cs" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.REVIEWED,
+        "en" to TranslationState.REVIEWED,
+        // we modified the base, so it resets the state for the value, which is not modified
+        "de" to TranslationState.TRANSLATED
+      )
+    )
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_CREATE,
+      Scope.TRANSLATIONS_EDIT,
+      Scope.TRANSLATIONS_STATE_EDIT
+    ]
+  )
+  @Test
+  fun `complex edit modifies state correctly when new translation created`() {
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "Test", "cs" to "Test"),
+      states = mapOf("en" to AssignableTranslationState.REVIEWED, "cs" to AssignableTranslationState.REVIEWED),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.REVIEWED,
+        "en" to TranslationState.REVIEWED,
+      )
+    )
+
+    doUpdateAndVerifyStates(
+      translations = mapOf("en" to "Test", "cs" to "Test", "de" to "Hello"),
+      states = mapOf(
+        "en" to AssignableTranslationState.REVIEWED,
+        "cs" to AssignableTranslationState.REVIEWED,
+        "de" to AssignableTranslationState.REVIEWED
+      ),
+      statesToVerify = mapOf(
+        "cs" to TranslationState.REVIEWED,
+        "en" to TranslationState.REVIEWED,
+        "de" to TranslationState.REVIEWED
+      )
+    )
+  }
+
+  private fun doUpdateAndVerifyStates(
+    translations: Map<String, String>,
+    states: Map<String, AssignableTranslationState>,
+    statesToVerify: Map<String, TranslationState>
+  ) {
+    doUpdate(translations, states)
+    verifyStates(statesToVerify)
+  }
+
+  private fun verifyStates(statesToVerify: Map<String, TranslationState>) {
+    executeInNewTransaction {
+      val key = keyService.find(testData.keyWithReferences.id)
+      assertThat(key).isNotNull
+      statesToVerify.forEach {
+        val state = key!!.translations.find { translation -> translation.language.tag == it.key }!!.state
+        assertThat(state)
+          .describedAs("State for ${it.key} is not ${it.value}")
+          .isEqualTo(it.value)
+      }
+    }
+  }
+
+  private fun doUpdate(
+    translations: Map<String, String>,
+    states: Map<String, AssignableTranslationState>
+  ) {
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = "key_with_referecnces",
+        translations = translations,
+        states = states,
+      )
+    ).andIsOk
   }
 
   @ProjectApiKeyAuthTestMethod(

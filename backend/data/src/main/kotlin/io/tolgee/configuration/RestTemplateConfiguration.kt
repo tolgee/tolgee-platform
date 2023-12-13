@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.client.SimpleClientHttpRequestFactory
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
@@ -18,12 +19,17 @@ class RestTemplateConfiguration {
       HttpComponentsClientHttpRequestFactory().apply {
         this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
       }
-    )
+    ).removeXmlConverter()
+  }
+
+  private fun RestTemplate.removeXmlConverter(): RestTemplate {
+    messageConverters.removeIf { it is MappingJackson2XmlHttpMessageConverter }
+    return this
   }
 
   @Bean(name = ["webhookRestTemplate"])
   fun webhookRestTemplate(): RestTemplate {
-    return RestTemplate(getClientHttpRequestFactory())
+    return RestTemplate(getClientHttpRequestFactory()).removeXmlConverter()
   }
 
   private fun getClientHttpRequestFactory(): SimpleClientHttpRequestFactory {

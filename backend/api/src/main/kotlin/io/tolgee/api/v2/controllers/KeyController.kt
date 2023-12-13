@@ -27,6 +27,7 @@ import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.model.Project
+import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.security.ProjectHolder
@@ -99,6 +100,12 @@ class KeyController(
     dto.translations?.filterValues { !it.isNullOrEmpty() }?.keys?.let { languageTags ->
       if (languageTags.isNotEmpty()) {
         securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
+      }
+    }
+
+    dto.states?.filterValues { it != AssignableTranslationState.TRANSLATED }?.keys?.let { languageTags ->
+      if (languageTags.isNotEmpty()) {
+        securityService.checkLanguageStateChangePermissionsByTag(projectHolder.project.id, languageTags)
       }
     }
 

@@ -243,7 +243,7 @@ class AutomationService(
     automation.triggers.add(
       AutomationTrigger(automation).apply {
         this.type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION
-        this.debounceDurationInMs = 5000
+        this.debounceDurationInMs = 30000
       }
     )
 

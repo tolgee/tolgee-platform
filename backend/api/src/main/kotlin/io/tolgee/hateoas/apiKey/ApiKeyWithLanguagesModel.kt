@@ -10,10 +10,8 @@ open class ApiKeyWithLanguagesModel(
   @Schema(hidden = true)
   apiKeyModel: ApiKeyModel,
   @Schema(
-    description = """Languages for which user has translate permission.
-
-If null, all languages are permitted.
-  """
+    description = """Languages for which user has translate permission.""",
+    deprecated = true
   )
-  val permittedLanguageIds: List<Long>?
+  val permittedLanguageIds: Set<Long>?,
 ) : RepresentationModel<ApiKeyWithLanguagesModel>(), IApiKeyModel by apiKeyModel

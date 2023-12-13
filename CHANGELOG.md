@@ -1,3 +1,32 @@
+# [3.39.0](https://github.com/tolgee/tolgee-platform/compare/v3.38.4...v3.39.0) (2023-12-07)
+
+
+### Features
+
+* Enable state change in complex edit ([#2003](https://github.com/tolgee/tolgee-platform/issues/2003)) ([bf78816](https://github.com/tolgee/tolgee-platform/commit/bf788161cabf9234c8920fe507270f2f302cd539))
+
+## [3.38.4](https://github.com/tolgee/tolgee-platform/compare/v3.38.3...v3.38.4) (2023-12-07)
+
+
+### Bug Fixes
+
+* handle async dispatch in security interceptors ([#2012](https://github.com/tolgee/tolgee-platform/issues/2012)) ([ba5aa3a](https://github.com/tolgee/tolgee-platform/commit/ba5aa3ac659b549892e3b11a5c89a2f725c3e5b5))
+
+## [3.38.3](https://github.com/tolgee/tolgee-platform/compare/v3.38.2...v3.38.3) (2023-11-28)
+
+
+### Bug Fixes
+
+* CDN purging ([#2002](https://github.com/tolgee/tolgee-platform/issues/2002)) ([5f04aeb](https://github.com/tolgee/tolgee-platform/commit/5f04aebfbaeb286d3984e37dc71d2c44f102322b))
+
+## [3.38.2](https://github.com/tolgee/tolgee-platform/compare/v3.38.1...v3.38.2) (2023-11-24)
+
+
+### Bug Fixes
+
+* Licencing test ([2170b1d](https://github.com/tolgee/tolgee-platform/commit/2170b1d54fe5ac9f8b281fda29989ee44448eb44))
+* Wrong HTTP client content-type and accept headers ([4d4b51c](https://github.com/tolgee/tolgee-platform/commit/4d4b51cbac7a74efe05eda9dcc838c742ad41148))
+
 ## [3.38.1](https://github.com/tolgee/tolgee-platform/compare/v3.38.0...v3.38.1) (2023-11-24)
 
 
