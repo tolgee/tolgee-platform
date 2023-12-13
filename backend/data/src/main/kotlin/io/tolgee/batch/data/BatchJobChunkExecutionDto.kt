@@ -9,7 +9,7 @@ import java.util.Date
  *
  * @author Geert Zondervan <zondervan@serviceplanet.nl>
  */
-class BatchJobChunkExecutionDto (
+class BatchJobChunkExecutionDto(
   val id: Long,
   val batchJobId: Long,
   var executeAfter: Date?,
