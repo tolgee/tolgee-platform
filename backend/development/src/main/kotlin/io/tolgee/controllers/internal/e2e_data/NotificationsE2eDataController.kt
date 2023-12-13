@@ -19,6 +19,9 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.security.UserAccountService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -30,9 +33,20 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/notifications"])
 class NotificationsE2eDataController : AbstractE2eDataController() {
+  @Autowired
+  lateinit var userAccountRepository: UserAccountRepository
+
+  @Autowired
+  lateinit var userAccountService: UserAccountService
+
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData() {
+    userAccountService.findActive("admin")?.let {
+      userAccountService.delete(it)
+      userAccountRepository.delete(it)
+    }
+
     testDataService.saveTestData(testData)
   }
 

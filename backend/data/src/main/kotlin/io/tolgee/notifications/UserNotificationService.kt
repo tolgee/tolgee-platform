@@ -68,41 +68,53 @@ class UserNotificationService(
     status: Set<NotificationStatus>,
     pageable: Pageable,
   ): List<UserNotification> {
-    return userNotificationRepository.findNotificationsOfUserFilteredPaged(user, status, pageable)
+    return userNotificationRepository.findNotificationsOfUserFilteredPaged(
+      user,
+      status.map { it.toString() },
+      pageable,
+    )
   }
 
   fun getUnreadNotificationsCount(user: Long): Int {
     return userNotificationRepository.countNotificationsByRecipientIdAndUnreadTrue(user)
   }
 
+  @Transactional
   fun markAsRead(user: Long, notifications: Collection<Long>) {
     return userNotificationRepository.markAsRead(user, notifications)
   }
 
+  @Transactional
   fun markAllAsRead(user: Long) {
     return userNotificationRepository.markAllAsRead(user)
   }
 
+  @Transactional
   fun markAsUnread(user: Long, notifications: Collection<Long>) {
     return userNotificationRepository.markAsUnread(user, notifications)
   }
 
+  @Transactional
   fun markAsDone(user: Long, notifications: Collection<Long>) {
     return userNotificationRepository.markAsDone(user, notifications)
   }
 
+  @Transactional
   fun markAllAsDone(user: Long) {
     return userNotificationRepository.markAllAsDone(user)
   }
 
+  @Transactional
   fun unmarkAsDone(user: Long, notifications: Collection<Long>) {
     return userNotificationRepository.unmarkAsDone(user, notifications)
   }
 
+  @Transactional
   fun deleteAllByUserId(userId: Long) {
     userNotificationRepository.deleteAllByUserId(userId)
   }
 
+  @Transactional
   fun deleteAllByProjectId(projectId: Long) {
     userNotificationRepository.deleteAllByProjectId(projectId)
   }

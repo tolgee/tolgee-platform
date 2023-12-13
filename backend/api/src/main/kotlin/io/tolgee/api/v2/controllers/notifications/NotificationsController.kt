@@ -42,7 +42,7 @@ class NotificationsController(
   private val userNotificationService: UserNotificationService,
   private val userNotificationModelAssembler: UserNotificationModelAssembler,
 ) {
-  @GetMapping("/")
+  @GetMapping("")
   @Operation(summary = "Fetch the current user's notifications")
   fun getNotifications(
     @RequestParam("status", defaultValue = "UNREAD,READ") status: Set<NotificationStatus>,

@@ -19,7 +19,6 @@ package io.tolgee.repository.notifications
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.notifications.UserNotification
-import io.tolgee.notifications.NotificationStatus
 import io.tolgee.notifications.NotificationType
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -36,17 +35,16 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
   @Query(
     """
       FROM UserNotification un WHERE
-        (io.tolgee.notifications.NotificationStatus.UNREAD IN :status AND
-          un.unread = true AND un.markedDoneAt IS NULL) OR
-        (io.tolgee.notifications.NotificationStatus.READ IN :status AND
-          un.unread = false AND un.markedDoneAt IS NULL) OR
-        (io.tolgee.notifications.NotificationStatus.DONE IN :status AND
-          un.markedDoneAt IS NOT NULL)
+        un.recipient.id = :recipient AND (
+          ('UNREAD' IN :status AND un.unread = true AND un.markedDoneAt IS NULL) OR
+          ('READ' IN :status AND un.unread = false AND un.markedDoneAt IS NULL) OR
+          ('DONE' IN :status AND un.markedDoneAt IS NOT NULL)
+        )
     """
   )
   fun findNotificationsOfUserFilteredPaged(
     recipient: Long,
-    status: Set<NotificationStatus>,
+    status: List<String>,
     pageable: Pageable,
   ): List<UserNotification>
 

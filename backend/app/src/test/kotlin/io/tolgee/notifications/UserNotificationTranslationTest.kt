@@ -86,7 +86,6 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
 
     waitUntilUserNotificationDispatch()
 
-    println(userNotificationRepository.findAllByRecipient(testData.alice).map { it.type })
     userNotificationRepository.findAllByRecipient(testData.alice).assert.hasSize(1)
   }
 

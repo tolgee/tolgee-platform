@@ -346,7 +346,7 @@ class TestDataService(
   }
 
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
-    val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
+    val metas = keyBuilders.mapNotNull { it.data.meta?.self }
     tagService.saveAll(metas.flatMap { it.tags })
     keyMetaService.saveAll(metas)
   }
