@@ -46,30 +46,9 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  @Scheduled(fixedRate = 60000)
+  @Scheduled(fixedDelay = 60000, initialDelay = 0)
   fun populateQueue() {
-    logger.debug("Running scheduled populate queue")
-
-//    val data1 = entityManager.createQuery(
-//      """
-//          select bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter
-//          from BatchJobChunkExecution bjce
-//          join bjce.batchJob bk
-//          where bjce.status = :executionStatus
-//          order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
-//      """.trimIndent(),
-//      Array<Any>::class.java
-//    ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
-//      .setHint(
-//        "javax.persistence.lock.timeout",
-//        LockOptions.SKIP_LOCKED
-//      ).resultList
-
-//    for (result in data) {
-//      println(
-//        "bjce.i: " + result[0] + ", bk.id: " + result[1] + ", executeAfter " + result[2] + ", jobCharacter " + result[3])
-//    }
-
+    logger.info("Running scheduled populate queue")
     val data = entityManager.createQuery(
       """
           select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
@@ -86,18 +65,22 @@ class BatchJobChunkExecutionQueue(
       ).resultList
 
     if (data.size > 0) {
-      logger.info("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
+      logger.debug("Attempt to add ${data.size} items to queue ${System.identityHashCode(this)}")
       addExecutionsToLocalQueue(data)
     }
   }
   
   fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
     val ids = queue.map { it.chunkExecutionId }.toSet()
+    var count = 0
     data.forEach {
       if (!ids.contains(it.id)) {
         queue.add(it.toItem())
+        count++
       }
     }
+
+    logger.debug("Added ${count} new items to queue ${System.identityHashCode(this)}")
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
