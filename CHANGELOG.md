@@ -1,3 +1,15 @@
+# [3.40.0](https://github.com/tolgee/tolgee-platform/compare/v3.39.0...v3.40.0) (2023-12-13)
+
+
+### Bug Fixes
+
+* XLIFF export is now compliant with XLIFF1.2 Schema (XSD) ([#2014](https://github.com/tolgee/tolgee-platform/issues/2014)) ([fa9d124](https://github.com/tolgee/tolgee-platform/commit/fa9d12497a0cba57b70cc781ee68cfd6f70cc9f1)), closes [#2015](https://github.com/tolgee/tolgee-platform/issues/2015)
+
+
+### Features
+
+* quick start guide ([#1917](https://github.com/tolgee/tolgee-platform/issues/1917)) ([f640383](https://github.com/tolgee/tolgee-platform/commit/f64038372ba0fdeb30cb848f8dbea381b0b1fc61))
+
 # [3.39.0](https://github.com/tolgee/tolgee-platform/compare/v3.38.4...v3.39.0) (2023-12-07)
 
 
