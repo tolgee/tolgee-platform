@@ -19,12 +19,11 @@ const StyledContainer = styled(Box)`
   gap: 8px;
   align-items: center;
   &.disabled {
-    color: ${({ theme }) => theme.palette.emphasis[500]};
-    border: none;
+    color: ${({ theme }) => theme.palette.emphasis[400]};
   }
   &.done {
     background: ${({ theme }) => theme.palette.quickStart.highlight};
-    border: none;
+    border-color: ${({ theme }) => theme.palette.quickStart.highlight};
   }
 `;
 

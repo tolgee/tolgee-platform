@@ -134,6 +134,7 @@ const getTheme = (mode: PaletteMode) => {
         secondary: c.textSecondary,
       },
       divider1: c.divider1,
+      tile: c.tile,
       cell: c.cell,
       background: {
         default: c.background,

@@ -5,11 +5,11 @@ export const StyledLink = styled(MuiLink)`
   font-size: 14px;
   cursor: pointer;
   font-weight: 500;
-  &.disabled {
-    color: ${({ theme }) => theme.palette.emphasis[500]};
-    pointer-events: none;
-  }
   &.secondary {
     color: ${({ theme }) => theme.palette.text.secondary};
+  }
+  &.disabled {
+    color: ${({ theme }) => theme.palette.emphasis[400]};
+    pointer-events: none;
   }
 ` as typeof MuiLink;

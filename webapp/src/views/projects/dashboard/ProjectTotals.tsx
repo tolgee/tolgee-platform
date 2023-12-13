@@ -39,7 +39,7 @@ const StyledTiles = styled(Box)`
 `;
 
 const StyledTile = styled(Box)`
-  background-color: ${({ theme }) => theme.palette.emphasis[50]};
+  background-color: ${({ theme }) => theme.palette.tile.background};
   border-radius: 20px;
   height: 120px;
   display: grid;
@@ -57,7 +57,7 @@ const StyledTile = styled(Box)`
     cursor: pointer;
 
     &:hover {
-      background-color: ${({ theme }) => theme.palette.emphasis[100]};
+      background-color: ${({ theme }) => theme.palette.tile.backgroundHover};
       transition: background-color 0.2s ease-in;
     }
   }

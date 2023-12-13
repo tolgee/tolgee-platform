@@ -78,21 +78,26 @@ export const IntegrateView: FunctionComponent = () => {
         sx={{ display: 'grid', maxWidth: '100%', contain: 'layout' }}
       >
         <Step expanded={true} sx={{ maxWidth: '100%' }}>
-          <StepLabel data-cy="integrate-choose-your-weapon-step-label">
-            <T keyName="integrate_choose_your_weapon" />
-          </StepLabel>
           <QuickStartHighlight
             itemKey="integrate_form"
             message={t('quick_start_item_integrate_form_hint')}
-            offset={2}
+            offset={4}
             borderRadius="5px"
           >
-            <StepContent data-cy="integrate-choose-your-weapon-step-content">
-              <WeaponSelector
-                selected={selectedWeapon}
-                onSelect={onWeaponSelect}
-              />
-            </StepContent>
+            <Box>
+              <StepLabel data-cy="integrate-choose-your-weapon-step-label">
+                <T keyName="integrate_choose_your_weapon" />
+              </StepLabel>
+              <StepContent
+                data-cy="integrate-choose-your-weapon-step-content"
+                sx={{ pb: 1 }}
+              >
+                <WeaponSelector
+                  selected={selectedWeapon}
+                  onSelect={onWeaponSelect}
+                />
+              </StepContent>
+            </Box>
           </QuickStartHighlight>
         </Step>
         <Step expanded={activeStep > 0}>

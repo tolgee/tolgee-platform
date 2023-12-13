@@ -10,6 +10,7 @@ import {
   Marker,
   Navbar,
   QuickStart,
+  Tile,
   TopBanner,
 } from './colors';
 
@@ -22,6 +23,7 @@ declare module '@mui/material/styles/createPalette' {
   interface Palette {
     primaryText: string;
     divider1: string;
+    tile: Tile;
     cell: Cell;
     default: PaletteColor;
     navbar: Navbar;
@@ -39,6 +41,7 @@ declare module '@mui/material/styles/createPalette' {
   interface PaletteOptions {
     primaryText: string;
     divider1: string;
+    tile: Tile;
     cell: Cell;
     default: PaletteColor;
     navbar: Navbar;

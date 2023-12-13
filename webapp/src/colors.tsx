@@ -65,6 +65,11 @@ export type TopBanner = {
   linkText: string;
 };
 
+export type Tile = {
+  background: string;
+  backgroundHover: string;
+};
+
 export type Cell = {
   hover: string;
   selected: string;
@@ -99,6 +104,10 @@ export const colors = {
     background: '#FDFDFF',
     backgroundPaper: '#ffffff',
     emphasis: customGrey,
+    tile: {
+      background: '#F7F8FB',
+      backgroundHover: '#f4f4f6',
+    },
     cell: {
       hover: '#f7f7f7',
       selected: '#EEEFF1',
@@ -162,12 +171,15 @@ export const colors = {
     divider1: '#2c3c52',
     background: '#1f2d40',
     backgroundPaper: '#1e2b3e',
+    tile: {
+      background: '#233043',
+      backgroundHover: '#253245',
+    },
     cell: {
       hover: '#233043',
       selected: '#243245',
       inside: '#283a53',
     },
-    cellSelected2: '#283a53',
     navbar: {
       background: '#182230',
       text: '#dddddd',
