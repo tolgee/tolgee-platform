@@ -27,6 +27,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
@@ -38,7 +39,9 @@ import org.springframework.web.method.HandlerMethod
 @Component
 class OrganizationAuthorizationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
+  @Lazy
   private val organizationRoleService: OrganizationRoleService,
+  @Lazy
   private val requestContextService: RequestContextService,
   private val organizationHolder: OrganizationHolder,
 ) : AbstractAuthorizationInterceptor() {

@@ -22,13 +22,16 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.HandlerMapping
 
 @Service
 class RequestContextService(
   private val authenticationFacade: AuthenticationFacade,
+  @Lazy
   private val projectService: ProjectService,
+  @Lazy
   private val organizationService: OrganizationService,
 ) {
   /**

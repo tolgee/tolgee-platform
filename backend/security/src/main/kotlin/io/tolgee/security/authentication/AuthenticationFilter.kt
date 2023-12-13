@@ -28,6 +28,7 @@ import io.tolgee.service.security.UserAccountService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -35,8 +36,11 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class AuthenticationFilter(
   private val authenticationProperties: AuthenticationProperties,
+  @Lazy
   private val currentDateProvider: CurrentDateProvider,
+  @Lazy
   private val rateLimitService: RateLimitService,
+  @Lazy
   private val jwtService: JwtService,
   private val userAccountService: UserAccountService,
   private val apiKeyService: ApiKeyService,

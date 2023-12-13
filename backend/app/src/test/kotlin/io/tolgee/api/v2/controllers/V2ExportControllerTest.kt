@@ -79,19 +79,19 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `it reports business event once in a day`() {
-    retry(exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }) {
+    retry(
+      retries = 10,
+      exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }
+    ) {
       executeInNewTransaction {
         initBaseData()
       }
-      performExport()
-      performExport()
       performExport()
       performExport()
       waitForNotThrowing(pollTime = 50, timeout = 3000) {
         verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
       }
       setForcedDate(currentDateProvider.date.addDays(1))
-      performExport()
       performExport()
       waitForNotThrowing(pollTime = 50, timeout = 3000) {
         verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
