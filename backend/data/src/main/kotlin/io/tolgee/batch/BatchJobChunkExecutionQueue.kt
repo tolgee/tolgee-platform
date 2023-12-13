@@ -2,8 +2,8 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.Metrics
-import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.BatchJobChunkExecutionDto
+import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
@@ -48,7 +48,7 @@ class BatchJobChunkExecutionQueue(
 
   @Scheduled(fixedDelay = 60000, initialDelay = 0)
   fun populateQueue() {
-    logger.info("Running scheduled populate queue")
+    logger.debug("Running scheduled populate queue")
     val data = entityManager.createQuery(
       """
           select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
@@ -69,7 +69,7 @@ class BatchJobChunkExecutionQueue(
       addExecutionsToLocalQueue(data)
     }
   }
-  
+
   fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
     val ids = queue.map { it.chunkExecutionId }.toSet()
     var count = 0
@@ -80,7 +80,7 @@ class BatchJobChunkExecutionQueue(
       }
     }
 
-    logger.debug("Added ${count} new items to queue ${System.identityHashCode(this)}")
+    logger.debug("Added $count new items to queue ${System.identityHashCode(this)}")
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
