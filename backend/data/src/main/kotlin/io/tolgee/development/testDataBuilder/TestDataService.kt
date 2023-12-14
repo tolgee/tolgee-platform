@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.component.eventListeners.LanguageStatsListener
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.PatBuilder
@@ -74,7 +75,8 @@ class TestDataService(
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
   private val automationService: AutomationService,
-  private val contentDeliveryConfigService: ContentDeliveryConfigService
+  private val contentDeliveryConfigService: ContentDeliveryConfigService,
+  private val languageStatsListener: LanguageStatsListener
 ) : Logging {
 
   @Transactional
@@ -88,6 +90,7 @@ class TestDataService(
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
     activityHolder.enableAutoCompletion = false
+    languageStatsListener.bypass = true
     prepare()
 
     // Projects have to be stored in separate transaction since projectHolder's
@@ -113,6 +116,7 @@ class TestDataService(
 
     updateLanguageStats(builder)
     activityHolder.enableAutoCompletion = true
+    languageStatsListener.bypass = false
   }
 
   @Transactional

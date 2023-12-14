@@ -14,6 +14,7 @@ import org.springframework.data.auditing.AuditingHandler
 import org.springframework.data.auditing.DateTimeProvider
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
+import java.sql.Timestamp
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -90,9 +91,9 @@ class CurrentDateProvider(
       ForcedServerDateTime::class.java
     ).resultList.singleOrNull()
 
-  private fun getForcedTime(): Date? =
+  private fun getForcedTime(): Timestamp? =
     entityManager.createNativeQuery(
-      "select st from forced_server_date_time st where st.id = 1",
-      Date::class.java
-    ).resultList.singleOrNull() as Date?
+      "select st from public.forced_server_date_time st where st.id = 1",
+      Timestamp::class.java
+    ).resultList.singleOrNull() as Timestamp?
 }
