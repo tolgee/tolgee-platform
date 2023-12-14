@@ -13,7 +13,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
-import io.tolgee.testing.assertions.UserApiAppAction
+import io.tolgee.testing.assertions.PakAction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -35,7 +35,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
   @Test
   fun accessWithApiKey_failure() {
     val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations"))
-      .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
+      .andExpect(MockMvcResultMatchers.status().isUnauthorized).andReturn()
     Assertions.assertThat(mvcResult).error()
   }
 
@@ -57,14 +57,14 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.values()), base.project)
     performAction(
-      UserApiAppAction(
+      PakAction(
         apiKey = apiKey.key,
         url = "/v2/projects",
         expectedStatus = HttpStatus.FORBIDDEN
       )
     )
     mvc.perform(MockMvcRequestBuilders.get("/v2/projects"))
-      .andIsForbidden
+      .andIsUnauthorized
   }
 
   @Test

@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
-class UserApiAppAction(
+class PakAction(
   var method: HttpMethod? = null,
   var body: Any? = null,
   var apiKey: String? = null,

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class PostgresRunnerConfiguration() {
+class PostgresRunnerConfiguration {
   @Bean
   fun postgresRunner(
     postgresAutostartProperties: PostgresAutostartProperties,
