@@ -69,7 +69,7 @@ class PatAuthTest : AbstractControllerTest() {
 
   @Test
   fun `user doesnt authorize with expired PAT`() {
-    val pat = createUserWithPat(Date(Date().time - 10000))
+    val pat = createUserWithPat(expiresAt = Date(Date().time - 10000))
     performGet(
       "/v2/user",
       HttpHeaders().apply {
@@ -80,10 +80,11 @@ class PatAuthTest : AbstractControllerTest() {
 
   @Test
   fun `pat doesnt work on restricted endpoint`() {
-    val pat = createUserWithPat(Date(Date().time - 10000))
+    val pat = createUserWithPat(expiresAt = Date(Date().time + 100000))
     performDelete(
       "/v2/pats/${pat.id}",
-      HttpHeaders().apply {
+      content = null,
+      httpHeaders = HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
       }
     ).andIsForbidden
