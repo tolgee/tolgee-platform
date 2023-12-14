@@ -21,7 +21,7 @@ class RestTemplateConfiguration {
       HttpComponentsClientHttpRequestFactory().apply {
         this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
       }
-    )
+    ).removeXmlConverter()
   }
 
   private fun RestTemplate.removeXmlConverter(): RestTemplate {

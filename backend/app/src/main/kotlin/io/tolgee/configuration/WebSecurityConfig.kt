@@ -32,10 +32,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
+import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.ObjectPostProcessor
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.intercept.AuthorizationFilter
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
@@ -58,26 +61,36 @@ class WebSecurityConfig(
   fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
     return httpSecurity
       // -- Global configuration
-      .csrf().disable()
-      .cors().and()
-      .headers()
-      .referrerPolicy().policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN).and()
-      .xssProtection().and()
-      .contentTypeOptions().and()
-      .frameOptions().deny()
-      .and()
-      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+      .csrf { it.disable() }
+      .cors(Customizer.withDefaults())
+      .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
       .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(authenticationDisabledFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalUserRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
-      .authorizeRequests()
-      .requestMatchers("/api/public/**", "/v2/public/**").permitAll()
-      .requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
-      .requestMatchers("/api/**", "/v2/**").authenticated()
-      .anyRequest().permitAll()
-      .and().build()
+      .authorizeHttpRequests {
+        it.withObjectPostProcessor(object : ObjectPostProcessor<AuthorizationFilter> {
+          override fun <O : AuthorizationFilter?> postProcess(filter: O): O {
+            // otherwise it throws error when using StreamingResponseBody
+            filter?.setFilterAsyncDispatch(false)
+            return filter
+          }
+        })
+        it.requestMatchers("/api/public/**", "/v2/public/**").permitAll()
+        it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
+        it.requestMatchers("/api/**", "/v2/**")
+        it.anyRequest().permitAll()
+      }.headers { headers ->
+        headers.xssProtection(Customizer.withDefaults())
+        headers.contentTypeOptions(Customizer.withDefaults())
+        headers.frameOptions {
+          it.deny()
+        }
+        headers.referrerPolicy {
+          it.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+        }
+      }.build()
   }
 
   @Bean
