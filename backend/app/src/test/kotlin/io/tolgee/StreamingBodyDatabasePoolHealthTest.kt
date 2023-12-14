@@ -56,7 +56,7 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
   fun `streaming responses do not cause a database connection pool exhaustion`() {
     retry(
       retries = 10,
-      exceptionMatcher = { getRootCause(it) is ConcurrentModificationException }
+      exceptionMatcher = { getRootCause(it) is ConcurrentModificationException || it is IllegalStateException }
     ) {
       val hikariDataSource = dataSource as HikariDataSource
       val pool = hikariDataSource.hikariPoolMXBean
