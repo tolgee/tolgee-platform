@@ -6,7 +6,6 @@ import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationPr
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Lazy
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -19,7 +18,6 @@ class MtServicesConfiguration(
   private val awsMachineTranslationProperties: AwsMachineTranslationProperties
 ) {
   @Bean
-  @Lazy(false)
   fun getGoogleTranslationService(): Translate? {
     if (googleMachineTranslationProperties.apiKey != null) {
       // setApiKey is deprecated for some reason, but we don't care,

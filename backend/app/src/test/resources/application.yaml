@@ -45,6 +45,7 @@ tolgee:
     enabled: true
     container-name: tolgee_backend_tests_postgres
     port: 55433
+    stop: false
   data-path: ./build/test_data
   authentication:
     native-enabled: true

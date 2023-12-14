@@ -1,23 +1,27 @@
 package io.tolgee.postgresRunners
 
+import io.tolgee.PostgresRunner
+import io.tolgee.configuration.tolgee.FileStorageProperties
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
-import org.springframework.context.ApplicationContext
-import org.springframework.stereotype.Component
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
-@Component
-class PostgresRunnerFactory(
-  private val postgresAutostartProperties: PostgresAutostartProperties,
-  private val applicationContext: ApplicationContext
-) {
-
-  val runner: PostgresRunner by lazy {
+@Configuration
+class PostgresRunnerConfiguration() {
+  @Bean
+  fun postgresRunner(
+    postgresAutostartProperties: PostgresAutostartProperties,
+    storageProperties: FileStorageProperties
+  ): PostgresRunner? {
+    if (!postgresAutostartProperties.enabled) {
+      return null
+    }
     if (postgresAutostartProperties.mode == PostgresAutostartProperties.PostgresAutostartMode.DOCKER) {
-      return@lazy applicationContext.getBean(PostgresDockerRunner::class.java)
+      return PostgresDockerRunner(postgresAutostartProperties)
     }
     if (postgresAutostartProperties.mode == PostgresAutostartProperties.PostgresAutostartMode.EMBEDDED) {
-      return@lazy applicationContext.getBean(PostgresEmbeddedRunner::class.java)
+      return PostgresEmbeddedRunner(postgresAutostartProperties, storageProperties)
     }
-
-    throw IllegalStateException("Postgres autostart mode: '${postgresAutostartProperties.mode}' not recognized.")
+    return null
   }
 }

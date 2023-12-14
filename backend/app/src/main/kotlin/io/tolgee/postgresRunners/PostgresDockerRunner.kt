@@ -1,17 +1,12 @@
 package io.tolgee.postgresRunners
 
+import io.tolgee.PostgresRunner
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
 import io.tolgee.misc.dockerRunner.DockerContainerRunner
-import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 
-@Component
-@Scope(SCOPE_SINGLETON)
 class PostgresDockerRunner(
-  protected val postgresAutostartProperties: PostgresAutostartProperties,
+  private val postgresAutostartProperties: PostgresAutostartProperties,
 ) : PostgresRunner {
   private var instance: DockerContainerRunner? = null
   private val logger = LoggerFactory.getLogger(javaClass)
@@ -40,15 +35,21 @@ class PostgresDockerRunner(
     }
   }
 
-  override val datasourceUrl by lazy {
-    "jdbc:postgresql://localhost:${postgresAutostartProperties.port}/${postgresAutostartProperties.databaseName}"
+  override fun stop() {
+    if (postgresAutostartProperties.stop) {
+      instance?.let {
+        logger.info("Stopping Postgres container")
+        it.stop()
+      }
+    }
   }
 
-  @PreDestroy
-  fun preDestroy() {
-    instance?.let {
-      logger.info("Stopping Postgres container")
-      it.stop()
-    }
+  override val shouldRunMigrations: Boolean
+    // we don't want to run migrations when the container existed, and we are not stopping it,
+    // this happens only for tests and there we can delete the database and start again with migrations
+    get() = instance?.containerExisted != true || postgresAutostartProperties.stop
+
+  override val datasourceUrl by lazy {
+    "jdbc:postgresql://localhost:${postgresAutostartProperties.port}/${postgresAutostartProperties.databaseName}"
   }
 }

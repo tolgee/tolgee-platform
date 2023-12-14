@@ -23,7 +23,7 @@ import java.util.*
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class CurrentDateProvider(
-  @Lazy
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection") @Lazy
   auditingHandler: AuditingHandler,
   private val entityManager: EntityManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
