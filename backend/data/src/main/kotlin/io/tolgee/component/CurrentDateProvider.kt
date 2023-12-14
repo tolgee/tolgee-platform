@@ -93,7 +93,7 @@ class CurrentDateProvider(
 
   private fun getForcedTime(): Timestamp? =
     entityManager.createNativeQuery(
-      "select st from public.forced_server_date_time st where st.id = 1",
+      "select st.time from public.forced_server_date_time st where st.id = 1",
       Timestamp::class.java
     ).resultList.singleOrNull() as Timestamp?
 }
