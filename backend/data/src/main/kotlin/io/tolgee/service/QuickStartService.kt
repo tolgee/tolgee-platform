@@ -25,7 +25,7 @@ class QuickStartService(
   fun completeStep(userAccount: UserAccountDto, step: String): QuickStart? {
     val quickStart = quickStartRepository.findByUserAccountId(userAccount.id)
     if (quickStart?.completedSteps?.let { !it.contains(step) } == true) {
-      quickStart.completedSteps.add(step)
+      quickStart.completedSteps = quickStart.completedSteps.plus(step)
       quickStartRepository.save(quickStart)
     }
     return quickStart

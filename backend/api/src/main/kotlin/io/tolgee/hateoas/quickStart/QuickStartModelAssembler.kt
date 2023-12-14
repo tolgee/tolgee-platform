@@ -11,7 +11,7 @@ class QuickStartModelAssembler() : RepresentationModelAssemblerSupport<QuickStar
   override fun toModel(entity: QuickStart): QuickStartModel {
     return QuickStartModel(
       finished = entity.finished,
-      completedSteps = entity.completedSteps,
+      completedSteps = entity.completedSteps.toMutableList(),
       open = entity.open
     )
   }

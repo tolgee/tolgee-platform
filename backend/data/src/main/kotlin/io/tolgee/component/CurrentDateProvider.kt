@@ -29,12 +29,6 @@ class CurrentDateProvider(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val transactionManager: PlatformTransactionManager
 ) : Logging, DateTimeProvider {
-  private fun getServerTimeEntity(): ForcedServerDateTime? =
-    entityManager.createQuery(
-      "select st from ForcedServerDateTime st where st.id = 1",
-      ForcedServerDateTime::class.java
-    ).resultList.singleOrNull()
-
   var forcedDate: Date? = null
     set(value) {
       if (field != value) {
@@ -67,8 +61,7 @@ class CurrentDateProvider(
   }
 
   init {
-    val forcedServerDateTime: ForcedServerDateTime? = getServerTimeEntity()
-    forcedDate = forcedServerDateTime?.time
+    forcedDate = getForcedTime()
     auditingHandler.setDateTimeProvider(this)
   }
 
@@ -90,4 +83,16 @@ class CurrentDateProvider(
   override fun getNow(): Optional<TemporalAccessor> {
     return Optional.of(date.toInstant())
   }
+
+  private fun getServerTimeEntity(): ForcedServerDateTime? =
+    entityManager.createQuery(
+      "select st from ForcedServerDateTime st where st.id = 1",
+      ForcedServerDateTime::class.java
+    ).resultList.singleOrNull()
+
+  private fun getForcedTime(): Date? =
+    entityManager.createNativeQuery(
+      "select st from forced_server_date_time st where st.id = 1",
+      Date::class.java
+    ).resultList.singleOrNull() as Date?
 }

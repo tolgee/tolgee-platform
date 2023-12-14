@@ -31,5 +31,5 @@ data class QuickStart(
 
   @Type(StringArrayType::class)
   @Column(columnDefinition = "text[]")
-  var completedSteps: MutableList<String> = mutableListOf()
+  var completedSteps: Array<String> = arrayOf()
 }
