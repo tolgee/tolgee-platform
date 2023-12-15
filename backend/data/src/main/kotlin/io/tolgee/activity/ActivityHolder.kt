@@ -5,6 +5,7 @@ import io.tolgee.activity.iterceptor.InterceptedEventsManager
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import jakarta.annotation.PreDestroy
 import org.springframework.context.ApplicationContext
 import kotlin.reflect.KClass
 
@@ -44,6 +45,13 @@ open class ActivityHolder(val applicationContext: ApplicationContext) {
       this.applicationContext.getBean(InterceptedEventsManager::class.java).initActivityHolder()
       field = value
     }
+
+  var destroyer: (() -> Unit)? = null
+
+  @PreDestroy
+  fun destroy() {
+    destroyer?.invoke()
+  }
 }
 
 typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>

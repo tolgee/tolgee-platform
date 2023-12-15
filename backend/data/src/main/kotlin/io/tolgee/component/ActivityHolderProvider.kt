@@ -34,20 +34,9 @@ class ActivityHolderProvider(private val applicationContext: ApplicationContext)
         it.activityRevision
       }
     } catch (e: ScopeNotActiveException) {
-      val transactionActivityHolder =
-        applicationContext.getBean("transactionActivityHolder", ActivityHolder::class.java)
-      if (TransactionSynchronizationManager.isSynchronizationActive()) {
-        TransactionSynchronizationManager.registerSynchronization(
-          object : TransactionSynchronization {
-            override fun afterCompletion(status: Int) {
-              clearThreadLocal()
-            }
-          }
-        )
-        return transactionActivityHolder
-      }
-
-      throw IllegalStateException("Transaction synchronization is not active.")
+      applicationContext.getBean("transactionActivityHolder", ActivityHolder::class.java)
+    }.also {
+      it.destroyer = this::clearThreadLocal
     }
   }
 

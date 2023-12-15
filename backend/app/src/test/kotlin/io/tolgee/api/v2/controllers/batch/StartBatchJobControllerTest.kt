@@ -18,6 +18,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.util.BatchDumper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,6 +38,9 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var batchJobService: BatchJobService
+
+  @Autowired
+  lateinit var batchDumper: BatchDumper
 
   @BeforeEach
   fun setup() {
@@ -377,17 +381,30 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val allKeyIds = keys.map { it.id }.toList()
     val keyIds = allKeyIds.take(700)
 
-    performProjectAuthPost(
+    var batchJobId = 0L
+
+    val res = performProjectAuthPost(
       "start-batch-job/set-keys-namespace",
       mapOf(
         "keyIds" to keyIds,
         "namespace" to "other-namespace"
       )
-    ).andIsOk.waitForJobCompleted()
+    ).andIsOk.andAssertThatJson {
+      node("id").isNumber.satisfies { id ->
+        batchJobId = id.toLong()
+      }
 
-    val all = keyService.find(keyIds)
-    all.count { it.namespace?.name == "other-namespace" }.assert.isEqualTo(keyIds.size)
-    namespaceService.find(testData.projectBuilder.self.id, "namespace1").assert.isNull()
+    }
+
+    try {
+      res.waitForJobCompleted()
+      val all = keyService.find(keyIds)
+      all.count { it.namespace?.name == "other-namespace" }.assert.isEqualTo(keyIds.size)
+      namespaceService.find(testData.projectBuilder.self.id, "namespace1").assert.isNull()
+    } catch (e: Throwable) {
+      batchDumper.dump(batchJobId)
+      throw e
+    }
   }
 
   @Test
@@ -410,10 +427,12 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   fun ResultActions.waitForJobCompleted() = andAssertThatJson {
     node("id").isNumber.satisfies(
-      Consumer {
-        waitFor(pollTime = 2000) {
-          val job = batchJobService.findJobDto(it.toLong())
-          job?.status?.completed == true
+      Consumer { id ->
+        waitFor(pollTime = 200, timeout = 120000) {
+          executeInNewTransaction {
+            val job = batchJobService.findJobDto(id.toLong())
+            job?.status?.completed == true
+          }
         }
       }
     )
