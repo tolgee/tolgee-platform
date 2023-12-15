@@ -1,3 +1,10 @@
+# [3.41.0](https://github.com/tolgee/tolgee-platform/compare/v3.40.0...v3.41.0) (2023-12-15)
+
+
+### Features
+
+* Update to Spring Boot 3, stabilize, project & organization delete performance (soft deleting) ([#1938](https://github.com/tolgee/tolgee-platform/issues/1938)) ([3147302](https://github.com/tolgee/tolgee-platform/commit/3147302b80d9accb5102a676590f5ac558e738b7))
+
 # [3.40.0](https://github.com/tolgee/tolgee-platform/compare/v3.39.0...v3.40.0) (2023-12-13)
 
 
