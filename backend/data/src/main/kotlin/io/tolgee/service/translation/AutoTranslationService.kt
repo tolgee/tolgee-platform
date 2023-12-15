@@ -47,15 +47,20 @@ class AutoTranslationService(
   fun autoTranslateViaBatchJob(
     projectId: Long,
     keyIds: List<Long>,
+    baseLanguageId: Long,
     useTranslationMemory: Boolean? = null,
     useMachineTranslation: Boolean? = null,
     isBatch: Boolean,
     isHiddenJob: Boolean,
   ) {
     val project = entityManager.getReference(Project::class.java, projectId)
-    val languageIds = languageService.findAll(projectId).map { it.id }
+    val languageIds = languageService.findAll(projectId).map { it.id }.filter { it != baseLanguageId }
+    val configs = this.getConfigs(project, languageIds)
     val request = AutoTranslationRequest().apply {
       target = languageIds.flatMap { languageId ->
+        if(configs[languageId]?.usingTm == false && configs[languageId]?.usingPrimaryMtService == false) {
+          return@flatMap listOf()
+        }
         keyIds.map { keyId ->
           BatchTranslationTargetItem(
             keyId = keyId,
@@ -288,11 +293,24 @@ class AutoTranslationService(
     return list!!
   }
 
+
+  fun getConfigs(project: Project, targetLanguageIds: List<Long>): Map<Long, AutoTranslationConfig> {
+    val configs = autoTranslationConfigRepository.findByProjectAndTargetLanguageIdIn(project, targetLanguageIds)
+    val default = autoTranslationConfigRepository.findDefaultForProject(project)
+      ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
+        it.project = project
+      }
+
+    return targetLanguageIds.associateWith { languageId ->
+      (configs.find { it.targetLanguage?.id == languageId } ?: default)
+    }
+  }
+
   fun getConfig(project: Project, targetLanguageId: Long) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, targetLanguageId)
       ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
-      it.project = project
-    }
+        it.project = project
+      }
 
   fun getDefaultConfig(project: Project) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, null) ?: AutoTranslationConfig()
