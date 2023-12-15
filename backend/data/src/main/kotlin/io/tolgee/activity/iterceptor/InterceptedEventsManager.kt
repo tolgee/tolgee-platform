@@ -10,6 +10,7 @@ import io.tolgee.activity.data.EntityDescriptionWithRelations
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
+import io.tolgee.component.ActivityHolderProvider
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
@@ -274,9 +275,12 @@ class InterceptedEventsManager(
     applicationContext.getBean(ActivityService::class.java)
   }
 
-  private val activityHolder: ActivityHolder by lazy {
-    applicationContext.getBean(ActivityHolder::class.java)
+  private val activityHolderProvider: ActivityHolderProvider by lazy {
+    applicationContext.getBean(ActivityHolderProvider::class.java)
   }
+
+  private val activityHolder
+    get() = activityHolderProvider.getActivityHolder()
 
   private val userAccount: UserAccountDto?
     get() = authenticationFacade.authenticatedUserOrNull

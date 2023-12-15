@@ -53,7 +53,8 @@ class ImportService(
   private val keyMetaService: KeyMetaService,
   private val removeExpiredImportService: RemoveExpiredImportService,
   private val entityManager: EntityManager,
-  private val businessEventPublisher: BusinessEventPublisher
+  private val businessEventPublisher: BusinessEventPublisher,
+  private val importDeleteService: ImportDeleteService
 ) {
   @Transactional
   fun addFiles(
@@ -251,16 +252,9 @@ class ImportService(
     )
   }
 
+  @Transactional
   fun deleteImport(import: Import) {
-    this.importTranslationRepository.deleteAllByImport(import)
-    this.importLanguageRepository.deleteAllByImport(import)
-    val keyIds = this.importKeyRepository.getAllIdsByImport(import)
-    this.keyMetaService.deleteAllByImportKeyIdIn(keyIds)
-    this.importKeyRepository.deleteByIdIn(keyIds)
-    this.importFileIssueParamRepository.deleteAllByImport(import)
-    this.importFileIssueRepository.deleteAllByImport(import)
-    this.importFileRepository.deleteAllByImport(import)
-    this.importRepository.delete(import)
+    importDeleteService.deleteImport(import.id)
   }
 
   @Transactional

@@ -121,13 +121,6 @@ class KeyMetaService(
 
   fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)
 
-  fun deleteAllByImportKeyIdIn(importKeyIds: List<Long>) {
-    tagService.deleteAllByImportKeyIdIn(importKeyIds)
-    keyCommentRepository.deleteAllByImportKeyIds(importKeyIds)
-    keyCodeReferenceRepository.deleteAllByImportKeyIds(importKeyIds)
-    this.keyMetaRepository.deleteAllByImportKeyIdIn(importKeyIds)
-  }
-
   fun deleteAllByKeyIdIn(ids: Collection<Long>) {
     tagService.deleteAllByKeyIdIn(ids)
     keyCommentRepository.deleteAllByKeyIds(ids)

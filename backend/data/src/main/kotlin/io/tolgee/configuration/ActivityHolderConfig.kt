@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.component.ActivityHolderProvider
 import io.tolgee.configuration.TransactionScopeConfig.Companion.SCOPE_TRANSACTION
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.config.BeanDefinition
@@ -31,16 +32,16 @@ class ActivityHolderConfig {
     return ActivityHolder(applicationContext)
   }
 
+  /**
+   * This method for getting the activity holder is slow, since it
+   * needs to create new bean every time holder is requested. Which is pretty often.
+   *
+   * Use the activityHolderProvider when possible.
+   */
   @Bean
   @Primary
   @Scope(BeanDefinition.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  fun activityHolder(applicationContext: ApplicationContext): ActivityHolder {
-    return try {
-      applicationContext.getBean("requestActivityHolder", ActivityHolder::class.java).also {
-        it.activityRevision
-      }
-    } catch (e: ScopeNotActiveException) {
-      return applicationContext.getBean("transactionActivityHolder", ActivityHolder::class.java)
-    }
+  fun activityHolder(activityHolderProvider: ActivityHolderProvider): ActivityHolder {
+    return activityHolderProvider.getActivityHolder()
   }
 }
