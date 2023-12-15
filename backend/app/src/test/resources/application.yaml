@@ -4,14 +4,19 @@ spring:
       - org.redisson.spring.starter.RedissonAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   jpa:
-    show-sql: true
+#    show-sql: true
     properties:
       hibernate:
+        order_by:
+          default_null_ordering: first
         jdbc:
           batch_size: 1000
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
+        enhancer:
+          enableLazyInitialization: true
+          enableDirtyTracking: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -38,8 +43,9 @@ spring:
 tolgee:
   postgres-autostart:
     enabled: true
-    container-name: tolgee_backend_tests_postgres
+    container-name: tolgee_backend_tests_postgres_main
     port: 55433
+    stop: false
   data-path: ./build/test_data
   authentication:
     native-enabled: true
@@ -57,6 +63,7 @@ tolgee:
   internal:
     fake-mt-providers: true
     mock-free-plan: true
+    disable-initial-user-creation: true
   cache:
     caffeine-max-size: 1000
   machine-translation:
@@ -79,3 +86,4 @@ logging:
     io.tolgee.batch.BatchJobActionService: DEBUG
     io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
     io.tolgee: DEBUG
+    io.tolgee.component.CurrentDateProvider: DEBUG

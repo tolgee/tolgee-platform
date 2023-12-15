@@ -13,12 +13,12 @@ import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.ContentStorageType
 import io.tolgee.model.contentDelivery.StorageConfig
 import io.tolgee.repository.contentDelivery.ContentStorageRepository
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.io.Serializable
-import javax.persistence.EntityManager
-import javax.transaction.Transactional
 
 @Service
 class ContentStorageService(
@@ -55,7 +55,7 @@ class ContentStorageService(
   }
 
   private fun clearOther(contentStorage: ContentStorage) {
-    ContentStorageType.entries.toTypedArray().forEach {
+    ContentStorageType.values().forEach {
       getProcessor(it).clearParentEntity(contentStorage, entityManager)
     }
   }

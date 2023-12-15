@@ -19,6 +19,9 @@ package io.tolgee.security.ratelimit
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.security.authentication.AuthenticationFacade
+import jakarta.servlet.DispatcherType
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
@@ -26,9 +29,6 @@ import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.HandlerMapping
 import java.time.Duration
-import javax.servlet.DispatcherType
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class RateLimitInterceptor(

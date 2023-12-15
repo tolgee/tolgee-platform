@@ -1,14 +1,14 @@
 package io.tolgee.model
 
-import javax.persistence.CascadeType
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToOne
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
-import javax.validation.constraints.NotBlank
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import jakarta.validation.constraints.NotBlank
 
 @Entity
 @Table(
@@ -36,4 +36,24 @@ class Invitation(
   var name: String? = null
 
   var email: String? = null
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as Invitation
+
+    if (id != other.id) return false
+    if (code != other.code) return false
+    if (name != other.name) return false
+    return email == other.email
+  }
+
+  override fun hashCode(): Int {
+    var result = id?.hashCode() ?: 0
+    result = 31 * result + code.hashCode()
+    result = 31 * result + (name?.hashCode() ?: 0)
+    result = 31 * result + (email?.hashCode() ?: 0)
+    return result
+  }
 }

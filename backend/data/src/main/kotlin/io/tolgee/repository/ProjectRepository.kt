@@ -26,11 +26,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   }
 
   @Query(
-    """from Project r 
+    """select r, p, o, role from Project r 
         left join fetch Permission p on p.project = r and p.user.id = :userAccountId
         left join fetch Organization o on r.organizationOwner = o
         left join fetch OrganizationRole role on role.organization = o and role.user.id = :userAccountId
-        where p is not null or (role is not null)
+        where (p is not null or (role is not null)) and r.deletedAt is null 
         order by r.name
         """
   )
@@ -49,7 +49,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
         )
-        and (:organizationId is null or o.id = :organizationId)
+        and (:organizationId is null or o.id = :organizationId) and r.deletedAt is null
     """
   )
   fun findAllPermitted(
@@ -67,26 +67,30 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   @Query(
     """
     $BASE_VIEW_QUERY
-    where r.id = :projectId
+    where r.id = :projectId and r.deletedAt is null
   """
   )
   fun findViewById(userAccountId: Long, projectId: Long): ProjectView?
 
+  @Query(
+    """
+      from Project p where p.name = :name and p.deletedAt is null
+    """
+  )
   fun findAllByName(name: String): List<Project>
 
   @Query(
     """
-      from Project p left join fetch p.languages l left join fetch p.baseLanguage where p.id in :projectIds
-    """
+    from Project p 
+    where p.name = :name and p.organizationOwner = :organization and p.deletedAt is null
+  """
   )
-  fun getWithLanguages(projectIds: Iterable<Long>): List<Project>
-
   fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project>
 
   @Query(
     """
     from Project p 
-    where p.organizationOwner is null and p.userOwner is not null
+    where p.organizationOwner is null and p.userOwner is not null and p.deletedAt is null
   """
   )
   fun findAllWithUserOwner(pageable: Pageable): Page<Project>
@@ -95,7 +99,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     """
     select p.id
     from Project p
-    where p.organizationOwner is null
+    where p.organizationOwner is null and p.deletedAt is null
   """
   )
   fun findAllWithUserOwnerIds(): List<Long>
@@ -106,8 +110,15 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     from Project p
     join p.permissions pp on pp.user.id in :userIds
     join fetch p.baseLanguage
-    where p.organizationOwner.id = :organizationId
+    where p.organizationOwner.id = :organizationId and p.deletedAt is null
   """
   )
   fun getProjectsWithDirectPermissions(organizationId: Long, userIds: List<Long>): List<Array<Any>>
+
+  @Query(
+    """
+    from Project where id = :id and deletedAt is null
+  """
+  )
+  fun find(id: Long): Project?
 }

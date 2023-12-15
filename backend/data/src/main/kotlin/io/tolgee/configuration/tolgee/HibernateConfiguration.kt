@@ -12,6 +12,6 @@ class HibernateConfiguration : HibernatePropertiesCustomizer {
   lateinit var activityInterceptor: ActivityDatabaseInterceptor
 
   override fun customize(vendorProperties: MutableMap<String, Any?>) {
-    vendorProperties["hibernate.ejb.interceptor"] = activityInterceptor
+    vendorProperties["hibernate.session_factory.interceptor"] = activityInterceptor
   }
 }

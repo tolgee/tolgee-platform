@@ -2,18 +2,17 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath "org.hibernate:hibernate-gradle-plugin:5.6.10.Final"
-    }
+    dependencies {}
 }
 
 plugins {
     id 'io.spring.dependency-management'
     id 'org.jetbrains.kotlin.jvm'
     id 'org.liquibase.gradle'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id "java"
     id "kotlin-allopen"
+    id "org.hibernate.orm"
 }
 
 apply plugin: "kotlin-allopen"
@@ -21,9 +20,9 @@ apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: 'org.hibernate.orm'
 
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Service")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
@@ -37,7 +36,7 @@ repositories {
 
 test {
     useJUnitPlatform()
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
 }
 
 apply from: "$rootDir/gradle/liquibase.gradle"
@@ -58,19 +57,24 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocWebmvcApi
     implementation libs.springDocOpenApiUi
-    implementation libs.springDocOpenApiKotlin
-    implementation libs.springDocOpenApiDataRest
-    implementation libs.springDocOpenApiHateoas
+    implementation libs.springDocOpenApiCommon
 
+
+    /**
+     * MISC
+     */
     implementation libs.hibernateTypes
+    implementation libs.jacksonKotlin
 
     /**
      * Liquibase
      */
     implementation libs.liquibaseCore
     liquibaseRuntime libs.liquibaseCore
+    liquibaseRuntime libs.jacksonModuleKotlin
+    liquibaseRuntime libs.liquibasePicoli
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
     liquibaseRuntime libs.liquibaseHibernate
@@ -82,11 +86,21 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+hibernate {
+    enhancement {
+        lazyInitialization = true
+        dirtyTracking = true
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)

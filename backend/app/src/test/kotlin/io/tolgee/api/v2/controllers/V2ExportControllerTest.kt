@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.retry
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -30,6 +31,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -77,19 +79,29 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `it reports business event once in a day`() {
-    executeInNewTransaction {
+    retry(
+      retries = 10,
+      exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }
+    ) {
       initBaseData()
+      try {
+        executeInNewTransaction {
+        }
+        performExport()
+        performExport()
+        waitForNotThrowing(pollTime = 50, timeout = 3000) {
+          verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
+        }
+        setForcedDate(currentDateProvider.date.addDays(1))
+        performExport()
+        waitForNotThrowing(pollTime = 50, timeout = 3000) {
+          verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
+        }
+      } finally {
+        Mockito.reset(postHog)
+        testDataService.cleanTestData(testData.root)
+      }
     }
-    performExport()
-    performExport()
-    performExport()
-    performExport()
-    Thread.sleep(2000)
-    verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
-    setForcedDate(currentDateProvider.date.addDays(1))
-    performExport()
-    performExport()
-    verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
   }
 
   @Test

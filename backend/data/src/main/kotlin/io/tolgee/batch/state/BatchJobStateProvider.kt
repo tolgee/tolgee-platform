@@ -6,6 +6,7 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.redisson.api.RMap
 import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
@@ -15,7 +16,6 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobStateProvider(

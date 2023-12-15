@@ -12,19 +12,19 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.util.TranslationStatsUtil
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.ColumnDefault
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.PrePersist
-import javax.persistence.PreUpdate
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
-import javax.validation.constraints.NotNull
 
 @Entity
 @Table(

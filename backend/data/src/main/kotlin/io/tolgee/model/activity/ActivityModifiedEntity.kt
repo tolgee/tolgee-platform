@@ -1,26 +1,21 @@
 package io.tolgee.model.activity
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
+import jakarta.persistence.Entity
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.IdClass
+import jakarta.persistence.ManyToOne
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
 import java.io.Serializable
-import javax.persistence.Entity
-import javax.persistence.Enumerated
-import javax.persistence.Id
-import javax.persistence.IdClass
-import javax.persistence.ManyToOne
 
 /**
  * Entity which is modified by the activity.
  */
 @Entity
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
-)
 @IdClass(ActivityModifiedEntityId::class)
 class ActivityModifiedEntity(
   @ManyToOne
@@ -44,20 +39,20 @@ class ActivityModifiedEntity(
   /**
    * Map of field to object containing old and new values
    */
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var modifications: MutableMap<String, PropertyModification> = mutableMapOf()
 
   /**
    * Data, which are discribing the entity, but are not modified by the change
    */
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var describingData: Map<String, Any?>? = null
 
   /**
    * Relations describing the entity.
    * e.g. For translation, we would also need key and language data
    */
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var describingRelations: Map<String, EntityDescriptionRef>? = null
 
   @Enumerated

@@ -7,8 +7,8 @@ import io.tolgee.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.ProjectWithStatsView
+import io.tolgee.service.LanguageService
 import io.tolgee.service.project.LanguageStatsService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -24,16 +24,16 @@ class ProjectWithStatsFacade(
   private val projectStatsService: ProjectStatsService,
   private val pagedWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
   private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
-  private val projectService: ProjectService,
-  private val languageStatsService: LanguageStatsService
+  private val languageStatsService: LanguageStatsService,
+  private val languageService: LanguageService
 ) {
   fun getPagedModelWithStats(
     projects: Page<ProjectWithLanguagesView>,
   ): PagedModel<ProjectWithStatsModel> {
     val projectIds = projects.content.map { it.id }
     val totals = projectStatsService.getProjectsTotals(projectIds)
-    val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
-      .associate { it.id to it.languages.toList() }
+    val languages = languageService.getViewsOfProjects(projectIds)
+      .groupBy { it.language.project.id }
 
     val languageStats = languageStatsService.getLanguageStats(projectIds)
 
@@ -69,7 +69,11 @@ class ProjectWithStatsFacade(
           TranslationState.UNTRANSLATED to untranslatedPercent
         )
       )
-      ProjectWithStatsView(projectWithLanguagesView, projectStatistics, languages[projectWithLanguagesView.id]!!)
+      ProjectWithStatsView(
+        view = projectWithLanguagesView,
+        stats = projectStatistics,
+        languages = languages[projectWithLanguagesView.id] ?: listOf()
+      )
     }
     val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
     return pagedWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)

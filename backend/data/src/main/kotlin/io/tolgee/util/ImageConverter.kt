@@ -2,6 +2,7 @@ package io.tolgee.util
 
 import java.awt.Dimension
 import java.awt.Image
+import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -23,13 +24,13 @@ class ImageConverter(
     Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
 
-  fun getImage(compressionQuality: Float = 0.5f, targetDimension: Dimension? = null): ByteArrayOutputStream {
-    val resizedImage = getScaledImage(targetDimension)
-    val bufferedImage = convertToBufferedImage(resizedImage)
-    return writeImage(bufferedImage, compressionQuality)
+  fun getImage(compressionQuality: Float = 0.8f, targetDimension: Dimension? = null): ByteArrayOutputStream {
+    val resultingTargetDimension = targetDimension ?: this.targetDimension
+    val resizedImage = getScaledImage(resultingTargetDimension)
+    return writeImage(resizedImage, compressionQuality)
   }
 
-  fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
+  fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.8f): ByteArrayOutputStream {
     val originalWidth = sourceBufferedImage.width
     val originalHeight = sourceBufferedImage.height
     val newWidth: Int
@@ -43,9 +44,8 @@ class ImageConverter(
       newWidth = (originalWidth * size) / originalHeight
     }
 
-    val resizedImage = sourceBufferedImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH)
-    val bufferedImage = convertToBufferedImage(resizedImage)
-    return writeImage(bufferedImage, compressionQuality)
+    val resizedImage = getScaledImage(Dimension(newWidth, newHeight))
+    return writeImage(resizedImage, compressionQuality)
   }
 
   private fun writeImage(bufferedImage: BufferedImage, compressionQuality: Float): ByteArrayOutputStream {
@@ -70,13 +70,19 @@ class ImageConverter(
     return writerParams
   }
 
-  private fun getScaledImage(targetDimension: Dimension?): Image {
-    val resultingTargetDimension = targetDimension ?: this.targetDimension
-    return sourceBufferedImage.getScaledInstance(
-      resultingTargetDimension.width,
-      resultingTargetDimension.height,
-      Image.SCALE_SMOOTH
+  private fun getScaledImage(targetDimension: Dimension): BufferedImage {
+    val resized = BufferedImage(targetDimension.width, targetDimension.height, sourceBufferedImage.type)
+    val g = resized.createGraphics()
+    g.setRenderingHint(
+      RenderingHints.KEY_INTERPOLATION,
+      RenderingHints.VALUE_INTERPOLATION_BILINEAR
     )
+    g.drawImage(
+      sourceBufferedImage, 0, 0, targetDimension.width, targetDimension.height, 0, 0, sourceBufferedImage.width,
+      sourceBufferedImage.height, null
+    )
+    g.dispose()
+    return resized
   }
 
   private fun getWriter() = ImageIO.getImageWritersByFormatName("png").next() as ImageWriter
@@ -93,12 +99,13 @@ class ImageConverter(
     return@lazy Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
 
-  private fun convertToBufferedImage(img: Image): BufferedImage {
+  private fun convertToBufferedImage(img: Image, width: Int, height: Int): BufferedImage {
     if (img is BufferedImage) {
       return img
     }
+
     val bi = BufferedImage(
-      img.getWidth(null), img.getHeight(null),
+      width, height,
       BufferedImage.TYPE_INT_ARGB
     )
     val graphics2D = bi.createGraphics()

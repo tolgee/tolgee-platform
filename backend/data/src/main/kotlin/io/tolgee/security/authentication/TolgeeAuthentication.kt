@@ -17,7 +17,9 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.model.*
+import io.tolgee.model.ApiKey
+import io.tolgee.model.Pat
+import io.tolgee.model.UserAccount
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority

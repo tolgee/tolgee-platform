@@ -81,7 +81,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
             target.text <> '' and
             target.text is not null
       where baseTranslation.language = :baseLanguage and
-        similarity(baseTranslation.text, :baseTranslationText) > 0.5 and
+        cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
         (:key is null or key <> :key)
       order by similarity desc
       """
@@ -163,4 +163,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   fun findAllByKeyIdInAndLanguageIdIn(keysIds: List<Long>, languagesIds: List<Long>): List<Translation>
   fun getAllByKeyIdInAndLanguageIdIn(keyIds: List<Long>, languageIds: List<Long>): List<Translation>
+
+  @Query(
+    """
+    from Translation t
+    join t.key k
+    where k.project.id = :projectId
+  """
+  )
+  fun getAllByProjectId(projectId: Long): List<Translation>
 }

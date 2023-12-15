@@ -47,9 +47,9 @@ repositories {
 
 
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Service")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.stereotype.Service")
@@ -59,7 +59,7 @@ allOpen {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 dependencies {
@@ -104,11 +104,11 @@ dependencies {
     implementation libs.icu4j
     implementation libs.jacksonModuleKotlin
     implementation libs.jacksonDataFormatXml
+    api 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 
-    testApi dependencies.create(libs.redissonSpringBootStarter.get()) {
-        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
-    }
-    testApi libs.redissonSpringData
+    implementation "org.springframework.boot:spring-boot-properties-migrator"
+
+    testApi libs.redissonSpringBootStarter
 
     /**
      * KOTLIN
@@ -174,7 +174,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
     testLogging {
         events = ["passed", "failed", "skipped"]
     }
@@ -184,21 +184,21 @@ task runContextRecreatingTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
-    maxHeapSize = "8000m"
+    maxHeapSize = "4096m"
 }
 
 task runStandardTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         excludeTags "contextRecreating", "websocket"
     }
-    maxHeapSize = "8000m"
+    maxHeapSize = "4096m"
 }
 
 task runWebsocketTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         includeTags "websocket"
     }
-    maxHeapSize = "8000m"
+    maxHeapSize = "4096m"
 }
 
 springBoot {
@@ -238,7 +238,7 @@ task addVersionFile(type: Task) {
 project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("bootBuildInfo").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

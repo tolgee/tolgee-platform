@@ -15,9 +15,13 @@ import org.springframework.transaction.event.TransactionalEventListener
 class LanguageStatsListener(
   private var languageStatsService: LanguageStatsService
 ) {
+
+  var bypass = false
+
   @TransactionalEventListener
   @Async
   fun onActivity(event: OnProjectActivityEvent) {
+    if (bypass) return
     runSentryCatching {
       val projectId = event.activityRevision.projectId ?: return
 

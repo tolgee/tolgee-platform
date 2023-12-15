@@ -89,7 +89,7 @@ class XliffFileExporter(
     return ResultItem(document, fileBodyElement)
   }
 
-  private fun String.parseHtml(): MutableIterator<Node> {
+  private fun String.parseHtml(): MutableIterator<Any?> {
     val fragment = DocumentHelper
       .parseText("<root>$this</root>")
     return fragment.rootElement.nodeIterator()
@@ -103,6 +103,7 @@ class XliffFileExporter(
   private fun Element.addFromHtmlOrText(string: String) {
     try {
       string.parseHtml().forEach { node ->
+        if (node !is Node) return@forEach
         node.parent = null
         this.add(node)
       }

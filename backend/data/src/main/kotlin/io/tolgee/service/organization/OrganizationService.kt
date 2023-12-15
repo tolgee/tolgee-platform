@@ -1,11 +1,13 @@
 package io.tolgee.service.organization
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
@@ -20,6 +22,7 @@ import io.tolgee.service.InvitationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.Cache
@@ -27,11 +30,11 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
@@ -51,7 +54,9 @@ class OrganizationService(
   private val tolgeeProperties: TolgeeProperties,
   private val permissionService: PermissionService,
   private val cacheManager: CacheManager,
-) {
+  private val currentDateProvider: CurrentDateProvider,
+  private val eventPublisher: ApplicationEventPublisher
+) : Logging {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
   @set:Autowired
@@ -161,19 +166,19 @@ class OrganizationService(
   }
 
   fun get(id: Long): Organization {
-    return organizationRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    return organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
   fun find(id: Long): Organization? {
-    return organizationRepository.findByIdOrNull(id)
+    return organizationRepository.find(id)
   }
 
   fun get(slug: String): Organization {
-    return organizationRepository.getOneBySlug(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    return find(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
   fun find(slug: String): Organization? {
-    return organizationRepository.getOneBySlug(slug)
+    return organizationRepository.findBySlug(slug)
   }
 
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
@@ -214,17 +219,10 @@ class OrganizationService(
     ]
   )
   fun delete(organization: Organization) {
-    projectService.findAllInOrganization(organization.id).forEach {
-      projectService.deleteProject(it.id)
-    }
-
-    invitationService.getForOrganization(organization).forEach { invitation ->
-      invitationService.delete(invitation)
-    }
-
-    // `get` is important to help reducing the likelihood of a race-condition
-    // One may still occur, as a con of not relying on a DB-level cascade delete logic.
-    get(organization.id).preferredBy
+    organization.deletedAt = currentDateProvider.date
+    save(organization)
+    eventPublisher.publishEvent(BeforeOrganizationDeleteEvent(organization))
+    organization.preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
       .forEach {
         it.preferredOrganization = findOrCreatePreferred(
@@ -233,11 +231,33 @@ class OrganizationService(
         )
         userPreferencesService.save(it)
       }
+  }
 
-    organizationRoleService.deleteAllInOrganization(organization)
+  @Transactional
+  fun deleteHard(organization: Organization) {
+    traceLogMeasureTime("deleteProjects") {
+      projectService.findAllInOrganization(organization.id).forEach {
+        projectService.deleteProject(it.id)
+      }
+    }
 
-    this.organizationRepository.delete(organization)
-    avatarService.unlinkAvatarFiles(organization)
+    traceLogMeasureTime("deleteInvitations") {
+      invitationService.getForOrganization(organization).forEach { invitation ->
+        invitationService.delete(invitation)
+      }
+    }
+
+    traceLogMeasureTime("deleteOrganizationRoles") {
+      organizationRoleService.deleteAllInOrganization(organization)
+    }
+
+    traceLogMeasureTime("deleteTheOrganization") {
+      this.organizationRepository.fetchData(organization)
+      this.organizationRepository.delete(organization)
+    }
+    traceLogMeasureTime("unlinkAvatarFiles") {
+      avatarService.unlinkAvatarFiles(organization)
+    }
   }
 
   @Transactional
@@ -263,11 +283,11 @@ class OrganizationService(
   }
 
   /**
-   * Checks address part uniqueness
+   * Checks slug uniqueness
    * @return Returns true if valid
    */
   fun validateSlugUniqueness(slug: String): Boolean {
-    return organizationRepository.countAllBySlug(slug) < 1
+    return !organizationRepository.organizationWithSlugExists(slug)
   }
 
   fun isThereAnotherOwner(id: Long): Boolean {

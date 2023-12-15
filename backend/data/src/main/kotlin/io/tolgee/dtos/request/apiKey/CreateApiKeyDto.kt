@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.Scope
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 import org.hibernate.validator.constraints.Length
 import java.util.stream.Collectors
-import javax.validation.constraints.Min
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
 
 data class CreateApiKeyDto(
   @field:NotNull

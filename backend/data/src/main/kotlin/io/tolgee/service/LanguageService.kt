@@ -7,12 +7,14 @@ import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.LanguageView
 import io.tolgee.repository.LanguageRepository
-import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationService
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -20,7 +22,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class LanguageService(
@@ -30,14 +31,12 @@ class LanguageService(
   private val permissionService: PermissionService,
   @Lazy
   private val securityService: SecurityService,
+  @Lazy
+  private val autoTranslationService: AutoTranslationService,
 ) {
   @set:Autowired
   @set:Lazy
   lateinit var translationService: TranslationService
-
-  @set:Autowired
-  @set:Lazy
-  lateinit var mtServiceConfigService: MtServiceConfigService
 
   @Transactional
   fun createLanguage(dto: LanguageDto?, project: Project): Language {
@@ -91,6 +90,16 @@ class LanguageService(
 
   fun get(id: Long): Language {
     return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  @Transactional
+  fun getView(id: Long): LanguageView {
+    return findView(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  @Transactional
+  fun findView(id: Long): LanguageView? {
+    return languageRepository.findView(id)
   }
 
   fun find(id: Long): Language? {
@@ -164,9 +173,17 @@ class LanguageService(
   }
 
   fun deleteAllByProject(projectId: Long) {
-    findAll(projectId).forEach {
-      deleteLanguage(it.id)
-    }
+    translationService.deleteAllByProject(projectId)
+    autoTranslationService.deleteConfigsByProject(projectId)
+    entityManager.createNativeQuery(
+      "delete from language_stats " +
+        "where language_id in (select id from language where project_id = :projectId)"
+    )
+      .setParameter("projectId", projectId)
+      .executeUpdate()
+    entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   fun save(language: Language): Language {
@@ -177,7 +194,7 @@ class LanguageService(
     return this.languageRepository.saveAll(languages)
   }
 
-  fun getPaged(projectId: Long, pageable: Pageable): Page<Language> {
+  fun getPaged(projectId: Long, pageable: Pageable): Page<LanguageView> {
     return this.languageRepository.findAllByProjectId(projectId, pageable)
   }
 
@@ -187,5 +204,10 @@ class LanguageService(
 
   fun getLanguageIdsByTags(projectId: Long, languageTags: Collection<String>): Map<String, Language> {
     return languageRepository.findAllByTagInAndProjectId(languageTags, projectId).associateBy { it.tag }
+  }
+
+  @Transactional
+  fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView> {
+    return languageRepository.getViewsOfProjects(projectIds)
   }
 }

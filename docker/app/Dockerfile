@@ -1,4 +1,4 @@
-FROM tolgee/base:jdk-14-postgres-13
+FROM tolgee/base:jdk-17-postgres-13
 
 #############
 ### Tolgee  #

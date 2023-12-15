@@ -8,6 +8,7 @@ import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
 import io.tolgee.model.UserAccount
+import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -46,7 +47,7 @@ class ProjectModelAssembler(
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationRole = view.organizationRole,
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
-      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
+      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageViewImpl(baseLanguage, true)) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
     ).add(link).also { model ->

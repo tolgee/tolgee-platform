@@ -20,13 +20,13 @@ import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class StartupImportService(

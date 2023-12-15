@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     id 'io.spring.dependency-management'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
@@ -30,7 +30,6 @@ configurations {
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
@@ -41,7 +40,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 idea {
@@ -51,9 +50,9 @@ idea {
 }
 
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
@@ -69,8 +68,8 @@ dependencies {
     api "org.springframework.boot:spring-boot-configuration-processor"
     api project(":data")
     api project(":ee-app")
-    api libs.springDocOpenApiDataRest
-    api libs.springDocOpenApiWebMvcCore
+    api libs.springDocOpenApiCommon
+    api libs.springDocWebmvcApi
     implementation libs.kotlinReflect
     implementation libs.kotlinCoroutines
 }
@@ -84,8 +83,11 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)

@@ -25,7 +25,8 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest(
   classes = [Application::class],
   properties = [
-    "tolgee.authentication.initial-username=johny"
+    "tolgee.authentication.initial-username=johny",
+    "tolgee.internal.disable-initial-user-creation=false"
   ]
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

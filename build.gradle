@@ -10,6 +10,19 @@ buildscript {
     }
 }
 
+
+plugins {
+    id("org.openrewrite.rewrite") version("6.3.16")
+}
+
+rewrite {
+    activeRecipe("org.openrewrite.java.migrate.jakarta.JavaxMigrationToJakarta")
+}
+
+dependencies {
+    rewrite("org.openrewrite.recipe:rewrite-migrate-java:2.1.0")
+}
+
 project.ext {
     dbSchemaContainerName = 'tolgee_postgres_dbschema'
 }
@@ -148,6 +161,7 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 
 subprojects {
     task allDeps(type: DependencyReportTask) {}
+    ext['hibernate.version'] = hibernateVersion
 
     tasks.withType(Test) {
         testLogging {

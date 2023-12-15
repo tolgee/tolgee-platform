@@ -1,21 +1,16 @@
 package io.tolgee.postgresRunners
 
+import io.tolgee.PostgresRunner
 import io.tolgee.configuration.tolgee.FileStorageProperties
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
 import io.tolgee.fixtures.waitFor
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.InputStream
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.annotation.PreDestroy
 import kotlin.concurrent.thread
 
-@Component
-@Scope(SCOPE_SINGLETON)
 class PostgresEmbeddedRunner(
   private val postgresAutostartProperties: PostgresAutostartProperties,
   private val storageProperties: FileStorageProperties
@@ -31,6 +26,14 @@ class PostgresEmbeddedRunner(
       waitForPostgres()
     }
   }
+
+  override fun stop() {
+    proc.destroy()
+    proc.waitFor()
+    running.set(false)
+  }
+
+  override val shouldRunMigrations: Boolean = true
 
   private fun startPostgresProcess() {
     val processBuilder = buildProcess()
@@ -99,13 +102,6 @@ class PostgresEmbeddedRunner(
         e.printStackTrace()
       }
     }
-  }
-
-  @PreDestroy
-  fun preDestroy() {
-    proc.destroy()
-    proc.waitFor()
-    running.set(false)
   }
 
   private fun logOutput(loggerMap: Map<InputStream, (message: String) -> Unit>) {

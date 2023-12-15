@@ -1,11 +1,11 @@
 package io.tolgee.model
 
+import jakarta.persistence.Entity
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.ColumnDefault
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.OneToOne
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 
 @Entity
 @Table(

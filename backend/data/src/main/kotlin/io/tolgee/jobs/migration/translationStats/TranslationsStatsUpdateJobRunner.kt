@@ -43,6 +43,6 @@ class TranslationsStatsUpdateJobRunner(
       return null
     }
     val hash = DigestUtils.sha256Hex(ids.flatMap { it.toBigInteger().toByteArray().toList() }.toByteArray())
-    return JobParameters(mapOf("idsHash" to JobParameter(hash)))
+    return JobParameters(mapOf("idsHash" to JobParameter(hash, String::class.java)))
   }
 }

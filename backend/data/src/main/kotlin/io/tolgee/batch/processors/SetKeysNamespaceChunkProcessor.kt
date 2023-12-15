@@ -7,11 +7,11 @@ import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.constants.Message
 import io.tolgee.model.batch.params.SetKeysNamespaceParams
 import io.tolgee.service.key.KeyService
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceException
 import kotlinx.coroutines.ensureActive
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceException
 import kotlin.coroutines.CoroutineContext
 
 @Component

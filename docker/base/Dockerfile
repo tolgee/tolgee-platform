@@ -1,11 +1,14 @@
-FROM alpine:edge
+FROM alpine:3.18
 
-RUN apk --no-cache add openjdk14
-
-####################################################################################
-### Postgres from postgres official Dockerfile                                     #
-### https://github.com/docker-library/postgres/blob/master/13/alpine/Dockerfile    #
-####################################################################################
+########################################################################################
+### Postgres from postgres official Dockerfile                                         #
+### https://github.com/docker-library/postgres/blob/master/13/alpine3.18/Dockerfile    #
+########################################################################################
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
@@ -24,8 +27,12 @@ ENV LANG en_US.utf8
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV PG_MAJOR 13
-ENV PG_VERSION 13.5
-ENV PG_SHA256 9b81067a55edbaabc418aacef457dd8477642827499560b00615a6ea6c13f6b3
+ENV PG_VERSION 13.12
+ENV PG_SHA256 0da1edcee3514b7bc7ba6dbaf0c00499e8ac1590668e8789c50253a6249f218b
+
+ENV DOCKER_PG_LLVM_DEPS \
+		llvm15-dev \
+		clang15
 
 RUN set -eux; \
 	\
@@ -41,10 +48,12 @@ RUN set -eux; \
 	rm postgresql.tar.bz2; \
 	\
 	apk add --no-cache --virtual .build-deps \
+		$DOCKER_PG_LLVM_DEPS \
 		bison \
 		coreutils \
 		dpkg-dev dpkg \
 		flex \
+		g++ \
 		gcc \
 		krb5-dev \
 		libc-dev \
@@ -52,15 +61,12 @@ RUN set -eux; \
 		libxml2-dev \
 		libxslt-dev \
 		linux-headers \
-		llvm-dev clang g++ \
 		make \
 		openldap-dev \
 		openssl-dev \
-# configure: error: prove not found
-		perl-utils \
-# configure: error: Perl module IPC::Run is required to run TAP tests
-		perl-ipc-run \
 		perl-dev \
+		perl-ipc-run \
+		perl-utils \
 		python3-dev \
 		tcl-dev \
 		util-linux-dev \
@@ -79,9 +85,16 @@ RUN set -eux; \
 # explicitly update autoconf config.guess and config.sub so they support more arches/libcs
 	wget -O config/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=7d3d27baf8107b630586c962c057e22149653deb'; \
 	wget -O config/config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=7d3d27baf8107b630586c962c057e22149653deb'; \
+	\
+# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n158
+	export LLVM_CONFIG="/usr/lib/llvm15/bin/llvm-config"; \
+# https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n163
+	export CLANG=clang-15; \
+	\
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-postgresql/postgresql.git/tree/debian/rules?h=9.5
 	./configure \
+		--enable-option-checking=fatal \
 		--build="$gnuArch" \
 # "/usr/src/postgresql/src/backend/access/common/tupconvert.c:105: undefined reference to `libintl_gettext'"
 #		--enable-nls \
@@ -98,7 +111,6 @@ RUN set -eux; \
 		--prefix=/usr/local \
 		--with-includes=/usr/local/include \
 		--with-libraries=/usr/local/lib \
-		--with-krb5 \
 		--with-gssapi \
 		--with-ldap \
 		--with-tcl \
@@ -128,9 +140,13 @@ RUN set -eux; \
 		$runDeps \
 		bash \
 		su-exec \
-# tzdata is optional, but only adds around 1Mb to image size and is recommended by Django documentation:
-# https://docs.djangoproject.com/en/1.10/ref/databases/#optimizing-postgresql-s-configuration
 		tzdata \
+		zstd \
+# https://wiki.alpinelinux.org/wiki/Release_Notes_for_Alpine_3.16.0#ICU_data_split
+		icu-data-full \
+# nss_wrapper is not availble on ppc64le: "test case segfaults in ppc64le"
+# https://git.alpinelinux.org/aports/commit/testing/nss_wrapper/APKBUILD?h=3.17-stable&id=94d81ceeb58cff448d489bbcbe9a6d40c9991663
+		$([ "$(apk --print-arch)" != 'ppc64le' ] && echo 'nss_wrapper') \
 	; \
 	apk del --no-network .build-deps; \
 	cd /; \
@@ -139,7 +155,8 @@ RUN set -eux; \
 		/usr/local/share/doc \
 		/usr/local/share/man \
 	; \
-	\
+	echo '{"spdxVersion":"SPDX-2.3","SPDXID":"SPDXRef-DOCUMENT","name":"postgres-sbom","packages":[{"name":"postgres","versionInfo":"13.12","SPDXID":"SPDXRef-Package--postgres","externalRefs":[{"referenceCategory":"PACKAGE-MANAGER","referenceType":"purl","referenceLocator":"pkg:generic/postgres@13.12?os_name=alpine&os_version=3.18"}],"licenseDeclared":"PostgreSQL"}]}' > /usr/local/postgres.spdx.json \
+	; \
 	postgres --version
 
 # make the sample config easier to munge (and "correct by default")
@@ -148,16 +165,17 @@ RUN set -eux; \
 	sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
 	grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample
 
-RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
+RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 3777 /var/run/postgresql
 
 ENV PGDATA /var/lib/postgresql/data
 # this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
-RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"
+RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 1777 "$PGDATA"
 VOLUME /var/lib/postgresql/data
 
-## Postgres entrypoint run by supervisor
 COPY postgres-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/postgres-entrypoint.sh
+
+RUN apk --no-cache add openjdk17
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
 # calls "Fast Shutdown mode" wherein new connections are disallowed and any

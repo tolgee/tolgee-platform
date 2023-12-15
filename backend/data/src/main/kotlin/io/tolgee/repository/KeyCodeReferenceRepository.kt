@@ -23,13 +23,13 @@ interface KeyCodeReferenceRepository : JpaRepository<KeyCodeReference, Long> {
     """delete from KeyCodeReference kcr where kcr.keyMeta in 
         (select km from kcr.keyMeta km where km.key.id in :keyIds)"""
   )
-  fun deleteAllByKeyIds(keyIds: Any)
+  fun deleteAllByKeyIds(keyIds: Collection<Long>)
 
   @Modifying
-  @Transactional
   @Query(
     """delete from KeyCodeReference kcr where kcr.keyMeta in 
-        (select km from kcr.keyMeta km where km.key.id = :keyId)"""
+        (select km from kcr.keyMeta km where km.key.id in 
+        (select k.id from Key k where k.project.id = :projectId))"""
   )
-  fun deleteAllByKeyId(keyId: Long)
+  fun deleteAllByProject(projectId: Long)
 }

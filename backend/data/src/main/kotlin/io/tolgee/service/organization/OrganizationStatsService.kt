@@ -1,8 +1,8 @@
 package io.tolgee.service.organization
 
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import javax.persistence.EntityManager
 
 @Service
 class OrganizationStatsService(
@@ -13,7 +13,7 @@ class OrganizationStatsService(
       .createQuery(
         """
           select count(l) from Language l 
-          where l.project.id = :projectId
+          where l.project.id = :projectId and l.project.deletedAt is null
         """.trimIndent()
       )
       .setParameter("projectId", projectId)
@@ -25,7 +25,7 @@ class OrganizationStatsService(
       .createQuery(
         """
           select count(k) from Key k
-          where k.project.id = :projectId
+          where k.project.id = :projectId and k.project.deletedAt is null
         """.trimIndent()
       )
       .setParameter("projectId", projectId)
@@ -40,12 +40,12 @@ class OrganizationStatsService(
           from (select p.id as projectId, count(l.id) as languageCount
                 from project as p
                          join language as l on l.project_id = p.id
-                where p.organization_owner_id = :organizationId
+                where p.organization_owner_id = :organizationId and p.deleted_at is null
                 group by p.id) as languageCounts
                    join (select p.id as projectId, count(k.id) as keyCount
                          from project as p
                                   join key as k on k.project_id = p.id
-                         where p.organization_owner_id = :organizationId
+                         where p.organization_owner_id = :organizationId and p.deleted_at is null
                          group by p.id) as keyCounts on keyCounts.projectId = languageCounts.projectId)
       """.trimIndent()
     ).setParameter("organizationId", organizationId).singleResult as BigDecimal? ?: 0
@@ -57,7 +57,7 @@ class OrganizationStatsService(
       """
       select count(t) from Translation t where 
         t.key.project.organizationOwner.id = :organizationId and 
-        t.state <> io.tolgee.model.enums.TranslationState.UNTRANSLATED
+        t.state <> io.tolgee.model.enums.TranslationState.UNTRANSLATED and t.key.project.deletedAt is null
       """.trimIndent()
     ).setParameter("organizationId", organizationId).singleResult as Long? ?: 0
   }

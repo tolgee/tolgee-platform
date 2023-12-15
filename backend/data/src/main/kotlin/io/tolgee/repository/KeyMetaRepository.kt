@@ -42,7 +42,6 @@ interface KeyMetaRepository : JpaRepository<KeyMeta?, Long?> {
   fun deleteAllByKeyIds(keyIds: Collection<Long>)
 
   @Modifying
-  @Transactional
-  @Query("delete from KeyMeta km where km.key.id = :keyId")
-  fun deleteAllByKeyId(keyId: Long)
+  @Query("delete from KeyMeta km where km.key.id in (select k.id from Key k where k.project.id = :projectId)")
+  fun deleteAllByProject(projectId: Long)
 }

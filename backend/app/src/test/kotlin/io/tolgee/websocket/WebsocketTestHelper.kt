@@ -43,7 +43,7 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
 
     webSocketStompClient.messageConverter = SimpleMessageConverter()
     sessionHandler = MySessionHandler(path, receivedMessages)
-    connection = webSocketStompClient.connect(
+    connection = webSocketStompClient.connectAsync(
       "http://localhost:$port/websocket", WebSocketHttpHeaders(),
       StompHeaders().apply { add("jwtToken", jwtToken) },
       sessionHandler!!
@@ -70,6 +70,8 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
     var subscription: StompSession.Subscription? = null
 
     override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
+      logger.info("Connected to websocket")
+      logger.info("Subscribing to $dest")
       subscription = session.subscribe(dest, this)
     }
 

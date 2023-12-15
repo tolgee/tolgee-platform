@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 @Service
@@ -62,6 +63,7 @@ class MtCreditBucketService(
   }
 
   @Transactional(noRollbackFor = [OutOfCreditsException::class])
+  @ExperimentalTime
   fun checkPositiveBalance(project: Project) {
     lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
       tryUntilItDoesntBreakConstraint {

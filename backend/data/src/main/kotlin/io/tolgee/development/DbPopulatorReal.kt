@@ -24,11 +24,11 @@ import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.SlugGenerator
 import io.tolgee.util.executeInNewTransaction
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class DbPopulatorReal(
@@ -103,6 +103,7 @@ class DbPopulatorReal(
     project.organizationOwner = organization
     project.slug = slugGenerator.generate(projectName, 3, 60) { true }
     en = createLanguage("en", project)
+    project.baseLanguage = en
     de = createLanguage("de", project)
     organization.projects.add(project)
     projectService.save(project)

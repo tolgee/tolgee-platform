@@ -4,7 +4,14 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assert

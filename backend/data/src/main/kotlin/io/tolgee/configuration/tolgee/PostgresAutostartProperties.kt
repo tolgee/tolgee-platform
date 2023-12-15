@@ -57,4 +57,10 @@ class PostgresAutostartProperties {
      */
     EMBEDDED
   }
+
+  @DocProperty(
+    description = "When true, Tolgee will stop the Postgres container on Tolgee shutdown." +
+      "This setting is applicable only for `DOCKER` mode."
+  )
+  var stop: Boolean = true
 }

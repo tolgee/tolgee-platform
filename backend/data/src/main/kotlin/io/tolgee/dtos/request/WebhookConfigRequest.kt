@@ -1,6 +1,6 @@
 package io.tolgee.dtos.request
 
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Size
 
 data class WebhookConfigRequest(
   @field:Size(max = 255)

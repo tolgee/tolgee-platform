@@ -16,11 +16,11 @@
 
 package io.tolgee.util
 
+import jakarta.persistence.EntityManager
 import org.hibernate.Session
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.OutputStream
-import javax.persistence.EntityManager
 
 @Component
 class StreamingResponseBodyProvider(
@@ -29,10 +29,14 @@ class StreamingResponseBodyProvider(
   fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody {
     return StreamingResponseBody {
       val session = entityManager.unwrap(Session::class.java)
-      fn(it)
+
+      session.doWork { connection ->
+        fn(it)
+        // Manually dispose the connection because spring has a hard time doing so by itself
+        connection.close()
+      }
 
       // Manually dispose the connection because spring has a hard time doing so by itself
-      session.disconnect()
       session.close()
     }
   }

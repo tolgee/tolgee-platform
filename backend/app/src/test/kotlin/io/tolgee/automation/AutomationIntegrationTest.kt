@@ -98,10 +98,14 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     purgingMock = mock()
     doReturn(purgingMock).whenever(contentDeliveryCachePurgingProvider).defaultPurging
 
+    // wait for the first invocation happening because of test data saving, then clear invocations
+    Thread.sleep(1000)
+    Mockito.clearInvocations(fileStorageMock)
+
     modifyTranslationData()
     verifyContentDeliveryPublish()
 
-    waitForNotThrowing {
+    waitForNotThrowing(pollTime = 200) {
       contentDeliveryConfigService
         .get(testData.defaultServerContentDeliveryConfig.self.id)
         .lastPublished!!.time

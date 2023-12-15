@@ -11,6 +11,7 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.hibernate.LockOptions
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Lazy
@@ -20,7 +21,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobChunkExecutionQueue(
@@ -58,7 +58,7 @@ class BatchJobChunkExecutionQueue(
       BatchJobChunkExecution::class.java
     ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
       .setHint(
-        "javax.persistence.lock.timeout",
+        "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
     if (data.size > 0) {
@@ -148,5 +148,9 @@ class BatchJobChunkExecutionQueue(
 
   override fun afterPropertiesSet() {
     metrics.registerJobQueue(queue)
+  }
+
+  fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> {
+    return queue.filter { it.jobId == jobId }
   }
 }

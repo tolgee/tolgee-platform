@@ -24,9 +24,12 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationEventPublisher
@@ -38,7 +41,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class UserAccountService(
@@ -51,7 +53,8 @@ class UserAccountService(
   private val organizationService: OrganizationService,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
-) {
+  private val cacheManager: CacheManager
+) : Logging {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
 
@@ -138,32 +141,50 @@ class UserAccountService(
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
   @Transactional
   fun delete(userAccount: UserAccount) {
-    userAccount.emailVerification?.let {
+    traceLogMeasureTime("deleteUser") {
+      val toDelete =
+        userAccountRepository.findWithFetchedEmailVerificationAndPermissions(userAccount.id)
+          ?: throw NotFoundException()
+      deleteWithFetchedData(toDelete)
+    }
+  }
+
+  private fun deleteWithFetchedData(toDelete: UserAccount) {
+    toDelete.emailVerification?.let {
       entityManager.remove(it)
     }
-    userAccount.apiKeys?.forEach {
+    toDelete.apiKeys?.forEach {
       entityManager.remove(it)
     }
-    userAccount.pats?.forEach {
+    toDelete.pats?.forEach {
       entityManager.remove(it)
     }
-    userAccount.permissions.forEach {
+    toDelete.permissions.forEach {
       entityManager.remove(it)
     }
-    userAccount.preferences?.let {
+    toDelete.preferences?.let {
       entityManager.remove(it)
     }
-    organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+    organizationService.getAllSingleOwnedByUser(toDelete).forEach {
       it.preferredBy.removeIf { preferences ->
-        preferences.userAccount.id == userAccount.id
+        preferences.userAccount.id == toDelete.id
       }
       organizationService.delete(it)
     }
-    userAccount.organizationRoles.forEach {
+    toDelete.organizationRoles.forEach {
       entityManager.remove(it)
     }
-    userAccountRepository.softDeleteUser(userAccount)
+    userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+  }
+
+  @Transactional
+  fun deleteByUserNames(usernames: List<String>) {
+    val data = userAccountRepository.findActiveWithFetchedDataByUserNames(usernames)
+    data.forEach {
+      deleteWithFetchedData(it)
+      cacheManager.getCache(Caches.USER_ACCOUNTS)?.evict(it.id)
+    }
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {

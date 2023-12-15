@@ -31,14 +31,13 @@ import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.util.getSafeNamespace
-import org.hibernate.annotations.QueryHints
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
-import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -183,7 +182,6 @@ class ImportService(
             """
     )
       .setParameter("import", import)
-      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
       .resultList as List<ImportKey>
 
     result = entityManager.createQuery(
@@ -195,7 +193,6 @@ class ImportService(
             where ik in :keys
         """
     ).setParameter("keys", result)
-      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
       .resultList as List<ImportKey>
 
     return result

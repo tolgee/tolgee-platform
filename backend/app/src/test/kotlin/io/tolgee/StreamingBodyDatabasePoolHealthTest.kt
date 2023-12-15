@@ -19,6 +19,7 @@ package io.tolgee
 import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.retry
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -52,11 +53,30 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `streaming responses do not cause a database connection pool exhaustion`() {
-    val hikariDataSource = dataSource as HikariDataSource
-    val pool = hikariDataSource.hikariPoolMXBean
+    // there is the bug in spring, co it throws the concurrent modification exception
+    // to avoid this, we will retry the test until it passes
+    // but we will also increase the sleep time between requests to make it more probable to pass
+    // I know, it's ugly. Sorry. If you have time to spare, remove the repeats and the sleep, maybe it will pass
+    // in future spring versions
+    // https://github.com/spring-projects/spring-security/issues/9175
+    var sleepBetweenMs = 0L
+    retry(
+      retries = 100,
+      exceptionMatcher = { it is ConcurrentModificationException || it is IllegalStateException }
+    ) {
+      try {
+        val hikariDataSource = dataSource as HikariDataSource
+        val pool = hikariDataSource.hikariPoolMXBean
 
-    pool.idleConnections.assert.isGreaterThan(90)
-    repeat(50) { performProjectAuthGet("export").andIsOk }
-    pool.idleConnections.assert.isGreaterThan(90)
+        pool.idleConnections.assert.isGreaterThan(90)
+        repeat(50) {
+          performProjectAuthGet("export").andIsOk
+          Thread.sleep(sleepBetweenMs)
+        }
+        pool.idleConnections.assert.isGreaterThan(90)
+      } finally {
+        sleepBetweenMs += 10
+      }
+    }
   }
 }

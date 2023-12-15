@@ -4,6 +4,7 @@ import io.tolgee.model.key.Namespace
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -41,4 +42,13 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   """
   )
   fun findOneByProjectIdAndName(projectId: Long, name: String): Namespace?
+
+  @Modifying
+  @Query(
+    """
+    delete from namespace where project_id = :projectId
+  """,
+    nativeQuery = true
+  )
+  fun deleteAllByProjectId(projectId: Long)
 }

@@ -3,8 +3,8 @@ package io.tolgee.dtos.response
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.PathDTO
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 @Deprecated(message = "Ugly parameter name")
 data class DeprecatedKeyDto(

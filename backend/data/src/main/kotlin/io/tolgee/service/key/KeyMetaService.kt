@@ -10,11 +10,11 @@ import io.tolgee.model.key.WithKeyMetaReference
 import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
-import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
+import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class KeyMetaService(
@@ -22,7 +22,7 @@ class KeyMetaService(
   private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
   private val keyCommentRepository: KeyCommentRepository,
   private val entityManager: EntityManager,
-) {
+) : Logging {
   @set:Autowired
   @set:Lazy
   lateinit var tagService: TagService
@@ -68,7 +68,6 @@ class KeyMetaService(
             """
     )
       .setParameter("import", import)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     result = entityManager.createQuery(
@@ -80,7 +79,6 @@ class KeyMetaService(
             where ikm in :metas 
         """
     ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     return result
@@ -96,7 +94,6 @@ class KeyMetaService(
             """
     )
       .setParameter("project", project)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     result = entityManager.createQuery(
@@ -107,7 +104,6 @@ class KeyMetaService(
             where ikm in :metas 
         """
     ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     return result
@@ -140,9 +136,40 @@ class KeyMetaService(
   }
 
   fun deleteAllByKeyId(id: Long) {
-    tagService.deleteAllByKeyIdIn(listOf(id))
-    keyCommentRepository.deleteAllByKeyId(id)
-    keyCodeReferenceRepository.deleteAllByKeyId(id)
-    this.keyMetaRepository.deleteAllByKeyId(id)
+    deleteAllByKeyIdIn(listOf(id))
+  }
+
+  fun deleteAllByProject(projectId: Long) {
+    tagService.deleteAllByProject(projectId)
+    entityManager.createNativeQuery(
+      """
+      delete from key_comment where key_meta_id in (
+        select id from key_meta where key_id in (
+          select id from key where project_id = :projectId
+        )
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      delete from key_code_reference where key_meta_id in (
+        select id from key_meta where key_id in (
+          select id from key where project_id = :projectId
+        )
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      delete from key_meta where key_id in (
+        select id from key where project_id = :projectId
+      )
+      """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 }

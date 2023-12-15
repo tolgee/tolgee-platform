@@ -16,15 +16,15 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.key.Tag_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
-import javax.persistence.EntityManager
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.ListJoin
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Root
-import javax.persistence.criteria.SetJoin
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.ListJoin
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
+import jakarta.persistence.criteria.SetJoin
 
 class ExportDataProvider(
   private val entityManager: EntityManager,
@@ -151,10 +151,7 @@ class ExportDataProvider(
   ): ListJoin<Key, Translation> {
     val translation = key.join(Key_.translations, JoinType.LEFT)
     translation.on(
-      cb.and(
-        cb.equal(key, translation.get(Translation_.key)),
-        cb.equal(language, translation.get(Translation_.language))
-      )
+      cb.equal(language, translation.get(Translation_.language))
     )
     return translation
   }

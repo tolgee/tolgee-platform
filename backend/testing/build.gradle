@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     id 'io.spring.dependency-management'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
@@ -36,7 +36,6 @@ configurations {
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
@@ -48,7 +47,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 idea {
@@ -58,9 +57,9 @@ idea {
 }
 
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
@@ -123,20 +122,23 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
 }
 
 project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)

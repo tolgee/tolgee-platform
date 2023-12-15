@@ -39,9 +39,15 @@ class PermissionTestUtil(
       val langByTag = { tag: String -> languages.find { it.tag == tag }!!.id }
       val query = getQueryFn(langByTag)
 
+      val typeAndQuery = if (type.isEmpty()) {
+        "?$query"
+      } else {
+        "/$type?$query"
+      }
+
       test.performAuthPut(
         "/v2/projects/${project.id}/users/${user.id}" +
-          "/set-permissions/$type?$query",
+          "/set-permissions$typeAndQuery",
         null
       )
     }
@@ -57,9 +63,15 @@ class PermissionTestUtil(
       val langByTag = { tag: String -> languages.find { it.tag == tag }!!.id }
       val query = getQueryFn(langByTag)
 
+      val typeAndQuery = if (type.isEmpty()) {
+        "?$query"
+      } else {
+        "/$type?$query"
+      }
+
       test.performAuthPut(
         "/v2/projects/${project.id}/users/${user.id}" +
-          "/set-permissions/$type?$query",
+          "/set-permissions$typeAndQuery",
         null
       ).andIsOk
 

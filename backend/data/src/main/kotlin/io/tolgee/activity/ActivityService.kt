@@ -10,13 +10,13 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityExistsException
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityExistsException
-import javax.persistence.EntityManager
 
 @Service
 class ActivityService(

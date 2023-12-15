@@ -266,13 +266,18 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Test
   fun `debounces job`() {
     currentDateProvider.forcedDate = currentDateProvider.date
+    val startTie = currentDateProvider.date
+
     util.makeAutomationChunkProcessorPass()
     val firstJobId = util.runDebouncedJob().id
 
     repeat(2) {
+      Thread.sleep(500)
       util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
     }
     currentDateProvider.move(Duration.ofSeconds(5))
+
+    Thread.sleep(500)
     repeat(2) {
       util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
     }
@@ -284,7 +289,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     // test it debounces for max time (10 sec * 4 = 40)
     repeat(7) {
-      currentDateProvider.move(Duration.ofSeconds(5))
+      currentDateProvider.move(Duration.ofSeconds(2))
+      Thread.sleep(20)
+      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+      currentDateProvider.move(Duration.ofSeconds(3))
+      Thread.sleep(20)
       util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
     }
 

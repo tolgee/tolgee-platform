@@ -62,10 +62,6 @@ class WebSocketConfig(
 
         return message
       }
-
-      override fun postReceive(message: Message<*>, channel: MessageChannel): Message<*>? {
-        return super.postReceive(message, channel)
-      }
     })
   }
 }

@@ -7,19 +7,19 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.hibernate:hibernate-gradle-plugin:5.6.10.Final"
     }
 }
 
 plugins {
     id 'io.spring.dependency-management'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id 'java'
     id 'org.liquibase.gradle'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
     id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
+    id "org.hibernate.orm"
 }
 
 group = 'io.tolgee'
@@ -41,7 +41,6 @@ configurations {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
@@ -61,19 +60,10 @@ idea {
     }
 }
 
-hibernate {
-    enhance {
-        enableLazyInitialization = true
-        enableDirtyTracking = true
-        enableAssociationManagement = false
-        enableExtendedEnhancement = false
-    }
-}
-
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
@@ -88,7 +78,14 @@ diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
+}
+
+hibernate {
+    enhancement {
+        lazyInitialization = true
+        dirtyTracking = true
+    }
 }
 
 dependencies {
@@ -113,22 +110,21 @@ dependencies {
      * DB
      */
     runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.hibernate:hibernate-jpamodelgen'
-    kapt "org.hibernate:hibernate-jpamodelgen"
+    implementation "org.hibernate:hibernate-jpamodelgen:$hibernateVersion"
+    kapt "org.hibernate:hibernate-jpamodelgen:$hibernateVersion"
 
     /**
      * Redisson
      */
-    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
-        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
-    }
-    implementation libs.redissonSpringData
+    implementation libs.redissonSpringBootStarter
 
     /**
      * Liquibase
      */
     implementation libs.liquibaseCore
     liquibaseRuntime libs.liquibaseCore
+    liquibaseRuntime libs.jacksonModuleKotlin
+    liquibaseRuntime libs.liquibasePicoli
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
     liquibaseRuntime libs.liquibaseHibernate
@@ -155,8 +151,7 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation libs.springDocOpenApiWebMvcCore
-    implementation libs.springDocOpenApiKotlin
+    implementation libs.springDocOpenApiCommon
 
     /**
      * MISC
@@ -177,6 +172,8 @@ dependencies {
     implementation 'com.eatthepath:java-otp:0.4.0'
     implementation libs.postHog
     implementation libs.micrometerPrometheus
+    implementation 'org.dom4j:dom4j:2.1.4'
+    implementation libs.jacksonKotlin
 
     /**
      * Google translation API
@@ -205,20 +202,23 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
 }
 
 project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)

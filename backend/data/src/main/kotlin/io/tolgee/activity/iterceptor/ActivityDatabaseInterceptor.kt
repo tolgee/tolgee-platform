@@ -2,16 +2,15 @@ package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.util.Logging
-import org.hibernate.EmptyInterceptor
+import org.hibernate.Interceptor
 import org.hibernate.Transaction
 import org.hibernate.type.Type
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
-import java.io.Serializable
 
 @Component
-class ActivityDatabaseInterceptor : EmptyInterceptor(), Logging {
+class ActivityDatabaseInterceptor : Interceptor, Logging {
 
   @Autowired
   lateinit var applicationContext: ApplicationContext
@@ -22,7 +21,7 @@ class ActivityDatabaseInterceptor : EmptyInterceptor(), Logging {
 
   override fun onSave(
     entity: Any?,
-    id: Serializable?,
+    id: Any?,
     state: Array<out Any>?,
     propertyNames: Array<out String>?,
     types: Array<out Type>?
@@ -36,7 +35,7 @@ class ActivityDatabaseInterceptor : EmptyInterceptor(), Logging {
 
   override fun onDelete(
     entity: Any?,
-    id: Serializable?,
+    id: Any?,
     state: Array<out Any>?,
     propertyNames: Array<out String>?,
     types: Array<out Type>?
@@ -49,7 +48,7 @@ class ActivityDatabaseInterceptor : EmptyInterceptor(), Logging {
 
   override fun onFlushDirty(
     entity: Any?,
-    id: Serializable?,
+    id: Any?,
     currentState: Array<out Any>?,
     previousState: Array<out Any>?,
     propertyNames: Array<out String>?,
@@ -66,15 +65,15 @@ class ActivityDatabaseInterceptor : EmptyInterceptor(), Logging {
     return true
   }
 
-  override fun onCollectionRemove(collection: Any?, key: Serializable?) {
+  override fun onCollectionRemove(collection: Any?, key: Any?) {
     interceptedEventsManager.onCollectionModification(collection, key)
   }
 
-  override fun onCollectionRecreate(collection: Any?, key: Serializable?) {
+  override fun onCollectionRecreate(collection: Any?, key: Any?) {
     interceptedEventsManager.onCollectionModification(collection, key)
   }
 
-  override fun onCollectionUpdate(collection: Any?, key: Serializable?) {
+  override fun onCollectionUpdate(collection: Any?, key: Any?) {
     interceptedEventsManager.onCollectionModification(collection, key)
   }
 

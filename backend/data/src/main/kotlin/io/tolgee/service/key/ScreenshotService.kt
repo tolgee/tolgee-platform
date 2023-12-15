@@ -23,11 +23,11 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.util.ImageConverter
+import jakarta.persistence.EntityManager
 import org.springframework.core.io.InputStreamSource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.awt.Dimension
-import javax.persistence.EntityManager
 import kotlin.math.roundToInt
 
 @Service
@@ -198,6 +198,7 @@ class ScreenshotService(
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
+  @Transactional
   fun findAll(key: Key): List<Screenshot> {
     return screenshotRepository.findAllByKey(key)
   }
@@ -219,10 +220,12 @@ class ScreenshotService(
     removeScreenshotReferences(key, listOf(screenshot))
   }
 
+  @Transactional
   fun removeScreenshotReferences(key: Key, screenshots: List<Screenshot>) {
     removeScreenshotReferencesById(key, screenshots.map { it.id })
   }
 
+  @Transactional
   fun removeScreenshotReferencesById(key: Key, screenshotIds: List<Long>?) {
     screenshotIds ?: return
     val references = keyScreenshotReferenceRepository.findAll(key, screenshotIds)
@@ -237,6 +240,7 @@ class ScreenshotService(
     }
   }
 
+  @Transactional
   fun removeScreenshotReferences(references: List<KeyScreenshotReference>) {
     val screenshotIds = references.map { it.screenshot.id }.toSet()
     keyScreenshotReferenceRepository.deleteAll(references)
@@ -265,7 +269,26 @@ class ScreenshotService(
   fun deleteAllByProject(projectId: Long) {
     val all = screenshotRepository.getAllByKeyProjectId(projectId)
     all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteAll(all)
+
+    entityManager.createNativeQuery(
+      """
+      DELETE FROM key_screenshot_reference WHERE key_id IN (
+        SELECT id FROM key WHERE project_id = :projectId
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      DELETE FROM screenshot WHERE id IN (
+        SELECT screenshot_id FROM key_screenshot_reference WHERE key_id IN (
+          SELECT id FROM key WHERE project_id = :projectId
+        )
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   fun deleteAllByKeyId(keyId: Long) {
@@ -301,33 +324,13 @@ class ScreenshotService(
     return screenshotRepository.getKeysWithScreenshots(ids)
   }
 
-  fun getScreenshotReferences(screenshots: Collection<Screenshot>): List<KeyScreenshotReference> {
-    return screenshotRepository.getScreenshotReferences(screenshots)
-  }
-
   fun saveAllReferences(data: List<KeyScreenshotReference>) {
     keyScreenshotReferenceRepository.saveAll(data)
   }
 
   fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
-    val keys = this.getKeysWithScreenshots(keyIds).toSet()
-
-    val allScreenshots = keys
-      .flatMap { key ->
-        key.keyScreenshotReferences.map { scr -> scr.screenshot }
-      }
-      .toSet() // remove dupes
-      .let {
-        screenshotRepository.getScreenshotsWithReferences(it)
-      }.toSet()
-
-    val keyIdScreenshotsMap = allScreenshots
-      .flatMap { it.keyScreenshotReferences }
-      .groupBy { it.key.id }
-
-    return keys.associate {
-      it.id to (keyIdScreenshotsMap[it.id]?.map { it.screenshot } ?: emptyList())
-    }
+    return this.getKeysWithScreenshots(keyIds)
+      .associate { it.id to it.keyScreenshotReferences.map { it.screenshot }.toSet().toList() }
   }
 
   fun getKeyScreenshotReferences(importedKeys: List<Key>, locations: List<String?>): List<KeyScreenshotReference> {

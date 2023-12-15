@@ -16,10 +16,10 @@ import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtService
+import jakarta.persistence.EntityManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class AutoTranslationService(
@@ -262,6 +262,14 @@ class AutoTranslationService(
     config.usingPrimaryMtService = dto.usingMachineTranslation
     config.enableForImport = dto.enableForImport
     return saveConfig(config)
+  }
+
+  fun deleteConfigsByProject(projectId: Long) {
+    entityManager.createNativeQuery(
+      "DELETE FROM auto_translation_config WHERE project_id = :projectId"
+    )
+      .setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   fun saveConfig(config: AutoTranslationConfig): AutoTranslationConfig {

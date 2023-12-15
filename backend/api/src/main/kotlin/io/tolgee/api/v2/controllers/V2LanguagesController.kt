@@ -15,8 +15,9 @@ import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
-import io.tolgee.model.Language
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.LanguageView
+import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -24,7 +25,8 @@ import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
-import org.springdoc.api.annotations.ParameterObject
+import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -37,7 +39,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -59,13 +60,13 @@ class V2LanguagesController(
   private val languageValidator: LanguageValidator,
   private val securityService: SecurityService,
   private val languageModelAssembler: LanguageModelAssembler,
-  private val pagedAssembler: PagedResourcesAssembler<Language>,
+  private val pagedAssembler: PagedResourcesAssembler<LanguageView>,
   private val projectHolder: ProjectHolder,
 ) : IController {
   @PostMapping(value = [""])
   @Operation(summary = "Creates language")
   @RequestActivity(ActivityType.CREATE_LANGUAGE)
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
@@ -74,21 +75,23 @@ class V2LanguagesController(
     val project = projectService.get(projectId)
     languageValidator.validateCreate(dto, project)
     val language = languageService.createLanguage(dto, project)
-    return languageModelAssembler.toModel(language)
+    return languageModelAssembler.toModel(LanguageViewImpl(language, false))
   }
 
   @Operation(summary = "Edits language")
   @PutMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.EDIT_LANGUAGE)
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun editLanguage(
     @RequestBody @Valid dto: LanguageDto,
     @PathVariable("languageId") languageId: Long
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
-    val language = languageService.get(languageId)
-    return languageModelAssembler.toModel(languageService.editLanguage(language, dto))
+    val view = languageService.getView(languageId)
+    languageService.editLanguage(view.language, dto)
+    val languageView = languageService.getView(languageId)
+    return languageModelAssembler.toModel(languageView)
   }
 
   @GetMapping(value = [""])
@@ -108,14 +111,14 @@ class V2LanguagesController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun get(@PathVariable("languageId") id: Long): LanguageModel {
-    val language = languageService.get(id)
-    return languageModelAssembler.toModel(language)
+    val languageView = languageService.getView(id)
+    return languageModelAssembler.toModel(languageView)
   }
 
   @Operation(summary = "Deletes specific language")
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun deleteLanguage(@PathVariable languageId: Long) {
     val language = languageService.get(languageId)

@@ -19,6 +19,10 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import io.tolgee.util.executeInNewRepeatableTransaction
+import jakarta.persistence.EntityManager
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -41,7 +45,9 @@ class ProjectsE2eDataController(
   private val permissionRepository: PermissionRepository,
   private val keyService: KeyService,
   private val languageService: LanguageService,
-) {
+  private val entityManager: EntityManager,
+  private val transactionManager: PlatformTransactionManager
+) : Logging {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun createProjects() {
@@ -57,7 +63,7 @@ class ProjectsE2eDataController(
 
     userAccountRepository.saveAll(createdUsers.values)
 
-    organizations.forEach {
+    val createdOrganizations = organizations.map {
       val organization = Organization(
         name = it.name,
         slug = organizationService.generateSlug(it.name),
@@ -79,16 +85,19 @@ class ProjectsE2eDataController(
           organizationRoleService.grantMemberRoleToUser(user, organization)
         }
       }
+      organization
     }
 
     projects.forEach { projectData ->
-      val organizationOwner = organizationService.get(projectData.organizationOwner)
+      val organizationOwner = createdOrganizations.find {
+        it.name.lowercase().replace("[^A-Za-z0-9]".toRegex(), "-") == projectData.organizationOwner.lowercase()
+      }
 
       val project = projectRepository.save(
         Project(
           name = projectData.name,
           slug = projectService.generateSlug(projectData.name),
-          organizationOwner = organizationOwner
+          organizationOwner = organizationOwner!!
         )
       )
 
@@ -112,23 +121,26 @@ class ProjectsE2eDataController(
   }
 
   @GetMapping(value = ["/clean"])
-  @Transactional
   fun cleanupProjects() {
-    projectService.deleteAllByName("I am a great project")
+    executeInNewRepeatableTransaction(transactionManager = transactionManager) {
+      entityManager.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
+      projectService.deleteAllByName("I am a great project")
 
-    projects.forEach {
-      projectService.deleteAllByName(it.name)
-    }
-
-    organizations.forEach {
-      organizationService.findAllByName(it.name).forEach { org ->
-        organizationService.delete(org)
+      projects.forEach {
+        traceLogMeasureTime("deleteAllByName: ${it.name}") {
+          projectService.deleteAllByName(it.name)
+        }
       }
-    }
 
-    users.forEach {
-      userAccountService.findActive(username = it.email)?.let {
-        userAccountRepository.delete(it)
+      organizations.forEach {
+        organizationService.findAllByName(it.name).forEach { org ->
+          organizationService.delete(org)
+        }
+      }
+
+      traceLogMeasureTime("deleteUsers") {
+        val usernames = users.map { it.email }
+        userAccountService.deleteByUserNames(usernames)
       }
     }
   }

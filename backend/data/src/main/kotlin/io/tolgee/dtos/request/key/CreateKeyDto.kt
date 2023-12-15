@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.util.getSafeNamespace
+import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
 import org.springframework.validation.annotation.Validated
-import javax.validation.constraints.NotBlank
 
 @Validated
 class CreateKeyDto(

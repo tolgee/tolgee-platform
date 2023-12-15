@@ -18,7 +18,8 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationMemoryService
-import org.springdoc.api.annotations.ParameterObject
+import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])

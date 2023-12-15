@@ -39,8 +39,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
   )
   fun getAllByProjectIdSortedById(projectId: Long): List<Key>
 
-  @Query("select k.id from Key k where k.project.id = :projectId")
-  fun getIdsByProjectId(projectId: Long?): List<Long>
+  @Query("select k from Key k left join fetch k.keyMeta km where k.project.id = :projectId")
+  fun getByProjectIdWithFetchedMetas(projectId: Long?): List<Key>
   fun deleteAllByIdIn(ids: Collection<Long>)
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
 
@@ -156,8 +156,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     from Language l
     join l.translations t
-    where t.key.id = :keyId 
-      and l.project.id = :projectId 
+    where t.id in (select t.id from Key k join k.translations t where k.id = :keyId)
+      and l.project.id = :projectId
       and t.state = io.tolgee.model.enums.TranslationState.DISABLED
    order by l.id
   """

@@ -13,7 +13,16 @@ interface InvitationRepository : JpaRepository<Invitation?, Long?> {
   fun deleteAllByCreatedAtLessThan(date: Date)
   fun findOneByCode(code: String?): Optional<Invitation>
   fun findAllByPermissionProjectOrderByCreatedAt(project: Project): LinkedHashSet<Invitation>
-  fun getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization: Organization): List<Invitation>
+  @Query(
+    """
+    from Invitation i
+    left join fetch i.organizationRole orl
+    left join fetch i.permission p
+    where i.organizationRole.organization = :organization
+    order by i.createdAt
+  """
+  )
+  fun getAllForOrganization(organization: Organization): List<Invitation>
 
   @Query(
     """

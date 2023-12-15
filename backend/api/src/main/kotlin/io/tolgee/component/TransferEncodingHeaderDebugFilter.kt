@@ -1,10 +1,10 @@
 package io.tolgee.component
 
 import io.tolgee.util.Logging
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.filter.OncePerRequestFilter
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class TransferEncodingHeaderDebugFilter : OncePerRequestFilter(), Logging {
   init {

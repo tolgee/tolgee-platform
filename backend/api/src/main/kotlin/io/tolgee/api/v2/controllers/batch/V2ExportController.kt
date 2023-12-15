@@ -14,7 +14,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType

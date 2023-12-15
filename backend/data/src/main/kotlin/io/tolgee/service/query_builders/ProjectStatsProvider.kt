@@ -13,10 +13,10 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.key.Tag_
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.util.KotlinCriteriaBuilder
-import javax.persistence.EntityManager
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.Root
-import javax.persistence.criteria.Selection
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Root
+import jakarta.persistence.criteria.Selection
 
 open class ProjectStatsProvider(
   val entityManager: EntityManager,

@@ -14,7 +14,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault

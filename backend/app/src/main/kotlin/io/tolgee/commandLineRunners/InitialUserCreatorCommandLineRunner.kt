@@ -1,5 +1,6 @@
 package io.tolgee.commandLineRunners
 
+import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
@@ -24,11 +25,15 @@ class InitialUserCreatorCommandLineRunner(
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationService: OrganizationService,
   private val passwordEncoder: PasswordEncoder,
+  private val internalProperties: InternalProperties
 ) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @Transactional
   override fun run(vararg args: String) {
+    if (internalProperties.disableInitialUserCreation) {
+      return
+    }
     val initialUser = userAccountService.findInitialUser()
     if (initialUser == null) {
       createInitialUser()
@@ -39,7 +44,6 @@ class InitialUserCreatorCommandLineRunner(
 
   fun createInitialUser() {
     logger.info("Creating initial user...")
-
     val initialUsername = properties.authentication.initialUsername
     val initialPassword = initialPasswordManager.initialPassword
     val user = userAccountService.createInitialUser(

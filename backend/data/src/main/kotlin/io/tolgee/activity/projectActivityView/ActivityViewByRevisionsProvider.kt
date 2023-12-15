@@ -16,9 +16,9 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.EntityUtil
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
-import javax.persistence.EntityManager
-import javax.persistence.criteria.Predicate
 
 class ActivityViewByRevisionsProvider(
   private val applicationContext: ApplicationContext,

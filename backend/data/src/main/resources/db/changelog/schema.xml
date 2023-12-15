@@ -1788,9 +1788,6 @@
     <changeSet author="jenik (generated)" id="1650442105133-29">
         <dropTable tableName="key_aud"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-30">
-        <dropTable tableName="language_aud"/>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1650442105133-31">
         <dropTable tableName="organization_aud"/>
     </changeSet>
@@ -1833,96 +1830,8 @@
             <column name="project_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-10">
-        <dropForeignKeyConstraint baseTableName="email_verification_aud" constraintName="FK1diai27pxl7epr7wmiddlwns5"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-11">
-        <dropForeignKeyConstraint baseTableName="api_key_scopes_enum_aud" constraintName="FK3jkyqktbidh2cyx3xy3qml99l"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-12">
-        <dropForeignKeyConstraint baseTableName="key_aud" constraintName="FKcwyby3t6jg4ybxox3nchfbpqy"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-13">
-        <dropForeignKeyConstraint baseTableName="invitation_aud" constraintName="FKdkc05rqm5p3ahqp80ukr4y6se"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-14">
-        <dropForeignKeyConstraint baseTableName="user_account_aud" constraintName="FKfi9ywuk505xl9g17jib6b7urx"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-15">
-        <dropForeignKeyConstraint baseTableName="organization_role_aud" constraintName="FKgey5u1uwkslc6hhyp3uka2wj8"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-16">
-        <dropForeignKeyConstraint baseTableName="organization_aud" constraintName="FKgrkrhev0nmxi9r1h096cm8lxe"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-17">
-        <dropForeignKeyConstraint baseTableName="api_key_aud" constraintName="FKhqt2jx03076gcmame7hggtppa"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-18">
-        <dropForeignKeyConstraint baseTableName="translation_aud" constraintName="FKlkb2y39ix1nhtnjkco5pkwa5w"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-19">
-        <dropForeignKeyConstraint baseTableName="permission_aud" constraintName="FKlkd3khuueqm30qwpdrku4w6eo"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-20">
-        <dropForeignKeyConstraint baseTableName="language_aud" constraintName="FKq4t05s4qw8uasc9mjl2tk83sm"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-21">
-        <dropForeignKeyConstraint baseTableName="screenshot_aud" constraintName="FKq6jhbxmwvr0o19sfqwog5gk7s"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-22">
-        <dropForeignKeyConstraint baseTableName="translation_comment_aud" constraintName="FKq8g6phhnoyyuyjh9omekg8ja7"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-23">
-        <dropForeignKeyConstraint baseTableName="permission_languages_aud"
-                                  constraintName="FKqrbr6c2d8ujo1y43a6ftsdp8c"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-24">
-        <dropForeignKeyConstraint baseTableName="project_aud" constraintName="FKqsyp928iixx9oharj1ofavbk5"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-25">
-        <dropTable tableName="api_key_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-26">
-        <dropTable tableName="api_key_scopes_enum_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-27">
-        <dropTable tableName="email_verification_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-28">
-        <dropTable tableName="invitation_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-29">
-        <dropTable tableName="key_aud"/>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1650442105133-30">
         <dropTable tableName="language_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-31">
-        <dropTable tableName="organization_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-32">
-        <dropTable tableName="organization_role_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-33">
-        <dropTable tableName="permission_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-34">
-        <dropTable tableName="permission_languages_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-35">
-        <dropTable tableName="project_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-36">
-        <dropTable tableName="screenshot_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-37">
-        <dropTable tableName="translation_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-38">
-        <dropTable tableName="translation_comment_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-39">
-        <dropTable tableName="user_account_aud"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1650963584426-32">
         <dropColumn columnName="third_party_billing_id" tableName="organization"/>
@@ -2975,5 +2884,69 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1695640860120-3">
         <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="quick_start" constraintName="FK946dggx61o0jyux1oo5gby8v0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik" id="1694597673945-1">
+        <preConditions onFail="MARK_RAN">
+            <and>
+            <sqlCheck expectedResult="false">
+                SELECT CASE
+                           WHEN EXISTS (SELECT 1
+                                        FROM information_schema.columns
+                                        WHERE table_name = 'batch_job_execution_params'
+                                          AND column_name = 'parameter_value')
+                           THEN 'true'
+                           ELSE 'false'
+                       END;
+            </sqlCheck>
+            <sqlCheck expectedResult="true">
+                SELECT CASE
+                            WHEN EXISTS (SELECT 1
+                                        FROM information_schema.columns
+                                        WHERE table_name = 'batch_job_execution_params')
+                            THEN 'true'
+                            ELSE 'false'
+                       END;
+            </sqlCheck>
+            </and>
+        </preConditions>
+        <sql>
+            ALTER TABLE BATCH_STEP_EXECUTION ADD CREATE_TIME TIMESTAMP NOT NULL DEFAULT '1970-01-01 00:00:00';
+
+            ALTER TABLE BATCH_STEP_EXECUTION ALTER COLUMN START_TIME DROP NOT NULL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN DATE_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN LONG_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN DOUBLE_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN TYPE_CD TYPE VARCHAR(100);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME TYPE_CD TO PARAMETER_TYPE;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN KEY_NAME TYPE VARCHAR(100);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME KEY_NAME TO PARAMETER_NAME;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN STRING_VAL TYPE VARCHAR(2500);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME STRING_VAL TO PARAMETER_VALUE;
+        </sql>
+    </changeSet>
+    <changeSet id="1693517732528-0" author="jenik">
+        <addColumn tableName="project">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1693517732528-1" author="jenik">
+        <addColumn tableName="organization">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1693517732528-2" author="jenik">
+        <sql>
+            CREATE INDEX project_deleted_at_null ON project((deleted_at IS NULL));
+            CREATE INDEX organization_deleted_at_null ON organization((deleted_at IS NULL));
+        </sql>
     </changeSet>
 </databaseChangeLog>

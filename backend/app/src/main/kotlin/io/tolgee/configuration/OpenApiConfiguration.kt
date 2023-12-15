@@ -10,7 +10,7 @@ import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.security.authentication.AllowApiAccess
-import org.springdoc.core.GroupedOpenApi
+import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
@@ -119,7 +119,7 @@ class OpenApiConfiguration {
       }
       .pathsToExclude(*excludedPaths, "/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
       .pathsToMatch(*paths)
-      .addOpenApiCustomiser { openApi ->
+      .addOpenApiCustomizer { openApi ->
         openApi.paths.forEach { (path, value) ->
           value.readOperations().forEach { operation ->
             operationHandlers[operation.operationId]?.method?.let { method ->
@@ -133,7 +133,7 @@ class OpenApiConfiguration {
           }
         }
       }
-      .addOpenApiCustomiser { openApi ->
+      .addOpenApiCustomizer { openApi ->
         val newPaths = Paths()
         openApi.paths.forEach { pathEntry ->
           val operations = ArrayList<Operation>()
@@ -200,7 +200,7 @@ class OpenApiConfiguration {
     return GroupedOpenApi.builder().group(name)
       .pathsToExclude(*excludedPaths)
       .pathsToMatch(*paths)
-      .addOpenApiCustomiser { openApi ->
+      .addOpenApiCustomizer { openApi ->
         val newPaths = Paths()
         openApi.paths.forEach { pathEntry ->
           val operations = ArrayList<Operation>()
@@ -243,7 +243,7 @@ class OpenApiConfiguration {
   }
 
   private fun GroupedOpenApi.Builder.handleLinks(): GroupedOpenApi.Builder {
-    this.addOpenApiCustomiser {
+    this.addOpenApiCustomizer {
       it.components?.schemas?.values?.forEach {
         it?.properties?.remove("_links")
       }

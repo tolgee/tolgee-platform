@@ -21,7 +21,6 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.io.File
-import java.util.stream.Collectors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
@@ -76,7 +75,6 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun `uploads without metadata`() {
     val key = keyService.create(project, CreateKeyDto("test"))
 
-    val text = "I am key"
     performStoreScreenshot(
       project,
       key,
@@ -166,12 +164,16 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
       }.toCollection(mutableListOf())
       key to list
     }
-    val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
+    val chunked = list.chunked(10)
+    val toDelete = chunked[0]
+    val notToDelete = chunked[1]
+
+    val idsToDelete = toDelete.map { it.id.toString() }.joinToString(",")
 
     performProjectAuthDelete("/keys/${key.id}/screenshots/$idsToDelete", null).andExpect(status().isOk)
 
     val rest = screenshotService.findAll(key)
-    assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
+    assertThat(rest).hasSize(10).containsExactlyInAnyOrder(*notToDelete.toTypedArray())
   }
 
   @Test

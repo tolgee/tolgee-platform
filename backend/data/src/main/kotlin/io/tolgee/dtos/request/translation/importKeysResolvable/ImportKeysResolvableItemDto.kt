@@ -2,9 +2,9 @@ package io.tolgee.dtos.request.translation.importKeysResolvable
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.request.key.KeyScreenshotDto
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import org.hibernate.validator.constraints.Length
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
 
 class ImportKeysResolvableItemDto(
   /**

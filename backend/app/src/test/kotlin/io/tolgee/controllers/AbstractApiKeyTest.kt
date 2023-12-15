@@ -4,13 +4,13 @@ import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AbstractControllerTest
-import io.tolgee.testing.assertions.UserApiAppAction
+import io.tolgee.testing.assertions.PakAction
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @Deprecated("This is too complicated")
 abstract class AbstractApiKeyTest : AbstractControllerTest() {
-  fun performAction(action: UserApiAppAction): MvcResult {
+  fun performAction(action: PakAction): MvcResult {
     return try {
       var resultActions = mvc.perform(action.requestBuilder)
       if (action.expectedStatus != null) {

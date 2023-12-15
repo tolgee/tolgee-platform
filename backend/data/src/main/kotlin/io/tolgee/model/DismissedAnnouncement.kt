@@ -1,8 +1,8 @@
 package io.tolgee.model
 
 import io.tolgee.model.enums.Announcement
+import jakarta.persistence.*
 import java.io.Serializable
-import javax.persistence.*
 
 @Entity
 @IdClass(DismissedAnnouncementId::class)

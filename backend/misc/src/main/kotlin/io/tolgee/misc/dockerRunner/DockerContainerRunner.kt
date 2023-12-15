@@ -32,6 +32,10 @@ class DockerContainerRunner(
   private val command: String = "",
   private val timeout: Long = 10000
 ) {
+
+  var containerExisted: Boolean = false
+    private set
+
   fun run() {
     if (stopBeforeStart) {
       stop()
@@ -46,8 +50,8 @@ class DockerContainerRunner(
   private fun startExistingOrNewContainer() {
     try {
       startExistingContainer()
+      containerExisted = true
     } catch (e: CommandRunFailedException) {
-      e.printStackTrace()
       startNewContainer()
     }
   }

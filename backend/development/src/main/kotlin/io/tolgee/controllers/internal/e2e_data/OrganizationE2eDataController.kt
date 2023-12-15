@@ -7,6 +7,10 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import io.tolgee.util.executeInNewRepeatableTransaction
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,45 +26,66 @@ class OrganizationE2eDataController(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
   private val dbPopulatorReal: DbPopulatorReal,
-  private val organizationRoleService: OrganizationRoleService
-) {
+  private val organizationRoleService: OrganizationRoleService,
+  private val transactionManager: PlatformTransactionManager
+) : Logging {
   @GetMapping(value = ["/generate"])
   @Transactional
-  fun createOrganizations() {
-    data.forEach {
-      val organization = organizationService.create(
+  fun createOrganizations(): Map<String, Map<String, String>> {
+    val organizations = data.map {
+      organizationService.create(
         it.dto,
         this.dbPopulatorReal.createUserIfNotExists(it.owner.email, null, it.owner.name)
       )
     }
 
-    data.forEach {
-      val organization = organizationService.find(it.dto.slug!!)
-      it.members.forEach { memberUserName ->
-        val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
-        organizationRoleService.grantMemberRoleToUser(user, organization!!)
-      }
+    data.forEach { dataItem ->
+      organizationService.findAllByName(dataItem.dto.name).forEach { organization ->
+        dataItem.members.forEach { memberUserName ->
+          val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
+          organizationRoleService.grantMemberRoleToUser(user, organization)
+        }
 
-      it.otherOwners.forEach { memberUserName ->
-        val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
-        organizationRoleService.grantOwnerRoleToUser(user, organization!!)
+        dataItem.otherOwners.forEach { memberUserName ->
+          val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
+          organizationRoleService.grantOwnerRoleToUser(user, organization)
+        }
       }
     }
+    return organizations.map { it.name to mapOf("slug" to it.slug) }.toMap()
   }
 
   @GetMapping(value = ["/clean"])
-  @Transactional
   fun cleanupOrganizations() {
-    organizationService.find("what-a-nice-organization")?.let {
-      organizationService.delete(it)
-    }
-    data.forEach {
-      organizationService.find(it.dto.slug!!)?.let { organization ->
-        organizationService.delete(organization)
-      }
-      userAccountService.findActive(it.owner.email)?.let { userAccount ->
-        if (userAccount.name != "admin") {
-          userAccountService.delete(userAccount)
+    traceLogMeasureTime("cleanupOrganizations") {
+      executeInNewRepeatableTransaction(
+        transactionManager,
+        isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE
+      ) {
+        traceLogMeasureTime("delete what-a-nice-organization") {
+          organizationService.findAllByName("What a nice organization").forEach {
+            organizationService.delete(it)
+          }
+        }
+        data.forEach {
+          traceLogMeasureTime("delete organization ${it.dto.slug}") {
+            val orgs =
+              traceLogMeasureTime("find organization") {
+                organizationService.findAllByName(it.dto.name)
+              }
+            orgs.forEach { organization ->
+              traceLogMeasureTime("delete organization") {
+                organizationService.delete(organization)
+              }
+            }
+          }
+        }
+        traceLogMeasureTime("delete users") {
+          val owners = data.mapNotNull {
+            if (it.owner.name == "admin") return@mapNotNull null
+            it.owner.email
+          }
+          userAccountService.deleteByUserNames(owners)
         }
       }
     }
@@ -84,7 +109,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Google",
           description = "An organization made by google company",
-          slug = "google"
         ),
         owner = UserData("admin")
       ),
@@ -92,7 +116,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Netsuite",
           description = "A system for everything",
-          slug = "netsuite"
         ),
         owner = UserData("evan@netsuite.com", "Evan Goldberg")
       ),
@@ -100,7 +123,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Microsoft",
           description = "A first software company ever or something like that.",
-          slug = "microsoft"
         ),
         owner = UserData("gates@microsoft.com", "Bill Gates"),
         members = mutableListOf("admin")
@@ -109,7 +131,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Tolgee",
           description = "This is us",
-          slug = "tolgee"
         ),
         owner = UserData("admin"),
         otherOwners = mutableListOf("evan@netsuite.com"),
@@ -123,7 +144,6 @@ class OrganizationE2eDataController(
                             |They also develop amazing things like react and other open source stuff.
                             |However, they sell our data to companies.
                         """.trimMargin(),
-          slug = "facebook"
         ),
         owner = UserData("cukrberg@facebook.com", "Mark Cukrberg"),
         otherOwners = mutableListOf("admin")
@@ -132,7 +152,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Unknown company",
           description = "We are very unknown.",
-          slug = "unknown-company"
         ),
         owner = UserData("admin")
       ),
@@ -140,7 +159,6 @@ class OrganizationE2eDataController(
         dto = OrganizationDto(
           name = "Techfides solutions s.r.o",
           description = "Lets develop the future",
-          slug = "techfides-solutions"
 
         ),
         owner = UserData("admin")
@@ -155,13 +173,12 @@ class OrganizationE2eDataController(
             dto = OrganizationDto(
               name = "ZZZ Cool company $number",
               description = "We are Z Cool company $number. What a nice day!",
-              slug = "zzz-cool-company-$number"
             ),
             otherOwners = mutableListOf("admin"),
             owner = UserData(email),
           )
         )
-        data.find { item -> item.dto.slug == "facebook" }!!.otherOwners.add(email)
+        data.find { item -> item.dto.name == "Facebook" }!!.otherOwners.add(email)
       }
     }
   }

@@ -12,7 +12,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import java.time.Duration
-import java.util.Date
+import java.util.*
 
 abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
   private var _userAccount: UserAccount? = null

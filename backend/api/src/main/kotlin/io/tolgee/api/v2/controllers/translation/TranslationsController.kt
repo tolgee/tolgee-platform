@@ -48,7 +48,8 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.query_builders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
-import org.springdoc.api.annotations.ParameterObject
+import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -58,6 +59,7 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -72,7 +74,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
 import java.util.concurrent.TimeUnit
-import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -235,10 +236,13 @@ When null, resulting file will be a flat key-value object.
   @Operation(summary = "Returns translations in project")
   @UseDefaultPermissions // Security: check done internally
   @AllowApiAccess
+  @Transactional
   fun getTranslations(
     @ParameterObject @ModelAttribute("translationFilters") params: GetTranslationsParams,
     @ParameterObject pageable: Pageable
   ): KeysWithTranslationsPageModel {
+    val baseLanguage = projectHolder.projectEntity.baseLanguage
+
     val languages: Set<Language> = languageService.getLanguagesForTranslationsView(
       params.languages,
       projectHolder.project.id,
@@ -257,7 +261,7 @@ When null, resulting file will be a flat key-value object.
     }
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
-    return pagedAssembler.toTranslationModel(data, languages, cursor)
+    return pagedAssembler.toTranslationModel(data, languages, cursor, baseLanguage)
   }
 
   @GetMapping(value = ["select-all"])

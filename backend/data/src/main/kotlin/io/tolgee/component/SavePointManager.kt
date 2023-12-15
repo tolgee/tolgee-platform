@@ -1,12 +1,11 @@
 package io.tolgee.component
 
-import org.hibernate.Session
+import jakarta.persistence.EntityManager
 import org.hibernate.internal.SessionImpl
 import org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl
 import org.springframework.stereotype.Component
 import java.sql.Savepoint
 import java.util.*
-import javax.persistence.EntityManager
 
 @Component
 class SavePointManager(
@@ -23,7 +22,7 @@ class SavePointManager(
       connection.rollback(savepoint)
     }
 
-    val session = (getSession().session as? SessionImpl) ?: throw IllegalStateException("Session is not SessionImpl")
+    val session = getSession()
     val coordinatorGetter = session::class.java.getMethod("getTransactionCoordinator")
     coordinatorGetter.isAccessible = true
     val coordinator = coordinatorGetter.invoke(session) as? JdbcResourceLocalTransactionCoordinatorImpl
@@ -40,8 +39,9 @@ class SavePointManager(
     field.isAccessible = false
   }
 
-  fun getSession(): Session {
-    return entityManager.unwrap(Session::class.java)
+  fun getSession(): SessionImpl {
+    return entityManager.unwrap(SessionImpl::class.java)
+      ?.let { it as? SessionImpl ?: throw IllegalStateException("Session is not SessionImpl") }
       ?: throw IllegalStateException("Session is null")
   }
 }

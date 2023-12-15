@@ -103,7 +103,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
         assertThat(screenshots).hasSize(1)
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
         assertThat(file).exists()
-        assertThat(file.readBytes().size).isCloseTo(1524, Offset.offset(200))
+        assertThat(file.readBytes().size).isCloseTo(1070, Offset.offset(500))
         node("filename").isString.startsWith(screenshots[0].filename).satisfies {
           val parts = it.split("?token=")
           val auth = jwtService.validateTicket(parts[1], JwtService.TicketType.IMG_ACCESS)

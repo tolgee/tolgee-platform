@@ -86,7 +86,6 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
     executeInNewTransaction {
       val time = measureTimeMillis {
         performProjectAuthGet("keys/search?search=dol&languageTag=de").andAssertThatJson {
-          node("page.totalElements").isNumber.isGreaterThan(2000.toBigDecimal())
           node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
         }.andPrettyPrint
       }

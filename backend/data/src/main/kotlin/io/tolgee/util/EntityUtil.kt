@@ -1,8 +1,8 @@
 package io.tolgee.util
 
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
-import javax.persistence.EntityManager
 
 @Component
 class EntityUtil(

@@ -5,7 +5,7 @@ import { assertMessage, confirmHardMode } from '../../common/shared';
 import { projectLeavingTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
-describe('Projects Basics', () => {
+describe('Leaving project', () => {
   beforeEach(() => {
     projectLeavingTestData.clean();
     projectLeavingTestData.generate();

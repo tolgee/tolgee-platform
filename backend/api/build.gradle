@@ -12,9 +12,8 @@ plugins {
     id 'java'
     id 'io.spring.dependency-management'
     id 'org.jetbrains.kotlin.jvm'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id "kotlin-allopen"
-
 }
 
 group = 'io.tolgee'
@@ -22,7 +21,6 @@ group = 'io.tolgee'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
-apply plugin: 'org.springframework.boot'
 apply plugin: "kotlin-allopen"
 apply plugin: 'io.spring.dependency-management'
 
@@ -31,7 +29,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 allOpen {
@@ -54,15 +52,9 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocWebmvcApi
     implementation libs.springDocOpenApiUi
-    implementation libs.springDocOpenApiKotlin
-    implementation libs.springDocOpenApiDataRest
-    implementation libs.springDocOpenApiHateoas
-    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
-        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
-    }
-    implementation libs.redissonSpringData
+    implementation libs.redissonSpringBootStarter
 
     /**
      * Misc
@@ -74,6 +66,8 @@ dependencies {
     implementation libs.jjwtJackson
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
     api libs.postHog
+    implementation libs.kotlinReflect
+    implementation libs.jacksonModuleKotlin
 }
 
 sourceSets {
@@ -81,8 +75,11 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
