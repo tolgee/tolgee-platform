@@ -14,9 +14,6 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
-        enhancer:
-          enableLazyInitialization: true
-          enableDirtyTracking: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

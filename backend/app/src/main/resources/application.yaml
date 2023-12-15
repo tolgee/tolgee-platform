@@ -22,9 +22,6 @@ spring:
         types:
           print:
             banner: false
-        enhancer:
-          enableLazyInitialization: true
-          enableDirtyTracking: true
   #    open-in-view: false
   batch:
     job:
