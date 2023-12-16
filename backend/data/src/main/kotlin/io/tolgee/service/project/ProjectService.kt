@@ -245,7 +245,7 @@ class ProjectService(
       }
 
       importService.getAllByProject(id).forEach {
-        importService.deleteImport(it)
+        importService.hardDeleteImport(it)
       }
 
       // otherwise we cannot delete the languages

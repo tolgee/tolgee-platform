@@ -1,6 +1,5 @@
 package io.tolgee.activity.iterceptor
 
-import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.EntityDescriptionProvider
 import io.tolgee.activity.annotation.ActivityLoggedEntity

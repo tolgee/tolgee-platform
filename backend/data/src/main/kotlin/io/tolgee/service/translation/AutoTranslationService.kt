@@ -58,7 +58,7 @@ class AutoTranslationService(
     val configs = this.getConfigs(project, languageIds)
     val request = AutoTranslationRequest().apply {
       target = languageIds.flatMap { languageId ->
-        if(configs[languageId]?.usingTm == false && configs[languageId]?.usingPrimaryMtService == false) {
+        if (configs[languageId]?.usingTm == false && configs[languageId]?.usingPrimaryMtService == false) {
           return@flatMap listOf()
         }
         keyIds.map { keyId ->
@@ -293,13 +293,12 @@ class AutoTranslationService(
     return list!!
   }
 
-
   fun getConfigs(project: Project, targetLanguageIds: List<Long>): Map<Long, AutoTranslationConfig> {
     val configs = autoTranslationConfigRepository.findByProjectAndTargetLanguageIdIn(project, targetLanguageIds)
     val default = autoTranslationConfigRepository.findDefaultForProject(project)
       ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
-        it.project = project
-      }
+      it.project = project
+    }
 
     return targetLanguageIds.associateWith { languageId ->
       (configs.find { it.targetLanguage?.id == languageId } ?: default)
@@ -309,8 +308,8 @@ class AutoTranslationService(
   fun getConfig(project: Project, targetLanguageId: Long) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, targetLanguageId)
       ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
-        it.project = project
-      }
+      it.project = project
+    }
 
   fun getDefaultConfig(project: Project) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, null) ?: AutoTranslationConfig()

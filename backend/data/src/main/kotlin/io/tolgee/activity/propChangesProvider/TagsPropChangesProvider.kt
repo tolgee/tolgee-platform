@@ -9,7 +9,7 @@ class TagsPropChangesProvider : PropChangesProvider {
 
   override fun getChanges(old: Any?, new: Any?): PropertyModification? {
     if (old is Collection<*> && new is Collection<*>) {
-      if(old === new){
+      if (old === new) {
         return null
       }
 

@@ -2949,4 +2949,13 @@
             CREATE INDEX organization_deleted_at_null ON organization((deleted_at IS NULL));
         </sql>
     </changeSet>
+    <changeSet id="1693517732529-0" author="jenik">
+        <dropUniqueConstraint tableName="import" constraintName="UKgf336yxrmsyau8skvim42lkuj" />
+        <addColumn tableName="import">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+        <sql>
+            CREATE INDEX import_deleted_at_null ON import((deleted_at IS NULL));
+        </sql>
+    </changeSet>
 </databaseChangeLog>

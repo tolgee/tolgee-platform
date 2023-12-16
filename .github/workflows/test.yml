@@ -144,7 +144,7 @@ jobs:
         if: always()
         with:
           name: Backend Tests
-          path: "**/build/test-results/TEST-*.xml"
+          path: "**/build/test-results/**/TEST-*.xml"
           reporter: java-junit
 
 

@@ -5,8 +5,6 @@ import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
-import org.springframework.transaction.support.TransactionSynchronization
-import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Class providing Activity Holder, while caching it in ThreadLocal.

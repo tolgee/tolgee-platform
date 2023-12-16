@@ -7,8 +7,19 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ImportRepository : JpaRepository<Import, Long> {
+
+  @Query(
+    """
+    select i from Import i where i.project.id = :projectId and i.author.id = :authorId and i.deletedAt is null
+  """
+  )
   fun findByProjectIdAndAuthorId(projectId: Long, authorId: Long): Import?
 
+  @Query(
+    """
+    select i from Import i where i.project.id = :projectId and i.deletedAt is null
+  """
+  )
   fun findAllByProjectId(projectId: Long): List<Import>
 
   @Query(
@@ -17,4 +28,11 @@ interface ImportRepository : JpaRepository<Import, Long> {
   """
   )
   fun getAllNamespaces(importId: Long): Set<String?>
+
+  @Query(
+    """
+    from Import i where i.id = :importId and i.deletedAt is not null
+  """
+  )
+  fun findDeleted(importId: Long): Import?
 }

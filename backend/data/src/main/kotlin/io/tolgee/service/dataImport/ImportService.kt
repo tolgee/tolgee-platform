@@ -1,10 +1,12 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -54,7 +56,8 @@ class ImportService(
   private val removeExpiredImportService: RemoveExpiredImportService,
   private val entityManager: EntityManager,
   private val businessEventPublisher: BusinessEventPublisher,
-  private val importDeleteService: ImportDeleteService
+  private val importDeleteService: ImportDeleteService,
+  private val currentDateProvider: CurrentDateProvider
 ) {
   @Transactional
   fun addFiles(
@@ -149,6 +152,10 @@ class ImportService(
    */
   fun getNotExpired(projectId: Long, authorId: Long): Import {
     return findNotExpired(projectId, authorId) ?: throw NotFoundException()
+  }
+
+  fun findDeleted(importId: Long): Import? {
+    return importRepository.findDeleted(importId)
   }
 
   private fun findNotExpired(projectId: Long, userAccountId: Long): Import? {
@@ -254,6 +261,13 @@ class ImportService(
 
   @Transactional
   fun deleteImport(import: Import) {
+    import.deletedAt = currentDateProvider.date
+    importRepository.save(import)
+    applicationContext.publishEvent(OnImportSoftDeleted(import.id))
+  }
+
+  @Transactional
+  fun hardDeleteImport(import: Import) {
     importDeleteService.deleteImport(import.id)
   }
 
@@ -267,7 +281,7 @@ class ImportService(
     this.importTranslationRepository.deleteAllByLanguage(language)
     this.importLanguageRepository.delete(language)
     if (this.findLanguages(import = language.file.import).isEmpty()) {
-      deleteImport(import)
+      hardDeleteImport(import)
     }
   }
 
