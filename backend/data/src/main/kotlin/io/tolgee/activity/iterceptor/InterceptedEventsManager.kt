@@ -235,6 +235,8 @@ class InterceptedEventsManager(
           logger.debug("Publishing project activity event")
           try {
             publishOnActivityEvent(activityRevision)
+            entityManager.flush()
+            entityManager.clear()
             activityService.storeActivityData(activityRevision, activityHolder.modifiedEntities)
             activityHolder.afterActivityFlushed?.invoke()
           } catch (e: Throwable) {

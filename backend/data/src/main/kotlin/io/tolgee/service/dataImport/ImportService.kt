@@ -52,7 +52,6 @@ class ImportService(
   private val applicationContext: ApplicationContext,
   private val importTranslationRepository: ImportTranslationRepository,
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
-  private val keyMetaService: KeyMetaService,
   private val removeExpiredImportService: RemoveExpiredImportService,
   private val entityManager: EntityManager,
   private val businessEventPublisher: BusinessEventPublisher,

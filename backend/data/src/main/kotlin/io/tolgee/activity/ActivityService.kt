@@ -9,6 +9,7 @@ import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.util.Logging
+import io.tolgee.util.flushAndClear
 import io.tolgee.util.logger
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityManager
@@ -26,15 +27,22 @@ class ActivityService(
 ) : Logging {
   @Transactional
   fun storeActivityData(activityRevision: ActivityRevision, modifiedEntities: ModifiedEntitiesType) {
+    // let's keep the persistent context small
+    entityManager.flushAndClear()
+
     val mergedActivityRevision = activityRevision.persist()
     mergedActivityRevision.persistedDescribingRelations()
+
+    entityManager.flushAndClear()
 
     mergedActivityRevision.modifiedEntities = modifiedEntities.values.flatMap { it.values }.toMutableList()
     mergedActivityRevision.persistModifiedEntities()
 
-    entityManager.flush()
+    entityManager.flushAndClear()
 
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
+
+    entityManager.flushAndClear()
   }
 
   private fun ActivityRevision.persistModifiedEntities() {

@@ -22,6 +22,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
+import io.tolgee.util.flushAndClear
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.apache.commons.codec.digest.DigestUtils.sha256Hex
@@ -103,7 +104,8 @@ class BatchJobService(
       }
     }
 
-    entityManager.flush()
+    entityManager.flushAndClear()
+
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
     return job
@@ -139,9 +141,9 @@ class BatchJobService(
     executions.let { batchJobChunkExecutionQueue.addToQueue(it) }
     logger.debug(
       "Starting job ${job.id}, aadded ${executions.size} executions to queue ${
-      System.identityHashCode(
-        batchJobChunkExecutionQueue
-      )
+        System.identityHashCode(
+          batchJobChunkExecutionQueue
+        )
       }"
     )
   }

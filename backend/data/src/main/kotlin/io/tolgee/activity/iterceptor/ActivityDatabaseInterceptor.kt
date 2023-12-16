@@ -77,9 +77,10 @@ class ActivityDatabaseInterceptor : Interceptor, Logging {
     interceptedEventsManager.onCollectionModification(collection, key)
   }
 
-  val interceptedEventsManager: InterceptedEventsManager
-    get() = applicationContext.getBean(InterceptedEventsManager::class.java)
-
-  val preCommitEventsPublisher: PreCommitEventPublisher
-    get() = applicationContext.getBean(PreCommitEventPublisher::class.java)
+  val interceptedEventsManager: InterceptedEventsManager by lazy {
+    applicationContext.getBean(InterceptedEventsManager::class.java)
+  }
+  val preCommitEventsPublisher: PreCommitEventPublisher by lazy {
+    applicationContext.getBean(PreCommitEventPublisher::class.java)
+  }
 }
