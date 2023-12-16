@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
 
 /**
  * Class providing Activity Holder, while caching it in ThreadLocal.
@@ -13,15 +14,23 @@ import org.springframework.stereotype.Component
  */
 @Component
 class ActivityHolderProvider(private val applicationContext: ApplicationContext) {
-  private val threadLocal = ThreadLocal<ActivityHolder?>()
+  private val threadLocal = ThreadLocal<Pair<Scope, ActivityHolder?>>()
 
   fun getActivityHolder(): ActivityHolder {
     // Get the activity holder from ThreadLocal.
-    var activityHolder = threadLocal.get()
+    var (scope, activityHolder) = threadLocal.get() ?: (null to null)
+
+    val currentScope = getCurrentScope()
+    if (scope != currentScope) {
+      // If the scope has changed, clear the ThreadLocal and fetch a new activity holder.
+      clearThreadLocal()
+      activityHolder = null
+    }
+
     if (activityHolder == null) {
       // If no activity holder exists for this thread, fetch one and store it in ThreadLocal.
       activityHolder = fetchActivityHolder()
-      threadLocal.set(activityHolder)
+      threadLocal.set(currentScope to activityHolder)
     }
     return activityHolder
   }
@@ -38,8 +47,19 @@ class ActivityHolderProvider(private val applicationContext: ApplicationContext)
     }
   }
 
+  private fun getCurrentScope(): Scope {
+    if (RequestContextHolder.getRequestAttributes() == null) {
+      return Scope.TRANSACTION
+    }
+    return Scope.REQUEST
+  }
+
   @PreDestroy
   fun clearThreadLocal() {
     threadLocal.remove()
+  }
+
+  enum class Scope {
+    REQUEST, TRANSACTION
   }
 }
