@@ -5,6 +5,7 @@ import io.tolgee.activity.projectActivityView.ProjectActivityViewByPageableProvi
 import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
@@ -33,10 +34,7 @@ class ActivityService(
     val mergedActivityRevision = activityRevision.persist()
     mergedActivityRevision.persistedDescribingRelations()
 
-    entityManager.flushAndClear()
-
-    mergedActivityRevision.modifiedEntities = modifiedEntities.values.flatMap { it.values }.toMutableList()
-    mergedActivityRevision.persistModifiedEntities()
+    mergedActivityRevision.modifiedEntities = modifiedEntities.persist()
 
     entityManager.flushAndClear()
 
@@ -45,14 +43,16 @@ class ActivityService(
     entityManager.flushAndClear()
   }
 
-  private fun ActivityRevision.persistModifiedEntities() {
-    modifiedEntities.forEach { activityModifiedEntity ->
+  private fun ModifiedEntitiesType.persist(): MutableList<ActivityModifiedEntity> {
+    val list = this.values.flatMap { it.values }.toMutableList()
+    list.forEach { activityModifiedEntity ->
       try {
         entityManager.persist(activityModifiedEntity)
       } catch (e: EntityExistsException) {
         logger.debug("ModifiedEntity entity already exists in persistence context, skipping", e)
       }
     }
+    return list
   }
 
   private fun ActivityRevision.persistedDescribingRelations() {

@@ -72,8 +72,8 @@ class ActivityRevision : java.io.Serializable {
    */
   var projectId: Long? = null
 
-  @OneToMany(mappedBy = "activityRevision", targetEntity = ActivityDescribingEntity::class)
-  var describingRelations: DescribingRelationsList = DescribingRelationsList()
+  @OneToMany(mappedBy = "activityRevision")
+  var describingRelations: MutableList<ActivityDescribingEntity> = mutableListOf()
 
   @OneToMany(mappedBy = "activityRevision")
   var modifiedEntities: MutableList<ActivityModifiedEntity> = mutableListOf()

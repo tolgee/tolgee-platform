@@ -141,9 +141,8 @@ class InterceptedEventsManager(
     value: EntityDescriptionWithRelations,
     activityRevision: ActivityRevision
   ): EntityDescriptionRef {
-    val activityDescribingEntity = activityRevision.describingRelations
-      .find { it.entityId == value.entityId && it.entityClass == value.entityClass }
-      ?: let {
+    val activityDescribingEntity = activityHolder
+      .getDescribingRelationFromCache(value.entityId, value.entityClass) {
         val compressedRelations = value.relations.map { relation ->
           relation.key to compressRelation(relation.value, activityRevision)
         }.toMap()
