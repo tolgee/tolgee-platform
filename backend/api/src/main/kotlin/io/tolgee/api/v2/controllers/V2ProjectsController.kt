@@ -112,7 +112,8 @@ class V2ProjectsController(
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
-  ): PagedModel<ProjectWithStatsModel> { val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
+  ): PagedModel<ProjectWithStatsModel> {
+    val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
     return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
