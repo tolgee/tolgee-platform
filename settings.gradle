@@ -23,6 +23,9 @@ pluginManagement {
             if (requested.id.id == 'org.hibernate.orm') {
                 useVersion(hibernateVersion)
             }
+            if(requested.id.id == 'io.sentry.jvm.gradle'){
+                useVersion('4.0.0')
+            }
         }
     }
 }
@@ -55,7 +58,6 @@ dependencyResolutionManagement {
             library('amazonSTS', "software.amazon.awssdk:sts:$amazonAwsSdkVersion")
             library('amazonTranslate', "software.amazon.awssdk:translate:$amazonAwsSdkVersion")
             library('googleCloud', "com.google.cloud:libraries-bom:24.0.0")
-            library('sentry', "io.sentry:sentry-spring-boot-starter:5.7.3")
             library('liquibaseCore', "org.liquibase:liquibase-core:4.25.0")
             library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.25.0")
             library('liquibasePicoli', "info.picocli:picocli:4.6.3")

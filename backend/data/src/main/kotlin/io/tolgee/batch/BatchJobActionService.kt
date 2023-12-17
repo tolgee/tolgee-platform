@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.sentry.Hint
 import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
@@ -162,7 +163,7 @@ class BatchJobActionService(
       fn()
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
-      Sentry.captureException(e, "Processing of chunk unexpectedly failed ${executionItem.chunkExecutionId}")
+      Sentry.captureException(e)
       val maxRetries = 10
       if (++executionItem.managementErrorRetrials > maxRetries) {
         logger.error("Chunk ${executionItem.chunkExecutionId} failed $maxRetries times, failing...")

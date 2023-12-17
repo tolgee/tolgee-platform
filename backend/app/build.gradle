@@ -16,6 +16,7 @@ plugins {
     id "kotlin-jpa"
     id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
+    id "io.sentry.jvm.gradle"
 }
 
 group = 'io.tolgee'
@@ -97,7 +98,6 @@ dependencies {
     /**
      * MISC
      */
-    implementation libs.sentry
     implementation libs.commonsCodec
     implementation libs.amazonS3
     implementation libs.amazonSTS

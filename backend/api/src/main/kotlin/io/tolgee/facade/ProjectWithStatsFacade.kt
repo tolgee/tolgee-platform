@@ -86,7 +86,8 @@ class ProjectWithStatsFacade(
     return try {
       this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
     } catch (e: NumberFormatException) {
-      Sentry.captureException(e, "Failed to convert $this to BigDecimal")
+      Sentry.captureMessage("Failed to convert $this to BigDecimal")
+      Sentry.captureException(e)
       BigDecimal(0)
     }
   }

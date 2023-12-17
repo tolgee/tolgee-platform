@@ -10,7 +10,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
     id 'org.springframework.boot' apply false
     id "kotlin-allopen"
-
+    id "io.sentry.jvm.gradle"
 }
 
 group = 'io.tolgee.security'
@@ -56,7 +56,6 @@ dependencies {
      * Misc
      */
     implementation libs.commonsCodec
-    implementation libs.sentry
     implementation libs.jjwtApi
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
