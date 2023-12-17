@@ -33,7 +33,4 @@ class ActivityDescribingEntity(
 
   @Type(JsonBinaryType::class)
   var describingRelations: Map<String, EntityDescriptionRef>? = null
-
-  @Enumerated
-  lateinit var revisionType: RevisionType
 }

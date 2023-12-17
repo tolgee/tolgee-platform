@@ -110,7 +110,7 @@ dependencies {
     /**
      * DB
      */
-    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.postgresql:postgresql'
     implementation "org.hibernate:hibernate-jpamodelgen:$hibernateVersion"
     kapt "org.hibernate:hibernate-jpamodelgen:$hibernateVersion"
 
