@@ -1,3 +1,10 @@
+## [3.41.1](https://github.com/tolgee/tolgee-platform/compare/v3.41.0...v3.41.1) (2023-12-17)
+
+
+### Bug Fixes
+
+* Fix Sentry logging ([#2026](https://github.com/tolgee/tolgee-platform/issues/2026)) ([761538c](https://github.com/tolgee/tolgee-platform/commit/761538c27e9fc67f6db8a375be1873cae6ed1da1))
+
 # [3.41.0](https://github.com/tolgee/tolgee-platform/compare/v3.40.0...v3.41.0) (2023-12-15)
 
 
