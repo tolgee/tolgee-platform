@@ -12,6 +12,7 @@ plugins {
     id 'org.springframework.boot' apply false
     id "java"
     id "kotlin-allopen"
+    id "io.sentry.jvm.gradle"
 }
 
 apply plugin: "kotlin-allopen"

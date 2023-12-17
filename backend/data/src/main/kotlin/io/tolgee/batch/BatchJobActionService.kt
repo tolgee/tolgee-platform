@@ -162,7 +162,7 @@ class BatchJobActionService(
       fn()
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
-      Sentry.captureException(e, "Processing of chunk unexpectedly failed ${executionItem.chunkExecutionId}")
+      Sentry.captureException(e)
       val maxRetries = 10
       if (++executionItem.managementErrorRetrials > maxRetries) {
         logger.error("Chunk ${executionItem.chunkExecutionId} failed $maxRetries times, failing...")
