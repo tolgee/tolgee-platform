@@ -1,5 +1,6 @@
 package io.tolgee.util
 
+import io.tolgee.model.ALLOCATION_SIZE
 import java.sql.Connection
 
 class SequenceIdProvider(
@@ -28,7 +29,7 @@ class SequenceIdProvider(
     val statement = connection.prepareStatement("select nextval('$sequenceName')")
     val resultSet = statement.executeQuery()
     resultSet.next()
-    currentId = resultSet.getLong(1)
-    currentMaxId = currentId!! + allocationSize - 1
+    currentMaxId = resultSet.getLong(1)
+    currentId = currentMaxId!! - allocationSize + 1
   }
 }
