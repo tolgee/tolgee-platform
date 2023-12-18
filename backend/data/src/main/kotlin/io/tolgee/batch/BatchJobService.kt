@@ -1,5 +1,6 @@
 package io.tolgee.batch
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
@@ -9,7 +10,9 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.ALLOCATION_SIZE
 import io.tolgee.model.Project
+import io.tolgee.model.SEQUENCE_NAME
 import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -21,12 +24,15 @@ import io.tolgee.repository.BatchJobRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
+import io.tolgee.util.SequenceIdProvider
 import io.tolgee.util.addMinutes
 import io.tolgee.util.flushAndClear
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.apache.commons.codec.digest.DigestUtils.sha256Hex
 import org.hibernate.LockOptions
+import org.hibernate.Session
+import org.postgresql.util.PGobject
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -34,6 +40,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
+import java.sql.Timestamp
 import java.time.Duration
 import java.util.*
 
@@ -49,6 +56,7 @@ class BatchJobService(
   private val currentDateProvider: CurrentDateProvider,
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
+  private val objectMapper: ObjectMapper
 ) : Logging {
 
   companion object {
@@ -96,19 +104,60 @@ class BatchJobService(
 
     job.params = processor.getParams(request)
 
-    val executions = List(chunked.size) { chunkNumber ->
-      BatchJobChunkExecution().apply {
-        batchJob = job
-        this.chunkNumber = chunkNumber
-        entityManager.persist(this)
-      }
-    }
-
     entityManager.flushAndClear()
+
+    val executions = storeExecutions(chunked, job)
 
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
     return job
+  }
+
+  private fun storeExecutions(
+    chunked: List<List<Any>>,
+    job: BatchJob
+  ): List<BatchJobChunkExecution> {
+    val executions = List(chunked.size) { chunkNumber ->
+      BatchJobChunkExecution().apply {
+        batchJob = job
+        this.chunkNumber = chunkNumber
+      }
+    }
+
+    insertExecutionsViaBatchStatement(executions)
+
+    entityManager.clear()
+
+    return executions
+  }
+
+  private fun insertExecutionsViaBatchStatement(executions: List<BatchJobChunkExecution>) {
+    entityManager.unwrap(Session::class.java).doWork { connection ->
+      val query = """
+        insert into tolgee_batch_job_chunk_execution 
+        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets) 
+        values (?, ?, ?, ?, ?, ?, ?)
+        """
+      val statement = connection.prepareStatement(query)
+      val sequenceIdProvider = SequenceIdProvider(connection, SEQUENCE_NAME, ALLOCATION_SIZE)
+      val timestamp = Timestamp(currentDateProvider.date.time)
+      executions.forEach {
+        val id = sequenceIdProvider.next()
+        it.id = id
+        statement.setLong(1, id)
+        statement.setLong(2, it.batchJob.id)
+        statement.setInt(3, it.chunkNumber)
+        statement.setString(4, it.status.name)
+        statement.setTimestamp(5, timestamp)
+        statement.setTimestamp(6, timestamp)
+        statement.setObject(7, PGobject().apply {
+          type = "jsonb"
+          value = objectMapper.writeValueAsString(it.successTargets)
+        })
+        statement.addBatch()
+      }
+      statement.executeBatch()
+    }
   }
 
   private fun tryDebounceJob(

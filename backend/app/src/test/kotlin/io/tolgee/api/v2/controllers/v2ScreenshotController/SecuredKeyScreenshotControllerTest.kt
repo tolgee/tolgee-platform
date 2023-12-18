@@ -95,10 +95,10 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   @Test
   @ProjectJWTAuthTestMethod
   fun uploadScreenshot() {
-    executeInNewTransaction {
-      val key = keyService.create(project, CreateKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
 
-      performStoreScreenshot(project, key).andIsCreated.andAssertThatJson {
+    performStoreScreenshot(project, key).andIsCreated.andAssertThatJson {
+      executeInNewTransaction {
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
