@@ -89,13 +89,6 @@ kotlin {
     jvmToolchain(17)
 }
 
-hibernate {
-    enhancement {
-        lazyInitialization = true
-        dirtyTracking = true
-    }
-}
-
 dependencyManagement {
     imports {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES

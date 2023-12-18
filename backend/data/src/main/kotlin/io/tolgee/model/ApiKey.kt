@@ -32,7 +32,11 @@ class ApiKey(
   @NotEmpty
   @Enumerated(EnumType.STRING)
   @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
-  var scopesEnum: MutableSet<Scope>
+  /**
+   * Scope should be never nullable, butthere were entries with null scopes in the production DB, which caused NPEs,
+   * so to be sure, lets meke it nullable
+   */
+  var scopesEnum: MutableSet<Scope?>
 ) : StandardAuditModel() {
 
   @field:NotBlank
