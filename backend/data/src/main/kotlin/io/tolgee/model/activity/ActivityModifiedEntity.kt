@@ -56,5 +56,5 @@ class ActivityModifiedEntity(
   var describingRelations: Map<String, EntityDescriptionRef>? = null
 
   @Enumerated
-  lateinit var revisionType: RevisionType
+  var revisionType: RevisionType = RevisionType.MOD
 }

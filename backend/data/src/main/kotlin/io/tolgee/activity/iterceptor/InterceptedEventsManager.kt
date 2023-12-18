@@ -68,7 +68,7 @@ class InterceptedEventsManager(
     }
 
     val changes = provider.getChanges(old, collection) ?: return
-    val activityModifiedEntity = getModifiedEntity(collectionOwner)
+    val activityModifiedEntity = getModifiedEntity(collectionOwner, RevisionType.MOD)
 
     val newChanges = activityModifiedEntity.modifications + mutableMapOf(ownerField.name to changes)
     activityModifiedEntity.modifications = (newChanges).toMutableMap()
@@ -89,7 +89,7 @@ class InterceptedEventsManager(
 
     entity as EntityWithId
 
-    val activityModifiedEntity = getModifiedEntity(entity)
+    val activityModifiedEntity = getModifiedEntity(entity, revisionType)
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
@@ -107,7 +107,7 @@ class InterceptedEventsManager(
     this.describingRelations = describingData.second
   }
 
-  private fun getModifiedEntity(entity: EntityWithId): ActivityModifiedEntity {
+  private fun getModifiedEntity(entity: EntityWithId, revisionType: RevisionType): ActivityModifiedEntity {
     val activityModifiedEntity = activityHolder.modifiedEntities
       .computeIfAbsent(entity::class) { mutableMapOf() }
       .computeIfAbsent(
@@ -117,7 +117,7 @@ class InterceptedEventsManager(
           activityRevision,
           entity::class.simpleName!!,
           entity.id
-        )
+        ).also { it.revisionType = revisionType }
       }
 
     return activityModifiedEntity
