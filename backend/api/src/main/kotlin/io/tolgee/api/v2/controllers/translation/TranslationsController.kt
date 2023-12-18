@@ -172,7 +172,7 @@ When null, resulting file will be a flat key-value object.
   @PutMapping("")
   @Operation(summary = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
@@ -182,8 +182,7 @@ When null, resulting file will be a flat key-value object.
 
     val translations = dto.languagesToReturn
       ?.let { languagesToReturn ->
-        key.translations
-          .filter { languagesToReturn.contains(it.language.tag) }
+        translationService.findForKeyByLanguages(key, languagesToReturn)
           .associateBy { it.language.tag }
       }
       ?: modifiedTranslations
@@ -194,7 +193,7 @@ When null, resulting file will be a flat key-value object.
   @PostMapping("")
   @Operation(summary = "Sets translations for existing or not existing key.")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
@@ -211,7 +210,7 @@ When null, resulting file will be a flat key-value object.
   @PutMapping("/{translationId}/set-state/{state}")
   @Operation(summary = "Sets translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun setTranslationState(
     @PathVariable translationId: Long,
@@ -266,7 +265,7 @@ When null, resulting file will be a flat key-value object.
 
   @GetMapping(value = ["select-all"])
   @Operation(summary = "Get select all keys")
-  @RequiresProjectPermissions([ Scope.KEYS_VIEW ])
+  @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
   fun getSelectAllKeyIds(
     @ParameterObject @ModelAttribute("translationFilters") params: TranslationFilters,
@@ -289,7 +288,7 @@ When null, resulting file will be a flat key-value object.
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
   @Operation(summary = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun dismissAutoTranslatedState(
     @PathVariable translationId: Long
@@ -304,7 +303,7 @@ When null, resulting file will be a flat key-value object.
   @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
   @Operation(summary = """Set's "outdated" indication""")
   @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun setOutdated(
     @PathVariable translationId: Long,
@@ -322,7 +321,7 @@ When null, resulting file will be a flat key-value object.
 
 Sorting is not supported for supported. It is automatically sorted from newest to oldest."""
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getTranslationHistory(
     @PathVariable translationId: Long,

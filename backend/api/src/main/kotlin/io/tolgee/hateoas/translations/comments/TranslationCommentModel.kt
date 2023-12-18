@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.translations.comments
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.hateoas.user_account.SimpleUserAccountModel
 import io.tolgee.hateoas.user_account.UserAccountModel
 import io.tolgee.model.enums.TranslationCommentState
 import org.springframework.hateoas.RepresentationModel
@@ -20,7 +21,7 @@ open class TranslationCommentModel(
   val state: TranslationCommentState,
 
   @Schema(description = "User who created the comment")
-  val author: UserAccountModel,
+  val author: SimpleUserAccountModel,
 
   @Schema(description = "Date when it was created")
   val createdAt: Date,

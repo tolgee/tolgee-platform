@@ -95,7 +95,7 @@ class TranslationCommentController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
-    val comment = translationCommentService.get(commentId)
+    val comment = translationCommentService.getWithAuthorFetched(commentId)
     comment.checkFromProject()
     return translationCommentModelAssembler.toModel(comment)
   }
@@ -106,7 +106,7 @@ class TranslationCommentController(
   @UseDefaultPermissions // Security: Permission check done inside; users should be able to edit their comments
   @AllowApiAccess
   fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
-    val comment = translationCommentService.get(commentId)
+    val comment = translationCommentService.getWithAuthorFetched(commentId)
     if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
     }
@@ -123,7 +123,7 @@ class TranslationCommentController(
     @PathVariable commentId: Long,
     @PathVariable state: TranslationCommentState
   ): TranslationCommentModel {
-    val comment = translationCommentService.get(commentId)
+    val comment = translationCommentService.getWithAuthorFetched(commentId)
     comment.checkFromProject()
     translationCommentService.setState(comment, state)
     return translationCommentModelAssembler.toModel(comment)

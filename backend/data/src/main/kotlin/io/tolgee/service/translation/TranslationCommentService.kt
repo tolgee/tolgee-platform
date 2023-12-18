@@ -37,12 +37,24 @@ class TranslationCommentService(
     }
   }
 
+  @Transactional
   fun find(id: Long): TranslationComment? {
     return translationCommentRepository.findById(id).orElse(null)
   }
 
+  @Transactional
   fun get(id: Long): TranslationComment {
     return find(id) ?: throw NotFoundException()
+  }
+
+  @Transactional
+  fun findWithAuthorFetched(id: Long): TranslationComment? {
+    return translationCommentRepository.findWithFetchedAuthor(id)
+  }
+
+  @Transactional
+  fun getWithAuthorFetched(id: Long): TranslationComment {
+    return findWithAuthorFetched(id) ?: throw NotFoundException()
   }
 
   @Transactional
