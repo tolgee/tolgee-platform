@@ -1,6 +1,5 @@
 package io.tolgee.util
 
-import io.tolgee.model.ALLOCATION_SIZE
 import java.sql.Connection
 
 class SequenceIdProvider(
