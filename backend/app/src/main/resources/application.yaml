@@ -9,7 +9,6 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   jpa:
-#    open-in-view: false
     properties:
       hibernate:
         order_by:
@@ -25,7 +24,6 @@ spring:
         enhancer:
           enableLazyInitialization: true
           enableDirtyTracking: true
-  #    open-in-view: false
   batch:
     job:
       enabled: false

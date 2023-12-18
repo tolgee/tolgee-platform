@@ -16,6 +16,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import io.tolgee.util.trace
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -139,8 +140,8 @@ class ProgressManager(
     errorMessage: Message? = null,
     failOnly: Boolean = false
   ) {
-    logger.debug("Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}")
-    logger.debug("Job ${job.id} progress: $progress of ${job.totalItems}")
+    logger.debug { "Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}" }
+    logger.debug { "Job ${job.id} progress: $progress of ${job.totalItems}" }
 
     if (job.totalChunks.toLong() != completedChunks) {
       return
@@ -165,7 +166,7 @@ class ProgressManager(
     }
 
     jobEntity.status = BatchJobStatus.SUCCESS
-    logger.debug("Publishing success event for job ${job.id}")
+    logger.debug { "Publishing success event for job ${job.id}" }
     eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
     cachingBatchJobService.saveJob(jobEntity)
   }
@@ -192,10 +193,10 @@ class ProgressManager(
 
   fun handleJobRunning(id: Long) {
     executeInNewTransaction(transactionManager) {
-      logger.trace("""Fetching job $id""")
+      logger.trace { """Fetching job $id""" }
       val job = batchJobService.getJobDto(id)
       if (job.status == BatchJobStatus.PENDING) {
-        logger.debug("""Updating job state to running ${job.id}""")
+        logger.debug { """Updating job state to running ${job.id}""" }
         cachingBatchJobService.setRunningState(job.id)
       }
     }

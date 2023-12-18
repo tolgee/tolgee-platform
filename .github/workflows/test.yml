@@ -139,6 +139,15 @@ jobs:
           path: |
             ./**/build/reports/**/*
 
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Backend Tests
+          path: "**/build/test-results/**/TEST-*.xml"
+          reporter: java-junit
+
+
   e2e:
     needs: [frontend-build, backend-build, e2e-install-deps]
     runs-on: ubuntu-latest

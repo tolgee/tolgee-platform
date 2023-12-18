@@ -7,14 +7,17 @@ import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.SequenceGenerator
 import org.springframework.data.util.ProxyUtils
 
+const val SEQUENCE_NAME = "hibernate_sequence"
+const val ALLOCATION_SIZE = 1000
+
 @MappedSuperclass
 abstract class StandardAuditModel : AuditModel(), EntityWithId {
   @Id
   @SequenceGenerator(
     name = "sequenceGenerator",
-    sequenceName = "hibernate_sequence",
+    sequenceName = SEQUENCE_NAME,
     initialValue = 1000000000,
-    allocationSize = 1000
+    allocationSize = ALLOCATION_SIZE
   )
   @GeneratedValue(
     strategy = GenerationType.SEQUENCE,

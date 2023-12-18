@@ -191,6 +191,10 @@ class TranslationService(
     ).mapKeys { it.key.tag }
   }
 
+  fun findForKeyByLanguages(key: Key, languageTags: Collection<String>): List<Translation> {
+    return translationRepository.findForKeyByLanguages(key, languageTags)
+  }
+
   private fun languageByTagFromLanguages(tag: String, languages: Collection<Language>) =
     languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository
 interface TranslationCommentRepository : JpaRepository<TranslationComment, Long> {
   fun deleteAllByIdIn(ids: List<Long>)
 
-  @Query("select tc from TranslationComment tc where tc.translation = :translation")
+  @Query("select tc from TranslationComment tc left join fetch tc.author where tc.translation = :translation")
   fun getPagedByTranslation(translation: Translation, pageable: Pageable): Page<TranslationComment>
 
   fun deleteAllByTranslationIdIn(translationIds: Collection<Long>)
@@ -28,4 +28,13 @@ interface TranslationCommentRepository : JpaRepository<TranslationComment, Long>
   """
   )
   fun getAllByProjectId(projectId: Long): List<TranslationComment>
+
+  @Query(
+    """
+    from TranslationComment tc
+    left join fetch tc.author
+    where tc.id = :id
+  """
+  )
+  fun findWithFetchedAuthor(id: Long): TranslationComment?
 }

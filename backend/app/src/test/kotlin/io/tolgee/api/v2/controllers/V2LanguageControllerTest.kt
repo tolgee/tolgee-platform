@@ -69,11 +69,11 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   fun deleteLanguage() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
+    val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
+    performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
     executeInNewTransaction {
-      val base = dbPopulator.createBase(generateUniqueString())
-      val project = base.project
-      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
-      performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
       Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
     }
   }
@@ -81,13 +81,14 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.LANGUAGES_EDIT])
   fun `deletes language with API key`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    this.userAccount = base.userAccount
+    this.projectSupplier = { base.project }
+    val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
+
+    performProjectAuthDelete("languages/${deutsch.id}", null)
+      .andExpect(MockMvcResultMatchers.status().isOk)
     executeInNewTransaction {
-      val base = dbPopulator.createBase(generateUniqueString())
-      this.userAccount = base.userAccount
-      this.projectSupplier = { base.project }
-      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
-      performProjectAuthDelete("languages/${deutsch.id}", null)
-        .andExpect(MockMvcResultMatchers.status().isOk)
       Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
     }
   }
@@ -95,11 +96,11 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `does not delete language with API key (permissions)`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    this.userAccount = base.userAccount
+    this.projectSupplier = { base.project }
+    val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
     executeInNewTransaction {
-      val base = dbPopulator.createBase(generateUniqueString())
-      this.userAccount = base.userAccount
-      this.projectSupplier = { base.project }
-      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
       performProjectAuthDelete("languages/${deutsch.id}", null).andIsForbidden
     }
   }

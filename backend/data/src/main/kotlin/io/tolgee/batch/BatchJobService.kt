@@ -1,5 +1,6 @@
 package io.tolgee.batch
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
@@ -9,7 +10,9 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.ALLOCATION_SIZE
 import io.tolgee.model.Project
+import io.tolgee.model.SEQUENCE_NAME
 import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -21,18 +24,23 @@ import io.tolgee.repository.BatchJobRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
+import io.tolgee.util.SequenceIdProvider
 import io.tolgee.util.addMinutes
+import io.tolgee.util.flushAndClear
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.apache.commons.codec.digest.DigestUtils.sha256Hex
 import org.hibernate.LockOptions
+import org.postgresql.util.PGobject
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
+import java.sql.Timestamp
 import java.time.Duration
 import java.util.*
 
@@ -48,6 +56,8 @@ class BatchJobService(
   private val currentDateProvider: CurrentDateProvider,
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
+  private val objectMapper: ObjectMapper,
+  private val jdbcTemplate: JdbcTemplate
 ) : Logging {
 
   companion object {
@@ -95,18 +105,60 @@ class BatchJobService(
 
     job.params = processor.getParams(request)
 
+    entityManager.flushAndClear()
+
+    val executions = storeExecutions(chunked, job)
+
+    applicationContext.publishEvent(OnBatchJobCreated(job, executions))
+
+    return job
+  }
+
+  private fun storeExecutions(
+    chunked: List<List<Any>>,
+    job: BatchJob
+  ): List<BatchJobChunkExecution> {
     val executions = List(chunked.size) { chunkNumber ->
       BatchJobChunkExecution().apply {
         batchJob = job
         this.chunkNumber = chunkNumber
-        entityManager.persist(this)
       }
     }
 
-    entityManager.flush()
-    applicationContext.publishEvent(OnBatchJobCreated(job, executions))
+    insertExecutionsViaBatchStatement(executions)
 
-    return job
+    entityManager.clear()
+
+    return executions
+  }
+
+  private fun insertExecutionsViaBatchStatement(executions: List<BatchJobChunkExecution>) {
+    val sequenceIdProvider = SequenceIdProvider(SEQUENCE_NAME, ALLOCATION_SIZE)
+    jdbcTemplate.batchUpdate(
+      """
+        insert into tolgee_batch_job_chunk_execution 
+        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets) 
+        values (?, ?, ?, ?, ?, ?, ?)
+        """,
+      executions,
+      100
+    ) { ps, execution ->
+      val id = sequenceIdProvider.next(ps.connection)
+      execution.id = id
+      ps.setLong(1, id)
+      ps.setLong(2, execution.batchJob.id)
+      ps.setInt(3, execution.chunkNumber)
+      ps.setString(4, execution.status.name)
+      ps.setTimestamp(5, Timestamp(currentDateProvider.date.time))
+      ps.setTimestamp(6, Timestamp(currentDateProvider.date.time))
+      ps.setObject(
+        7,
+        PGobject().apply {
+          type = "jsonb"
+          value = objectMapper.writeValueAsString(execution.successTargets)
+        }
+      )
+    }
   }
 
   private fun tryDebounceJob(

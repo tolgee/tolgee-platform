@@ -1,6 +1,5 @@
 package io.tolgee.activity.iterceptor
 
-import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.EntityDescriptionProvider
 import io.tolgee.activity.annotation.ActivityLoggedEntity
@@ -10,6 +9,7 @@ import io.tolgee.activity.data.EntityDescriptionWithRelations
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
+import io.tolgee.component.ActivityHolderProvider
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
@@ -68,7 +68,7 @@ class InterceptedEventsManager(
     }
 
     val changes = provider.getChanges(old, collection) ?: return
-    val activityModifiedEntity = getModifiedEntity(collectionOwner)
+    val activityModifiedEntity = getModifiedEntity(collectionOwner, RevisionType.MOD)
 
     val newChanges = activityModifiedEntity.modifications + mutableMapOf(ownerField.name to changes)
     activityModifiedEntity.modifications = (newChanges).toMutableMap()
@@ -89,7 +89,7 @@ class InterceptedEventsManager(
 
     entity as EntityWithId
 
-    val activityModifiedEntity = getModifiedEntity(entity)
+    val activityModifiedEntity = getModifiedEntity(entity, revisionType)
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
@@ -107,7 +107,7 @@ class InterceptedEventsManager(
     this.describingRelations = describingData.second
   }
 
-  private fun getModifiedEntity(entity: EntityWithId): ActivityModifiedEntity {
+  private fun getModifiedEntity(entity: EntityWithId, revisionType: RevisionType): ActivityModifiedEntity {
     val activityModifiedEntity = activityHolder.modifiedEntities
       .computeIfAbsent(entity::class) { mutableMapOf() }
       .computeIfAbsent(
@@ -117,7 +117,7 @@ class InterceptedEventsManager(
           activityRevision,
           entity::class.simpleName!!,
           entity.id
-        )
+        ).also { it.revisionType = revisionType }
       }
 
     return activityModifiedEntity
@@ -141,9 +141,8 @@ class InterceptedEventsManager(
     value: EntityDescriptionWithRelations,
     activityRevision: ActivityRevision
   ): EntityDescriptionRef {
-    val activityDescribingEntity = activityRevision.describingRelations
-      .find { it.entityId == value.entityId && it.entityClass == value.entityClass }
-      ?: let {
+    val activityDescribingEntity = activityHolder
+      .getDescribingRelationFromCache(value.entityId, value.entityClass) {
         val compressedRelations = value.relations.map { relation ->
           relation.key to compressRelation(relation.value, activityRevision)
         }.toMap()
@@ -235,6 +234,8 @@ class InterceptedEventsManager(
           logger.debug("Publishing project activity event")
           try {
             publishOnActivityEvent(activityRevision)
+            entityManager.flush()
+            entityManager.clear()
             activityService.storeActivityData(activityRevision, activityHolder.modifiedEntities)
             activityHolder.afterActivityFlushed?.invoke()
           } catch (e: Throwable) {
@@ -274,9 +275,12 @@ class InterceptedEventsManager(
     applicationContext.getBean(ActivityService::class.java)
   }
 
-  private val activityHolder: ActivityHolder by lazy {
-    applicationContext.getBean(ActivityHolder::class.java)
+  private val activityHolderProvider: ActivityHolderProvider by lazy {
+    applicationContext.getBean(ActivityHolderProvider::class.java)
   }
+
+  private val activityHolder
+    get() = activityHolderProvider.getActivityHolder()
 
   private val userAccount: UserAccountDto?
     get() = authenticationFacade.authenticatedUserOrNull

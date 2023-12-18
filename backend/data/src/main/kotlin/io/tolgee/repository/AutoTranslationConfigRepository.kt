@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface AutoTranslationConfigRepository : JpaRepository<AutoTranslationConfig, Long> {
   fun findOneByProjectAndTargetLanguageId(project: Project, languageId: Long?): AutoTranslationConfig?
+  fun findByProjectAndTargetLanguageIdIn(project: Project, languageIds: List<Long>): List<AutoTranslationConfig>
 
   @Query(
     """

@@ -1,10 +1,12 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -29,7 +31,6 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
-import io.tolgee.service.key.KeyMetaService
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -50,10 +51,11 @@ class ImportService(
   private val applicationContext: ApplicationContext,
   private val importTranslationRepository: ImportTranslationRepository,
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
-  private val keyMetaService: KeyMetaService,
   private val removeExpiredImportService: RemoveExpiredImportService,
   private val entityManager: EntityManager,
-  private val businessEventPublisher: BusinessEventPublisher
+  private val businessEventPublisher: BusinessEventPublisher,
+  private val importDeleteService: ImportDeleteService,
+  private val currentDateProvider: CurrentDateProvider
 ) {
   @Transactional
   fun addFiles(
@@ -148,6 +150,10 @@ class ImportService(
    */
   fun getNotExpired(projectId: Long, authorId: Long): Import {
     return findNotExpired(projectId, authorId) ?: throw NotFoundException()
+  }
+
+  fun findDeleted(importId: Long): Import? {
+    return importRepository.findDeleted(importId)
   }
 
   private fun findNotExpired(projectId: Long, userAccountId: Long): Import? {
@@ -251,16 +257,16 @@ class ImportService(
     )
   }
 
+  @Transactional
   fun deleteImport(import: Import) {
-    this.importTranslationRepository.deleteAllByImport(import)
-    this.importLanguageRepository.deleteAllByImport(import)
-    val keyIds = this.importKeyRepository.getAllIdsByImport(import)
-    this.keyMetaService.deleteAllByImportKeyIdIn(keyIds)
-    this.importKeyRepository.deleteByIdIn(keyIds)
-    this.importFileIssueParamRepository.deleteAllByImport(import)
-    this.importFileIssueRepository.deleteAllByImport(import)
-    this.importFileRepository.deleteAllByImport(import)
-    this.importRepository.delete(import)
+    import.deletedAt = currentDateProvider.date
+    importRepository.save(import)
+    applicationContext.publishEvent(OnImportSoftDeleted(import.id))
+  }
+
+  @Transactional
+  fun hardDeleteImport(import: Import) {
+    importDeleteService.deleteImport(import.id)
   }
 
   @Transactional

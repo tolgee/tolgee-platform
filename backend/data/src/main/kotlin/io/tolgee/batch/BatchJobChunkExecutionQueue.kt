@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.Metrics
+import io.tolgee.batch.data.BatchJobChunkExecutionDto
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -45,35 +46,41 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  @Scheduled(fixedRate = 60000)
+  @Scheduled(fixedDelay = 60000, initialDelay = 0)
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
     val data = entityManager.createQuery(
       """
+          select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
           from BatchJobChunkExecution bjce
-          join fetch bjce.batchJob bk
+          join bjce.batchJob bk
           where bjce.status = :executionStatus
           order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
       """.trimIndent(),
-      BatchJobChunkExecution::class.java
+      BatchJobChunkExecutionDto::class.java
     ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
+
     if (data.size > 0) {
-      logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
+      logger.debug("Attempt to add ${data.size} items to queue ${System.identityHashCode(this)}")
+      addExecutionsToLocalQueue(data)
     }
-    addExecutionsToLocalQueue(data)
   }
 
-  fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecution>) {
+  fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
     val ids = queue.map { it.chunkExecutionId }.toSet()
+    var count = 0
     data.forEach {
       if (!ids.contains(it.id)) {
         queue.add(it.toItem())
+        count++
       }
     }
+
+    logger.debug("Added $count new items to queue ${System.identityHashCode(this)}")
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
@@ -120,6 +127,9 @@ class BatchJobChunkExecutionQueue(
     jobCharacter: JobCharacter? = null
   ) =
     ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
+
+  private fun BatchJobChunkExecutionDto.toItem(providedJobCharacter: JobCharacter? = null) =
+    ExecutionQueueItem(id, batchJobId, executeAfter?.time, providedJobCharacter ?: jobCharacter)
 
   val size get() = queue.size
 

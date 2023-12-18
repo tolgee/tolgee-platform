@@ -56,10 +56,6 @@ class BatchJobActionService(
   @EventListener(ApplicationReadyEvent::class)
   fun run() {
     println("Application ready")
-    executeInNewTransaction(transactionManager) {
-      batchJobChunkExecutionQueue.populateQueue()
-    }
-
     concurrentExecutionLauncher.run { executionItem, coroutineContext ->
       var retryExecution: BatchJobChunkExecution? = null
       try {

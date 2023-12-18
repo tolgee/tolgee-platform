@@ -15,6 +15,8 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.flushAndClear
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
 class StoredDataImporter(
@@ -45,6 +47,8 @@ class StoredDataImporter(
    * thrown ImportConflictNotResolvedException commits the transaction
    */
   private val translationService = applicationContext.getBean(TranslationService::class.java)
+
+  private val entityManager = applicationContext.getBean(EntityManager::class.java)
 
   private val namespacesToSave = mutableMapOf<String?, Namespace>()
 
@@ -89,6 +93,8 @@ class StoredDataImporter(
     saveMetaData(keyEntitiesToSave)
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
+
+    entityManager.flushAndClear()
   }
 
   private fun saveMetaData(keyEntitiesToSave: MutableCollection<Key>) {
