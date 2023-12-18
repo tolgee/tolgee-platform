@@ -1,3 +1,10 @@
+## [3.41.2](https://github.com/tolgee/tolgee-platform/compare/v3.41.1...v3.41.2) (2023-12-18)
+
+
+### Bug Fixes
+
+* ApiKey Scope NPE and Content Delivery issues ([#2029](https://github.com/tolgee/tolgee-platform/issues/2029)) ([8fc8bc9](https://github.com/tolgee/tolgee-platform/commit/8fc8bc9da9fefaceed38de6b0c2df4318a411fd2))
+
 ## [3.41.1](https://github.com/tolgee/tolgee-platform/compare/v3.41.0...v3.41.1) (2023-12-17)
 
 
