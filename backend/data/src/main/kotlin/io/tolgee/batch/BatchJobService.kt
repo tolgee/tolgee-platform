@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
@@ -56,7 +57,8 @@ class BatchJobService(
   private val currentDateProvider: CurrentDateProvider,
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
-  private val objectMapper: ObjectMapper
+  private val objectMapper: ObjectMapper,
+  private val jdbcTemplate: JdbcTemplate
 ) : Logging {
 
   companion object {
@@ -132,31 +134,28 @@ class BatchJobService(
   }
 
   private fun insertExecutionsViaBatchStatement(executions: List<BatchJobChunkExecution>) {
-    entityManager.unwrap(Session::class.java).doWork { connection ->
-      val query = """
+    val sequenceIdProvider = SequenceIdProvider(SEQUENCE_NAME, ALLOCATION_SIZE)
+    jdbcTemplate.batchUpdate(
+      """
         insert into tolgee_batch_job_chunk_execution 
         (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets) 
         values (?, ?, ?, ?, ?, ?, ?)
-        """
-      val statement = connection.prepareStatement(query)
-      val sequenceIdProvider = SequenceIdProvider(connection, SEQUENCE_NAME, ALLOCATION_SIZE)
-      val timestamp = Timestamp(currentDateProvider.date.time)
-      executions.forEach {
-        val id = sequenceIdProvider.next()
-        it.id = id
-        statement.setLong(1, id)
-        statement.setLong(2, it.batchJob.id)
-        statement.setInt(3, it.chunkNumber)
-        statement.setString(4, it.status.name)
-        statement.setTimestamp(5, timestamp)
-        statement.setTimestamp(6, timestamp)
-        statement.setObject(7, PGobject().apply {
-          type = "jsonb"
-          value = objectMapper.writeValueAsString(it.successTargets)
-        })
-        statement.addBatch()
-      }
-      statement.executeBatch()
+        """,
+      executions,
+      100
+    ) { ps, execution ->
+      val id = sequenceIdProvider.next(ps.connection)
+      execution.id = id
+      ps.setLong(1, id)
+      ps.setLong(2, execution.batchJob.id)
+      ps.setInt(3, execution.chunkNumber)
+      ps.setString(4, execution.status.name)
+      ps.setTimestamp(5, Timestamp(currentDateProvider.date.time))
+      ps.setTimestamp(6, Timestamp(currentDateProvider.date.time))
+      ps.setObject(7, PGobject().apply {
+        type = "jsonb"
+        value = objectMapper.writeValueAsString(execution.successTargets)
+      })
     }
   }
 

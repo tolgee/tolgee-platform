@@ -11,15 +11,3 @@ fun EntityManager.flushAndClear() {
   this.flush()
   this.clear()
 }
-
-
-inline fun <reified T> EntityManager.doInStatelessSession(
-  crossinline block: (StatelessSession) -> T
-): T {
-  return unwrap(Session::class.java).doReturningWork { connection ->
-    val statelessSession = unwrap(Session::class.java).sessionFactory.openStatelessSession(connection)
-    statelessSession.use { ss ->
-      block(ss)
-    }
-  }
-}
