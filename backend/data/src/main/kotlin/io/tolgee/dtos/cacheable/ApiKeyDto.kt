@@ -37,7 +37,7 @@ data class ApiKeyDto(
         expiresAt = apiKey.expiresAt,
         projectId = apiKey.project.id,
         userAccountId = apiKey.userAccount.id,
-        scopes = apiKey.scopesEnum.toSet(),
+        scopes = apiKey.scopesEnum.filterNotNull().toSet(),
       )
     }
   }

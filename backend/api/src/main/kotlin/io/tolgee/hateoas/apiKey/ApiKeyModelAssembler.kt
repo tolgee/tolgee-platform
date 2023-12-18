@@ -16,7 +16,7 @@ class ApiKeyModelAssembler : RepresentationModelAssemblerSupport<ApiKey, ApiKeyM
     userFullName = entity.userAccount.name,
     projectId = entity.project.id,
     projectName = entity.project.name,
-    scopes = entity.scopesEnum.map { it.value }.toSet(),
+    scopes = entity.scopesEnum.mapNotNull { it?.value }.toSet(),
     expiresAt = entity.expiresAt?.time,
     lastUsedAt = entity.lastUsedAt?.time
   )
