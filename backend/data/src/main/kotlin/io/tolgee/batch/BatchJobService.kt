@@ -31,7 +31,6 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.apache.commons.codec.digest.DigestUtils.sha256Hex
 import org.hibernate.LockOptions
-import org.hibernate.Session
 import org.postgresql.util.PGobject
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -152,10 +151,13 @@ class BatchJobService(
       ps.setString(4, execution.status.name)
       ps.setTimestamp(5, Timestamp(currentDateProvider.date.time))
       ps.setTimestamp(6, Timestamp(currentDateProvider.date.time))
-      ps.setObject(7, PGobject().apply {
-        type = "jsonb"
-        value = objectMapper.writeValueAsString(execution.successTargets)
-      })
+      ps.setObject(
+        7,
+        PGobject().apply {
+          type = "jsonb"
+          value = objectMapper.writeValueAsString(execution.successTargets)
+        }
+      )
     }
   }
 
@@ -189,9 +191,9 @@ class BatchJobService(
     executions.let { batchJobChunkExecutionQueue.addToQueue(it) }
     logger.debug(
       "Starting job ${job.id}, aadded ${executions.size} executions to queue ${
-        System.identityHashCode(
-          batchJobChunkExecutionQueue
-        )
+      System.identityHashCode(
+        batchJobChunkExecutionQueue
+      )
       }"
     )
   }

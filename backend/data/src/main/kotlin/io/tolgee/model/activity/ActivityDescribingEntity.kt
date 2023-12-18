@@ -2,9 +2,7 @@ package io.tolgee.model.activity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.EntityDescriptionRef
-import io.tolgee.activity.data.RevisionType
 import jakarta.persistence.Entity
-import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
 import jakarta.persistence.ManyToOne

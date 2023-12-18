@@ -109,8 +109,8 @@ class Project(
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
-    this.organizationOwner = organizationOwner
-  }
+      this.organizationOwner = organizationOwner
+    }
 
   fun findLanguageOptional(tag: String): Optional<Language> {
     return languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()

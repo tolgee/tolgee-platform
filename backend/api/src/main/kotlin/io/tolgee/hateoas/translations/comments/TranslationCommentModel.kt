@@ -2,7 +2,6 @@ package io.tolgee.hateoas.translations.comments
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.hateoas.user_account.SimpleUserAccountModel
-import io.tolgee.hateoas.user_account.UserAccountModel
 import io.tolgee.model.enums.TranslationCommentState
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation

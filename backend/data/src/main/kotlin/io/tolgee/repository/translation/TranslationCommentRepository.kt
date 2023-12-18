@@ -29,7 +29,6 @@ interface TranslationCommentRepository : JpaRepository<TranslationComment, Long>
   )
   fun getAllByProjectId(projectId: Long): List<TranslationComment>
 
-
   @Query(
     """
     from TranslationComment tc

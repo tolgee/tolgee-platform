@@ -2,7 +2,6 @@ package io.tolgee.hateoas.translations.comments
 
 import io.tolgee.api.v2.controllers.translation.TranslationCommentController
 import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
-import io.tolgee.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.translation.TranslationComment
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
