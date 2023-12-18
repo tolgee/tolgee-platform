@@ -279,7 +279,7 @@ class ImportService(
     this.importTranslationRepository.deleteAllByLanguage(language)
     this.importLanguageRepository.delete(language)
     if (this.findLanguages(import = language.file.import).isEmpty()) {
-      hardDeleteImport(import)
+      deleteImport(import)
     }
   }
 
