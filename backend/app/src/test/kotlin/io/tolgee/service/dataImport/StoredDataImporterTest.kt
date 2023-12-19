@@ -23,11 +23,11 @@ class StoredDataImporterTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
-    storedDataImporter =
-      StoredDataImporter(
-        applicationContext,
-        importTestData.import,
-      )
+    storedDataImporter = StoredDataImporter(
+      applicationContext,
+      importTestData.import,
+      reportStatus = reportStatus,
+    )
   }
 
   fun login() {
@@ -87,12 +87,12 @@ class StoredDataImporterTest : AbstractSpringTest() {
 
   @Test
   fun `it force replaces translations`() {
-    storedDataImporter =
-      StoredDataImporter(
-        applicationContext!!,
-        importTestData.import,
-        ForceMode.OVERRIDE,
-      )
+    storedDataImporter = StoredDataImporter(
+      applicationContext!!,
+      importTestData.import,
+      ForceMode.OVERRIDE,
+      reportStatus,
+    )
     testDataService.saveTestData(importTestData.root)
     login()
     storedDataImporter.doImport()
@@ -107,12 +107,12 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun `it imports metadata`() {
     importTestData.addKeyMetadata()
     testDataService.saveTestData(importTestData.root)
-    storedDataImporter =
-      StoredDataImporter(
-        applicationContext,
-        importTestData.import,
-        ForceMode.OVERRIDE,
-      )
+    storedDataImporter = StoredDataImporter(
+      applicationContext,
+      importTestData.import,
+      ForceMode.OVERRIDE,
+      reportStatus,
+    )
     login()
     storedDataImporter.doImport()
     entityManager.flush()
@@ -136,12 +136,12 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun `it force keeps translations`() {
     importTestData.translationWithConflict.override = true
     importTestData.translationWithConflict.resolve()
-    storedDataImporter =
-      StoredDataImporter(
-        applicationContext,
-        importTestData.import,
-        ForceMode.KEEP,
-      )
+    storedDataImporter = StoredDataImporter(
+      applicationContext,
+      importTestData.import,
+      ForceMode.KEEP,
+      reportStatus,
+    )
     testDataService.saveTestData(importTestData.root)
     login()
 

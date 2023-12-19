@@ -10,12 +10,26 @@ import { Message } from 'tg.store/global/types';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { ImportFileDropzone } from './ImportFileDropzone';
+import { ImportProgressBar } from './ImportProgress';
+import { ImportOperationStatus } from './ImportOperationStatus';
+import { ImportOperationTitle } from './ImportOperationTitle';
 
 export const MAX_FILE_COUNT = 20;
+
+export type OperationType = 'addFiles' | 'apply';
+
+export type OperationStatusType =
+  | 'PREPARING_AND_VALIDATING'
+  | 'STORING_KEYS'
+  | 'STORING_TRANSLATIONS'
+  | 'FINALIZING';
 
 type ImportFileInputProps = {
   onNewFiles: (files: File[]) => void;
   loading: boolean;
+  operation?: OperationType;
+  operationStatus?: OperationStatusType;
+  importDone: boolean;
 };
 
 export type ValidationResult = {
@@ -25,8 +39,7 @@ export type ValidationResult = {
 
 const StyledRoot = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  border: `1px dashed ${theme.palette.emphasis[400]}`,
-  maxWidth: 600,
+  border: `1px dashed ${theme.palette.emphasis[100]}`,
   margin: '0px auto',
   width: '100%',
 }));
@@ -45,6 +58,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     'properties',
   ];
   const [resetKey, setResetKey] = useState(0);
+
   function resetInput() {
     setResetKey((key) => key + 1);
   }
@@ -149,7 +163,8 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
         message={t('quick_start_item_pick_import_file_hint')}
       >
         <StyledRoot
-          sx={{
+          sx={(theme) => ({
+            backgroundColor: theme.palette.background.paper,
             mt: 4,
             pt: 5,
             pb: 5,
@@ -157,7 +172,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
             alignItems: 'center',
             flexDirection: 'column',
             display: 'flex',
-          }}
+          })}
         >
           <input
             key={resetKey}
@@ -169,24 +184,47 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
             multiple
             accept={ALLOWED_EXTENSIONS.join(',')}
           />
-          <Typography variant="body1">
-            <T keyName="import_file_input_drop_file_text" />
-          </Typography>
-          <Box mt={2} mb={2}>
-            <LoadingButton
-              loading={props.loading}
-              onClick={() =>
-                fileRef.current?.dispatchEvent(new MouseEvent('click'))
-              }
-              variant="outlined"
-              color="primary"
-            >
-              <T keyName="import_file_input_select_file_button" />
-            </LoadingButton>
+          {props.operation ? (
+            <ImportOperationTitle operation={props.operation} />
+          ) : (
+            <Typography variant="body1">
+              <T keyName="import_file_input_drop_file_text" />
+            </Typography>
+          )}
+          <Box
+            mt={2}
+            mb={2}
+            sx={{
+              height: '50px',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            {props.loading || props.importDone ? (
+              <ImportProgressBar loading={props.loading} />
+            ) : (
+              <LoadingButton
+                loading={props.loading}
+                onClick={() =>
+                  fileRef.current?.dispatchEvent(new MouseEvent('click'))
+                }
+                variant="outlined"
+                color="primary"
+              >
+                <T keyName="import_file_input_select_file_button" />
+              </LoadingButton>
+            )}
           </Box>
-          <Typography variant="body1">
-            <T keyName="import_file_supported_formats" />
-          </Typography>
+          {props.operationStatus ? (
+            <ImportOperationStatus status={props.operationStatus} />
+          ) : (
+            !props.loading && (
+              <Typography variant="body1">
+                <T keyName="import_file_supported_formats" />
+              </Typography>
+            )
+          )}
         </StyledRoot>
       </QuickStartHighlight>
     </ImportFileDropzone>

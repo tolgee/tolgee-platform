@@ -10,6 +10,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
+import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -23,6 +24,7 @@ class StoredDataImporter(
   applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
+  private val reportStatus: (ImportApplicationStatus) -> Unit,
 ) {
   private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)
@@ -75,21 +77,30 @@ class StoredDataImporter(
   }
 
   fun doImport() {
+    reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
     importDataManager.storedLanguages.forEach {
-      it.doImport()
+      it.prepareImport()
     }
 
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
 
+    reportStatus(ImportApplicationStatus.STORING_KEYS)
+
     namespaceService.saveAll(namespacesToSave.values)
 
     val keyEntitiesToSave = saveKeys()
 
+    saveMetaData(keyEntitiesToSave)
+
+    reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
+
     saveTranslations()
 
-    saveMetaData(keyEntitiesToSave)
+    reportStatus(ImportApplicationStatus.FINALIZING)
+
+    entityManager.flush()
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
 
@@ -163,7 +174,7 @@ class StoredDataImporter(
     }
   }
 
-  private fun ImportLanguage.doImport() {
+  private fun ImportLanguage.prepareImport() {
     importDataManager.populateStoredTranslations(this)
     importDataManager.handleConflicts(true)
     importDataManager.getStoredTranslations(this).forEach { it.doImport() }

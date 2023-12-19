@@ -47,6 +47,7 @@ export interface BaseViewProps {
   allCentered?: boolean;
   'data-cy'?: string;
   initialSearch?: string;
+  overflow?: string;
 }
 
 export const BaseView = (props: BaseViewProps) => {
@@ -144,6 +145,7 @@ export const BaseView = (props: BaseViewProps) => {
                 display="grid"
                 position="relative"
                 maxWidth="100%"
+                sx={{ overflow: props.overflow }}
               >
                 {typeof props.children === 'function'
                   ? props.children()

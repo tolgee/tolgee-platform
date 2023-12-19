@@ -31,6 +31,7 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
+import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -95,16 +96,18 @@ class ImportService(
     projectId: Long,
     authorId: Long,
     forceMode: ForceMode = ForceMode.NO_FORCE,
+    reportStatus: (ImportApplicationStatus) -> Unit = {}
   ) {
-    import(getNotExpired(projectId, authorId), forceMode)
+    import(getNotExpired(projectId, authorId), forceMode, reportStatus)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
   fun import(
     import: Import,
     forceMode: ForceMode = ForceMode.NO_FORCE,
+    reportStatus: (ImportApplicationStatus) -> Unit = {}
   ) {
-    StoredDataImporter(applicationContext, import, forceMode).doImport()
+    StoredDataImporter(applicationContext, import, forceMode, reportStatus).doImport()
     deleteImport(import)
     businessEventPublisher.publish(
       OnBusinessEventToCaptureEvent(

@@ -83,6 +83,7 @@ export const ImportView: FunctionComponent = () => {
         ],
       ]}
       maxWidth="wide"
+      overflow="scroll"
     >
       <ImportConflictResolutionDialog
         row={resolveRow}
@@ -91,7 +92,18 @@ export const ImportView: FunctionComponent = () => {
       <Box mt={2} position="relative">
         <ImportFileInput
           onNewFiles={dataHelper.onNewFiles}
-          loading={dataHelper.addFilesMutation.isLoading}
+          loading={
+            dataHelper.addFilesMutation.isLoading || applyImportHelper.loading
+          }
+          operationStatus={applyImportHelper.status}
+          importDone={applyImportHelper.loaded}
+          operation={
+            applyImportHelper.loading
+              ? 'apply'
+              : dataHelper.addFilesMutation.isLoading
+              ? 'addFiles'
+              : undefined
+          }
         />
 
         {dataHelper.addFilesMutation.data?.errors?.map((e, idx) => (
