@@ -10,7 +10,7 @@ const StyledContainer = styled('div')`
 export const AvatarImg = (props: { size: number; owner: AvatarOwner }) => {
   const theme = useTheme();
   const background =
-    theme.palette.mode === 'dark' ? 'rgb(239, 239, 239)' : 'rgb(200, 200, 200)';
+    theme.palette.mode === 'dark' ? 'rgb(239, 239, 239)' : 'rgb(230, 230, 230)';
   const avatarPath =
     props.size <= 50
       ? props.owner.avatar?.thumbnail

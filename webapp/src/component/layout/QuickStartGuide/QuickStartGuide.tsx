@@ -16,7 +16,6 @@ const StyledContainer = styled(Box)`
   grid-template-rows: auto 1fr auto;
   height: 100%;
   position: relative;
-  border-top: 1px solid ${({ theme }) => theme.palette.quickStart.topBorder};
 `;
 
 const StyledContent = styled(Box)`

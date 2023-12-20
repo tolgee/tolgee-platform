@@ -7,7 +7,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
-import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
@@ -99,37 +98,6 @@ class UserAccountService(
     return userAccount
   }
 
-  @Transactional
-  fun createUser(request: SignUpDto, role: UserAccount.Role = UserAccount.Role.USER): UserAccount {
-    dtoToEntity(request).let {
-      it.role = role
-      this.createUser(it)
-      return it
-    }
-  }
-
-  @Transactional
-  fun createInitialUser(request: SignUpDto): UserAccount {
-    // Check if the account already exists.
-    // This can only be the case on Tolgee 3.x series and should be removed on Tolgee 4.
-    val candidate = findActive(request.email)
-    if (candidate != null) {
-      candidate.isInitialUser = true
-      return save(candidate)
-    }
-
-    dtoToEntity(request).let {
-      it.role = UserAccount.Role.ADMIN
-      it.isInitialUser = true
-      it.passwordChanged = false
-      this.createUser(it)
-
-      // TODO: remove this on Tolgee 4 release
-      transferLegacyNoAuthUser()
-      return it
-    }
-  }
-
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#id")
   @Transactional
   fun delete(id: Long) {
@@ -185,11 +153,6 @@ class UserAccountService(
       deleteWithFetchedData(it)
       cacheManager.getCache(Caches.USER_ACCOUNTS)?.evict(it.id)
     }
-  }
-
-  fun dtoToEntity(request: SignUpDto): UserAccount {
-    val encodedPassword = passwordEncoder.encode(request.password!!)
-    return UserAccount(name = request.name, username = request.email, password = encodedPassword)
   }
 
   fun findByThirdParty(type: String, id: String): Optional<UserAccount> {
@@ -433,10 +396,7 @@ class UserAccountService(
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
-  val isAnyUserAccount: Boolean
-    get() = userAccountRepository.count() > 0
-
-  private fun transferLegacyNoAuthUser() {
+  fun transferLegacyNoAuthUser() {
     val legacyImplicitUser = findActive("___implicit_user")
       ?: return
 

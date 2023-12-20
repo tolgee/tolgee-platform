@@ -46,7 +46,7 @@ class DemoProjectCreator(
     val project = Project().apply {
       name = "Demo project"
       this@apply.organizationOwner = organization
-      this.description = "This is a demo project of an packing list app"
+      this.description = "This is a demo project of a packing list app"
     }
     projectService.save(project)
     setAvatar(project)

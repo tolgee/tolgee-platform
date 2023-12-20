@@ -3,11 +3,13 @@ package io.tolgee.service
 import io.tolgee.component.email.InvitationEmailSender
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.misc.CreateInvitationParams
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Organization
@@ -35,7 +37,8 @@ class InvitationService @Autowired constructor(
   private val organizationRoleService: OrganizationRoleService,
   private val permissionService: PermissionService,
   private val invitationEmailSender: InvitationEmailSender,
-  private val businessEventPublisher: BusinessEventPublisher
+  private val businessEventPublisher: BusinessEventPublisher,
+  private val tolgeeProperties: TolgeeProperties
 ) : Logging {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
@@ -230,5 +233,16 @@ class InvitationService @Autowired constructor(
 
   fun userOrInvitationWithEmailExists(email: String, organization: Organization): Boolean {
     return invitationRepository.countByUserOrInvitationWithEmailAndOrganization(email, organization) > 0
+  }
+
+  @Transactional
+  fun getInvitationOnRegistration(invitationCode: String?): Invitation? {
+    if (invitationCode == null) {
+      if (!tolgeeProperties.authentication.registrationsAllowed) {
+        throw AuthenticationException(Message.REGISTRATIONS_NOT_ALLOWED)
+      }
+      return null
+    }
+    return getInvitation(invitationCode)
   }
 }
