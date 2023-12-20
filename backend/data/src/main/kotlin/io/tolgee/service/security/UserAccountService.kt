@@ -323,7 +323,7 @@ class UserAccountService(
     }
 
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
-    if (!matches) throw PermissionException()
+    if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(dto.password)

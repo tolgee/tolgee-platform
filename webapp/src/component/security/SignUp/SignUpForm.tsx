@@ -9,7 +9,7 @@ import {
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { SetPasswordFields } from '../SetPasswordFields';
+import { PasswordLabel, SetPasswordField } from '../SetPasswordField';
 import { useConfig } from 'tg.globalContext/helpers';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
 import { Alert } from '../../common/Alert';
@@ -19,7 +19,6 @@ export type SignUpType = {
   name: string;
   email: string;
   password: string;
-  passwordRepeat?: string;
   organizationName: string;
   invitationCode?: string;
 };
@@ -64,7 +63,6 @@ export const SignUpForm = (props: Props) => {
       initialValues={
         {
           password: '',
-          passwordRepeat: '',
           name: '',
           email: '',
           organizationName: orgRequired ? '' : undefined,
@@ -104,7 +102,7 @@ export const SignUpForm = (props: Props) => {
           variant="standard"
         />
       )}
-      <SetPasswordFields />
+      <SetPasswordField label={<PasswordLabel />} />
       <Box mt={2} mb={3}>
         <Typography variant="body2">
           <T

@@ -7,6 +7,6 @@ import jakarta.validation.constraints.Size
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserMfaRecoveryRequestDto(
   @field:NotBlank
-  @field:Size(max = 50)
+  @field:Size(max = 200)
   var password: String = ""
 )

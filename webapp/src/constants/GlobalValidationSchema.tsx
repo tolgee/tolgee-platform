@@ -5,6 +5,9 @@ import * as Yup from 'yup';
 import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationService } from '../service/OrganizationService';
 import { SignUpService } from '../service/SignUpService';
+import YupPassword from 'yup-password';
+
+YupPassword(Yup);
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -41,18 +44,13 @@ Yup.setLocale({
 });
 
 export class Validation {
-  static readonly USER_PASSWORD = Yup.string().min(8).max(50).required();
-
-  static readonly USER_PASSWORD_WITH_REPEAT_NAKED = {
-    password: Validation.USER_PASSWORD,
-    passwordRepeat: Yup.string()
-      .oneOf([Yup.ref('password'), null], 'Passwords must match')
-      .required(),
-  };
-
-  static readonly USER_PASSWORD_WITH_REPEAT = Yup.object().shape(
-    Validation.USER_PASSWORD_WITH_REPEAT_NAKED
-  );
+  static readonly USER_PASSWORD = (t: TFunType) =>
+    Yup.string()
+      .min(8)
+      .max(200)
+      .required()
+      .minSymbols(1, t('password_validation_min_symbols', { count: 1 }))
+      .minNumbers(1, t('password_validation_min_numbers', { count: 1 }));
 
   static readonly RESET_PASSWORD_REQUEST = Yup.object().shape({
     email: Yup.string().email().required(),
@@ -72,7 +70,7 @@ export class Validation {
 
   static readonly SIGN_UP = (t: TFunType, orgRequired: boolean) =>
     Yup.object().shape({
-      ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
+      password: Validation.USER_PASSWORD(t),
       name: Yup.string().required(),
       email: Yup.string().email().required().test(
         'checkEmailUnique',
@@ -91,7 +89,7 @@ export class Validation {
   ) =>
     Yup.object().shape({
       currentPassword: Yup.string()
-        .max(50)
+        .max(200)
         .when('email', {
           is: (email) => email !== currentEmail,
           then: Yup.string().required('Current password is required'),
@@ -103,13 +101,16 @@ export class Validation {
           : Yup.string().email().required(),
     });
 
-  static readonly USER_PASSWORD_CHANGE = Yup.object().shape({
-    currentPassword: Yup.string().max(50).required(),
-    password: Validation.USER_PASSWORD,
-    passwordRepeat: Yup.string()
-      .notRequired()
-      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
-  });
+  static readonly USER_PASSWORD_CHANGE = (t: TFunType) =>
+    Yup.object().shape({
+      currentPassword: Yup.string().max(200).required(),
+      password: Validation.USER_PASSWORD(t),
+    });
+
+  static readonly PASSWORD_RESET = (t: TFunType) =>
+    Yup.object().shape({
+      password: Validation.USER_PASSWORD(t),
+    });
 
   static readonly USER_MFA_ENABLE = Yup.object().shape({
     password: Yup.string().max(50).required(),

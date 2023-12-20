@@ -16,14 +16,13 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { DashboardPage } from '../layout/DashboardPage';
-import { SetPasswordFields } from './SetPasswordFields';
+import { NewPasswordLabel, SetPasswordField } from './SetPasswordField';
 import { useLogout } from 'tg.hooks/useLogout';
 
 const globalActions = container.resolve(GlobalActions);
 
 type ValueType = {
   password: string;
-  passwordRepeat: string;
 };
 
 const PasswordResetSetView: FunctionComponent = () => {
@@ -81,10 +80,11 @@ const PasswordResetSetView: FunctionComponent = () => {
           }
           windowTitle={t('reset_password_set_title')}
           title={t('reset_password_set_title')}
+          maxWidth={650}
           content={
             <StandardForm
-              initialValues={{ password: '', passwordRepeat: '' } as ValueType}
-              validationSchema={Validation.USER_PASSWORD_WITH_REPEAT}
+              initialValues={{ password: '' } as ValueType}
+              validationSchema={Validation.PASSWORD_RESET(t)}
               submitButtons={
                 <>
                   <Box display="flex">
@@ -111,7 +111,7 @@ const PasswordResetSetView: FunctionComponent = () => {
                 );
               }}
             >
-              <SetPasswordFields />
+              <SetPasswordField label={<NewPasswordLabel />} />
             </StandardForm>
           }
         />
