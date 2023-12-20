@@ -98,6 +98,15 @@ class UserAccountService(
     return userAccount
   }
 
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun createUser(userAccount: UserAccount, rawPassword: String): UserAccount {
+    userAccountRepository.saveAndFlush(userAccount)
+    userAccount.password = passwordEncoder.encode(rawPassword)
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    return userAccount
+  }
+
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#id")
   @Transactional
   fun delete(id: Long) {

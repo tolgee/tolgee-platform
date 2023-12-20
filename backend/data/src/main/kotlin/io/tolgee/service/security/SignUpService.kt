@@ -28,7 +28,6 @@ class SignUpService(
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
-
     userAccountService.findActive(dto.email)?.let {
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
