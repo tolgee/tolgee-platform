@@ -77,7 +77,6 @@ class GithubOAuthDelegate(
         newUserAccount.thirdPartyAuthId = userResponse.id
         newUserAccount.thirdPartyAuthType = "github"
         newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-        userAccountService.createUser(newUserAccount)
 
         signUpService.signUp(newUserAccount, invitationCode, null)
 

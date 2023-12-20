@@ -59,8 +59,11 @@ class InitialUserCreatorCommandLineRunner(
       username = initialUsername,
       password = passwordEncoder.encode(initialPassword),
       name = initialUsername,
-      role = UserAccount.Role.ADMIN
-    )
+      role = UserAccount.Role.ADMIN,
+    ).apply {
+      passwordChanged = false
+      isInitialUser = true
+    }
 
     userAccountService.createUser(userAccount = user)
     userAccountService.transferLegacyNoAuthUser()
