@@ -3,7 +3,6 @@ package io.tolgee.service
 import io.tolgee.component.email.InvitationEmailSender
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.misc.CreateInvitationParams
@@ -22,7 +21,6 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.Logging
 import org.apache.commons.lang3.RandomStringUtils
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
@@ -30,14 +28,13 @@ import java.time.Instant
 import java.util.*
 
 @Service
-class InvitationService @Autowired constructor(
+class InvitationService(
   private val invitationRepository: InvitationRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val permissionService: PermissionService,
   private val invitationEmailSender: InvitationEmailSender,
   private val businessEventPublisher: BusinessEventPublisher,
-  private val tolgeeProperties: TolgeeProperties
 ) : Logging {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
