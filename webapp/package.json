@@ -18,7 +18,6 @@
     "@stomp/stompjs": "^6.1.2",
     "@tolgee/format-icu": "^5.16.0",
     "@tolgee/react": "^5.16.0",
-    "check-password-strength": "^2.0.7",
     "clsx": "^1.1.1",
     "codemirror": "^5.62.0",
     "copy-to-clipboard": "^3.3.1",
