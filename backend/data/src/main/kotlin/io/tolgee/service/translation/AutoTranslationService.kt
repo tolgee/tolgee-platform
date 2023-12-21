@@ -131,7 +131,7 @@ class AutoTranslationService(
     return null
   }
 
-  fun autoTranslateSync(
+  fun autoTranslateSyncWithRetry(
     key: Key,
     forcedLanguageTags: List<String>? = null,
     useTranslationMemory: Boolean? = null,
@@ -140,29 +140,39 @@ class AutoTranslationService(
   ) {
     tryUntilItDoesntBreakConstraint(maxRepeats = 10) {
       executeInNewTransaction(transactionManager) {
-        val adjustedConfigs = getAdjustedConfigs(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation)
-
-        val translations = adjustedConfigs.map {
-          if (it.override) {
-            return@map it to translationService.getOrCreate(key, it.language)
-          }
-
-          it to getUntranslatedTranslations(key, listOf(it.language)).firstOrNull()
-        }.filter {
-          it.second?.state != TranslationState.DISABLED
-        }
-
-        val toTmTranslate = translations.filter { it.first.usingTm }.mapNotNull { it.second }
-
-        val translatedWithTm = autoTranslateUsingTm(toTmTranslate, key).filter { it.value }.keys
-
-        val toMtTranslate =
-          translations.filter { it.first.usingPrimaryMtService && !translatedWithTm.contains(it.second) }
-            .mapNotNull { it.second }
-
-        autoTranslateUsingMachineTranslation(toMtTranslate, key, isBatch)
+        autoTranslateSync(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation, isBatch)
       }
     }
+  }
+
+  fun autoTranslateSync(
+    key: Key,
+    forcedLanguageTags: List<String>? = null,
+    useTranslationMemory: Boolean? = null,
+    useMachineTranslation: Boolean? = null,
+    isBatch: Boolean,
+  ) {
+    val adjustedConfigs = getAdjustedConfigs(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation)
+
+    val translations = adjustedConfigs.map {
+      if (it.override) {
+        return@map it to translationService.getOrCreate(key, it.language)
+      }
+
+      it to getUntranslatedTranslations(key, listOf(it.language)).firstOrNull()
+    }.filter {
+      it.second?.state != TranslationState.DISABLED
+    }
+
+    val toTmTranslate = translations.filter { it.first.usingTm }.mapNotNull { it.second }
+
+    val translatedWithTm = autoTranslateUsingTm(toTmTranslate, key).filter { it.value }.keys
+
+    val toMtTranslate =
+      translations.filter { it.first.usingPrimaryMtService && !translatedWithTm.contains(it.second) }
+        .mapNotNull { it.second }
+
+    autoTranslateUsingMachineTranslation(toMtTranslate, key, isBatch)
   }
 
   /**

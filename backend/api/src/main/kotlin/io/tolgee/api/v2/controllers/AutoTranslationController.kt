@@ -71,7 +71,7 @@ When no languages provided, it translates only untranslated languages."""
       throw BadRequestException(Message.CANNOT_TRANSLATE_BASE_LANGUAGE)
     }
 
-    autoTranslationService.autoTranslateSync(
+    autoTranslationService.autoTranslateSyncWithRetry(
       key = key,
       forcedLanguageTags = languages?.toList(),
       useTranslationMemory = useTranslationMemory ?: false,
