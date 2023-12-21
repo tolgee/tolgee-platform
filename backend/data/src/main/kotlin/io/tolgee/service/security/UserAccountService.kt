@@ -90,7 +90,6 @@ class UserAccountService(
     }
   }
 
-  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   @Transactional
   fun createUser(userAccount: UserAccount): UserAccount {
     userAccountRepository.saveAndFlush(userAccount)
@@ -99,7 +98,6 @@ class UserAccountService(
     return userAccount
   }
 
-  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   @Transactional
   fun createUser(userAccount: UserAccount, rawPassword: String): UserAccount {
     userAccountRepository.saveAndFlush(userAccount)

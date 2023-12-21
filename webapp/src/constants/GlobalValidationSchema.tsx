@@ -47,7 +47,7 @@ export class Validation {
   static readonly USER_PASSWORD = (t: TFunType) =>
     Yup.string()
       .min(8)
-      .max(200)
+      .max(50)
       .required()
       .minSymbols(1, t('password_validation_min_symbols', { count: 1 }))
       .minNumbers(1, t('password_validation_min_numbers', { count: 1 }));
@@ -89,7 +89,7 @@ export class Validation {
   ) =>
     Yup.object().shape({
       currentPassword: Yup.string()
-        .max(200)
+        .max(50)
         .when('email', {
           is: (email) => email !== currentEmail,
           then: Yup.string().required('Current password is required'),
@@ -103,7 +103,7 @@ export class Validation {
 
   static readonly USER_PASSWORD_CHANGE = (t: TFunType) =>
     Yup.object().shape({
-      currentPassword: Yup.string().max(200).required(),
+      currentPassword: Yup.string().max(50).required(),
       password: Validation.USER_PASSWORD(t),
     });
 

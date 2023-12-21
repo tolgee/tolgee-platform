@@ -17,6 +17,6 @@ data class UserTotpEnableRequestDto(
   var otp: String = "",
 
   @field:NotBlank
-  @field:Size(max = 200)
+  @field:Size(max = 50)
   var password: String = ""
 )

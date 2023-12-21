@@ -3,7 +3,9 @@ package io.tolgee.service.security
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -45,7 +47,7 @@ class SignUpService(
   }
 
   fun signUp(entity: UserAccount, invitationCode: String?, organizationName: String?): UserAccount {
-    val invitation = invitationService.getInvitationOnRegistration(invitationCode)
+    val invitation = findAndCheckInvitationOnRegistration(invitationCode)
     val user = userAccountService.createUser(entity)
     if (invitation != null) {
       invitationService.accept(invitation.code, user)
@@ -63,5 +65,16 @@ class SignUpService(
   fun dtoToEntity(request: SignUpDto): UserAccount {
     val encodedPassword = passwordEncoder.encode(request.password!!)
     return UserAccount(name = request.name, username = request.email, password = encodedPassword)
+  }
+
+  @Transactional
+  fun findAndCheckInvitationOnRegistration(invitationCode: String?): Invitation? {
+    if (invitationCode == null) {
+      if (!tolgeeProperties.authentication.registrationsAllowed) {
+        throw AuthenticationException(Message.REGISTRATIONS_NOT_ALLOWED)
+      }
+      return null
+    }
+    return invitationService.getInvitation(invitationCode)
   }
 }

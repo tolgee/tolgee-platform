@@ -14,7 +14,7 @@ data class SignUpDto(
   @field:Size(min = 3, max = 50)
   var organizationName: String? = null,
 
-  @field:Size(min = 8, max = 200)
+  @field:Size(min = 8, max = 50)
   @field:NotBlank
   var password: String? = null,
 

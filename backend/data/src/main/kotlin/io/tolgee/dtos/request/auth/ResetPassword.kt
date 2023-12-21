@@ -10,6 +10,6 @@ data class ResetPassword(
   @field:NotBlank
   var code: String? = null,
 
-  @field:Size(min = 8, max = 200)
+  @field:Size(min = 8, max = 50)
   var password: String? = null,
 )
