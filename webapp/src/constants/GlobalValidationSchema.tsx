@@ -5,9 +5,6 @@ import * as Yup from 'yup';
 import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationService } from '../service/OrganizationService';
 import { SignUpService } from '../service/SignUpService';
-import YupPassword from 'yup-password';
-
-YupPassword(Yup);
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -45,12 +42,7 @@ Yup.setLocale({
 
 export class Validation {
   static readonly USER_PASSWORD = (t: TFunType) =>
-    Yup.string()
-      .min(8)
-      .max(50)
-      .required()
-      .minSymbols(1, t('password_validation_min_symbols', { count: 1 }))
-      .minNumbers(1, t('password_validation_min_numbers', { count: 1 }));
+    Yup.string().min(8).max(50).required();
 
   static readonly RESET_PASSWORD_REQUEST = Yup.object().shape({
     email: Yup.string().email().required(),

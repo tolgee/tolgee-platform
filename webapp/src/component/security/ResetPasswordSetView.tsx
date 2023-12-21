@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { useTranslate } from '@tolgee/react';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
@@ -13,11 +13,15 @@ import { AppState } from 'tg.store/index';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
+import { NewPasswordLabel } from './SetPasswordField';
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { DashboardPage } from '../layout/DashboardPage';
-import { NewPasswordLabel, SetPasswordField } from './SetPasswordField';
 import { useLogout } from 'tg.hooks/useLogout';
+
+const PasswordFieldWithValidation = React.lazy(
+  () => import('tg.component/security/PasswordFieldWithValidation')
+);
 
 const globalActions = container.resolve(GlobalActions);
 
@@ -111,7 +115,7 @@ const PasswordResetSetView: FunctionComponent = () => {
                 );
               }}
             >
-              <SetPasswordField label={<NewPasswordLabel />} />
+              <PasswordFieldWithValidation label={<NewPasswordLabel />} />
             </StandardForm>
           }
         />

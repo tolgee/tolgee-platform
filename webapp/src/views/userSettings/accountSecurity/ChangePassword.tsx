@@ -9,12 +9,13 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdatePasswordDTO } from 'tg.service/request.types';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import {
-  NewPasswordLabel,
-  SetPasswordField,
-} from 'tg.component/security/SetPasswordField';
+import { NewPasswordLabel } from 'tg.component/security/SetPasswordField';
 import { useUser } from 'tg.globalContext/helpers';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+
+const PasswordFieldWithValidation = React.lazy(
+  () => import('tg.component/security/PasswordFieldWithValidation')
+);
 
 const messagesService = container.resolve(MessageService);
 const securityService = container.resolve(SecurityService);
@@ -68,7 +69,7 @@ export const ChangePassword: FunctionComponent = () => {
           label={<T keyName="current-password" />}
           variant="standard"
         />
-        <SetPasswordField label={<NewPasswordLabel />} />
+        <PasswordFieldWithValidation label={<NewPasswordLabel />} />
       </StandardForm>
     </Box>
   );
