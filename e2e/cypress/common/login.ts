@@ -72,7 +72,7 @@ export const fillAndSubmitSignUpForm = (
   if (withOrganization) {
     cy.xpath(getInput('organizationName')).type('organization');
   }
-  cy.xpath(getInput('password')).type('password1!');
+  cy.xpath(getInput('password')).type('very.strong.password');
   gcy('sign-up-submit-button').click();
 };
 

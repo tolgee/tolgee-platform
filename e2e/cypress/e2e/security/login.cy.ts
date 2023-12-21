@@ -86,7 +86,7 @@ context('Login', () => {
     getParsedResetPasswordEmail().then((r) => {
       cy.visit(r.resetLink);
     });
-    const newPassword = 'new_password1!';
+    const newPassword = 'new_very.strong.password';
     cy.xpath("//*[@name='password']").type(newPassword);
     cy.contains('Save new password').click();
     assertMessage('Password successfully reset');
