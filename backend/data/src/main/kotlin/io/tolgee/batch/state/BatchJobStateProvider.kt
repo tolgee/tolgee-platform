@@ -125,6 +125,9 @@ class BatchJobStateProvider(
   }
 
   fun getCachedJobIds(): MutableSet<Long> {
-    return getStatesMap().keys
+    val keys = getStatesMap().keys
+    // redisson defers the access to the key set, so it was throwing NoSuchElementException when iterating over keys
+    // so let's rather copy the set
+    return keys.toMutableSet()
   }
 }
