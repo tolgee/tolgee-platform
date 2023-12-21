@@ -2,7 +2,6 @@ package io.tolgee.component.demoProject
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
@@ -62,16 +61,15 @@ class DemoProjectCreator(
   }
 
   private fun addBigMeta() {
-    val bigMetaDto = BigMetaDto().apply {
-      keys.forEach { (keyName, _) ->
-        relatedKeysInOrder.add(
-          RelatedKeyDto().apply {
-            this.keyName = keyName
-          }
-        )
-      }
+    val relatedKeysInOrder = mutableListOf<RelatedKeyDto>()
+    keys.forEach { (keyName, _) ->
+      relatedKeysInOrder.add(
+        RelatedKeyDto().apply {
+          this.keyName = keyName
+        }
+      )
     }
-    bigMetaService.store(bigMetaDto, project)
+    bigMetaService.store(relatedKeysInOrder, project)
   }
 
   private fun setStates() {

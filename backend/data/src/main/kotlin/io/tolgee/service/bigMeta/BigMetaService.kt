@@ -56,13 +56,8 @@ class BigMetaService(
       return
     }
 
-    val distances =
-      logger.traceMeasureTime("storeRelatedKeysInOrder -> get new distances") {
-        KeysDistanceUtil(relatedKeysInOrder, project, this).newDistances
-      }
-    logger.traceMeasureTime("storeRelatedKeysInOrder -> save new distances") {
-      keysDistanceRepository.saveAll(distances)
-    }
+    val distances = KeysDistanceUtil(relatedKeysInOrder, project, this).newDistances
+    keysDistanceRepository.saveAll(distances)
   }
 
   fun getKeyIdsForItems(
@@ -85,9 +80,7 @@ class BigMetaService(
 
   @Transactional
   fun findExistingKeysDistancesByIds(keyIds: List<Long>): List<KeysDistance> {
-    return logger.traceMeasureTime("findExistingKeysDistancesByIds") {
-      keysDistanceRepository.findForKeyIdsWithRelations(keyIds)
-    }
+    return keysDistanceRepository.findForKeyIdsWithRelations(keyIds)
   }
 
   fun get(id: Long): KeysDistance {

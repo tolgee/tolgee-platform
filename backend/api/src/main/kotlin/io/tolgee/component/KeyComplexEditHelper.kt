@@ -149,7 +149,6 @@ class KeyComplexEditHelper(
         bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity)
       }
 
-      keyWithDataModelAssembler.toModel(edited)
       val translations = translationService.setForKey(
         key,
         oldTranslations = oldTranslations,

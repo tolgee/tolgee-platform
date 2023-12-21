@@ -36,9 +36,7 @@ class BigMetaController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun store(@RequestBody @Valid data: BigMetaDto) {
-    logger.traceMeasureTime("BigMetaController.store") {
-      bigMetaService.store(data, projectHolder.projectEntity)
-    }
+    bigMetaService.store(data, projectHolder.projectEntity)
   }
 
   @GetMapping("/keys/{id}/big-meta")
