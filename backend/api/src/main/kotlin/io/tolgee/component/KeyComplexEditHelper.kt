@@ -87,7 +87,16 @@ class KeyComplexEditHelper(
       doStateUpdate()
       doUpdateTags()
       doUpdateScreenshots()
-      doUpdateKey()
+      val result = doUpdateKey()
+      storeBigMeta()
+      result
+    }
+  }
+
+  private fun storeBigMeta() {
+    if (isBigMetaProvided) {
+      securityService.checkBigMetaUploadPermission(projectHolder.project.id)
+      bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity)
     }
   }
 
@@ -143,11 +152,6 @@ class KeyComplexEditHelper(
       val oldTranslations = modifiedTranslations.map {
         it.key to existingTranslationsByTag[it.key]
       }.toMap()
-
-      if (isBigMetaProvided) {
-        securityService.checkBigMetaUploadPermission(projectHolder.project.id)
-        bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity)
-      }
 
       val translations = translationService.setForKey(
         key,
