@@ -132,7 +132,6 @@ class KeyController(
     }
   }
 
-
   @PutMapping(value = ["/{id}/complex-update"])
   @Operation(summary = "More")
   @UseDefaultPermissions // Security: key permissions are checked separately in method body
