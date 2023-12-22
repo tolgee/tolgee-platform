@@ -1,3 +1,10 @@
+## [3.42.1](https://github.com/tolgee/tolgee-platform/compare/v3.42.0...v3.42.1) (2023-12-22)
+
+
+### Bug Fixes
+
+* Onboarding & other UI fixes, security improvements ([#2036](https://github.com/tolgee/tolgee-platform/issues/2036)) ([8cde2c5](https://github.com/tolgee/tolgee-platform/commit/8cde2c55cea0342cc4f5e66aed499ad04f0c1e74))
+
 # [3.42.0](https://github.com/tolgee/tolgee-platform/compare/v3.41.4...v3.42.0) (2023-12-22)
 
 
