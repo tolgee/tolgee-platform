@@ -20,6 +20,7 @@ import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.retry
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -73,7 +74,9 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
           performProjectAuthGet("export").andIsOk
           Thread.sleep(sleepBetweenMs)
         }
-        pool.idleConnections.assert.isGreaterThan(90)
+        waitForNotThrowing(pollTime = 50, timeout = 5000) {
+          pool.idleConnections.assert.isGreaterThan(90)
+        }
       } finally {
         sleepBetweenMs += 10
       }
