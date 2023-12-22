@@ -1,3 +1,10 @@
+# [3.42.0](https://github.com/tolgee/tolgee-platform/compare/v3.41.4...v3.42.0) (2023-12-22)
+
+
+### Features
+
+* Enable big-meta (context storing) in key create / edit endpoints & optimize ([#2005](https://github.com/tolgee/tolgee-platform/issues/2005)) ([166d276](https://github.com/tolgee/tolgee-platform/commit/166d2765b988b6e1d17b47643bcb1e9271c6e731))
+
 ## [3.41.4](https://github.com/tolgee/tolgee-platform/compare/v3.41.3...v3.41.4) (2023-12-22)
 
 
