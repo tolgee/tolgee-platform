@@ -2,7 +2,6 @@ package io.tolgee.commandLineRunners
 
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.UserAccount
 import io.tolgee.security.InitialPasswordManager
@@ -45,10 +44,29 @@ class InitialUserCreatorCommandLineRunner(
   fun createInitialUser() {
     logger.info("Creating initial user...")
     val initialUsername = properties.authentication.initialUsername
+
+    // Check if the account already exists.
+    // This can only be the case on Tolgee 3.x series and should be removed on Tolgee 4.
+    val candidate = userAccountService.findActive(initialUsername)
+    if (candidate != null) {
+      candidate.isInitialUser = true
+      userAccountService.save(candidate)
+      return
+    }
+
     val initialPassword = initialPasswordManager.initialPassword
-    val user = userAccountService.createInitialUser(
-      SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername),
-    )
+    val user = UserAccount(
+      username = initialUsername,
+      password = passwordEncoder.encode(initialPassword),
+      name = initialUsername,
+      role = UserAccount.Role.ADMIN,
+    ).apply {
+      passwordChanged = false
+      isInitialUser = true
+    }
+
+    userAccountService.createUser(userAccount = user)
+    userAccountService.transferLegacyNoAuthUser()
 
     // If the user was already existing, it may already have assigned orgs.
     // To avoid conflicts, we only create the org if the user doesn't have any.

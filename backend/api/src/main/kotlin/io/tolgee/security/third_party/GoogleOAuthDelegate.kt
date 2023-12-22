@@ -4,11 +4,10 @@ import io.tolgee.configuration.tolgee.GoogleAuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.service.InvitationService
+import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -23,8 +22,8 @@ class GoogleOAuthDelegate(
   private val jwtService: JwtService,
   private val userAccountService: UserAccountService,
   private val restTemplate: RestTemplate,
-  private val properties: TolgeeProperties,
-  private val invitationService: InvitationService
+  properties: TolgeeProperties,
+  private val signUpService: SignUpService
 ) {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
@@ -78,15 +77,6 @@ class GoogleOAuthDelegate(
             throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
           }
 
-          var invitation: Invitation? = null
-          if (invitationCode == null) {
-            if (!properties.authentication.registrationsAllowed) {
-              throw AuthenticationException(Message.REGISTRATIONS_NOT_ALLOWED)
-            }
-          } else {
-            invitation = invitationService.getInvitation(invitationCode)
-          }
-
           val newUserAccount = UserAccount()
           newUserAccount.username = userResponse.email
             ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
@@ -94,10 +84,7 @@ class GoogleOAuthDelegate(
           newUserAccount.thirdPartyAuthId = userResponse.sub
           newUserAccount.thirdPartyAuthType = "google"
           newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-          userAccountService.createUser(newUserAccount)
-          if (invitation != null) {
-            invitationService.accept(invitation.code, newUserAccount)
-          }
+          signUpService.signUp(newUserAccount, invitationCode, null)
 
           newUserAccount
         }

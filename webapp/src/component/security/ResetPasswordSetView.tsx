@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { useTranslate } from '@tolgee/react';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
@@ -13,17 +13,20 @@ import { AppState } from 'tg.store/index';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
+import { NewPasswordLabel } from './SetPasswordField';
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { DashboardPage } from '../layout/DashboardPage';
-import { SetPasswordFields } from './SetPasswordFields';
 import { useLogout } from 'tg.hooks/useLogout';
+
+const PasswordFieldWithValidation = React.lazy(
+  () => import('tg.component/security/PasswordFieldWithValidation')
+);
 
 const globalActions = container.resolve(GlobalActions);
 
 type ValueType = {
   password: string;
-  passwordRepeat: string;
 };
 
 const PasswordResetSetView: FunctionComponent = () => {
@@ -81,10 +84,11 @@ const PasswordResetSetView: FunctionComponent = () => {
           }
           windowTitle={t('reset_password_set_title')}
           title={t('reset_password_set_title')}
+          maxWidth={650}
           content={
             <StandardForm
-              initialValues={{ password: '', passwordRepeat: '' } as ValueType}
-              validationSchema={Validation.USER_PASSWORD_WITH_REPEAT}
+              initialValues={{ password: '' } as ValueType}
+              validationSchema={Validation.PASSWORD_RESET(t)}
               submitButtons={
                 <>
                   <Box display="flex">
@@ -111,7 +115,7 @@ const PasswordResetSetView: FunctionComponent = () => {
                 );
               }}
             >
-              <SetPasswordFields />
+              <PasswordFieldWithValidation label={<NewPasswordLabel />} />
             </StandardForm>
           }
         />

@@ -61,6 +61,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = () => {
         windowTitle={t('reset_password_title')}
         title={t('reset_password_title')}
         backLink={LINKS.LOGIN.build()}
+        maxWidth={650}
         content={
           loadable.loaded ? (
             <Alert severity="success">

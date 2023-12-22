@@ -21,7 +21,6 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.Logging
 import org.apache.commons.lang3.RandomStringUtils
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
@@ -29,13 +28,13 @@ import java.time.Instant
 import java.util.*
 
 @Service
-class InvitationService @Autowired constructor(
+class InvitationService(
   private val invitationRepository: InvitationRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val permissionService: PermissionService,
   private val invitationEmailSender: InvitationEmailSender,
-  private val businessEventPublisher: BusinessEventPublisher
+  private val businessEventPublisher: BusinessEventPublisher,
 ) : Logging {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {

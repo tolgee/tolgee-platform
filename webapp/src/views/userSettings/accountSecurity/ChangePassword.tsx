@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import { Box, Typography } from '@mui/material';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { MessageService } from 'tg.service/MessageService';
@@ -9,9 +9,13 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdatePasswordDTO } from 'tg.service/request.types';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
+import { NewPasswordLabel } from 'tg.component/security/SetPasswordField';
 import { useUser } from 'tg.globalContext/helpers';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+
+const PasswordFieldWithValidation = React.lazy(
+  () => import('tg.component/security/PasswordFieldWithValidation')
+);
 
 const messagesService = container.resolve(MessageService);
 const securityService = container.resolve(SecurityService);
@@ -19,9 +23,14 @@ const securityService = container.resolve(SecurityService);
 export const ChangePassword: FunctionComponent = () => {
   const user = useUser();
 
+  const { t } = useTranslate();
+
   const updatePassword = useApiMutation({
     url: '/v2/user/password',
     method: 'put',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+    },
   });
 
   const handleSubmit = (v: UserUpdatePasswordDTO) => {
@@ -49,10 +58,9 @@ export const ChangePassword: FunctionComponent = () => {
           {
             currentPassword: '',
             password: '',
-            passwordRepeat: '',
           } as UserUpdatePasswordDTO
         }
-        validationSchema={Validation.USER_PASSWORD_CHANGE}
+        validationSchema={Validation.USER_PASSWORD_CHANGE(t)}
         onSubmit={handleSubmit}
       >
         <TextField
@@ -61,7 +69,7 @@ export const ChangePassword: FunctionComponent = () => {
           label={<T keyName="current-password" />}
           variant="standard"
         />
-        <SetPasswordFields />
+        <PasswordFieldWithValidation label={<NewPasswordLabel />} />
       </StandardForm>
     </Box>
   );

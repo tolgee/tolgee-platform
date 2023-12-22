@@ -59,7 +59,8 @@
     "uuid": "9.0.0",
     "web-vitals": "^2.1.0",
     "yup": "^0.32.9",
-    "zustand": "4.1.2"
+    "zustand": "4.1.2",
+    "zxcvbn": "^4.4.2"
   },
   "scripts": {
     "start": "NODE_OPTIONS=--openssl-legacy-provider craco start",
@@ -116,6 +117,7 @@
     "@types/react-redux": "^7.1.18",
     "@types/react-router-dom": "^5.1.8",
     "@types/yup": "^0.29.13",
+    "@types/zxcvbn": "^4.4.4",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "babel-loader": "8.1.0",

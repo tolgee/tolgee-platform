@@ -27,7 +27,6 @@ export type SignUpType = {
   name: string;
   email: string;
   password: string;
-  passwordRepeat?: string;
   organizationName: string;
   invitationCode?: string;
 };
@@ -71,8 +70,6 @@ export const SignUpView: FunctionComponent = () => {
       invitationCode: InvitationCodeService.getCode(),
       recaptchaToken: await getRecaptchaToken(),
     } as SignUpType;
-
-    delete request.passwordRepeat;
 
     signUpMutation.mutate(
       { content: { 'application/json': request } },

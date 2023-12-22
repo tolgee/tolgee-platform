@@ -2,7 +2,6 @@ package io.tolgee.development
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.LanguageDto
-import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Language
@@ -25,6 +24,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.SlugGenerator
 import io.tolgee.util.executeInNewTransaction
 import jakarta.persistence.EntityManager
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
@@ -45,6 +45,7 @@ class DbPopulatorReal(
   private val apiKeyService: ApiKeyService,
   private val languageStatsService: LanguageStatsService,
   private val platformTransactionManager: PlatformTransactionManager,
+  private val passwordEncoder: PasswordEncoder
 ) {
   private lateinit var de: Language
   private lateinit var en: Language
@@ -59,12 +60,17 @@ class DbPopulatorReal(
 
   fun createUserIfNotExists(username: String, password: String? = null, name: String? = null): UserAccount {
     return userAccountService.findActive(username) ?: let {
-      val signUpDto = SignUpDto(
-        name = name ?: username, email = username,
-        password = password
-          ?: initialPasswordManager.initialPassword
+
+      val rawPassword = password
+        ?: initialPasswordManager.initialPassword
+
+      userAccountService.createUser(
+        UserAccount(
+          name = name ?: username,
+          username = username,
+          password = passwordEncoder.encode(rawPassword)
+        )
       )
-      userAccountService.createUser(signUpDto)
     }
   }
 

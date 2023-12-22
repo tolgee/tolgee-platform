@@ -18,6 +18,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -46,7 +47,8 @@ class ProjectsE2eDataController(
   private val keyService: KeyService,
   private val languageService: LanguageService,
   private val entityManager: EntityManager,
-  private val transactionManager: PlatformTransactionManager
+  private val transactionManager: PlatformTransactionManager,
+  private val signUpService: SignUpService
 ) : Logging {
   @GetMapping(value = ["/generate"])
   @Transactional
@@ -54,7 +56,7 @@ class ProjectsE2eDataController(
     val createdUsers = mutableMapOf<String, UserAccount>()
 
     users.forEach {
-      createdUsers[it.email] = userAccountService.dtoToEntity(
+      createdUsers[it.email] = signUpService.dtoToEntity(
         SignUpDto(
           name = it.name, email = it.email, password = "admin"
         )
