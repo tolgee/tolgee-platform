@@ -4,6 +4,7 @@ import com.google.common.primitives.Longs
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.model.Project
 import io.tolgee.model.keyBigMeta.KeysDistance
+import io.tolgee.util.Logging
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -12,8 +13,7 @@ class KeysDistanceUtil(
   private val relatedKeysInOrder: MutableList<RelatedKeyDto>,
   private val project: Project,
   private val bigMetaService: BigMetaService
-) {
-
+) : Logging {
   val newDistances by lazy {
     increaseRelevant()
     decreaseOthers()
@@ -28,6 +28,7 @@ class KeysDistanceUtil(
           return@forEach2
         }
         val key2Id = keyIdMap[item2.namespace to item2.keyName] ?: return@forEach2
+
         val distance = distances[min(key1Id, key2Id) to max(key1Id, key2Id)]
           ?: createDistance(key1Id, key2Id)
         relevant[distance.key1Id to distance.key2Id] = distance

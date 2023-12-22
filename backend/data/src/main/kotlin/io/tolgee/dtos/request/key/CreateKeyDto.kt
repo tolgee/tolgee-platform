@@ -3,6 +3,8 @@ package io.tolgee.dtos.request.key
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.RelatedKeyDto
+import io.tolgee.dtos.WithRelatedKeysInOrder
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.util.getSafeNamespace
 import jakarta.validation.constraints.NotBlank
@@ -35,8 +37,10 @@ class CreateKeyDto(
   @Deprecated("Use screenshots instead")
   val screenshotUploadedImageIds: List<Long>? = null,
 
-  val screenshots: List<KeyScreenshotDto>? = null
-) {
+  val screenshots: List<KeyScreenshotDto>? = null,
+
+  override var relatedKeysInOrder: MutableList<RelatedKeyDto>? = null
+) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {
     this.namespace = getSafeNamespace(namespace)

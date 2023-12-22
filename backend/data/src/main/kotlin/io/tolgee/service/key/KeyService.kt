@@ -18,6 +18,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.translation.TranslationService
@@ -44,7 +45,8 @@ class KeyService(
   private val entityManager: EntityManager,
   @Lazy
   private var translationService: TranslationService,
-  private val languageRepository: LanguageRepository
+  private val languageRepository: LanguageRepository,
+  private val bigMetaService: BigMetaService
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -107,6 +109,8 @@ class KeyService(
     dto.tags?.forEach {
       tagService.tagKey(key, it)
     }
+
+    bigMetaService.store(dto.relatedKeysInOrder, project)
 
     storeScreenshots(dto, key)
 

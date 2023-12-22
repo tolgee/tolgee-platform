@@ -215,6 +215,10 @@ class SecurityService(
     }
   }
 
+  fun checkBigMetaUploadPermission(projectId: Long) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+  }
+
   fun fixInvalidApiKeyWhenRequired(apiKey: ApiKey) {
     val oldSize = apiKey.scopesEnum.size
     apiKey.scopesEnum.removeIf {

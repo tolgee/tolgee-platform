@@ -95,24 +95,41 @@ class KeyController(
   @RequiresProjectPermissions([Scope.KEYS_CREATE])
   @AllowApiAccess
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
-    if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
-      projectHolder.projectEntity.checkScreenshotsUploadPermission()
-    }
+    checkScrenshotUploadPermissions(dto)
+    checkTranslatePermission(dto)
+    checkCanStoreBigMeta(dto)
+    checkStateChangePermission(dto)
 
+    val key = keyService.create(projectHolder.projectEntity, dto)
+    return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
+  }
+
+  private fun checkCanStoreBigMeta(dto: CreateKeyDto) {
+    if (!dto.relatedKeysInOrder.isNullOrEmpty()) {
+      securityService.checkBigMetaUploadPermission(projectHolder.project.id)
+    }
+  }
+
+  private fun checkTranslatePermission(dto: CreateKeyDto) {
     dto.translations?.filterValues { !it.isNullOrEmpty() }?.keys?.let { languageTags ->
       if (languageTags.isNotEmpty()) {
         securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
       }
     }
+  }
 
+  private fun checkStateChangePermission(dto: CreateKeyDto) {
     dto.states?.filterValues { it != AssignableTranslationState.TRANSLATED }?.keys?.let { languageTags ->
       if (languageTags.isNotEmpty()) {
         securityService.checkLanguageStateChangePermissionsByTag(projectHolder.project.id, languageTags)
       }
     }
+  }
 
-    val key = keyService.create(projectHolder.projectEntity, dto)
-    return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
+  private fun checkScrenshotUploadPermissions(dto: CreateKeyDto) {
+    if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
+      projectHolder.projectEntity.checkScreenshotsUploadPermission()
+    }
   }
 
   @PutMapping(value = ["/{id}/complex-update"])

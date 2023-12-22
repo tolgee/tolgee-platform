@@ -12,6 +12,7 @@ import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.repository.KeysDistanceRepository
+import io.tolgee.util.Logging
 import io.tolgee.util.equalNullable
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.runSentryCatching
@@ -30,7 +31,7 @@ class BigMetaService(
   private val keysDistanceRepository: KeysDistanceRepository,
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager
-) {
+) : Logging {
   companion object {
     const val MAX_DISTANCE_SCORE = 10000L
     const val MAX_POINTS = 2000L
@@ -43,16 +44,19 @@ class BigMetaService(
 
   @Transactional
   fun store(data: BigMetaDto, project: Project) {
-    storeRelatedKeysInOrder(data.relatedKeysInOrder, project)
+    store(data.relatedKeysInOrder, project)
   }
 
   @Transactional
-  fun storeRelatedKeysInOrder(
-    relatedKeysInOrder: MutableList<RelatedKeyDto>,
+  fun store(
+    relatedKeysInOrder: MutableList<RelatedKeyDto>?,
     project: Project
   ) {
-    val distances = KeysDistanceUtil(relatedKeysInOrder, project, this)
-      .newDistances
+    if (relatedKeysInOrder.isNullOrEmpty()) {
+      return
+    }
+
+    val distances = KeysDistanceUtil(relatedKeysInOrder, project, this).newDistances
     keysDistanceRepository.saveAll(distances)
   }
 
@@ -76,12 +80,7 @@ class BigMetaService(
 
   @Transactional
   fun findExistingKeysDistancesByIds(keyIds: List<Long>): List<KeysDistance> {
-    val directIds = mutableSetOf<Long>()
-    keysDistanceRepository.findForKeyIds(keyIds).forEach {
-      directIds.add(it.key1Id)
-      directIds.add(it.key2Id)
-    }
-    return keysDistanceRepository.findForKeyIds(directIds)
+    return keysDistanceRepository.findForKeyIdsWithRelations(keyIds)
   }
 
   fun get(id: Long): KeysDistance {

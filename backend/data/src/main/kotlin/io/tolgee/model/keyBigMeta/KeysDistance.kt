@@ -15,6 +15,8 @@ import org.springframework.data.domain.Persistable
 @Table(
   indexes = [
     Index(columnList = "key1Id, key2Id", unique = true),
+    Index(columnList = "key1Id"),
+    Index(columnList = "key2Id"),
   ]
 )
 @IdClass(KeysDistanceId::class)

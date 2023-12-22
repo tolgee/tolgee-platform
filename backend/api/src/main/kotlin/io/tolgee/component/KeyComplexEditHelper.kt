@@ -14,6 +14,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
@@ -42,6 +43,7 @@ class KeyComplexEditHelper(
   private val activityHolder: ActivityHolder = applicationContext.getBean(ActivityHolder::class.java)
   private val transactionManager: PlatformTransactionManager =
     applicationContext.getBean(PlatformTransactionManager::class.java)
+  private val bigMetaService = applicationContext.getBean(BigMetaService::class.java)
 
   private lateinit var key: Key
   private var modifiedTranslations: Map<Long, String?>? = null
@@ -54,6 +56,7 @@ class KeyComplexEditHelper(
   private var isKeyModified by Delegates.notNull<Boolean>()
   private var isScreenshotDeleted by Delegates.notNull<Boolean>()
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
+  private var isBigMetaProvided by Delegates.notNull<Boolean>()
 
   private val languages by lazy {
     val translationLanguages = dto.translations?.keys ?: setOf()
@@ -84,7 +87,16 @@ class KeyComplexEditHelper(
       doStateUpdate()
       doUpdateTags()
       doUpdateScreenshots()
-      doUpdateKey()
+      val result = doUpdateKey()
+      storeBigMeta()
+      result
+    }
+  }
+
+  private fun storeBigMeta() {
+    if (isBigMetaProvided) {
+      securityService.checkBigMetaUploadPermission(projectHolder.project.id)
+      bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity)
     }
   }
 
@@ -225,6 +237,7 @@ class KeyComplexEditHelper(
     isKeyModified = key.name != dto.name || getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
+    isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()
   }
 
   private fun areTagsModified(

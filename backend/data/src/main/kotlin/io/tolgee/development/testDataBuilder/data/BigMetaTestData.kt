@@ -30,7 +30,7 @@ class BigMetaTestData {
   }
 
   fun addLotOfData(): List<Key> {
-    val keys = (0..1000).map {
+    val keys = (0..5000).map {
       projectBuilder.addKey(null, "key$it").self
     }
 
