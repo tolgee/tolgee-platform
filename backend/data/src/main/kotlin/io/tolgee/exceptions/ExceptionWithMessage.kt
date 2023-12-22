@@ -22,7 +22,7 @@ abstract class ExceptionWithMessage(
     this.tolgeeMessage = message
   }
 
-  constructor(message: Message) : this(null, null) {
+  constructor(message: Message) : this(message.code, null) {
     this.tolgeeMessage = message
   }
 }
