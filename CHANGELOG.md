@@ -1,3 +1,10 @@
+## [3.41.4](https://github.com/tolgee/tolgee-platform/compare/v3.41.3...v3.41.4) (2023-12-22)
+
+
+### Bug Fixes
+
+* Fix auto-translation errors, drop some handled exceptions (sentry) ([#2040](https://github.com/tolgee/tolgee-platform/issues/2040)) ([13e4c7e](https://github.com/tolgee/tolgee-platform/commit/13e4c7ec6caca42587f2ff618958a013ddd945f8))
+
 ## [3.41.3](https://github.com/tolgee/tolgee-platform/compare/v3.41.2...v3.41.3) (2023-12-18)
 
 
