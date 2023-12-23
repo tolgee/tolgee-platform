@@ -104,6 +104,11 @@ export const ImportView: FunctionComponent = () => {
               ? 'addFiles'
               : undefined
           }
+          onImportMore={() => {
+            applyImportHelper.clear();
+            dataHelper.addFilesMutation.reset();
+          }}
+          filesUploaded={dataHelper.addFilesMutation.isSuccess}
         />
 
         {dataHelper.addFilesMutation.data?.errors?.map((e, idx) => (

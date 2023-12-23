@@ -26,7 +26,6 @@ class StoredDataImporterTest : AbstractSpringTest() {
     storedDataImporter = StoredDataImporter(
       applicationContext,
       importTestData.import,
-      reportStatus = reportStatus,
     )
   }
 
@@ -88,10 +87,9 @@ class StoredDataImporterTest : AbstractSpringTest() {
   @Test
   fun `it force replaces translations`() {
     storedDataImporter = StoredDataImporter(
-      applicationContext!!,
+      applicationContext,
       importTestData.import,
       ForceMode.OVERRIDE,
-      reportStatus,
     )
     testDataService.saveTestData(importTestData.root)
     login()
@@ -111,7 +109,6 @@ class StoredDataImporterTest : AbstractSpringTest() {
       applicationContext,
       importTestData.import,
       ForceMode.OVERRIDE,
-      reportStatus,
     )
     login()
     storedDataImporter.doImport()
@@ -140,7 +137,6 @@ class StoredDataImporterTest : AbstractSpringTest() {
       applicationContext,
       importTestData.import,
       ForceMode.KEEP,
-      reportStatus,
     )
     testDataService.saveTestData(importTestData.root)
     login()

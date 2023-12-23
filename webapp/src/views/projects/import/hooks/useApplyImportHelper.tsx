@@ -78,6 +78,11 @@ export const useApplyImportHelper = (
     setConflictNotResolvedDialogOpen(false);
   };
 
+  const clear = () => {
+    importApplyMutation.reset();
+    setStatus(undefined);
+  };
+
   return {
     onDialogClose,
     onApplyImport,
@@ -86,5 +91,6 @@ export const useApplyImportHelper = (
     loading: importApplyMutation.isLoading,
     loaded: importApplyMutation.isSuccess,
     status,
+    clear,
   };
 };

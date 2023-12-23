@@ -24,7 +24,7 @@ class StoredDataImporter(
   applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
-  private val reportStatus: (ImportApplicationStatus) -> Unit,
+  private val reportStatus: (ImportApplicationStatus) -> Unit = {},
 ) {
   private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)

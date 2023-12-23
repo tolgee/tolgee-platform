@@ -48,12 +48,13 @@ export const LanguageSelector: React.FC<{
   const importData = useImportDataHelper();
   const languageHelper = useImportLanguageHelper(props.row);
 
-  const usedLanguages = importData
-    .result!._embedded!.languages!.map((l) => ({
-      existingId: l.existingLanguageId,
-      namespace: l.namespace,
-    }))
-    .filter((l) => !!l);
+  const usedLanguages =
+    importData.result?._embedded?.languages
+      ?.map((l) => ({
+        existingId: l.existingLanguageId,
+        namespace: l.namespace,
+      }))
+      .filter((l) => !!l) || [];
 
   const state = useStateObject({ addNewLanguageDialogOpen: false });
 

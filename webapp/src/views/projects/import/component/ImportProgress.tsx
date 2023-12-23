@@ -17,22 +17,27 @@ const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
     position: absolute;
     top: 0;
     left: 0;
+    background-color: ${({ theme }) => theme.palette.import.progressWorking};
+    transition: width 1s steps(1, jump-end),
+      background-color 1s steps(1, jump-end);
   }
 
   &.loading::before {
     width: 99%;
-    background: ${({ theme }) => theme.palette.import.progressWorking};
     transition: width 30s cubic-bezier(0.15, 0.735, 0.095, 1);
   }
 
   &.finish::before {
     width: 100%;
-    background: ${({ theme }) => theme.palette.import.progressDone};
-    transition: width 0.2s ease-in-out;
+    background-color: ${({ theme }) => theme.palette.import.progressDone};
+    transition: width 0.2s ease-in-out, background-color 0.2s steps(1, jump-end);
   }
 `;
 
-export const ImportProgressBar = (props: { loading: boolean }) => {
+export const ImportProgressBar = (props: {
+  loading: boolean;
+  loaded: boolean;
+}) => {
   const [transitionLoading, setTransitionLoading] = React.useState(false);
 
   useLoadingRegister(props.loading);
@@ -43,18 +48,17 @@ export const ImportProgressBar = (props: { loading: boolean }) => {
     }, 100);
   }, []);
 
+  const classes = clsx({
+    loading: transitionLoading && props.loading,
+    finish: props.loaded,
+  });
+
   return (
     <Box
       px={'200px'}
       sx={{ width: '100%', display: 'flex', alignItems: 'center' }}
     >
-      <StyledProgress
-        data-cy="import-progress"
-        className={clsx({
-          loading: transitionLoading && props.loading,
-          finish: !props.loading,
-        })}
-      />
+      <StyledProgress data-cy="import-progress" className={classes} />
     </Box>
   );
 };

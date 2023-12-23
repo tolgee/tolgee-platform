@@ -1,11 +1,13 @@
 import { T } from '@tolgee/react';
-import { OperationStatusType, OperationType } from './ImportFileInput';
+import { OperationStatusType } from './ImportFileInput';
 import { useDebounce } from 'use-debounce/lib';
+import React from 'react';
 
 export const ImportOperationStatus = (props: {
-  status: OperationStatusType;
+  status?: OperationStatusType;
 }) => {
-  const [debouncedStatus] = useDebounce(props.status, 1000);
+  const [debouncedStatus] = useDebounce(props.status, 1000, { leading: true });
+
   switch (debouncedStatus) {
     case 'PREPARING_AND_VALIDATING':
       return <T keyName="import-status-preparing-and-validating" />;
