@@ -19,7 +19,7 @@ export const useApplyImportHelper = (
   );
 
   const importApplyMutation = useNdJsonStreamedMutation({
-    url: '/v2/projects/{projectId}/import/apply',
+    url: '/v2/projects/{projectId}/import/apply-streaming',
     method: 'put',
     fetchOptions: {
       // error is displayed on the page

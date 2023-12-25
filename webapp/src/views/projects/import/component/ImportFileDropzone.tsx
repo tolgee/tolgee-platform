@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { Box, styled } from '@mui/material';
 import { green, red } from '@mui/material/colors';
-import { Backup, HighlightOff } from '@mui/icons-material';
+import { HighlightOff } from '@mui/icons-material';
 import React, { FunctionComponent, useState } from 'react';
 
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';

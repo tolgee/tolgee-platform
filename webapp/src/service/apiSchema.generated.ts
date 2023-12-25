@@ -141,6 +141,10 @@ export interface paths {
     /** Sets namespace for file to import. */
     put: operations["selectNamespace"];
   };
+  "/v2/projects/{projectId}/import/apply-streaming": {
+    /** Imports the data prepared in previous step. Streams current status. */
+    put: operations["applyImportStreaming"];
+  };
   "/v2/projects/{projectId}/import/apply": {
     /** Imports the data prepared in previous step */
     put: operations["applyImport"];
@@ -1068,6 +1072,8 @@ export interface components {
       /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
       screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
+      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
     };
     KeyInScreenshotPositionDto: {
       /** Format: int32 */
@@ -1087,6 +1093,11 @@ export interface components {
        */
       uploadedImageId: number;
       positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
+    };
+    /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+    RelatedKeyDto: {
+      namespace?: string;
+      keyName: string;
     };
     KeyInScreenshotModel: {
       /** Format: int64 */
@@ -1506,15 +1517,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1650,17 +1661,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       username?: string;
-      scopes: string[];
+      description: string;
       /** Format: int64 */
-      projectId: number;
+      lastUsedAt?: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
+      projectId: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1918,6 +1929,8 @@ export interface components {
       /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
       screenshots?: components["schemas"]["KeyScreenshotDto"][];
+      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
     };
     StorageTestResult: {
       success: boolean;
@@ -2278,13 +2291,8 @@ export interface components {
       zip: boolean;
     };
     BigMetaDto: {
-      /** @description List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
-      relatedKeysInOrder: components["schemas"]["RelatedKeyDto"][];
-    };
-    /** @description List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
-    RelatedKeyDto: {
-      namespace?: string;
-      keyName: string;
+      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
     };
     TranslationCommentWithLangKeyDto: {
       /** Format: int64 */
@@ -2529,11 +2537,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2642,8 +2650,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
       baseTranslation?: string;
+      namespace?: string;
       translation?: string;
     };
     KeySearchSearchResultModel: {
@@ -2651,8 +2659,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
       baseTranslation?: string;
+      namespace?: string;
       translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -3153,15 +3161,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3279,17 +3287,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       username?: string;
-      scopes: string[];
+      description: string;
       /** Format: int64 */
-      projectId: number;
+      lastUsedAt?: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
+      projectId: number;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -4840,8 +4848,8 @@ export interface operations {
       };
     };
   };
-  /** Imports the data prepared in previous step */
-  applyImport: {
+  /** Imports the data prepared in previous step. Streams current status. */
+  applyImportStreaming: {
     parameters: {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
@@ -4858,6 +4866,34 @@ export interface operations {
           "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Imports the data prepared in previous step */
+  applyImport: {
+    parameters: {
+      query: {
+        /** Whether override or keep all translations with unresolved conflicts */
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

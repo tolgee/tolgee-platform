@@ -265,13 +265,16 @@ export const useNdJsonStreamedMutation = <
       const { done, value } = await reader.read();
       const text = new TextDecoder().decode(value);
       if (text) {
-        try {
-          const parsed = JSON.parse(text);
-          result.push(parsed);
-          onData(parsed);
-        } catch (e) {
-          // ignore
+        const parsed = getParsedJsonOrNull(text);
+        if (!parsed) {
+          continue;
         }
+        if (parsed['error']) {
+          const error = parsed['error'];
+          throw new ApiError('Api error', error);
+        }
+        result.push(parsed);
+        onData(parsed);
       }
       if (done) {
         break;
@@ -295,3 +298,15 @@ export const useNdJsonStreamedMutation = <
   );
   return { ...mutation, mutate, mutateAsync };
 };
+
+function getParsedJsonOrNull(json?: string): any {
+  if (!json) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    return null;
+  }
+}

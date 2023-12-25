@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.SetFileNamespaceRequest
@@ -43,7 +44,6 @@ import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.util.StreamingResponseBodyProvider
-import io.tolgee.util.disableAccelBuffering
 import jakarta.servlet.http.HttpServletRequest
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
@@ -68,7 +68,6 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import java.io.OutputStreamWriter
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -125,8 +124,8 @@ class V2ImportController(
     return ImportAddFilesResultModel(errors, result)
   }
 
-  @PutMapping("/apply", produces = [MediaType.APPLICATION_NDJSON_VALUE])
-  @Operation(description = "Imports the data prepared in previous step", summary = "Apply")
+  @PutMapping("/apply")
+  @Operation(description = "Imports the data prepared in previous step")
   @RequestActivity(ActivityType.IMPORT)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
@@ -134,22 +133,30 @@ class V2ImportController(
     @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
     @RequestParam(defaultValue = "NO_FORCE")
     forceMode: ForceMode,
+  ) {
+    val projectId = projectHolder.project.id
+    this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode)
+  }
+
+  @PutMapping("/apply-streaming", produces = [MediaType.APPLICATION_NDJSON_VALUE])
+  @Operation(description = "Imports the data prepared in previous step. Streams current status.")
+  @RequestActivity(ActivityType.IMPORT)
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
+  @AllowApiAccess
+  fun applyImportStreaming(
+    @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
+    @RequestParam(defaultValue = "NO_FORCE")
+    forceMode: ForceMode,
   ): ResponseEntity<StreamingResponseBody> {
     val projectId = projectHolder.project.id
-    return ResponseEntity.ok().disableAccelBuffering().body(
-      streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
-        val writer = OutputStreamWriter(outputStream)
-        val reportStatus =
-          { status: ImportApplicationStatus ->
-            writer.write(
-              (objectMapper.writeValueAsString(ImportApplicationStatusItem(status)) + "\n")
-            )
-            writer.flush()
-          }
 
-        this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode, reportStatus)
+    return streamingResponseBodyProvider.streamNdJson { write ->
+      val writeStatus = { status: ImportApplicationStatus ->
+        write(ImportApplicationStatusItem(status))
       }
-    )
+
+      this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode, writeStatus)
+    }
   }
 
   @GetMapping("/result")

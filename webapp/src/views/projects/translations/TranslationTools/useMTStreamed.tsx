@@ -1,13 +1,10 @@
-import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from 'react-query';
 import { container } from 'tsyringe';
 import { useState } from 'react';
 
 import { paths } from 'tg.service/apiSchema.generated';
 import { ApiError } from 'tg.service/http/ApiError';
-import {
-  ApiSchemaHttpService,
-  ResponseContent,
-} from 'tg.service/http/ApiSchemaHttpService';
+import { ApiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
 import { QueryProps } from 'tg.service/http/useQueryApi';
 
 const apiHttpService = container.resolve(ApiSchemaHttpService);

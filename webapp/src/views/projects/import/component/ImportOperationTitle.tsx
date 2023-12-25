@@ -28,9 +28,17 @@ export const ImportOperationTitle = (props: {
     }
     switch (props.operation) {
       case 'addFiles':
-        return <T keyName="import-add-files-operation" />;
+        return (
+          <ImportInputAreaLayoutTitle>
+            <T keyName="import-add-files-operation" />
+          </ImportInputAreaLayoutTitle>
+        );
       case 'apply':
-        return <T keyName="import-apply-operation" />;
+        return (
+          <ImportInputAreaLayoutTitle>
+            <T keyName="import-apply-operation" />
+          </ImportInputAreaLayoutTitle>
+        );
     }
 
     return null;
