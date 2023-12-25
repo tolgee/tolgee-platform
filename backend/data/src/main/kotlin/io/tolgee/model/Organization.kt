@@ -28,13 +28,13 @@ class Organization(
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
 
-  @field:NotBlank @field:Size(min = 3, max = 50)
+  @field:NotBlank @field:Size(min = 1, max = 50)
   open var name: String = "",
 
   open var description: String? = null,
 
   @Column(name = "address_part")
-  @field:NotBlank @field:Size(min = 3, max = 60)
+  @field:NotBlank @field:Size(min = 1, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-_]*$", message = "invalid_pattern")
   open var slug: String = "",
 
