@@ -1,3 +1,10 @@
+## [3.42.2](https://github.com/tolgee/tolgee-platform/compare/v3.42.1...v3.42.2) (2023-12-26)
+
+
+### Bug Fixes
+
+* Organization validation constraints too strict ([#2043](https://github.com/tolgee/tolgee-platform/issues/2043)) ([2472861](https://github.com/tolgee/tolgee-platform/commit/2472861c8a0f319312bd1ea1686580c5ca870277))
+
 ## [3.42.1](https://github.com/tolgee/tolgee-platform/compare/v3.42.0...v3.42.1) (2023-12-22)
 
 
