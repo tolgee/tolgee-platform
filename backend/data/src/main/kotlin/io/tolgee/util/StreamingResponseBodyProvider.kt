@@ -17,8 +17,10 @@
 package io.tolgee.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.sentry.Sentry
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.exceptions.ExpectedException
 import io.tolgee.exceptions.NotFoundException
 import jakarta.persistence.EntityManager
 import org.hibernate.Session
@@ -59,6 +61,9 @@ class StreamingResponseBodyProvider(
           } catch (e: Throwable) {
             val message = getErrorMessage(e)
             writer.writeJson(StreamedErrorMessage(message))
+            if (e !is ExpectedException) {
+              Sentry.captureException(e)
+            }
           }
         }
       }

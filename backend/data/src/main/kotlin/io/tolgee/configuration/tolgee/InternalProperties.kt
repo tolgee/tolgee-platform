@@ -28,4 +28,6 @@ class InternalProperties {
   var e3eContentStorageBypassOk: Boolean? = null
 
   var disableInitialUserCreation: Boolean = false
+
+  var useInMemoryFileStorage: Boolean = false
 }

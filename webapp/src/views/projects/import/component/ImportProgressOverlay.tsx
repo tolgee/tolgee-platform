@@ -39,6 +39,7 @@ export const ImportProgressOverlay = (props: {
   loading: boolean;
   operationStatus?: OperationStatusType;
   onImportMore: () => void;
+  onActiveChange: (isActive: boolean) => void;
 }) => {
   const project = useProject();
 
@@ -77,6 +78,10 @@ export const ImportProgressOverlay = (props: {
       operation: props.operation,
     });
   }, [props.loading, props.operation, props.importDone]);
+
+  useEffect(() => {
+    props.onActiveChange(visible);
+  }, [visible]);
 
   return (
     <StyledRoot

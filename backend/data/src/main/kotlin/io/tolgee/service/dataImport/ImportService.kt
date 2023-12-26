@@ -1,8 +1,11 @@
 package io.tolgee.service.dataImport
 
+import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
@@ -35,8 +38,10 @@ import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
@@ -57,6 +62,10 @@ class ImportService(
   private val businessEventPublisher: BusinessEventPublisher,
   private val importDeleteService: ImportDeleteService,
   private val currentDateProvider: CurrentDateProvider,
+  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  private val self: ImportService,
+  private val fileStorage: FileStorage,
+  private val tolgeeProperties: TolgeeProperties
 ) {
   @Transactional
   fun addFiles(
@@ -64,7 +73,7 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: ImportAddFilesParams = ImportAddFilesParams(),
-  ): List<ErrorResponseBody> {
+  ): MutableList<ErrorResponseBody> {
     val import =
       findNotExpired(project.id, userAccount.id) ?: Import(project).also {
         it.author = userAccount
@@ -77,6 +86,10 @@ class ImportService(
     }
 
     importRepository.save(import)
+    Sentry.addBreadcrumb("Import ID: ${import.id}")
+
+    self.saveFilesToFileStorage(import.id, files)
+
     val fileProcessor =
       CoreImportFilesProcessor(
         applicationContext = applicationContext,
@@ -107,6 +120,7 @@ class ImportService(
     forceMode: ForceMode = ForceMode.NO_FORCE,
     reportStatus: (ImportApplicationStatus) -> Unit = {}
   ) {
+    Sentry.addBreadcrumb("Import ID: ${import.id}")
     StoredDataImporter(applicationContext, import, forceMode, reportStatus).doImport()
     deleteImport(import)
     businessEventPublisher.publish(
@@ -127,6 +141,7 @@ class ImportService(
       return
     }
     val import = importLanguage.file.import
+    Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     existingLanguage?.let {
       val langAlreadySelectedInTheSameNS =
@@ -148,6 +163,7 @@ class ImportService(
     namespace: String?,
   ) {
     val import = file.import
+    Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     file.namespace = getSafeNamespace(namespace)
     importFileRepository.save(file)
@@ -373,4 +389,24 @@ class ImportService(
     importFileIssueParamRepository.saveAll(params)
 
   fun getAllNamespaces(importId: Long) = importRepository.getAllNamespaces(importId)
+
+  /**
+   * This function saves the files to file storage.
+   * When import fails, we need the files for future debugging
+   */
+  @Async
+  fun saveFilesToFileStorage(importId: Long, files: List<ImportFileDto>) {
+    if (tolgeeProperties.import.storeFilesForDebugging) {
+      files.forEach {
+        fileStorage.storeFile(getFileStoragePath(importId, it.name), it.data)
+      }
+    }
+  }
+
+  fun getFileStoragePath(importId: Long, fileName: String): String {
+    val notBlankFilename = fileName.ifBlank { "blank_name" }
+    return "${getFileStorageImportRoot(importId)}/$notBlankFilename"
+  }
+
+  private fun getFileStorageImportRoot(importId: Long) = "importFiles/$importId"
 }

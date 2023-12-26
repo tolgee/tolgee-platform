@@ -11,6 +11,7 @@ import { DropzoneIcon } from 'tg.component/CustomIcons';
 
 export interface ScreenshotDropzoneProps {
   onNewFiles: (files: File[]) => void;
+  active: boolean;
 }
 
 const StyledWrapper = styled(Box)`
@@ -68,6 +69,9 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
   );
 
   const onDragEnter = (e: React.DragEvent) => {
+    if (!props.active) {
+      return;
+    }
     e.stopPropagation();
     e.preventDefault();
     setDragEnterTarget(e.target);
@@ -84,6 +88,9 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
   };
 
   const onDragLeave = (e: React.DragEvent) => {
+    if (!props.active) {
+      return;
+    }
     e.stopPropagation();
     e.preventDefault();
     if (e.target === dragEnterTarget) {
@@ -92,6 +99,9 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
   };
 
   const onDrop = async (e: React.DragEvent) => {
+    if (!props.active) {
+      return;
+    }
     e.stopPropagation();
     e.preventDefault();
     if (e.dataTransfer.items) {

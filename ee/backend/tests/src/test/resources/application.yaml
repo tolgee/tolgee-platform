@@ -58,6 +58,7 @@ tolgee:
     fake-mt-providers: true
     mock-free-plan: true
     disable-initial-user-creation: true
+    use-in-memory-file-storage: true
   cache:
     caffeine-max-size: 1000
   machine-translation:

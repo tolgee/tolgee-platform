@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.SetFileNamespaceRequest
@@ -103,7 +102,7 @@ class V2ImportController(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams,
   ): ImportAddFilesResultModel {
-    val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
+    val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream.readAllBytes()) }
     val errors =
       importService.addFiles(
         files = fileDtos,

@@ -165,8 +165,13 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     return { ...result, valid };
   };
 
+  const [isProgressOverlayActive, setIsProgressOverlayActive] = useState(false);
+
   return (
-    <ImportFileDropzone onNewFiles={onNewFiles}>
+    <ImportFileDropzone
+      onNewFiles={onNewFiles}
+      active={!isProgressOverlayActive}
+    >
       <QuickStartHighlight
         offset={10}
         itemKey="pick_import_file"
@@ -181,6 +186,9 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
               onImportMore={props.onImportMore}
               filesUploaded={props.filesUploaded}
               operationStatus={props.operationStatus}
+              onActiveChange={(isActive) =>
+                setIsProgressOverlayActive(isActive)
+              }
             />
             <ImportInputAreaLayoutTop>
               <input
