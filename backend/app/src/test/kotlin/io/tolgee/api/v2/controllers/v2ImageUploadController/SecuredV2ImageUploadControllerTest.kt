@@ -14,7 +14,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
-import java.io.File
 import java.time.Duration
 import java.util.*
 
@@ -70,8 +69,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       performAuthGet("/uploaded-images/${image.filename}.png?token=$token")
         .andIsOk.andReturn().response.contentAsByteArray
 
-    val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + image.filename + ".png")
-    assertThat(storedImage).isEqualTo(file.readBytes())
+    assertThat(storedImage).isEqualTo(fileStorage.readFile("uploadedImages/" + image.filename + ".png"))
   }
 
   @Test
@@ -79,9 +77,8 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
   fun upload() {
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
       node("filename").isString.satisfies {
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it + ".png")
-        assertThat(file).exists()
-        assertThat(file.readBytes().size).isCloseTo(5538, Offset.offset(500))
+        val path = "uploadedImages/" + it + ".png";
+        assertThat(fileStorage.readFile(path).size).isCloseTo(5538, Offset.offset(500))
       }
       node("requestFilename").isString.satisfies {
         val parts = it.split("?token=")

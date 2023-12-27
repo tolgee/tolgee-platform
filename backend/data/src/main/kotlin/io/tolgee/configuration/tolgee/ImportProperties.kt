@@ -42,8 +42,10 @@ class ImportProperties {
   )
   var createImplicitApiKey: Boolean = false
 
-  @DocProperty(description = "The language tag of the base language of the imported projects " +
-    "(for importing data on startup).")
+  @DocProperty(
+    description = "The language tag of the base language of the imported " +
+      "project (for importing data on startup)."
+  )
   var baseLanguageTag: String = "en"
 
   @DocProperty(
