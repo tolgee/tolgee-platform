@@ -1,5 +1,6 @@
 package io.tolgee.service.bigMeta
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.query_results.KeyIdFindResult
@@ -21,16 +22,20 @@ import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.JoinType
 import org.springframework.context.event.EventListener
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
+import java.sql.Timestamp
 
 @Service
 class BigMetaService(
   private val keysDistanceRepository: KeysDistanceRepository,
   private val entityManager: EntityManager,
-  private val transactionManager: PlatformTransactionManager
+  private val transactionManager: PlatformTransactionManager,
+  private val jdbcTemplate: JdbcTemplate,
+  private val currentDateProvider: CurrentDateProvider
 ) : Logging {
   companion object {
     const val MAX_DISTANCE_SCORE = 10000L
@@ -56,8 +61,31 @@ class BigMetaService(
       return
     }
 
-    val distances = KeysDistanceUtil(relatedKeysInOrder, project, this).newDistances
-    keysDistanceRepository.saveAll(distances)
+    val util = KeysDistanceUtil(relatedKeysInOrder, project, this)
+
+    insertNewDistances(util.newDistances)
+  }
+
+  private fun insertNewDistances(toInsert: List<KeysDistanceDto>) {
+    val timestamp = Timestamp(currentDateProvider.date.time)
+    jdbcTemplate.batchUpdate(
+      """
+      insert into keys_distance (key1id, key2id, score, hits, created_at, updated_at, project_id) 
+      values (?, ?, ?, ?, ?, ?, ?)
+      on conflict (key1id, key2id) do update set score = excluded.score, hits = excluded.hits, updated_at = ?
+      """,
+      toInsert,
+      100
+    ) { ps, dto ->
+      ps.setLong(1, dto.key1Id)
+      ps.setLong(2, dto.key2Id)
+      ps.setLong(3, dto.score)
+      ps.setLong(4, dto.hits)
+      ps.setTimestamp(5, timestamp)
+      ps.setTimestamp(6, timestamp)
+      ps.setLong(7, dto.projectId)
+      ps.setTimestamp(8, timestamp)
+    }
   }
 
   fun getKeyIdsForItems(
@@ -73,14 +101,26 @@ class BigMetaService(
   }
 
   @Transactional
-  fun findExistingKeyDistances(keys: List<KeyIdFindResult>, project: Project): List<KeysDistance> {
+  fun findExistingKeyDistances(keys: List<KeyIdFindResult>, project: Project): Set<KeysDistanceDto> {
     val keyIds = keys.map { it.id }
-    return findExistingKeysDistancesByIds(keyIds)
+    return findExistingKeysDistancesDtosByIds(keyIds)
   }
 
   @Transactional
-  fun findExistingKeysDistancesByIds(keyIds: List<Long>): List<KeysDistance> {
-    return keysDistanceRepository.findForKeyIdsWithRelations(keyIds)
+  fun findExistingKeysDistancesDtosByIds(keyIds: List<Long>): Set<KeysDistanceDto> {
+    return entityManager.createQuery(
+      """
+       select new io.tolgee.service.bigMeta.KeysDistanceDto(kd.key1Id, kd.key2Id, kd.score, kd.project.id, kd.hits) from KeysDistance kd
+        where kd.key1Id in (
+            select kd2.key1Id from KeysDistance kd2 where kd2.key1Id in :data or kd2.key2Id in :data
+        ) or kd.key2Id in (
+            select kd3.key2Id from KeysDistance kd3 where kd3.key1Id in :data or kd3.key2Id in :data
+        )
+    """,
+      KeysDistanceDto::class.java
+    )
+      .setParameter("data", keyIds)
+      .resultList.toSet()
   }
 
   fun get(id: Long): KeysDistance {
