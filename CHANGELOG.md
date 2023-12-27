@@ -1,3 +1,10 @@
+## [3.42.3](https://github.com/tolgee/tolgee-platform/compare/v3.42.2...v3.42.3) (2023-12-27)
+
+
+### Bug Fixes
+
+* Fix high memory usages on import ([#2046](https://github.com/tolgee/tolgee-platform/issues/2046)) ([0b3554a](https://github.com/tolgee/tolgee-platform/commit/0b3554a82c473d88f04a09f90f65f11177672f84))
+
 ## [3.42.2](https://github.com/tolgee/tolgee-platform/compare/v3.42.1...v3.42.2) (2023-12-26)
 
 

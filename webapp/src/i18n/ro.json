@@ -325,7 +325,7 @@
   "content_delivery_not_configured_message" : "Pentru a activa funcțiile de livrare a conținutului, trebuie să configurați livrarea-conținutului în setările serverului Tolgee. Verificați documentația Tolgee pentru aceasta.",
   "content_delivery_not_configured_title" : "Livrarea conținutului nu este configurată",
   "content_delivery_not_enabled_message" : "Planul dvs. nu include mai multe configurații de livrare a conținutului. Actualizați-vă planul pentru a accesa această funcție.",
-  "content_delivery_not_enabled_title" : "Doar o singură livrare este activată",
+  "content_delivery_not_enabled_title" : "Este activată doar o singură configurație de livrare a conținutului",
   "content_delivery_over_limit_title" : "Ați depășit limita, modificarea este restricționată",
   "content_delivery_page_hint" : "Încărcați traducerile direct din Tolgee astfel încât să fie mereu actualizate",
   "content_delivery_publis_success" : "Conținutul a fost publicat cu succes!",
