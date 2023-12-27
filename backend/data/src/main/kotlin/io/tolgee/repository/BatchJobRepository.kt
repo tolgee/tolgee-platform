@@ -84,17 +84,17 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
 
   @Query(
     """
-    select j from BatchJob j
+    select j.id from BatchJob j
     join BatchJobChunkExecution bjce on bjce.batchJob.id = j.id
     where j.id in :jobIds
     group by j.id
     having max(bjce.updatedAt) < :before
   """
   )
-  fun getStuckJobs(
+  fun getStuckJobIds(
     jobIds: MutableSet<Long>,
     before: Date,
-  ): List<BatchJob>
+  ): List<Long>
 
   @Query(
     """

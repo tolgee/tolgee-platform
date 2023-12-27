@@ -15,12 +15,12 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.hibernate.LockOptions
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @Component
@@ -38,7 +38,7 @@ class BatchJobChunkExecutionQueue(
     private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
   }
 
-  @EventListener(JobQueueItemsEvent::class)
+  @EventListener
   fun onJobItemEvent(event: JobQueueItemsEvent) {
     when (event.type) {
       QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
@@ -46,7 +46,12 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  @Scheduled(fixedDelay = 60000, initialDelay = 0)
+  @EventListener
+  fun onApplicationReady(event: ApplicationReadyEvent) {
+    populateQueue()
+  }
+
+  @Scheduled(fixedDelay = 60000)
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
     val data = entityManager.createQuery(

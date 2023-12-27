@@ -30,9 +30,9 @@ class ScheduledJobCleaner(
   }
 
   private fun handleStuckJobs() {
-    batchJobService.getStuckJobs(batchJobStateProvider.getCachedJobIds()).forEach {
-      logger.warn("Removing stuck job state ${it.id} using scheduled task")
-      batchJobStateProvider.removeJobState(it.id)
+    batchJobService.getStuckJobIds(batchJobStateProvider.getCachedJobIds()).forEach {
+      logger.warn("Removing stuck job state it using scheduled task")
+      batchJobStateProvider.removeJobState(it)
     }
   }
 

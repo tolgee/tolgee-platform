@@ -2,8 +2,10 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.batch.data.AllIncompleteJobsResult
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.data.JobUnlockedChunk
 import io.tolgee.batch.events.OnBatchJobCreated
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
@@ -230,7 +232,7 @@ class BatchJobService(
       projectId,
       userAccountId = getUserAccountIdForCurrentJobView(projectId),
       oneHourAgo = currentDateProvider.date.addMinutes(-60),
-      completedStatuses = BatchJobStatus.values().filter { it.completed }
+      completedStatuses = BatchJobStatus.entries.filter { it.completed }
     )
 
     val progresses = getProgresses(jobs)
@@ -292,14 +294,14 @@ class BatchJobService(
     return BatchJobView(job, progress, errorMessage)
   }
 
-  fun getAllUnlockedChunksForJobs(jobIds: Iterable<Long>): MutableList<BatchJobChunkExecution> {
+  fun getAllUnlockedChunksForJobs(jobIds: Iterable<Long>): List<JobUnlockedChunk> {
     return entityManager.createQuery(
       """
+          select new io.tolgee.batch.data.JobUnlockedChunk(bjce.batchJob.id, bjce.id)
           from BatchJobChunkExecution bjce
-          join fetch bjce.batchJob bk
           where bjce.batchJob.id in :jobIds
-      """.trimIndent(),
-      BatchJobChunkExecution::class.java
+      """,
+      JobUnlockedChunk::class.java
     )
       .setParameter("jobIds", jobIds)
       .setHint(
@@ -369,16 +371,16 @@ class BatchJobService(
       .resultList
   }
 
-  fun getAllIncompleteJobs(projectId: Long): List<BatchJob> {
+  fun getAllIncompleteJobIds(projectId: Long): List<AllIncompleteJobsResult> {
     return entityManager.createQuery(
-      """from BatchJob j
+      """select new io.tolgee.batch.data.AllIncompleteJobsResult(j.id, j.totalChunks) from BatchJob j
       where j.project.id = :projectId
       and j.status not in :completedStatuses
     """,
-      BatchJob::class.java
+      AllIncompleteJobsResult::class.java
     )
       .setParameter("projectId", projectId)
-      .setParameter("completedStatuses", BatchJobStatus.values().filter { it.completed })
+      .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
       .resultList
   }
 
@@ -397,7 +399,7 @@ class BatchJobService(
   fun getJobsCompletedBefore(lockedJobIds: Iterable<Long>, before: Date): List<BatchJob> =
     batchJobRepository.getCompletedJobs(lockedJobIds, before)
 
-  fun getStuckJobs(jobIds: MutableSet<Long>): List<BatchJob> {
-    return batchJobRepository.getStuckJobs(jobIds, currentDateProvider.date.addMinutes(-2))
+  fun getStuckJobIds(jobIds: MutableSet<Long>): List<Long> {
+    return batchJobRepository.getStuckJobIds(jobIds, currentDateProvider.date.addMinutes(-2))
   }
 }

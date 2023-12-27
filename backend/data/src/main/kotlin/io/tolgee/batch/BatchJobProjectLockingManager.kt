@@ -113,11 +113,12 @@ class BatchJobProjectLockingManager(
   }
 
   private fun getInitialJobId(projectId: Long): Long? {
-    val jobs = batchJobService.getAllIncompleteJobs(projectId)
+    val jobs = batchJobService.getAllIncompleteJobIds(projectId)
     val unlockedChunkCounts = batchJobService
-      .getAllUnlockedChunksForJobs(jobs.map { it.id })
-      .groupBy { it.batchJob.id }.map { it.key to it.value.count() }.toMap()
-    return jobs.find { it.totalChunks != unlockedChunkCounts[it.id] }?.id
+      .getAllUnlockedChunksForJobs(jobs.map { it.jobId })
+      .groupBy { it.batchJobId }.map { it.key to it.value.count() }.toMap()
+    // we are looking for a job that has already started and preferably for a locked one
+    return jobs.find { it.totalChunks != unlockedChunkCounts[it.jobId] }?.jobId ?: jobs.firstOrNull()?.jobId
   }
 
   private fun getRedissonProjectLocks(): RMap<Long, Long> {
