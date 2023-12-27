@@ -45,13 +45,15 @@ export const ImportProgressBar = (props: {
   useEffect(() => {
     setTimeout(() => {
       setTransitionLoading(true);
-    }, 100);
+    }, 10);
   }, []);
 
   const classes = clsx({
     loading: transitionLoading && props.loading,
     finish: props.loaded,
   });
+
+  console.table({ classes, ...props });
 
   return (
     <Box

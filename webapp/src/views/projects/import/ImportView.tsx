@@ -74,6 +74,8 @@ export const ImportView: FunctionComponent = () => {
   const loading =
     dataHelper.addFilesMutation.isLoading || applyImportHelper.loading;
 
+  const [isProgressOverlayActive, setIsProgressOverlayActive] = useState(false);
+
   return (
     <BaseProjectView
       windowTitle={t('import_translations_title')}
@@ -110,6 +112,10 @@ export const ImportView: FunctionComponent = () => {
             dataHelper.addFilesMutation.reset();
           }}
           filesUploaded={dataHelper.addFilesMutation.isSuccess}
+          isProgressOverlayActive={isProgressOverlayActive}
+          onProgressOverlayActiveChange={(isActive) =>
+            setIsProgressOverlayActive(isActive)
+          }
         />
 
         {dataHelper.addFilesMutation.data?.errors?.map((e, idx) => (
@@ -120,7 +126,7 @@ export const ImportView: FunctionComponent = () => {
           />
         ))}
         <Box position="relative">
-          <ImportResultLoadingOverlay loading={loading} />
+          <ImportResultLoadingOverlay loading={isProgressOverlayActive} />
           <ImportResult
             onResolveRow={setResolveRow}
             onLoadData={dataHelper.refetchData}

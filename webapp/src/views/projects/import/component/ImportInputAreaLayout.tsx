@@ -6,30 +6,27 @@ export const ImportInputAreaLayout = styled(Box)`
   align-items: center;
   flex-direction: column;
   display: flex;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: 40px;
+  padding-bottom: 40px;
   height: 100%;
 `;
 
 export const ImportInputAreaLayoutCenter = styled(Box)`
-  height: 50px;
+  height: 76px;
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 8px;
-  margin-bottom: 8px;
   align-items: center;
 `;
 
 export const ImportInputAreaLayoutTop = styled(Box)`
-  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
 export const ImportInputAreaLayoutBottom = styled(Box)`
-  min-height: 40px;
+  min-height: 24px;
 `;
 
 export const ImportInputAreaLayoutTitle: FC<{

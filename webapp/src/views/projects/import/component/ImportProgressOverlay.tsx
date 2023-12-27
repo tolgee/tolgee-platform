@@ -83,6 +83,11 @@ export const ImportProgressOverlay = (props: {
     props.onActiveChange(visible);
   }, [visible]);
 
+  const showFilesUploaded =
+    filesUploaded || (props.filesUploaded && visible && !operation);
+
+  const showImportDone = props.importDone;
+
   return (
     <StyledRoot
       className={clsx({ visible })}
@@ -105,11 +110,7 @@ export const ImportProgressOverlay = (props: {
         <ImportInputAreaLayoutCenter>
           <ImportProgressBar
             loading={props.loading}
-            loaded={
-              filesUploaded ||
-              (props.filesUploaded && visible && !operation) ||
-              props.importDone
-            }
+            loaded={showFilesUploaded || showImportDone}
           />
         </ImportInputAreaLayoutCenter>
         <ImportInputAreaLayoutBottom>

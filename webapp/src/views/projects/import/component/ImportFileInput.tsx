@@ -36,6 +36,8 @@ type ImportFileInputProps = {
   importDone: boolean;
   onImportMore: () => void;
   filesUploaded?: boolean;
+  onProgressOverlayActiveChange: (isActive: boolean) => void;
+  isProgressOverlayActive: boolean;
 };
 
 export type ValidationResult = {
@@ -51,7 +53,6 @@ const StyledRoot = styled(Box)(({ theme }) => ({
   position: 'relative',
   backgroundColor: theme.palette.background.paper,
   marginTop: '16px',
-  height: '240px',
 }));
 
 const messageActions = container.resolve(MessageActions);
@@ -165,12 +166,10 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     return { ...result, valid };
   };
 
-  const [isProgressOverlayActive, setIsProgressOverlayActive] = useState(false);
-
   return (
     <ImportFileDropzone
       onNewFiles={onNewFiles}
-      active={!isProgressOverlayActive}
+      active={!props.isProgressOverlayActive}
     >
       <QuickStartHighlight
         offset={10}
@@ -187,7 +186,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
               filesUploaded={props.filesUploaded}
               operationStatus={props.operationStatus}
               onActiveChange={(isActive) =>
-                setIsProgressOverlayActive(isActive)
+                props.onProgressOverlayActiveChange(isActive)
               }
             />
             <ImportInputAreaLayoutTop>
