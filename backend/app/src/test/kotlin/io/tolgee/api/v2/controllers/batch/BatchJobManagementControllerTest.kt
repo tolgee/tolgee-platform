@@ -44,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
@@ -127,7 +126,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         while (true) {
           val context = it.arguments[2] as CoroutineContext
           context.ensureActive()
-          Thread.sleep(100)
+          Thread.sleep(10)
         }
       }
       it.callRealMethod()
@@ -143,7 +142,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       )
     ).andIsOk
 
-    Thread.sleep(2000)
+    Thread.sleep(500)
 
     val job = getSingleJob()
     performProjectAuthPut("batch-jobs/${job.id}/cancel")
