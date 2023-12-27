@@ -53,8 +53,6 @@ export const ImportProgressBar = (props: {
     finish: props.loaded,
   });
 
-  console.table({ classes, ...props });
-
   return (
     <Box
       px={'200px'}
