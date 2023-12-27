@@ -1,3 +1,10 @@
+## [3.42.4](https://github.com/tolgee/tolgee-platform/compare/v3.42.3...v3.42.4) (2023-12-27)
+
+
+### Bug Fixes
+
+* Faster context storing ([#2048](https://github.com/tolgee/tolgee-platform/issues/2048)) ([ac8bd00](https://github.com/tolgee/tolgee-platform/commit/ac8bd0057c4d5219b5cf61f4054a017daff6a214))
+
 ## [3.42.3](https://github.com/tolgee/tolgee-platform/compare/v3.42.2...v3.42.3) (2023-12-27)
 
 
