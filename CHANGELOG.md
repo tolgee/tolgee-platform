@@ -1,3 +1,10 @@
+## [3.42.5](https://github.com/tolgee/tolgee-platform/compare/v3.42.4...v3.42.5) (2023-12-27)
+
+
+### Bug Fixes
+
+* Fix slow cancellation of batch operation ([#2047](https://github.com/tolgee/tolgee-platform/issues/2047)) ([58a43ca](https://github.com/tolgee/tolgee-platform/commit/58a43cadbc9815fc145ce0e74d5bd31a02047495))
+
 ## [3.42.4](https://github.com/tolgee/tolgee-platform/compare/v3.42.3...v3.42.4) (2023-12-27)
 
 
