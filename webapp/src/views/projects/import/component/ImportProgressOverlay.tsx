@@ -94,6 +94,7 @@ export const ImportProgressOverlay = (props: {
       sx={{
         pointerEvents: props.importDone ? 'all' : 'none',
       }}
+      data-cy="import-progress-overlay"
     >
       <ImportInputAreaLayout>
         <ImportInputAreaLayoutTop>

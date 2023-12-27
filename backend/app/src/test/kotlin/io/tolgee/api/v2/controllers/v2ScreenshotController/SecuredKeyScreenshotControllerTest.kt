@@ -102,7 +102,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       executeInNewTransaction {
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
-        val bytes = fileStorage.readFile("/screenshots/" + screenshots[0].filename)
+        val bytes = fileStorage.readFile("screenshots/" + screenshots[0].filename)
         assertThat(bytes.size).isCloseTo(1070, Offset.offset(500))
         node("filename").isString.startsWith(screenshots[0].filename).satisfies {
           val parts = it.split("?token=")
