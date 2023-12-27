@@ -97,7 +97,7 @@ class ProgressManager(
     )
   }
 
-  fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution) {
+  fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution, triggerJobCompleted: Boolean = true) {
     val state = batchJobStateProvider.updateState(execution.batchJob.id) {
       logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
       it.compute(execution.id) { _, v ->
@@ -118,18 +118,21 @@ class ProgressManager(
         "(current execution: ${execution.id}), " +
         "incomplete executions: $incompleteExecutions"
     }
-    if (isJobCompleted) {
-      onJobCompletedCommitted(execution)
+    if (isJobCompleted && triggerJobCompleted) {
+      onJobCompletedCommitted(execution.batchJob.id)
     }
   }
 
-  private fun onJobCompletedCommitted(execution: BatchJobChunkExecution) {
-    batchJobStateProvider.removeJobState(execution.batchJob.id)
-    val jobDto = batchJobService.getJobDto(execution.batchJob.id)
-    eventPublisher.publishEvent(OnBatchJobStatusUpdated(jobDto.id, jobDto.projectId, jobDto.status))
-    cachingBatchJobService.evictJobCache(execution.batchJob.id)
-    batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId, jobDto.id)
-    batchJobStateProvider.removeJobState(execution.batchJob.id)
+  fun onJobCompletedCommitted(jobId: Long) {
+    val jobDto = batchJobService.getJobDto(jobId)
+    onJobCompletedCommitted(jobDto)
+  }
+
+  fun onJobCompletedCommitted(batchJob: BatchJobDto) {
+    eventPublisher.publishEvent(OnBatchJobStatusUpdated(batchJob.id, batchJob.projectId, batchJob.status))
+    cachingBatchJobService.evictJobCache(batchJob.id)
+    batchJobProjectLockingManager.unlockJobForProject(batchJob.projectId, batchJob.id)
+    batchJobStateProvider.removeJobState(batchJob.id)
   }
 
   fun handleJobStatus(

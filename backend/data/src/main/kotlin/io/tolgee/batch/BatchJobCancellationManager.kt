@@ -92,8 +92,10 @@ class BatchJobCancellationManager(
     }
     logger.debug("""Job $jobId cancellation committed. setting transaction committed for the executions.""")
     executions.forEach {
-      progressManager.handleChunkCompletedCommitted(it)
+      progressManager.handleChunkCompletedCommitted(it, false)
     }
+
+    progressManager.onJobCompletedCommitted(jobId)
   }
 
   fun cancelExecution(execution: BatchJobChunkExecution) {
