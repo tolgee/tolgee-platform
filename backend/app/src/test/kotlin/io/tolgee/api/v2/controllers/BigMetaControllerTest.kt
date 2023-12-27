@@ -54,7 +54,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
       )
     ).andIsOk
 
-    bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
+    bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
   }
 
   @OptIn(ExperimentalTime::class)
@@ -84,7 +84,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
       storeLogOfBigMeta(keys, 800, 50)
     }.inWholeSeconds.assert.isLessThan(10)
 
-    bigMetaService.findExistingKeysDistancesByIds(keys.map { it.id }).assert.hasSize(104790)
+    bigMetaService.findExistingKeysDistancesDtosByIds(keys.map { it.id }).assert.hasSize(104790)
   }
 
   private fun storeLogOfBigMeta(keys: List<Key>, drop: Int, take: Int) {

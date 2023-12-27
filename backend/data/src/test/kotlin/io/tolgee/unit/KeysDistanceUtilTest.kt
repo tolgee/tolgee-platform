@@ -3,8 +3,8 @@ package io.tolgee.unit
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.query_results.KeyIdFindResult
 import io.tolgee.model.Project
-import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.service.bigMeta.KeysDistanceUtil
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -28,12 +28,12 @@ class KeysDistanceUtilTest {
 
     whenever(bigMetaService.findExistingKeyDistances(any(), any()))
       .thenReturn(
-        listOf(
-          KeysDistance(1, 3).also { keysDistance ->
+        setOf(
+          KeysDistanceDto(1, 3, projectId = 0).also { keysDistance ->
             keysDistance.score = 10000
             keysDistance.hits = 10
           },
-          KeysDistance(3, 4).also { keysDistance ->
+          KeysDistanceDto(3, 4, projectId = 0).also { keysDistance ->
             keysDistance.score = 10000
             keysDistance.hits = 1
           }

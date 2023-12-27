@@ -48,14 +48,14 @@ class BigMetaServiceTest : ProjectAuthControllerTest("/v2/projects/") {
       )
     ).andIsOk
 
-    bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
+    bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
 
     executeInNewTransaction {
       keyService.delete(testData.yepKey.id)
     }
 
     waitForNotThrowing(pollTime = 1000) {
-      bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(0)
+      bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(0)
     }
   }
 }

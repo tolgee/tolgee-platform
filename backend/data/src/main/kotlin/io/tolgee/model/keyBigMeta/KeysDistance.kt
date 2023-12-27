@@ -30,7 +30,7 @@ class KeysDistance(
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
-  var score: Long = 10000
+  var score: Long = MAX_SCORE
 
   var hits: Long = 1
   override fun equals(other: Any?): Boolean {
@@ -63,4 +63,8 @@ class KeysDistance(
 
   @Transient
   var new = false
+
+  companion object {
+    const val MAX_SCORE = 10000L
+  }
 }

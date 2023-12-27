@@ -1,9 +1,7 @@
 package io.tolgee.service.bigMeta
 
-import com.google.common.primitives.Longs
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.model.Project
-import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.util.Logging
 import kotlin.math.abs
 import kotlin.math.max
@@ -17,7 +15,7 @@ class KeysDistanceUtil(
   val newDistances by lazy {
     increaseRelevant()
     decreaseOthers()
-    distances.values
+    distances.values.toList()
   }
 
   private fun increaseRelevant() {
@@ -51,7 +49,7 @@ class KeysDistanceUtil(
     bigMetaService.getKeyIdsForItems(relatedKeysInOrder, project.id)
   }
 
-  private val relevant = mutableMapOf<Pair<Long, Long>, KeysDistance>()
+  private val relevant = mutableMapOf<Pair<Long, Long>, KeysDistanceDto>()
 
   private val keyIdMap by lazy {
     keys.associate { (it.namespace to it.name) to it.id }
@@ -69,15 +67,14 @@ class KeysDistanceUtil(
 
   private val relatedKeysSize = relatedKeysInOrder.size
 
-  private fun createDistance(key1Id: Long, key2Id: Long): KeysDistance {
-    return KeysDistance()
-      .apply {
-        this.key1Id = Longs.min(key1Id, key2Id)
-        this.key2Id = max(key1Id, key2Id)
-        this.project = this@KeysDistanceUtil.project
-        this.new = true
-        distances[this.key1Id to this.key2Id] = this
-      }
+  private fun createDistance(key1Id: Long, key2Id: Long): KeysDistanceDto {
+    return KeysDistanceDto(
+      key1Id = min(a = key1Id, b = key2Id),
+      key2Id = max(key1Id, key2Id),
+      projectId = project.id,
+    ).apply {
+      distances[this.key1Id to this.key2Id] = this
+    }
   }
 
   private fun computeDistanceScore(
