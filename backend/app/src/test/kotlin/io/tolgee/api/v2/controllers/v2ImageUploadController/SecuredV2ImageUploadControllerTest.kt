@@ -77,7 +77,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
   fun upload() {
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
       node("filename").isString.satisfies {
-        val path = "uploadedImages/" + it + ".png";
+        val path = "uploadedImages/" + it + ".png"
         assertThat(fileStorage.readFile(path).size).isCloseTo(5538, Offset.offset(500))
       }
       node("requestFilename").isString.satisfies {
