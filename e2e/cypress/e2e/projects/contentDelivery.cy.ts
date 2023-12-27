@@ -84,7 +84,7 @@ describe('Content delivery', () => {
     deleteDelivery('Azure');
     deleteDelivery('S3');
 
-    cy.contains('Only single delivery enabled');
+    cy.contains('Only single content delivery configuration enabled');
     cy.gcy('content-delivery-add-button').should('be.disabled');
   });
 
