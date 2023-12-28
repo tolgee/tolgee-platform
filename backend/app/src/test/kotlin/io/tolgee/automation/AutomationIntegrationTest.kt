@@ -16,7 +16,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.addMinutes
+import io.tolgee.util.addSeconds
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -144,7 +144,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
     mockWebhookResponse(HttpStatus.OK)
 
-    currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(60)
+    verifyWebhookExecuted(testData) {
+      // webhooks are configured to be retried after 5 seconds
+      currentDateProvider.forcedDate = currentDateProvider.date.addSeconds(5)
+    }
 
     verifyWebhookExecuted(testData) {
       modifyTranslationData()
@@ -166,10 +169,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun verifyWebhookExecuted(testData: WebhooksTestData, webhookTriggeringCallback: () -> Unit) {
-    val invocations = Mockito.mockingDetails(webhookRestTemplate).invocations.count()
+    val invocations = getWebhookRestTemplateInvocationCount()
     webhookTriggeringCallback()
     waitForNotThrowing {
-      Mockito.mockingDetails(webhookRestTemplate).invocations.count().assert.isEqualTo(invocations + 1)
+      getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocations + 1)
       val callArguments = Mockito.mockingDetails(webhookRestTemplate).invocations.last().arguments
       callArguments[0].assert
         .isEqualTo(testData.webhookConfig.self.url)
@@ -188,6 +191,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         .lastExecuted!!.time.assert.isEqualTo(currentDateProvider.date.time)
     }
   }
+
+  private fun getWebhookRestTemplateInvocationCount() = Mockito.mockingDetails(webhookRestTemplate).invocations.count()
 
   private fun verifyWebhookSignature(httpEntity: HttpEntity<String>, secret: String) {
     val signature = httpEntity.headers["Tolgee-Signature"]
