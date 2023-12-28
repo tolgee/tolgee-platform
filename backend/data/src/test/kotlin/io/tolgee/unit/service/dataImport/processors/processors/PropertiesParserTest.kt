@@ -17,7 +17,6 @@ class PropertiesParserTest {
   private lateinit var importFileDto: ImportFileDto
   private lateinit var fileProcessorContext: FileProcessorContext
 
-
   @BeforeEach
   fun setup() {
     importMock = mock()
@@ -40,5 +39,4 @@ class PropertiesParserTest {
     val multiLineText = fileProcessorContext.translations["Cleanup"]?.get(0)?.text
     Assertions.assertThat(multiLineText).hasLineCount(3)
   }
-
 }
