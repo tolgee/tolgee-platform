@@ -183,7 +183,7 @@ class BatchJobConcurrentLauncher(
     /**
      * Only single job can run in project at the same time
      */
-    if (!batchJobProjectLockingManager.canRunBatchJobOfExecution(executionItem.jobId)) {
+    if (!batchJobProjectLockingManager.canLockJobForProject(executionItem.jobId)) {
       logger.debug(
         "⚠️ Cannot run execution ${executionItem.chunkExecutionId}. " +
           "Other job from the project is currently running, skipping"

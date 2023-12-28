@@ -29,8 +29,11 @@ class BatchJobProjectLockingManager(
     }
   }
 
-  fun canRunBatchJobOfExecution(batchJobId: Long): Boolean {
+  fun canLockJobForProject(batchJobId: Long): Boolean {
     val jobDto = batchJobService.getJobDto(batchJobId)
+    if (!jobDto.type.exclusive) {
+      return true
+    }
     return tryLockJobForProject(jobDto)
   }
 

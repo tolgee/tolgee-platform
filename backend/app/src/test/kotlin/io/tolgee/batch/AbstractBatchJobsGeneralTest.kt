@@ -202,10 +202,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val thirdExecution = executions[job1.id]!![1]
     val fourthExecution = executions[job2.id]!![1]
 
-    util.waitForQueueSize(4)
-    batchJobChunkExecutionQueue.clear()
-    util.waitForQueueSize(0)
-    batchJobConcurrentLauncher.pause = false
+    util.waitAndClearQueue(4)
 
     batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
     util.waitForExecutionSuccess(firstExecution)
@@ -232,6 +229,29 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     util.assertJobStateCacheCleared(job1)
     util.assertJobStateCacheCleared(job2)
     util.assertJobUnlocked()
+  }
+
+  @Test
+  fun `doesn't lock non-exclusive job`() {
+    clearForcedDate()
+    batchJobConcurrentLauncher.pause = true
+
+    val job1 = util.runChunkedJob(20)
+    val job2 = util.runNonExclusiveJob()
+
+    val executions = util.getExecutions(listOf(job1.id, job2.id))
+
+    val firstExecution = executions[job1.id]!!.first()
+    val secondExecution = executions[job2.id]!!.first()
+
+    util.waitAndClearQueue(3)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
+    util.waitForExecutionSuccess(firstExecution)
+    util.verifyJobLocked(job1)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(secondExecution))
+    util.waitForExecutionSuccess(secondExecution)
   }
 
   /**

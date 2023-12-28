@@ -331,13 +331,21 @@ class BatchJobTestUtil(
   }
 
   fun runDebouncedJob(): BatchJob {
+    return runAutomationJob(Duration.ofSeconds(10))
+  }
+
+  fun runNonExclusiveJob(): BatchJob {
+    return runAutomationJob(null)
+  }
+
+  private fun runAutomationJob(duration: Duration?): BatchJob {
     return executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
         request = AutomationBjRequest(1, 1, 1),
         project = testData.projectBuilder.self,
         author = testData.user,
         type = BatchJobType.AUTOMATION,
-        debounceDuration = Duration.ofSeconds(10)
+        debounceDuration = duration
       )
     }
   }
@@ -346,6 +354,13 @@ class BatchJobTestUtil(
     waitForNotThrowing(pollTime = 50, timeout = 2000) {
       batchJobChunkExecutionQueue.size.assert.isEqualTo(size)
     }
+  }
+
+  fun waitAndClearQueue(waitForQueueSize: Int) {
+    this.waitForQueueSize(waitForQueueSize)
+    batchJobChunkExecutionQueue.clear()
+    this.waitForQueueSize(0)
+    batchJobConcurrentLauncher.pause = false
   }
 
   fun waitForExecutionSuccess(execution: BatchJobChunkExecution) {
@@ -361,7 +376,7 @@ class BatchJobTestUtil(
   fun verifiedTriedToLockJob(jobId: Long) {
     waitForNotThrowing {
       verify(batchJobProjectLockingManager, atLeast(1))
-        .canRunBatchJobOfExecution(ArgumentMatchers.eq(jobId))
+        .canLockJobForProject(ArgumentMatchers.eq(jobId))
     }
   }
 
@@ -423,4 +438,7 @@ class BatchJobTestUtil(
 
   private val batchJobService: BatchJobService
     get() = applicationContext.getBean(BatchJobService::class.java)
+
+  private val batchJobConcurrentLauncher: BatchJobConcurrentLauncher
+    get() = applicationContext.getBean(BatchJobConcurrentLauncher::class.java)
 }

@@ -16,7 +16,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.addMinutes
+import io.tolgee.util.addSeconds
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -75,15 +75,12 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun before() {
     Mockito.reset(restTemplate, webhookRestTemplate)
-    webhookInvocationCount = 0
   }
 
   @AfterEach
   fun after() {
     currentDateProvider.forcedDate = null
   }
-
-  var webhookInvocationCount = 0
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -124,9 +121,9 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     this.projectSupplier = { testData.projectBuilder.self }
     mockWebhookResponse(HttpStatus.OK)
 
-    modifyTranslationData()
-
-    verifyWebhookExecuted(testData)
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
   }
 
   @Test
@@ -139,17 +136,23 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     this.projectSupplier = { testData.projectBuilder.self }
     mockWebhookResponse(HttpStatus.BAD_REQUEST)
 
-    modifyTranslationData()
-
-    verifyWebhookExecuted(testData)
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
     webhookConfigService.get(testData.webhookConfig.self.id).firstFailed!!
       .time.assert.isEqualTo(currentDateProvider.date.time)
 
     mockWebhookResponse(HttpStatus.OK)
 
-    currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(60)
-    modifyTranslationData()
-    verifyWebhookExecuted(testData)
+    verifyWebhookExecuted(testData) {
+      // webhooks are configured to be retried after 5 seconds
+      currentDateProvider.forcedDate = currentDateProvider.date.addSeconds(5)
+    }
+
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
+
     webhookConfigService.get(testData.webhookConfig.self.id).firstFailed.assert.isNull()
   }
 
@@ -165,10 +168,11 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       )
   }
 
-  private fun verifyWebhookExecuted(testData: WebhooksTestData) {
-    val newExpectedInvocationsCount = ++webhookInvocationCount
+  private fun verifyWebhookExecuted(testData: WebhooksTestData, webhookTriggeringCallback: () -> Unit) {
+    val invocations = getWebhookRestTemplateInvocationCount()
+    webhookTriggeringCallback()
     waitForNotThrowing {
-      Mockito.mockingDetails(webhookRestTemplate).invocations.count().assert.isEqualTo(newExpectedInvocationsCount)
+      getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocations + 1)
       val callArguments = Mockito.mockingDetails(webhookRestTemplate).invocations.last().arguments
       callArguments[0].assert
         .isEqualTo(testData.webhookConfig.self.url)
@@ -187,6 +191,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         .lastExecuted!!.time.assert.isEqualTo(currentDateProvider.date.time)
     }
   }
+
+  private fun getWebhookRestTemplateInvocationCount() = Mockito.mockingDetails(webhookRestTemplate).invocations.count()
 
   private fun verifyWebhookSignature(httpEntity: HttpEntity<String>, secret: String) {
     val signature = httpEntity.headers["Tolgee-Signature"]
