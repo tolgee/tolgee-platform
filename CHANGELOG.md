@@ -1,3 +1,10 @@
+## [3.42.6](https://github.com/tolgee/tolgee-platform/compare/v3.42.5...v3.42.6) (2023-12-28)
+
+
+### Bug Fixes
+
+* control buttons not present sometimes ([#2051](https://github.com/tolgee/tolgee-platform/issues/2051)) ([87d6413](https://github.com/tolgee/tolgee-platform/commit/87d641360a0ca2de3546b5b53ac7045aef82142a))
+
 ## [3.42.5](https://github.com/tolgee/tolgee-platform/compare/v3.42.4...v3.42.5) (2023-12-27)
 
 
