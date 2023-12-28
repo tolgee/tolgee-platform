@@ -75,15 +75,12 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun before() {
     Mockito.reset(restTemplate, webhookRestTemplate)
-    webhookInvocationCount = 0
   }
 
   @AfterEach
   fun after() {
     currentDateProvider.forcedDate = null
   }
-
-  var webhookInvocationCount = 0
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -124,9 +121,9 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     this.projectSupplier = { testData.projectBuilder.self }
     mockWebhookResponse(HttpStatus.OK)
 
-    modifyTranslationData()
-
-    verifyWebhookExecuted(testData)
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
   }
 
   @Test
@@ -139,17 +136,20 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     this.projectSupplier = { testData.projectBuilder.self }
     mockWebhookResponse(HttpStatus.BAD_REQUEST)
 
-    modifyTranslationData()
-
-    verifyWebhookExecuted(testData)
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
     webhookConfigService.get(testData.webhookConfig.self.id).firstFailed!!
       .time.assert.isEqualTo(currentDateProvider.date.time)
 
     mockWebhookResponse(HttpStatus.OK)
 
     currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(60)
-    modifyTranslationData()
-    verifyWebhookExecuted(testData)
+
+    verifyWebhookExecuted(testData) {
+      modifyTranslationData()
+    }
+
     webhookConfigService.get(testData.webhookConfig.self.id).firstFailed.assert.isNull()
   }
 
@@ -165,10 +165,11 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       )
   }
 
-  private fun verifyWebhookExecuted(testData: WebhooksTestData) {
-    val newExpectedInvocationsCount = ++webhookInvocationCount
+  private fun verifyWebhookExecuted(testData: WebhooksTestData, webhookTriggeringCallback: () -> Unit) {
+    val invocations = Mockito.mockingDetails(webhookRestTemplate).invocations.count()
+    webhookTriggeringCallback()
     waitForNotThrowing {
-      Mockito.mockingDetails(webhookRestTemplate).invocations.count().assert.isEqualTo(newExpectedInvocationsCount)
+      Mockito.mockingDetails(webhookRestTemplate).invocations.count().assert.isEqualTo(invocations + 1)
       val callArguments = Mockito.mockingDetails(webhookRestTemplate).invocations.last().arguments
       callArguments[0].assert
         .isEqualTo(testData.webhookConfig.self.url)
