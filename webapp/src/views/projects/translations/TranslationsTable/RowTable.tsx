@@ -69,7 +69,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
 
   return (
     <StyledContainer
-      onMouseEnter={() => setHover(true)}
+      onMouseOver={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
