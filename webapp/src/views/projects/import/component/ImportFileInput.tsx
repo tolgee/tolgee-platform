@@ -36,7 +36,14 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   const { t } = useTranslate();
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
-  const ALLOWED_EXTENSIONS = ['json', 'zip', 'po', 'xliff', 'xlf'];
+  const ALLOWED_EXTENSIONS = [
+    'json',
+    'zip',
+    'po',
+    'xliff',
+    'xlf',
+    'properties',
+  ];
   const [resetKey, setResetKey] = useState(0);
   function resetInput() {
     setResetKey((key) => key + 1);

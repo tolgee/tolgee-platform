@@ -21,6 +21,7 @@ class ProcessorFactory {
       "po" -> PoFileProcessor(context)
       "xliff" -> XliffFileProcessor(context)
       "xlf" -> XliffFileProcessor(context)
+      "properties" -> PropertyFileProcessor(context)
       else -> throw ImportCannotParseFileException(file.name, "No matching processor")
     }
   }
