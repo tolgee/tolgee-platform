@@ -497,7 +497,7 @@
   "import_file_issue_param_type_value" : "valoare: {value}",
   "import_file_issues_title" : "Probleme fișier",
   "import_files_uploaded" : "Fișierele au fost încărcate",
-  "import_file_supported_formats" : "Formatele suportate sunt .json, .xliff, .po, .properties",
+  "import_file_supported_formats" : "Formatele suportate sunt .json, .xliff, .po",
   "import_language_select" : "Limba",
   "import_max_file_count_message" : "Prea multe fișiere",
   "import_namespace_name_header" : "Spațiu de nume",

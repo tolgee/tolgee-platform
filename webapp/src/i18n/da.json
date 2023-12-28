@@ -497,7 +497,7 @@
   "import_file_issue_param_type_value" : "værdi: {value}",
   "import_file_issues_title" : "Problemer med filer",
   "import_files_uploaded" : "Filer uploaded",
-  "import_file_supported_formats" : "understøttede formater er .json, .xliff, .po, .properties",
+  "import_file_supported_formats" : "understøttede formater er .json, .xliff, .po",
   "import_language_select" : "Sprog",
   "import_max_file_count_message" : "For mange filer",
   "import_namespace_name_header" : "Navnerum",

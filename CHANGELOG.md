@@ -1,3 +1,10 @@
+# [3.43.0](https://github.com/tolgee/tolgee-platform/compare/v3.42.7...v3.43.0) (2023-12-28)
+
+
+### Features
+
+* Add simple properties file importer ([#2050](https://github.com/tolgee/tolgee-platform/issues/2050)) ([11dd90f](https://github.com/tolgee/tolgee-platform/commit/11dd90f2607393094cd48bef7b20e6df37d3f39d)), closes [#2042](https://github.com/tolgee/tolgee-platform/issues/2042)
+
 ## [3.42.7](https://github.com/tolgee/tolgee-platform/compare/v3.42.6...v3.42.7) (2023-12-28)
 
 

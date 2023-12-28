@@ -305,7 +305,7 @@
   "import_file_issue_param_type_line" : "行：{value}",
   "import_file_issue_param_type_value" : "值：{value}",
   "import_file_issues_title" : "文件问题",
-  "import_file_supported_formats" : "支持的格式为 .json、.xliff、.po、.properties",
+  "import_file_supported_formats" : "支持的格式为 .json、.xliff、.po",
   "import_language_select" : "语言",
   "import_max_file_count_message" : "文件太多",
   "import_namespace_name_header" : "命名空间",

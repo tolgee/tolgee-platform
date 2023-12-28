@@ -497,7 +497,7 @@
   "import_file_issue_param_type_value" : "hodnota: {value}",
   "import_file_issues_title" : "Problémy souboru",
   "import_files_uploaded" : "Soubory byly nahrány",
-  "import_file_supported_formats" : "podporované formáty jsou .json, .xliff, .po, .properties",
+  "import_file_supported_formats" : "podporované formáty jsou .json, .xliff, .po",
   "import_language_select" : "Jazyk",
   "import_max_file_count_message" : "Příliš mnoho souborů",
   "import_namespace_name_header" : "Namespace",
