@@ -1,3 +1,10 @@
+## [3.42.7](https://github.com/tolgee/tolgee-platform/compare/v3.42.6...v3.42.7) (2023-12-28)
+
+
+### Bug Fixes
+
+* Automations not exclusive for project ([#2049](https://github.com/tolgee/tolgee-platform/issues/2049)) ([234ad6a](https://github.com/tolgee/tolgee-platform/commit/234ad6adcdc7e96d84678352563df046f9f44f7a))
+
 ## [3.42.6](https://github.com/tolgee/tolgee-platform/compare/v3.42.5...v3.42.6) (2023-12-28)
 
 
