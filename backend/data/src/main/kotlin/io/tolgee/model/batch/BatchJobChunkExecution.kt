@@ -33,6 +33,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   var chunkNumber: Int = 0
 
+  @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var successTargets: List<Any> = listOf()
 

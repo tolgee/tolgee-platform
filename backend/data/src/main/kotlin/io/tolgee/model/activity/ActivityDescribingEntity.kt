@@ -2,6 +2,7 @@ package io.tolgee.model.activity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.EntityDescriptionRef
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
@@ -26,9 +27,11 @@ class ActivityDescribingEntity(
   val entityId: Long
 ) : Serializable {
 
+  @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var data: Map<String, Any?> = mutableMapOf()
 
   @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   var describingRelations: Map<String, EntityDescriptionRef>? = null
 }

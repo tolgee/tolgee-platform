@@ -2968,4 +2968,58 @@
             <column name="key1id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-5">
+        <addUniqueConstraint columnNames="batch_job_chunk_execution_id" constraintName="UC_ACTIVITY_REVISIONBATCH_JOB_CHUNK_EXECUTION_ID_COL" tableName="activity_revision"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-6">
+        <addUniqueConstraint columnNames="batch_job_id" constraintName="UC_ACTIVITY_REVISIONBATCH_JOB_ID_COL" tableName="activity_revision"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-7">
+        <addUniqueConstraint columnNames="target_language_id" constraintName="UC_AUTO_TRANSLATION_CONFIGTARGET_LANGUAGE_ID_COL" tableName="auto_translation_config"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-8">
+        <addUniqueConstraint columnNames="conflict_id" constraintName="UC_IMPORT_TRANSLATIONCONFLICT_ID_COL" tableName="import_translation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-9">
+        <addUniqueConstraint columnNames="import_key_id" constraintName="UC_KEY_METAIMPORT_KEY_ID_COL" tableName="key_meta"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-10">
+        <addUniqueConstraint columnNames="key_id" constraintName="UC_KEY_METAKEY_ID_COL" tableName="key_meta"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-11">
+        <addUniqueConstraint columnNames="user_account_id" constraintName="UC_MT_CREDIT_BUCKETUSER_ACCOUNT_ID_COL" tableName="mt_credit_bucket"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-12">
+        <addUniqueConstraint columnNames="target_language_id" constraintName="UC_MT_SERVICE_CONFIGTARGET_LANGUAGE_ID_COL" tableName="mt_service_config"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-13">
+        <addUniqueConstraint columnNames="invitation_id" constraintName="UC_ORGANIZATION_ROLEINVITATION_ID_COL" tableName="organization_role"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-14">
+        <addUniqueConstraint columnNames="invitation_id" constraintName="UC_PERMISSIONINVITATION_ID_COL" tableName="permission"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-15">
+        <addUniqueConstraint columnNames="organization_id" constraintName="UC_PERMISSIONORGANIZATION_ID_COL" tableName="permission"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-16">
+        <addUniqueConstraint columnNames="base_language_id" constraintName="UC_PROJECTBASE_LANGUAGE_ID_COL" tableName="project"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-17">
+        <addUniqueConstraint columnNames="author_id, project_id" constraintName="UKgf336yxrmsyau8skvim42lkuj" tableName="import"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-18">
+        <dropColumn columnName="revision_type" tableName="activity_describing_entity"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-1">
+        <modifyDataType columnName="avatar_hash" newDataType="varchar(255)" tableName="organization"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-2">
+        <modifyDataType columnName="avatar_hash" newDataType="varchar(255)" tableName="project"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-3">
+        <modifyDataType columnName="avatar_hash" newDataType="varchar(255)" tableName="user_account"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-4">
+        <modifyDataType columnName="structure_delimiter" newDataType="char(255)" tableName="content_delivery_config"/>
+    </changeSet>
 </databaseChangeLog>
