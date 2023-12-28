@@ -497,7 +497,7 @@
   "import_file_issue_param_type_value" : "value: {value}",
   "import_file_issues_title" : "File issues",
   "import_files_uploaded" : "Files uploaded",
-  "import_file_supported_formats" : "supported formats are .json, .xliff, .po",
+  "import_file_supported_formats" : "supported formats are .json, .xliff, .po, .properties",
   "import_language_select" : "Language",
   "import_max_file_count_message" : "Too many files",
   "import_namespace_name_header" : "Namespace",

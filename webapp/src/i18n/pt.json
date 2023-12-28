@@ -251,7 +251,7 @@
   "import_file_issue_param_type_line" : "linha: {value}",
   "import_file_issue_param_type_value" : "valor: {value}",
   "import_file_issues_title" : "Problemas com o arquivo",
-  "import_file_supported_formats" : "os formatos suportados são .json, .xliff, .po",
+  "import_file_supported_formats" : "os formatos suportados são .json, .xliff, .po, .properties",
   "import_language_select" : "Idioma",
   "import_namespace_name_header" : "Namespace",
   "import_not_resolved_error_dialog_cancel_button" : "Voltar",

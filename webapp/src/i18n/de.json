@@ -427,7 +427,7 @@
   "import_file_issue_param_type_line" : "Zeile: {value}",
   "import_file_issue_param_type_value" : "Wert: {value}",
   "import_file_issues_title" : "Datei-Probleme",
-  "import_file_supported_formats" : "unterstützte Formate sind .json, .xliff, .po",
+  "import_file_supported_formats" : "unterstützte Formate sind .json, .xliff, .po, .properties",
   "import_language_select" : "Sprache",
   "import_max_file_count_message" : "Zu viele Dateien",
   "import_namespace_name_header" : "Namespace",
