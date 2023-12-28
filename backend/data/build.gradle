@@ -76,7 +76,7 @@ apply from: "$rootDir/gradle/liquibase.gradle"
 configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
 
 diff.dependsOn compileKotlin
-diffChangeLog.dependsOn compileKotlin
+diffChangelog.dependsOn compileKotlin
 
 kotlin {
     jvmToolchain(17)

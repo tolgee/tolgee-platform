@@ -103,7 +103,7 @@ project(':server-app').afterEvaluate {
     task startDbChangelogContainer {
         doLast {
             exec {
-                commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55432:5432", "--name", dbSchemaContainerName, "postgres:13"
+                commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55438:5432", "--name", dbSchemaContainerName, "postgres:13"
             }
             Thread.sleep(5000)
         }
@@ -111,8 +111,8 @@ project(':server-app').afterEvaluate {
 
     task stopDbChangelogContainer(type: Exec) {
         commandLine "docker", "rm", "--force", dbSchemaContainerName
-        mustRunAfter project(':data').tasks.findByName("diffChangeLog")
-        mustRunAfter project(':ee-app').tasks.findByName("diffChangeLog")
+        mustRunAfter project(':data').tasks.findByName("diffChangelog")
+        mustRunAfter project(':ee-app').tasks.findByName("diffChangelog")
     }
 
     task diffChangeLog {
@@ -126,7 +126,7 @@ project(':server-app').afterEvaluate {
         finalizedBy = [
                 startDbChangelogContainer,
                 project(':server-app').tasks.findByName("bootRun"),
-                project(':data').tasks.findByName("diffChangeLog"),
+                project(':data').tasks.findByName("diffChangelog"),
         ]
 
         def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangeLog")

@@ -7,6 +7,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.enums.TranslationState
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
@@ -37,25 +38,30 @@ class ContentDeliveryConfig(
   var lastPublished: Date? = null
 
   @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var languages: Set<String>? = null
 
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
 
   @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var filterKeyId: List<Long>? = null
 
   @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var filterKeyIdNot: List<Long>? = null
   override var filterTag: String? = null
   override var filterKeyPrefix: String? = null
 
   @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var filterState: List<TranslationState>? = listOf(
     TranslationState.TRANSLATED,
     TranslationState.REVIEWED,
   )
 
   @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var filterNamespace: List<String?>? = null
 }

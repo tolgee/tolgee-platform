@@ -15,7 +15,7 @@ ext {
             activities {
                 //noinspection GroovyAssignabilityCheck
                 main {
-                    changeLogFile changeLogPah
+                    changeLogFile "${project.projectDir}/${changeLogPah}"
                     url liveDb.url
                     referenceUrl liveDb.referenceUrl
                     username liveDb.username

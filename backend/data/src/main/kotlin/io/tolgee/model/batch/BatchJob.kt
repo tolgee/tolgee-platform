@@ -8,6 +8,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityRevision
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType.STRING
 import jakarta.persistence.Enumerated
@@ -27,6 +28,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   var author: UserAccount? = null
 
+  @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var target: List<Any> = listOf()
 
@@ -45,6 +47,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
   var activityRevision: ActivityRevision? = null
 
+  @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var params: Any? = null
 

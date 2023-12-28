@@ -79,10 +79,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `it reports business event once in a day`() {
-    retry(
-      retries = 10,
-      exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }
-    ) {
+    retryingOnCommonIssues {
       initBaseData()
       try {
         executeInNewTransaction {
@@ -108,10 +105,10 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to single json`() {
-    executeInNewTransaction {
-      initBaseData()
-    }
-    retry {
+    retryingOnCommonIssues {
+      executeInNewTransaction {
+        initBaseData()
+      }
       val response = performProjectAuthGet("export?languages=en&zip=false")
         .andDo { obj: MvcResult -> obj.asyncResult }
       response.andPrettyPrint.andAssertThatJson {
@@ -128,10 +125,10 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to single xliff`() {
-    executeInNewTransaction {
-      initBaseData()
-    }
-    retry {
+    retryingOnCommonIssues {
+      executeInNewTransaction {
+        initBaseData()
+      }
       val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
         .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
 
@@ -146,49 +143,54 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it filters by keyId in`() {
-    testData = TranslationsTestData()
-    testData.generateLotOfData(1000)
-    testDataService.saveTestData(testData.root)
-    prepareUserAndProject(testData)
-    commitTransaction()
+    retryingOnCommonIssues {
+      testData = TranslationsTestData()
+      testData.generateLotOfData(1000)
+      testDataService.saveTestData(testData.root)
+      prepareUserAndProject(testData)
+      commitTransaction()
 
-    val time = measureTimeMillis {
-      val selectAllResult = performProjectAuthGet("translations/select-all")
-        .andIsOk
-        .andGetContentAsString
-      val keyIds = jacksonObjectMapper().readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(500)
-      val parsed = performExportPost(mapOf("filterKeyId" to keyIds))
-      assertThatJson(parsed["en.json"]!!) {
-        isObject.hasSize(499)
+      val time = measureTimeMillis {
+        val selectAllResult = performProjectAuthGet("translations/select-all")
+          .andIsOk
+          .andGetContentAsString
+        val keyIds = jacksonObjectMapper()
+          .readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(500)
+        val parsed = performExportPost(mapOf("filterKeyId" to keyIds))
+        assertThatJson(parsed["en.json"]!!) {
+          isObject.hasSize(499)
+        }
       }
-    }
 
-    assertThat(time).isLessThan(2000)
+      assertThat(time).isLessThan(2000)
+    }
   }
 
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `the structureDelimiter works`() {
-    testData = TranslationsTestData()
-    testData.generateScopedData()
-    testDataService.saveTestData(testData.root)
-    prepareUserAndProject(testData)
-    commitTransaction()
+    retryingOnCommonIssues {
+      testData = TranslationsTestData()
+      testData.generateScopedData()
+      testDataService.saveTestData(testData.root)
+      prepareUserAndProject(testData)
+      commitTransaction()
 
-    performExport("structureDelimiter=").let { parsed ->
-      assertThatJson(parsed["en.json"]!!) {
-        node("hello\\.i\\.am\\.scoped").isEqualTo("yupee!")
+      performExport("structureDelimiter=").let { parsed ->
+        assertThatJson(parsed["en.json"]!!) {
+          node("hello\\.i\\.am\\.scoped").isEqualTo("yupee!")
+        }
       }
-    }
-    performExport("structureDelimiter=+").let { parsed ->
-      assertThatJson(parsed["en.json"]!!) {
-        node("hello.i.am.plus.scoped").isEqualTo("yupee!")
+      performExport("structureDelimiter=+").let { parsed ->
+        assertThatJson(parsed["en.json"]!!) {
+          node("hello.i.am.plus.scoped").isEqualTo("yupee!")
+        }
       }
-    }
-    performExport("").let { parsed ->
-      assertThatJson(parsed["en.json"]!!) {
-        node("hello.i.am.scoped").isEqualTo("yupee!")
+      performExport("").let { parsed ->
+        assertThatJson(parsed["en.json"]!!) {
+          node("hello.i.am.scoped").isEqualTo("yupee!")
+        }
       }
     }
   }
@@ -223,18 +225,20 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to json with namespaces`() {
-    val namespacesTestData = NamespacesTestData()
-    testDataService.saveTestData(namespacesTestData.root)
-    projectSupplier = { namespacesTestData.projectBuilder.self }
-    userAccount = namespacesTestData.user
+    retryingOnCommonIssues {
+      val namespacesTestData = NamespacesTestData()
+      testDataService.saveTestData(namespacesTestData.root)
+      projectSupplier = { namespacesTestData.projectBuilder.self }
+      userAccount = namespacesTestData.user
 
-    val parsed = performExport()
+      val parsed = performExport()
 
-    assertThatJson(parsed["ns-1/en.json"]!!) {
-      node("key").isEqualTo("hello")
-    }
-    assertThatJson(parsed["en.json"]!!) {
-      node("key").isEqualTo("hello")
+      assertThatJson(parsed["ns-1/en.json"]!!) {
+        node("key").isEqualTo("hello")
+      }
+      assertThatJson(parsed["en.json"]!!) {
+        node("key").isEqualTo("hello")
+      }
     }
   }
 
@@ -242,53 +246,57 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports only allowed languages`() {
-    val testData = LanguagePermissionsTestData()
-    testDataService.saveTestData(testData.root)
-    projectSupplier = { testData.projectBuilder.self }
-    userAccount = testData.viewEnOnlyUser
+    retryingOnCommonIssues {
+      val testData = LanguagePermissionsTestData()
+      testDataService.saveTestData(testData.root)
+      projectSupplier = { testData.projectBuilder.self }
+      userAccount = testData.viewEnOnlyUser
 
-    val parsed = performExport()
-    val files = parsed.keys
-    files.assert.containsExactly("en.json")
+      val parsed = performExport()
+      val files = parsed.keys
+      files.assert.containsExactly("en.json")
+    }
   }
 
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports all languages by default`() {
-    val testData = TestDataBuilder()
-    val user = testData.addUserAccount {
-      username = "user"
-    }
-    val projectBuilder = testData.addProject {
-      name = "Oh my project"
-      organizationOwner = user.defaultOrganizationBuilder.self
-    }
-
-    val langs = arrayOf(
-      projectBuilder.addEnglish(),
-      projectBuilder.addCzech(),
-      projectBuilder.addGerman(),
-      projectBuilder.addFrench()
-    )
-
-    val key = projectBuilder.addKey { name = "key" }.self
-    langs.forEach { lang ->
-      projectBuilder.addTranslation {
-        this.language = lang.self
-        this.key = key
-        this.text = "yey"
+    retryingOnCommonIssues {
+      val testData = TestDataBuilder()
+      val user = testData.addUserAccount {
+        username = "user"
       }
+      val projectBuilder = testData.addProject {
+        name = "Oh my project"
+        organizationOwner = user.defaultOrganizationBuilder.self
+      }
+
+      val langs = arrayOf(
+        projectBuilder.addEnglish(),
+        projectBuilder.addCzech(),
+        projectBuilder.addGerman(),
+        projectBuilder.addFrench()
+      )
+
+      val key = projectBuilder.addKey { name = "key" }.self
+      langs.forEach { lang ->
+        projectBuilder.addTranslation {
+          this.language = lang.self
+          this.key = key
+          this.text = "yey"
+        }
+      }
+
+      testDataService.saveTestData(testData)
+
+      projectSupplier = { projectBuilder.self }
+      userAccount = user.self
+
+      val parsed = performExport()
+      val files = parsed.keys
+      files.assert.containsExactlyInAnyOrder(*langs.map { "${it.self.tag}.json" }.toTypedArray())
     }
-
-    testDataService.saveTestData(testData)
-
-    projectSupplier = { projectBuilder.self }
-    userAccount = user.self
-
-    val parsed = performExport()
-    val files = parsed.keys
-    files.assert.containsExactlyInAnyOrder(*langs.map { "${it.self.tag}.json" }.toTypedArray())
   }
 
   private fun initBaseData() {
@@ -300,5 +308,14 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun prepareUserAndProject(testData: TranslationsTestData) {
     userAccount = testData.user
     projectSupplier = { testData.project }
+  }
+
+  private fun retryingOnCommonIssues(fn: () -> Unit) {
+    retry(
+      retries = 10,
+      exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }
+    ) {
+      fn()
+    }
   }
 }

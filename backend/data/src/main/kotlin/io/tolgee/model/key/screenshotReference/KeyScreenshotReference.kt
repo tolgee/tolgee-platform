@@ -22,6 +22,7 @@ class KeyScreenshotReference {
   lateinit var screenshot: Screenshot
 
   @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   var positions: MutableList<KeyInScreenshotPosition>? = mutableListOf()
 
   @Column(columnDefinition = "text", length = 5000)
