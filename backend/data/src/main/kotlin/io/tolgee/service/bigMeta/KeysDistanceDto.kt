@@ -7,5 +7,5 @@ data class KeysDistanceDto(
   var key2Id: Long = 0,
   var score: Long = MAX_SCORE,
   var projectId: Long,
-  var hits: Long = 1
+  var hits: Long = 1,
 )

@@ -40,8 +40,8 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:\\d+}/",
-    "/v2/projects/"
-  ]
+    "/v2/projects/",
+  ],
 )
 @OpenApiTag(name = "Tags", description = "Manipulates key tags")
 class TagsController(
@@ -49,15 +49,19 @@ class TagsController(
   private val projectHolder: ProjectHolder,
   private val tagService: TagService,
   private val tagModelAssembler: TagModelAssembler,
-  private val pagedResourcesAssembler: PagedResourcesAssembler<Tag>
+  private val pagedResourcesAssembler: PagedResourcesAssembler<Tag>,
 ) : IController {
-
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
   @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it is created")
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
-  fun tagKey(@PathVariable keyId: Long, @Valid @RequestBody tagKeyDto: TagKeyDto): TagModel {
+  fun tagKey(
+    @PathVariable
+    keyId: Long,
+    @Valid @RequestBody
+    tagKeyDto: TagKeyDto,
+  ): TagModel {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     key.checkInProject()
     return tagService.tagKey(key, tagKeyDto.name.trim()).model
@@ -66,9 +70,12 @@ class TagsController(
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
   @Operation(summary = "Removes tag with provided id from key with provided id")
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
-  fun removeTag(@PathVariable keyId: Long, @PathVariable tagId: Long) {
+  fun removeTag(
+    @PathVariable keyId: Long,
+    @PathVariable tagId: Long,
+  ) {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     val tag = tagService.find(tagId) ?: throw NotFoundException()
     tag.checkInProject()
@@ -82,7 +89,7 @@ class TagsController(
   @AllowApiAccess
   fun getAll(
     @RequestParam search: String? = null,
-    @SortDefault("name") @ParameterObject pageable: Pageable
+    @SortDefault("name") @ParameterObject pageable: Pageable,
   ): PagedModel<TagModel> {
     val data = tagService.getProjectTags(projectHolder.project.id, search, pageable)
     return pagedResourcesAssembler.toModel(data, tagModelAssembler)

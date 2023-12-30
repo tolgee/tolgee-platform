@@ -11,7 +11,6 @@ import java.io.Serializable
 open class KeyImportResolvableResultModel(
   @Schema(description = "List of keys")
   val keys: List<KeyModel>,
-
   @Schema(description = "Map uploadedImageId to screenshot")
   val screenshots: Map<Long, ScreenshotModel>,
 ) : RepresentationModel<KeyImportResolvableResultModel>(), Serializable

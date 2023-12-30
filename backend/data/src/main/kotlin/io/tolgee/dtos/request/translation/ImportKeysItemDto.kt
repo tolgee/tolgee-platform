@@ -13,24 +13,21 @@ class ImportKeysItemDto(
   @field:NotBlank
   @field:Length(max = 2000)
   val name: String = "",
-
   @field:Length(max = 100)
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
   val namespace: String? = null,
-
   /**
    * Map of language tag -> text
    */
   @field:NotNull
   @Schema(
     description = "Object mapping language tag to translation",
-    example = "{\"en\": \"What a translated value!\", \"cs\": \"Jaká to přeložená hodnota!\"}"
+    example = "{\"en\": \"What a translated value!\", \"cs\": \"Jaká to přeložená hodnota!\"}",
   )
   val translations: Map<String, String?> = mapOf(),
-
   @Schema(
     description = "Tags of the key",
-    example = "[\"homepage\", \"user-profile\"]"
+    example = "[\"homepage\", \"user-profile\"]",
   )
-  val tags: List<String>? = null
+  val tags: List<String>? = null,
 )

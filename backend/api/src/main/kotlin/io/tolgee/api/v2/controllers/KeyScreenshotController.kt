@@ -47,15 +47,15 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping(
   value = [
     "/v2/projects/keys/{keyId}/screenshots",
-    "/v2/projects/{projectId:[0-9]+}/keys/{keyId}/screenshots"
-  ]
+    "/v2/projects/{projectId:[0-9]+}/keys/{keyId}/screenshots",
+  ],
 )
 @Tag(name = "Screenshots")
 class KeyScreenshotController(
   private val screenshotService: ScreenshotService,
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
-  private val screenshotModelAssembler: ScreenshotModelAssembler
+  private val screenshotModelAssembler: ScreenshotModelAssembler,
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload screenshot for specific key")
@@ -67,7 +67,7 @@ class KeyScreenshotController(
   fun uploadScreenshot(
     @PathVariable keyId: Long,
     @RequestPart("screenshot") screenshot: MultipartFile,
-    @RequestPart("info", required = false) info: ScreenshotInfoDto?
+    @RequestPart("info", required = false) info: ScreenshotInfoDto?,
   ): ResponseEntity<ScreenshotModel> {
     val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
     if (!contentTypes.contains(screenshot.contentType!!)) {
@@ -83,7 +83,9 @@ class KeyScreenshotController(
   @Operation(summary = "Returns all screenshots for specified key")
   @RequiresProjectPermissions([ Scope.SCREENSHOTS_VIEW ])
   @AllowApiAccess
-  fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
+  fun getKeyScreenshots(
+    @PathVariable keyId: Long,
+  ): CollectionModel<ScreenshotModel> {
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
     return screenshotModelAssembler.toCollectionModel(screenshotService.findAll(keyEntity))
@@ -94,7 +96,10 @@ class KeyScreenshotController(
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
   @RequiresProjectPermissions([ Scope.SCREENSHOTS_DELETE ])
   @AllowApiAccess
-  fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>, @PathVariable keyId: Long) {
+  fun deleteScreenshots(
+    @PathVariable("ids") ids: Set<Long>,
+    @PathVariable keyId: Long,
+  ) {
     val screenshots = screenshotService.findByIdIn(ids)
     screenshots.forEach {
       it.checkInProject()

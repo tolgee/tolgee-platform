@@ -3,7 +3,6 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.model.Screenshot
 
 class KeysInfoTestData : BaseTestData() {
-
   lateinit var key1and2Screenshot: Screenshot
   lateinit var key2Screenshot: Screenshot
 
@@ -17,9 +16,10 @@ class KeysInfoTestData : BaseTestData() {
         key1and2Screenshot = addScreenshot { }.self
       }
 
-      val key2 = addKey("namespace-1", "key-2") {
-        addTranslation("de", "existing translation")
-      }
+      val key2 =
+        addKey("namespace-1", "key-2") {
+          addTranslation("de", "existing translation")
+        }
 
       addScreenshotReference {
         screenshot = key1and2Screenshot

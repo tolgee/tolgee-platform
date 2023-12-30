@@ -9,9 +9,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class AutoTranslationListener(
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) : Logging {
-
   @Order(2)
   @EventListener
   fun onApplicationEvent(event: OnProjectActivityStoredEvent) {

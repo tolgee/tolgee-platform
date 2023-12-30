@@ -30,7 +30,7 @@ import org.springframework.test.context.ContextConfiguration
     "tolgee.websocket.use-redis=true",
     "spring.redis.port=56379",
   ],
-  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ContextConfiguration(initializers = [BatchJobsGeneralWithRedisTest.Companion.Initializer::class])
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -85,9 +85,9 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
         eq(JOB_QUEUE_TOPIC),
         eq(
           jacksonObjectMapper().writeValueAsString(
-            JobQueueItemsEvent(listOf(peek), QueueEventType.REMOVE)
-          )
-        )
+            JobQueueItemsEvent(listOf(peek), QueueEventType.REMOVE),
+          ),
+        ),
       )
     waitForNotThrowing(timeout = 2000) {
       batchJobChunkExecutionQueue.contains(peek).assert.isFalse()

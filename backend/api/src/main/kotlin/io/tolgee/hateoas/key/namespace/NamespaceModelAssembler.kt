@@ -7,10 +7,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class NamespaceModelAssembler : RepresentationModelAssemblerSupport<Namespace, NamespaceModel>(
-  NamespaceController::class.java, NamespaceModel::class.java
+  NamespaceController::class.java,
+  NamespaceModel::class.java,
 ) {
-  override fun toModel(entity: Namespace) = NamespaceModel(
-    id = entity.id,
-    name = entity.name,
-  )
+  override fun toModel(entity: Namespace) =
+    NamespaceModel(
+      id = entity.id,
+      name = entity.name,
+    )
 }

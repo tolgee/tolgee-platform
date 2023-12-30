@@ -10,7 +10,7 @@ class TextHelperTest {
     val str = "this.is.escaped\\.delimiter.aaa.once\\.more.and.multiple\\\\\\.and.\\\\\\\\.text"
     val split = TextHelper.splitOnNonEscapedDelimiter(str, '.')
     assertThat(split).isEqualTo(
-      listOf("this", "is", "escaped.delimiter", "aaa", "once.more", "and", "multiple\\.and", "\\\\", "text")
+      listOf("this", "is", "escaped.delimiter", "aaa", "once.more", "and", "multiple\\.and", "\\\\", "text"),
     )
   }
 
@@ -25,13 +25,14 @@ class TextHelperTest {
 
   @Test
   fun `replaces ICU params in text with params`() {
-    val result = TextHelper.replaceIcuParams(
-      "{name} Hello! " +
-        "{aaa, plural, " +
-        "one {What} " +
-        "other {what} } " +
-        "I am standard text! {anotherParam}"
-    )
+    val result =
+      TextHelper.replaceIcuParams(
+        "{name} Hello! " +
+          "{aaa, plural, " +
+          "one {What} " +
+          "other {what} } " +
+          "I am standard text! {anotherParam}",
+      )
     assertThat(result.text)
       .isEqualTo("{xx0xx} Hello! {xx1xx} I am standard text! {xx2xx}")
     assertThat(result.isComplex).isEqualTo(true)
@@ -43,14 +44,15 @@ class TextHelperTest {
 
   @Test
   fun `replaces ICU params with escaping`() {
-    val result = TextHelper.replaceIcuParams(
-      "'{name} Hello! " +
-        "{aaa, plural, " +
-        "one {What} " +
-        "other {what} } " +
-        "I am standard text! {anotherParam}" +
-        "That's cool! That''s cool as well!"
-    )
+    val result =
+      TextHelper.replaceIcuParams(
+        "'{name} Hello! " +
+          "{aaa, plural, " +
+          "one {What} " +
+          "other {what} } " +
+          "I am standard text! {anotherParam}" +
+          "That's cool! That''s cool as well!",
+      )
     assertThat(result.text)
       .isEqualTo("{name} Hello! {xx0xx} I am standard text! {xx1xx}That's cool! That's cool as well!")
     assertThat(result.isComplex).isEqualTo(true)

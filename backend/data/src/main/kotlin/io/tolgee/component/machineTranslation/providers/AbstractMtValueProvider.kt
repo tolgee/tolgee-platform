@@ -3,7 +3,6 @@ package io.tolgee.component.machineTranslation.providers
 import io.tolgee.component.machineTranslation.MtValueProvider
 
 abstract class AbstractMtValueProvider : MtValueProvider {
-
   private val String.toSuitableTag: String?
     get() = getSuitableTag(this)
 
@@ -19,14 +18,14 @@ abstract class AbstractMtValueProvider : MtValueProvider {
     if (suitableSourceTag.isNullOrEmpty() || suitableTargetTag.isNullOrEmpty()) {
       return MtValueProvider.MtResult(
         null,
-        0
+        0,
       )
     }
 
     if (suitableSourceTag == suitableTargetTag) {
       return MtValueProvider.MtResult(
         params.text,
-        0
+        0,
       )
     }
 
@@ -34,7 +33,7 @@ abstract class AbstractMtValueProvider : MtValueProvider {
       params.apply {
         sourceLanguageTag = suitableSourceTag
         targetLanguageTag = suitableTargetTag
-      }
+      },
     )
   }
 

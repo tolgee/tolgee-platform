@@ -36,38 +36,53 @@ class OrganizationRoleService(
   fun checkUserCanViewStrict(organizationId: Long) {
     checkUserCanViewStrict(
       authenticationFacade.authenticatedUser.id,
-      organizationId
+      organizationId,
     )
   }
 
-  private fun checkUserCanViewStrict(userId: Long, organizationId: Long) {
+  private fun checkUserCanViewStrict(
+    userId: Long,
+    organizationId: Long,
+  ) {
     if (!canUserViewStrict(userId, organizationId)) throw PermissionException()
   }
 
-  fun canUserViewStrict(userId: Long, organizationId: Long) =
-    this.organizationRepository.canUserView(userId, organizationId)
+  fun canUserViewStrict(
+    userId: Long,
+    organizationId: Long,
+  ) = this.organizationRepository.canUserView(userId, organizationId)
 
   fun checkUserCanView(organizationId: Long) {
     checkUserCanView(
       authenticationFacade.authenticatedUser.id,
       organizationId,
-      authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
+      authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN,
     )
   }
 
-  private fun checkUserCanView(userId: Long, organizationId: Long, isAdmin: Boolean = false) {
+  private fun checkUserCanView(
+    userId: Long,
+    organizationId: Long,
+    isAdmin: Boolean = false,
+  ) {
     if (!isAdmin && !canUserViewStrict(userId, organizationId)) throw PermissionException()
   }
 
-  fun canUserView(userId: Long, organizationId: Long): Boolean {
-    val userAccountDto = userAccountService.findDto(userId)
-      ?: return false
+  fun canUserView(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean {
+    val userAccountDto =
+      userAccountService.findDto(userId)
+        ?: return false
 
     return canUserView(userAccountDto, organizationId)
   }
 
-  fun canUserView(user: UserAccountDto, organizationId: Long) =
-    user.role === UserAccount.Role.ADMIN || this.organizationRepository.canUserView(user.id, organizationId)
+  fun canUserView(
+    user: UserAccountDto,
+    organizationId: Long,
+  ) = user.role === UserAccount.Role.ADMIN || this.organizationRepository.canUserView(user.id, organizationId)
 
   /**
    * Verifies the user has a role equal or higher than a given role.
@@ -77,7 +92,11 @@ class OrganizationRoleService(
    * @param role The minimum role the user should have.
    * @return Whether the user has at least the [role] role in the organization.
    */
-  fun isUserOfRole(userId: Long, organizationId: Long, role: OrganizationRoleType): Boolean {
+  fun isUserOfRole(
+    userId: Long,
+    organizationId: Long,
+    role: OrganizationRoleType,
+  ): Boolean {
     // The use of a when here is an intentional code design choice.
     // If a new role gets added, this will not compile and will need to be addressed.
     return when (role) {
@@ -88,7 +107,10 @@ class OrganizationRoleService(
     }
   }
 
-  fun checkUserIsOwner(userId: Long, organizationId: Long) {
+  fun checkUserIsOwner(
+    userId: Long,
+    organizationId: Long,
+  ) {
     val isServerAdmin = userAccountService.get(userId).role == UserAccount.Role.ADMIN
     if (this.isUserOwner(userId, organizationId) || isServerAdmin) return else throw PermissionException()
   }
@@ -97,7 +119,10 @@ class OrganizationRoleService(
     this.checkUserIsOwner(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
-  fun checkUserIsMemberOrOwner(userId: Long, organizationId: Long) {
+  fun checkUserIsMemberOrOwner(
+    userId: Long,
+    organizationId: Long,
+  ) {
     val isServerAdmin = userAccountService.get(userId).role == UserAccount.Role.ADMIN
     if (isUserMemberOrOwner(userId, organizationId) || isServerAdmin) {
       return
@@ -109,12 +134,18 @@ class OrganizationRoleService(
     this.checkUserIsMemberOrOwner(this.authenticationFacade.authenticatedUser.id, organizationId)
   }
 
-  fun isUserMemberOrOwner(userId: Long, organizationId: Long): Boolean {
+  fun isUserMemberOrOwner(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean {
     val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
     return role != null
   }
 
-  fun isUserOwner(userId: Long, organizationId: Long): Boolean {
+  fun isUserOwner(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean {
     val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
     return role?.type == OrganizationRoleType.OWNER
   }
@@ -123,7 +154,10 @@ class OrganizationRoleService(
     return organizationRoleRepository.findById(id).orElse(null)
   }
 
-  fun getType(userId: Long, organizationId: Long): OrganizationRoleType {
+  fun getType(
+    userId: Long,
+    organizationId: Long,
+  ): OrganizationRoleType {
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
       ?.let { return it.type!! }
     throw PermissionException()
@@ -137,7 +171,10 @@ class OrganizationRoleService(
     return findType(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
-  fun findType(userId: Long, organizationId: Long): OrganizationRoleType? {
+  fun findType(
+    userId: Long,
+    organizationId: Long,
+  ): OrganizationRoleType? {
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
       ?.let { return it.type }
     return null
@@ -146,7 +183,7 @@ class OrganizationRoleService(
   fun grantRoleToUser(
     user: UserAccount,
     organization: Organization,
-    organizationRoleType: OrganizationRoleType
+    organizationRoleType: OrganizationRoleType,
   ) {
     OrganizationRole(user = user, organization = organization, type = organizationRoleType)
       .let {
@@ -160,11 +197,15 @@ class OrganizationRoleService(
     this.removeUser(organizationId, authenticationFacade.authenticatedUser.id)
   }
 
-  fun removeUser(organizationId: Long, userId: Long) {
-    val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
-      organizationRoleRepository.delete(it)
-      it
-    }
+  fun removeUser(
+    organizationId: Long,
+    userId: Long,
+  ) {
+    val role =
+      organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
+        organizationRoleRepository.delete(it)
+        it
+      }
     val permissions = permissionService.removeAllProjectInOrganization(organizationId, userId)
 
     if (role == null && permissions.isEmpty()) {
@@ -182,15 +223,25 @@ class OrganizationRoleService(
     organizationRoleRepository.deleteById(id)
   }
 
-  fun grantMemberRoleToUser(user: UserAccount, organization: Organization) {
+  fun grantMemberRoleToUser(
+    user: UserAccount,
+    organization: Organization,
+  ) {
     this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
   }
 
-  fun grantOwnerRoleToUser(user: UserAccount, organization: Organization) {
+  fun grantOwnerRoleToUser(
+    user: UserAccount,
+    organization: Organization,
+  ) {
     this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.OWNER)
   }
 
-  fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
+  fun setMemberRole(
+    organizationId: Long,
+    userId: Long,
+    dto: SetOrganizationRoleDto,
+  ) {
     val user = userAccountService.findActive(userId) ?: throw NotFoundException()
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
@@ -201,14 +252,17 @@ class OrganizationRoleService(
   fun createForInvitation(
     invitation: Invitation,
     type: OrganizationRoleType,
-    organization: Organization
+    organization: Organization,
   ): OrganizationRole {
     return OrganizationRole(invitation = invitation, type = type, organization = organization).let {
       organizationRoleRepository.save(it)
     }
   }
 
-  fun acceptInvitation(organizationRole: OrganizationRole, userAccount: UserAccount) {
+  fun acceptInvitation(
+    organizationRole: OrganizationRole,
+    userAccount: UserAccount,
+  ) {
     organizationRole.invitation = null
     organizationRole.user = userAccount
     organizationRoleRepository.save(organizationRole)
@@ -223,7 +277,7 @@ class OrganizationRoleService(
       .countAllByOrganizationIdAndTypeAndUserIdNot(
         id,
         OrganizationRoleType.OWNER,
-        authenticationFacade.authenticatedUser.id
+        authenticationFacade.authenticatedUser.id,
       ) > 0
   }
 

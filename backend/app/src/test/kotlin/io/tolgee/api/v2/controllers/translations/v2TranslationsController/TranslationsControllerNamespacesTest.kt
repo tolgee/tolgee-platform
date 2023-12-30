@@ -18,7 +18,6 @@ import java.math.BigDecimal
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/projects/") {
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `it returns namespaces`() {
@@ -52,8 +51,8 @@ class TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/proj
       SetTranslationsWithKeyDto(
         key = "new_key_in_ns",
         namespace = "heloo",
-        translations = mapOf("en" to "eeeen")
-      )
+        translations = mapOf("en" to "eeeen"),
+      ),
     ).andPrettyPrint.andIsOk.andAssertThatJson {
       node("keyNamespace").isEqualTo("heloo")
     }

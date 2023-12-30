@@ -3,7 +3,7 @@ package io.tolgee.fixtures
 fun retry(
   retries: Int = 3,
   exceptionMatcher: (Throwable) -> Boolean = { true },
-  fn: () -> Unit
+  fn: () -> Unit,
 ) {
   val thrown = mutableListOf<Throwable>()
   var passed = false
@@ -29,5 +29,6 @@ fun retry(
 }
 
 class RetryException(val retryCount: Int, val causes: List<Throwable>) : Exception(
-  "Test failed in $retryCount retries", causes.last()
+  "Test failed in $retryCount retries",
+  causes.last(),
 )

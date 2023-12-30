@@ -9,5 +9,5 @@ data class ProportionalUsagePeriod(
   val total: BigDecimal,
   val usedQuantityOverPlan: Long,
   val unusedQuantity: Long,
-  val usedQuantity: Long
+  val usedQuantity: Long,
 )

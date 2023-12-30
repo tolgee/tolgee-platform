@@ -23,81 +23,94 @@ class LanguagePermissionsTestData {
   lateinit var germanTranslation: Translation
   lateinit var projectBuilder: ProjectBuilder
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    addProject()
-  }
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      addProject()
+    }
 
-  val reviewEnOnlyUser = addUserAccountWithPermissions {
-    translateLanguages = mutableSetOf(englishLanguage)
-    type = ProjectPermissionType.REVIEW
-  }
+  val reviewEnOnlyUser =
+    addUserAccountWithPermissions {
+      translateLanguages = mutableSetOf(englishLanguage)
+      type = ProjectPermissionType.REVIEW
+    }
 
-  val translateEnOnlyUser = addUserAccountWithPermissions {
-    translateLanguages = mutableSetOf(englishLanguage)
-    type = ProjectPermissionType.TRANSLATE
-  }
+  val translateEnOnlyUser =
+    addUserAccountWithPermissions {
+      translateLanguages = mutableSetOf(englishLanguage)
+      type = ProjectPermissionType.TRANSLATE
+    }
 
-  val translateAllUser = addUserAccountWithPermissions {
-    type = ProjectPermissionType.TRANSLATE
-  }
+  val translateAllUser =
+    addUserAccountWithPermissions {
+      type = ProjectPermissionType.TRANSLATE
+    }
 
-  val reviewAllUser = addUserAccountWithPermissions {
-    type = ProjectPermissionType.REVIEW
-  }
+  val reviewAllUser =
+    addUserAccountWithPermissions {
+      type = ProjectPermissionType.REVIEW
+    }
 
-  val translateAllExplicitUser = addUserAccountWithPermissions {
-    type = ProjectPermissionType.TRANSLATE
-    translateLanguages = mutableSetOf(englishLanguage, germanLanguage)
-  }
+  val translateAllExplicitUser =
+    addUserAccountWithPermissions {
+      type = ProjectPermissionType.TRANSLATE
+      translateLanguages = mutableSetOf(englishLanguage, germanLanguage)
+    }
 
-  val reviewUser = addUserAccountWithPermissions {
-    type = ProjectPermissionType.REVIEW
-    translateLanguages = mutableSetOf(englishLanguage)
-    viewLanguages = mutableSetOf(englishLanguage)
-    stateChangeLanguages = mutableSetOf(englishLanguage)
-  }
+  val reviewUser =
+    addUserAccountWithPermissions {
+      type = ProjectPermissionType.REVIEW
+      translateLanguages = mutableSetOf(englishLanguage)
+      viewLanguages = mutableSetOf(englishLanguage)
+      stateChangeLanguages = mutableSetOf(englishLanguage)
+    }
 
-  val translateUser = addUserAccountWithPermissions {
-    type = ProjectPermissionType.TRANSLATE
-    translateLanguages = mutableSetOf(englishLanguage)
-    viewLanguages = mutableSetOf(englishLanguage)
-    stateChangeLanguages = mutableSetOf()
-  }
+  val translateUser =
+    addUserAccountWithPermissions {
+      type = ProjectPermissionType.TRANSLATE
+      translateLanguages = mutableSetOf(englishLanguage)
+      viewLanguages = mutableSetOf(englishLanguage)
+      stateChangeLanguages = mutableSetOf()
+    }
 
-  val viewEnOnlyUser = addUserAccountWithPermissions {
-    type = ProjectPermissionType.VIEW
-    translateLanguages = mutableSetOf()
-    viewLanguages = mutableSetOf(englishLanguage)
-    stateChangeLanguages = mutableSetOf()
-  }
+  val viewEnOnlyUser =
+    addUserAccountWithPermissions {
+      type = ProjectPermissionType.VIEW
+      translateLanguages = mutableSetOf()
+      viewLanguages = mutableSetOf(englishLanguage)
+      stateChangeLanguages = mutableSetOf()
+    }
 
-  val viewScopeUser = addUserAccountWithPermissions {
-    scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
-    type = null
-    translateLanguages = mutableSetOf()
-    viewLanguages = mutableSetOf(englishLanguage)
-    stateChangeLanguages = mutableSetOf()
-  }
+  val viewScopeUser =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+      type = null
+      translateLanguages = mutableSetOf()
+      viewLanguages = mutableSetOf(englishLanguage)
+      stateChangeLanguages = mutableSetOf()
+    }
 
-  val editScopeUser = addUserAccountWithPermissions {
-    scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
-    type = null
-    translateLanguages = mutableSetOf(englishLanguage)
-  }
+  val editScopeUser =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
+      type = null
+      translateLanguages = mutableSetOf(englishLanguage)
+    }
 
-  val stateChangeScopeUser = addUserAccountWithPermissions {
-    scopes = arrayOf(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
-    type = null
-    stateChangeLanguages = mutableSetOf(englishLanguage)
-  }
+  val stateChangeScopeUser =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
+      type = null
+      stateChangeLanguages = mutableSetOf(englishLanguage)
+    }
 
-  val stateChangeScopeUserEnForAll = addUserAccountWithPermissions {
-    scopes = arrayOf(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
-    type = null
-    translateLanguages = mutableSetOf(englishLanguage)
-    viewLanguages = mutableSetOf(englishLanguage)
-    stateChangeLanguages = mutableSetOf(englishLanguage)
-  }
+  val stateChangeScopeUserEnForAll =
+    addUserAccountWithPermissions {
+      scopes = arrayOf(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
+      type = null
+      translateLanguages = mutableSetOf(englishLanguage)
+      viewLanguages = mutableSetOf(englishLanguage)
+      stateChangeLanguages = mutableSetOf(englishLanguage)
+    }
 
   init {
     projectBuilder.apply {
@@ -110,9 +123,10 @@ class LanguagePermissionsTestData {
   }
 
   private fun TestDataBuilder.addProject() {
-    val organization = addOrganization {
-      name = "Org"
-    }
+    val organization =
+      addOrganization {
+        name = "Org"
+      }
 
     addProject {
       project = this
@@ -146,9 +160,10 @@ class LanguagePermissionsTestData {
   }
 
   private fun addUserAccountWithPermissions(setPerms: Permission.() -> Unit): UserAccount {
-    val userBuilder = this.root.addUserAccount {
-      this@addUserAccount.username = UUID.randomUUID().toString()
-    }
+    val userBuilder =
+      this.root.addUserAccount {
+        this@addUserAccount.username = UUID.randomUUID().toString()
+      }
 
     projectBuilder.addPermission {
       user = userBuilder.self

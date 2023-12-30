@@ -6,7 +6,7 @@ import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.projectActivityView.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.dtos.query_results.TranslationHistoryView
+import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
@@ -30,10 +30,13 @@ class ActivityService(
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
   private val currentDateProvider: CurrentDateProvider,
   private val objectMapper: ObjectMapper,
-  private val jdbcTemplate: JdbcTemplate
+  private val jdbcTemplate: JdbcTemplate,
 ) : Logging {
   @Transactional
-  fun storeActivityData(activityRevision: ActivityRevision, modifiedEntities: ModifiedEntitiesType) {
+  fun storeActivityData(
+    activityRevision: ActivityRevision,
+    modifiedEntities: ModifiedEntitiesType,
+  ) {
     // let's keep the persistent context small
     entityManager.flushAndClear()
 
@@ -52,7 +55,7 @@ class ActivityService(
         "describing_relations, modifications, revision_type, activity_revision_id) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
       list,
-      100
+      100,
     ) { ps, entity ->
       ps.setString(1, entity.entityClass)
       ps.setLong(2, entity.entityId)
@@ -72,7 +75,7 @@ class ActivityService(
         "(entity_class, entity_id, data, describing_relations, activity_revision_id) " +
         "VALUES (?, ?, ?, ?, ?)",
       activityRevision.describingRelations,
-      100
+      100,
     ) { ps, entity ->
       ps.setString(1, entity.entityClass)
       ps.setLong(2, entity.entityId)
@@ -100,11 +103,14 @@ class ActivityService(
   }
 
   @Transactional
-  fun getProjectActivity(projectId: Long, pageable: Pageable): Page<ProjectActivityView> {
+  fun getProjectActivity(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ProjectActivityView> {
     return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
-      pageable = pageable
+      pageable = pageable,
     ).get()
   }
 
@@ -112,16 +118,19 @@ class ActivityService(
   fun getProjectActivity(revisionId: Long): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
-      revisionId
+      revisionId,
     ).get()
   }
 
   @Transactional
-  fun getTranslationHistory(translationId: Long, pageable: Pageable): Page<TranslationHistoryView> {
+  fun getTranslationHistory(
+    translationId: Long,
+    pageable: Pageable,
+  ): Page<TranslationHistoryView> {
     return activityModifiedEntityRepository.getTranslationHistory(
       translationId = translationId,
       pageable = pageable,
-      ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD)
+      ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD),
     )
   }
 }

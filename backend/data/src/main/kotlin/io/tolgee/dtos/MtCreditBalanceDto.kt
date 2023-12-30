@@ -7,5 +7,5 @@ data class MtCreditBalanceDto(
   val bucketSize: Long,
   val extraCreditBalance: Long,
   val refilledAt: Date,
-  val nextRefillAt: Date
+  val nextRefillAt: Date,
 )

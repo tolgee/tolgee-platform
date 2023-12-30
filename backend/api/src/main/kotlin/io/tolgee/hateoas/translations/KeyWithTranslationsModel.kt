@@ -11,28 +11,20 @@ import org.springframework.hateoas.server.core.Relation
 open class KeyWithTranslationsModel(
   @Schema(description = "Id of key record")
   val keyId: Long,
-
   @Schema(description = "Name of key", example = "this_is_super_key")
   val keyName: String,
-
   @Schema(description = "The namespace id of the key", example = "100000282")
   val keyNamespaceId: Long?,
-
   @Schema(description = "The namespace of the key", example = "homepage")
   val keyNamespace: String?,
-
   @Schema(description = "Tags of key")
   val keyTags: List<TagModel>,
-
   @Schema(description = "Count of screenshots provided for the key", example = "1")
   val screenshotCount: Long,
-
   @Schema(description = "Key screenshots. Not provided when API key hasn't screenshots.view scope permission.")
   val screenshots: List<ScreenshotModel>?,
-
   @Schema(description = "There is a context available for this key")
   val contextPresent: Boolean,
-
   @Schema(
     description = "Translations object",
     example = """
@@ -44,7 +36,7 @@ open class KeyWithTranslationsModel(
         "commentCount": 1
       }
     }
-    """
+    """,
   )
-  val translations: Map<String, TranslationViewModel>
+  val translations: Map<String, TranslationViewModel>,
 ) : RepresentationModel<KeyWithTranslationsModel>()

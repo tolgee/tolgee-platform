@@ -7,9 +7,8 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class PostHogConfiguration(
-  private val properties: PostHogProperties
+  private val properties: PostHogProperties,
 ) {
-
   @Bean(destroyMethod = "shutdown")
   fun postHog(): PostHog? {
     return properties.apiKey?.let { postHogApiKey ->

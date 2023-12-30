@@ -15,9 +15,10 @@ class S3ClientProvider(private val s3config: S3Config) {
   fun provide(): S3Client {
     val credentialsProvider = getCredentialsProvider()
 
-    val builder = S3Client.builder().credentialsProvider(credentialsProvider).serviceConfiguration(
-      S3Configuration.builder().pathStyleAccessEnabled(true).build()
-    )
+    val builder =
+      S3Client.builder().credentialsProvider(credentialsProvider).serviceConfiguration(
+        S3Configuration.builder().pathStyleAccessEnabled(true).build(),
+      )
     if (!s3config.endpoint.isNullOrEmpty()) {
       builder.setEndpoint()
     }
@@ -27,17 +28,20 @@ class S3ClientProvider(private val s3config: S3Config) {
     return builder.build()
   }
 
-  private fun getCredentialsProvider(): AwsCredentialsProvider? = when (
-    s3config.accessKey.isNullOrEmpty() ||
-      s3config.secretKey.isNullOrEmpty()
-  ) {
-    true -> DefaultCredentialsProvider.create()
-    false -> StaticCredentialsProvider.create(
-      AwsBasicCredentials.create(
-        s3config.accessKey, s3config.secretKey
-      )
-    )
-  }
+  private fun getCredentialsProvider(): AwsCredentialsProvider? =
+    when (
+      s3config.accessKey.isNullOrEmpty() ||
+        s3config.secretKey.isNullOrEmpty()
+    ) {
+      true -> DefaultCredentialsProvider.create()
+      false ->
+        StaticCredentialsProvider.create(
+          AwsBasicCredentials.create(
+            s3config.accessKey,
+            s3config.secretKey,
+          ),
+        )
+    }
 
   private fun S3ClientBuilder.setEndpoint() {
     try {

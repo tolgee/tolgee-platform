@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component
 @Component
 class AutoTranslationSettingsModelAssembler :
   RepresentationModelAssemblerSupport<AutoTranslationConfig, AutoTranslationConfigModel>(
-    AutoTranslationController::class.java, AutoTranslationConfigModel::class.java
+    AutoTranslationController::class.java,
+    AutoTranslationConfigModel::class.java,
   ) {
   override fun toModel(entity: AutoTranslationConfig): AutoTranslationConfigModel {
     return AutoTranslationConfigModel(

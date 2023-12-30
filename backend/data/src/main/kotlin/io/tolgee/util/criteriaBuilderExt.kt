@@ -10,7 +10,7 @@ import jakarta.persistence.criteria.Root
 
 fun CriteriaBuilder.greaterThanNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return expression.isNotNull
@@ -20,7 +20,7 @@ fun CriteriaBuilder.greaterThanNullable(
 
 fun CriteriaBuilder.lessThanNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return this.isTrue(this.literal(false))
@@ -30,7 +30,7 @@ fun CriteriaBuilder.lessThanNullable(
 
 fun CriteriaBuilder.greaterThanOrEqualToNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return this.isTrue(this.literal(true))
@@ -40,7 +40,7 @@ fun CriteriaBuilder.greaterThanOrEqualToNullable(
 
 fun CriteriaBuilder.lessThanOrEqualToNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return this.isNull(expression)
@@ -50,7 +50,7 @@ fun CriteriaBuilder.lessThanOrEqualToNullable(
 
 fun CriteriaBuilder.equalNullable(
   expression: Expression<String>,
-  value: Any?
+  value: Any?,
 ): Predicate {
   if (value == null) {
     return this.isNull(expression)
@@ -59,7 +59,7 @@ fun CriteriaBuilder.equalNullable(
 }
 
 inline fun <reified RootT, reified Result> EntityManager.query(
-  fn: CriteriaQuery<Result>.(cb: CriteriaBuilder, root: Root<RootT>) -> Unit
+  fn: CriteriaQuery<Result>.(cb: CriteriaBuilder, root: Root<RootT>) -> Unit,
 ): TypedQuery<Result> {
   val cb = this.criteriaBuilder
   val cq = cb.createQuery(Result::class.java)

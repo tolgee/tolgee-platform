@@ -13,16 +13,19 @@ import org.springframework.web.client.RestTemplate
 class AzureContentDeliveryCachePurging(
   private val config: AzureFrontDoorConfig,
   private val restTemplate: RestTemplate,
-  private val azureCredentialProvider: AzureCredentialProvider
+  private val azureCredentialProvider: AzureCredentialProvider,
 ) : ContentDeliveryCachePurging {
-  override fun purgeForPaths(contentDeliveryConfig: ContentDeliveryConfig, paths: Set<String>) {
+  override fun purgeForPaths(
+    contentDeliveryConfig: ContentDeliveryConfig,
+    paths: Set<String>,
+  ) {
     val token = getAccessToken()
     purgeWithToken(contentDeliveryConfig, token)
   }
 
   private fun purgeWithToken(
     contentDeliveryConfig: ContentDeliveryConfig,
-    token: String
+    token: String,
   ) {
     val contentRoot = config.contentRoot?.removeSuffix("/") ?: ""
     val body = mapOf("contentPaths" to listOf("$contentRoot/${contentDeliveryConfig.slug}/*"))
@@ -32,7 +35,7 @@ class AzureContentDeliveryCachePurging(
   private fun executePurgeRequest(
     token: String,
     body: Map<String, List<String>>,
-    config: AzureFrontDoorConfig
+    config: AzureFrontDoorConfig,
   ) {
     val entity: HttpEntity<String> = getHttpEntity(token, body)
 
@@ -43,10 +46,13 @@ class AzureContentDeliveryCachePurging(
         "/afdEndpoints/${config.endpointName}" +
         "/purge?api-version=2023-05-01"
 
-    val response = restTemplate.exchange(
-      url, HttpMethod.POST, entity,
-      String::class.java
-    )
+    val response =
+      restTemplate.exchange(
+        url,
+        HttpMethod.POST,
+        entity,
+        String::class.java,
+      )
 
     if (!response.statusCode.is2xxSuccessful) {
       throw IllegalStateException("Purging failed with status code ${response.statusCode}")
@@ -55,7 +61,7 @@ class AzureContentDeliveryCachePurging(
 
   private fun getHttpEntity(
     token: String,
-    body: Map<String, List<String>>
+    body: Map<String, List<String>>,
   ): HttpEntity<String> {
     val headers = getHeaders(token)
     val jsonBody = jacksonObjectMapper().writeValueAsString(body)
@@ -72,8 +78,9 @@ class AzureContentDeliveryCachePurging(
   private fun getAccessToken(): String {
     val credential = azureCredentialProvider.get(config)
 
-    val context = TokenRequestContext()
-      .addScopes("https://management.azure.com/.default")
+    val context =
+      TokenRequestContext()
+        .addScopes("https://management.azure.com/.default")
 
     return credential.getToken(context).block()?.token ?: throw IllegalStateException("No token")
   }

@@ -22,7 +22,12 @@ data class FileProcessorContext(
 
   lateinit var languageNameGuesses: List<String>
 
-  fun addTranslation(keyName: String, languageName: String, value: Any?, idx: Int = 0) {
+  fun addTranslation(
+    keyName: String,
+    languageName: String,
+    value: Any?,
+    idx: Int = 0,
+  ) {
     val stringValue = value as? String
 
     if (keyName.isBlank()) {
@@ -62,14 +67,21 @@ data class FileProcessorContext(
     }
   }
 
-  fun addKeyComment(key: String, text: String) {
+  fun addKeyComment(
+    key: String,
+    text: String,
+  ) {
     val keyMeta = getOrCreateKeyMeta(key)
     keyMeta.addComment {
       this.text = text
     }
   }
 
-  fun addKeyCodeReference(key: String, path: String, line: Long? = null) {
+  fun addKeyCodeReference(
+    key: String,
+    path: String,
+    line: Long? = null,
+  ) {
     val keyMeta = getOrCreateKeyMeta(key)
     keyMeta.addCodeReference {
       this.path = path

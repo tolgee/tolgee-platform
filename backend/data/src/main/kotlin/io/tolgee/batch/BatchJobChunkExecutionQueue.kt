@@ -29,7 +29,7 @@ class BatchJobChunkExecutionQueue(
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
   private val redisTemplate: StringRedisTemplate,
-  private val metrics: Metrics
+  private val metrics: Metrics,
 ) : Logging, InitializingBean {
   companion object {
     /**
@@ -54,20 +54,21 @@ class BatchJobChunkExecutionQueue(
   @Scheduled(fixedDelay = 60000)
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
-    val data = entityManager.createQuery(
-      """
-          select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
-          from BatchJobChunkExecution bjce
-          join bjce.batchJob bk
-          where bjce.status = :executionStatus
-          order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
-      """.trimIndent(),
-      BatchJobChunkExecutionDto::class.java
-    ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
-      .setHint(
-        "jakarta.persistence.lock.timeout",
-        LockOptions.SKIP_LOCKED
-      ).resultList
+    val data =
+      entityManager.createQuery(
+        """
+        select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
+        from BatchJobChunkExecution bjce
+        join bjce.batchJob bk
+        where bjce.status = :executionStatus
+        order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
+        """.trimIndent(),
+        BatchJobChunkExecutionDto::class.java,
+      ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
+        .setHint(
+          "jakarta.persistence.lock.timeout",
+          LockOptions.SKIP_LOCKED,
+        ).resultList
 
     if (data.size > 0) {
       logger.debug("Attempt to add ${data.size} items to queue ${System.identityHashCode(this)}")
@@ -96,7 +97,10 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  fun addToQueue(execution: BatchJobChunkExecution, jobCharacter: JobCharacter) {
+  fun addToQueue(
+    execution: BatchJobChunkExecution,
+    jobCharacter: JobCharacter,
+  ) {
     val item = execution.toItem(jobCharacter)
     addItemsToQueue(listOf(item))
   }
@@ -111,7 +115,7 @@ class BatchJobChunkExecutionQueue(
       val event = JobQueueItemsEvent(items, QueueEventType.ADD)
       redisTemplate.convertAndSend(
         RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
-        jacksonObjectMapper().writeValueAsString(event)
+        jacksonObjectMapper().writeValueAsString(event),
       )
       return
     }
@@ -129,7 +133,7 @@ class BatchJobChunkExecutionQueue(
     // Yes. jobCharacter is part of the batchJob entity.
     // However, we don't want to fetch it here, because it would be a waste of resources.
     // So we can provide the jobCharacter here.
-    jobCharacter: JobCharacter? = null
+    jobCharacter: JobCharacter? = null,
   ) =
     ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
 
@@ -138,8 +142,10 @@ class BatchJobChunkExecutionQueue(
 
   val size get() = queue.size
 
-  fun joinToString(separator: String = ", ", transform: (item: ExecutionQueueItem) -> String) =
-    queue.joinToString(separator, transform = transform)
+  fun joinToString(
+    separator: String = ", ",
+    transform: (item: ExecutionQueueItem) -> String,
+  ) = queue.joinToString(separator, transform = transform)
 
   fun poll(): ExecutionQueueItem? {
     return queue.poll()
@@ -154,9 +160,11 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun peek(): ExecutionQueueItem = queue.peek()
+
   fun contains(item: ExecutionQueueItem?): Boolean = queue.contains(item)
 
   fun isEmpty(): Boolean = queue.isEmpty()
+
   fun getJobCharacterCounts(): Map<JobCharacter, Int> {
     return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
   }

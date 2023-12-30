@@ -4,9 +4,9 @@ open class EntityDescriptionWithRelations(
   entityClass: String,
   entityId: Long,
   data: Map<String, Any?>,
-  val relations: Map<String, EntityDescriptionWithRelations>
+  val relations: Map<String, EntityDescriptionWithRelations>,
 ) : EntityDescription(
-  entityClass,
-  entityId,
-  data
-)
+    entityClass,
+    entityId,
+    data,
+  )

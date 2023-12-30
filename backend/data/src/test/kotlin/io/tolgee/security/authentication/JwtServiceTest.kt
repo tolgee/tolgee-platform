@@ -52,12 +52,13 @@ class JwtServiceTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
-  private val jwtService: JwtService = JwtService(
-    testSigningKey,
-    authenticationProperties,
-    currentDateProvider,
-    userAccountService,
-  )
+  private val jwtService: JwtService =
+    JwtService(
+      testSigningKey,
+      authenticationProperties,
+      currentDateProvider,
+      userAccountService,
+    )
 
   @BeforeEach
   fun setupMocks() {
@@ -178,7 +179,7 @@ class JwtServiceTest {
     assertDoesNotThrow { jwtService.validateTicket(ticketLong, JwtService.TicketType.AUTH_MFA) }
 
     Mockito.`when`(currentDateProvider.date).thenReturn(
-      Date(now + JwtService.DEFAULT_TICKET_EXPIRATION_TIME + 1000)
+      Date(now + JwtService.DEFAULT_TICKET_EXPIRATION_TIME + 1000),
     )
 
     assertThrows<AuthenticationException> { jwtService.validateTicket(ticket, JwtService.TicketType.AUTH_MFA) }
@@ -193,10 +194,12 @@ class JwtServiceTest {
   @Test
   fun `it rejects invalid tokens and tickets`() {
     val invalidToken = "this certainly does not look like a token to me!"
-    val badToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-      "eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9.kn_amo5h7__tlveBus_215x3Zq9UGFI6O_QpJ2rKi9o"
-    val noSigToken = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0." +
-      "eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9"
+    val badToken =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+        "eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9.kn_amo5h7__tlveBus_215x3Zq9UGFI6O_QpJ2rKi9o"
+    val noSigToken =
+      "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0." +
+        "eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9"
     val token = jwtService.emitToken(TEST_USER_ID)
     val ticket = jwtService.emitTicket(TEST_USER_ID, JwtService.TicketType.AUTH_MFA)
 

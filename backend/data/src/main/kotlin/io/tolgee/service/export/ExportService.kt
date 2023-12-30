@@ -19,29 +19,33 @@ class ExportService(
   private val fileExporterFactory: FileExporterFactory,
   private val projectService: ProjectService,
   private val entityManager: EntityManager,
-  private val businessEventPublisher: BusinessEventPublisher
+  private val businessEventPublisher: BusinessEventPublisher,
 ) {
-  fun export(projectId: Long, exportParams: IExportParams): Map<String, InputStream> {
+  fun export(
+    projectId: Long,
+    exportParams: IExportParams,
+  ): Map<String, InputStream> {
     val data = getDataForExport(projectId, exportParams)
     val baseLanguage = getProjectBaseLanguage(projectId)
-    val baseTranslationsProvider = getBaseTranslationsProvider(
-      exportParams = exportParams,
-      projectId = projectId,
-      baseLanguage = baseLanguage
-    )
+    val baseTranslationsProvider =
+      getBaseTranslationsProvider(
+        exportParams = exportParams,
+        projectId = projectId,
+        baseLanguage = baseLanguage,
+      )
 
     return fileExporterFactory.create(
       data = data,
       exportParams = exportParams,
       baseTranslationsProvider = baseTranslationsProvider,
-      baseLanguage
+      baseLanguage,
     ).produceFiles().also {
       businessEventPublisher.publishOnceInTime(
         OnBusinessEventToCaptureEvent(
           eventName = "EXPORT",
-          projectId = projectId
+          projectId = projectId,
         ),
-        Duration.ofDays(1)
+        Duration.ofDays(1),
       )
     }
   }
@@ -53,7 +57,7 @@ class ExportService(
   private fun getBaseTranslationsProvider(
     exportParams: IExportParams,
     projectId: Long,
-    baseLanguage: Language
+    baseLanguage: Language,
   ): () -> List<ExportTranslationView> {
     return {
       getDataForExport(projectId, exportParams, listOf(baseLanguage.tag))
@@ -63,13 +67,13 @@ class ExportService(
   private fun getDataForExport(
     projectId: Long,
     exportParams: IExportParams,
-    overrideLanguageTags: List<String>? = null
+    overrideLanguageTags: List<String>? = null,
   ): List<ExportTranslationView> {
     return ExportDataProvider(
       entityManager = entityManager,
       exportParams = exportParams,
       projectId = projectId,
-      overrideLanguageTag = overrideLanguageTags
+      overrideLanguageTag = overrideLanguageTags,
     ).getData()
   }
 

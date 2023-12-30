@@ -1,7 +1,10 @@
 package io.tolgee.component.machineTranslation
 
 object LanguageTagConvertor {
-  fun findSuitableTag(suitableTags: Array<String>, desiredLanguage: String): String? {
+  fun findSuitableTag(
+    suitableTags: Array<String>,
+    desiredLanguage: String,
+  ): String? {
     if (suitableTags.contains(desiredLanguage)) {
       return desiredLanguage
     }

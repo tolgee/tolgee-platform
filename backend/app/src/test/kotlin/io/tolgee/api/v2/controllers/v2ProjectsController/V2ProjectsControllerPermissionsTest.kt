@@ -20,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }
 
   @Test
@@ -48,9 +47,10 @@ class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `cannot set permission to user outside of project or organization`() {
     val testData = PermissionsTestData()
-    val user = testData.root.addUserAccount {
-      username = "pepa@seznam.cz"
-    }.self
+    val user =
+      testData.root.addUserAccount {
+        username = "pepa@seznam.cz"
+      }.self
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin.self
     projectSupplier = { testData.projectBuilder.self }
@@ -62,17 +62,18 @@ class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `sets user permissions to organization base`() {
     val testData = PermissionsTestData()
-    val me = testData.addUserWithPermissions(
-      type = ProjectPermissionType.EDIT,
-      organizationBaseScopes = listOf(Scope.KEYS_VIEW)
-    )
+    val me =
+      testData.addUserWithPermissions(
+        type = ProjectPermissionType.EDIT,
+        organizationBaseScopes = listOf(Scope.KEYS_VIEW),
+      )
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin.self
     this.projectSupplier = { testData.projectBuilder.self }
 
     permissionService.getProjectPermissionData(
       testData.projectBuilder.self.id,
-      me.id
+      me.id,
     ).directPermissions.assert.isNotNull
     performProjectAuthPut("users/${me.id}/set-by-organization").andIsOk
     val permissionData = permissionService.getProjectPermissionData(testData.projectBuilder.self.id, me.id)

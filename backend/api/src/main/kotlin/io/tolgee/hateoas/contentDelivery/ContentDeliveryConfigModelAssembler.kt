@@ -10,10 +10,11 @@ import org.springframework.stereotype.Component
 @Component
 class ContentDeliveryConfigModelAssembler(
   private val contentStorageModelAssembler: ContentStorageModelAssembler,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
 ) : RepresentationModelAssemblerSupport<ContentDeliveryConfig, ContentDeliveryConfigModel>(
-  ContentDeliveryConfigController::class.java, ContentDeliveryConfigModel::class.java
-) {
+    ContentDeliveryConfigController::class.java,
+    ContentDeliveryConfigModel::class.java,
+  ) {
   override fun toModel(entity: ContentDeliveryConfig): ContentDeliveryConfigModel {
     return ContentDeliveryConfigModel(
       id = entity.id,
@@ -22,7 +23,7 @@ class ContentDeliveryConfigModelAssembler(
       storage = entity.contentStorage?.let { contentStorageModelAssembler.toModel(it) },
       publicUrl = getPublicUrl(entity),
       autoPublish = entity.automationActions.isNotEmpty(),
-      lastPublished = entity.lastPublished?.time
+      lastPublished = entity.lastPublished?.time,
     ).also {
       it.copyPropsFrom(entity)
     }

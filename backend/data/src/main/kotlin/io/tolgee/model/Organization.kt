@@ -22,26 +22,24 @@ import java.util.*
 @Table(
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["address_part"], name = "organization_address_part_unique"),
-  ]
+  ],
 )
 class Organization(
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
-
-  @field:NotBlank @field:Size(min = 1, max = 50)
+  @field:NotBlank
+  @field:Size(min = 1, max = 50)
   open var name: String = "",
-
   open var description: String? = null,
-
   @Column(name = "address_part")
-  @field:NotBlank @field:Size(min = 1, max = 60)
+  @field:NotBlank
+  @field:Size(min = 1, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-_]*$", message = "invalid_pattern")
   open var slug: String = "",
-
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
-  var mtCreditBucket: MtCreditBucket? = null
+  var mtCreditBucket: MtCreditBucket? = null,
 ) : ModelWithAvatar, AuditModel(), SoftDeletable {
-
   @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true)
   lateinit var basePermission: Permission
 
@@ -52,7 +50,7 @@ class Organization(
   @OneToMany(mappedBy = "organizationOwner")
   @field:Filter(
     name = "deletedFilter",
-    condition = "(deleted_at IS NULL)"
+    condition = "(deleted_at IS NULL)",
   )
   var projects: MutableList<Project> = mutableListOf()
 

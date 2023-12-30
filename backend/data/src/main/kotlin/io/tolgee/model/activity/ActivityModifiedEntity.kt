@@ -22,21 +22,18 @@ class ActivityModifiedEntity(
   @ManyToOne
   @Id
   val activityRevision: ActivityRevision,
-
   /**
    * Class of the modified entity
    * e.g. Translation, Key
    */
   @Id
   val entityClass: String,
-
   /**
    * ID of the modified entity
    */
   @Id
-  val entityId: Long
+  val entityId: Long,
 ) : Serializable {
-
   /**
    * Map of field to object containing old and new values
    */

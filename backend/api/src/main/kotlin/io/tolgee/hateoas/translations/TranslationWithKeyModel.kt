@@ -12,12 +12,9 @@ import java.io.Serializable
 open class TranslationWithKeyModel(
   @Schema(description = "Id of translation record")
   val id: Long,
-
   @Schema(description = "Translation text")
   val text: String?,
-
   @Schema(description = "State of translation")
   val state: TranslationState,
-
-  val key: KeyModel
+  val key: KeyModel,
 ) : RepresentationModel<TranslationWithKeyModel>(), Serializable

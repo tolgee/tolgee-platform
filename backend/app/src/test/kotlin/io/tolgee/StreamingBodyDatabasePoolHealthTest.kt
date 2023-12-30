@@ -34,7 +34,7 @@ import javax.sql.DataSource
     "tolgee.rate-limits.global-limits = false",
     "tolgee.rate-limits.endpoint-limits = false",
     "tolgee.rate-limits.authentication-limits = false",
-  ]
+  ],
 )
 class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
@@ -63,7 +63,7 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
     var sleepBetweenMs = 0L
     retry(
       retries = 100,
-      exceptionMatcher = { it is ConcurrentModificationException || it is IllegalStateException }
+      exceptionMatcher = { it is ConcurrentModificationException || it is IllegalStateException },
     ) {
       try {
         val hikariDataSource = dataSource as HikariDataSource

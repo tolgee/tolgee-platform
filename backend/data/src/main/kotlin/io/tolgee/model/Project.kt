@@ -37,16 +37,13 @@ class Project(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
-
   @field:NotBlank
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp
   var name: String = "",
-
   @field:Size(min = 3, max = 2000)
   @ActivityLoggedProp
   var description: String? = null,
-
   @Column(name = "address_part")
   @ActivityLoggedProp
   @field:Size(min = 3, max = 60)
@@ -109,8 +106,8 @@ class Project(
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
-      this.organizationOwner = organizationOwner
-    }
+    this.organizationOwner = organizationOwner
+  }
 
   fun findLanguageOptional(tag: String): Optional<Language> {
     return languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()

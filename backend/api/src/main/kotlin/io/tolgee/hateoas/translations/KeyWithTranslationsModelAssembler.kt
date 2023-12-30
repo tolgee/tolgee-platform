@@ -11,23 +11,27 @@ import org.springframework.stereotype.Component
 class KeyWithTranslationsModelAssembler(
   private val translationViewModelAssembler: TranslationViewModelAssembler,
   private val tagModelAssembler: TagModelAssembler,
-  private val screenshotModelAssembler: ScreenshotModelAssembler
+  private val screenshotModelAssembler: ScreenshotModelAssembler,
 ) : RepresentationModelAssemblerSupport<KeyWithTranslationsView, KeyWithTranslationsModel>(
-  TranslationsController::class.java, KeyWithTranslationsModel::class.java
-) {
-  override fun toModel(view: KeyWithTranslationsView) = KeyWithTranslationsModel(
-    keyId = view.keyId,
-    keyName = view.keyName,
-    keyNamespaceId = view.keyNamespaceId,
-    keyNamespace = view.keyNamespace,
-    keyTags = view.keyTags.map { tagModelAssembler.toModel(it) },
-    contextPresent = view.contextPresent,
-    translations = view.translations.map {
-      it.key to translationViewModelAssembler.toModel(it.value)
-    }.toMap(),
-    screenshotCount = view.screenshotCount,
-    screenshots = view.screenshots?.map {
-      screenshotModelAssembler.toModel(it)
-    }
-  )
+    TranslationsController::class.java,
+    KeyWithTranslationsModel::class.java,
+  ) {
+  override fun toModel(view: KeyWithTranslationsView) =
+    KeyWithTranslationsModel(
+      keyId = view.keyId,
+      keyName = view.keyName,
+      keyNamespaceId = view.keyNamespaceId,
+      keyNamespace = view.keyNamespace,
+      keyTags = view.keyTags.map { tagModelAssembler.toModel(it) },
+      contextPresent = view.contextPresent,
+      translations =
+        view.translations.map {
+          it.key to translationViewModelAssembler.toModel(it.value)
+        }.toMap(),
+      screenshotCount = view.screenshotCount,
+      screenshots =
+        view.screenshots?.map {
+          screenshotModelAssembler.toModel(it)
+        },
+    )
 }

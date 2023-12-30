@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class PathDTOTest {
-  private val testList = LinkedList(
-    listOf(*testFullPath.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
-  )
+  private val testList =
+    LinkedList(
+      listOf(*TEST_FULL_PATH.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()),
+    )
 
   private fun getTestList(): LinkedList<String> {
     return LinkedList(testList)
@@ -61,6 +62,6 @@ class PathDTOTest {
   }
 
   companion object {
-    private const val testFullPath = "item1.item2.item1.item1.last"
+    private const val TEST_FULL_PATH = "item1.item2.item1.item1.last"
   }
 }

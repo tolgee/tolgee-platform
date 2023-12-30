@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class WebhookConfigModelAssembler() : RepresentationModelAssemblerSupport<WebhookConfig, WebhookConfigModel>(
-  WebhookConfigController::class.java, WebhookConfigModel::class.java
+  WebhookConfigController::class.java,
+  WebhookConfigModel::class.java,
 ) {
   override fun toModel(entity: WebhookConfig): WebhookConfigModel {
     return WebhookConfigModel(
@@ -15,7 +16,7 @@ class WebhookConfigModelAssembler() : RepresentationModelAssemblerSupport<Webhoo
       url = entity.url,
       entity.webhookSecret,
       entity.firstFailed?.time,
-      entity.lastExecuted?.time
+      entity.lastExecuted?.time,
     )
   }
 }

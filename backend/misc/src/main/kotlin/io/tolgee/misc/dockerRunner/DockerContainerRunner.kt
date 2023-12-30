@@ -9,19 +9,16 @@ class DockerContainerRunner(
   private val image: String,
   private val expose: Map<String, String> = mapOf(),
   private val waitForLog: String,
-
   /**
    * How many times should the waitForLog string
    * be present in the log, when starting new container
    */
   private val waitForLogTimesForNewContainer: Int = 1,
-
   /**
    * How many times should the waitForLog string
    * be present in the log, when starting existing container
    */
   private val waitForLogTimesForExistingContainer: Int = 1,
-
   /**
    * Should container be removed after run?
    */
@@ -30,9 +27,8 @@ class DockerContainerRunner(
   private val stopBeforeStart: Boolean = true,
   private val env: Map<String, String>? = null,
   private val command: String = "",
-  private val timeout: Long = 10000
+  private val timeout: Long = 10000,
 ) {
-
   var containerExisted: Boolean = false
     private set
 
@@ -72,7 +68,10 @@ class DockerContainerRunner(
 
   private fun isContainerRunning() = "docker ps".runCommand().contains(" $containerName\n")
 
-  private fun waitForContainerLoggedOutput(startTime: Long, times: Int) {
+  private fun waitForContainerLoggedOutput(
+    startTime: Long,
+    times: Int,
+  ) {
     waitFor(timeout) {
       val since = System.currentTimeMillis() - startTime
       val sinceString = String.format(Locale.US, "%.03f", since.toFloat() / 1000)
@@ -110,7 +109,7 @@ class DockerContainerRunner(
   private fun String.runCommand(
     workingDir: File = File("."),
     timeoutAmount: Long = 120,
-    timeoutUnit: TimeUnit = TimeUnit.SECONDS
+    timeoutUnit: TimeUnit = TimeUnit.SECONDS,
   ): String {
     val process = startProcess(workingDir, timeoutAmount, timeoutUnit)
 
@@ -122,7 +121,11 @@ class DockerContainerRunner(
       process.errorStream.bufferedReader().readText()
   }
 
-  private fun String.startProcess(workingDir: File, timeoutAmount: Long, timeoutUnit: TimeUnit): Process {
+  private fun String.startProcess(
+    workingDir: File,
+    timeoutAmount: Long,
+    timeoutUnit: TimeUnit,
+  ): Process {
     return ProcessBuilder("\\s+".toRegex().split(this.trim()))
       .directory(workingDir)
       .redirectOutput(ProcessBuilder.Redirect.PIPE)

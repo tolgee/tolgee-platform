@@ -6,5 +6,5 @@ import org.springframework.context.ApplicationEvent
 class OnConsumePayAsYouGoMtCredits(
   source: MtCreditBucketService,
   val organizationId: Long,
-  val credits: Long
+  val credits: Long,
 ) : ApplicationEvent(source)

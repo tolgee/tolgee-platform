@@ -29,10 +29,9 @@ import java.util.*
 @SpringBootTest(
   properties = [
     "tolgee.recaptcha.secretKey=dummy_key",
-  ]
+  ],
 )
 class RecaptchaValidationTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var reCaptchaValidationService: ReCaptchaValidationService
 
@@ -44,7 +43,7 @@ class RecaptchaValidationTest : AbstractSpringTest() {
   fun setup() {
     Mockito.reset(restTemplate)
     whenever(
-      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>())
+      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>()),
     ).then {
       ResponseEntity(
         Companion.Response().apply {
@@ -53,7 +52,7 @@ class RecaptchaValidationTest : AbstractSpringTest() {
           hostname = ""
           errorCodes = null
         },
-        HttpStatus.OK
+        HttpStatus.OK,
       )
     }
   }
@@ -64,14 +63,16 @@ class RecaptchaValidationTest : AbstractSpringTest() {
 
     verify(restTemplate, times(1))
       .postForEntity(
-        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(Companion.Response::class.java)
+        eq("https://www.google.com/recaptcha/api/siteverify"),
+        any(),
+        eq(Companion.Response::class.java),
       )
   }
 
   @Test
   fun `returns false when invalid`() {
     whenever(
-      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>())
+      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>()),
     ).then {
       ResponseEntity(
         Companion.Response().apply {
@@ -80,7 +81,7 @@ class RecaptchaValidationTest : AbstractSpringTest() {
           hostname = ""
           errorCodes = null
         },
-        HttpStatus.OK
+        HttpStatus.OK,
       )
     }
 
@@ -88,7 +89,9 @@ class RecaptchaValidationTest : AbstractSpringTest() {
 
     verify(restTemplate, times(1))
       .postForEntity(
-        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(Companion.Response::class.java)
+        eq("https://www.google.com/recaptcha/api/siteverify"),
+        any(),
+        eq(Companion.Response::class.java),
       )
   }
 }

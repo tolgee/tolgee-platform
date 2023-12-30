@@ -20,23 +20,28 @@ class AzureCognitiveApiService(
   private val azureCognitiveTranslationProperties: AzureCognitiveTranslationProperties,
   private val restTemplate: RestTemplate,
 ) {
-
-  fun translate(text: String, sourceTag: String, targetTag: String): String? {
+  fun translate(
+    text: String,
+    sourceTag: String,
+    targetTag: String,
+  ): String? {
     val headers = HttpHeaders()
     headers.add("Ocp-Apim-Subscription-Key", azureCognitiveTranslationProperties.authKey)
     // Optional when using a single-service Translator Resource
-    if (azureCognitiveTranslationProperties.region != null)
+    if (azureCognitiveTranslationProperties.region != null) {
       headers.add("Ocp-Apim-Subscription-Region", azureCognitiveTranslationProperties.region)
+    }
     headers.contentType = MediaType.APPLICATION_JSON
 
     val requestBody: List<AzureCognitiveRequest> = listOf(AzureCognitiveRequest(text))
     val request = HttpEntity(requestBody, headers)
 
-    val response: ResponseEntity<LinkedList<AzureCognitiveResponse>> = restTemplate.exchange(
-      "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=$sourceTag&to=$targetTag",
-      HttpMethod.POST,
-      request
-    )
+    val response: ResponseEntity<LinkedList<AzureCognitiveResponse>> =
+      restTemplate.exchange(
+        "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=$sourceTag&to=$targetTag",
+        HttpMethod.POST,
+        request,
+      )
 
     return response.body?.first?.translations?.first()?.text
       ?: throw RuntimeException(response.toString())

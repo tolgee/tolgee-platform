@@ -10,9 +10,8 @@ import org.springframework.stereotype.Component
 @Component
 class ProjectTranslationLastModifiedManager(
   val currentDateProvider: CurrentDateProvider,
-  val cacheManager: CacheManager
+  val cacheManager: CacheManager,
 ) {
-
   fun getLastModified(projectId: Long): Long {
     return getCache()?.get(projectId)?.get() as? Long
       ?: let {

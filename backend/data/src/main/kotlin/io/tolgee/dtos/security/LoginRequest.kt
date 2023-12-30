@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty
 class LoginRequest {
   @field:NotBlank
   var username: String = ""
+
   @field:NotEmpty
   var password: String = ""
   var otp: String? = null

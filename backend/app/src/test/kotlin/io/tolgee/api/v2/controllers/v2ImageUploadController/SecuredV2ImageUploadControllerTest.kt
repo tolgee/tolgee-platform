@@ -23,8 +23,8 @@ import java.util.*
 @SpringBootTest(
   properties = [
     "tolgee.authentication.secured-image-retrieval=true",
-    "tolgee.authentication.secured-image-timestamp-max-age=10000"
-  ]
+    "tolgee.authentication.secured-image-timestamp-max-age=10000",
+  ],
 )
 class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   @AfterEach
@@ -42,12 +42,13 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
   fun getScreenshotFileInvalidTimestamp() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
-    val token = jwtService.emitTicket(
-      userAccount!!.id,
-      JwtService.TicketType.IMG_ACCESS,
-      5000,
-      mapOf("fileName" to image.filenameWithExtension)
-    )
+    val token =
+      jwtService.emitTicket(
+        userAccount!!.id,
+        JwtService.TicketType.IMG_ACCESS,
+        5000,
+        mapOf("fileName" to image.filenameWithExtension),
+      )
 
     moveCurrentDate(Duration.ofSeconds(10))
     performAuthGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
@@ -57,15 +58,17 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
   fun getFile() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
-    val token = jwtService.emitTicket(
-      userAccount!!.id,
-      JwtService.TicketType.IMG_ACCESS,
-      5000,
-      mapOf("fileName" to image.filenameWithExtension)
-    )
+    val token =
+      jwtService.emitTicket(
+        userAccount!!.id,
+        JwtService.TicketType.IMG_ACCESS,
+        5000,
+        mapOf("fileName" to image.filenameWithExtension),
+      )
 
-    val storedImage = performAuthGet("/uploaded-images/${image.filename}.png?token=$token")
-      .andIsOk.andReturn().response.contentAsByteArray
+    val storedImage =
+      performAuthGet("/uploaded-images/${image.filename}.png?token=$token")
+        .andIsOk.andReturn().response.contentAsByteArray
 
     val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + image.filename + ".png")
     assertThat(storedImage).isEqualTo(file.readBytes())

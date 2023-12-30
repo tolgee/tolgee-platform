@@ -24,13 +24,19 @@ class ImageConverter(
     Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
 
-  fun getImage(compressionQuality: Float = 0.8f, targetDimension: Dimension? = null): ByteArrayOutputStream {
+  fun getImage(
+    compressionQuality: Float = 0.8f,
+    targetDimension: Dimension? = null,
+  ): ByteArrayOutputStream {
     val resultingTargetDimension = targetDimension ?: this.targetDimension
     val resizedImage = getScaledImage(resultingTargetDimension)
     return writeImage(resizedImage, compressionQuality)
   }
 
-  fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.8f): ByteArrayOutputStream {
+  fun getThumbnail(
+    size: Int = 150,
+    compressionQuality: Float = 0.8f,
+  ): ByteArrayOutputStream {
     val originalWidth = sourceBufferedImage.width
     val originalHeight = sourceBufferedImage.height
     val newWidth: Int
@@ -48,7 +54,10 @@ class ImageConverter(
     return writeImage(resizedImage, compressionQuality)
   }
 
-  private fun writeImage(bufferedImage: BufferedImage, compressionQuality: Float): ByteArrayOutputStream {
+  private fun writeImage(
+    bufferedImage: BufferedImage,
+    compressionQuality: Float,
+  ): ByteArrayOutputStream {
     val imageWriter = getWriter()
     val writerParams = getWriterParams(imageWriter, compressionQuality)
     val outputStream = ByteArrayOutputStream()
@@ -61,7 +70,10 @@ class ImageConverter(
     return outputStream
   }
 
-  private fun getWriterParams(writer: ImageWriter, compressionQuality: Float): ImageWriteParam? {
+  private fun getWriterParams(
+    writer: ImageWriter,
+    compressionQuality: Float,
+  ): ImageWriteParam? {
     val writerParams = writer.defaultWriteParam
     if (compressionQuality > 0) {
       writerParams.compressionMode = ImageWriteParam.MODE_EXPLICIT
@@ -75,11 +87,11 @@ class ImageConverter(
     val g = resized.createGraphics()
     g.setRenderingHint(
       RenderingHints.KEY_INTERPOLATION,
-      RenderingHints.VALUE_INTERPOLATION_BILINEAR
+      RenderingHints.VALUE_INTERPOLATION_BILINEAR,
     )
     g.drawImage(
       sourceBufferedImage, 0, 0, targetDimension.width, targetDimension.height, 0, 0, sourceBufferedImage.width,
-      sourceBufferedImage.height, null
+      sourceBufferedImage.height, null,
     )
     g.dispose()
     return resized
@@ -99,15 +111,21 @@ class ImageConverter(
     return@lazy Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
 
-  private fun convertToBufferedImage(img: Image, width: Int, height: Int): BufferedImage {
+  private fun convertToBufferedImage(
+    img: Image,
+    width: Int,
+    height: Int,
+  ): BufferedImage {
     if (img is BufferedImage) {
       return img
     }
 
-    val bi = BufferedImage(
-      width, height,
-      BufferedImage.TYPE_INT_ARGB
-    )
+    val bi =
+      BufferedImage(
+        width,
+        height,
+        BufferedImage.TYPE_INT_ARGB,
+      )
     val graphics2D = bi.createGraphics()
     graphics2D.drawImage(img, 0, 0, null)
     graphics2D.dispose()

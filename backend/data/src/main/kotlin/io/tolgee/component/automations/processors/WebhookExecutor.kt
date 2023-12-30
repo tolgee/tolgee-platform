@@ -17,9 +17,12 @@ import org.springframework.web.client.RestTemplate
 class WebhookExecutor(
   @Qualifier("webhookRestTemplate")
   private val restTemplate: RestTemplate,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
-  fun signAndExecute(config: WebhookConfig, data: WebhookRequest) {
+  fun signAndExecute(
+    config: WebhookConfig,
+    data: WebhookRequest,
+  ) {
     val stringData = jacksonObjectMapper().writeValueAsString(data)
     val headers = HttpHeaders()
     @Suppress("UastIncorrectHttpHeaderInspection")
@@ -39,7 +42,10 @@ class WebhookExecutor(
     }
   }
 
-  private fun generateSigHeader(payload: String, key: String): String {
+  private fun generateSigHeader(
+    payload: String,
+    key: String,
+  ): String {
     val timestamp = currentDateProvider.date.time
     val signature = computeHmacSha256(key, "$timestamp.$payload")
     return String.format("""{"timestamp": $timestamp, "signature": "$signature"}""")

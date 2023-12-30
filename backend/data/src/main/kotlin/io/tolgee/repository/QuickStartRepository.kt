@@ -7,5 +7,9 @@ import org.springframework.stereotype.Repository
 @Repository
 interface QuickStartRepository : JpaRepository<QuickStart, Long> {
   fun findByUserAccountId(userAccountId: Long): QuickStart?
-  fun findByUserAccountIdAndOrganizationId(userAccountId: Long, organizationId: Long): QuickStart?
+
+  fun findByUserAccountIdAndOrganizationId(
+    userAccountId: Long,
+    organizationId: Long,
+  ): QuickStart?
 }

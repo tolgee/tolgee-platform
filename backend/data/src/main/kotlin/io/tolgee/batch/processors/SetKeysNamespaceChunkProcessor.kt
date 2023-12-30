@@ -17,13 +17,13 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class SetKeysNamespaceChunkProcessor(
   private val entityManager: EntityManager,
-  private val keyService: KeyService
+  private val keyService: KeyService,
 ) : ChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     val subChunked = chunk.chunked(100)
     var progress = 0

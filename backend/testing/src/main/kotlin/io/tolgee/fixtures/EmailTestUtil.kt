@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class EmailTestUtil() {
-
   @Autowired
   @MockBean
   lateinit var javaMailSender: JavaMailSender
@@ -41,13 +40,14 @@ class EmailTestUtil() {
     get() = messageContents.first()
 
   val messageContents: List<String>
-    get() = messageArgumentCaptor.allValues.map {
-      (
-        (it.content as MimeMultipart)
-          .getBodyPart(0).content as MimeMultipart
+    get() =
+      messageArgumentCaptor.allValues.map {
+        (
+          (it.content as MimeMultipart)
+            .getBodyPart(0).content as MimeMultipart
         )
-        .getBodyPart(0).content as String
-    }
+          .getBodyPart(0).content as String
+      }
 
   fun verifyEmailSent() {
     verify(javaMailSender).send(any<MimeMessage>())

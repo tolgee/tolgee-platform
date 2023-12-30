@@ -32,7 +32,10 @@ open class AzureBlobFileStorage(
     }
   }
 
-  override fun storeFile(storageFilePath: String, bytes: ByteArray) {
+  override fun storeFile(
+    storageFilePath: String,
+    bytes: ByteArray,
+  ) {
     try {
       val client = getBlobClient(storageFilePath)
       client.upload(BinaryData.fromBytes(bytes), true)

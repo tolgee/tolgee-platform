@@ -8,7 +8,8 @@ import java.util.*
 
 @Component
 class PatModelAssembler() : RepresentationModelAssemblerSupport<Pat, PatModel>(
-  PatController::class.java, PatModel::class.java
+  PatController::class.java,
+  PatModel::class.java,
 ) {
   override fun toModel(entity: Pat): PatModel {
     return PatModel(
@@ -17,7 +18,7 @@ class PatModelAssembler() : RepresentationModelAssemblerSupport<Pat, PatModel>(
       expiresAt = entity.expiresAt?.time,
       createdAt = entity.createdAt?.time ?: Date().time,
       updatedAt = entity.updatedAt?.time ?: Date().time,
-      lastUsedAt = entity.lastUsedAt?.time
+      lastUsedAt = entity.lastUsedAt?.time,
     )
   }
 }

@@ -12,9 +12,12 @@ import org.springframework.stereotype.Component
 class EeContentStorageProvider(
   private val contentStorageService: ContentStorageService,
   private val projectService: ProjectService,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : ContentStorageProvider {
-  override fun getStorage(projectId: Long, contentStorageId: Long): ContentStorage {
+  override fun getStorage(
+    projectId: Long,
+    contentStorageId: Long,
+  ): ContentStorage {
     projectService.findDto(projectId)?.let {
       enabledFeaturesProvider.checkFeatureEnabled(it.organizationOwnerId, Feature.PROJECT_LEVEL_CONTENT_STORAGES)
     }

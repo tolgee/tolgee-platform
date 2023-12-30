@@ -55,18 +55,19 @@ class ImportService(
   private val entityManager: EntityManager,
   private val businessEventPublisher: BusinessEventPublisher,
   private val importDeleteService: ImportDeleteService,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   @Transactional
   fun addFiles(
     files: List<ImportFileDto>,
     project: Project,
     userAccount: UserAccount,
-    params: ImportAddFilesParams = ImportAddFilesParams()
+    params: ImportAddFilesParams = ImportAddFilesParams(),
   ): List<ErrorResponseBody> {
-    val import = findNotExpired(project.id, userAccount.id) ?: Import(project).also {
-      it.author = userAccount
-    }
+    val import =
+      findNotExpired(project.id, userAccount.id) ?: Import(project).also {
+        it.author = userAccount
+      }
 
     val languages = findLanguages(import)
 
@@ -75,11 +76,12 @@ class ImportService(
     }
 
     importRepository.save(import)
-    val fileProcessor = CoreImportFilesProcessor(
-      applicationContext = applicationContext,
-      import = import,
-      params = params
-    )
+    val fileProcessor =
+      CoreImportFilesProcessor(
+        applicationContext = applicationContext,
+        import = import,
+        params = params,
+      )
     val errors = fileProcessor.processFiles(files)
 
     if (findLanguages(import).isEmpty()) {
@@ -89,34 +91,45 @@ class ImportService(
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
-  fun import(projectId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
+  fun import(
+    projectId: Long,
+    authorId: Long,
+    forceMode: ForceMode = ForceMode.NO_FORCE,
+  ) {
     import(getNotExpired(projectId, authorId), forceMode)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
-  fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
+  fun import(
+    import: Import,
+    forceMode: ForceMode = ForceMode.NO_FORCE,
+  ) {
     StoredDataImporter(applicationContext, import, forceMode).doImport()
     deleteImport(import)
     businessEventPublisher.publish(
       OnBusinessEventToCaptureEvent(
         eventName = "IMPORT",
         projectId = import.project.id,
-        userAccountId = import.author.id
-      )
+        userAccountId = import.author.id,
+      ),
     )
   }
 
   @Transactional
-  fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language?) {
+  fun selectExistingLanguage(
+    importLanguage: ImportLanguage,
+    existingLanguage: Language?,
+  ) {
     if (importLanguage.existingLanguage == existingLanguage) {
       return
     }
     val import = importLanguage.file.import
     val dataManager = ImportDataManager(applicationContext, import)
     existingLanguage?.let {
-      val langAlreadySelectedInTheSameNS = dataManager.storedLanguages.any {
-        it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
-      }
+      val langAlreadySelectedInTheSameNS =
+        dataManager.storedLanguages.any {
+          it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
+        }
       if (langAlreadySelectedInTheSameNS) {
         throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
       }
@@ -127,7 +140,10 @@ class ImportService(
   }
 
   @Transactional
-  fun selectNamespace(file: ImportFile, namespace: String?) {
+  fun selectNamespace(
+    file: ImportFile,
+    namespace: String?,
+  ) {
     val import = file.import
     val dataManager = ImportDataManager(applicationContext, import)
     file.namespace = getSafeNamespace(namespace)
@@ -141,14 +157,16 @@ class ImportService(
     return this.importRepository.save(import)
   }
 
-  fun saveFile(importFile: ImportFile): ImportFile =
-    importFileRepository.save(importFile)
+  fun saveFile(importFile: ImportFile): ImportFile = importFileRepository.save(importFile)
 
   /**
    * Returns import when not expired.
    * When expired import is found, it is removed
    */
-  fun getNotExpired(projectId: Long, authorId: Long): Import {
+  fun getNotExpired(
+    projectId: Long,
+    authorId: Long,
+  ): Import {
     return findNotExpired(projectId, authorId) ?: throw NotFoundException()
   }
 
@@ -156,16 +174,25 @@ class ImportService(
     return importRepository.findDeleted(importId)
   }
 
-  private fun findNotExpired(projectId: Long, userAccountId: Long): Import? {
+  private fun findNotExpired(
+    projectId: Long,
+    userAccountId: Long,
+  ): Import? {
     val import = this.find(projectId, userAccountId)
     return removeExpiredImportService.removeIfExpired(import)
   }
 
-  fun find(projectId: Long, authorId: Long): Import? {
+  fun find(
+    projectId: Long,
+    authorId: Long,
+  ): Import? {
     return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
   }
 
-  fun get(projectId: Long, authorId: Long): Import {
+  fun get(
+    projectId: Long,
+    authorId: Long,
+  ): Import {
     return this.find(projectId, authorId) ?: throw NotFoundException()
   }
 
@@ -176,30 +203,31 @@ class ImportService(
   fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
   @Suppress("UNCHECKED_CAST")
-
   fun findKeys(import: Import): List<ImportKey> {
-    var result: List<ImportKey> = entityManager.createQuery(
-      """
+    var result: List<ImportKey> =
+      entityManager.createQuery(
+        """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.comments ikc
             join ik.file if
             where if.import = :import
-            """
-    )
-      .setParameter("import", import)
-      .resultList as List<ImportKey>
+            """,
+      )
+        .setParameter("import", import)
+        .resultList as List<ImportKey>
 
-    result = entityManager.createQuery(
-      """
+    result =
+      entityManager.createQuery(
+        """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ik in :keys
-        """
-    ).setParameter("keys", result)
-      .resultList as List<ImportKey>
+        """,
+      ).setParameter("keys", result)
+        .resultList as List<ImportKey>
 
     return result
   }
@@ -208,8 +236,7 @@ class ImportService(
     importLanguageRepository.saveAll(entries)
   }
 
-  fun findTranslations(languageId: Long) =
-    this.importTranslationRepository.findAllByImportAndLanguageId(languageId)
+  fun findTranslations(languageId: Long) = this.importTranslationRepository.findAllByImportAndLanguageId(languageId)
 
   fun saveTranslations(translations: List<ImportTranslation>) {
     this.importTranslationRepository.saveAll(translations)
@@ -231,7 +258,11 @@ class ImportService(
     this.importTranslationRepository.removeExistingTranslationConflictReferences(translationIds)
   }
 
-  fun getResult(projectId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
+  fun getResult(
+    projectId: Long,
+    userId: Long,
+    pageable: Pageable,
+  ): Page<ImportLanguageView> {
     return this.getNotExpired(projectId, userId).let {
       this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
     }
@@ -250,10 +281,14 @@ class ImportService(
     pageable: Pageable,
     onlyConflicts: Boolean,
     onlyUnresolved: Boolean,
-    search: String? = null
+    search: String? = null,
   ): Page<ImportTranslationView> {
     return importTranslationRepository.findImportTranslationsView(
-      languageId, pageable, onlyConflicts, onlyUnresolved, search
+      languageId,
+      pageable,
+      onlyConflicts,
+      onlyUnresolved,
+      search,
     )
   }
 
@@ -270,8 +305,10 @@ class ImportService(
   }
 
   @Transactional
-  fun deleteImport(projectId: Long, authorId: Long) =
-    this.deleteImport(get(projectId, authorId))
+  fun deleteImport(
+    projectId: Long,
+    authorId: Long,
+  ) = this.deleteImport(get(projectId, authorId))
 
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {
@@ -287,13 +324,19 @@ class ImportService(
     return importTranslationRepository.findById(translationId).orElse(null)
   }
 
-  fun resolveTranslationConflict(translation: ImportTranslation, override: Boolean) {
+  fun resolveTranslationConflict(
+    translation: ImportTranslation,
+    override: Boolean,
+  ) {
     translation.override = override
     translation.resolve()
     importTranslationRepository.save(translation)
   }
 
-  fun resolveAllOfLanguage(language: ImportLanguage, override: Boolean) {
+  fun resolveAllOfLanguage(
+    language: ImportLanguage,
+    override: Boolean,
+  ) {
     val translations = findTranslations(language.id)
     translations.forEach {
       it.resolve()
@@ -306,7 +349,10 @@ class ImportService(
     return importFileRepository.findById(fileId).orElse(null)
   }
 
-  fun getFileIssues(fileId: Long, pageable: Pageable): Page<ImportFileIssueView> {
+  fun getFileIssues(
+    fileId: Long,
+    pageable: Pageable,
+  ): Page<ImportFileIssueView> {
     return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
   }
 
@@ -318,8 +364,7 @@ class ImportService(
     this.importFileIssueRepository.saveAll(issues)
   }
 
-  fun getAllByProject(projectId: Long) =
-    this.importRepository.findAllByProjectId(projectId)
+  fun getAllByProject(projectId: Long) = this.importRepository.findAllByProjectId(projectId)
 
   fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
     importFileIssueParamRepository.saveAll(params)

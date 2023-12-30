@@ -65,11 +65,13 @@ class ApiKeyController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>,
   private val permissionService: PermissionService,
 ) {
-
   @PostMapping(path = ["/api-keys"])
   @Operation(summary = "Creates new API key with provided scopes")
   @RequiresSuperAuthentication
-  fun create(@RequestBody @Valid dto: CreateApiKeyDto): RevealedApiKeyModel {
+  fun create(
+    @RequestBody @Valid
+    dto: CreateApiKeyDto,
+  ): RevealedApiKeyModel {
     val project = projectService.get(dto.projectId)
     if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
       securityService.checkApiKeyScopes(dto.scopes, project)
@@ -79,7 +81,7 @@ class ApiKeyController(
       scopes = dto.scopes,
       project = project,
       expiresAt = dto.expiresAt,
-      description = dto.description
+      description = dto.description,
     ).let {
       revealedApiKeyModelAssembler.toModel(it)
     }
@@ -87,14 +89,19 @@ class ApiKeyController(
 
   @Operation(summary = "Returns user's api keys")
   @GetMapping(path = ["/api-keys"])
-  fun allByUser(pageable: Pageable, @RequestParam filterProjectId: Long?): PagedModel<ApiKeyModel> {
+  fun allByUser(
+    pageable: Pageable,
+    @RequestParam filterProjectId: Long?,
+  ): PagedModel<ApiKeyModel> {
     return apiKeyService.getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
   }
 
   @Operation(summary = "Returns specific API key info")
   @GetMapping(path = ["/api-keys/{keyId:[0-9]+}"])
-  fun get(@PathVariable keyId: Long): ApiKeyModel {
+  fun get(
+    @PathVariable keyId: Long,
+  ): ApiKeyModel {
     val apiKey = apiKeyService.findOptional(keyId).orElseThrow { NotFoundException() }
     if (apiKey.userAccount.id != authenticationFacade.authenticatedUser.id) {
       securityService.checkProjectPermission(apiKey.project.id, Scope.ADMIN)
@@ -112,17 +119,18 @@ class ApiKeyController(
 
     val apiKey = authenticationFacade.projectApiKeyEntity
 
-    val permissionData = permissionService.getProjectPermissionData(
-      apiKey.project.id,
-      authenticationFacade.authenticatedUser.id
-    )
+    val permissionData =
+      permissionService.getProjectPermissionData(
+        apiKey.project.id,
+        authenticationFacade.authenticatedUser.id,
+      )
 
     val translateLanguageIds =
       permissionData.computedPermissions.translateLanguageIds.toNormalizedPermittedLanguageSet()
 
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
-      permittedLanguageIds = translateLanguageIds
+      permittedLanguageIds = translateLanguageIds,
     )
   }
 
@@ -131,31 +139,35 @@ class ApiKeyController(
   @AllowApiAccess()
   fun getCurrentPermissions(
     @RequestParam
-    @Parameter(description = "Required when using with PAT") projectId: Long?
+    @Parameter(description = "Required when using with PAT")
+    projectId: Long?,
   ): ApiKeyPermissionsModel {
     val apiKeyAuthentication = authenticationFacade.isProjectApiKeyAuth
     val personalAccessTokenAuth = authenticationFacade.isPersonalAccessTokenAuth
 
-    val projectIdNotNull = when {
-      apiKeyAuthentication ->
-        authenticationFacade.projectApiKey.projectId
+    val projectIdNotNull =
+      when {
+        apiKeyAuthentication ->
+          authenticationFacade.projectApiKey.projectId
 
-      personalAccessTokenAuth ->
-        projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
+        personalAccessTokenAuth ->
+          projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
 
-      else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
-    }
+        else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+      }
 
-    val permissionData = permissionService.getProjectPermissionData(
-      projectIdNotNull,
-      authenticationFacade.authenticatedUser.id
-    )
+    val permissionData =
+      permissionService.getProjectPermissionData(
+        projectIdNotNull,
+        authenticationFacade.authenticatedUser.id,
+      )
 
     val computed = permissionData.computedPermissions
-    val scopes = when {
-      apiKeyAuthentication -> authenticationFacade.projectApiKey.scopes.toTypedArray()
-      else -> computed.scopes
-    }
+    val scopes =
+      when {
+        apiKeyAuthentication -> authenticationFacade.projectApiKey.scopes.toTypedArray()
+        else -> computed.scopes
+      }
 
     return ApiKeyPermissionsModel(
       projectIdNotNull,
@@ -163,7 +175,7 @@ class ApiKeyController(
       translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
-      scopes = scopes
+      scopes = scopes,
     )
   }
 
@@ -185,7 +197,11 @@ class ApiKeyController(
   @PutMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Edits existing API key")
   @RequiresSuperAuthentication
-  fun update(@RequestBody @Valid dto: V2EditApiKeyDto, @PathVariable apiKeyId: Long): ApiKeyModel {
+  fun update(
+    @RequestBody @Valid
+    dto: V2EditApiKeyDto,
+    @PathVariable apiKeyId: Long,
+  ): ApiKeyModel {
     val apiKey = apiKeyService.get(apiKeyId)
     checkOwner(apiKey)
     securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
@@ -195,12 +211,13 @@ class ApiKeyController(
 
   @PutMapping(value = ["/api-keys/{apiKeyId:[0-9]+}/regenerate"])
   @Operation(
-    summary = "Regenerates API key. It generates new API key value and updates its time of expiration."
+    summary = "Regenerates API key. It generates new API key value and updates its time of expiration.",
   )
   @RequiresSuperAuthentication
   fun regenerate(
-    @RequestBody @Valid dto: RegenerateApiKeyDto,
-    @PathVariable apiKeyId: Long
+    @RequestBody @Valid
+    dto: RegenerateApiKeyDto,
+    @PathVariable apiKeyId: Long,
   ): RevealedApiKeyModel {
     checkOwner(apiKeyId)
     return revealedApiKeyModelAssembler.toModel(apiKeyService.regenerate(apiKeyId, dto.expiresAt))
@@ -209,7 +226,9 @@ class ApiKeyController(
   @DeleteMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Deletes API key")
   @RequiresSuperAuthentication
-  fun delete(@PathVariable apiKeyId: Long) {
+  fun delete(
+    @PathVariable apiKeyId: Long,
+  ) {
     val apiKey = apiKeyService.findOptional(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
     checkOwner(apiKey)
     apiKeyService.deleteApiKey(apiKey)
@@ -239,8 +258,9 @@ class ApiKeyController(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(
-              example = """
+            schema =
+              Schema(
+                example = """
             {
               "TRANSLATE":[
                 "translations.view",
@@ -267,12 +287,12 @@ class ApiKeyController(
                 "translations.view",
                 "screenshots.view"
               ]
-            }"""
-            )
-          )
-        ]
-      )
-    ]
+            }""",
+              ),
+          ),
+        ],
+      ),
+    ],
   )
   @Deprecated(message = "Don't use this endpoint, it's useless.")
   val scopes: Map<String, List<String>> by lazy {

@@ -8,7 +8,13 @@ import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.*
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
@@ -242,7 +248,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   protected fun initMachineTranslationProperties(
     freeCreditsAmount: Long,
-    enabledServices: Set<MtServiceType> = setOf(MtServiceType.GOOGLE)
+    enabledServices: Set<MtServiceType> = setOf(MtServiceType.GOOGLE),
   ) {
     machineTranslationProperties.freeCreditsAmount = freeCreditsAmount
     awsMachineTranslationProperties.accessKey = "dummy"
@@ -266,7 +272,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     return io.tolgee.util.executeInNewTransaction(
       transactionManager = platformTransactionManager,
       fn = fn,
-      isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
+      isolationLevel = TransactionDefinition.ISOLATION_DEFAULT,
     )
   }
 
@@ -278,7 +284,10 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     currentDateProvider.forcedDate = null
   }
 
-  open fun forceDateString(dateString: String, pattern: String = "yyyy-MM-dd HH:mm:ss z") {
+  open fun forceDateString(
+    dateString: String,
+    pattern: String = "yyyy-MM-dd HH:mm:ss z",
+  ) {
     currentDateProvider.forceDateString(dateString, pattern)
   }
 

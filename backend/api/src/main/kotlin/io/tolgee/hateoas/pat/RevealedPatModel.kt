@@ -8,5 +8,5 @@ import org.springframework.hateoas.server.core.Relation
 open class RevealedPatModel(
   @Schema(hidden = true)
   patModel: PatModel,
-  val token: String
+  val token: String,
 ) : IPatModel by patModel, RepresentationModel<RevealedPatModel>()

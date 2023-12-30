@@ -19,9 +19,10 @@ class AuthenticationInterceptorTest {
 
   private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade)
 
-  private val mockMvc = MockMvcBuilders.standaloneSetup(TestController::class.java)
-    .addInterceptors(authenticationInterceptor)
-    .build()
+  private val mockMvc =
+    MockMvcBuilders.standaloneSetup(TestController::class.java)
+      .addInterceptors(authenticationInterceptor)
+      .build()
 
   @BeforeEach
   fun setupMocks() {

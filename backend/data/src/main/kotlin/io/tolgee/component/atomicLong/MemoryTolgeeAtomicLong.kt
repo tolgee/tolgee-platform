@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 class MemoryTolgeeAtomicLong(
   private val name: String,
-  private val defaultProvider: () -> Long
+  private val defaultProvider: () -> Long,
 ) : TolgeeAtomicLong {
   companion object {
     private val map = ConcurrentHashMap<String, AtomicLong>()

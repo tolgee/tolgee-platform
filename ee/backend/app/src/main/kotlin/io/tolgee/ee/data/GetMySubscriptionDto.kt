@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank
 class GetMySubscriptionDto(
   @field:NotBlank
   var licenseKey: String = "",
-
   @field:NotBlank
-  var instanceId: String = ""
+  var instanceId: String = "",
 )

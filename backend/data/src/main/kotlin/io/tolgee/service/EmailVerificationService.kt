@@ -28,7 +28,7 @@ class EmailVerificationService(
   private val tolgeeProperties: TolgeeProperties,
   private val emailVerificationRepository: EmailVerificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val emailVerificationSender: EmailVerificationSender
+  private val emailVerificationSender: EmailVerificationSender,
 ) {
   @Lazy
   @Autowired
@@ -38,16 +38,17 @@ class EmailVerificationService(
   fun createForUser(
     userAccount: UserAccount,
     callbackUrl: String? = null,
-    newEmail: String? = null
+    newEmail: String? = null,
   ): EmailVerification? {
     if (tolgeeProperties.authentication.needsEmailVerification) {
       val resultCallbackUrl = getCallbackUrl(callbackUrl)
       val code = generateCode()
 
-      val emailVerification = userAccount.emailVerification?.also {
-        it.newEmail = newEmail
-        it.code = code
-      } ?: EmailVerification(userAccount = userAccount, code = code, newEmail = newEmail)
+      val emailVerification =
+        userAccount.emailVerification?.also {
+          it.newEmail = newEmail
+          it.code = code
+        } ?: EmailVerification(userAccount = userAccount, code = code, newEmail = newEmail)
 
       emailVerificationRepository.save(emailVerification)
       userAccount.emailVerification = emailVerification
@@ -72,7 +73,10 @@ class EmailVerificationService(
   }
 
   @Transactional
-  fun verify(userId: Long, code: String) {
+  fun verify(
+    userId: Long,
+    code: String,
+  ) {
     val user = userAccountService.findActive(userId) ?: throw NotFoundException()
     val old = UserAccountDto.fromEntity(user)
     val emailVerification = user.emailVerification
@@ -99,7 +103,10 @@ class EmailVerificationService(
     }
   }
 
-  private fun setNewEmailIfChanged(newEmail: String?, user: UserAccount) {
+  private fun setNewEmailIfChanged(
+    newEmail: String?,
+    user: UserAccount,
+  ) {
     newEmail?.let {
       user.username = newEmail
     }

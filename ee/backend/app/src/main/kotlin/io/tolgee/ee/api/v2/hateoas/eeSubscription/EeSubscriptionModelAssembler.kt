@@ -7,9 +7,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class EeSubscriptionModelAssembler(
-  private val userAccountService: UserAccountService
+  private val userAccountService: UserAccountService,
 ) : RepresentationModelAssembler<EeSubscription, EeSubscriptionModel> {
-
   override fun toModel(eeSubscription: EeSubscription): EeSubscriptionModel {
     val currentUserCount = userAccountService.countAll()
 
@@ -21,7 +20,7 @@ class EeSubscriptionModelAssembler(
       cancelAtPeriodEnd = eeSubscription.cancelAtPeriodEnd,
       currentUserCount = currentUserCount,
       status = eeSubscription.status,
-      lastValidCheck = eeSubscription.lastValidCheck
+      lastValidCheck = eeSubscription.lastValidCheck,
     )
   }
 }

@@ -10,10 +10,9 @@ import java.io.Serializable
 open class ImportNamespaceModel(
   @Schema(
     description = "The id of namespace. When null, namespace doesn't exist and will be created by import.",
-    example = "10000048"
+    example = "10000048",
   )
   val id: Long?,
-
   @Schema(description = "", example = "homepage")
   val name: String,
 ) : RepresentationModel<ImportNamespaceModel>(), Serializable

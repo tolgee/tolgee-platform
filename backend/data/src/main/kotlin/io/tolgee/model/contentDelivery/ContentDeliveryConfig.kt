@@ -19,7 +19,7 @@ import java.util.*
 
 @Entity
 @Table(
-  uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "slug"])]
+  uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "slug"])],
 )
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
@@ -56,10 +56,11 @@ class ContentDeliveryConfig(
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  override var filterState: List<TranslationState>? = listOf(
-    TranslationState.TRANSLATED,
-    TranslationState.REVIEWED,
-  )
+  override var filterState: List<TranslationState>? =
+    listOf(
+      TranslationState.TRANSLATED,
+      TranslationState.REVIEWED,
+    )
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")

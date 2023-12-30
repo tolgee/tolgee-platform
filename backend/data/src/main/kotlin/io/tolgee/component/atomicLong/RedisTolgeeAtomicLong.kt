@@ -4,7 +4,7 @@ import io.tolgee.util.TolgeeAtomicLong
 import org.redisson.api.RAtomicLong
 
 class RedisTolgeeAtomicLong(
-  private val it: RAtomicLong
+  private val it: RAtomicLong,
 ) : TolgeeAtomicLong {
   override fun addAndGet(delta: Long): Long {
     return it.addAndGet(delta)

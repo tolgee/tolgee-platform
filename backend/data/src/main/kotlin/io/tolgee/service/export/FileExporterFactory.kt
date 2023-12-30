@@ -15,7 +15,7 @@ class FileExporterFactory {
     data: List<ExportTranslationView>,
     exportParams: IExportParams,
     baseTranslationsProvider: () -> List<ExportTranslationView>,
-    baseLanguage: Language
+    baseLanguage: Language,
   ): FileExporter {
     return when (exportParams.format) {
       ExportFormat.JSON -> JsonFileExporter(data, exportParams)

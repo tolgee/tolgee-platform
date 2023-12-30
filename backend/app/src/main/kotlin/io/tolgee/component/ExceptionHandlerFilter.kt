@@ -28,7 +28,11 @@ import org.springframework.web.servlet.HandlerExceptionResolver
 class ExceptionHandlerFilter(
   @Lazy private val handlerExceptionResolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     try {
       filterChain.doFilter(request, response)
     } catch (ex: Exception) {

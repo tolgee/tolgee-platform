@@ -12,12 +12,9 @@ import kotlin.reflect.full.hasAnnotation
 
 @Component
 class EntityDescriptionProvider(
-  private val entityUtil: EntityUtil
+  private val entityUtil: EntityUtil,
 ) {
-  fun getDescriptionWithRelations(
-    entity: EntityWithId,
-  ): EntityDescriptionWithRelations? {
-
+  fun getDescriptionWithRelations(entity: EntityWithId): EntityDescriptionWithRelations? {
     val description = getDescription(entity) ?: return null
 
     val relations = mutableMapOf<String, EntityDescriptionWithRelations>()
@@ -38,19 +35,22 @@ class EntityDescriptionProvider(
       description.entityClass,
       description.entityId,
       description.data,
-      relations
+      relations,
     )
   }
 
   fun getDescription(entity: EntityWithId): EntityDescription? {
     val entityClass = entityUtil.getRealEntityClass(entity::class.java) ?: return null
 
-    val fieldValues = entityClass.kotlin.members.filter { member ->
-      member.hasAnnotation<ActivityDescribingProp>()
-    }.associateTo(HashMap()) { it.name to it.call(entity) }
+    val fieldValues =
+      entityClass.kotlin.members.filter { member ->
+        member.hasAnnotation<ActivityDescribingProp>()
+      }.associateTo(HashMap()) { it.name to it.call(entity) }
 
     return EntityDescription(
-      entityClass.simpleName, entityId = entity.id, fieldValues
+      entityClass.simpleName,
+      entityId = entity.id,
+      fieldValues,
     )
   }
 }

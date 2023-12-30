@@ -4,9 +4,10 @@ import io.tolgee.development.testDataBuilder.EntityDataBuilder
 import io.tolgee.model.Language
 
 class LanguageBuilder(
-  val projectBuilder: ProjectBuilder
+  val projectBuilder: ProjectBuilder,
 ) : EntityDataBuilder<Language, LanguageBuilder> {
-  override var self: Language = Language().apply {
-    project = projectBuilder.self
-  }
+  override var self: Language =
+    Language().apply {
+      project = projectBuilder.self
+    }
 }

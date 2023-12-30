@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class ActivityDatabaseInterceptor : Interceptor, Logging {
-
   @Autowired
   lateinit var applicationContext: ApplicationContext
 
@@ -24,11 +23,15 @@ class ActivityDatabaseInterceptor : Interceptor, Logging {
     id: Any?,
     state: Array<out Any>?,
     propertyNames: Array<out String>?,
-    types: Array<out Type>?
+    types: Array<out Type>?,
   ): Boolean {
     preCommitEventsPublisher.onPersist(entity)
     interceptedEventsManager.onFieldModificationsActivity(
-      entity, state, null, propertyNames, RevisionType.ADD
+      entity,
+      state,
+      null,
+      propertyNames,
+      RevisionType.ADD,
     )
     return true
   }
@@ -38,11 +41,15 @@ class ActivityDatabaseInterceptor : Interceptor, Logging {
     id: Any?,
     state: Array<out Any>?,
     propertyNames: Array<out String>?,
-    types: Array<out Type>?
+    types: Array<out Type>?,
   ) {
     preCommitEventsPublisher.onDelete(entity)
     interceptedEventsManager.onFieldModificationsActivity(
-      entity, null, state, propertyNames, RevisionType.DEL
+      entity,
+      null,
+      state,
+      propertyNames,
+      RevisionType.DEL,
     )
   }
 
@@ -52,7 +59,7 @@ class ActivityDatabaseInterceptor : Interceptor, Logging {
     currentState: Array<out Any>?,
     previousState: Array<out Any>?,
     propertyNames: Array<out String>?,
-    types: Array<out Type>?
+    types: Array<out Type>?,
   ): Boolean {
     preCommitEventsPublisher.onUpdate(entity)
     interceptedEventsManager.onFieldModificationsActivity(
@@ -60,20 +67,29 @@ class ActivityDatabaseInterceptor : Interceptor, Logging {
       currentState,
       previousState,
       propertyNames,
-      RevisionType.MOD
+      RevisionType.MOD,
     )
     return true
   }
 
-  override fun onCollectionRemove(collection: Any?, key: Any?) {
+  override fun onCollectionRemove(
+    collection: Any?,
+    key: Any?,
+  ) {
     interceptedEventsManager.onCollectionModification(collection, key)
   }
 
-  override fun onCollectionRecreate(collection: Any?, key: Any?) {
+  override fun onCollectionRecreate(
+    collection: Any?,
+    key: Any?,
+  ) {
     interceptedEventsManager.onCollectionModification(collection, key)
   }
 
-  override fun onCollectionUpdate(collection: Any?, key: Any?) {
+  override fun onCollectionUpdate(
+    collection: Any?,
+    key: Any?,
+  ) {
     interceptedEventsManager.onCollectionModification(collection, key)
   }
 

@@ -20,11 +20,12 @@ class AutoTranslateTestData : BaseTestData() {
           tag = "de"
           germanLanguage = this
         }
-        val spanish = addLanguage {
-          name = "Spanish"
-          tag = "es"
-          spanishLanguage = this
-        }.self
+        val spanish =
+          addLanguage {
+            name = "Spanish"
+            tag = "es"
+            spanishLanguage = this
+          }.self
         addAutoTranslationConfig {
           usingTm = true
           usingPrimaryMtService = true

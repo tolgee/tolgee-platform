@@ -45,7 +45,7 @@ class DbPopulatorReal(
   private val apiKeyService: ApiKeyService,
   private val languageStatsService: LanguageStatsService,
   private val platformTransactionManager: PlatformTransactionManager,
-  private val passwordEncoder: PasswordEncoder
+  private val passwordEncoder: PasswordEncoder,
 ) {
   private lateinit var de: Language
   private lateinit var en: Language
@@ -58,33 +58,44 @@ class DbPopulatorReal(
     }
   }
 
-  fun createUserIfNotExists(username: String, password: String? = null, name: String? = null): UserAccount {
+  fun createUserIfNotExists(
+    username: String,
+    password: String? = null,
+    name: String? = null,
+  ): UserAccount {
     return userAccountService.findActive(username) ?: let {
-
-      val rawPassword = password
-        ?: initialPasswordManager.initialPassword
+      val rawPassword =
+        password
+          ?: initialPasswordManager.initialPassword
 
       userAccountService.createUser(
         UserAccount(
           name = name ?: username,
           username = username,
-          password = passwordEncoder.encode(rawPassword)
-        )
+          password = passwordEncoder.encode(rawPassword),
+        ),
       )
     }
   }
 
-  fun createOrganization(name: String, userAccount: UserAccount): Organization {
+  fun createOrganization(
+    name: String,
+    userAccount: UserAccount,
+  ): Organization {
     val slug = slugGenerator.generate(name, 3, 100) { true }
     return organizationService.create(OrganizationDto(name, slug), userAccount)
   }
 
   @Transactional
   @Deprecated("Use create PermissionTestData or other permission classes")
-  fun createUsersAndOrganizations(username: String = "user", userCount: Int = 4): List<UserAccount> {
-    val users = (1..userCount).map {
-      createUserIfNotExists("$username-$it")
-    }
+  fun createUsersAndOrganizations(
+    username: String = "user",
+    userCount: Int = 4,
+  ): List<UserAccount> {
+    val users =
+      (1..userCount).map {
+        createUserIfNotExists("$username-$it")
+      }
 
     users.mapIndexed { listUserIdx, user ->
       (1..listUserIdx).forEach { organizationNum ->
@@ -103,7 +114,10 @@ class DbPopulatorReal(
   }
 
   @Transactional
-  fun createProjectWithOrganization(projectName: String, organization: Organization): Project {
+  fun createProjectWithOrganization(
+    projectName: String,
+    organization: Organization,
+  ): Project {
     val project = Project()
     project.name = projectName
     project.organizationOwner = organization
@@ -117,7 +131,11 @@ class DbPopulatorReal(
   }
 
   @Transactional
-  fun createBase(projectName: String, username: String, password: String? = null): Base {
+  fun createBase(
+    projectName: String,
+    username: String,
+    password: String? = null,
+  ): Base {
     val userAccount = createUserIfNotExists(username, password)
     val organization = createOrganizationIfNotExist(username, username, userAccount)
     val project = createProject(projectName, organization)
@@ -141,14 +159,21 @@ class DbPopulatorReal(
     return project
   }
 
-  fun createOrganizationIfNotExist(name: String, slug: String = name, userAccount: UserAccount): Organization {
+  fun createOrganizationIfNotExist(
+    name: String,
+    slug: String = name,
+    userAccount: UserAccount,
+  ): Organization {
     return organizationService.find(name) ?: let {
       organizationService.create(OrganizationDto(name, slug = slug), userAccount)
     }
   }
 
   @Transactional
-  fun createBase(projectName: String, username: String): Base {
+  fun createBase(
+    projectName: String,
+    username: String,
+  ): Base {
     return createBase(projectName, username, null)
   }
 
@@ -166,51 +191,84 @@ class DbPopulatorReal(
   }
 
   @Transactional
-  fun populate(projectName: String, userName: String): Base {
+  fun populate(
+    projectName: String,
+    userName: String,
+  ): Base {
     val base = createBase(projectName, userName)
     val project = projectService.get(base.project.id)
     createApiKey(project)
     createTranslation(project, "Hello world!", "Hallo Welt!", en, de)
     createTranslation(project, "English text one.", "Deutsch text einz.", en, de)
     createTranslation(
-      project, "This is translation in home folder",
-      "Das ist die Übersetzung im Home-Ordner", en, de
+      project,
+      "This is translation in home folder",
+      "Das ist die Übersetzung im Home-Ordner",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is translation in news folder",
-      "Das ist die Übersetzung im News-Ordner", en, de
+      project,
+      "This is translation in news folder",
+      "Das ist die Übersetzung im News-Ordner",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is another translation in news folder",
-      "Das ist eine weitere Übersetzung im Nachrichtenordner", en, de
+      project,
+      "This is another translation in news folder",
+      "Das ist eine weitere Übersetzung im Nachrichtenordner",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is standard text somewhere in DOM.",
-      "Das ist Standardtext irgendwo im DOM.", en, de
+      project,
+      "This is standard text somewhere in DOM.",
+      "Das ist Standardtext irgendwo im DOM.",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is another standard text somewhere in DOM.",
-      "Das ist ein weiterer Standardtext irgendwo in DOM.", en, de
+      project,
+      "This is another standard text somewhere in DOM.",
+      "Das ist ein weiterer Standardtext irgendwo in DOM.",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is translation retrieved by service.",
-      "Dase Übersetzung wird vom Service abgerufen.", en, de
+      project,
+      "This is translation retrieved by service.",
+      "Dase Übersetzung wird vom Service abgerufen.",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is textarea with placeholder and value.",
-      "Das ist ein Textarea mit Placeholder und Value.", en, de
+      project,
+      "This is textarea with placeholder and value.",
+      "Das ist ein Textarea mit Placeholder und Value.",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is textarea with placeholder.",
-      "Das ist ein Textarea mit Placeholder.", en, de
+      project,
+      "This is textarea with placeholder.",
+      "Das ist ein Textarea mit Placeholder.",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is input with value.",
-      "Das ist ein Input mit value.", en, de
+      project,
+      "This is input with value.",
+      "Das ist ein Input mit value.",
+      en,
+      de,
     )
     createTranslation(
-      project, "This is input with placeholder.",
-      "Das ist ein Input mit Placeholder.", en, de
+      project,
+      "This is input with placeholder.",
+      "Das ist ein Input mit Placeholder.",
+      en,
+      de,
     )
     return base
   }
@@ -218,18 +276,22 @@ class DbPopulatorReal(
   private fun createApiKey(project: Project) {
     val user = project.organizationOwner.memberRoles[0].user
     if (apiKeyService.findOptional(apiKeyService.hashKey(API_KEY)).isEmpty) {
-      val apiKey = ApiKey(
-        project = project,
-        key = API_KEY,
-        userAccount = user!!,
-        scopesEnum = Scope.values().toSet()
-      )
+      val apiKey =
+        ApiKey(
+          project = project,
+          key = API_KEY,
+          userAccount = user!!,
+          scopesEnum = Scope.values().toSet(),
+        )
       project.apiKeys.add(apiKey)
       apiKeyService.save(apiKey)
     }
   }
 
-  private fun createLanguage(name: String, project: Project): Language {
+  private fun createLanguage(
+    name: String,
+    project: Project,
+  ): Language {
     return languageService.createLanguage(LanguageDto(name, name, name), project)
   }
 
@@ -238,11 +300,12 @@ class DbPopulatorReal(
     english: String,
     deutsch: String,
     en: Language,
-    de: Language
+    de: Language,
   ) {
     val key = Key()
-    key.name = "sampleApp." + english.replace(" ", "_")
-      .lowercase(Locale.getDefault()).replace("\\.+$".toRegex(), "")
+    key.name = "sampleApp." +
+      english.replace(" ", "_")
+        .lowercase(Locale.getDefault()).replace("\\.+$".toRegex(), "")
     key.project = project
     val translation = Translation()
     translation.language = en

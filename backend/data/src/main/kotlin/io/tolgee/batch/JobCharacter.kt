@@ -8,5 +8,5 @@ enum class JobCharacter(
   val maxConcurrencyRatio: Double,
 ) {
   SLOW(0.2),
-  FAST(0.8)
+  FAST(0.8),
 }

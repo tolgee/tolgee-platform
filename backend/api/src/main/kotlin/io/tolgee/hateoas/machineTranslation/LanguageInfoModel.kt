@@ -10,5 +10,5 @@ import java.io.Serializable
 class LanguageInfoModel(
   val languageId: Long,
   val languageTag: String,
-  val supportedServices: List<MtSupportedService>
+  val supportedServices: List<MtSupportedService>,
 ) : RepresentationModel<LanguageInfoModel>(), Serializable

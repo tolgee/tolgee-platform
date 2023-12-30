@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
-
   @Test
   fun `get all projects with slug`() {
     val users = dbPopulator.createUsersAndOrganizations()
@@ -96,9 +95,10 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `user with no direct permission cannot see the the project in organization with none base permissions`() {
     val testData = PermissionsTestData()
-    val user = testData.root.addUserAccount {
-      username = "pavek@stb.cz"
-    }.self
+    val user =
+      testData.root.addUserAccount {
+        username = "pavek@stb.cz"
+      }.self
     testData.organizationBuilder.self.basePermission.type = ProjectPermissionType.NONE
     testData.organizationBuilder.build {
       addRole {

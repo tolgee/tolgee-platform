@@ -17,9 +17,8 @@ class PreferredOrganizationFacade(
   private val userPreferencesService: UserPreferencesService,
   private val privateOrganizationModelAssembler: PrivateOrganizationModelAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  private val quickStartService: QuickStartService
+  private val quickStartService: QuickStartService,
 ) {
-
   fun getPreferred(): PrivateOrganizationModel? {
     val preferences = userPreferencesService.findOrCreate(authenticationFacade.authenticatedUser.id)
     val preferredOrganization = preferences.preferredOrganization
@@ -29,7 +28,7 @@ class PreferredOrganizationFacade(
       return this.privateOrganizationModelAssembler.toModel(
         view,
         enabledFeaturesProvider.get(view.organization.id),
-        quickStartService.find(authenticationFacade.authenticatedUser.id, view.organization.id)
+        quickStartService.find(authenticationFacade.authenticatedUser.id, view.organization.id),
       )
     }
     return null

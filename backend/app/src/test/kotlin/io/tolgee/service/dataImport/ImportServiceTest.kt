@@ -49,12 +49,13 @@ class ImportServiceTest : AbstractSpringTest() {
 
   @Test
   fun `deletes import language`() {
-    val testData = executeInNewTransaction {
-      val testData = ImportTestData()
-      testDataService.saveTestData(testData.root)
-      assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
-      testData
-    }
+    val testData =
+      executeInNewTransaction {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
+        testData
+      }
     executeInNewTransaction {
       importService.findLanguage(testData.importEnglish.id)?.let {
         importService.deleteLanguage(it)
@@ -115,16 +116,18 @@ class ImportServiceTest : AbstractSpringTest() {
 
   @Test
   fun `imports namespaces and merges same keys from multiple files`() {
-    val testData = executeInNewTransaction {
-      val testData = ImportNamespacesTestData()
-      testDataService.saveTestData(testData.root)
-      SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-        null,
-        UserAccountDto.fromEntity(testData.userAccount),
-        TolgeeAuthenticationDetails(false)
-      )
-      testData
-    }
+    val testData =
+      executeInNewTransaction {
+        val testData = ImportNamespacesTestData()
+        testDataService.saveTestData(testData.root)
+        SecurityContextHolder.getContext().authentication =
+          TolgeeAuthentication(
+            null,
+            UserAccountDto.fromEntity(testData.userAccount),
+            TolgeeAuthenticationDetails(false),
+          )
+        testData
+      }
     executeInNewTransaction {
       permissionService.find(testData.project.id, testData.userAccount.id)
       val import = importService.get(testData.import.id)

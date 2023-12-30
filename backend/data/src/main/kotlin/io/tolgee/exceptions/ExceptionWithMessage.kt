@@ -6,9 +6,8 @@ import java.io.Serializable
 abstract class ExceptionWithMessage(
   private val _code: String? = null,
   val params: List<Serializable?>? = null,
-  cause: Throwable? = null
+  cause: Throwable? = null,
 ) : RuntimeException("$_code $params", cause) {
-
   var tolgeeMessage: Message? = null
 
   val code: String
@@ -17,7 +16,7 @@ abstract class ExceptionWithMessage(
   constructor(message: Message, params: List<Serializable?>? = null, cause: Throwable? = null) : this(
     message.code,
     params,
-    cause
+    cause,
   ) {
     this.tolgeeMessage = message
   }

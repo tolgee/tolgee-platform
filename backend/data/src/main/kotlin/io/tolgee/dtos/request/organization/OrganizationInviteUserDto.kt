@@ -9,17 +9,15 @@ import jakarta.validation.constraints.Size
 data class OrganizationInviteUserDto(
   @field:NotNull
   var roleType: OrganizationRoleType = OrganizationRoleType.MEMBER,
-
   @Schema(
-    description = """Name of invited user"""
+    description = """Name of invited user""",
   )
   @field:Size(max = 250)
   var name: String? = null,
-
   @Schema(
-    description = """Email to send invitation to"""
+    description = """Email to send invitation to""",
   )
   @field:Size(max = 250)
   @field:Email
-  var email: String? = null
+  var email: String? = null,
 )

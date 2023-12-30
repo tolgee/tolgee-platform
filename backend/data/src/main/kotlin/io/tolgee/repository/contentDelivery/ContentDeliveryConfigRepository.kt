@@ -14,9 +14,12 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
     """
     select count(c) = 0 from ContentDeliveryConfig c
     where c.project.id = :projectId and c.slug = :slug
-    """
+    """,
   )
-  fun isSlugUnique(projectId: Long, slug: String): Boolean
+  fun isSlugUnique(
+    projectId: Long,
+    slug: String,
+  ): Boolean
 
   @Query(
     """
@@ -28,17 +31,24 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
     select count(*)
     from ContentDeliveryConfig e
     where e.project.id in :projectId
-  """
+  """,
   )
-  fun findAllByProjectId(projectId: Long, pageable: Pageable): Page<ContentDeliveryConfig>
+  fun findAllByProjectId(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ContentDeliveryConfig>
 
   @Query(
     """
     from ContentDeliveryConfig e
     left join fetch e.automationActions
     where e.id = :contentDeliveryConfigId and e.project.id = :projectId
-  """
+  """,
   )
-  fun getByProjectIdAndId(projectId: Long, contentDeliveryConfigId: Long): ContentDeliveryConfig
+  fun getByProjectIdAndId(
+    projectId: Long,
+    contentDeliveryConfigId: Long,
+  ): ContentDeliveryConfig
+
   fun countByProject(project: Project): Int
 }

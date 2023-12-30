@@ -20,5 +20,5 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 
 data class TicketAuthentication(
   val userAccount: UserAccountDto,
-  val data: Map<String, String?>?
+  val data: Map<String, String?>?,
 )

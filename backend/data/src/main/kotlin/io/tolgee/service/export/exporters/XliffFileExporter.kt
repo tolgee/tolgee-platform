@@ -19,7 +19,7 @@ class XliffFileExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
-  val baseLanguage: Language
+  val baseLanguage: Language,
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.XLIFF.extension
 
@@ -51,11 +51,12 @@ class XliffFileExporter(
   private fun addToFileElement(
     fileBodyElement: Element,
     pathItems: List<String>,
-    translation: ExportTranslationView
+    translation: ExportTranslationView,
   ) {
-    val transUnitElement = fileBodyElement.addElement("trans-unit")
-      .addAttribute("id", pathItems.joinToString(exportParams.structureDelimiter.toString()))
-      .addAttribute("datatype", "html")
+    val transUnitElement =
+      fileBodyElement.addElement("trans-unit")
+        .addAttribute("id", pathItems.joinToString(exportParams.structureDelimiter.toString()))
+        .addAttribute("datatype", "html")
 
     baseTranslations[translation.key.name]?.text?.let {
       transUnitElement.addElement("source").addFromHtmlOrText(it)
@@ -77,21 +78,23 @@ class XliffFileExporter(
   private fun createBaseDocumentStructure(translation: ExportTranslationView): ResultItem {
     val document = DocumentHelper.createDocument()
     document.xmlEncoding = "UTF-8"
-    val fileBodyElement = document.addElement("xliff")
-      .addNamespace("", "urn:oasis:names:tc:xliff:document:1.2")
-      .addAttribute("version", "1.2")
-      .addElement("file", "urn:oasis:names:tc:xliff:document:1.2")
-      .addAttribute("original", "undefined")
-      .addAttribute("datatype", "plaintext")
-      .addAttribute("source-language", baseLanguage.tag)
-      .addAttribute("target-language", translation.languageTag)
-      .addElement("body")
+    val fileBodyElement =
+      document.addElement("xliff")
+        .addNamespace("", "urn:oasis:names:tc:xliff:document:1.2")
+        .addAttribute("version", "1.2")
+        .addElement("file", "urn:oasis:names:tc:xliff:document:1.2")
+        .addAttribute("original", "undefined")
+        .addAttribute("datatype", "plaintext")
+        .addAttribute("source-language", baseLanguage.tag)
+        .addAttribute("target-language", translation.languageTag)
+        .addElement("body")
     return ResultItem(document, fileBodyElement)
   }
 
   private fun String.parseHtml(): MutableIterator<Any?> {
-    val fragment = DocumentHelper
-      .parseText("<root>$this</root>")
+    val fragment =
+      DocumentHelper
+        .parseText("<root>$this</root>")
     return fragment.rootElement.nodeIterator()
   }
 

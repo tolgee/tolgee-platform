@@ -1,7 +1,13 @@
 package io.tolgee.model
 
 import io.tolgee.model.enums.Announcement
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.Id
+import jakarta.persistence.IdClass
+import jakarta.persistence.ManyToOne
 import java.io.Serializable
 
 @Entity
@@ -10,8 +16,7 @@ class DismissedAnnouncement(
   @Id
   @ManyToOne(fetch = FetchType.LAZY)
   var user: UserAccount,
-
   @Id
   @Enumerated(EnumType.STRING)
-  var announcement: Announcement
+  var announcement: Announcement,
 ) : Serializable

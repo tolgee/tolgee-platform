@@ -15,7 +15,6 @@ class UserPreferences(
   @JoinColumn(name = "user_account_id")
   var userAccount: UserAccount,
 ) : AuditModel() {
-
   constructor(userAccount: UserAccount, preferredOrganization: Organization?) : this(userAccount) {
     this.preferredOrganization = preferredOrganization
   }

@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
 @SpringBootApplication(
   scanBasePackages = ["io.tolgee"],
-  exclude = [LdapAutoConfiguration::class]
+  exclude = [LdapAutoConfiguration::class],
 )
 @EnableJpaAuditing
 @EntityScan("io.tolgee.model")

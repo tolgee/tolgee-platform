@@ -13,8 +13,9 @@ class SimpleProjectModelAssembler(
   private val languageModelAssembler: LanguageModelAssembler,
   private val avatarService: AvatarService,
 ) : RepresentationModelAssemblerSupport<Project, SimpleProjectModel>(
-  V2ProjectsController::class.java, SimpleProjectModel::class.java
-) {
+    V2ProjectsController::class.java,
+    SimpleProjectModel::class.java,
+  ) {
   override fun toModel(entity: Project): SimpleProjectModel {
     return SimpleProjectModel(
       id = entity.id,
@@ -22,11 +23,12 @@ class SimpleProjectModelAssembler(
       description = entity.description,
       slug = entity.slug,
       avatar = avatarService.getAvatarLinks(entity.avatarHash),
-      baseLanguage = entity.baseLanguage?.let {
-        languageModelAssembler.toModel(
-          LanguageViewImpl(it, true)
-        )
-      },
+      baseLanguage =
+        entity.baseLanguage?.let {
+          languageModelAssembler.toModel(
+            LanguageViewImpl(it, true),
+          )
+        },
     )
   }
 }

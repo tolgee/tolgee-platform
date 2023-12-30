@@ -79,7 +79,6 @@ enum class BatchJobType(
     activityType = ActivityType.AUTOMATION,
     maxRetries = 3,
     processor = AutomationChunkProcessor::class,
-    exclusive = false
-  )
-  ;
+    exclusive = false,
+  ),
 }

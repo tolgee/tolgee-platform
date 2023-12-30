@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class EventStreamConfig(
-  private val objectMapper: ObjectMapper
+  private val objectMapper: ObjectMapper,
 ) : WebMvcConfigurer {
   override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>?>) {
     converters.add(EventStreamHttpMessageConverter(objectMapper))
@@ -18,9 +18,9 @@ class EventStreamConfig(
 }
 
 class EventStreamHttpMessageConverter(
-  objectMapper: ObjectMapper
+  objectMapper: ObjectMapper,
 ) : AbstractJackson2HttpMessageConverter(objectMapper, MediaType.TEXT_EVENT_STREAM)
 
 class JavascriptHttpMessageConverter(
-  objectMapper: ObjectMapper
+  objectMapper: ObjectMapper,
 ) : AbstractJackson2HttpMessageConverter(objectMapper, MediaType("application", "javascript"))

@@ -21,8 +21,8 @@ class BusinessEventReportingActivityListener(
         userAccountId = userId,
         projectId = projectId,
         utmData = event.utmData,
-        data = event.sdkInfo
-      )
+        data = event.sdkInfo,
+      ),
     )
   }
 }

@@ -41,15 +41,15 @@ class ImageUploadServiceTest : AbstractSpringTest() {
         Date.from(
           Instant.now()
             .plus(2, ChronoUnit.HOURS)
-            .minus(500, ChronoUnit.MILLIS)
-        )
+            .minus(500, ChronoUnit.MILLIS),
+        ),
       )
     imageUploadService.cleanOldImages()
     val after = imageUploadService.find(listOf(storedNewer.id, storedOlder.id))
     assertThat(after).hasSize(1)
     assertThrows<FileStoreException> {
       fileStorage.readFile(
-        UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + storedOlder.filenameWithExtension
+        UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + storedOlder.filenameWithExtension,
       )
     }
     assertThat(after[0].id).isEqualTo(storedNewer.id)

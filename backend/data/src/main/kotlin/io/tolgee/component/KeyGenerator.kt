@@ -8,7 +8,7 @@ import java.security.SecureRandom
 
 @Component
 class KeyGenerator(
-  private val random: SecureRandom
+  private val random: SecureRandom,
 ) {
   fun generate(bits: Int = 256): String {
     return BigInteger(bits, random).toString(32)

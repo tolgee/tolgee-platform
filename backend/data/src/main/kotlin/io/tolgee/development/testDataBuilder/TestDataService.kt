@@ -76,9 +76,8 @@ class TestDataService(
   private val activityHolder: ActivityHolder,
   private val automationService: AutomationService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
-  private val languageStatsListener: LanguageStatsListener
+  private val languageStatsListener: LanguageStatsListener,
 ) : Logging {
-
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
     val builder = TestDataBuilder()
@@ -322,15 +321,16 @@ class TestDataService(
 
   private fun saveMtServiceConfigs(builder: ProjectBuilder) {
     mtServiceConfigService.saveAll(
-      builder.data.translationServiceConfigs.map { it.self }
+      builder.data.translationServiceConfigs.map { it.self },
     )
   }
 
   private fun saveLanguages(builder: ProjectBuilder) {
-    val languages = builder.data.languages.map {
-      // refresh entity if updating to get new stats
-      if (it.self.id != 0L) languageService.get(it.self.id) else it.self
-    }
+    val languages =
+      builder.data.languages.map {
+        // refresh entity if updating to get new stats
+        if (it.self.id != 0L) languageService.get(it.self.id) else it.self
+      }
     languageService.saveAll(languages)
   }
 
@@ -380,14 +380,15 @@ class TestDataService(
   }
 
   private fun saveAllOrganizations(builder: TestDataBuilder) {
-    val organizationsToSave = builder.data.organizations.map {
-      it.self.apply {
-        val slug = this.slug
-        if (slug.isEmpty()) {
-          this.slug = organizationService.generateSlug(this.name)
+    val organizationsToSave =
+      builder.data.organizations.map {
+        it.self.apply {
+          val slug = this.slug
+          if (slug.isEmpty()) {
+            this.slug = organizationService.generateSlug(this.name)
+          }
         }
       }
-    }
 
     organizationsToSave.forEach { org ->
       permissionService.save(org.basePermission)
@@ -401,7 +402,7 @@ class TestDataService(
       userAccountBuilders.map {
         it.self.password = passwordEncoder.encode(it.rawPassword)
         it.self
-      }
+      },
     )
     saveUserAvatars(userAccountBuilders)
     saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })

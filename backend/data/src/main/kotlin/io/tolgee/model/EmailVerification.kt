@@ -15,12 +15,10 @@ data class EmailVerification(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null,
-
   @NotBlank
   var code: String? = null,
-
   @Email
-  var newEmail: String? = null
+  var newEmail: String? = null,
 ) : AuditModel() {
   @Suppress("JoinDeclarationAndAssignment")
   @OneToOne(optional = false)
@@ -30,9 +28,9 @@ data class EmailVerification(
     id: Long? = null,
     @NotBlank code: String,
     userAccount: UserAccount,
-    newEmail: String? = null
+    newEmail: String? = null,
   ) :
     this(id = id, code = code, newEmail = newEmail) {
-      this.userAccount = userAccount
-    }
+    this.userAccount = userAccount
+  }
 }

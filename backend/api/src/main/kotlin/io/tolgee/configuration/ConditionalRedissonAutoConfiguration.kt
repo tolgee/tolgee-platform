@@ -18,6 +18,6 @@ import org.springframework.data.redis.core.RedisOperations
 @EnableConfigurationProperties(RedissonProperties::class, RedisProperties::class)
 @ConditionalOnExpression(
   "\${tolgee.websocket.use-redis:false} or " +
-    "(\${tolgee.cache.use-redis:false} and \${tolgee.cache.enabled:false})"
+    "(\${tolgee.cache.use-redis:false} and \${tolgee.cache.enabled:false})",
 )
 class ConditionalRedissonAutoConfiguration : RedissonAutoConfiguration()

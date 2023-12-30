@@ -19,7 +19,6 @@ import org.springframework.http.HttpHeaders
 @SpringBootTest
 @AutoConfigureMockMvc
 class AdministrationControllerTest : AuthorizedControllerTest() {
-
   lateinit var testData: AdministrationTestData
 
   @BeforeEach
@@ -63,14 +62,15 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `generates user jwt token`() {
-    val token = performAuthGet("/v2/administration/users/${testData.user.id}/generate-token")
-      .andIsOk.andGetContentAsString
+    val token =
+      performAuthGet("/v2/administration/users/${testData.user.id}/generate-token")
+        .andIsOk.andGetContentAsString
 
     performGet(
       "/v2/organizations",
       HttpHeaders().apply {
         set("Authorization", "Bearer $token")
-      }
+      },
     ).andIsOk
   }
 

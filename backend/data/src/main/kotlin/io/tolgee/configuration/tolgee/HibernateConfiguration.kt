@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class HibernateConfiguration : HibernatePropertiesCustomizer {
-
   @Autowired
   lateinit var activityInterceptor: ActivityDatabaseInterceptor
 

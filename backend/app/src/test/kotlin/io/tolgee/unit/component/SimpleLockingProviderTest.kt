@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.system.measureTimeMillis
 
 class SimpleLockingProviderTest {
-
   val provider = SimpleLockingProvider()
 
   @Test
@@ -57,7 +56,11 @@ class SimpleLockingProviderTest {
     yep2Lock.lock()
   }
 
-  private suspend fun massiveRun(threads: Int, repeats: Int, action: suspend () -> Unit) {
+  private suspend fun massiveRun(
+    threads: Int,
+    repeats: Int,
+    action: suspend () -> Unit,
+  ) {
     measureTimeMillis {
       coroutineScope { // scope for coroutines
         repeat(threads) {

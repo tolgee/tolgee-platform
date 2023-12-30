@@ -179,10 +179,14 @@ abstract class AbstractTokenBucketManagerTest {
     }
   }
 
-  private fun assertThrowsRetry(expectedRetryTime: Duration = Duration.ofMinutes(1), fn: () -> Unit) {
-    val refillAt = assertThrows<NotEnoughTokensException> {
-      fn()
-    }.refillAt
+  private fun assertThrowsRetry(
+    expectedRetryTime: Duration = Duration.ofMinutes(1),
+    fn: () -> Unit,
+  ) {
+    val refillAt =
+      assertThrows<NotEnoughTokensException> {
+        fn()
+      }.refillAt
 
     val expectedRefillAt = currentDateProvider.date.time + expectedRetryTime.toMillis()
 

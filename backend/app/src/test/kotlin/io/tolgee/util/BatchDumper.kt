@@ -11,7 +11,7 @@ class BatchDumper(
   private val batchJobService: BatchJobService,
   private val batchJobStateProvider: BatchJobStateProvider,
   private val currentDateProvider: CurrentDateProvider,
-  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
+  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
 ) : Logging {
   fun dump(jobId: Long) {
     val stringBuilder = StringBuilder()
@@ -22,21 +22,31 @@ class BatchDumper(
     logger.info(stringBuilder.toString())
   }
 
-  private fun dumpDbExecutions(jobId: Long, stringBuilder: StringBuilder) {
+  private fun dumpDbExecutions(
+    jobId: Long,
+    stringBuilder: StringBuilder,
+  ) {
     val dbExecutions = batchJobService.getExecutions(jobId)
     stringBuilder.append("\n\nDatabase state:")
     stringBuilder.append(" (${dbExecutions.size} executions)")
     stringBuilder.append("\n\n${listOf("Execution ID", "Status", "Completed", "ExecuteAfter offset").toTable()}")
-    val dbExecutionsString = dbExecutions
-      .joinToString(separator = "\n") {
-        listOf(
-          it.id, it.status.name, it.status.completed, it.executeAfter.offset
-        ).toTable()
-      }
+    val dbExecutionsString =
+      dbExecutions
+        .joinToString(separator = "\n") {
+          listOf(
+            it.id,
+            it.status.name,
+            it.status.completed,
+            it.executeAfter.offset,
+          ).toTable()
+        }
     stringBuilder.append("\n$dbExecutionsString")
   }
 
-  private fun dumpCachedState(stringBuilder: StringBuilder, jobId: Long) {
+  private fun dumpCachedState(
+    stringBuilder: StringBuilder,
+    jobId: Long,
+  ) {
     stringBuilder.append("\n\nCached state:")
     val cachedState = batchJobStateProvider.getCached(jobId)?.entries
     if (cachedState == null) {
@@ -57,7 +67,10 @@ class BatchDumper(
     }
   }
 
-  private fun dumpQueuedItems(jobId: Long, stringBuilder: StringBuilder) {
+  private fun dumpQueuedItems(
+    jobId: Long,
+    stringBuilder: StringBuilder,
+  ) {
     val queuedItems = batchJobChunkExecutionQueue.getQueuedJobItems(jobId)
     val queuedItemsString = queuedItems.joinToString(", ")
     stringBuilder.append("\n\nQueued items: (${queuedItems.size} executions) $queuedItemsString")

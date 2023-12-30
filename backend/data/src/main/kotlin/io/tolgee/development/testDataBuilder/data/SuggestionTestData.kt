@@ -17,11 +17,12 @@ class SuggestionTestData : BaseTestData() {
 
   init {
     projectBuilder.apply {
-      germanLanguage = addLanguage {
-        name = "German"
-        tag = "de"
-        originalName = "Deutsch"
-      }.self
+      germanLanguage =
+        addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "Deutsch"
+        }.self
       addKeys()
       addKeyDistances()
     }
@@ -162,8 +163,12 @@ class SuggestionTestData : BaseTestData() {
       this.targetLanguage = germanLanguage
       this.enabledServices =
         mutableSetOf(
-          MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL, MtServiceType.AZURE,
-          MtServiceType.BAIDU, MtServiceType.TOLGEE
+          MtServiceType.GOOGLE,
+          MtServiceType.AWS,
+          MtServiceType.DEEPL,
+          MtServiceType.AZURE,
+          MtServiceType.BAIDU,
+          MtServiceType.TOLGEE,
         )
       this.primaryService = MtServiceType.AWS
     }
@@ -174,8 +179,11 @@ class SuggestionTestData : BaseTestData() {
       this.targetLanguage = germanLanguage
       this.enabledServices =
         mutableSetOf(
-          MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL, MtServiceType.AZURE,
-          MtServiceType.BAIDU
+          MtServiceType.GOOGLE,
+          MtServiceType.AWS,
+          MtServiceType.DEEPL,
+          MtServiceType.AZURE,
+          MtServiceType.BAIDU,
         )
       this.primaryService = MtServiceType.GOOGLE
     }

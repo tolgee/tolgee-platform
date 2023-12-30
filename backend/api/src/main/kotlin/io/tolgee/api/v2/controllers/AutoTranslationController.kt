@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/keys/{keyId:[0-9]+}/auto-translate",
-    "/v2/projects/keys/{keyId:[0-9]+}/auto-translate"
-  ]
+    "/v2/projects/keys/{keyId:[0-9]+}/auto-translate",
+  ],
 )
 @Tag(name = "Auto Translation")
 @Suppress("MVCPathVariableInspection")
@@ -35,7 +35,7 @@ class AutoTranslationController(
   private val autoTranslationService: AutoTranslationService,
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
-  private val securityService: SecurityService
+  private val securityService: SecurityService,
 ) {
   @PutMapping("")
   @Operation(
@@ -44,7 +44,7 @@ class AutoTranslationController(
 You need to set at least one of useMachineTranslation or useTranslationMemory to true.
 
 This will replace the the existing translation with the result obtained from specified source!
-    """
+    """,
   )
   @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
   @AllowApiAccess
@@ -52,17 +52,19 @@ This will replace the the existing translation with the result obtained from spe
     @PathVariable keyId: Long,
     @Parameter(
       description = """Tags of languages to auto-translate. 
-When no languages provided, it translates only untranslated languages."""
+When no languages provided, it translates only untranslated languages.""",
     )
-    @RequestParam languages: Set<String>?,
+    @RequestParam
+    languages: Set<String>?,
     @RequestParam useMachineTranslation: Boolean?,
-    @RequestParam useTranslationMemory: Boolean?
+    @RequestParam useTranslationMemory: Boolean?,
   ) {
     val key = keyService.get(keyId)
-    val languagesToTranslate = securityService.filterViewPermissionByTag(
-      projectHolder.project.id,
-      languages ?: getAllLanguagesToTranslate()
-    )
+    val languagesToTranslate =
+      securityService.filterViewPermissionByTag(
+        projectHolder.project.id,
+        languages ?: getAllLanguagesToTranslate(),
+      )
 
     checkPermissions(key, languagesToTranslate)
     validateServices(useMachineTranslation, useTranslationMemory)
@@ -76,17 +78,23 @@ When no languages provided, it translates only untranslated languages."""
       forcedLanguageTags = languages?.toList(),
       useTranslationMemory = useTranslationMemory ?: false,
       useMachineTranslation = useMachineTranslation ?: false,
-      isBatch = true
+      isBatch = true,
     )
   }
 
-  private fun validateServices(useMachineTranslation: Boolean?, useTranslationMemory: Boolean?) {
+  private fun validateServices(
+    useMachineTranslation: Boolean?,
+    useTranslationMemory: Boolean?,
+  ) {
     if (useMachineTranslation != true && useTranslationMemory != true) {
       throw BadRequestException(Message.NO_AUTO_TRANSLATION_METHOD)
     }
   }
 
-  private fun checkPermissions(key: Key, languagesToTranslate: Set<String>) {
+  private fun checkPermissions(
+    key: Key,
+    languagesToTranslate: Set<String>,
+  ) {
     keyService.checkInProject(key, projectHolder.project.id)
     securityService.checkLanguageTranslatePermissionsByTag(languagesToTranslate, projectHolder.project.id)
   }
@@ -100,7 +108,7 @@ When no languages provided, it translates only untranslated languages."""
 
   private fun getBaseLanguageTag(): String {
     return projectHolder.projectEntity.baseLanguage?.tag ?: throw NotFoundException(
-      Message.BASE_LANGUAGE_NOT_FOUND
+      Message.BASE_LANGUAGE_NOT_FOUND,
     )
   }
 }

@@ -32,10 +32,7 @@ class CoreImportFilesProcessor(
     )
   }
 
-  fun processFiles(
-    files: Collection<ImportFileDto>?,
-  ): MutableList<ErrorResponseBody> {
-
+  fun processFiles(files: Collection<ImportFileDto>?): MutableList<ErrorResponseBody> {
     val errors = mutableListOf<ErrorResponseBody>()
     files?.forEach {
       try {
@@ -50,9 +47,7 @@ class CoreImportFilesProcessor(
     return errors
   }
 
-  private fun processFileOrArchive(
-    file: ImportFileDto,
-  ): MutableList<ErrorResponseBody> {
+  private fun processFileOrArchive(file: ImportFileDto): MutableList<ErrorResponseBody> {
     val errors = mutableListOf<ErrorResponseBody>()
 
     if (file.isArchive) {
@@ -63,16 +58,15 @@ class CoreImportFilesProcessor(
     return mutableListOf()
   }
 
-  private fun processFile(
-    file: ImportFileDto,
-  ) {
+  private fun processFile(file: ImportFileDto) {
     val savedFileEntity = file.saveFileEntity()
-    val fileProcessorContext = FileProcessorContext(
-      file = file,
-      fileEntity = savedFileEntity,
-      maxTranslationTextLength = tolgeeProperties.maxTranslationTextLength,
-      params = params
-    )
+    val fileProcessorContext =
+      FileProcessorContext(
+        file = file,
+        fileEntity = savedFileEntity,
+        maxTranslationTextLength = tolgeeProperties.maxTranslationTextLength,
+        params = params,
+      )
     val processor = processorFactory.getProcessor(file, fileProcessorContext)
     processor.process()
     processor.context.processResult()
@@ -80,7 +74,7 @@ class CoreImportFilesProcessor(
 
   private fun processArchive(
     archive: ImportFileDto,
-    errors: MutableList<ErrorResponseBody>
+    errors: MutableList<ErrorResponseBody>,
   ): MutableList<ErrorResponseBody> {
     val processor = processorFactory.getArchiveProcessor(archive)
     val files = processor.process(archive)
@@ -95,10 +89,11 @@ class CoreImportFilesProcessor(
     }
 
   private fun ImportFileDto.saveFileEntity(): ImportFile {
-    val entity = ImportFile(
-      name,
-      import
-    )
+    val entity =
+      ImportFile(
+        name,
+        import,
+      )
     import.files.add(entity)
     return importService.saveFile(entity)
   }
@@ -154,8 +149,8 @@ class CoreImportFilesProcessor(
               FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
               mapOf(
                 FileIssueParamType.KEY_ID to collidingTranslations.key.id.toString(),
-                FileIssueParamType.LANGUAGE_ID to collidingTranslations.language.id.toString()
-              )
+                FileIssueParamType.LANGUAGE_ID to collidingTranslations.language.id.toString(),
+              ),
             )
           }
           return@translationForeach

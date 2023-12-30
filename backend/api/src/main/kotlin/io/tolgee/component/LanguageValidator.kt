@@ -13,9 +13,12 @@ import java.util.*
 
 @Component
 class LanguageValidator(
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
 ) {
-  fun validateEdit(id: Long, dto: LanguageDto) {
+  fun validateEdit(
+    id: Long,
+    dto: LanguageDto,
+  ) {
     val validationErrors = LinkedHashSet<ValidationError>()
 
     // handle edit validation
@@ -32,7 +35,10 @@ class LanguageValidator(
     }
   }
 
-  fun validateCreate(dto: LanguageDto, project: Project?) {
+  fun validateCreate(
+    dto: LanguageDto,
+    project: Project?,
+  ) {
     val validationErrors = LinkedHashSet<ValidationError>()
 
     // handle create validation
@@ -43,15 +49,25 @@ class LanguageValidator(
     }
   }
 
-  private fun validateNameUniqueness(dto: LanguageDto, project: Project?): Optional<ValidationError> {
+  private fun validateNameUniqueness(
+    dto: LanguageDto,
+    project: Project?,
+  ): Optional<ValidationError> {
     return if (languageService.findByName(dto.name, project!!).isPresent) {
       Optional.of(ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_NAME_EXISTS))
-    } else Optional.empty()
+    } else {
+      Optional.empty()
+    }
   }
 
-  private fun validateTagUniqueness(dto: LanguageDto, project: Project?): Optional<ValidationError> {
+  private fun validateTagUniqueness(
+    dto: LanguageDto,
+    project: Project?,
+  ): Optional<ValidationError> {
     return if (languageService.findByTag(dto.tag, project!!).isPresent) {
       Optional.of(ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_TAG_EXISTS))
-    } else Optional.empty()
+    } else {
+      Optional.empty()
+    }
   }
 }

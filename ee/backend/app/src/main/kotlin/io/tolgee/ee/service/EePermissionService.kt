@@ -22,11 +22,11 @@ class EePermissionService(
     projectId: Long,
     userId: Long,
     scopes: Set<Scope>,
-    languages: LanguagePermissions
+    languages: LanguagePermissions,
   ): Permission {
     validateLanguagePermissions(
       languagePermissions = languages,
-      scopes = scopes
+      scopes = scopes,
     )
 
     val permission = permissionService.getOrCreateDirectPermission(projectId, userId)
@@ -39,7 +39,10 @@ class EePermissionService(
     return permissionService.save(permission)
   }
 
-  fun setOrganizationBasePermission(organizationId: Long, scopes: Set<Scope>) {
+  fun setOrganizationBasePermission(
+    organizationId: Long,
+    scopes: Set<Scope>,
+  ) {
     val permission = organizationService.get(organizationId).basePermission
     permission.scopes = scopes.toTypedArray()
     permission.type = null
@@ -48,18 +51,19 @@ class EePermissionService(
 
   fun createForInvitation(
     invitation: Invitation,
-    params: CreateProjectInvitationParams
+    params: CreateProjectInvitationParams,
   ): Permission {
     val scopes = Scope.parse(params.scopes)
 
     validateLanguagePermissions(params.languagePermissions, scopes)
 
-    val permission = Permission(
-      type = null,
-      invitation = invitation,
-      project = params.project,
-      scopes = scopes.toTypedArray(),
-    )
+    val permission =
+      Permission(
+        type = null,
+        invitation = invitation,
+        project = params.project,
+        scopes = scopes.toTypedArray(),
+      )
 
     permissionService.setPermissionLanguages(permission, params.languagePermissions, params.project.id)
 
@@ -68,7 +72,7 @@ class EePermissionService(
 
   private fun validateLanguagePermissions(
     languagePermissions: LanguagePermissions,
-    scopes: Set<Scope>?
+    scopes: Set<Scope>?,
   ) {
     if (scopes.isNullOrEmpty()) {
       throw BadRequestException(Message.SCOPES_HAS_TO_BE_SET)

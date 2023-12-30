@@ -1,7 +1,7 @@
 package io.tolgee.util
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.security.third_party.OAuth2Delegate
+import io.tolgee.security.thirdParty.OAuth2Delegate
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -17,9 +17,8 @@ import org.springframework.web.client.RestTemplate
 class OAuth2AuthUtil(
   private val tolgeeProperties: TolgeeProperties,
   private var authMvc: MockMvc? = null,
-  private val restTemplate: RestTemplate? = null
+  private val restTemplate: RestTemplate? = null,
 ) {
-
   private val defaultUserResponse: OAuth2Delegate.GenericUserResponse
     get() {
       val fakeGenericOAuth2User = OAuth2Delegate.GenericUserResponse()
@@ -40,10 +39,11 @@ class OAuth2AuthUtil(
 
   fun authorizeOAuth2User(
     tokenResponse: Map<String, String?>? = this.defaultTokenResponse,
-    userResponse: ResponseEntity<OAuth2Delegate.GenericUserResponse> = ResponseEntity(
-      this.defaultUserResponse,
-      HttpStatus.OK
-    )
+    userResponse: ResponseEntity<OAuth2Delegate.GenericUserResponse> =
+      ResponseEntity(
+        this.defaultUserResponse,
+        HttpStatus.OK,
+      ),
   ): MvcResult {
     val receivedCode = "ThiS_Is_Fake_valid_COde"
     val oauth2Conf = tolgeeProperties.authentication.oauth2
@@ -59,15 +59,15 @@ class OAuth2AuthUtil(
           eq(oauth2Conf.userUrl!!),
           eq(HttpMethod.GET),
           any(),
-          eq(OAuth2Delegate.GenericUserResponse::class.java)
-        )
+          eq(OAuth2Delegate.GenericUserResponse::class.java),
+        ),
       ).thenReturn(userResponse)
     }
 
     return authMvc!!.perform(
       MockMvcRequestBuilders.get("/api/public/authorize_oauth/oauth2?code=$receivedCode")
         .accept(MediaType.APPLICATION_JSON)
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON),
     )
       .andReturn()
   }

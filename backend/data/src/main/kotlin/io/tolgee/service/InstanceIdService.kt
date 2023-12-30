@@ -11,19 +11,20 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class InstanceIdService(
   private val entityManager: EntityManager,
-  private val platformTransactionManager: PlatformTransactionManager
+  private val platformTransactionManager: PlatformTransactionManager,
 ) {
   @Transactional
   fun getInstanceId(): String {
     return tryUntilItDoesntBreakConstraint {
       executeInNewTransaction(platformTransactionManager) {
-        val entity = entityManager.find(InstanceId::class.java, 1)
-          ?: let {
-            val instanceId = InstanceId()
-            entityManager.persist(instanceId)
-            entityManager.flush()
-            instanceId
-          }
+        val entity =
+          entityManager.find(InstanceId::class.java, 1)
+            ?: let {
+              val instanceId = InstanceId()
+              entityManager.persist(instanceId)
+              entityManager.flush()
+              instanceId
+            }
         entity.instanceId
       }
     }

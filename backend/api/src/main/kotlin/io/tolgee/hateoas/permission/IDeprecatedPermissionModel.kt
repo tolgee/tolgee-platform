@@ -8,7 +8,7 @@ interface IDeprecatedPermissionModel : IPermissionModel {
 
 List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.""",
     deprecated = true,
-    example = "[200001, 200004]"
+    example = "[200001, 200004]",
   )
   val permittedLanguageIds: Collection<Long>?
 }

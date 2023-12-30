@@ -4,7 +4,7 @@ import io.tolgee.configuration.PublicConfigurationDTO
 import io.tolgee.dtos.response.AnnouncementDto
 import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModel
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
-import io.tolgee.hateoas.user_account.PrivateUserAccountModel
+import io.tolgee.hateoas.userAccount.PrivateUserAccountModel
 
 class InitialDataModel(
   val serverConfiguration: PublicConfigurationDTO,

@@ -24,7 +24,7 @@ import java.io.OutputStream
 
 @Component
 class StreamingResponseBodyProvider(
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
   fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody {
     return StreamingResponseBody {

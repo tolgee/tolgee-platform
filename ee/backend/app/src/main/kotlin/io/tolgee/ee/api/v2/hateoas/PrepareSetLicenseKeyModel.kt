@@ -10,5 +10,5 @@ import java.math.BigDecimal
 open class PrepareSetLicenseKeyModel(
   val perSetPrice: BigDecimal,
   val currentSeats: Long,
-  val total: Long
+  val total: Long,
 ) : RepresentationModel<PrepareSetLicenseKeyModel>(), Serializable

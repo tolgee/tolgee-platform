@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/announcement",
-  ]
+  ],
 )
 @Tag(name = "New features announcements")
 class AnnouncementController(
   private val announcementService: AnnouncementService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) : IController {
   @GetMapping("")
   @Operation(description = "Get latest announcement")

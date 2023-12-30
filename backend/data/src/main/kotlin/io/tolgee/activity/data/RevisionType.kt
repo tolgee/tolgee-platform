@@ -1,7 +1,10 @@
 package io.tolgee.activity.data
 
 enum class RevisionType {
-  ADD, MOD, DEL;
+  ADD,
+  MOD,
+  DEL,
+  ;
 
   fun isAdd(): Boolean {
     return this == ADD

@@ -24,7 +24,7 @@ class InitialUserCreatorCommandLineRunner(
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationService: OrganizationService,
   private val passwordEncoder: PasswordEncoder,
-  private val internalProperties: InternalProperties
+  private val internalProperties: InternalProperties,
 ) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -55,15 +55,16 @@ class InitialUserCreatorCommandLineRunner(
     }
 
     val initialPassword = initialPasswordManager.initialPassword
-    val user = UserAccount(
-      username = initialUsername,
-      password = passwordEncoder.encode(initialPassword),
-      name = initialUsername,
-      role = UserAccount.Role.ADMIN,
-    ).apply {
-      passwordChanged = false
-      isInitialUser = true
-    }
+    val user =
+      UserAccount(
+        username = initialUsername,
+        password = passwordEncoder.encode(initialPassword),
+        name = initialUsername,
+        role = UserAccount.Role.ADMIN,
+      ).apply {
+        passwordChanged = false
+        isInitialUser = true
+      }
 
     userAccountService.createUser(userAccount = user)
     userAccountService.transferLegacyNoAuthUser()
@@ -74,7 +75,7 @@ class InitialUserCreatorCommandLineRunner(
       OrganizationDto(
         properties.authentication.initialUsername,
       ),
-      userAccount = user
+      userAccount = user,
     )
   }
 

@@ -30,7 +30,6 @@ import kotlin.properties.Delegates
 @AutoConfigureMockMvc
 class PublicControllerTest :
   AbstractControllerTest() {
-
   private var canCreateOrganizations by Delegates.notNull<Boolean>()
 
   @BeforeEach
@@ -50,12 +49,13 @@ class PublicControllerTest :
 
   @Test
   fun `creates organization`() {
-    val dto = SignUpDto(
-      name = "Pavel Novak",
-      password = "aaaaaaaaa",
-      email = "aaaa@aaaa.com",
-      organizationName = "Hello"
-    )
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "aaaa@aaaa.com",
+        organizationName = "Hello",
+      )
     performPost("/api/public/sign_up", dto).andIsOk
     assertThat(organizationRepository.findAllByName("Hello")).hasSize(1)
   }
@@ -78,17 +78,18 @@ class PublicControllerTest :
         // hypothetically every endpoint might be triggered from SDK
         it["X-Tolgee-SDK-Type"] = "Unreal"
         it["X-Tolgee-SDK-Version"] = "1.0.0"
-      }
+      },
     ).andIsOk
 
     var params: Map<String, Any?>? = null
     waitForNotThrowing(timeout = 10000) {
       verify(postHog, times(1)).capture(
-        any(), eq("SIGN_UP"),
+        any(),
+        eq("SIGN_UP"),
         argThat {
           params = this
           true
-        }
+        },
       )
     }
     params!!["utm_hello"].assert.isEqualTo("hello")
@@ -100,15 +101,17 @@ class PublicControllerTest :
   fun `doesn't create organization when invitation provided`() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val invitation = invitationService.create(
-      CreateProjectInvitationParams(project, ProjectPermissionType.EDIT)
-    )
-    val dto = SignUpDto(
-      name = "Pavel Novak",
-      password = "aaaaaaaaa",
-      email = "aaaa@aaaa.com",
-      invitationCode = invitation.code
-    )
+    val invitation =
+      invitationService.create(
+        CreateProjectInvitationParams(project, ProjectPermissionType.EDIT),
+      )
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "aaaa@aaaa.com",
+        invitationCode = invitation.code,
+      )
     performPost("/api/public/sign_up", dto).andIsOk
     assertThat(organizationRepository.findAllByName("Pavel Novak")).hasSize(0)
   }
@@ -116,12 +119,13 @@ class PublicControllerTest :
   @Test
   fun `doesn't create orgs when disabled`() {
     tolgeeProperties.authentication.userCanCreateOrganizations = false
-    val dto = SignUpDto(
-      name = "Pavel Novak",
-      password = "aaaaaaaaa",
-      email = "aaaa@aaaa.com",
-      organizationName = "Jejda",
-    )
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "aaaa@aaaa.com",
+        organizationName = "Jejda",
+      )
     performPost("/api/public/sign_up", dto).andIsOk
     assertThat(organizationRepository.findAllByName("Jejda")).hasSize(0)
   }

@@ -13,30 +13,31 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 @AutoConfigureMockMvc
 class DemoProjectTest :
   AbstractControllerTest() {
-
   @Test
   fun `creates demo project`() {
     val demoOrganization = "Oh my organization"
-    val dto = SignUpDto(
-      name = "Pavel Novak",
-      password = "aaaaaaaaa",
-      email = "aaaa@aaaa.com",
-      organizationName = demoOrganization
-    )
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "aaaa@aaaa.com",
+        organizationName = demoOrganization,
+      )
     performPost("/api/public/sign_up", dto).andIsOk
-    val project = executeInNewTransaction {
-      val organization = organizationRepository.findAllByName(demoOrganization).single()
-      val project = organization.projects.single()
-      assertThat(project.name).isEqualTo("Demo project")
-      val keyCount = DemoProjectData.translations["en"]!!.size
-      project.keys.assert.hasSize(keyCount)
-      val key = project.keys.find { it.name == "add-item-add-button" }!!
-      key.keyScreenshotReferences.assert.hasSize(1)
-      val screenshot = key.keyScreenshotReferences.single().screenshot
-      screenshot.keyScreenshotReferences.assert.hasSize(keyCount)
-      key.translations.assert.hasSize(3)
-      project
-    }
+    val project =
+      executeInNewTransaction {
+        val organization = organizationRepository.findAllByName(demoOrganization).single()
+        val project = organization.projects.single()
+        assertThat(project.name).isEqualTo("Demo project")
+        val keyCount = DemoProjectData.translations["en"]!!.size
+        project.keys.assert.hasSize(keyCount)
+        val key = project.keys.find { it.name == "add-item-add-button" }!!
+        key.keyScreenshotReferences.assert.hasSize(1)
+        val screenshot = key.keyScreenshotReferences.single().screenshot
+        screenshot.keyScreenshotReferences.assert.hasSize(keyCount)
+        key.translations.assert.hasSize(3)
+        project
+      }
 
     waitForNotThrowing {
       executeInNewTransaction {

@@ -24,7 +24,6 @@ import java.math.BigDecimal
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TranslationCommentsTestData
 
   @BeforeEach
@@ -72,8 +71,8 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       "translations/${testData.translation.id}/comments",
       TranslationCommentDto(
         text = "Test",
-        state = TranslationCommentState.RESOLUTION_NOT_NEEDED
-      )
+        state = TranslationCommentState.RESOLUTION_NOT_NEEDED,
+      ),
     ).andIsCreated.andAssertThatJson {
       node("id").isValidId
       node("text").isEqualTo("Test")
@@ -94,8 +93,8 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
         keyId = testData.bKey.id,
         testData.englishLanguage.id,
         text = "Test",
-        state = TranslationCommentState.RESOLUTION_NOT_NEEDED
-      )
+        state = TranslationCommentState.RESOLUTION_NOT_NEEDED,
+      ),
     ).andIsCreated.andAssertThatJson {
       node("comment") {
         node("id").isValidId
@@ -120,8 +119,8 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       "translations/${testData.translation.id}/comments",
       mapOf(
         "text" to "",
-        "state" to "DUMMY"
-      )
+        "state" to "DUMMY",
+      ),
     ).andIsBadRequest.andPrettyPrint.andAssertThatJson {
       node("params[0]").isString.startsWith("Cannot deserialize value of type")
     }
@@ -134,8 +133,8 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       "translations/${testData.translation.id}/comments",
       mapOf(
         "text" to "",
-        "state" to "RESOLVED"
-      )
+        "state" to "RESOLVED",
+      ),
     ).andIsBadRequest.andPrettyPrint.andAssertThatJson {
       node("STANDARD_VALIDATION").isObject
     }
@@ -148,8 +147,8 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}",
       mapOf(
         "text" to "",
-        "state" to "RESOLVED"
-      )
+        "state" to "RESOLVED",
+      ),
     ).andIsBadRequest.andPrettyPrint.andAssertThatJson {
       node("STANDARD_VALIDATION").isObject
     }
@@ -162,8 +161,8 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}",
       TranslationCommentDto(
         text = "Updated",
-        state = TranslationCommentState.RESOLVED
-      )
+        state = TranslationCommentState.RESOLVED,
+      ),
     ).andIsOk.andAssertThatJson {
       node("id").isValidId
       node("text").isEqualTo("Updated")
@@ -182,8 +181,8 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}",
       TranslationCommentDto(
         text = "Updated",
-        state = TranslationCommentState.RESOLVED
-      )
+        state = TranslationCommentState.RESOLVED,
+      ),
     ).andIsBadRequest.andPrettyPrint
   }
 
@@ -192,7 +191,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
   fun `updates comment state`() {
     performProjectAuthPut(
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}/set-state/RESOLVED",
-      null
+      null,
     ).andIsOk.andAssertThatJson {
       node("text").isEqualTo("First comment")
       node("state").isEqualTo("RESOLVED")
@@ -204,7 +203,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
   fun `deletes comment`() {
     performProjectAuthDelete(
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}",
-      null
+      null,
     ).andIsOk
 
     assertThat(translationCommentService.find(testData.firstComment.id)).isNull()
@@ -217,7 +216,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
     userAccount = testData.pepa
     performProjectAuthDelete(
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}",
-      null
+      null,
     ).andIsBadRequest.andPrettyPrint
   }
 }

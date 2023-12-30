@@ -41,8 +41,8 @@ import kotlin.system.measureTimeMillis
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
-    "tolgee.cache.enabled=true"
-  ]
+    "tolgee.cache.enabled=true",
+  ],
 )
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
@@ -109,8 +109,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       executeInNewTransaction {
         initBaseData()
       }
-      val response = performProjectAuthGet("export?languages=en&zip=false")
-        .andDo { obj: MvcResult -> obj.asyncResult }
+      val response =
+        performProjectAuthGet("export?languages=en&zip=false")
+          .andDo { obj: MvcResult -> obj.asyncResult }
       response.andPrettyPrint.andAssertThatJson {
         node("Z key").isEqualTo("A translation")
       }
@@ -129,8 +130,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       executeInNewTransaction {
         initBaseData()
       }
-      val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
-        .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
+      val response =
+        performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
+          .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
 
       assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/x-xliff+xml")
@@ -150,17 +152,20 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       prepareUserAndProject(testData)
       commitTransaction()
 
-      val time = measureTimeMillis {
-        val selectAllResult = performProjectAuthGet("translations/select-all")
-          .andIsOk
-          .andGetContentAsString
-        val keyIds = jacksonObjectMapper()
-          .readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(500)
-        val parsed = performExportPost(mapOf("filterKeyId" to keyIds))
-        assertThatJson(parsed["en.json"]!!) {
-          isObject.hasSize(499)
+      val time =
+        measureTimeMillis {
+          val selectAllResult =
+            performProjectAuthGet("translations/select-all")
+              .andIsOk
+              .andGetContentAsString
+          val keyIds =
+            jacksonObjectMapper()
+              .readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(500)
+          val parsed = performExportPost(mapOf("filterKeyId" to keyIds))
+          assertThatJson(parsed["en.json"]!!) {
+            isObject.hasSize(499)
+          }
         }
-      }
 
       assertThat(time).isLessThan(2000)
     }
@@ -196,16 +201,18 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun performExport(query: String = ""): Map<String, String> {
-    val mvcResult = performProjectAuthGet("export?$query")
-      .andIsOk
-      .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+    val mvcResult =
+      performProjectAuthGet("export?$query")
+        .andIsOk
+        .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
     return parseZip(mvcResult.response.contentAsByteArray)
   }
 
   private fun performExportPost(body: Any): Map<String, String> {
-    val mvcResult = performProjectAuthPost("export", body)
-      .andIsOk
-      .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+    val mvcResult =
+      performProjectAuthPost("export", body)
+        .andIsOk
+        .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
     return parseZip(mvcResult.response.contentAsByteArray)
   }
 
@@ -264,20 +271,23 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `it exports all languages by default`() {
     retryingOnCommonIssues {
       val testData = TestDataBuilder()
-      val user = testData.addUserAccount {
-        username = "user"
-      }
-      val projectBuilder = testData.addProject {
-        name = "Oh my project"
-        organizationOwner = user.defaultOrganizationBuilder.self
-      }
+      val user =
+        testData.addUserAccount {
+          username = "user"
+        }
+      val projectBuilder =
+        testData.addProject {
+          name = "Oh my project"
+          organizationOwner = user.defaultOrganizationBuilder.self
+        }
 
-      val langs = arrayOf(
-        projectBuilder.addEnglish(),
-        projectBuilder.addCzech(),
-        projectBuilder.addGerman(),
-        projectBuilder.addFrench()
-      )
+      val langs =
+        arrayOf(
+          projectBuilder.addEnglish(),
+          projectBuilder.addCzech(),
+          projectBuilder.addGerman(),
+          projectBuilder.addFrench(),
+        )
 
       val key = projectBuilder.addKey { name = "key" }.self
       langs.forEach { lang ->
@@ -313,7 +323,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun retryingOnCommonIssues(fn: () -> Unit) {
     retry(
       retries = 10,
-      exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException }
+      exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException },
     ) {
       fn()
     }

@@ -5,9 +5,8 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 
 class TranslationBuilder(
-  val projectBuilder: ProjectBuilder
+  val projectBuilder: ProjectBuilder,
 ) : BaseEntityDataBuilder<Translation, TranslationBuilder>() {
-
   class DATA {
     var comments = mutableListOf<TranslationCommentBuilder>()
   }

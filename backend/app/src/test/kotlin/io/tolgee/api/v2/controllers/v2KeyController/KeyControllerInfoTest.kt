@@ -17,7 +17,6 @@ import kotlin.properties.Delegates
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: KeysInfoTestData
   var uploadedImageId by Delegates.notNull<Long>()
 
@@ -36,19 +35,20 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `returns the data`() {
     executeInNewTransaction {
-      val keys = (1..20)
-        .map {
-          mapOf("name" to "key-$it")
-        } +
-        listOf(
-          mapOf("name" to "key-22", "namespace" to "ns"),
-          mapOf("name" to "key-1", "namespace" to "namespace-1"),
-          mapOf("name" to "key-300")
-        )
+      val keys =
+        (1..20)
+          .map {
+            mapOf("name" to "key-$it")
+          } +
+          listOf(
+            mapOf("name" to "key-22", "namespace" to "ns"),
+            mapOf("name" to "key-1", "namespace" to "namespace-1"),
+            mapOf("name" to "key-300"),
+          )
 
       performProjectAuthPost(
         "keys/info",
-        mapOf("keys" to keys, "languageTags" to listOf("de"))
+        mapOf("keys" to keys, "languageTags" to listOf("de")),
       ).andIsOk.andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(22)

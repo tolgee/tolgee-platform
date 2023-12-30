@@ -13,12 +13,10 @@ import jakarta.validation.constraints.NotNull
 class KeyComment(
   @ManyToOne(optional = false)
   override var keyMeta: KeyMeta,
-
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  var author: UserAccount? = null
+  var author: UserAccount? = null,
 ) : StandardAuditModel(), WithKeyMetaReference {
-
   var fromImport: Boolean = false
 
   @field:NotBlank

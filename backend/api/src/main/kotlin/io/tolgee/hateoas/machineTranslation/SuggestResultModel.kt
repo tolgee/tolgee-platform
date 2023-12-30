@@ -16,10 +16,9 @@ class SuggestResultModel(
       "TOLGEE": "This was translated by Tolgee Translator",
     }
   """,
-    deprecated = true
+    deprecated = true,
   )
   val machineTranslations: Map<MtServiceType, String?>?,
-
   @Schema(
     description = "Results provided by enabled services.",
     example = """
@@ -33,12 +32,11 @@ class SuggestResultModel(
         "contextDescription": "This is an example in swagger"
       } 
     }
-  """
+  """,
   )
   val result: Map<MtServiceType, TranslationItemModel?>?,
-
   @Schema(
-    description = "If true, the base translation was empty and no translation was provided."
+    description = "If true, the base translation was empty and no translation was provided.",
   )
   val baseBlank: Boolean,
 ) : RepresentationModel<KeyModel>(), Serializable

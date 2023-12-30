@@ -5,5 +5,5 @@ import org.springframework.context.ApplicationEvent
 
 class OnProjectActivityStoredEvent(
   source: Any,
-  val activityRevision: ActivityRevision
+  val activityRevision: ActivityRevision,
 ) : ApplicationEvent(source)

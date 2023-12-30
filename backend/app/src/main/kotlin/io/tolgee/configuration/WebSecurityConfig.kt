@@ -70,13 +70,15 @@ class WebSecurityConfig(
       .addFilterBefore(globalUserRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .authorizeHttpRequests {
-        it.withObjectPostProcessor(object : ObjectPostProcessor<AuthorizationFilter> {
-          override fun <O : AuthorizationFilter?> postProcess(filter: O): O {
-            // otherwise it throws error when using StreamingResponseBody
-            filter?.setFilterAsyncDispatch(false)
-            return filter
-          }
-        })
+        it.withObjectPostProcessor(
+          object : ObjectPostProcessor<AuthorizationFilter> {
+            override fun <O : AuthorizationFilter?> postProcess(filter: O): O {
+              // otherwise it throws error when using StreamingResponseBody
+              filter?.setFilterAsyncDispatch(false)
+              return filter
+            }
+          },
+        )
         it.requestMatchers("/api/public/**", "/v2/public/**").permitAll()
         it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
         it.requestMatchers("/api/**", "/v2/**")

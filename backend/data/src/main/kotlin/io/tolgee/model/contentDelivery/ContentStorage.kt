@@ -12,11 +12,9 @@ import jakarta.validation.constraints.NotBlank
 class ContentStorage(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
-
   @NotBlank
-  var name: String
+  var name: String,
 ) : StandardAuditModel() {
-
   var publicUrlPrefix: String? = null
 
   @OneToOne(mappedBy = "contentStorage", optional = true, orphanRemoval = true)

@@ -16,16 +16,20 @@ import java.security.MessageDigest
 @Service
 class AvatarService(
   private val fileStorage: FileStorage,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   companion object {
-    fun getAvatarPaths(hash: String) = Avatar(
-      large = "${FileStoragePath.AVATARS}/$hash.png",
-      thumbnail = "${FileStoragePath.AVATARS}/$hash-thumb.png"
-    )
+    fun getAvatarPaths(hash: String) =
+      Avatar(
+        large = "${FileStoragePath.AVATARS}/$hash.png",
+        thumbnail = "${FileStoragePath.AVATARS}/$hash-thumb.png",
+      )
   }
 
-  fun storeAvatarFiles(avatar: InputStream, entity: ModelWithAvatar): String {
+  fun storeAvatarFiles(
+    avatar: InputStream,
+    entity: ModelWithAvatar,
+  ): String {
     val avatarBytes = avatar.readAllBytes()
     val converter = ImageConverter(avatarBytes.inputStream())
     val large = converter.getImage(-1f, Dimension(200, 200)).toByteArray()
@@ -41,7 +45,10 @@ class AvatarService(
   }
 
   @Transactional
-  fun setAvatar(entity: ModelWithAvatar, avatar: InputStream) {
+  fun setAvatar(
+    entity: ModelWithAvatar,
+    avatar: InputStream,
+  ) {
     val hash = storeAvatarFiles(avatar, entity)
     removeAvatar(entity)
     entity.avatarHash = hash
@@ -68,8 +75,9 @@ class AvatarService(
     }
   }
 
-  fun getAvatarLinks(paths: Avatar) = Avatar(
-    tolgeeProperties.fileStorageUrl + "/" + paths.large,
-    tolgeeProperties.fileStorageUrl + "/" + paths.thumbnail
-  )
+  fun getAvatarLinks(paths: Avatar) =
+    Avatar(
+      tolgeeProperties.fileStorageUrl + "/" + paths.large,
+      tolgeeProperties.fileStorageUrl + "/" + paths.thumbnail,
+    )
 }

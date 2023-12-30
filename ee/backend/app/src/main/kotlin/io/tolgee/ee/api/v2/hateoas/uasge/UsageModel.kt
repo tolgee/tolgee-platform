@@ -11,8 +11,9 @@ import java.math.BigDecimal
 open class UsageModel(
   val subscriptionPrice: BigDecimal? = 0.toBigDecimal(),
   @Schema(
-    description = "Relevant for invoices only. When there are " +
-      "applied stripe credits, we need to reduce the total price by this amount."
+    description =
+      "Relevant for invoices only. When there are " +
+        "applied stripe credits, we need to reduce the total price by this amount.",
   )
   val appliedStripeCredits: BigDecimal? = null,
   val seats: AverageProportionalUsageItemModel = AverageProportionalUsageItemModel(),

@@ -22,9 +22,8 @@ class TranslationsStatsUpdateJobRunner(
   val translationStatsJob: Job,
   val jobLauncher: JobLauncher,
   val translationRepository: TranslationRepository,
-  val jobRepository: JobRepository
+  val jobRepository: JobRepository,
 ) : MigrationJobRunner {
-
   val log = LoggerFactory.getLogger(this::class.java)
 
   override fun run(): JobExecution? {

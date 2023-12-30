@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest
 @SpringBootTest
 @AutoConfigureMockMvc
 class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
-
   @Test
   fun testLeaveOrganization() {
     val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
@@ -53,14 +52,14 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
 
     permissionService.getProjectPermissionData(
       testData.projectBuilder.self.id,
-      me.id
+      me.id,
     ).directPermissions.assert.isNotNull
 
     performAuthPut("/v2/organizations/${testData.organizationBuilder.self.id}/leave", null).andIsOk
 
     permissionService.getProjectPermissionData(
       testData.projectBuilder.self.id,
-      me.id
+      me.id,
     ).directPermissions.assert.isNull()
   }
 

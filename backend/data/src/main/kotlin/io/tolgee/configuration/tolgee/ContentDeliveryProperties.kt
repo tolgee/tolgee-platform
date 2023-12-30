@@ -6,13 +6,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.content-delivery")
 @DocProperty(
   displayName = "Content Delivery",
-  description = "These properties are used to configure " +
-    "default server content delivery storage."
+  description =
+    "These properties are used to configure " +
+      "default server content delivery storage.",
 )
 class ContentDeliveryProperties {
   @DocProperty(
-    description = "The root path where the content is accessible by the public. If this property is not null. " +
-      "Content delivery will be enabled on your server."
+    description =
+      "The root path where the content is accessible by the public. If this property is not null. " +
+        "Content delivery will be enabled on your server.",
   )
   var publicUrlPrefix: String? = null
 

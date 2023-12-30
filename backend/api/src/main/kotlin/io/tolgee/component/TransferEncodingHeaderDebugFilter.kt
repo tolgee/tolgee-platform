@@ -15,7 +15,11 @@ class TransferEncodingHeaderDebugFilter : OncePerRequestFilter(), Logging {
     return !this.logger.isDebugEnabled
   }
 
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     filterChain.doFilter(request, response)
     val value = response.getHeader("Transport-Encoding")
     if (value != null) {

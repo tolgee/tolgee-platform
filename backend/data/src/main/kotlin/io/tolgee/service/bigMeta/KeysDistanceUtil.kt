@@ -10,7 +10,7 @@ import kotlin.math.min
 class KeysDistanceUtil(
   private val relatedKeysInOrder: MutableList<RelatedKeyDto>,
   private val project: Project,
-  private val bigMetaService: BigMetaService
+  private val bigMetaService: BigMetaService,
 ) : Logging {
   val newDistances by lazy {
     increaseRelevant()
@@ -27,8 +27,9 @@ class KeysDistanceUtil(
         }
         val key2Id = keyIdMap[item2.namespace to item2.keyName] ?: return@forEach2
 
-        val distance = distances[min(key1Id, key2Id) to max(key1Id, key2Id)]
-          ?: createDistance(key1Id, key2Id)
+        val distance =
+          distances[min(key1Id, key2Id) to max(key1Id, key2Id)]
+            ?: createDistance(key1Id, key2Id)
         relevant[distance.key1Id to distance.key2Id] = distance
         distance.score = computeDistanceScore(distance.score, distance.hits, relatedKeysSize, index1, index2)
         distance.hits++
@@ -67,7 +68,10 @@ class KeysDistanceUtil(
 
   private val relatedKeysSize = relatedKeysInOrder.size
 
-  private fun createDistance(key1Id: Long, key2Id: Long): KeysDistanceDto {
+  private fun createDistance(
+    key1Id: Long,
+    key2Id: Long,
+  ): KeysDistanceDto {
     return KeysDistanceDto(
       key1Id = min(a = key1Id, b = key2Id),
       key2Id = max(key1Id, key2Id),
@@ -82,12 +86,13 @@ class KeysDistanceUtil(
     hits: Long,
     relatedKeysSize: Int,
     index1: Int,
-    index2: Int
+    index2: Int,
   ): Long {
     val maxDistance = (relatedKeysSize - 2)
 
-    val points = (
-      (maxDistance - (abs(index1 - index2) - 1)) / maxDistance.toDouble()
+    val points =
+      (
+        (maxDistance - (abs(index1 - index2) - 1)) / maxDistance.toDouble()
       ) * BigMetaService.MAX_POINTS
 
     val baseDistance = BigMetaService.MAX_DISTANCE_SCORE - BigMetaService.MAX_POINTS

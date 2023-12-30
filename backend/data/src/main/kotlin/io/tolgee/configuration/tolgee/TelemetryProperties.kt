@@ -18,7 +18,7 @@ Once a day we collect following data
 - number of users
 
 We don't collect any other data. Please leave telemetry enabled to help us improve Tolgee.""",
-  displayName = "Telemetry"
+  displayName = "Telemetry",
 )
 class TelemetryProperties {
   @DocProperty(description = "Whether telemetry is enabled")

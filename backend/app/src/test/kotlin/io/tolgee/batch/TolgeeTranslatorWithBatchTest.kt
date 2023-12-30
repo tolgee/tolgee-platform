@@ -58,12 +58,12 @@ class TolgeeTranslatorWithBatchTest {
   @Test
   fun `it correctly handles Too Many Requests`() {
     doThrow(getMockedTooManyRequestsError()).whenever(
-      restTemplate
+      restTemplate,
     ).exchange(
       argThat<String> { this.contains("/api/openai/translate") },
       argThat<HttpMethod> { this == HttpMethod.POST },
       any<HttpEntity<*>>(),
-      any<ParameterizedTypeReference<Any>>()
+      any<ParameterizedTypeReference<Any>>(),
     )
 
     assertThrows<TranslationApiRateLimitException> {
@@ -75,8 +75,8 @@ class TolgeeTranslatorWithBatchTest {
           "cs",
           null,
           null,
-          true
-        )
+          true,
+        ),
       )
     }.retryAt.assert.isEqualTo(currentDateProvider.date.time + 100 * 1000)
 
@@ -96,8 +96,8 @@ class TolgeeTranslatorWithBatchTest {
           "cs",
           null,
           null,
-          true
-        )
+          true,
+        ),
       )
     }.retryAt.assert.isEqualTo(currentDateProvider.date.time + 100 * 1000)
 
@@ -115,10 +115,10 @@ class TolgeeTranslatorWithBatchTest {
       jacksonObjectMapper().writeValueAsBytes(
         mapOf(
           "error" to "Too Many Requests",
-          "retryAfter" to 100
-        )
+          "retryAfter" to 100,
+        ),
       ),
-      Charsets.UTF_8
+      Charsets.UTF_8,
     )
   }
 }

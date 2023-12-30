@@ -33,7 +33,6 @@ import org.springframework.context.ApplicationContext
 import java.util.*
 
 class CoreImportFileProcessorUnitTest {
-
   private lateinit var applicationContextMock: ApplicationContext
   private lateinit var importMock: Import
   private lateinit var processorFactoryMock: ProcessorFactory
@@ -100,7 +99,7 @@ class CoreImportFileProcessorUnitTest {
         this.first().run {
           name == "lng" && existingLanguage!!.name == "lng"
         }
-      }
+      },
     )
   }
 
@@ -115,8 +114,8 @@ class CoreImportFileProcessorUnitTest {
         existingTranslation,
         Translation("equal text").also {
           it.key = Key("equal key")
-        }
-      )
+        },
+      ),
     )
     processor.processFiles(listOf(importFileDto))
     verify(importServiceMock).saveTranslations(
@@ -125,7 +124,7 @@ class CoreImportFileProcessorUnitTest {
         assertThat(this[1].conflict).isNull()
         assertThat(this[2].conflict).isNull()
         true
-      }
+      },
     )
   }
 
@@ -141,12 +140,12 @@ class CoreImportFileProcessorUnitTest {
     verify(keyMetaServiceMock).save(
       argThat {
         this.comments.any { it.text == "test comment" }
-      }
+      },
     )
     verify(keyMetaServiceMock).save(
       argThat {
         this.codeReferences.any { it.path == "hello.php" }
-      }
+      },
     )
     verify(importServiceMock).saveTranslations(
       argThat {
@@ -154,7 +153,7 @@ class CoreImportFileProcessorUnitTest {
         assertThat(this[0].key.keyMeta?.codeReferences).hasSize(2)
         assertThat(this[0].key.keyMeta?.comments).hasSize(1)
         true
-      }
+      },
     )
   }
 }

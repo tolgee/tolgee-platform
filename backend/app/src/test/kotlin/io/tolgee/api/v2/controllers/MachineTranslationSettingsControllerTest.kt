@@ -24,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
-
   lateinit var testData: MtSettingsTestData
 
   @BeforeEach
@@ -60,18 +59,19 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
           MachineTranslationLanguagePropsDto(
             targetLanguageId = null,
             primaryService = MtServiceType.GOOGLE,
-            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE),
           ),
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.englishLanguage.id,
             primaryService = MtServiceType.GOOGLE,
-            enabledServicesInfo = setOf(
-              MtServiceInfo(MtServiceType.GOOGLE, null),
-              MtServiceInfo(MtServiceType.AWS, Formality.DEFAULT)
-            )
-          )
-        )
-      )
+            enabledServicesInfo =
+              setOf(
+                MtServiceInfo(MtServiceType.GOOGLE, null),
+                MtServiceInfo(MtServiceType.AWS, Formality.DEFAULT),
+              ),
+          ),
+        ),
+      ),
     ).andIsOk.andAssertThatJson {
       node("_embedded.languageConfigs") {
         node("[0]") {
@@ -122,23 +122,25 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
           MachineTranslationLanguagePropsDto(
             targetLanguageId = null,
             primaryService = MtServiceType.GOOGLE,
-            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE),
           ),
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.germanLanguage.id,
             primaryService = MtServiceType.AWS,
-            enabledServicesInfo = setOf(
-              MtServiceInfo(MtServiceType.GOOGLE, null),
-              MtServiceInfo(MtServiceType.AWS, Formality.FORMAL)
-            )
-          )
-        )
-      )
+            enabledServicesInfo =
+              setOf(
+                MtServiceInfo(MtServiceType.GOOGLE, null),
+                MtServiceInfo(MtServiceType.AWS, Formality.FORMAL),
+              ),
+          ),
+        ),
+      ),
     )
 
     executeInNewTransaction {
-      val germanSetting = mtServiceConfigService.getProjectSettings(testData.projectBuilder.self)
-        .find { it.targetLanguage?.id == testData.germanLanguage.id }
+      val germanSetting =
+        mtServiceConfigService.getProjectSettings(testData.projectBuilder.self)
+          .find { it.targetLanguage?.id == testData.germanLanguage.id }
       germanSetting!!.awsFormality.assert.isEqualTo(Formality.FORMAL)
     }
   }
@@ -154,9 +156,9 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
             targetLanguageId = testData.germanLanguage.id,
             primaryService = MtServiceType.AWS,
             primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL),
-          )
-        )
-      )
+          ),
+        ),
+      ),
     ).andAssertThatJson {
       node("_embedded.languageConfigs") {
         node("[1]") {
@@ -178,34 +180,40 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     performSet(
       MachineTranslationLanguagePropsDto(
         testData.englishLanguage.id,
-        primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL)
-      )
+        primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL),
+      ),
     ).andIsOk
   }
 
-  private fun performSet(language: Language?, mtServiceType: MtServiceType, formality: Formality) = performAuthPut(
+  private fun performSet(
+    language: Language?,
+    mtServiceType: MtServiceType,
+    formality: Formality,
+  ) = performAuthPut(
     "/v2/projects/${project.id}/machine-translation-service-settings",
     SetMachineTranslationSettingsDto(
       listOf(
         MachineTranslationLanguagePropsDto(
           targetLanguageId = language?.id,
           primaryServiceInfo = MtServiceInfo(mtServiceType, Formality.DEFAULT),
-          enabledServicesInfo = setOf(
-            MtServiceInfo(mtServiceType, formality)
-          )
-        )
-      )
-    )
+          enabledServicesInfo =
+            setOf(
+              MtServiceInfo(mtServiceType, formality),
+            ),
+        ),
+      ),
+    ),
   )
 
-  private fun performSet(props: MachineTranslationLanguagePropsDto) = performAuthPut(
-    "/v2/projects/${project.id}/machine-translation-service-settings",
-    SetMachineTranslationSettingsDto(
-      listOf(
-        props
-      )
+  private fun performSet(props: MachineTranslationLanguagePropsDto) =
+    performAuthPut(
+      "/v2/projects/${project.id}/machine-translation-service-settings",
+      SetMachineTranslationSettingsDto(
+        listOf(
+          props,
+        ),
+      ),
     )
-  )
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -217,10 +225,10 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.spanishLanguage.id,
             primaryService = MtServiceType.GOOGLE,
-            enabledServices = setOf(MtServiceType.AWS)
-          )
-        )
-      )
+            enabledServices = setOf(MtServiceType.AWS),
+          ),
+        ),
+      ),
     ).andIsOk
   }
 
@@ -228,7 +236,7 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `it returns the configuration`() {
     performAuthGet(
-      "/v2/projects/${project.id}/machine-translation-service-settings"
+      "/v2/projects/${project.id}/machine-translation-service-settings",
     ).andPrettyPrint.andAssertThatJson {
       node("_embedded.languageConfigs") {
         node("[0]") {
@@ -251,7 +259,7 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `it returns the info`() {
     performAuthGet(
-      "/v2/projects/${project.id}/machine-translation-language-info"
+      "/v2/projects/${project.id}/machine-translation-language-info",
     ).andPrettyPrint.andAssertThatJson {
       node("_embedded.languageInfos") {
         isArray

@@ -17,19 +17,24 @@ class TokenBucketManager(
   val currentDateProvider: CurrentDateProvider,
   val lockingProvider: LockingProvider,
   @Lazy
-  var redissonClient: RedissonClient
+  var redissonClient: RedissonClient,
 ) : Logging {
   companion object {
     val localTokenBucketStorage = ConcurrentHashMap<String, TokenBucket>()
   }
 
-  fun consume(bucketId: String, tokensToConsume: Long, bucketSize: Long, renewPeriod: Duration) {
+  fun consume(
+    bucketId: String,
+    tokensToConsume: Long,
+    bucketSize: Long,
+    renewPeriod: Duration,
+  ) {
     updateBucket(bucketId) {
       consumeMappingFn(
         tokenBucket = it,
         tokensToConsume = tokensToConsume,
         bucketSize = bucketSize,
-        renewPeriod = renewPeriod
+        renewPeriod = renewPeriod,
       )
     }
   }
@@ -42,19 +47,28 @@ class TokenBucketManager(
     }
   }
 
-  fun addTokens(bucketId: String, tokensToAdd: Long) {
+  fun addTokens(
+    bucketId: String,
+    tokensToAdd: Long,
+  ) {
     updateTokens(bucketId) { oldTokens, bucketSize ->
       min(oldTokens + tokensToAdd, bucketSize)
     }
   }
 
-  fun updateTokens(bucketId: String, updateFn: ((oldTokens: Long, bucketSize: Long) -> Long)) {
+  fun updateTokens(
+    bucketId: String,
+    updateFn: ((oldTokens: Long, bucketSize: Long) -> Long),
+  ) {
     updateBucket(bucketId) {
       updateMappingFn(it, updateFn)
     }
   }
 
-  fun setEmptyUntil(bucketId: String, refillAt: Long) {
+  fun setEmptyUntil(
+    bucketId: String,
+    refillAt: Long,
+  ) {
     updateBucket(bucketId) { setEmptyUntilMappingFn(it, refillAt) }
   }
 
@@ -64,7 +78,7 @@ class TokenBucketManager(
     tokenBucket: TokenBucket?,
     tokensToConsume: Long,
     bucketSize: Long,
-    renewPeriod: Duration
+    renewPeriod: Duration,
   ): TokenBucket {
     val currentTokenBucket =
       getCurrentOrNewBucket(tokenBucket, bucketSize, renewPeriod)
@@ -75,9 +89,7 @@ class TokenBucketManager(
     return currentTokenBucket.apply { tokens = currentTokenBucket.tokens - tokensToConsume }
   }
 
-  private fun checkPositiveMappingFn(
-    tokenBucket: TokenBucket?,
-  ): TokenBucket? {
+  private fun checkPositiveMappingFn(tokenBucket: TokenBucket?): TokenBucket? {
     tokenBucket ?: return null
     if (tokenBucket.isTimeToRefill(currentDateProvider.date.time)) {
       return tokenBucket
@@ -102,19 +114,22 @@ class TokenBucketManager(
   private fun getCurrentOrNewBucket(
     tokenBucket: TokenBucket?,
     bucketSize: Long,
-    renewPeriod: Duration
+    renewPeriod: Duration,
   ) = tokenBucket ?: TokenBucket(currentDateProvider.date.time, bucketSize, bucketSize, renewPeriod)
 
   private fun updateMappingFn(
     tokenBucket: TokenBucket?,
-    updateFn: ((oldTokens: Long, bucketSize: Long) -> Long)
+    updateFn: ((oldTokens: Long, bucketSize: Long) -> Long),
   ): TokenBucket? {
     tokenBucket ?: return null
     val newTokens = updateFn(tokenBucket.tokens, tokenBucket.size)
     return tokenBucket.apply { tokens = newTokens }
   }
 
-  private fun updateBucket(bucketId: String, mappingFn: (bucket: TokenBucket?) -> TokenBucket?): TokenBucket? {
+  private fun updateBucket(
+    bucketId: String,
+    mappingFn: (bucket: TokenBucket?) -> TokenBucket?,
+  ): TokenBucket? {
     if (!usingRedisProvider.areWeUsingRedis) {
       return localTokenBucketStorage.compute(bucketId) { _, bucket ->
         mappingFn(bucket)

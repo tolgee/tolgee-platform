@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CachedPermissionService(
-  private val permissionRepository: PermissionRepository
+  private val permissionRepository: PermissionRepository,
 ) {
   @set:Autowired
   lateinit var projectService: ProjectService
@@ -31,7 +31,7 @@ class CachedPermissionService(
 
   @CacheEvict(
     cacheNames = [Caches.PERMISSIONS],
-    key = "{#permission.user?.id, #permission.project?.id, #permission.organization?.id}"
+    key = "{#permission.user?.id, #permission.project?.id, #permission.organization?.id}",
   )
   fun delete(permission: Permission) {
     permissionRepository.delete(permission)
@@ -39,14 +39,18 @@ class CachedPermissionService(
 
   @Cacheable(
     cacheNames = [Caches.PERMISSIONS],
-    key = "{#userId, #projectId, #organizationId}"
+    key = "{#userId, #projectId, #organizationId}",
   )
   @Transactional
-  fun find(projectId: Long? = null, userId: Long? = null, organizationId: Long? = null): PermissionDto? {
+  fun find(
+    projectId: Long? = null,
+    userId: Long? = null,
+    organizationId: Long? = null,
+  ): PermissionDto? {
     return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
       projectId = projectId,
       userId = userId,
-      organizationId = organizationId
+      organizationId = organizationId,
     )?.let { permission ->
       PermissionDto(
         id = permission.id,
@@ -59,16 +63,19 @@ class CachedPermissionService(
         viewLanguageIds = permission.viewLanguageIds,
         stateChangeLanguageIds = permission.stateChangeLanguageIds,
         type = permission.type,
-        granular = permission.granular
+        granular = permission.granular,
       )
     }
   }
 
   @CacheEvict(
     cacheNames = [Caches.PERMISSIONS],
-    key = "{#permission.user?.id, #permission.project?.id, #permission.organization?.id}"
+    key = "{#permission.user?.id, #permission.project?.id, #permission.organization?.id}",
   )
-  fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
+  fun acceptInvitation(
+    permission: Permission,
+    userAccount: UserAccount,
+  ): Permission {
     permission.invitation = null
     permission.user = userAccount
     return permissionRepository.save(permission)
@@ -76,7 +83,7 @@ class CachedPermissionService(
 
   @CacheEvict(
     cacheNames = [Caches.PERMISSIONS],
-    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
+    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}",
   )
   fun save(permission: Permission): Permission {
     return permissionRepository.save(permission)

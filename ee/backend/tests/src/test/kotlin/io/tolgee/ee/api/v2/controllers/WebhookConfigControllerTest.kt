@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 
 class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: WebhooksTestData
 
   @Autowired
@@ -64,7 +63,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun createWebhook(): ResultActions {
     return performProjectAuthPost(
       "webhook-configs",
-      mapOf("url" to "https://hello.com")
+      mapOf("url" to "https://hello.com"),
     )
   }
 
@@ -73,7 +72,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `updates webhook config`() {
     performProjectAuthPut(
       "webhook-configs/${testData.webhookConfig.self.id}",
-      mapOf("url" to "https://hello.com")
+      mapOf("url" to "https://hello.com"),
     ).andIsOk.andAssertThatJson {
       node("id").isValidId
       node("url").isEqualTo("https://hello.com")
@@ -84,7 +83,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `deletes webhook config`() {
     performProjectAuthDelete(
-      "webhook-configs/${testData.webhookConfig.self.id}"
+      "webhook-configs/${testData.webhookConfig.self.id}",
     ).andIsOk
 
     webhookConfigService.find(testData.webhookConfig.self.id).assert.isNull()
@@ -94,7 +93,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `lists webhook configs`() {
     performProjectAuthGet(
-      "webhook-configs"
+      "webhook-configs",
     ).andAssertThatJson {
       node("_embedded.webhookConfigs") {
         isArray.hasSize(1)
@@ -108,7 +107,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `get single webhook config`() {
     performProjectAuthGet(
-      "webhook-configs/${testData.webhookConfig.self.id}"
+      "webhook-configs/${testData.webhookConfig.self.id}",
     ).andAssertThatJson {
       node("id").isValidId
       node("url").isEqualTo("https://this-will-hopefully-never-exist.com/wh")
@@ -121,7 +120,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `tests a config`() {
     performProjectAuthPost(
       "webhook-configs/${testData.webhookConfig.self.id}/test",
-      null
+      null,
     ).andIsOk.andAssertThatJson {
       node("success").isBoolean.isFalse
     }

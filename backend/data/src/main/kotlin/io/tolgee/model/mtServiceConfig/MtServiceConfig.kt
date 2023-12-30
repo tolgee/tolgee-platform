@@ -58,17 +58,18 @@ class MtServiceConfig : StandardAuditModel() {
   companion object {
     fun getServiceInfo(
       config: MtServiceConfig,
-      serviceType: MtServiceType?
+      serviceType: MtServiceType?,
     ): MtServiceInfo? {
       if (serviceType == null) {
         return null
       }
-      val formality = when (serviceType) {
-        MtServiceType.AWS -> config.awsFormality
-        MtServiceType.DEEPL -> config.deeplFormality
-        MtServiceType.TOLGEE -> config.tolgeeFormality
-        else -> null
-      }
+      val formality =
+        when (serviceType) {
+          MtServiceType.AWS -> config.awsFormality
+          MtServiceType.DEEPL -> config.deeplFormality
+          MtServiceType.TOLGEE -> config.tolgeeFormality
+          else -> null
+        }
       return MtServiceInfo(serviceType, formality)
     }
   }

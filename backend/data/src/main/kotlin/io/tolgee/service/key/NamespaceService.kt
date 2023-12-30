@@ -30,9 +30,10 @@ class NamespaceService(
   fun deleteUnusedNamespaces(namespaces: List<Namespace?>) {
     val namespaceIds = namespaces.mapNotNull { it?.id }.toSet()
 
-    val counts = namespaceRepository
-      .getKeysInNamespaceCount(namespaceIds)
-      .associate { it[0] to it[1] }
+    val counts =
+      namespaceRepository
+        .getKeysInNamespaceCount(namespaceIds)
+        .associate { it[0] to it[1] }
 
     namespaceIds.forEach {
       if (counts[it] == 0L || counts[it] == null) {
@@ -67,33 +68,43 @@ class NamespaceService(
     namespaceRepository.save(namespace)
   }
 
-  fun find(name: String?, projectId: Long): Namespace? {
+  fun find(
+    name: String?,
+    projectId: Long,
+  ): Namespace? {
     name ?: return null
     return namespaceRepository.findByNameAndProjectId(name, projectId)
   }
 
-  fun findOrCreate(name: String?, projectId: Long): Namespace? {
+  fun findOrCreate(
+    name: String?,
+    projectId: Long,
+  ): Namespace? {
     return tryUntilItDoesntBreakConstraint {
       find(getSafeNamespace(name), projectId) ?: create(name, projectId)
     }
   }
 
-  fun create(name: String?, projectId: Long): Namespace? {
+  fun create(
+    name: String?,
+    projectId: Long,
+  ): Namespace? {
     if (name.isNullOrBlank()) {
       return null
     }
     return Namespace(
       name = name,
-      project = entityManager.getReference(Project::class.java, projectId)
+      project = entityManager.getReference(Project::class.java, projectId),
     ).apply {
       namespaceRepository.save(this)
     }
   }
 
   fun getAllInProject(projectId: Long) = namespaceRepository.getAllByProjectId(projectId)
+
   fun getAllInProject(
     projectId: Long,
-    pageable: Pageable
+    pageable: Pageable,
   ) = namespaceRepository.getAllByProjectId(projectId, pageable)
 
   fun saveAll(entities: Collection<Namespace>) {
@@ -104,23 +115,38 @@ class NamespaceService(
     return namespaceRepository.isDefaultUsed(projectId)
   }
 
-  fun get(projectId: Long, namespaceId: Long): Namespace {
+  fun get(
+    projectId: Long,
+    namespaceId: Long,
+  ): Namespace {
     return this.find(projectId, namespaceId) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
   }
 
-  fun get(projectId: Long, name: String): Namespace {
+  fun get(
+    projectId: Long,
+    name: String,
+  ): Namespace {
     return this.find(projectId, name) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
   }
 
-  fun find(projectId: Long, name: String): Namespace? {
+  fun find(
+    projectId: Long,
+    name: String,
+  ): Namespace? {
     return namespaceRepository.findOneByProjectIdAndName(projectId, name)
   }
 
-  fun find(projectId: Long, namespaceId: Long): Namespace? {
+  fun find(
+    projectId: Long,
+    namespaceId: Long,
+  ): Namespace? {
     return namespaceRepository.findOneByProjectIdAndId(projectId, namespaceId)
   }
 
-  fun update(namespace: Namespace, dto: UpdateNamespaceDto) {
+  fun update(
+    namespace: Namespace,
+    dto: UpdateNamespaceDto,
+  ) {
     this.find(dto.name, namespace.project.id)?.let {
       throw BadRequestException(Message.NAMESPACE_EXISTS)
     }

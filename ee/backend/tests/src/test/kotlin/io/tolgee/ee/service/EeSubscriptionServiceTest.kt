@@ -25,7 +25,6 @@ import java.util.*
 @Suppress("SpringBootApplicationProperties")
 @SpringBootTest(properties = ["tolgee.ee.check-period-ms=500"])
 class EeSubscriptionServiceTest : AbstractSpringTest() {
-
   @Autowired
   @MockBean
   lateinit var restTemplate: RestTemplate
@@ -50,7 +49,7 @@ class EeSubscriptionServiceTest : AbstractSpringTest() {
         cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
-      }
+      },
     )
 
     eeLicenseMockRequestUtil.mock {
@@ -85,7 +84,7 @@ class EeSubscriptionServiceTest : AbstractSpringTest() {
         cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
-      }
+      },
     )
 
     eeLicenseMockRequestUtil.mock {
@@ -103,11 +102,11 @@ class EeSubscriptionServiceTest : AbstractSpringTest() {
           jacksonObjectMapper().writeValueAsString(
             ErrorResponseBody(
               Message.LICENSE_KEY_USED_BY_ANOTHER_INSTANCE.code,
-              null
-            )
+              null,
+            ),
           ).toByteArray(),
-          null
-        )
+          null,
+        ),
       )
 
       verify {

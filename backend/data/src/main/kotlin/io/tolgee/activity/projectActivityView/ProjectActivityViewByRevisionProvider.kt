@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext
 
 class ProjectActivityViewByRevisionProvider(
   private val applicationContext: ApplicationContext,
-  private val revisionId: Long
+  private val revisionId: Long,
 ) {
   fun get(): ProjectActivityView? {
     val revisions = getProjectActivityRevisions(revisionId)

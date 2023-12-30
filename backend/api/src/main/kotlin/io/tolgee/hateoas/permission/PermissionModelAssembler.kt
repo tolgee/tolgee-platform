@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class PermissionModelAssembler() : RepresentationModelAssemblerSupport<IPermission, PermissionModel>(
-  V2UserController::class.java, PermissionModel::class.java
+  V2UserController::class.java,
+  PermissionModel::class.java,
 ) {
   override fun toModel(entity: IPermission): PermissionModel {
     return PermissionModel(

@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @Transactional
 class ImportRepositoryTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var importRepository: ImportRepository
 

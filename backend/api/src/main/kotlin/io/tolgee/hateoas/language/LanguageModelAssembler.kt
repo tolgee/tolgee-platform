@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class LanguageModelAssembler : RepresentationModelAssemblerSupport<LanguageView, LanguageModel>(
-  V2LanguagesController::class.java, LanguageModel::class.java
+  V2LanguagesController::class.java,
+  LanguageModel::class.java,
 ) {
   override fun toModel(view: LanguageView): LanguageModel {
     return LanguageModel(
@@ -16,7 +17,7 @@ class LanguageModelAssembler : RepresentationModelAssemblerSupport<LanguageView,
       originalName = view.language.originalName,
       tag = view.language.tag,
       flagEmoji = view.language.flagEmoji,
-      base = view.base
+      base = view.base,
     )
   }
 }

@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 @SpringBootTest
 class ImportFileRepositoryTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var importFileRepository: ImportFileRepository
 
@@ -37,12 +36,13 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
   fun `validates ImportFile entity`() {
     val import = createBaseImport()
 
-    val longName = StringBuilder().let { builder ->
-      repeat((1..2010).count()) {
-        builder.append("a")
+    val longName =
+      StringBuilder().let { builder ->
+        repeat((1..2010).count()) {
+          builder.append("a")
+        }
+        builder.toString()
       }
-      builder.toString()
-    }
 
     ImportFile(import = import, name = longName).let {
       assertThatExceptionOfType(ConstraintViolationException::class.java)

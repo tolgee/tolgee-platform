@@ -13,5 +13,5 @@ open class KeyModifiedModel(
   @Schema(description = "Name of key", example = "this_is_super_key")
   val name: String,
   @Schema(description = "Old name of key", example = "this_is_super_key_old")
-  val oldName: String
+  val oldName: String,
 ) : RepresentationModel<KeyModifiedModel>(), Serializable

@@ -22,11 +22,12 @@ class FormatDetectorTest {
   fun setup() {
     importMock = mock()
     importFile = ImportFile("exmample.po", importMock)
-    importFileDto = ImportFileDto(
-      "exmample.po",
-      File("src/test/resources/import/po/example.po")
-        .inputStream()
-    )
+    importFileDto =
+      ImportFileDto(
+        "exmample.po",
+        File("src/test/resources/import/po/example.po")
+          .inputStream(),
+      )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 

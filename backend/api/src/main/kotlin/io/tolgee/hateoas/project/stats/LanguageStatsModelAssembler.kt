@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class LanguageStatsModelAssembler : RepresentationModelAssemblerSupport<LanguageStats, LanguageStatsModel>(
-  V2ProjectsController::class.java, LanguageStatsModel::class.java
+  V2ProjectsController::class.java,
+  LanguageStatsModel::class.java,
 ) {
   override fun toModel(it: LanguageStats): LanguageStatsModel {
     return LanguageStatsModel(
@@ -24,7 +25,7 @@ class LanguageStatsModelAssembler : RepresentationModelAssemblerSupport<Language
       reviewedPercentage = it.reviewedPercentage,
       untranslatedKeyCount = it.untranslatedKeys,
       untranslatedWordCount = it.untranslatedWords,
-      untranslatedPercentage = it.untranslatedPercentage
+      untranslatedPercentage = it.untranslatedPercentage,
     )
   }
 }

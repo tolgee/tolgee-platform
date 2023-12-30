@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.machine-translation")
 @DocProperty(
   description = "Configuration of Machine Translation services.",
-  displayName = "Machine Translation"
+  displayName = "Machine Translation",
 )
 open class MachineTranslationProperties(
   var google: GoogleMachineTranslationProperties = GoogleMachineTranslationProperties(),
@@ -14,10 +14,10 @@ open class MachineTranslationProperties(
   var deepl: DeeplMachineTranslationProperties = DeeplMachineTranslationProperties(),
   var azure: AzureCognitiveTranslationProperties = AzureCognitiveTranslationProperties(),
   var baidu: BaiduMachineTranslationProperties = BaiduMachineTranslationProperties(),
-
   @DocProperty(
-    description = "Amount of machine translations users of the Free tier can request per month. " +
-      "Used by Tolgee Cloud, see [pricing](/pricing). Set to `-1` to disable credit-based limitation."
+    description =
+      "Amount of machine translations users of the Free tier can request per month. " +
+        "Used by Tolgee Cloud, see [pricing](/pricing). Set to `-1` to disable credit-based limitation.",
   )
   var freeCreditsAmount: Long = -1,
 )

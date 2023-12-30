@@ -7,5 +7,5 @@ import jakarta.validation.constraints.Size
 data class TagKeyDto(
   @field:NotBlank
   @field:Size(max = ValidationConstants.MAX_TAG_LENGTH)
-  val name: String = ""
+  val name: String = "",
 )

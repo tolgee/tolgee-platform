@@ -63,7 +63,7 @@ class ActivityViewByRevisionsProvider(
         meta = revision.meta,
         modifications = modifiedEntities[revision.id],
         counts = counts[revision.id],
-        params = params[revision.id]
+        params = params[revision.id],
       )
     }
   }
@@ -109,7 +109,7 @@ class ActivityViewByRevisionsProvider(
     val counts: MutableMap<Long, MutableMap<String, Long>> = mutableMapOf()
     activityRevisionRepository.getModifiedEntityTypeCounts(
       revisionIds = revisionIds,
-      allowedTypes
+      allowedTypes,
     ).forEach { (revisionId, entityClass, count) ->
       counts
         .computeIfAbsent(revisionId as Long) { mutableMapOf() }
@@ -120,12 +120,12 @@ class ActivityViewByRevisionsProvider(
 
   private fun getAuthors(revisions: Collection<ActivityRevision>) =
     userAccountService.getAllByIdsIncludingDeleted(
-      revisions.mapNotNull { it.authorId }.toSet()
+      revisions.mapNotNull { it.authorId }.toSet(),
     ).associateBy { it.id }
 
   private fun getAllowedRevisionRelations(
     revisionIds: List<Long>,
-    allowedTypes: Collection<ActivityType>
+    allowedTypes: Collection<ActivityType>,
   ): Map<Long, List<ActivityDescribingEntity>> {
     return activityRevisionRepository.getRelationsForRevisions(revisionIds, allowedTypes)
       .groupBy { it.activityRevision.id }
@@ -133,18 +133,20 @@ class ActivityViewByRevisionsProvider(
 
   private fun getModifiedEntities(): Map<Long, List<ModifiedEntityView>> {
     return rawModifiedEntities.map { modifiedEntity ->
-      val relations = modifiedEntity.describingRelations
-        ?.mapNotNull relationsOfEntityMap@{ relationEntry ->
-          relationEntry.key to extractCompressedRef(
-            relationEntry.value,
-            allRelationData[modifiedEntity.activityRevision.id] ?: let {
-              Sentry.captureException(
-                IllegalStateException("No relation data for revision ${modifiedEntity.activityRevision.id}")
+      val relations =
+        modifiedEntity.describingRelations
+          ?.mapNotNull relationsOfEntityMap@{ relationEntry ->
+            relationEntry.key to
+              extractCompressedRef(
+                relationEntry.value,
+                allRelationData[modifiedEntity.activityRevision.id] ?: let {
+                  Sentry.captureException(
+                    IllegalStateException("No relation data for revision ${modifiedEntity.activityRevision.id}"),
+                  )
+                  return@relationsOfEntityMap null
+                },
               )
-              return@relationsOfEntityMap null
-            }
-          )
-        }?.toMap()
+          }?.toMap()
       ModifiedEntityView(
         activityRevision = modifiedEntity.activityRevision,
         entityClass = modifiedEntity.entityClass,
@@ -152,7 +154,7 @@ class ActivityViewByRevisionsProvider(
         exists = entityExistences[modifiedEntity.entityClass to modifiedEntity.entityId],
         modifications = modifiedEntity.modifications,
         description = modifiedEntity.describingData,
-        describingRelations = relations
+        describingRelations = relations,
       )
     }.groupBy { it.activityRevision.id }
   }
@@ -198,8 +200,8 @@ class ActivityViewByRevisionsProvider(
         whereConditions.add(
           cb.or(
             cb.notEqual(revision.get(ActivityRevision_.type), it),
-            root.get(ActivityModifiedEntity_.entityClass).`in`(restrictedEntityNames)
-          )
+            root.get(ActivityModifiedEntity_.entityClass).`in`(restrictedEntityNames),
+          ),
         )
       }
     }
@@ -210,20 +212,21 @@ class ActivityViewByRevisionsProvider(
 
   private fun extractCompressedRef(
     value: EntityDescriptionRef,
-    describingEntities: List<ActivityDescribingEntity>
+    describingEntities: List<ActivityDescribingEntity>,
   ): ExistenceEntityDescription {
     val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
 
-    val relations = entity?.describingRelations
-      ?.map { it.key to extractCompressedRef(it.value, describingEntities) }
-      ?.toMap()
+    val relations =
+      entity?.describingRelations
+        ?.map { it.key to extractCompressedRef(it.value, describingEntities) }
+        ?.toMap()
 
     return ExistenceEntityDescription(
       entityClass = value.entityClass,
       entityId = value.entityId,
       exists = entityExistences[value.entityClass to value.entityId],
       data = entity?.data ?: mapOf(),
-      relations = relations ?: mapOf()
+      relations = relations ?: mapOf(),
     )
   }
 }

@@ -19,14 +19,11 @@ class ActivityDescribingEntity(
   @Id
   @NotFound(action = NotFoundAction.IGNORE)
   val activityRevision: ActivityRevision,
-
   @Id
   val entityClass: String,
-
   @Id
-  val entityId: Long
+  val entityId: Long,
 ) : Serializable {
-
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var data: Map<String, Any?> = mutableMapOf()

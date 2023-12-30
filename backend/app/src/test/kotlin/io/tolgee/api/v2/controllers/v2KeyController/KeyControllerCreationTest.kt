@@ -36,7 +36,6 @@ import java.math.BigDecimal
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: KeysTestData
 
   @Autowired
@@ -89,7 +88,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `create key with translations require translate permissions`() {
     performProjectAuthPost(
       "keys",
-      CreateKeyDto(name = "super_key", translations = mapOf("en" to "hello", "de" to "hello"))
+      CreateKeyDto(name = "super_key", translations = mapOf("en" to "hello", "de" to "hello")),
     ).andIsForbidden
   }
 
@@ -106,8 +105,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         name = keyName,
         translations = mapOf("en" to "EN", "de" to "DE"),
         tags = listOf("tag", "tag2"),
-        screenshotUploadedImageIds = screenshotImageIds
-      )
+        screenshotUploadedImageIds = screenshotImageIds,
+      ),
     ).andIsCreated.andPrettyPrint.andAssertThatJson {
       node("id").isValidId
       node("name").isEqualTo(keyName)
@@ -162,7 +161,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThrows<FileStoreException> {
       screenshotImages.forEach {
         fileStorage.readFile(
-          "${ImageUploadService.UPLOADED_IMAGES_STORAGE_FOLDER_NAME}/${it.filenameWithExtension}"
+          "${ImageUploadService.UPLOADED_IMAGES_STORAGE_FOLDER_NAME}/${it.filenameWithExtension}",
         )
       }
     }
@@ -180,21 +179,23 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         name = keyName,
         translations = mapOf("en" to "EN", "de" to "DE"),
         tags = listOf("tag", "tag2"),
-        screenshots = screenshotImages.map {
-          KeyScreenshotDto().apply {
-            text = "text"
-            uploadedImageId = it.id
-            positions = listOf(
-              KeyInScreenshotPositionDto().apply {
-                x = 100
-                y = 120
-                width = 200
-                height = 300
-              }
-            )
-          }
-        }
-      )
+        screenshots =
+          screenshotImages.map {
+            KeyScreenshotDto().apply {
+              text = "text"
+              uploadedImageId = it.id
+              positions =
+                listOf(
+                  KeyInScreenshotPositionDto().apply {
+                    x = 100
+                    y = 120
+                    width = 200
+                    height = 300
+                  },
+                )
+            }
+          },
+      ),
     ).andIsCreated.andPrettyPrint.andAssertThatJson {
       node("screenshots") {
         isArray.hasSize(3)
@@ -228,7 +229,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       }
       assertThat(screenshots).hasSize(3)
       assertThat(
-        imageUploadService.find(screenshotImages.map { it.id })
+        imageUploadService.find(screenshotImages.map { it.id }),
       ).hasSize(0)
       screenshots.forEach {
         val position = it.keyScreenshotReferences[0].positions!![0]
@@ -250,11 +251,12 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       CreateKeyDto(
         name = keyName,
         translations = mapOf("en" to "EN", "de" to "DE"),
-        relatedKeysInOrder = mutableListOf(
-          RelatedKeyDto(null, "first_key"),
-          RelatedKeyDto(null, "super_key")
-        )
-      )
+        relatedKeysInOrder =
+          mutableListOf(
+            RelatedKeyDto(null, "first_key"),
+            RelatedKeyDto(null, "super_key"),
+          ),
+      ),
     ).andIsCreated.andAssertThatJson {
       node("id").isNumber.satisfies { it ->
         bigMetaService.getCloseKeyIds(it.toLong()).assert.hasSize(1)
@@ -270,8 +272,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       CreateKeyDto(
         name = "super_key",
         translations = mapOf("en" to "EN"),
-        states = mapOf("en" to AssignableTranslationState.REVIEWED)
-      )
+        states = mapOf("en" to AssignableTranslationState.REVIEWED),
+      ),
     ).andIsCreated.andAssertThatJson {
       node("id").isNumber.satisfies { id ->
         executeInNewTransaction {
@@ -287,7 +289,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `checks state change language permissions`() {
     prepareTestData(
       scopes = listOf(Scope.KEYS_CREATE, Scope.TRANSLATIONS_EDIT, Scope.TRANSLATIONS_STATE_EDIT),
-      stateChangeTags = listOf("cs")
+      stateChangeTags = listOf("cs"),
     )
 
     performProjectAuthPost(
@@ -295,8 +297,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       CreateKeyDto(
         name = "super_key",
         translations = mapOf("en" to "EN"),
-        states = mapOf("en" to AssignableTranslationState.REVIEWED)
-      )
+        states = mapOf("en" to AssignableTranslationState.REVIEWED),
+      ),
     ).andIsForbidden
 
     performProjectAuthPost(
@@ -304,8 +306,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       CreateKeyDto(
         name = "super_key",
         translations = mapOf("cs" to "CS"),
-        states = mapOf("cs" to AssignableTranslationState.REVIEWED)
-      )
+        states = mapOf("cs" to AssignableTranslationState.REVIEWED),
+      ),
     ).andIsCreated
   }
 
@@ -314,7 +316,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `checks state change permissions (missing scope)`() {
     prepareTestData(
       scopes = listOf(Scope.KEYS_CREATE, Scope.TRANSLATIONS_EDIT),
-      stateChangeTags = null
+      stateChangeTags = null,
     )
 
     performProjectAuthPost(
@@ -322,8 +324,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       CreateKeyDto(
         name = "super_key",
         translations = mapOf("cs" to "CS"),
-        states = mapOf("cs" to AssignableTranslationState.REVIEWED)
-      )
+        states = mapOf("cs" to AssignableTranslationState.REVIEWED),
+      ),
     ).andIsForbidden
 
     // this works, because TRANSLATED is the initial state, so we are not changing anytning
@@ -332,19 +334,23 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       CreateKeyDto(
         name = "super_key",
         translations = mapOf("cs" to "CS"),
-        states = mapOf("cs" to AssignableTranslationState.TRANSLATED)
-      )
+        states = mapOf("cs" to AssignableTranslationState.TRANSLATED),
+      ),
     ).andIsCreated
   }
 
-  private fun prepareTestData(scopes: List<Scope>, stateChangeTags: List<String>?) {
+  private fun prepareTestData(
+    scopes: List<Scope>,
+    stateChangeTags: List<String>?,
+  ) {
     val testData = PermissionsTestData()
-    val user = testData.addUserWithPermissions(
-      scopes = scopes,
-      type = null,
-      stateChangeLanguageTags = stateChangeTags,
-      translateLanguageTags = listOf("en", "cs")
-    )
+    val user =
+      testData.addUserWithPermissions(
+        scopes = scopes,
+        type = null,
+        stateChangeLanguageTags = stateChangeTags,
+        translateLanguageTags = listOf("en", "cs"),
+      )
     testDataService.saveTestData(testData.root)
     userAccount = user
     this.projectSupplier = { testData.projectBuilder.self }

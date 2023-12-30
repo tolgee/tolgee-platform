@@ -27,7 +27,6 @@ import java.util.stream.Collectors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
-
   lateinit var initialFileStorageUrl: String
 
   @BeforeAll
@@ -81,26 +80,28 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val file = File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${image.filenameWithExtension}""")
-    val result = performAuthGet("/uploaded-images/${image.filenameWithExtension}").andIsOk
-      .andExpect(
-        header().string("Cache-Control", "max-age=365, must-revalidate, no-transform")
-      )
-      .andReturn()
+    val result =
+      performAuthGet("/uploaded-images/${image.filenameWithExtension}").andIsOk
+        .andExpect(
+          header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"),
+        )
+        .andReturn()
     assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
   }
 
   @Test
   fun delete() {
     whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 30L }
-    val list = (1..20).map {
-      imageUploadService.store(screenshotFile, userAccount!!, null)
-    }.toCollection(mutableListOf())
+    val list =
+      (1..20).map {
+        imageUploadService.store(screenshotFile, userAccount!!, null)
+      }.toCollection(mutableListOf())
 
     val idsToDelete = list.take(10).map { it.id }.joinToString(",")
 
     list.asSequence().take(10).forEach {
       assertThat(
-        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}""")
+        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}"""),
       ).exists()
     }
 
@@ -110,7 +111,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
     list.asSequence().take(10).forEach {
       assertThat(
-        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}""")
+        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}"""),
       ).doesNotExist()
     }
   }
@@ -123,15 +124,18 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
   @Test
   fun uploadValidationNoImage() {
-    val response = performAuthMultipart(
-      "/v2/image-upload",
-      listOf(
-        MockMultipartFile(
-          "image", "originalShot.png", "not_valid",
-          "test".toByteArray()
-        )
-      ),
-    ).andIsBadRequest.andReturn()
+    val response =
+      performAuthMultipart(
+        "/v2/image-upload",
+        listOf(
+          MockMultipartFile(
+            "image",
+            "originalShot.png",
+            "not_valid",
+            "test".toByteArray(),
+          ),
+        ),
+      ).andIsBadRequest.andReturn()
     assertThat(response).error().isCustomValidation.hasMessage("file_not_image")
   }
 }

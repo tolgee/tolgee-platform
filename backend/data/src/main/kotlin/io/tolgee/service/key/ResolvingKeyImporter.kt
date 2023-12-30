@@ -36,7 +36,7 @@ import java.io.Serializable
 class ResolvingKeyImporter(
   val applicationContext: ApplicationContext,
   val keysToImport: List<ImportKeysResolvableItemDto>,
-  val projectEntity: Project
+  val projectEntity: Project,
 ) {
   private val entityManager = applicationContext.getBean(EntityManager::class.java)
   private val keyService = applicationContext.getBean(KeyService::class.java)
@@ -81,10 +81,11 @@ class ResolvingKeyImporter(
         }
 
         if (isNew) {
-          val translation = Translation(resolvable.text).apply {
-            this.key = key
-            this.language = language
-          }
+          val translation =
+            Translation(resolvable.text).apply {
+              this.key = key
+              this.language = language
+            }
           translationService.save(translation)
         }
       }
@@ -93,31 +94,35 @@ class ResolvingKeyImporter(
   }
 
   private fun importScreenshots(): Map<Long, Screenshot> {
-    val uploadedImagesIds = keysToImport.flatMap {
-      it.screenshots?.map { screenshot -> screenshot.uploadedImageId } ?: listOf()
-    }
+    val uploadedImagesIds =
+      keysToImport.flatMap {
+        it.screenshots?.map { screenshot -> screenshot.uploadedImageId } ?: listOf()
+      }
 
     val images = imageUploadService.find(uploadedImagesIds)
     checkImageUploadermissions(images)
 
-    val createdScreenshots = images.associate {
-      it.id to screenshotService.saveScreenshot(it)
-    }
+    val createdScreenshots =
+      images.associate {
+        it.id to screenshotService.saveScreenshot(it)
+      }
 
     val locations = images.map { it.location }
 
-    val allReferences = screenshotService.getKeyScreenshotReferences(
-      importedKeys,
-      locations
-    ).toMutableList()
+    val allReferences =
+      screenshotService.getKeyScreenshotReferences(
+        importedKeys,
+        locations,
+      ).toMutableList()
 
     val referencesToDelete = mutableListOf<KeyScreenshotReference>()
 
     keysToImport.forEach {
       val key = getOrCreateKey(it)
       it.screenshots?.forEach { screenshot ->
-        val screenshotResult = createdScreenshots[screenshot.uploadedImageId]
-          ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+        val screenshotResult =
+          createdScreenshots[screenshot.uploadedImageId]
+            ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
         val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
 
         screenshotService.addReference(
@@ -125,13 +130,14 @@ class ResolvingKeyImporter(
           screenshot = screenshotResult.screenshot,
           info = info,
           originalDimension = screenshotResult.originalDimension,
-          targetDimension = screenshotResult.targetDimension
+          targetDimension = screenshotResult.targetDimension,
         )
 
-        val toDelete = allReferences.filter { reference ->
-          reference.key.id == key.id &&
-            reference.screenshot.location == screenshotResult.screenshot.location
-        }
+        val toDelete =
+          allReferences.filter { reference ->
+            reference.key.id == key.id &&
+              reference.screenshot.location == screenshotResult.screenshot.location
+          }
 
         referencesToDelete.addAll(toDelete)
       }
@@ -175,18 +181,18 @@ class ResolvingKeyImporter(
     translationExists: Boolean,
     resolvable: ImportTranslationResolvableDto,
     key: Key,
-    language: Language
+    language: Language,
   ): Boolean {
     if (translationExists && resolvable.resolution == ImportTranslationResolution.NEW) {
       errors.add(
-        listOf(Message.TRANSLATION_EXISTS.code, key.namespace?.name, key.name, language.tag)
+        listOf(Message.TRANSLATION_EXISTS.code, key.namespace?.name, key.name, language.tag),
       )
       return true
     }
 
     if (!translationExists && resolvable.resolution != ImportTranslationResolution.NEW) {
       errors.add(
-        listOf(Message.TRANSLATION_NOT_FOUND.code, key.namespace?.name, key.name, language.tag)
+        listOf(Message.TRANSLATION_NOT_FOUND.code, key.namespace?.name, key.name, language.tag),
       )
       return true
     }
@@ -195,7 +201,7 @@ class ResolvingKeyImporter(
 
   private fun getExistingTranslation(
     key: Key,
-    language: Language
+    language: Language,
   ) = existingTranslations[key.namespace?.name to key.name]?.get(language.tag)
 
   private fun ImportKeysResolvableItemDto.mapLanguageAsKey() =
@@ -210,11 +216,14 @@ class ResolvingKeyImporter(
       keyService.createWithoutExistenceCheck(
         name = keyToImport.name,
         namespace = keyToImport.namespace,
-        project = projectEntity
+        project = projectEntity,
       )
     }
 
-  private fun getAllByNamespaceAndName(projectId: Long, keys: List<Pair<String?, String?>>): List<Key> {
+  private fun getAllByNamespaceAndName(
+    projectId: Long,
+    keys: List<Pair<String?, String?>>,
+  ): List<Key> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createQuery(Key::class.java)
     val root = query.from(Key::class.java)
@@ -222,12 +231,13 @@ class ResolvingKeyImporter(
     @Suppress("UNCHECKED_CAST")
     val namespaceJoin: Join<Key, Namespace> = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
 
-    val predicates = keys.map { (namespace, name) ->
-      cb.and(
-        cb.equal(root.get(Key_.name), name),
-        cb.equalNullable(namespaceJoin.get(Namespace_.name), namespace)
-      )
-    }.toTypedArray()
+    val predicates =
+      keys.map { (namespace, name) ->
+        cb.and(
+          cb.equal(root.get(Key_.name), name),
+          cb.equalNullable(namespaceJoin.get(Namespace_.name), namespace),
+        )
+      }.toTypedArray()
 
     val projectIdPath = root.get(Key_.project).get(Project_.id)
 
@@ -239,7 +249,7 @@ class ResolvingKeyImporter(
   private val existingKeys by lazy {
     this.getAllByNamespaceAndName(
       projectId = projectEntity.id,
-      keys = keysToImport.map { it.namespace to it.name }
+      keys = keysToImport.map { it.namespace to it.name },
     ).associateBy { (it.namespace?.name to it.name) }.toMutableMap()
   }
 

@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
+import io.tolgee.dtos.response.ApiKeyDTO
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AbstractControllerTest
@@ -28,6 +28,6 @@ abstract class AbstractApiKeyTest : AbstractControllerTest() {
       scopesSet = Scope.values().toSet()
     }
     val base = dbPopulator.createBase(generateUniqueString())
-    return ApiKeyDTO.fromEntity(apiKeyService.create(base.userAccount, scopesSet, base.project))
+    return io.tolgee.dtos.response.ApiKeyDTO.fromEntity(apiKeyService.create(base.userAccount, scopesSet, base.project))
   }
 }

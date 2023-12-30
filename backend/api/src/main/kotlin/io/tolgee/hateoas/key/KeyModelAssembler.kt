@@ -7,11 +7,13 @@ import org.springframework.stereotype.Component
 
 @Component
 class KeyModelAssembler : RepresentationModelAssemblerSupport<Key, KeyModel>(
-  TranslationsController::class.java, KeyModel::class.java
+  TranslationsController::class.java,
+  KeyModel::class.java,
 ) {
-  override fun toModel(entity: Key) = KeyModel(
-    id = entity.id,
-    name = entity.name,
-    namespace = entity.namespace?.name
-  )
+  override fun toModel(entity: Key) =
+    KeyModel(
+      id = entity.id,
+      name = entity.name,
+      namespace = entity.namespace?.name,
+    )
 }

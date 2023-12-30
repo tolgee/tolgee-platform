@@ -41,8 +41,9 @@ class AuthenticationFacade(
     get() = SecurityContextHolder.getContext().authentication is TolgeeAuthentication
 
   val authentication: TolgeeAuthentication
-    get() = SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
-      ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+    get() =
+      SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
+        ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   // -- CURRENT USER
   val authenticatedUser: UserAccountDto
@@ -55,13 +56,14 @@ class AuthenticationFacade(
     get() = authenticatedUserEntityOrNull ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   val authenticatedUserEntityOrNull: UserAccount?
-    get() = authenticatedUserOrNull?.let {
-      if (authentication.userAccountEntity == null) {
-        authentication.userAccountEntity = userAccountService.findActive(it.id)
-      }
+    get() =
+      authenticatedUserOrNull?.let {
+        if (authentication.userAccountEntity == null) {
+          authentication.userAccountEntity = userAccountService.findActive(it.id)
+        }
 
-      return authentication.userAccountEntity
-    }
+        return authentication.userAccountEntity
+      }
 
   // -- AUTHENTICATION METHOD AND DETAILS
   val isUserSuperAuthenticated: Boolean

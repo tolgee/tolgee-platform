@@ -18,7 +18,6 @@ class BusinessEventReporter(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
 ) {
-
   @Lazy
   @Autowired
   private lateinit var selfProxied: BusinessEventReporter
@@ -43,7 +42,7 @@ class BusinessEventReporter(
       "${'$'}identify",
       mapOf(
         "${'$'}anon_distinct_id" to data.anonymousUserId,
-      ) + getSetMapOfUserData(dto)
+      ) + getSetMapOfUserData(dto),
     )
   }
 
@@ -52,11 +51,12 @@ class BusinessEventReporter(
     val setEntry = getIdentificationMapForPostHog(data)
 
     postHog?.capture(
-      id.toString(), data.eventName,
+      id.toString(),
+      data.eventName,
       mapOf(
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
-      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
+      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry,
     )
   }
 
@@ -67,24 +67,28 @@ class BusinessEventReporter(
    * or if instanceId is sent by self-hosted instance.
    */
   private fun getIdentificationMapForPostHog(data: OnBusinessEventToCaptureEvent): Map<String, Any?> {
-    val setEntry = data.userAccountDto?.let { userAccountDto ->
-      getSetMapOfUserData(userAccountDto)
-    } ?: data.instanceId?.let {
-      mapOf(
-        "${'$'}set" to mapOf(
-          "instanceId" to it
+    val setEntry =
+      data.userAccountDto?.let { userAccountDto ->
+        getSetMapOfUserData(userAccountDto)
+      } ?: data.instanceId?.let {
+        mapOf(
+          "${'$'}set" to
+            mapOf(
+              "instanceId" to it,
+            ),
         )
-      )
-    } ?: emptyMap()
+      } ?: emptyMap()
     return setEntry + getAnonIdMap(data)
   }
 
-  private fun getSetMapOfUserData(userAccountDto: UserAccountDto) = mapOf(
-    "${'$'}set" to mapOf(
-      "email" to userAccountDto.username,
-      "name" to userAccountDto.name,
-    ),
-  )
+  private fun getSetMapOfUserData(userAccountDto: UserAccountDto) =
+    mapOf(
+      "${'$'}set" to
+        mapOf(
+          "email" to userAccountDto.username,
+          "name" to userAccountDto.name,
+        ),
+    )
 
   fun getAnonIdMap(data: OnBusinessEventToCaptureEvent): Map<String, String> {
     return (
@@ -93,7 +97,7 @@ class BusinessEventReporter(
           "${'$'}anon_distinct_id" to data.anonymousUserId,
         )
       }
-      ) ?: emptyMap()
+    ) ?: emptyMap()
   }
 
   private fun fillOtherData(data: OnBusinessEventToCaptureEvent): OnBusinessEventToCaptureEvent {
@@ -105,7 +109,7 @@ class BusinessEventReporter(
       projectDto = projectDto,
       organizationId = organizationId,
       organizationName = organizationName,
-      userAccountDto = userAccountDto
+      userAccountDto = userAccountDto,
     )
   }
 }

@@ -17,7 +17,10 @@ class ReCaptchaValidationService(
   private val tolgeeProperties: TolgeeProperties,
   private val restTemplate: RestTemplate,
 ) {
-  fun validate(token: String?, ip: String): Boolean {
+  fun validate(
+    token: String?,
+    ip: String,
+  ): Boolean {
     if (tolgeeProperties.recaptcha.secretKey == null ||
       // for e2e testing purposes
       tolgeeProperties.recaptcha.secretKey == "dummy_secret_key"
@@ -41,10 +44,11 @@ class ReCaptchaValidationService(
     requestBody.add("secret", tolgeeProperties.recaptcha.secretKey)
     requestBody.add("response", token)
 
-    val response = restTemplate.postForEntity<Response>(
-      "https://www.google.com/recaptcha/api/siteverify",
-      requestBody
-    )
+    val response =
+      restTemplate.postForEntity<Response>(
+        "https://www.google.com/recaptcha/api/siteverify",
+        requestBody,
+      )
 
     return response.body?.success
       ?: throw UnexpectedGoogleApiResponseException(response)

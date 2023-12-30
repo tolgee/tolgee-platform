@@ -8,7 +8,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 
 @Configuration
 class EmailConfig(
-  private val properties: TolgeeProperties
+  private val properties: TolgeeProperties,
 ) {
   @Bean
   fun mailSender(): JavaMailSender {

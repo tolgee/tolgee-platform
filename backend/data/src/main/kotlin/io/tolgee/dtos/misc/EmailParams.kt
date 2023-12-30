@@ -4,5 +4,5 @@ class EmailParams(
   var to: String,
   var text: String,
   var subject: String,
-  var attachments: List<EmailAttachment> = listOf()
+  var attachments: List<EmailAttachment> = listOf(),
 )

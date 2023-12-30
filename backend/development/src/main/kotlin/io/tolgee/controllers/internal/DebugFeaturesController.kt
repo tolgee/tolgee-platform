@@ -18,23 +18,25 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["internal/features"])
 @Transactional
 class DebugFeaturesController(
-  val enabledFeaturesProvider: EnabledFeaturesProvider
+  val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PutMapping(value = ["/toggle"])
   @Transactional
   fun toggleFeature(
     feature: Feature,
     @Schema(
-      description = "If true, feature will be enabled, if false, disabled, " +
-        "if null features will behave as if they were not set"
+      description =
+        "If true, feature will be enabled, if false, disabled, " +
+          "if null features will behave as if they were not set",
     )
-    enabled: Boolean?
+    enabled: Boolean?,
   ) {
-    val provider = enabledFeaturesProvider as? PublicEnabledFeaturesProvider
-      ?: throw BadRequestException(
-        "EnabledFeaturesProvider is not PublicEnabledFeaturesProvider. " +
-          "Disable billing module to use this endpoint."
-      )
+    val provider =
+      enabledFeaturesProvider as? PublicEnabledFeaturesProvider
+        ?: throw BadRequestException(
+          "EnabledFeaturesProvider is not PublicEnabledFeaturesProvider. " +
+            "Disable billing module to use this endpoint.",
+        )
 
     if (enabled == null) {
       provider.forceEnabled = null

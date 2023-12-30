@@ -34,13 +34,13 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
-  value = ["/v2/image-upload"]
+  value = ["/v2/image-upload"],
 )
 @Tag(name = "Image upload")
 class V2ImageUploadController(
   private val uploadedImageModelAssembler: UploadedImageModelAssembler,
   private val imageUploadService: ImageUploadService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads an image for later use")
@@ -49,7 +49,7 @@ class V2ImageUploadController(
   @AllowApiAccess
   fun upload(
     @RequestParam("image") image: MultipartFile,
-    @RequestPart("info", required = false) info: ImageUploadInfoDto?
+    @RequestPart("info", required = false) info: ImageUploadInfoDto?,
   ): ResponseEntity<UploadedImageModel> {
     imageUploadService.validateIsImage(image)
     val imageEntity = imageUploadService.store(image, authenticationFacade.authenticatedUserEntity, info)
@@ -59,7 +59,9 @@ class V2ImageUploadController(
   @DeleteMapping("/{ids}")
   @Operation(summary = "Deletes uploaded images")
   @AllowApiAccess
-  fun delete(@PathVariable ids: Set<Long>) {
+  fun delete(
+    @PathVariable ids: Set<Long>,
+  ) {
     val images = imageUploadService.find(ids)
     images.forEach {
       if (it.userAccount.id != authenticationFacade.authenticatedUser.id) {

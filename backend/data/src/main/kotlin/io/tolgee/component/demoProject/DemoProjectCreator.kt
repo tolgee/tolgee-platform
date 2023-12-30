@@ -42,11 +42,12 @@ class DemoProjectCreator(
   }
 
   val project: Project by lazy {
-    val project = Project().apply {
-      name = "Demo project"
-      this@apply.organizationOwner = organization
-      this.description = "This is a demo project of a packing list app"
-    }
+    val project =
+      Project().apply {
+        name = "Demo project"
+        this@apply.organizationOwner = organization
+        this.description = "This is a demo project of a packing list app"
+      }
     projectService.save(project)
     setAvatar(project)
     project
@@ -66,7 +67,7 @@ class DemoProjectCreator(
       relatedKeysInOrder.add(
         RelatedKeyDto().apply {
           this.keyName = keyName
-        }
+        },
       )
     }
     bigMetaService.store(relatedKeysInOrder, project)
@@ -78,7 +79,11 @@ class DemoProjectCreator(
     }
   }
 
-  private fun setTranslation(keyName: String, languageTag: String, translation: String): Translation {
+  private fun setTranslation(
+    keyName: String,
+    languageTag: String,
+    translation: String,
+  ): Translation {
     val language = languages[languageTag]!!
     return translationService.setTranslation(getOrCreateKey(keyName), language, translation).also {
       it.state = TranslationState.REVIEWED
@@ -91,13 +96,18 @@ class DemoProjectCreator(
     DemoProjectData.screenshots.forEach { demoScreenshot ->
       val key = getOrCreateKey(demoScreenshot.keyName)
 
-      val positions = demoScreenshot.positions.map {
-        KeyInScreenshotPositionDto(it.x, it.y, it.width, it.height)
-      }
+      val positions =
+        demoScreenshot.positions.map {
+          KeyInScreenshotPositionDto(it.x, it.y, it.width, it.height)
+        }
 
       val dimension = Dimension(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT)
       screenshotService.addReference(
-        key, screenshot, ScreenshotInfoDto(text = null, positions, null), dimension, dimension
+        key,
+        screenshot,
+        ScreenshotInfoDto(text = null, positions, null),
+        dimension,
+        dimension,
       )
     }
   }
@@ -111,7 +121,7 @@ class DemoProjectCreator(
               screenshotImage.readAllBytes(),
               screenshotThumbnail.readAllBytes(),
               null,
-              Dimension(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT)
+              Dimension(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT),
             )
           }
       }
@@ -121,10 +131,11 @@ class DemoProjectCreator(
 
   private fun getOrCreateKey(keyName: String): Key {
     return keys.computeIfAbsent(keyName) {
-      val key = Key().apply {
-        name = keyName
-        this@apply.project = this@DemoProjectCreator.project
-      }
+      val key =
+        Key().apply {
+          name = keyName
+          this@apply.project = this@DemoProjectCreator.project
+        }
       keyService.save(key)
       key
     }

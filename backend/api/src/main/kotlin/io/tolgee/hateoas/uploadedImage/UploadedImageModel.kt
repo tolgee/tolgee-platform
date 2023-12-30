@@ -12,5 +12,5 @@ open class UploadedImageModel(
   val fileUrl: String,
   val requestFilename: String,
   val createdAt: Date,
-  val location: String? = null
+  val location: String? = null,
 ) : RepresentationModel<UploadedImageModel>()

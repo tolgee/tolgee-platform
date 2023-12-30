@@ -50,16 +50,18 @@ class OrganizationAuthorizationInterceptorTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
-  private val organizationAuthenticationInterceptor = OrganizationAuthorizationInterceptor(
-    authenticationFacade,
-    organizationRoleService,
-    requestContextService,
-    Mockito.mock(OrganizationHolder::class.java),
-  )
+  private val organizationAuthenticationInterceptor =
+    OrganizationAuthorizationInterceptor(
+      authenticationFacade,
+      organizationRoleService,
+      requestContextService,
+      Mockito.mock(OrganizationHolder::class.java),
+    )
 
-  private val mockMvc = MockMvcBuilders.standaloneSetup(TestController::class.java)
-    .addInterceptors(organizationAuthenticationInterceptor)
-    .build()
+  private val mockMvc =
+    MockMvcBuilders.standaloneSetup(TestController::class.java)
+      .addInterceptors(organizationAuthenticationInterceptor)
+      .build()
 
   @BeforeEach
   fun setupMocks() {
@@ -137,19 +139,27 @@ class OrganizationAuthorizationInterceptorTest {
     fun getAll() = "hello!"
 
     @GetMapping("/v2/organizations/{id}/not-annotated")
-    fun notAnnotated(@PathVariable id: Long) = "henlo from org #$id!"
+    fun notAnnotated(
+      @PathVariable id: Long,
+    ) = "henlo from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/default-perms")
     @UseDefaultPermissions
-    fun defaultPerms(@PathVariable id: Long) = "henlo from org #$id!"
+    fun defaultPerms(
+      @PathVariable id: Long,
+    ) = "henlo from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/requires-admin")
     @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-    fun requiresAdmin(@PathVariable id: Long) = "henlo from org #$id!"
+    fun requiresAdmin(
+      @PathVariable id: Long,
+    ) = "henlo from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/nonsense-perms")
     @RequiresOrganizationRole(OrganizationRoleType.OWNER)
     @UseDefaultPermissions
-    fun nonsensePerms(@PathVariable id: Long) = "henlo from org #$id!"
+    fun nonsensePerms(
+      @PathVariable id: Long,
+    ) = "henlo from org #$id!"
   }
 }

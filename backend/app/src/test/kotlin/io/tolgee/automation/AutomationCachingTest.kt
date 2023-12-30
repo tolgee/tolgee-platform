@@ -23,10 +23,9 @@ import org.springframework.cache.Cache
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",
-  ]
+  ],
 )
 class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private lateinit var testData: ContentDeliveryConfigTestData
 
   @Autowired
@@ -68,8 +67,8 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
       listOf(
         testData.projectBuilder.self.id,
         AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
-        null
-      )
+        null,
+      ),
     )
 
   @Test
@@ -92,16 +91,17 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     getFromCache().assert.isNull()
   }
 
-  private fun getEntityManagerInvocationsCount() = Mockito.mockingDetails(entityManager)
-    .invocations.count {
-      it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
-    }
+  private fun getEntityManagerInvocationsCount() =
+    Mockito.mockingDetails(entityManager)
+      .invocations.count {
+        it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
+      }
 
   private fun doGetAutomations() {
     automationService.getProjectAutomations(
       testData.projectBuilder.self.id,
       AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
-      null
+      null,
     )
   }
 }

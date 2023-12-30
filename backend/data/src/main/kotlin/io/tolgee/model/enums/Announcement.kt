@@ -7,7 +7,8 @@ import java.time.format.DateTimeFormatter
 enum class Announcement(val until: Long) {
   FEATURE_BATCH_OPERATIONS(parseTime("2023-09-10 00:00 UTC")),
   FEATURE_MT_FORMALITY(parseTime("2023-10-20 00:00 UTC")),
-  FEATURE_CONTENT_DELIVERY_AND_WEBHOOKS(parseTime("2024-01-05 00:00 UTC"));
+  FEATURE_CONTENT_DELIVERY_AND_WEBHOOKS(parseTime("2024-01-05 00:00 UTC")),
+  ;
 
   companion object {
     val last: Announcement

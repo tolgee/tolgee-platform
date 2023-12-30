@@ -13,5 +13,5 @@ data class UserAccountWithOrganizationRoleModel(
   var username: String,
   var organizationRole: OrganizationRoleType?,
   var projectsWithDirectPermission: List<SimpleProjectModel>,
-  var avatar: Avatar?
+  var avatar: Avatar?,
 ) : RepresentationModel<UserAccountWithOrganizationRoleModel>()

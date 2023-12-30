@@ -13,7 +13,6 @@ class TolgeeTranslationProvider(
   private val tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties,
   private val tolgeeTranslateApiService: TolgeeTranslateApiService,
 ) : AbstractMtValueProvider() {
-
   override val isEnabled: Boolean
     get() = !tolgeeMachineTranslationProperties.url.isNullOrBlank()
 
@@ -26,8 +25,8 @@ class TolgeeTranslationProvider(
         params.targetLanguageTag,
         params.metadataOrThrow(),
         params.formality,
-        params.isBatch
-      )
+        params.isBatch,
+      ),
     )
   }
 
@@ -42,5 +41,6 @@ class TolgeeTranslationProvider(
   override val formalitySupportingLanguages = null
 
   override fun isLanguageSupported(tag: String): Boolean = true
+
   override fun isLanguageFormalitySupported(tag: String): Boolean = true
 }

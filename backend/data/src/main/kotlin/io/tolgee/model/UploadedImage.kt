@@ -15,13 +15,11 @@ import org.hibernate.annotations.ColumnDefault
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["filename"], name = "uploaded_image_filename")])
 class UploadedImage(
   var filename: String,
-
   @ManyToOne(fetch = FetchType.LAZY)
-  var userAccount: UserAccount
+  var userAccount: UserAccount,
 ) : StandardAuditModel() {
-
-  @ColumnDefault("jpg")
   // legacy is jpg, new is png
+  @ColumnDefault("jpg")
   var extension: String? = null
     get() = field ?: "jpg"
 

@@ -17,15 +17,17 @@ class ProjectStatsTestData : BaseTestData() {
       addLanguages()
       addKeys()
 
-      val organizationOwner = root.addUserAccount {
-        name = "franta"
-        username = "franta"
-      }.self
+      val organizationOwner =
+        root.addUserAccount {
+          name = "franta"
+          username = "franta"
+        }.self
 
-      val organizationMember = root.addUserAccount {
-        name = "jindra"
-        username = "jindra"
-      }.self
+      val organizationMember =
+        root.addUserAccount {
+          name = "jindra"
+          username = "jindra"
+        }.self
 
       root.addOrganization {
         name = "org"
@@ -56,20 +58,23 @@ class ProjectStatsTestData : BaseTestData() {
   }
 
   private fun ProjectBuilder.addKeys() {
-    val tag1 = Tag().apply {
-      name = "Tag1"
-      project = this@addKeys.self
-    }
+    val tag1 =
+      Tag().apply {
+        name = "Tag1"
+        project = this@addKeys.self
+      }
 
-    val tag2 = Tag().apply {
-      name = "Tag2"
-      project = this@addKeys.self
-    }
+    val tag2 =
+      Tag().apply {
+        name = "Tag2"
+        project = this@addKeys.self
+      }
 
-    val tag3 = Tag().apply {
-      name = "Tag3"
-      project = this@addKeys.self
-    }
+    val tag3 =
+      Tag().apply {
+        name = "Tag3"
+        project = this@addKeys.self
+      }
 
     addKey {
       name = "Super key"

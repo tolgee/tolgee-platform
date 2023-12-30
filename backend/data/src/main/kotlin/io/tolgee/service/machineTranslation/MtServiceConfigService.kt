@@ -39,7 +39,10 @@ class MtServiceConfigService(
     return getEnabledServiceInfosByStoredConfig(language) ?: getEnabledServicesByDefaultServerConfig(language)
   }
 
-  fun getPrimaryServices(languagesIds: List<Long>, project: Project): Map<Long, MtServiceInfo?> {
+  fun getPrimaryServices(
+    languagesIds: List<Long>,
+    project: Project,
+  ): Map<Long, MtServiceInfo?> {
     val configs = getStoredConfigs(languagesIds, project)
     return languagesIds.associateWith { languageId ->
       configs[languageId]?.primaryServiceInfo
@@ -83,26 +86,29 @@ class MtServiceConfigService(
     return services[serviceType]?.second?.isLanguageSupported(this.tag) ?: return false
   }
 
-  private fun isServiceEnabledByServerConfig(it: MtServiceInfo) =
-    getServiceProcessor(it)?.isEnabled ?: false
+  private fun isServiceEnabledByServerConfig(it: MtServiceInfo) = getServiceProcessor(it)?.isEnabled ?: false
 
-  private fun isServiceEnabledByServerConfig(it: MtServiceType) =
-    this.services[it]?.second?.isEnabled ?: false
+  private fun isServiceEnabledByServerConfig(it: MtServiceType) = this.services[it]?.second?.isEnabled ?: false
 
   @Transactional
-  fun setProjectSettings(project: Project, dto: SetMachineTranslationSettingsDto) {
+  fun setProjectSettings(
+    project: Project,
+    dto: SetMachineTranslationSettingsDto,
+  ) {
     val storedConfigs = getStoredConfigs(project.id)
     val allLanguages = languageService.findAll(project.id).associateBy { it.id }
 
     validateSettings(dto.settings, allLanguages)
 
     dto.settings.forEach { languageSetting ->
-      val entity = storedConfigs.find { it.targetLanguage?.id == languageSetting.targetLanguageId }
-        ?: MtServiceConfig().apply {
-          this.project = project
-          this.targetLanguage = languageSetting.targetLanguageId
-            ?.let { allLanguages.getLanguageOrThrow(it) }
-        }
+      val entity =
+        storedConfigs.find { it.targetLanguage?.id == languageSetting.targetLanguageId }
+          ?: MtServiceConfig().apply {
+            this.project = project
+            this.targetLanguage =
+              languageSetting.targetLanguageId
+                ?.let { allLanguages.getLanguageOrThrow(it) }
+          }
 
       setPrimaryService(entity, languageSetting)
       entity.enabledServices = getEnabledServices(languageSetting)
@@ -110,16 +116,17 @@ class MtServiceConfigService(
       save(entity)
     }
 
-    val toDelete = storedConfigs.filter { storedConfig ->
-      dto.settings.find { it.targetLanguageId == storedConfig.targetLanguage?.id } == null
-    }
+    val toDelete =
+      storedConfigs.filter { storedConfig ->
+        dto.settings.find { it.targetLanguageId == storedConfig.targetLanguage?.id } == null
+      }
 
     delete(toDelete)
   }
 
   private fun setPrimaryService(
     entity: MtServiceConfig,
-    languageSetting: MachineTranslationLanguagePropsDto
+    languageSetting: MachineTranslationLanguagePropsDto,
   ) {
     // this setting is already deprecated (it doesn't support formality), but we need to support it for now
     entity.primaryService = languageSetting.primaryService
@@ -136,7 +143,10 @@ class MtServiceConfigService(
     return this[id] ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
-  private fun validateSettings(settings: List<MachineTranslationLanguagePropsDto>, allLanguages: Map<Long, Language>) {
+  private fun validateSettings(
+    settings: List<MachineTranslationLanguagePropsDto>,
+    allLanguages: Map<Long, Language>,
+  ) {
     settings.forEach {
       validateSetting(allLanguages, it)
     }
@@ -144,7 +154,7 @@ class MtServiceConfigService(
 
   private fun validateSetting(
     allLanguages: Map<Long, Language>,
-    languageProps: MachineTranslationLanguagePropsDto
+    languageProps: MachineTranslationLanguagePropsDto,
   ) {
     val language = allLanguages.getLanguageOrThrow(languageProps.targetLanguageId) ?: return
     validateLanguageSupported(languageProps, language)
@@ -161,14 +171,15 @@ class MtServiceConfigService(
 
   private fun validatePrimaryServiceFormality(
     languageProps: MachineTranslationLanguagePropsDto,
-    language: Language
+    language: Language,
   ) {
     val primaryServiceInfo = languageProps.primaryServiceInfo ?: return
     if (primaryServiceInfo.formality === null) {
       return
     }
-    val isSupported = getServiceProcessor(primaryServiceInfo)?.isLanguageFormalitySupported(language.tag)
-      ?: false
+    val isSupported =
+      getServiceProcessor(primaryServiceInfo)?.isLanguageFormalitySupported(language.tag)
+        ?: false
 
     if (!isSupported) {
       throwFormalityNotSupported(primaryServiceInfo, language)
@@ -197,16 +208,15 @@ class MtServiceConfigService(
   ) {
     throw BadRequestException(
       Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE,
-      listOf(mtServiceInfo.serviceType.name, language.tag, mtServiceInfo.formality!!)
+      listOf(mtServiceInfo.serviceType.name, language.tag, mtServiceInfo.formality!!),
     )
   }
 
-  private fun getServiceProcessor(it: MtServiceInfo) =
-    this.services[it.serviceType]?.second
+  private fun getServiceProcessor(it: MtServiceInfo) = this.services[it.serviceType]?.second
 
   private fun validateLanguageSupported(
     it: MachineTranslationLanguagePropsDto,
-    language: Language
+    language: Language,
   ) {
     val allServices = getAllEnabledOrPrimaryServices(it)
     allServices.forEach {
@@ -229,7 +239,10 @@ class MtServiceConfigService(
     return allServiceTypes.filter { isServiceEnabledByServerConfig(it) }.toMutableSet()
   }
 
-  private fun setFormalities(entity: MtServiceConfig, languageSetting: MachineTranslationLanguagePropsDto) {
+  private fun setFormalities(
+    entity: MtServiceConfig,
+    languageSetting: MachineTranslationLanguagePropsDto,
+  ) {
     languageSetting.enabledServicesInfoNotNull.forEach {
       when (it.serviceType) {
         MtServiceType.AWS -> entity.awsFormality = it.formality ?: Formality.DEFAULT
@@ -259,17 +272,19 @@ class MtServiceConfigService(
         }
         configs.forEach { config ->
           // put primary service first
-          config.enabledServices = config.enabledServices
-            .sortedByDescending { config.primaryService == it }
-            .toSortedSet()
+          config.enabledServices =
+            config.enabledServices
+              .sortedByDescending { config.primaryService == it }
+              .toSortedSet()
         }
       }
   }
 
   private fun getDefaultConfig(project: Project): MtServiceConfig {
     return MtServiceConfig().apply {
-      enabledServices = services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
-        .keys.toMutableSet()
+      enabledServices =
+        services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
+          .keys.toMutableSet()
       this.project = project
       primaryService = services.entries.find { it.value.first.defaultPrimary }?.key
     }
@@ -300,7 +315,10 @@ class MtServiceConfigService(
     return entities.find { it.targetLanguage != null } ?: entities.find { it.targetLanguage == null }
   }
 
-  private fun getStoredConfigs(languageIds: List<Long>, project: Project): Map<Long, MtServiceConfig?> {
+  private fun getStoredConfigs(
+    languageIds: List<Long>,
+    project: Project,
+  ): Map<Long, MtServiceConfig?> {
     val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, project)
     return languageIds.associateWith { languageId ->
       entities.find { it.targetLanguage?.id == languageId } ?: entities.find { it.targetLanguage == null }

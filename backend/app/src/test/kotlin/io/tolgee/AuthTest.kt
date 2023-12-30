@@ -11,7 +11,7 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
 import io.tolgee.security.authentication.JwtService
-import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
+import io.tolgee.security.thirdParty.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.util.GitHubAuthUtil
 import io.tolgee.util.GoogleAuthUtil
@@ -82,16 +82,18 @@ class AuthTest : AbstractControllerTest() {
 
   @Test
   fun userWithTokenHasAccess() {
-    val response = doAuthentication(initialUsername, initialPassword)
-      .andReturn().response.contentAsString
+    val response =
+      doAuthentication(initialUsername, initialPassword)
+        .andReturn().response.contentAsString
     val token = mapper.readValue(response, HashMap::class.java)["accessToken"] as String?
-    val mvcResult = mvc.perform(
-      MockMvcRequestBuilders.get("/api/projects")
-        .accept(MediaType.ALL)
-        .header("Authorization", String.format("Bearer %s", token))
-        .contentType(MediaType.APPLICATION_JSON)
-    )
-      .andReturn()
+    val mvcResult =
+      mvc.perform(
+        MockMvcRequestBuilders.get("/api/projects")
+          .accept(MediaType.ALL)
+          .header("Authorization", String.format("Bearer %s", token))
+          .contentType(MediaType.APPLICATION_JSON),
+      )
+        .andReturn()
     assertThat(mvcResult.response.status).isEqualTo(200)
   }
 
@@ -106,12 +108,13 @@ class AuthTest : AbstractControllerTest() {
 
     currentDateProvider.forcedDate = baseline
 
-    val mvcResult = mvc.perform(
-      MockMvcRequestBuilders.get("/api/projects")
-        .accept(MediaType.ALL)
-        .header("Authorization", String.format("Bearer %s", token))
-        .contentType(MediaType.APPLICATION_JSON)
-    ).andReturn()
+    val mvcResult =
+      mvc.perform(
+        MockMvcRequestBuilders.get("/api/projects")
+          .accept(MediaType.ALL)
+          .header("Authorization", String.format("Bearer %s", token))
+          .contentType(MediaType.APPLICATION_JSON),
+      ).andReturn()
 
     assertThat(mvcResult.response.status).isEqualTo(401)
     assertThat(mvcResult.response.contentAsString).contains(Message.EXPIRED_JWT_TOKEN.code)
@@ -273,7 +276,7 @@ class AuthTest : AbstractControllerTest() {
       MockMvcRequestBuilders.put("/v2/projects/${project.id}/users/${project.id}/revoke-access")
         .accept(MediaType.ALL)
         .header("Authorization", String.format("Bearer %s", token))
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON),
     ).andIsForbidden.andAssertThatJson {
       node("code").isEqualTo(Message.EXPIRED_SUPER_JWT_TOKEN.code)
     }

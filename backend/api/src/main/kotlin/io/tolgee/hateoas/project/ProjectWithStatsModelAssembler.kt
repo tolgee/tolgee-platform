@@ -28,19 +28,22 @@ class ProjectWithStatsModelAssembler(
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
 ) : RepresentationModelAssemblerSupport<ProjectWithStatsView, ProjectWithStatsModel>(
-  V2ProjectsController::class.java, ProjectWithStatsModel::class.java
-) {
+    V2ProjectsController::class.java,
+    ProjectWithStatsModel::class.java,
+  ) {
   override fun toModel(view: ProjectWithStatsView): ProjectWithStatsModel {
     val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
-    val baseLanguage = view.baseLanguage ?: let {
-      projectService.getOrCreateBaseLanguage(view.id)
-    }
-    val computedPermissions = permissionService.computeProjectPermission(
-      view.organizationRole,
-      view.organizationOwner.basePermission,
-      view.directPermission,
-      UserAccount.Role.USER
-    ).getAdminPermissions(userRole = authenticationFacade.authenticatedUserOrNull?.role)
+    val baseLanguage =
+      view.baseLanguage ?: let {
+        projectService.getOrCreateBaseLanguage(view.id)
+      }
+    val computedPermissions =
+      permissionService.computeProjectPermission(
+        view.organizationRole,
+        view.organizationOwner.basePermission,
+        view.directPermission,
+        UserAccount.Role.USER,
+      ).getAdminPermissions(userRole = authenticationFacade.authenticatedUserOrNull?.role)
 
     return ProjectWithStatsModel(
       id = view.id,

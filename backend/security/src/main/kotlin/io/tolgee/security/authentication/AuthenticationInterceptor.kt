@@ -32,9 +32,13 @@ import org.springframework.web.servlet.HandlerInterceptor
  */
 @Component
 class AuthenticationInterceptor(
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) : HandlerInterceptor, Ordered {
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+  override fun preHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+  ): Boolean {
     if (handler !is HandlerMethod || DispatcherType.ASYNC == request.dispatcherType) {
       return super.preHandle(request, response, handler)
     }

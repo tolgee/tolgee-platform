@@ -13,13 +13,13 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class UntagKeysChunkProcessor(
   private val entityManager: EntityManager,
-  private val tagService: TagService
+  private val tagService: TagService,
 ) : ChunkProcessor<UntagKeysRequest, UntagKeysParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     @Suppress("UNCHECKED_CAST")
     val subChunked = chunk.chunked(100) as List<List<Long>>

@@ -4,9 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 data class RegenerateApiKeyDto(
   @Schema(
-    description = "Expiration date in epoch format (milliseconds)." +
-      " When null key never expires.",
-    example = "1661172869000"
+    description =
+      "Expiration date in epoch format (milliseconds)." +
+        " When null key never expires.",
+    example = "1661172869000",
   )
-  val expiresAt: Long? = null
+  val expiresAt: Long? = null,
 )

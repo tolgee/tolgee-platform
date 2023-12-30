@@ -21,7 +21,7 @@ import kotlin.properties.Delegates
  */
 class AutoTranslationEventHandler(
   private val event: OnProjectActivityStoredEvent,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
   var projectId by Delegates.notNull<Long>()
 
@@ -44,15 +44,16 @@ class AutoTranslationEventHandler(
         keyIds = keyIds,
         isBatch = true,
         baseLanguageId = baseLanguageId ?: return,
-        isHiddenJob = event.isLowVolumeActivity()
+        isHiddenJob = event.isLowVolumeActivity(),
       )
     }
   }
 
   private fun shouldRunTheOperation(): Boolean {
-    val configs = autoTranslationService.getConfigs(
-      entityManager.getReference(Project::class.java, projectId)
-    )
+    val configs =
+      autoTranslationService.getConfigs(
+        entityManager.getReference(Project::class.java, projectId),
+      )
 
     val usingPrimaryMtService = configs.any { it.usingPrimaryMtService }
     val usingTm = configs.any { it.usingTm }
@@ -70,8 +71,7 @@ class AutoTranslationEventHandler(
     return hasEnabledForImport && event.activityRevision.type in IMPORT_ACTIVITIES
   }
 
-  private fun OnProjectActivityStoredEvent.isLowVolumeActivity() =
-    activityRevision.type in LOW_VOLUME_ACTIVITIES
+  private fun OnProjectActivityStoredEvent.isLowVolumeActivity() = activityRevision.type in LOW_VOLUME_ACTIVITIES
 
   private fun getKeyIdsToAutoTranslate(): List<Long> {
     return event.activityRevision.modifiedEntities.mapNotNull { modifiedEntity ->
@@ -96,8 +96,7 @@ class AutoTranslationEventHandler(
       modification.old != modification.new
   }
 
-  private fun ActivityModifiedEntity.isTranslation() =
-    entityClass == Translation::class.simpleName
+  private fun ActivityModifiedEntity.isTranslation() = entityClass == Translation::class.simpleName
 
   private fun ActivityModifiedEntity.isBaseTranslation(): Boolean {
     return describingRelations?.values

@@ -5,11 +5,12 @@ class FormatDetector(private val messages: List<String>) {
    * Tries to detect message format by on all messages in file
    */
   operator fun invoke(): SupportedFormat {
-    val regulars = mapOf(
-      SupportedFormat.C to ToICUConverter.C_PARAM_REGEX,
-      SupportedFormat.PHP to ToICUConverter.PHP_PARAM_REGEX,
-      SupportedFormat.PYTHON to ToICUConverter.PYTHON_PARAM_REGEX
-    )
+    val regulars =
+      mapOf(
+        SupportedFormat.C to ToICUConverter.C_PARAM_REGEX,
+        SupportedFormat.PHP to ToICUConverter.PHP_PARAM_REGEX,
+        SupportedFormat.PYTHON to ToICUConverter.PYTHON_PARAM_REGEX,
+      )
 
     val hitsMap = mutableMapOf<SupportedFormat, Int>()
     regulars.forEach { regularEntry ->

@@ -22,6 +22,6 @@ class RabbitmqAutostartProperties {
      * Expects that postgres is installed in the same container.
      * So the Postgres is started with Tolgee.
      */
-    EMBEDDED
+    EMBEDDED,
   }
 }

@@ -15,8 +15,8 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
     TransactionalTestExecutionListener::class,
     DependencyInjectionTestExecutionListener::class,
     CleanDbTestListener::class,
-    DirtiesContextTestExecutionListener::class
-  ]
+    DirtiesContextTestExecutionListener::class,
+  ],
 )
 @ActiveProfiles(profiles = ["local"])
 abstract class AbstractTransactionalTest {

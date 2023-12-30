@@ -84,13 +84,17 @@ val ResultActions.andAssertError
   get() = assertThat(this.andReturn()).error()
 
 val ResultActions.andPrettyPrint: ResultActions
-  get() = jacksonObjectMapper().let { mapper ->
-    val parsed = mapper.readValue<Any>(this.andGetContentAsString)
-    println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed))
-    return this
-  }
+  get() =
+    jacksonObjectMapper().let { mapper ->
+      val parsed = mapper.readValue<Any>(this.andGetContentAsString)
+      println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed))
+      return this
+    }
 
-fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit): JsonAssert {
+fun JsonAssert.node(
+  node: String,
+  rfn: JsonAssert.() -> Unit,
+): JsonAssert {
   rfn(node(node))
   return this
 }

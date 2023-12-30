@@ -14,16 +14,16 @@ import javax.sql.DataSource
 class PostgresAutoStartConfiguration(
   val postgresAutostartProperties: PostgresAutostartProperties,
 ) {
-  private var _dataSource: DataSource? = null
+  private var dataSource: DataSource? = null
 
   @Bean("dataSource")
   @ConfigurationProperties(prefix = "spring.datasource")
   fun getDataSource(postgresRunner: PostgresRunner?): DataSource {
     postgresRunner ?: throw IllegalStateException("Postgres runner is not initialized")
-    _dataSource?.let { return it }
+    dataSource?.let { return it }
     postgresRunner.run()
-    _dataSource = buildDataSource(postgresRunner)
-    return _dataSource!!
+    dataSource = buildDataSource(postgresRunner)
+    return dataSource!!
   }
 
   private fun buildDataSource(postgresRunner: PostgresRunner): DataSource {

@@ -33,7 +33,6 @@ import org.springframework.test.web.servlet.ResultActions
 
 @ContextRecreatingTest
 class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: ContentDeliveryConfigTestData
 
   @Autowired
@@ -60,9 +59,11 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = setOf(
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES, Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS
-    )
+    enabledFeaturesProvider.forceEnabled =
+      setOf(
+        Feature.PROJECT_LEVEL_CONTENT_STORAGES,
+        Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS,
+      )
     Mockito.reset(s3FileStorageFactory)
     Mockito.reset(azureFileStorageFactory)
   }
@@ -102,7 +103,7 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
   private fun createAzureConfig(): ResultActions {
     return performProjectAuthPost(
       "content-delivery-configs",
-      mapOf("name" to "Azure 2", "contentStorageId" to testData.azureContentStorage.self.id)
+      mapOf("name" to "Azure 2", "contentStorageId" to testData.azureContentStorage.self.id),
     )
   }
 
@@ -113,7 +114,7 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     var id: Long? = null
     performProjectAuthPost(
       "content-delivery-configs",
-      mapOf("name" to "Azure 2", "contentStorageId" to testData.azureContentStorage.self.id, "autoPublish" to true)
+      mapOf("name" to "Azure 2", "contentStorageId" to testData.azureContentStorage.self.id, "autoPublish" to true),
     ).andAssertThatJson {
       node("id").isNumber.satisfies {
         id = it.toLong()
@@ -133,7 +134,7 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `removes the automation on update`() {
     performProjectAuthPut(
       "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}",
-      mapOf("name" to "DS", "autoPublish" to false)
+      mapOf("name" to "DS", "autoPublish" to false),
     )
     executeInNewTransaction {
       contentDeliveryConfigService
@@ -147,7 +148,7 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `updates content delivery config`() {
     performProjectAuthPut(
       "content-delivery-configs/${testData.s3ContentDeliveryConfig.self.id}",
-      mapOf("name" to "S3 2", "contentStorageId" to testData.s3ContentStorage.self.id)
+      mapOf("name" to "S3 2", "contentStorageId" to testData.s3ContentStorage.self.id),
     ).andAssertThatJson {
       node("name").isEqualTo("S3 2")
       node("storage") {
@@ -179,7 +180,7 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `deletes content delivery config`() {
     performProjectAuthDelete(
-      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}"
+      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}",
     ).andIsOk
     contentDeliveryConfigService.find(testData.defaultServerContentDeliveryConfig.self.id).assert.isNull()
   }

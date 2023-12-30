@@ -22,7 +22,7 @@ import java.util.*
   indexes = [
     jakarta.persistence.Index(columnList = "chunkNumber"),
     jakarta.persistence.Index(columnList = "status"),
-  ]
+  ],
 )
 class BatchJobChunkExecution : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

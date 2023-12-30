@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: LanguagePermissionsTestData
 
   @BeforeEach
@@ -101,14 +100,18 @@ class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("
     }.andIsOk
   }
 
-  private fun performUpdate(lang: String) = performProjectAuthPut(
-    "/translations",
-    SetTranslationsWithKeyDto(
-      "key", null, mutableMapOf(lang to lang)
+  private fun performUpdate(lang: String) =
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "key",
+        null,
+        mutableMapOf(lang to lang),
+      ),
     )
-  )
 
-  private fun performSetState(translationId: Long) = performProjectAuthPut(
-    "/translations/$translationId/set-state/REVIEWED"
-  )
+  private fun performSetState(translationId: Long) =
+    performProjectAuthPut(
+      "/translations/$translationId/set-state/REVIEWED",
+    )
 }

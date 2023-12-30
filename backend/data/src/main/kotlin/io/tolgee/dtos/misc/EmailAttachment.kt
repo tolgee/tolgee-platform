@@ -4,5 +4,5 @@ import org.springframework.core.io.InputStreamSource
 
 class EmailAttachment(
   var name: String,
-  var inputStreamSource: InputStreamSource
+  var inputStreamSource: InputStreamSource,
 )

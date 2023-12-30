@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.sentry")
 @DocProperty(
   description = "Tolgee uses [Sentry](https://sentry.io/) for error reporting.",
-  displayName = "Sentry"
+  displayName = "Sentry",
 )
 class SentryProperties {
   @DocProperty(description = "Server DSN. If unset, error reporting is disabled on the server.")

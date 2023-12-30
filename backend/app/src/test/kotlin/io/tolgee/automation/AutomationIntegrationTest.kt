@@ -44,7 +44,6 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureMockMvc
 class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
-
   @MockBean
   @Autowired
   lateinit var contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider
@@ -164,11 +163,14 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         any<String>(),
         any<HttpMethod>(),
         any<HttpEntity<*>>(),
-        any<Class<*>>()
+        any<Class<*>>(),
       )
   }
 
-  private fun verifyWebhookExecuted(testData: WebhooksTestData, webhookTriggeringCallback: () -> Unit) {
+  private fun verifyWebhookExecuted(
+    testData: WebhooksTestData,
+    webhookTriggeringCallback: () -> Unit,
+  ) {
     val invocations = getWebhookRestTemplateInvocationCount()
     webhookTriggeringCallback()
     waitForNotThrowing {
@@ -194,7 +196,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun getWebhookRestTemplateInvocationCount() = Mockito.mockingDetails(webhookRestTemplate).invocations.count()
 
-  private fun verifyWebhookSignature(httpEntity: HttpEntity<String>, secret: String) {
+  private fun verifyWebhookSignature(
+    httpEntity: HttpEntity<String>,
+    secret: String,
+  ) {
     val signature = httpEntity.headers["Tolgee-Signature"]
     signature.assert.isNotNull
     verifyWebhookSignatureHeader(
@@ -202,7 +207,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       signature!!.single(),
       secret,
       300000,
-      currentDateProvider.date.time
+      currentDateProvider.date.time,
     )
   }
 
@@ -221,8 +226,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       "/translations",
       mapOf(
         "key" to "key",
-        "translations" to mapOf("en" to UUID.randomUUID().toString())
-      )
+        "translations" to mapOf("en" to UUID.randomUUID().toString()),
+      ),
     ).andIsOk
   }
 }

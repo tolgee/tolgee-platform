@@ -23,7 +23,6 @@ import kotlin.properties.Delegates
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: ResolvableImportTestData
   var uploadedImageId by Delegates.notNull<Long>()
   var uploadedImageId2 by Delegates.notNull<Long>()
@@ -37,16 +36,18 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
-    uploadedImageId = imageUploadService.store(
-      generateImage(),
-      userAccount!!,
-      ImageUploadInfoDto(location = "My cool frame")
-    ).id
-    uploadedImageId2 = imageUploadService.store(
-      generateImage(),
-      testData.viewOnlyUser,
-      ImageUploadInfoDto(location = "My cool frame")
-    ).id
+    uploadedImageId =
+      imageUploadService.store(
+        generateImage(),
+        userAccount!!,
+        ImageUploadInfoDto(location = "My cool frame"),
+      ).id
+    uploadedImageId2 =
+      imageUploadService.store(
+        generateImage(),
+        testData.viewOnlyUser,
+        ImageUploadInfoDto(location = "My cool frame"),
+      ).id
   }
 
   @Test
@@ -55,67 +56,77 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       mapOf(
-        "keys" to listOf(
-          mapOf(
-            "name" to "key-1",
-            "namespace" to "namespace-1",
-            "translations" to mapOf(
-              "de" to mapOf(
-                "text" to "changed",
-                "resolution" to "OVERRIDE"
-              ),
-              "en" to mapOf(
-                "text" to "new",
-                "resolution" to "NEW"
-              )
-            ),
-            "screenshots" to listOf(
-              mapOf(
-                "text" to "Oh oh Oh",
-                "uploadedImageId" to uploadedImageId,
-                "positions" to listOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "de" to
+                    mapOf(
+                      "text" to "changed",
+                      "resolution" to "OVERRIDE",
+                    ),
+                  "en" to
+                    mapOf(
+                      "text" to "new",
+                      "resolution" to "NEW",
+                    ),
+                ),
+              "screenshots" to
+                listOf(
                   mapOf(
-                    "x" to 100,
-                    "y" to 150,
-                    "width" to 80,
-                    "height" to 100
+                    "text" to "Oh oh Oh",
+                    "uploadedImageId" to uploadedImageId,
+                    "positions" to
+                      listOf(
+                        mapOf(
+                          "x" to 100,
+                          "y" to 150,
+                          "width" to 80,
+                          "height" to 100,
+                        ),
+                        mapOf(
+                          "x" to 500,
+                          "y" to 200,
+                          "width" to 30,
+                          "height" to 20,
+                        ),
+                      ),
                   ),
-                  mapOf(
-                    "x" to 500,
-                    "y" to 200,
-                    "width" to 30,
-                    "height" to 20
-                  )
-                )
-              )
-            )
-          ),
-          mapOf(
-            "name" to "key-2",
-            "namespace" to "namespace-1",
-            "translations" to mapOf(
-              "en" to mapOf(
-                "text" to "new",
-                "resolution" to "KEEP"
-              )
+                ),
             ),
-            "screenshots" to listOf(
-              mapOf(
-                "text" to "Oh oh Oh",
-                "uploadedImageId" to uploadedImageId,
-                "positions" to listOf(
+            mapOf(
+              "name" to "key-2",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "new",
+                      "resolution" to "KEEP",
+                    ),
+                ),
+              "screenshots" to
+                listOf(
                   mapOf(
-                    "x" to 100,
-                    "y" to 150,
-                    "width" to 80,
-                    "height" to 100
-                  )
-                )
-              )
-            )
+                    "text" to "Oh oh Oh",
+                    "uploadedImageId" to uploadedImageId,
+                    "positions" to
+                      listOf(
+                        mapOf(
+                          "x" to 100,
+                          "y" to 150,
+                          "width" to 80,
+                          "height" to 100,
+                        ),
+                      ),
+                  ),
+                ),
+            ),
           ),
-        )
-      )
+      ),
     ).andIsOk.andAssertThatJson {
       node("keys").isArray.hasSize(2)
       node("screenshots") {
@@ -142,22 +153,26 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       mapOf(
-        "keys" to listOf(
-          mapOf(
-            "name" to "key-1",
-            "namespace" to "namespace-1",
-            "translations" to mapOf(
-              "de" to mapOf(
-                "text" to "changed",
-              ),
-              "en" to mapOf(
-                "text" to "new",
-                "resolution" to "KEEP"
-              )
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "de" to
+                    mapOf(
+                      "text" to "changed",
+                    ),
+                  "en" to
+                    mapOf(
+                      "text" to "new",
+                      "resolution" to "KEEP",
+                    ),
+                ),
             ),
           ),
-        )
-      )
+      ),
     ).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("import_keys_error")
       node("params") {
@@ -184,7 +199,7 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     val data: Map<*, *> = jacksonObjectMapper().readValue(realData.inputStream, Map::class.java)
     performProjectAuthPost(
       "keys/import-resolvable",
-      data
+      data,
     ).andIsOk
   }
 
@@ -195,18 +210,21 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       mapOf(
-        "keys" to listOf(
-          mapOf(
-            "name" to "key-1",
-            "namespace" to "namespace-1",
-            "translations" to mapOf(
-              "de" to mapOf(
-                "text" to "changed",
-              ),
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "de" to
+                    mapOf(
+                      "text" to "changed",
+                    ),
+                ),
             ),
           ),
-        )
-      )
+      ),
     ).andIsForbidden
   }
 
@@ -217,13 +235,14 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       mapOf(
-        "keys" to listOf(
-          mapOf(
-            "name" to "key-1",
-            "namespace" to "namespace-10",
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-10",
+            ),
           ),
-        )
-      )
+      ),
     ).andIsForbidden
   }
 
@@ -234,33 +253,36 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       mapOf(
-        "keys" to listOf(
-          mapOf(
-            "name" to "key-1",
-            "namespace" to "namespace-1",
-            "screenshots" to listOf(
-              mapOf(
-                "text" to "Oh oh Oh",
-                "uploadedImageId" to uploadedImageId,
-                "positions" to listOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-1",
+              "screenshots" to
+                listOf(
                   mapOf(
-                    "x" to 100,
-                    "y" to 150,
-                    "width" to 80,
-                    "height" to 100
+                    "text" to "Oh oh Oh",
+                    "uploadedImageId" to uploadedImageId,
+                    "positions" to
+                      listOf(
+                        mapOf(
+                          "x" to 100,
+                          "y" to 150,
+                          "width" to 80,
+                          "height" to 100,
+                        ),
+                        mapOf(
+                          "x" to 500,
+                          "y" to 200,
+                          "width" to 30,
+                          "height" to 20,
+                        ),
+                      ),
                   ),
-                  mapOf(
-                    "x" to 500,
-                    "y" to 200,
-                    "width" to 30,
-                    "height" to 20
-                  )
-                )
-              )
-            )
+                ),
+            ),
           ),
-        )
-      )
+      ),
     ).andIsForbidden
   }
 
@@ -271,13 +293,14 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       mapOf(
-        "keys" to listOf(
-          mapOf(
-            "name" to "key-1",
-            "namespace" to "namespace-8",
-          )
-        ),
-      )
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-8",
+            ),
+          ),
+      ),
     ).andIsOk
   }
 
@@ -288,22 +311,30 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       mapOf(
-        "keys" to listOf(
-          mapOf(
-            "name" to "key-1",
-            "namespace" to "namespace-1",
-            "translations" to mapOf(
-              "en" to mapOf(
-                "text" to "changed",
-              ),
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "changed",
+                    ),
+                ),
             ),
-          )
-        ),
-      )
+          ),
+      ),
     ).andIsOk
   }
 
-  fun assertTranslationText(namespace: String?, keyName: String, languageTag: String, expectedText: String) {
+  fun assertTranslationText(
+    namespace: String?,
+    keyName: String,
+    languageTag: String,
+    expectedText: String,
+  ) {
     projectService.get(testData.projectBuilder.self.id)
       .keys
       .find { it.name == keyName && it.namespace?.name == namespace }!!
@@ -311,7 +342,7 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
       .find { it.language.tag == languageTag }!!
       .text
       .assert.isEqualTo(
-        expectedText
+        expectedText,
       )
   }
 }

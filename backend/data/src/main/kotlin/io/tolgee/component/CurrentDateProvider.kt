@@ -28,7 +28,7 @@ class CurrentDateProvider(
   auditingHandler: AuditingHandler,
   private val entityManager: EntityManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val transactionManager: PlatformTransactionManager
+  private val transactionManager: PlatformTransactionManager,
 ) : Logging, DateTimeProvider {
   var forcedDate: Date? = null
     set(value) {
@@ -54,7 +54,7 @@ class CurrentDateProvider(
           entityManager.persist(
             ForcedServerDateTime().apply {
               time = date
-            }
+            },
           )
         }
       }
@@ -66,7 +66,10 @@ class CurrentDateProvider(
     auditingHandler.setDateTimeProvider(this)
   }
 
-  fun forceDateString(dateString: String, pattern: String = "yyyy-MM-dd HH:mm:ss z") {
+  fun forceDateString(
+    dateString: String,
+    pattern: String = "yyyy-MM-dd HH:mm:ss z",
+  ) {
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
     val parsed = ZonedDateTime.parse(dateString, formatter).toInstant().toEpochMilli()
     forcedDate = Date(parsed)
@@ -88,12 +91,12 @@ class CurrentDateProvider(
   private fun getServerTimeEntity(): ForcedServerDateTime? =
     entityManager.createQuery(
       "select st from ForcedServerDateTime st where st.id = 1",
-      ForcedServerDateTime::class.java
+      ForcedServerDateTime::class.java,
     ).resultList.singleOrNull()
 
   private fun getForcedTime(): Timestamp? =
     entityManager.createNativeQuery(
       "select st.time from public.forced_server_date_time st where st.id = 1",
-      Timestamp::class.java
+      Timestamp::class.java,
     ).resultList.singleOrNull() as Timestamp?
 }

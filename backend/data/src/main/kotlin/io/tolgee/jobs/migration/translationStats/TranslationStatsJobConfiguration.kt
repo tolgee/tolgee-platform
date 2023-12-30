@@ -20,7 +20,6 @@ import javax.sql.DataSource
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Configuration
 class TranslationStatsJobConfiguration {
-
   companion object {
     const val JOB_NAME = "translationStatsJob"
   }
@@ -49,30 +48,34 @@ class TranslationStatsJobConfiguration {
   }
 
   val reader: ItemReader<StatsMigrationTranslationView>
-    get() = RepositoryItemReader<StatsMigrationTranslationView>().apply {
-      setRepository(translationRepository)
-      setMethodName(translationRepository::findAllForStatsUpdate.name)
-      setSort(mapOf("id" to Sort.Direction.ASC))
-      setPageSize(100)
-    }
+    get() =
+      RepositoryItemReader<StatsMigrationTranslationView>().apply {
+        setRepository(translationRepository)
+        setMethodName(translationRepository::findAllForStatsUpdate.name)
+        setSort(mapOf("id" to Sort.Direction.ASC))
+        setPageSize(100)
+      }
 
-  val writer: ItemWriter<TranslationStats> = ItemWriter { items ->
-    items.forEach {
-      val query = entityManager.createNativeQuery(
-        "UPDATE translation set word_count = :wordCount, character_count = :characterCount where id = :id"
-      )
-      query.setParameter("wordCount", it.wordCount)
-      query.setParameter("characterCount", it.characterCount)
-      query.setParameter("id", it.id)
-      query.executeUpdate()
+  val writer: ItemWriter<TranslationStats> =
+    ItemWriter { items ->
+      items.forEach {
+        val query =
+          entityManager.createNativeQuery(
+            "UPDATE translation set word_count = :wordCount, character_count = :characterCount where id = :id",
+          )
+        query.setParameter("wordCount", it.wordCount)
+        query.setParameter("characterCount", it.characterCount)
+        query.setParameter("id", it.id)
+        query.executeUpdate()
+      }
     }
-  }
 
   val step: Step
-    get() = StepBuilder("step", jobRepository)
-      .chunk<StatsMigrationTranslationView, TranslationStats>(100, platformTransactionManager)
-      .reader(reader)
-      .processor(TranslationProcessor())
-      .writer(writer)
-      .build()
+    get() =
+      StepBuilder("step", jobRepository)
+        .chunk<StatsMigrationTranslationView, TranslationStats>(100, platformTransactionManager)
+        .reader(reader)
+        .processor(TranslationProcessor())
+        .writer(writer)
+        .build()
 }

@@ -15,18 +15,21 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["internal/sql"])
 @Transactional
 class SqlController(
-  val entityManager: EntityManager
+  val entityManager: EntityManager,
 ) {
-
   @PostMapping(value = ["/list"])
   @Transactional
-  fun getList(@RequestBody query: String): MutableList<Any?>? {
+  fun getList(
+    @RequestBody query: String,
+  ): MutableList<Any?>? {
     return entityManager.createNativeQuery(query).resultList
   }
 
   @PostMapping(value = ["/execute"])
   @Transactional
-  fun execute(@RequestBody query: String) {
+  fun execute(
+    @RequestBody query: String,
+  ) {
     entityManager.createNativeQuery(query).executeUpdate()
   }
 }

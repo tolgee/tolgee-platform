@@ -24,7 +24,6 @@ import org.springframework.http.HttpHeaders
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TranslationsTestData
 
   @BeforeEach
@@ -39,8 +38,10 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", null, mutableMapOf("en" to "English")
-      )
+        "A key",
+        null,
+        mutableMapOf("en" to "English"),
+      ),
     ).andIsOk
       .andAssertThatJson {
         node("translations.en.text").isEqualTo("English")
@@ -57,8 +58,11 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", null, mutableMapOf("en" to "English"), setOf("en", "de")
-      )
+        "A key",
+        null,
+        mutableMapOf("en" to "English"),
+        setOf("en", "de"),
+      ),
     ).andIsOk
       .andAssertThatJson {
         node("translations.en.text").isEqualTo("English")
@@ -74,8 +78,10 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", null, mutableMapOf("en" to text)
-      )
+        "A key",
+        null,
+        mutableMapOf("en" to text),
+      ),
     ).andIsBadRequest
   }
 
@@ -110,7 +116,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     saveTestData()
     performProjectAuthPut(
       "/translations",
-      SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English"))
+      SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English")),
     ).andIsForbidden
   }
 
@@ -120,7 +126,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     saveTestData()
     performProjectAuthPost(
       "/translations",
-      SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English"))
+      SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English")),
     ).andIsOk
   }
 
@@ -133,7 +139,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
       SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English")),
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsOk
   }
 
@@ -143,7 +149,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     saveTestData()
     performProjectAuthPost(
       "/translations",
-      SetTranslationsWithKeyDto("A key not existings", null, mutableMapOf("en" to "English"))
+      SetTranslationsWithKeyDto("A key not existings", null, mutableMapOf("en" to "English")),
     ).andIsForbidden
   }
 
@@ -155,8 +161,10 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", null, mutableMapOf("en" to "English", "de" to null)
-      )
+        "A key",
+        null,
+        mutableMapOf("en" to "English", "de" to null),
+      ),
     ).andIsOk
       .andAssertThatJson {
         node("translations.en.text").isEqualTo("English")
@@ -178,8 +186,10 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     performProjectAuthPost(
       "/translations",
       SetTranslationsWithKeyDto(
-        "Super ultra cool new key", null, mutableMapOf("en" to "English")
-      )
+        "Super ultra cool new key",
+        null,
+        mutableMapOf("en" to "English"),
+      ),
     ).andIsOk.andAssertThatJson {
       node("translations.en.text").isEqualTo("English")
       node("translations.en.id").isValidId
@@ -196,8 +206,10 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "lala", null, mutableMapOf("en" to "English")
-      )
+        "lala",
+        null,
+        mutableMapOf("en" to "English"),
+      ),
     ).andIsOk.andAssertThatJson {
       node("translations.en.text").isEqualTo("English")
       node("translations.en.id").isValidId
@@ -216,8 +228,8 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
         key = "state test key",
         namespace = null,
         translations = mutableMapOf("en" to "b"),
-        languagesToReturn = setOf("en", "de")
-      )
+        languagesToReturn = setOf("en", "de"),
+      ),
     ).andAssertThatJson {
       node("translations.en.outdated").isEqualTo(false)
       node("translations.de.outdated").isEqualTo(true)
@@ -235,8 +247,8 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
         key = "state test key",
         namespace = null,
         translations = mutableMapOf("de" to "new"),
-        languagesToReturn = setOf("en", "de")
-      )
+        languagesToReturn = setOf("en", "de"),
+      ),
     ).andAssertThatJson {
       node("translations.en.outdated").isEqualTo(false)
       node("translations.de.outdated").isEqualTo(false)
@@ -250,7 +262,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     val translation = testData.aKeyGermanTranslation
     performProjectAuthPut(
       "/translations/${translation.id}/dismiss-auto-translated-state",
-      null
+      null,
     ).andIsOk
     val updatedTranslation = translationService.get(translation.id)
     assertThat(updatedTranslation.auto).isEqualTo(false)
@@ -266,10 +278,13 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     testOutdated(translation, true)
   }
 
-  private fun testOutdated(translation: Translation, state: Boolean) {
+  private fun testOutdated(
+    translation: Translation,
+    state: Boolean,
+  ) {
     performProjectAuthPut(
       "/translations/${translation.id}/set-outdated-flag/$state",
-      null
+      null,
     ).andIsOk
     val updatedTranslation = translationService.get(translation.id)
     assertThat(updatedTranslation.outdated).isEqualTo(state)

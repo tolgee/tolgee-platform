@@ -34,14 +34,14 @@ import java.util.*
 open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
   /** The MimeMessage to convert  */
   private val mimeMessage: jakarta.mail.internet.MimeMessage
+
   /** @return Returns the plainContent if any
-   */
-  /** Plain mail content from MimeMessage  */
+   Plain mail content from MimeMessage  */
   var plainContent: String? = null
     private set
+
   /** @return Returns the htmlContent if any
-   */
-  /** Html mail content from MimeMessage  */
+   Html mail content from MimeMessage  */
   var htmlContent: String? = null
     private set
 
@@ -50,9 +50,9 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
 
   /** Attachments stored by their content-id  */
   private val cidMap: MutableMap<String, jakarta.activation.DataSource>
+
   /** @return Returns the isMultiPart.
-   */
-  /** Is this a Multipart email  */
+   Is this a Multipart email  */
   var isMultipart: Boolean
     private set
 
@@ -126,7 +126,9 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
       val addresses: Array<jakarta.mail.Address> = mimeMessage.from
       return if (addresses == null || addresses.size == 0) {
         null
-      } else (addresses[0] as jakarta.mail.internet.InternetAddress).address
+      } else {
+        (addresses[0] as jakarta.mail.internet.InternetAddress).address
+      }
     }
 
   @get:Throws(Exception::class)
@@ -139,7 +141,9 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
       val addresses: Array<jakarta.mail.Address> = mimeMessage.replyTo
       return if (addresses == null || addresses.size == 0) {
         null
-      } else (addresses[0] as jakarta.mail.internet.InternetAddress).address
+      } else {
+        (addresses[0] as jakarta.mail.internet.InternetAddress).address
+      }
     }
 
   @get:Throws(Exception::class)
@@ -159,17 +163,20 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
    * @throws IOException        parsing the MimeMessage failed
    */
   @Throws(jakarta.mail.MessagingException::class, IOException::class)
-  protected fun parse(parent: jakarta.mail.Multipart?, part: jakarta.mail.internet.MimePart) {
+  protected fun parse(
+    parent: jakarta.mail.Multipart?,
+    part: jakarta.mail.internet.MimePart,
+  ) {
     if (isMimeType(
         part,
-        "text/plain"
+        "text/plain",
       ) && plainContent == null && !jakarta.mail.Part.ATTACHMENT.equals(part.disposition, ignoreCase = true)
     ) {
       plainContent = part.content.toString()
     } else {
       if (isMimeType(
           part,
-          "text/html"
+          "text/html",
         ) && htmlContent == null && !jakarta.mail.Part.ATTACHMENT.equals(part.disposition, ignoreCase = true)
       ) {
         htmlContent = part.content.toString()
@@ -214,7 +221,10 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
    * @throws IOException        parsing the MimeMessage failed
    */
   @Throws(jakarta.mail.MessagingException::class, IOException::class)
-  private fun isMimeType(part: jakarta.mail.internet.MimePart, mimeType: String): Boolean {
+  private fun isMimeType(
+    part: jakarta.mail.internet.MimePart,
+    mimeType: String,
+  ): Boolean {
     // Do not use part.isMimeType(String) as it is broken for MimeBodyPart
     // and does not really check the actual content type.
     return try {
@@ -238,7 +248,7 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
   @Throws(jakarta.mail.MessagingException::class, IOException::class)
   protected fun createDataSource(
     parent: jakarta.mail.Multipart?,
-    part: jakarta.mail.internet.MimePart
+    part: jakarta.mail.internet.MimePart,
   ): jakarta.activation.DataSource {
     val dataHandler: jakarta.activation.DataHandler = part.dataHandler
     val dataSource: jakarta.activation.DataSource = dataHandler.dataSource
@@ -330,16 +340,20 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
    * @throws UnsupportedEncodingException decoding the text failed
    */
   @Throws(jakarta.mail.MessagingException::class, UnsupportedEncodingException::class)
-  protected fun getDataSourceName(part: jakarta.mail.Part, dataSource: jakarta.activation.DataSource): String? {
+  protected fun getDataSourceName(
+    part: jakarta.mail.Part,
+    dataSource: jakarta.activation.DataSource,
+  ): String? {
     var result: String? = dataSource.name
     if (result == null || result.isEmpty()) {
       result = part.fileName
     }
-    result = if (result != null && !result.isEmpty()) {
-      jakarta.mail.internet.MimeUtility.decodeText(result)
-    } else {
-      null
-    }
+    result =
+      if (result != null && !result.isEmpty()) {
+        jakarta.mail.internet.MimeUtility.decodeText(result)
+      } else {
+        null
+      }
     return result
   }
 
@@ -374,6 +388,8 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     val pos = fullMimeType.indexOf(';')
     return if (pos >= 0) {
       fullMimeType.substring(0, pos)
-    } else fullMimeType
+    } else {
+      fullMimeType
+    }
   }
 }

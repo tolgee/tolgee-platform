@@ -6,5 +6,5 @@ import io.tolgee.model.batch.BatchJob
 class BatchJobView(
   val batchJob: BatchJob,
   val progress: Int,
-  val errorMessage: Message?
+  val errorMessage: Message?,
 )

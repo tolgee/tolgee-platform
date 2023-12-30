@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 class LanguageDeletePermissionTest : AbstractSpringTest() {
-
   lateinit var testData: LanguagePermissionsTestData
 
   @BeforeEach
@@ -110,7 +109,10 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
     }
   }
 
-  private fun checkUser(userAccount: UserAccount, checkFn: ProjectPermissionData.() -> Unit) {
+  private fun checkUser(
+    userAccount: UserAccount,
+    checkFn: ProjectPermissionData.() -> Unit,
+  ) {
     val data = permissionService.getProjectPermissionData(testData.project.id, userAccount.id)
     checkFn(data)
   }

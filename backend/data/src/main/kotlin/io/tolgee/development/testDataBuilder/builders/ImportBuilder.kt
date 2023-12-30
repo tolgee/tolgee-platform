@@ -13,11 +13,12 @@ class ImportBuilder(
 
   val data = DATA()
 
-  override var self: Import = Import(projectBuilder.self).apply {
-    projectBuilder.onlyUser?.let {
-      author = it
+  override var self: Import =
+    Import(projectBuilder.self).apply {
+      projectBuilder.onlyUser?.let {
+        author = it
+      }
     }
-  }
 
   fun addImportFile(ft: FT<ImportFile>) = addOperation(data.importFiles, ft)
 }

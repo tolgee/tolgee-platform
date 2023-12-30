@@ -6,5 +6,5 @@ import kotlin.reflect.KClass
 
 @Target(allowedTargets = [AnnotationTarget.PROPERTY])
 annotation class ActivityLoggedProp(
-  val modificationProvider: KClass<out PropChangesProvider> = DefaultPropChangesProvider::class
+  val modificationProvider: KClass<out PropChangesProvider> = DefaultPropChangesProvider::class,
 )

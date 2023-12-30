@@ -5,9 +5,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.authentication.google")
 @DocProperty(
-  description = "The following instructions explain how to set up Google OAuth. " +
-    "[Setting up OAuth 2.0](https://support.google.com/cloud/answer/6158849).",
-  displayName = "Google"
+  description =
+    "The following instructions explain how to set up Google OAuth. " +
+      "[Setting up OAuth 2.0](https://support.google.com/cloud/answer/6158849).",
+  displayName = "Google",
 )
 class GoogleAuthenticationProperties {
   @DocProperty(description = "OAuth Client ID, obtained in Google Cloud Console.")
@@ -17,8 +18,9 @@ class GoogleAuthenticationProperties {
   var clientSecret: String? = null
 
   @DocProperty(
-    description = "The registration can be limited to users of a Google Workspace domain. " +
-      "If nothing is set, anyone can log in with their Google account."
+    description =
+      "The registration can be limited to users of a Google Workspace domain. " +
+        "If nothing is set, anyone can log in with their Google account.",
   )
   var workspaceDomain: String? = null
 

@@ -64,7 +64,7 @@ class ProjectService(
   private val projectHolder: ProjectHolder,
   @Lazy
   private val batchJobService: BatchJobService,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -131,11 +131,12 @@ class ProjectService(
   @Transactional
   fun getView(id: Long): ProjectWithLanguagesView {
     val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
-    val withoutPermittedLanguages = projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
-      ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    val withoutPermittedLanguages =
+      projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
+        ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
-      perms.directPermissions?.translateLanguageIds?.toList()
+      perms.directPermissions?.translateLanguageIds?.toList(),
     )
   }
 
@@ -161,15 +162,20 @@ class ProjectService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun editProject(id: Long, dto: EditProjectDTO): Project {
-    val project = projectRepository.findById(id)
-      .orElseThrow { NotFoundException() }!!
+  fun editProject(
+    id: Long,
+    dto: EditProjectDTO,
+  ): Project {
+    val project =
+      projectRepository.findById(id)
+        .orElseThrow { NotFoundException() }!!
     project.name = dto.name
     project.description = dto.description
 
     dto.baseLanguageId?.let {
-      val language = project.languages.find { it.id == dto.baseLanguageId }
-        ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+      val language =
+        project.languages.find { it.id == dto.baseLanguageId }
+          ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
       project.baseLanguage = language
     }
 
@@ -195,12 +201,13 @@ class ProjectService(
         val permission = result[1] as Permission?
         val organization = result[2] as Organization
         val organizationRole = result[3] as OrganizationRole?
-        val scopes = permissionService.computeProjectPermission(
-          organizationRole?.type,
-          organization.basePermission,
-          permission,
-          userAccount.role ?: UserAccount.Role.USER
-        ).scopes
+        val scopes =
+          permissionService.computeProjectPermission(
+            organizationRole?.type,
+            organization.basePermission,
+            permission,
+            userAccount.role ?: UserAccount.Role.USER,
+          ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()
   }
@@ -211,15 +218,17 @@ class ProjectService(
 
   private fun addPermittedLanguagesToProjects(
     projectsPage: Page<ProjectView>,
-    userId: Long
+    userId: Long,
   ): Page<ProjectWithLanguagesView> {
-    val projectLanguageMap = permissionService.getPermittedTranslateLanguagesForProjectIds(
-      projectsPage.content.map { it.id },
-      userId
-    )
-    val newContent = projectsPage.content.map {
-      ProjectWithLanguagesView.fromProjectView(it, projectLanguageMap[it.id])
-    }
+    val projectLanguageMap =
+      permissionService.getPermittedTranslateLanguagesForProjectIds(
+        projectsPage.content.map { it.id },
+        userId,
+      )
+    val newContent =
+      projectsPage.content.map {
+        ProjectWithLanguagesView.fromProjectView(it, projectLanguageMap[it.id])
+      }
 
     return PageImpl(newContent, projectsPage.pageable, projectsPage.totalElements)
   }
@@ -319,7 +328,10 @@ class ProjectService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
-  fun setAvatar(project: Project, avatar: InputStream) {
+  fun setAvatar(
+    project: Project,
+    avatar: InputStream,
+  ) {
     avatarService.setAvatar(project, avatar)
   }
 
@@ -327,7 +339,10 @@ class ProjectService(
     return projectRepository.countAllBySlug(slug) < 1
   }
 
-  fun generateSlug(name: String, oldSlug: String? = null): String {
+  fun generateSlug(
+    name: String,
+    oldSlug: String? = null,
+  ): String {
     return slugGenerator.generate(name, 3, 60) {
       if (oldSlug == it) {
         return@generate true
@@ -339,13 +354,13 @@ class ProjectService(
   fun findPermittedInOrganizationPaged(
     pageable: Pageable,
     search: String?,
-    organizationId: Long? = null
+    organizationId: Long? = null,
   ): Page<ProjectWithLanguagesView> {
     return findPermittedInOrganizationPaged(
       pageable = pageable,
       search = search,
       organizationId = organizationId,
-      userAccountId = authenticationFacade.authenticatedUser.id
+      userAccountId = authenticationFacade.authenticatedUser.id,
     )
   }
 
@@ -353,20 +368,20 @@ class ProjectService(
     pageable: Pageable,
     search: String?,
     organizationId: Long? = null,
-    userAccountId: Long
+    userAccountId: Long,
   ): Page<ProjectWithLanguagesView> {
-    val withoutPermittedLanguages = projectRepository.findAllPermitted(
-      userAccountId,
-      pageable,
-      search,
-      organizationId
-    )
+    val withoutPermittedLanguages =
+      projectRepository.findAllPermitted(
+        userAccountId,
+        pageable,
+        search,
+        organizationId,
+      )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
-  fun saveAll(projects: Collection<Project>): MutableList<Project> =
-    projectRepository.saveAll(projects)
+  fun saveAll(projects: Collection<Project>): MutableList<Project> = projectRepository.saveAll(projects)
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
   fun save(project: Project): Project {
@@ -386,7 +401,10 @@ class ProjectService(
     return this.projectRepository.findById(project.id).orElseThrow { NotFoundException() }
   }
 
-  private fun getOrCreateBaseLanguage(dto: CreateProjectDTO, createdLanguages: List<Language>): Language {
+  private fun getOrCreateBaseLanguage(
+    dto: CreateProjectDTO,
+    createdLanguages: List<Language>,
+  ): Language {
     if (dto.baseLanguageTag != null) {
       return createdLanguages.find { it.tag == dto.baseLanguageTag }
         ?: throw BadRequestException(Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)
@@ -395,18 +413,27 @@ class ProjectService(
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  fun transferToOrganization(projectId: Long, organizationId: Long) {
+  fun transferToOrganization(
+    projectId: Long,
+    organizationId: Long,
+  ) {
     val project = get(projectId)
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
     project.organizationOwner = organization
     save(project)
   }
 
-  fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project> {
+  fun findAllByNameAndOrganizationOwner(
+    name: String,
+    organization: Organization,
+  ): List<Project> {
     return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
   }
 
-  fun getProjectsWithDirectPermissions(id: Long, userIds: List<Long>): Map<Long, List<Project>> {
+  fun getProjectsWithDirectPermissions(
+    id: Long,
+    userIds: List<Long>,
+  ): Map<Long, List<Project>> {
     val result = projectRepository.getProjectsWithDirectPermissions(id, userIds)
     return result
       .map { it[0] as Long to it[1] as Project }

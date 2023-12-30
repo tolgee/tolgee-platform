@@ -5,5 +5,5 @@ import jakarta.validation.constraints.NotBlank
 
 data class SetOrganizationRoleDto(
   @NotBlank
-  val roleType: OrganizationRoleType = OrganizationRoleType.MEMBER
+  val roleType: OrganizationRoleType = OrganizationRoleType.MEMBER,
 )

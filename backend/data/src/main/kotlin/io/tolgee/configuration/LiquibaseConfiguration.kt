@@ -11,7 +11,10 @@ import javax.sql.DataSource
 class LiquibaseConfiguration {
   @Bean
   @Primary
-  fun liquibase(dataSource: DataSource, postgresRunner: PostgresRunner?): SpringLiquibase {
+  fun liquibase(
+    dataSource: DataSource,
+    postgresRunner: PostgresRunner?,
+  ): SpringLiquibase {
     val liquibase = SpringLiquibase()
     liquibase.setShouldRun(postgresRunner?.shouldRunMigrations != false)
     liquibase.dataSource = dataSource

@@ -11,7 +11,7 @@ interface IExportParams {
     description = """Languages to be contained in export.
                 
 If null, all languages are exported""",
-    example = "en"
+    example = "en",
   )
   var languages: Set<String>?
 
@@ -56,7 +56,7 @@ When null, resulting file won't be structured.
   var filterState: List<TranslationState>?
 
   @get:Schema(
-    description = """Select one ore multiple namespaces to export"""
+    description = """Select one ore multiple namespaces to export""",
   )
   var filterNamespace: List<String?>?
 

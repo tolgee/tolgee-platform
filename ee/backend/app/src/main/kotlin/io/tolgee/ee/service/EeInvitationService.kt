@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 class EeInvitationService(
   private val eePermissionService: EePermissionService,
   private val invitationService: InvitationService,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
@@ -20,7 +20,7 @@ class EeInvitationService(
     return invitationService.create(params) { invitation ->
       eePermissionService.createForInvitation(
         invitation = invitation,
-        params
+        params,
       )
     }
   }

@@ -31,11 +31,12 @@ class TolgeeBlobClient(val client: BlobAsyncClient) : BlobClient(client) {
   override fun uploadWithResponse(
     options: BlobParallelUploadOptions,
     timeout: Duration?,
-    context: Context?
+    context: Context?,
   ): Response<BlockBlobItem> {
     Objects.requireNonNull(options)
-    val upload: Mono<Response<BlockBlobItem>> = client.uploadWithResponse(options)
-      .contextWrite(FluxUtil.toReactorContext(context))
+    val upload: Mono<Response<BlockBlobItem>> =
+      client.uploadWithResponse(options)
+        .contextWrite(FluxUtil.toReactorContext(context))
 
     try {
       return StorageImplUtils.blockWithOptionalTimeout(upload, timeout)
@@ -48,7 +49,7 @@ class TolgeeBlobClient(val client: BlobAsyncClient) : BlobClient(client) {
   override fun uploadFromFileWithResponse(
     options: BlobUploadFromFileOptions?,
     timeout: Duration?,
-    context: Context?
+    context: Context?,
   ): Response<BlockBlobItem> {
     val upload: Mono<Response<BlockBlobItem>> =
       this.client.uploadFromFileWithResponse(options)

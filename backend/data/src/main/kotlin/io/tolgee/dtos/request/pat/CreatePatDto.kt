@@ -11,11 +11,11 @@ data class CreatePatDto(
   @field:NotBlank
   @field:Length(max = 250, min = 1)
   val description: String = "",
-
   @Schema(
-    description = "Expiration date in epoch format (milliseconds)." +
-      " When null, token never expires.",
-    example = "1661172869000"
+    description =
+      "Expiration date in epoch format (milliseconds)." +
+        " When null, token never expires.",
+    example = "1661172869000",
   )
-  val expiresAt: Long? = null
+  val expiresAt: Long? = null,
 )

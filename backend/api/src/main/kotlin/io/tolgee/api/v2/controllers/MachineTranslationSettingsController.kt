@@ -47,7 +47,7 @@ class MachineTranslationSettingsController(
   @Operation(summary = "Sets machine translation settings for project")
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   fun setMachineTranslationSettings(
-    @RequestBody dto: SetMachineTranslationSettingsDto
+    @RequestBody dto: SetMachineTranslationSettingsDto,
   ): CollectionModel<LanguageConfigItemModel> {
     mtServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
     return getMachineTranslationSettings()
@@ -63,9 +63,9 @@ class MachineTranslationSettingsController(
         LanguageInfoModel(
           it.language.id,
           it.language.tag,
-          supportedServices = it.supportedServices
+          supportedServices = it.supportedServices,
         )
-      }.sortedBy { it.languageId }
+      }.sortedBy { it.languageId },
     )
   }
 }

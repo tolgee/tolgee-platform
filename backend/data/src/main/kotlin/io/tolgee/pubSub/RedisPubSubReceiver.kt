@@ -11,9 +11,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 
 class RedisPubSubReceiver(
   private val template: SimpMessagingTemplate,
-  private val applicationEventPublisher: ApplicationEventPublisher
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) : Logging {
-
   fun receiveWebsocketMessage(message: String) {
     val data = jacksonObjectMapper().readValue(message, RedisWebsocketEventWrapper::class.java)
     template.convertAndSend(data.destination, data.message)

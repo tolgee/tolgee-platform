@@ -21,7 +21,6 @@ import java.util.*
 
 @SpringBootTest()
 class UsageReportingTest : AbstractSpringTest() {
-
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
@@ -49,7 +48,7 @@ class UsageReportingTest : AbstractSpringTest() {
         cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
-      }
+      },
     )
 
     eeLicenseMockRequestUtil.mock {
@@ -62,21 +61,23 @@ class UsageReportingTest : AbstractSpringTest() {
       }
 
       verify {
-        val user1 = userAccountService.createUser(
-          UserAccount(
-            name = "Test",
-            username = "aa@a.a",
-          ),
-          rawPassword = "12345678"
-        )
+        val user1 =
+          userAccountService.createUser(
+            UserAccount(
+              name = "Test",
+              username = "aa@a.a",
+            ),
+            rawPassword = "12345678",
+          )
         captor.assertSeats(1)
-        val user2 = userAccountService.createUser(
-          UserAccount(
-            name = "Test",
-            username = "ab@a.a",
-          ),
-          rawPassword = "12345678"
-        )
+        val user2 =
+          userAccountService.createUser(
+            UserAccount(
+              name = "Test",
+              username = "ab@a.a",
+            ),
+            rawPassword = "12345678",
+          )
         captor.assertSeats(2)
         userAccountService.delete(user1.id)
         captor.assertSeats(1)

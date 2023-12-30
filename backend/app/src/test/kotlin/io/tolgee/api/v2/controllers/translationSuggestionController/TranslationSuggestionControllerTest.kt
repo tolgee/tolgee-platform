@@ -118,18 +118,19 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   private fun initMachineTranslationMocks() {
     val googleTranslationMock = mock() as Translation
-    val awsTranslateTextResult = TranslateTextResponse
-      .builder()
-      .translatedText("Translated with Amazon")
-      .build()
+    val awsTranslateTextResult =
+      TranslateTextResponse
+        .builder()
+        .translatedText("Translated with Amazon")
+        .build()
 
     whenever(
       googleTranslate.translate(
         any<String>(),
         any(),
         any(),
-        any()
-      )
+        any(),
+      ),
     ).thenReturn(googleTranslationMock)
 
     whenever(googleTranslationMock.translatedText).thenReturn("Translated with Google")
@@ -141,8 +142,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any(),
         any(),
         any(),
-        any()
-      )
+        any(),
+      ),
     ).thenReturn("Translated with DeepL")
 
     whenever(
@@ -150,7 +151,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any(),
         any(),
         any(),
-      )
+      ),
     ).thenReturn("Translated with Azure Cognitive")
 
     whenever(
@@ -158,7 +159,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any(),
         any(),
         any(),
-      )
+      ),
     ).thenReturn("Translated with Baidu")
 
     tolgeeTranslateParamsCaptor = argumentCaptor()
@@ -166,11 +167,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     whenever(
       tolgeeTranslateApiService.translate(
         tolgeeTranslateParamsCaptor.capture(),
-      )
+      ),
     ).thenAnswer {
       MtValueProvider.MtResult(
         "Translated with Tolgee Translator",
-        ((it.arguments[0] as? TolgeeTranslateApiService.Companion.TolgeeTranslateParams)?.text?.length ?: 0) * 100
+        ((it.arguments[0] as? TolgeeTranslateApiService.Companion.TolgeeTranslateParams)?.text?.length ?: 0) * 100,
       )
     }
   }
@@ -186,7 +187,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/translation-memory",
-      SuggestRequestDto(keyId = testData.thisIsBeautifulKey.id, targetLanguageId = testData.germanLanguage.id)
+      SuggestRequestDto(keyId = testData.thisIsBeautifulKey.id, targetLanguageId = testData.germanLanguage.id),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("_embedded.translationMemoryItems") {
         node("[0]") {
@@ -206,7 +207,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/translation-memory",
-      SuggestRequestDto(baseText = "This is beautiful", targetLanguageId = testData.germanLanguage.id)
+      SuggestRequestDto(baseText = "This is beautiful", targetLanguageId = testData.germanLanguage.id),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("_embedded.translationMemoryItems") {
         node("[0]") {
@@ -225,12 +226,13 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `it suggests from TM fast enough`() {
     testData.generateLotOfData()
     saveTestData()
-    val time = measureTimeMillis {
-      performAuthPost(
-        "/v2/projects/${project.id}/suggest/translation-memory",
-        SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
-      ).andIsOk
-    }
+    val time =
+      measureTimeMillis {
+        performAuthPost(
+          "/v2/projects/${project.id}/suggest/translation-memory",
+          SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id),
+        ).andIsOk
+      }
     assertThat(time).isLessThan(1500)
   }
 
@@ -240,7 +242,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
-      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
+      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
@@ -256,7 +258,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
-      SuggestRequestDto(baseText = "Yupee", targetLanguageId = testData.germanLanguage.id)
+      SuggestRequestDto(baseText = "Yupee", targetLanguageId = testData.germanLanguage.id),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
@@ -276,7 +278,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         {
           "AWS": "Translated with Amazon"
         }
-      """
+      """,
       )
     }
   }
@@ -344,7 +346,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         {
           "AWS": "Translated with Amazon"
         }
-        """
+        """,
       )
     }
   }
@@ -408,7 +410,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
-      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
+      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
@@ -416,7 +418,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     }
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
-      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
+      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id),
     ).andIsBadRequest
   }
 
@@ -432,8 +434,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         contextDescription = "context",
         actualPrice = 100,
         usedService = MtServiceType.GOOGLE,
-        baseBlank = false
-      )
+        baseBlank = false,
+      ),
     )
     performMtRequestAndExpectAfterBalance(10)
   }
@@ -487,8 +489,9 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     testData.enableAWS(Formality.FORMAL)
     saveTestData()
     performMtRequest()
-    val request = Mockito.mockingDetails(amazonTranslate).invocations.first().arguments[0]
-      as TranslateTextRequest
+    val request =
+      Mockito.mockingDetails(amazonTranslate).invocations.first().arguments[0]
+        as TranslateTextRequest
     request.settings().formality().assert.isEqualTo(AwsFormality.FORMAL)
   }
 
@@ -498,7 +501,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     performMtRequestAndExpectBadRequest()
   }
 
-  private fun performMtRequestAndExpectAfterBalance(creditBalance: Long, extraCreditBalance: Long = 0) {
+  private fun performMtRequestAndExpectAfterBalance(
+    creditBalance: Long,
+    extraCreditBalance: Long = 0,
+  ) {
     performMtRequest().andIsOk
     mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
       .assert.isEqualTo(creditBalance * 100)
@@ -516,8 +522,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       SuggestRequestDto(
         keyId = testData.beautifulKey.id,
         targetLanguageId = testData.germanLanguage.id,
-        services = services?.toSet()
-      )
+        services = services?.toSet(),
+      ),
     )
   }
 

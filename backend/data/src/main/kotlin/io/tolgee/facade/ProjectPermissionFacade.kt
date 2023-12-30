@@ -12,9 +12,8 @@ import org.springframework.stereotype.Component
 @Component
 class ProjectPermissionFacade(
   private val authenticationFacade: AuthenticationFacade,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
 ) {
-
   fun checkNotCurrentUser(userId: Long) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
@@ -23,7 +22,7 @@ class ProjectPermissionFacade(
 
   fun getLanguagesAndCheckFromProject(
     languages: Set<Long>?,
-    projectId: Long
+    projectId: Long,
   ): Set<Language> {
     languages?.let {
       val languageEntities = languageService.findByIdIn(languages)
@@ -37,16 +36,22 @@ class ProjectPermissionFacade(
     return setOf()
   }
 
-  fun getLanguages(params: RequestWithLanguagePermissions, projectId: Long): LanguagePermissions {
+  fun getLanguages(
+    params: RequestWithLanguagePermissions,
+    projectId: Long,
+  ): LanguagePermissions {
     return LanguagePermissions(
       view = this.getLanguagesAndCheckFromProject(params.viewLanguages, projectId),
-      translate = this.getLanguagesAndCheckFromProject(
-        params.translateLanguages ?: params.languages,
-        projectId
-      ),
-      stateChange = this.getLanguagesAndCheckFromProject(
-        params.stateChangeLanguages, projectId
-      )
+      translate =
+        this.getLanguagesAndCheckFromProject(
+          params.translateLanguages ?: params.languages,
+          projectId,
+        ),
+      stateChange =
+        this.getLanguagesAndCheckFromProject(
+          params.stateChangeLanguages,
+          projectId,
+        ),
     )
   }
 }

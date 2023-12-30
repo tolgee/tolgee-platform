@@ -20,7 +20,10 @@ class ConfigurationDocumentationProvider {
     globalItems + listOf(handleObject(TolgeeProperties(), null))
   }
 
-  private fun handleObject(obj: Any, parent: KProperty<*>?): Group {
+  private fun handleObject(
+    obj: Any,
+    parent: KProperty<*>?,
+  ): Group {
     val additionalProps: MutableList<DocItem> = mutableListOf()
     obj::class.findAnnotations(AdditionalDocsProperties::class).forEach { additionalProp ->
       if (additionalProp.global) {
@@ -36,33 +39,40 @@ class ConfigurationDocumentationProvider {
 
     val objDef = obj::class.findAnnotations(DocProperty::class).singleOrNull()
     val confPropsDef = obj::class.findAnnotations(ConfigurationProperties::class).singleOrNull()
-    val props = obj::class.declaredMemberProperties.mapNotNull {
-      handleProperty(it, obj)
-    }.sortedWith(
-      compareBy(
-        { it is Group },
-        { it.name },
+    val props =
+      obj::class.declaredMemberProperties.mapNotNull {
+        handleProperty(it, obj)
+      }.sortedWith(
+        compareBy(
+          { it is Group },
+          { it.name },
+        ),
       )
-    )
 
-    val name = objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
-      "(.*)\\.(.+?)\$".toRegex(),
-      "$1"
-    )?.nullIfEmpty
-      ?: throw RuntimeException("No name for $obj with parent $parent")
+    val name =
+      objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
+        "(.*)\\.(.+?)\$".toRegex(),
+        "$1",
+      )?.nullIfEmpty
+        ?: throw RuntimeException("No name for $obj with parent $parent")
     return Group(
       name = name,
       displayName = objDef?.displayName?.nullIfEmpty,
       description = objDef?.description?.nullIfEmpty,
       children = props + additionalProps,
-      prefix = objDef?.prefix?.nullIfEmpty ?: confPropsDef?.prefix?.nullIfEmpty
-        ?: throw NullPointerException("No prefix for ${obj::class.simpleName}")
+      prefix =
+        objDef?.prefix?.nullIfEmpty ?: confPropsDef?.prefix?.nullIfEmpty
+          ?: throw NullPointerException("No prefix for ${obj::class.simpleName}"),
     )
   }
 
-  private fun handleProperty(it: KProperty1<out Any, *>, obj: Any): DocItem? {
-    val annotation = it.javaField?.getAnnotation(DocProperty::class.java)
-      ?: it.findAnnotations<DocProperty>().singleOrNull()
+  private fun handleProperty(
+    it: KProperty1<out Any, *>,
+    obj: Any,
+  ): DocItem? {
+    val annotation =
+      it.javaField?.getAnnotation(DocProperty::class.java)
+        ?: it.findAnnotations<DocProperty>().singleOrNull()
     if (annotation?.hidden == true) {
       return null
     }
@@ -88,8 +98,9 @@ class ConfigurationDocumentationProvider {
       }
 
       else -> {
-        val child = it.getter.call(obj)
-          ?: throw RuntimeException("Property ${it.name} is null")
+        val child =
+          it.getter.call(obj)
+            ?: throw RuntimeException("Property ${it.name} is null")
         handleObject(child, it)
       }
     }
@@ -106,10 +117,14 @@ class ConfigurationDocumentationProvider {
 
   private fun getPropertyName(
     annotation: DocProperty?,
-    it: KProperty1<out Any, *>
+    it: KProperty1<out Any, *>,
   ) = annotation?.name?.nullIfEmpty ?: it.name
 
-  private fun getDefaultValue(annotation: DocProperty?, obj: Any, property: KProperty<*>): String {
+  private fun getDefaultValue(
+    annotation: DocProperty?,
+    obj: Any,
+    property: KProperty<*>,
+  ): String {
     if (!annotation?.defaultValue.isNullOrEmpty()) {
       return annotation?.defaultValue ?: ""
     }
@@ -125,7 +140,7 @@ class ConfigurationDocumentationProvider {
         displayName = docProperty.displayName,
         description = docProperty.description,
         children = docProperty.children.map { getPropertyTree(it) },
-        prefix = docProperty.prefix.nullIfEmpty
+        prefix = docProperty.prefix.nullIfEmpty,
       )
     }
     return Property(

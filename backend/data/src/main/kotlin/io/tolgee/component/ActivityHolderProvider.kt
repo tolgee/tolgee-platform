@@ -60,6 +60,7 @@ class ActivityHolderProvider(private val applicationContext: ApplicationContext)
   }
 
   enum class Scope {
-    REQUEST, TRANSACTION
+    REQUEST,
+    TRANSACTION,
   }
 }

@@ -9,9 +9,8 @@ class OnAfterMachineTranslationEvent(
    * The project containing translation
    */
   val project: Project,
-
   /**
    * The actual total price of translation actually consumed
    */
-  val actualSumPrice: Int
+  val actualSumPrice: Int,
 ) : ApplicationEvent(source)

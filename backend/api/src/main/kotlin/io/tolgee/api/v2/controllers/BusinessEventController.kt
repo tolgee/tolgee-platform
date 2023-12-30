@@ -28,7 +28,9 @@ class BusinessEventController(
 ) : Logging {
   @PostMapping("/report")
   @Operation(summary = "Reports business event")
-  fun report(@RequestBody eventData: BusinessEventReportRequest) {
+  fun report(
+    @RequestBody eventData: BusinessEventReportRequest,
+  ) {
     try {
       eventData.projectId?.let { securityService.checkAnyProjectPermission(it) }
       eventData.organizationId?.let { organizationRoleService.checkUserCanView(it) }
@@ -44,7 +46,9 @@ class BusinessEventController(
 
   @PostMapping("/identify")
   @Operation(summary = "Identifies user")
-  fun identify(@RequestBody eventData: IdentifyRequest) {
+  fun identify(
+    @RequestBody eventData: IdentifyRequest,
+  ) {
     try {
       businessEventPublisher.publish(eventData)
     } catch (e: Throwable) {

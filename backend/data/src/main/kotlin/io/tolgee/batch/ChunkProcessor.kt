@@ -9,10 +9,11 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
     job: BatchJobDto,
     chunk: List<TargetItemType>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit)
+    onProgress: ((Int) -> Unit),
   )
 
   fun getTarget(data: RequestType): List<TargetItemType>
+
   fun getParams(data: RequestType): ParamsType
 
   fun getParams(job: BatchJobDto): ParamsType {
@@ -27,7 +28,10 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
     return JobCharacter.FAST
   }
 
-  fun getChunkSize(request: RequestType, projectId: Long): Int {
+  fun getChunkSize(
+    request: RequestType,
+    projectId: Long,
+  ): Int {
     return 0
   }
 

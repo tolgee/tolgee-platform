@@ -28,21 +28,28 @@ abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/
     File("${tolgeeProperties.fileStorage.fsDataPath}/screenshots").deleteRecursively()
   }
 
-  protected fun performStoreScreenshot(project: Project, key: Key, info: Any? = null): ResultActions {
+  protected fun performStoreScreenshot(
+    project: Project,
+    key: Key,
+    info: Any? = null,
+  ): ResultActions {
     return performProjectAuthMultipart(
       url = "keys/${key.id}/screenshots",
-      files = listOf(
-        MockMultipartFile(
-          "screenshot", "originalShot.png", "image/png",
-          screenshotFile.inputStream.readAllBytes()
+      files =
+        listOf(
+          MockMultipartFile(
+            "screenshot",
+            "originalShot.png",
+            "image/png",
+            screenshotFile.inputStream.readAllBytes(),
+          ),
+          MockMultipartFile(
+            "info",
+            "info",
+            MediaType.APPLICATION_JSON_VALUE,
+            jacksonObjectMapper().writeValueAsBytes(info),
+          ),
         ),
-        MockMultipartFile(
-          "info",
-          "info",
-          MediaType.APPLICATION_JSON_VALUE,
-          jacksonObjectMapper().writeValueAsBytes(info)
-        )
-      )
     )
   }
 

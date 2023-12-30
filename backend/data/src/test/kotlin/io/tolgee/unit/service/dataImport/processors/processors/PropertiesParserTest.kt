@@ -21,11 +21,12 @@ class PropertiesParserTest {
   fun setup() {
     importMock = mock()
     importFile = ImportFile("messages_en.properties", importMock)
-    importFileDto = ImportFileDto(
-      "messages_en.properties",
-      File("src/test/resources/import/example.properties")
-        .inputStream()
-    )
+    importFileDto =
+      ImportFileDto(
+        "messages_en.properties",
+        File("src/test/resources/import/example.properties")
+          .inputStream(),
+      )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 

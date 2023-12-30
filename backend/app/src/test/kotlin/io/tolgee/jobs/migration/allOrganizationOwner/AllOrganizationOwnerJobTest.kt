@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 
 class AllOrganizationOwnerJobTest : AbstractSpringTest() {
-
   @Autowired
   @Qualifier("translationStatsJob")
   lateinit var translationStatsJob: Job
@@ -40,20 +39,21 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
 
   @BeforeEach
   fun setup() {
-    val user = userAccountRepository.save(
-      UserAccount(
-        name = "User with 2 projects",
-        username = "user",
-        password = "pass"
+    val user =
+      userAccountRepository.save(
+        UserAccount(
+          name = "User with 2 projects",
+          username = "user",
+          password = "pass",
+        ),
       )
-    )
     project1 = projectRepository.save(Project(name = "Project").also { it.userOwner = user })
     permissionRepository.save(
       Permission(
         user = user,
         project = project1,
-        type = ProjectPermissionType.MANAGE
-      )
+        type = ProjectPermissionType.MANAGE,
+      ),
     )
 
     val project2 = projectRepository.save(Project(name = "Project 2").also { it.userOwner = user })
@@ -61,17 +61,18 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
       Permission(
         user = user,
         project = project2,
-        type = ProjectPermissionType.MANAGE
-      )
+        type = ProjectPermissionType.MANAGE,
+      ),
     )
 
-    val user2 = userAccountRepository.save(
-      UserAccount(
-        name = "User with no role",
-        username = "user2",
-        password = "pass"
+    val user2 =
+      userAccountRepository.save(
+        UserAccount(
+          name = "User with no role",
+          username = "user2",
+          password = "pass",
+        ),
       )
-    )
 
     permissionService.grantFullAccessToProject(user2, project2)
   }
@@ -112,8 +113,9 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   fun `creates the organization for user with no organization membership`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
-      val createdOrganization = userAccountRepository.findByUsername("user2").get()
-        .organizationRoles.single().organization
+      val createdOrganization =
+        userAccountRepository.findByUsername("user2").get()
+          .organizationRoles.single().organization
       assertThat(createdOrganization?.name).isEqualTo("User with no role")
     }
   }

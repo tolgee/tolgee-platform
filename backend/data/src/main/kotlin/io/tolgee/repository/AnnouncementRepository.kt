@@ -14,7 +14,10 @@ interface AnnouncementRepository : JpaRepository<DismissedAnnouncement, Dismisse
     select count(*) > 0 from DismissedAnnouncement as an
      where an.user.id = :userId
      and an.announcement = :announcement
-  """
+  """,
   )
-  fun isDismissed(userId: Long, announcement: Announcement): Boolean
+  fun isDismissed(
+    userId: Long,
+    announcement: Announcement,
+  ): Boolean
 }

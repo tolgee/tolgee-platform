@@ -23,7 +23,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsOk.andAssertThatJson {
       node("username").isEqualTo("franta")
     }
@@ -41,7 +41,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/projects/translations/en",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsBadRequest.andHasErrorMessage(Message.PROJECT_NOT_SELECTED)
   }
 
@@ -53,7 +53,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsOk
   }
 
@@ -63,7 +63,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_nopat")
-      }
+      },
     ).andIsUnauthorized
   }
 
@@ -74,7 +74,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsUnauthorized
   }
 
@@ -84,9 +84,10 @@ class PatAuthTest : AbstractControllerTest() {
     performDelete(
       "/v2/pats/${pat.id}",
       content = null,
-      httpHeaders = HttpHeaders().apply {
-        add("X-API-Key", "tgpat_${pat.token}")
-      }
+      httpHeaders =
+        HttpHeaders().apply {
+          add("X-API-Key", "tgpat_${pat.token}")
+        },
     ).andIsForbidden
   }
 

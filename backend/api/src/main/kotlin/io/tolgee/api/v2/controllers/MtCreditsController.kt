@@ -23,13 +23,15 @@ import org.springframework.web.bind.annotation.RestController
 class MtCreditsController(
   private val projectHolder: ProjectHolder,
   private val mtCreditBucketService: MtCreditBucketService,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
 ) {
   @GetMapping("/projects/{projectId:\\d+}/machine-translation-credit-balance")
   @Operation(summary = "Returns machine translation credit balance for specified project")
   @UseDefaultPermissions
   @AllowApiAccess
-  fun getProjectCredits(@PathVariable projectId: Long): CreditBalanceModel {
+  fun getProjectCredits(
+    @PathVariable projectId: Long,
+  ): CreditBalanceModel {
     return mtCreditBucketService.getCreditBalances(projectHolder.projectEntity).model
   }
 
@@ -37,15 +39,18 @@ class MtCreditsController(
   @Operation(summary = "Returns machine translation credit balance for organization")
   @RequiresOrganizationRole
   @AllowApiAccess
-  fun getOrganizationCredits(@PathVariable organizationId: Long): CreditBalanceModel {
+  fun getOrganizationCredits(
+    @PathVariable organizationId: Long,
+  ): CreditBalanceModel {
     val organization = organizationService.get(organizationId)
     return mtCreditBucketService.getCreditBalances(organization).model
   }
 
   private val MtCreditBalanceDto.model
-    get() = CreditBalanceModel(
-      creditBalance = this.creditBalance / 100,
-      bucketSize = this.bucketSize / 100,
-      extraCreditBalance = this.extraCreditBalance / 100
-    )
+    get() =
+      CreditBalanceModel(
+        creditBalance = this.creditBalance / 100,
+        bucketSize = this.bucketSize / 100,
+        extraCreditBalance = this.extraCreditBalance / 100,
+      )
 }

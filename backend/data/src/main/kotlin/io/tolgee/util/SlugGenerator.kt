@@ -9,7 +9,6 @@ import java.util.*
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 class SlugGenerator {
-
   companion object {
     const val DELIMITER = "-"
   }
@@ -18,11 +17,12 @@ class SlugGenerator {
     name: String,
     minLength: Int,
     maxLength: Int,
-    checkUniquenessCallback: (name: String) -> Boolean
+    checkUniquenessCallback: (name: String) -> Boolean,
   ): String {
-    var namePart = StringUtils.stripAccents(name).lowercase(Locale.getDefault())
-      .replace("[^a-z0-9]+".toRegex(), DELIMITER)
-      .let { it.substring(0, min(it.length, maxLength)) }
+    var namePart =
+      StringUtils.stripAccents(name).lowercase(Locale.getDefault())
+        .replace("[^a-z0-9]+".toRegex(), DELIMITER)
+        .let { it.substring(0, min(it.length, maxLength)) }
 
     namePart = namePart.removePrefix(DELIMITER)
 
@@ -43,7 +43,6 @@ class SlugGenerator {
 
       val result = namePart + numPart.emptyOnZero()
       if (result.length >= minLength && checkUniquenessCallback(result)) {
-
         // has to contain letter
         if (result.matches(".*[a-z]+.*+".toRegex())) {
           return result

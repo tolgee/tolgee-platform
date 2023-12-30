@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest(classes = [Application::class])
 @Transactional
 class ImportFileIssueRepositoryTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var importFileIssueRepository: ImportFileIssueRepository
 
@@ -24,9 +23,11 @@ class ImportFileIssueRepositoryTest : AbstractSpringTest() {
     val testData = ImportTestData()
     testData.addFileIssues()
     testDataService.saveTestData(testData.root)
-    val result = importFileIssueRepository.findAllByFileIdView(
-      testData.importBuilder.data.importFiles[0].self.id, PageRequest.of(0, 10)
-    ).content
+    val result =
+      importFileIssueRepository.findAllByFileIdView(
+        testData.importBuilder.data.importFiles[0].self.id,
+        PageRequest.of(0, 10),
+      ).content
 
     assertThat(result).hasSize(4)
     assertThat(result[0].params).hasSize(1)

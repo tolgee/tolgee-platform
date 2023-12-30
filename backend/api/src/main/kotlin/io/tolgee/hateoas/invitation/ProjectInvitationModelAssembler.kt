@@ -9,11 +9,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProjectInvitationModelAssembler(
-  private val permissionModelAssembler: PermissionModelAssembler
+  private val permissionModelAssembler: PermissionModelAssembler,
 ) :
   RepresentationModelAssemblerSupport<Invitation, ProjectInvitationModel>(
-    V2InvitationController::class.java, ProjectInvitationModel::class.java
-  ) {
+      V2InvitationController::class.java,
+      ProjectInvitationModel::class.java,
+    ) {
   override fun toModel(entity: Invitation): ProjectInvitationModel {
     return ProjectInvitationModel(
       id = entity.id!!,
@@ -23,7 +24,7 @@ class ProjectInvitationModelAssembler(
       createdAt = entity.createdAt!!,
       invitedUserName = entity.name,
       invitedUserEmail = entity.email,
-      permission = permissionModelAssembler.toModel(entity.permission!!)
+      permission = permissionModelAssembler.toModel(entity.permission!!),
     )
       .add(linkTo<V2InvitationController> { acceptInvitation(entity.code) }.withRel("accept"))
       .add(linkTo<V2InvitationController> { deleteInvitation(entity.id!!) }.withRel("delete"))

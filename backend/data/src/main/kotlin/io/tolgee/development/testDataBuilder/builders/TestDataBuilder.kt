@@ -6,7 +6,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
 class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
-
   companion object {
     operator fun invoke(fn: (TestDataBuilder.() -> Unit) = {}) = TestDataBuilder(fn)
   }
@@ -37,21 +36,22 @@ class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
     val builder = UserAccountBuilder(this)
     data.userAccounts.add(builder)
     ft(builder.self)
-    val organizationBuilder = addOrganization {
-      name = if (builder.self.name.isNotBlank()) builder.self.name else builder.self.username
-    }.build {
-      addRole {
-        user = builder.self
-        type = OrganizationRoleType.OWNER
+    val organizationBuilder =
+      addOrganization {
+        name = if (builder.self.name.isNotBlank()) builder.self.name else builder.self.username
+      }.build {
+        addRole {
+          user = builder.self
+          type = OrganizationRoleType.OWNER
+        }
       }
-    }
     builder.defaultOrganizationBuilder = organizationBuilder
     return builder
   }
 
   fun addProject(
     organizationOwner: Organization? = null,
-    ft: Project.() -> Unit
+    ft: Project.() -> Unit,
   ): ProjectBuilder {
     val projectBuilder = ProjectBuilder(organizationOwner, testDataBuilder = this)
     data.projects.add(projectBuilder)

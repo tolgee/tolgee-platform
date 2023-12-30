@@ -10,5 +10,5 @@ open class ProjectStatsModel(
   val reviewedPercentage: Double,
   val membersCount: Long,
   val tagCount: Long,
-  val languageStats: List<LanguageStatsModel>
+  val languageStats: List<LanguageStatsModel>,
 )

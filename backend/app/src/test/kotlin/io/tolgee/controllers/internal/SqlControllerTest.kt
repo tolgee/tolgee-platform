@@ -28,15 +28,17 @@ class SqlControllerTest : AbstractControllerTest(), Logging {
 
   @Test
   fun listEndpoints() {
-    val requestMappingHandlerMapping: RequestMappingHandlerMapping = applicationContext
-      .getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping::class.java)
-    val map: Map<RequestMappingInfo, HandlerMethod> = requestMappingHandlerMapping
-      .handlerMethods
+    val requestMappingHandlerMapping: RequestMappingHandlerMapping =
+      applicationContext
+        .getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping::class.java)
+    val map: Map<RequestMappingInfo, HandlerMethod> =
+      requestMappingHandlerMapping
+        .handlerMethods
     map.forEach { (key: RequestMappingInfo?, value: HandlerMethod?) ->
       logger.info(
         "{} {}",
         key,
-        value
+        value,
       )
     }
   }
@@ -45,11 +47,12 @@ class SqlControllerTest : AbstractControllerTest(), Logging {
   fun getList() {
     logger.info("Internal controller enabled: ${tolgeeProperties.internal.controllerEnabled}")
     dbPopulator.createBase("Test")
-    val parseResponseTo: List<Any> = mvc.perform(
-      post("/internal/sql/list")
-        .content("select * from user_account")
-    )
-      .andExpect(status().isOk).andReturn().parseResponseTo()
+    val parseResponseTo: List<Any> =
+      mvc.perform(
+        post("/internal/sql/list")
+          .content("select * from user_account"),
+      )
+        .andExpect(status().isOk).andReturn().parseResponseTo()
 
     assertThat(parseResponseTo).isNotEmpty
   }
@@ -60,7 +63,7 @@ class SqlControllerTest : AbstractControllerTest(), Logging {
     val project = dbPopulator.createBase("Test").project
     mvc.perform(
       post("/internal/sql/execute")
-        .content("delete from permission")
+        .content("delete from permission"),
     )
       .andExpect(status().isOk).andReturn()
 

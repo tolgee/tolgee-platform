@@ -34,7 +34,10 @@ class MtCreditBucketService(
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
 ) : Logging {
-  fun consumeCredits(project: Project, amount: Int): MtCreditBucket {
+  fun consumeCredits(
+    project: Project,
+    amount: Int,
+  ): MtCreditBucket {
     return lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
@@ -48,7 +51,10 @@ class MtCreditBucketService(
 
   private fun getMtCreditBucketLockName(project: Project) = "mt-credit-lock-${project.organizationOwner.id}"
 
-  private fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
+  private fun consumeCredits(
+    bucket: MtCreditBucket,
+    amount: Int,
+  ) {
     refillIfItsTime(bucket)
 
     // The check for sufficient credit amount (bucket, extra credits, pay as you go spending limit)
@@ -68,10 +74,11 @@ class MtCreditBucketService(
     lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
-          val time = measureTime {
-            val bucket = findOrCreateBucket(project)
-            checkPositiveBalance(bucket)
-          }
+          val time =
+            measureTime {
+              val bucket = findOrCreateBucket(project)
+              checkPositiveBalance(bucket)
+            }
           logger.debug("Checked for positive credits in $time")
         }
       }
@@ -95,10 +102,13 @@ class MtCreditBucketService(
     return balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
   }
 
-  private fun MtCreditBucket.consumeSufficientCredits(amount: Int, organizationId: Long) {
+  private fun MtCreditBucket.consumeSufficientCredits(
+    amount: Int,
+    organizationId: Long,
+  ) {
     logger.debug(
       "Consuming $amount credits for organization $organizationId, " +
-        "credits: $credits, extraCredits: $extraCredits"
+        "credits: $credits, extraCredits: $extraCredits",
     )
     if (this.credits >= amount) {
       this.credits -= amount
@@ -120,19 +130,25 @@ class MtCreditBucketService(
       OnConsumePayAsYouGoMtCredits(
         this@MtCreditBucketService,
         organizationId,
-        amountToConsumeFromPayAsYouGo
-      )
+        amountToConsumeFromPayAsYouGo,
+      ),
     )
   }
 
   @Transactional
-  fun addExtraCredits(organization: Organization, amount: Long) {
+  fun addExtraCredits(
+    organization: Organization,
+    amount: Long,
+  ) {
     val bucket = findOrCreateBucket(organization)
     addExtraCredits(bucket, amount)
   }
 
   @Transactional
-  fun addExtraCredits(bucket: MtCreditBucket, amount: Long) {
+  fun addExtraCredits(
+    bucket: MtCreditBucket,
+    amount: Long,
+  ) {
     bucket.extraCredits += amount
     save(bucket)
   }
@@ -156,7 +172,7 @@ class MtCreditBucketService(
       bucketSize = bucket.bucketSize,
       extraCreditBalance = bucket.extraCredits,
       refilledAt = bucket.refilled,
-      nextRefillAt = bucket.getNextRefillDate()
+      nextRefillAt = bucket.getNextRefillDate(),
     )
   }
 
@@ -172,7 +188,10 @@ class MtCreditBucketService(
     refillBucket(bucket, getRefillAmount(bucket.organization))
   }
 
-  fun refillBucket(bucket: MtCreditBucket, bucketSize: Long) {
+  fun refillBucket(
+    bucket: MtCreditBucket,
+    bucketSize: Long,
+  ) {
     bucket.credits = bucketSize
     bucket.refilled = currentDateProvider.date
     bucket.bucketSize = bucket.credits
@@ -191,7 +210,7 @@ class MtCreditBucketService(
   private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
     return tryUntilItDoesntBreakConstraint {
       machineTranslationCreditBucketRepository.findByOrganization(organization) ?: createBucket(
-        organization
+        organization,
       )
     }
   }

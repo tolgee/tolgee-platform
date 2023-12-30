@@ -11,14 +11,19 @@ import org.springframework.test.web.servlet.ResultActions
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class ProjectJwtAuthRequestPerformer(
   userAccountProvider: () -> UserAccount,
-  projectUrlPrefix: String
+  projectUrlPrefix: String,
 ) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {
-
-  override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
+  override fun performProjectAuthPut(
+    url: String,
+    content: Any?,
+  ): ResultActions {
     return super.performAuthPut(projectUrlPrefix + project.id + "/" + url, content)
   }
 
-  override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
+  override fun performProjectAuthPost(
+    url: String,
+    content: Any?,
+  ): ResultActions {
     return performAuthPost(projectUrlPrefix + project.id + "/" + url, content)
   }
 
@@ -26,14 +31,17 @@ class ProjectJwtAuthRequestPerformer(
     return performAuthGet(projectUrlPrefix + project.id + "/" + url)
   }
 
-  override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
+  override fun performProjectAuthDelete(
+    url: String,
+    content: Any?,
+  ): ResultActions {
     return performAuthDelete(projectUrlPrefix + project.id + "/" + url, content)
   }
 
   override fun performProjectAuthMultipart(
     url: String,
     files: List<MockMultipartFile>,
-    params: Map<String, Array<String>>
+    params: Map<String, Array<String>>,
   ): ResultActions {
     return performAuthMultipart(projectUrlPrefix + project.id + "/" + url, files, params)
   }

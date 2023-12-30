@@ -27,7 +27,6 @@ import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
 class XliffFileExporterTest {
-
   @Test
   fun `exports translations`() {
     val translations = getBaseTranslations()
@@ -35,12 +34,13 @@ class XliffFileExporterTest {
     val params = ExportParams()
     val baseProvider = { translations.filter { it.languageTag == "en" } }
 
-    val files = XliffFileExporter(
-      translations,
-      exportParams = params,
-      baseTranslationsProvider = baseProvider,
-      baseLanguage = Language().apply { tag = "en" }
-    ).produceFiles()
+    val files =
+      XliffFileExporter(
+        translations,
+        exportParams = params,
+        baseTranslationsProvider = baseProvider,
+        baseLanguage = Language().apply { tag = "en" },
+      ).produceFiles()
 
     assertThat(files).hasSize(2)
     var fileContent = files["de.xlf"]!!.bufferedReader().readText()
@@ -75,12 +75,13 @@ class XliffFileExporterTest {
     val params = ExportParams()
     val baseProvider = { translations.filter { it.languageTag == "en" } }
 
-    val files = XliffFileExporter(
-      translations,
-      exportParams = params,
-      baseTranslationsProvider = baseProvider,
-      baseLanguage = Language().apply { tag = "en" }
-    ).produceFiles()
+    val files =
+      XliffFileExporter(
+        translations,
+        exportParams = params,
+        baseTranslationsProvider = baseProvider,
+        baseLanguage = Language().apply { tag = "en" },
+      ).produceFiles()
 
     assertThat(files).hasSize(2)
     val fileContent = files["de.xlf"]!!.bufferedReader().readText()
@@ -93,27 +94,33 @@ class XliffFileExporterTest {
 
   private fun getHtmlTranslations(): List<ExportTranslationView> {
     val key = ExportKeyView(1, "html_key")
-    val validHtmlTranslation = ExportTranslationView(
-      1,
-      "<p>Sweat jesus, this is HTML!</p>",
-      TranslationState.TRANSLATED,
-      key,
-      "en"
-    )
-    val invalidHtmlTranslation = ExportTranslationView(
-      1,
-      "Sweat jesus, this is invalid < HTML!",
-      TranslationState.TRANSLATED,
-      key,
-      "de"
-    )
+    val validHtmlTranslation =
+      ExportTranslationView(
+        1,
+        "<p>Sweat jesus, this is HTML!</p>",
+        TranslationState.TRANSLATED,
+        key,
+        "en",
+      )
+    val invalidHtmlTranslation =
+      ExportTranslationView(
+        1,
+        "Sweat jesus, this is invalid < HTML!",
+        TranslationState.TRANSLATED,
+        key,
+        "de",
+      )
     key.translations["en"] = validHtmlTranslation
     key.translations["de"] = invalidHtmlTranslation
     val translations = listOf(validHtmlTranslation, invalidHtmlTranslation)
     return translations
   }
 
-  private fun assertHasTransUnitAndReturn(text: String, sourceLanguage: String, targetLanguage: String): Element {
+  private fun assertHasTransUnitAndReturn(
+    text: String,
+    sourceLanguage: String,
+    targetLanguage: String,
+  ): Element {
     val document = text.parseToDocument()
     val docFiles = document.selectNodes("//file")
     assertThat(docFiles).hasSize(1)
@@ -157,25 +164,27 @@ class XliffFileExporterTest {
     val params = ExportParams()
     val baseProvider = { translations.filter { it.languageTag == "en" } }
 
-    val files = XliffFileExporter(
-      translations,
-      exportParams = params,
-      baseTranslationsProvider = baseProvider,
-      baseLanguage = Language().apply { tag = "en" }
-    ).produceFiles()
+    val files =
+      XliffFileExporter(
+        translations,
+        exportParams = params,
+        baseTranslationsProvider = baseProvider,
+        baseLanguage = Language().apply { tag = "en" },
+      ).produceFiles()
 
     val validator: Validator
     javaClass.classLoader.getResourceAsStream("xliff/xliff-core-1.2-transitional.xsd")
       .use { xsdInputStream ->
-        validator = try {
-          val factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-          val schemaFile: Source = StreamSource(xsdInputStream)
+        validator =
+          try {
+            val factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+            val schemaFile: Source = StreamSource(xsdInputStream)
 
-          val schema = factory.newSchema(schemaFile)
-          schema.newValidator()
-        } catch (e: Exception) {
-          throw e
-        }
+            val schema = factory.newSchema(schemaFile)
+            schema.newValidator()
+          } catch (e: Exception) {
+            throw e
+          }
       }
 
     assertThat(files).hasSize(2)

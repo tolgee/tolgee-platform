@@ -36,7 +36,11 @@ class RateLimitInterceptor(
   private val rateLimitProperties: RateLimitProperties,
   private val rateLimitService: RateLimitService,
 ) : HandlerInterceptor, Ordered {
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+  override fun preHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+  ): Boolean {
     if (handler !is HandlerMethod || DispatcherType.ASYNC == request.dispatcherType) {
       return super.preHandle(request, response, handler)
     }
@@ -52,10 +56,11 @@ class RateLimitInterceptor(
   fun extractEndpointRateLimit(
     request: HttpServletRequest,
     account: UserAccountDto?,
-    handler: HandlerMethod
+    handler: HandlerMethod,
   ): RateLimitPolicy? {
-    val annotation = AnnotationUtils.getAnnotation(handler.method, RateLimited::class.java)
-      ?: return null
+    val annotation =
+      AnnotationUtils.getAnnotation(handler.method, RateLimited::class.java)
+        ?: return null
 
     if (!shouldRateLimit(annotation)) {
       return null
@@ -78,7 +83,11 @@ class RateLimitInterceptor(
       (!annotation.isAuthentication && rateLimitProperties.endpointLimits)
   }
 
-  private fun getBucketName(request: HttpServletRequest, annotation: RateLimited, account: UserAccountDto?): String {
+  private fun getBucketName(
+    request: HttpServletRequest,
+    annotation: RateLimited,
+    account: UserAccountDto?,
+  ): String {
     val matchedPath = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE) as String
     val pathVariablesMap = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
 

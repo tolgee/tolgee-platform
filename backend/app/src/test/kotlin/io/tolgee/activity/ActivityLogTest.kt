@@ -32,7 +32,6 @@ import java.math.BigDecimal
 import java.util.function.Consumer
 
 class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private lateinit var testData: BaseTestData
 
   @MockBean
@@ -67,7 +66,6 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPut(
       "translations",
       mapOf("key" to "key", "translations" to mapOf(testData.englishLanguage.tag to "Test")),
-
     ).andIsOk
 
     performProjectAuthGet("activity").andIsOk.andPrettyPrint.andAssertThatJson {
@@ -109,10 +107,11 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/machine-translate",
       mapOf(
         "keyIds" to keyIds,
-        "targetLanguageIds" to listOf(
-          csLanguageId
-        )
-      )
+        "targetLanguageIds" to
+          listOf(
+            csLanguageId,
+          ),
+      ),
     ).andIsOk.waitForJobCompleted()
 
     performProjectAuthGet("activity").andIsOk.andPrettyPrint.andAssertThatJson {
@@ -137,17 +136,18 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
         it["X-Tolgee-Utm"] = "eyJ1dG1faGVsbG8iOiJoZWxsbyJ9"
         it["X-Tolgee-SDK-Type"] = "Unreal"
         it["X-Tolgee-SDK-Version"] = "1.0.0"
-      }
+      },
     ).andIsOk
 
     var params: Map<String, Any?>? = null
     waitForNotThrowing(timeout = 10000) {
       verify(postHog, times(1)).capture(
-        any(), eq("SET_TRANSLATIONS"),
+        any(),
+        eq("SET_TRANSLATIONS"),
         argThat {
           params = this
           true
-        }
+        },
       )
     }
     params!!["utm_hello"].assert.isEqualTo("hello")
@@ -191,7 +191,10 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
     node("exists").isEqualTo(true)
   }
 
-  private fun JsonAssert.isLanguageRelation(name: String, tag: String) {
+  private fun JsonAssert.isLanguageRelation(
+    name: String,
+    tag: String,
+  ) {
     node("entityClass").isEqualTo("Language")
     node("entityId").isValidId
     node("data") {
@@ -201,14 +204,15 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
     node("exists").isEqualTo(true)
   }
 
-  private fun ResultActions.waitForJobCompleted() = andAssertThatJson {
-    node("id").isNumber.satisfies(
-      Consumer {
-        waitFor(pollTime = 2000) {
-          val job = batchJobService.findJobDto(it.toLong())
-          job?.status?.completed == true
-        }
-      }
-    )
-  }
+  private fun ResultActions.waitForJobCompleted() =
+    andAssertThatJson {
+      node("id").isNumber.satisfies(
+        Consumer {
+          waitFor(pollTime = 2000) {
+            val job = batchJobService.findJobDto(it.toLong())
+            job?.status?.completed == true
+          }
+        },
+      )
+    }
 }

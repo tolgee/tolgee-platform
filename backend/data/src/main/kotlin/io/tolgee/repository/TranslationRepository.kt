@@ -28,23 +28,39 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
          and l.tag in :languages
          and ((n.name is null and :namespace is null) or n.name = :namespace)
         order by k.name
-   """
+   """,
   )
-  fun getTranslations(languages: Set<String>, namespace: String?, projectId: Long): List<SimpleTranslationView>
+  fun getTranslations(
+    languages: Set<String>,
+    namespace: String?,
+    projectId: Long,
+  ): List<SimpleTranslationView>
 
   @Query(
     "from Translation t " +
       "join fetch Key k on t.key = k " +
-      "where k = :key and k.project = :project and t.language in :languages"
+      "where k = :key and k.project = :project and t.language in :languages",
   )
-  fun getTranslations(key: Key, project: Project, languages: Collection<Language>): Set<Translation>
-  fun findOneByKeyAndLanguage(key: Key, language: Language): Optional<Translation>
-  fun findOneByKeyIdAndLanguageId(key: Long, language: Long): Translation?
+  fun getTranslations(
+    key: Key,
+    project: Project,
+    languages: Collection<Language>,
+  ): Set<Translation>
+
+  fun findOneByKeyAndLanguage(
+    key: Key,
+    language: Language,
+  ): Optional<Translation>
+
+  fun findOneByKeyIdAndLanguageId(
+    key: Long,
+    language: Long,
+  ): Translation?
 
   @Query(
     """
         from Translation t join fetch t.key k left join fetch k.keyMeta where t.language.id = :languageId
-    """
+    """,
   )
   fun getAllByLanguageId(languageId: Long): List<Translation>
 
@@ -53,13 +69,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     join fetch t.key k 
     left join fetch k.keyMeta 
     left join fetch t.comments
-    where t.key.id in :keyIds"""
+    where t.key.id in :keyIds""",
   )
   fun getAllByKeyIdIn(keyIds: Collection<Long>): Collection<Translation>
 
   @Query(
     """select t.id from Translation t where t.key.id in 
-        (select k.id from t.key k where k.project.id = :projectId)"""
+        (select k.id from t.key k where k.project.id = :projectId)""",
   )
   fun selectIdsByProject(projectId: Long): List<Long>
 
@@ -84,14 +100,14 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
         cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
         (:key is null or key <> :key)
       order by similarity desc
-      """
+      """,
   )
   fun getTranslateMemorySuggestions(
     baseTranslationText: String,
     key: Key? = null,
     baseLanguage: Language,
     targetLanguage: Language,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<TranslationMemoryItemView>
 
   @Query(
@@ -108,21 +124,21 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
       where baseTranslation.language = :baseLanguage and
         baseTranslation.text = :baseTranslationText and
         key <> :key
-      """
+      """,
   )
   fun getTranslationMemoryValue(
     baseTranslationText: String,
     key: Key,
     baseLanguage: Language,
     targetLanguage: Language,
-    pageable: Pageable = PageRequest.of(0, 1)
+    pageable: Pageable = PageRequest.of(0, 1),
   ): List<TranslationMemoryItemView>
 
   @Query(
     """
     select t.id as id, t.text as text, t.language.tag as languageTag
     from Translation t
-  """
+  """,
   )
   fun findAllForStatsUpdate(pageable: Pageable): Page<StatsMigrationTranslationView>
 
@@ -130,9 +146,9 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     """
     select t.id
     from Translation t
-    where t.text <> null and (t.wordCount is null or t.characterCount is null or (length(text) <> 0 and t.characterCount = 0))
+    where t.text is not null and (t.wordCount is null or t.characterCount is null or (length(text) <> 0 and t.characterCount = 0))
     order by t.id
-  """
+  """,
   )
   fun findAllIdsForStatsUpdate(): List<Long>
 
@@ -147,7 +163,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
       join k.project p
       where t.language.id <> p.baseLanguage.id
     )
-  """
+  """,
   )
   @Modifying
   fun setOutdated(keyIds: List<Long>)
@@ -157,26 +173,40 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     from Translation t
     join t.language l on l.tag in :languageTags
     where t.key.id in :keys
-  """
+  """,
   )
-  fun getForKeys(keys: List<Long>, languageTags: List<String>): List<Translation>
+  fun getForKeys(
+    keys: List<Long>,
+    languageTags: List<String>,
+  ): List<Translation>
 
-  fun findAllByKeyIdInAndLanguageIdIn(keysIds: List<Long>, languagesIds: List<Long>): List<Translation>
-  fun getAllByKeyIdInAndLanguageIdIn(keyIds: List<Long>, languageIds: List<Long>): List<Translation>
+  fun findAllByKeyIdInAndLanguageIdIn(
+    keysIds: List<Long>,
+    languagesIds: List<Long>,
+  ): List<Translation>
+
+  fun getAllByKeyIdInAndLanguageIdIn(
+    keyIds: List<Long>,
+    languageIds: List<Long>,
+  ): List<Translation>
 
   @Query(
     """
     from Translation t
     join t.key k
     where k.project.id = :projectId
-  """
+  """,
   )
   fun getAllByProjectId(projectId: Long): List<Translation>
+
   @Query(
     """
     from Translation t
     where t.key = :key and t.language.tag in :languageTags
-  """
+  """,
   )
-  fun findForKeyByLanguages(key: Key, languageTags: Collection<String>): List<Translation>
+  fun findForKeyByLanguages(
+    key: Key,
+    languageTags: Collection<String>,
+  ): List<Translation>
 }

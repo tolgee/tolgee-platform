@@ -1,6 +1,6 @@
 package io.tolgee
 
-import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
+import io.tolgee.dtos.response.ApiKeyDTO
 import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.ProjectApiKeyAuthRequestPerformer
 import io.tolgee.fixtures.ProjectAuthRequestPerformer
@@ -15,16 +15,17 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 
 abstract class ProjectAuthControllerTest(
-  val projectUrlPrefix: String = "/api/project/"
+  val projectUrlPrefix: String = "/api/project/",
 ) : AuthorizedControllerTest(), AuthRequestPerformer {
-
   // for api key auth methods
   val apiKey: ApiKeyDTO
     get() {
       val performer = this.projectAuthRequestPerformer
-      return if (performer is ProjectApiKeyAuthRequestPerformer)
-        performer.apiKey else
+      return if (performer is ProjectApiKeyAuthRequestPerformer) {
+        performer.apiKey
+      } else {
         throw Exception("Method not annotated with ApiKeyAccessTestMethod?")
+      }
     }
 
   val project: Project
@@ -58,7 +59,7 @@ abstract class ProjectAuthControllerTest(
             { userAccount },
             this.scopes,
             projectUrlPrefix,
-            this.apiKeyPresentType
+            this.apiKeyPresentType,
           )
       }
     }
@@ -71,11 +72,17 @@ abstract class ProjectAuthControllerTest(
     }
   }
 
-  fun performProjectAuthPut(url: String, content: Any? = null): ResultActions {
+  fun performProjectAuthPut(
+    url: String,
+    content: Any? = null,
+  ): ResultActions {
     return projectAuthRequestPerformer.performProjectAuthPut(url, content)
   }
 
-  fun performProjectAuthPost(url: String, content: Any? = null): ResultActions {
+  fun performProjectAuthPost(
+    url: String,
+    content: Any? = null,
+  ): ResultActions {
     return projectAuthRequestPerformer.performProjectAuthPost(url, content)
   }
 
@@ -83,14 +90,17 @@ abstract class ProjectAuthControllerTest(
     return projectAuthRequestPerformer.performProjectAuthGet(url)
   }
 
-  fun performProjectAuthDelete(url: String, content: Any? = null): ResultActions {
+  fun performProjectAuthDelete(
+    url: String,
+    content: Any? = null,
+  ): ResultActions {
     return projectAuthRequestPerformer.performProjectAuthDelete(url, content)
   }
 
   fun performProjectAuthMultipart(
     url: String,
     files: List<MockMultipartFile>,
-    params: Map<String, Array<String>> = mapOf()
+    params: Map<String, Array<String>> = mapOf(),
   ): ResultActions {
     return projectAuthRequestPerformer.performProjectAuthMultipart(url, files, params)
   }

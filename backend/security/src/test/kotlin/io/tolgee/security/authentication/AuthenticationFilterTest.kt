@@ -80,21 +80,23 @@ class AuthenticationFilterTest {
 
   private val userAccount = Mockito.mock(UserAccount::class.java, Mockito.RETURNS_DEFAULTS)
 
-  private val authenticationFilter = AuthenticationFilter(
-    authProperties,
-    currentDateProvider,
-    rateLimitService,
-    jwtService,
-    userAccountService,
-    pakService,
-    patService,
-  )
+  private val authenticationFilter =
+    AuthenticationFilter(
+      authProperties,
+      currentDateProvider,
+      rateLimitService,
+      jwtService,
+      userAccountService,
+      pakService,
+      patService,
+    )
 
-  private val authenticationFacade = AuthenticationFacade(
-    userAccountService,
-    Mockito.mock(ApiKeyService::class.java),
-    Mockito.mock(PatService::class.java),
-  )
+  private val authenticationFacade =
+    AuthenticationFacade(
+      userAccountService,
+      Mockito.mock(ApiKeyService::class.java),
+      Mockito.mock(PatService::class.java),
+    )
 
   @BeforeEach
   fun setupMocksAndSecurityCtx() {
@@ -105,7 +107,7 @@ class AuthenticationFilterTest {
 
     Mockito.`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
       .thenReturn(
-        RateLimitPolicy("test policy", 5, Duration.ofSeconds(1), true)
+        RateLimitPolicy("test policy", 5, Duration.ofSeconds(1), true),
       )
 
     Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))
@@ -120,7 +122,7 @@ class AuthenticationFilterTest {
           "uwu",
           userAccountDto,
           null,
-        )
+        ),
       )
 
     Mockito.`when`(jwtService.validateToken(TEST_INVALID_TOKEN))

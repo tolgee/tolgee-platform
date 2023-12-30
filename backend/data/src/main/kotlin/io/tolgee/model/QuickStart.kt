@@ -17,7 +17,6 @@ data class QuickStart(
   @JoinColumn(name = "user_account_id")
   var userAccount: UserAccount,
 ) {
-
   @Id
   @Column(name = "user_account_id")
   var userAccountId: Long = 0

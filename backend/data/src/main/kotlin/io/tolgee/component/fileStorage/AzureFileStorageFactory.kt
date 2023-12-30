@@ -12,9 +12,10 @@ open class AzureFileStorageFactory {
   fun create(config: AzureBlobConfig): AzureBlobFileStorage {
     try {
       val connectionString = config.connectionString
-      val blobServiceClient = BlobServiceClientBuilder()
-        .connectionString(connectionString)
-        .buildClient()
+      val blobServiceClient =
+        BlobServiceClientBuilder()
+          .connectionString(connectionString)
+          .buildClient()
       val containerClient = blobServiceClient.getBlobContainerClient(config.containerName)
       return AzureBlobFileStorage(containerClient)
     } catch (e: Exception) {

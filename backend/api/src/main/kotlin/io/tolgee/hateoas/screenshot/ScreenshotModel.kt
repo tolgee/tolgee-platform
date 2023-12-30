@@ -16,7 +16,6 @@ When images are secured. Encrypted timestamp is appended to the filename.
   """,
   )
   val filename: String,
-
   @Schema(
     description = """Thumbnail file name, which may be downloaded from the screenshot path.
 

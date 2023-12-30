@@ -7,5 +7,5 @@ import io.tolgee.model.UserAccount
 data class Base(
   val project: Project,
   var organization: Organization,
-  val userAccount: UserAccount
+  val userAccount: UserAccount,
 )

@@ -25,21 +25,26 @@ class V2InvitationController(
 ) {
   @GetMapping("/{code}/accept")
   @Operation(summary = "Accepts invitation to project or organization")
-  fun acceptInvitation(@PathVariable("code") code: String?): ResponseEntity<Void> {
+  fun acceptInvitation(
+    @PathVariable("code") code: String?,
+  ): ResponseEntity<Void> {
     invitationService.accept(code)
     return ResponseEntity(HttpStatus.OK)
   }
 
   @DeleteMapping("/{invitationId}")
   @Operation(summary = "Deletes invitation by ID")
-  fun deleteInvitation(@PathVariable("invitationId") id: Long): ResponseEntity<Void> {
-    val invitation = invitationService.findById(id).orElseThrow {
-      NotFoundException()
-    }
+  fun deleteInvitation(
+    @PathVariable("invitationId") id: Long,
+  ): ResponseEntity<Void> {
+    val invitation =
+      invitationService.findById(id).orElseThrow {
+        NotFoundException()
+      }
     invitation.permission?.let {
       securityService.checkProjectPermission(
         invitation.permission!!.project!!.id,
-        Scope.ADMIN
+        Scope.ADMIN,
       )
     }
 

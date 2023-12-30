@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class V2InvitationControllerTest : AuthorizedControllerTest() {
-
   @BeforeEach
   fun setup() {
     loginAsUser(initialUsername)
@@ -55,12 +54,13 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
 
-    val invitation = invitationService.create(
-      CreateProjectInvitationParams(
-        project,
-        ProjectPermissionType.EDIT
+    val invitation =
+      invitationService.create(
+        CreateProjectInvitationParams(
+          project,
+          ProjectPermissionType.EDIT,
+        ),
       )
-    )
 
     performAuthDelete("/v2/invitations/${invitation.id}").andIsOk
     assertThatThrownBy { invitationService.getInvitation(invitation.code) }
@@ -70,12 +70,13 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   fun `accepts invitation`() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val code = invitationService.create(
-      CreateProjectInvitationParams(
-        project,
-        ProjectPermissionType.EDIT
-      )
-    ).code
+    val code =
+      invitationService.create(
+        CreateProjectInvitationParams(
+          project,
+          ProjectPermissionType.EDIT,
+        ),
+      ).code
 
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
@@ -88,13 +89,15 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   fun `accepts translate invitation with languages`() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val code = invitationService.create(
-      CreateProjectInvitationParams(
-        project,
-        ProjectPermissionType.TRANSLATE,
-        LanguagePermissions(translate = project.languages, null, null), null
-      )
-    ).code
+    val code =
+      invitationService.create(
+        CreateProjectInvitationParams(
+          project,
+          ProjectPermissionType.TRANSLATE,
+          LanguagePermissions(translate = project.languages, null, null),
+          null,
+        ),
+      ).code
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
 
@@ -105,7 +108,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   private fun assertInvitationAccepted(
     project: Project,
     newUser: UserAccount,
-    expectedType: ProjectPermissionType
+    expectedType: ProjectPermissionType,
   ) {
     assertThat(invitationService.getForProject(project)).hasSize(0)
     assertThat(permissionService.getProjectPermissionScopes(project.id, newUser)).isNotNull
@@ -121,8 +124,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
         languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
         name = "Franta",
         email = "a@a.a",
-        scopes = null
-      )
+        scopes = null,
+      ),
     )
   }
 }

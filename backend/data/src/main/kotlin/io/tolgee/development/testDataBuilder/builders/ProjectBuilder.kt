@@ -23,17 +23,18 @@ import org.springframework.core.io.ClassPathResource
 
 class ProjectBuilder(
   organizationOwner: Organization? = null,
-  val testDataBuilder: TestDataBuilder
+  val testDataBuilder: TestDataBuilder,
 ) : BaseEntityDataBuilder<Project, ProjectBuilder>() {
-  override var self: Project = Project().apply {
-    if (organizationOwner == null) {
-      if (testDataBuilder.data.organizations.size > 0) {
-        this.organizationOwner = testDataBuilder.data.organizations.first().self
+  override var self: Project =
+    Project().apply {
+      if (organizationOwner == null) {
+        if (testDataBuilder.data.organizations.size > 0) {
+          this.organizationOwner = testDataBuilder.data.organizations.first().self
+        }
+        return@apply
       }
-      return@apply
+      this.organizationOwner = organizationOwner
     }
-    this.organizationOwner = organizationOwner
-  }
 
   class DATA {
     val permissions = mutableListOf<PermissionBuilder>()
@@ -61,15 +62,17 @@ class ProjectBuilder(
 
   fun addApiKey(ft: FT<ApiKey>) = addOperation(data.apiKeys, ft)
 
-  fun addImport(ft: FT<Import> = {}) =
-    addOperation(data.imports, ImportBuilder(this), ft)
+  fun addImport(ft: FT<Import> = {}) = addOperation(data.imports, ImportBuilder(this), ft)
 
-  fun addLanguage(ft: FT<Language>) =
-    addOperation(data.languages, ft)
+  fun addLanguage(ft: FT<Language>) = addOperation(data.languages, ft)
 
   fun addKey(ft: FT<Key>) = addOperation(data.keys, ft)
 
-  fun addKey(namespace: String? = null, keyName: String, ft: (KeyBuilder.() -> Unit)? = null): KeyBuilder {
+  fun addKey(
+    namespace: String? = null,
+    keyName: String,
+    ft: (KeyBuilder.() -> Unit)? = null,
+  ): KeyBuilder {
     return addKey(keyName, ft).build { setNamespace(namespace) }
   }
 
@@ -77,7 +80,10 @@ class ProjectBuilder(
     return addKey(keyName, null)
   }
 
-  fun addKey(keyName: String, ft: (KeyBuilder.() -> Unit)?): KeyBuilder {
+  fun addKey(
+    keyName: String,
+    ft: (KeyBuilder.() -> Unit)?,
+  ): KeyBuilder {
     return addKey {
       name = keyName
     }.apply {
@@ -89,8 +95,7 @@ class ProjectBuilder(
 
   fun addTranslation(ft: FT<Translation>) = addOperation(data.translations, ft)
 
-  fun addMtServiceConfig(ft: FT<MtServiceConfig>) =
-    addOperation(data.translationServiceConfigs, ft)
+  fun addMtServiceConfig(ft: FT<MtServiceConfig>) = addOperation(data.translationServiceConfigs, ft)
 
   fun setAvatar(filePath: String) {
     data.avatarFile = ClassPathResource(filePath, this.javaClass.classLoader)
@@ -149,7 +154,11 @@ class ProjectBuilder(
     return data.languages.find { it.self.tag == tag }
   }
 
-  fun addKeysDistance(key1: Key, key2: Key, ft: FT<KeysDistance>): KeysDistanceBuilder {
+  fun addKeysDistance(
+    key1: Key,
+    key2: Key,
+    ft: FT<KeysDistance>,
+  ): KeysDistanceBuilder {
     val builder = KeysDistanceBuilder(this, key1, key2)
     ft(builder.self)
     data.keyDistances.add(builder)
@@ -157,8 +166,11 @@ class ProjectBuilder(
   }
 
   fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
+
   fun addContentStorage(ft: FT<ContentStorage>) = addOperation(data.contentStorages, ft)
+
   fun addContentDeliveryConfig(ft: FT<ContentDeliveryConfig>) = addOperation(data.contentDeliveryConfigs, ft)
+
   fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user

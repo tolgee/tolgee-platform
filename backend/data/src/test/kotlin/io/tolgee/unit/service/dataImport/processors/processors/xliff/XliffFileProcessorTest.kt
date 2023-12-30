@@ -21,11 +21,12 @@ class XliffFileProcessorTest {
   fun setup() {
     importMock = mock()
     importFile = ImportFile("exmample.xliff", importMock)
-    importFileDto = ImportFileDto(
-      "exmample.xliff",
-      File("src/test/resources/import/xliff/example.xliff")
-        .inputStream()
-    )
+    importFileDto =
+      ImportFileDto(
+        "exmample.xliff",
+        File("src/test/resources/import/xliff/example.xliff")
+          .inputStream(),
+      )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 

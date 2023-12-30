@@ -25,9 +25,8 @@ class AllOrganizationOwnerJobRunner(
   val jobLauncher: JobLauncher,
   val projectRepository: ProjectRepository,
   val userAccountRepository: UserAccountRepository,
-  val jobRepository: JobRepository
+  val jobRepository: JobRepository,
 ) : MigrationJobRunner {
-
   val log = LoggerFactory.getLogger(this::class.java)
 
   override fun run(): JobExecution? {

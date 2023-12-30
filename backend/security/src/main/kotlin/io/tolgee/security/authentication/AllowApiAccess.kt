@@ -33,7 +33,7 @@ import io.tolgee.API_KEY_HEADER_NAME
   schema = Schema(type = "string"),
   explode = Explode.TRUE,
   example = "tgpak_gm2dcxzynjvdqm3fozwwgmdjmvwdgojqonvxamldnu4hi5lp",
-  description = "API key provided via query parameter. Will be deprecated in the future."
+  description = "API key provided via query parameter. Will be deprecated in the future.",
 )
 @Parameter(
   `in` = ParameterIn.HEADER,
@@ -42,7 +42,7 @@ import io.tolgee.API_KEY_HEADER_NAME
   schema = Schema(type = "string"),
   explode = Explode.TRUE,
   example = "tgpak_gm2dcxzynjvdqm3fozwwgmdjmvwdgojqonvxamldnu4hi5lp",
-  description = "API key provided via header. Safer since headers are not stored in server logs."
+  description = "API key provided via header. Safer since headers are not stored in server logs.",
 )
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class AllowApiAccess(val tokenType: AuthTokenType = AuthTokenType.ANY)

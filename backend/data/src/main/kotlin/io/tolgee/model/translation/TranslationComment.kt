@@ -20,7 +20,7 @@ import org.hibernate.validator.constraints.Length
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["translation"])
 @Table(
-  indexes = [Index(columnList = "state")]
+  indexes = [Index(columnList = "state")],
 )
 class TranslationComment(
   @field:Length(max = 10000)
@@ -29,12 +29,10 @@ class TranslationComment(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String = "",
-
   @ActivityLoggedProp
   var state: TranslationCommentState = TranslationCommentState.NEEDS_RESOLUTION,
-
   @ManyToOne
-  var translation: Translation
+  var translation: Translation,
 ) : StandardAuditModel() {
   @ManyToOne(optional = false, fetch = LAZY)
   lateinit var author: UserAccount

@@ -6,5 +6,5 @@ import java.io.Serializable
 data class StorageTestResult(
   val success: Boolean,
   val message: Message? = null,
-  val params: List<Serializable?>? = null
+  val params: List<Serializable?>? = null,
 )

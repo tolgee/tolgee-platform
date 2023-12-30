@@ -6,5 +6,5 @@ import java.awt.Dimension
 data class CreateScreenshotResult(
   val screenshot: Screenshot,
   val originalDimension: Dimension,
-  val targetDimension: Dimension
+  val targetDimension: Dimension,
 )

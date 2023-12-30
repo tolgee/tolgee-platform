@@ -76,11 +76,12 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/pre-translate-by-tm",
       mapOf(
         "keyIds" to keyIds,
-        "targetLanguageIds" to listOf(
-          testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
-          testData.projectBuilder.getLanguageByTag("de")!!.self.id
-        )
-      )
+        "targetLanguageIds" to
+          listOf(
+            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+            testData.projectBuilder.getLanguageByTag("de")!!.self.id,
+          ),
+      ),
     )
       .andIsOk
       .andAssertThatJson {
@@ -89,8 +90,9 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     waitForAllTranslated(keyIds, keyCount, "cs")
     executeInNewTransaction {
-      val jobs = entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
-        .resultList
+      val jobs =
+        entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
+          .resultList
       jobs.assert.hasSize(1)
       val job = jobs[0]
       job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
@@ -112,11 +114,12 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/machine-translate",
       mapOf(
         "keyIds" to keyIds,
-        "targetLanguageIds" to listOf(
-          testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
-          testData.projectBuilder.getLanguageByTag("de")!!.self.id
-        )
-      )
+        "targetLanguageIds" to
+          listOf(
+            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+            testData.projectBuilder.getLanguageByTag("de")!!.self.id,
+          ),
+      ),
     )
       .andIsOk
       .andAssertThatJson {
@@ -125,8 +128,9 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     waitForAllTranslated(keyIds, keyCount)
     executeInNewTransaction {
-      val jobs = entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
-        .resultList
+      val jobs =
+        entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
+          .resultList
       jobs.assert.hasSize(1)
       val job = jobs[0]
       job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
@@ -138,14 +142,16 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun waitForAllTranslated(
     keyIds: List<Long>,
     keyCount: Int,
-    expectedCsValue: String = "translated with GOOGLE from en to cs"
+    expectedCsValue: String = "translated with GOOGLE from en to cs",
   ) {
     waitForNotThrowing(pollTime = 1000, timeout = 60000) {
-      @Suppress("UNCHECKED_CAST") val czechTranslations = entityManager.createQuery(
-        """
-        from Translation t where t.key.id in :keyIds and t.language.tag = 'cs'
-        """.trimIndent()
-      ).setParameter("keyIds", keyIds).resultList as List<Translation>
+      @Suppress("UNCHECKED_CAST")
+      val czechTranslations =
+        entityManager.createQuery(
+          """
+          from Translation t where t.key.id in :keyIds and t.language.tag = 'cs'
+          """.trimIndent(),
+        ).setParameter("keyIds", keyIds).resultList as List<Translation>
       czechTranslations.assert.hasSize(keyCount)
       czechTranslations.forEach {
         it.text.assert.contains(expectedCsValue)
@@ -166,7 +172,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/delete-keys",
       mapOf(
         "keyIds" to keyIds,
-      )
+      ),
     ).andIsOk.waitForJobCompleted()
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
@@ -176,9 +182,10 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       executeInNewTransaction {
-        val data = entityManager
-          .createQuery("""from BatchJob""", BatchJob::class.java)
-          .resultList
+        val data =
+          entityManager
+            .createQuery("""from BatchJob""", BatchJob::class.java)
+            .resultList
 
         data.assert.hasSize(1)
         data[0].activityRevision.assert.isNotNull
@@ -203,14 +210,16 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "keyIds" to keyIds,
         "languageIds" to languagesToChangeStateIds,
-        "state" to "REVIEWED"
-      )
+        "state" to "REVIEWED",
+      ),
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val all = translationService.getTranslations(
-        keys.map { it.id }, allLanguageIds
-      )
+      val all =
+        translationService.getTranslations(
+          keys.map { it.id },
+          allLanguageIds,
+        )
       all.count { it.state == TranslationState.REVIEWED }.assert.isEqualTo(keyIds.size * 2)
     }
   }
@@ -232,13 +241,15 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "keyIds" to keyIds,
         "languageIds" to languagesToClearIds,
-      )
+      ),
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val all = translationService.getTranslations(
-        keys.map { it.id }, allLanguageIds
-      )
+      val all =
+        translationService.getTranslations(
+          keys.map { it.id },
+          allLanguageIds,
+        )
       all.count { it.state == TranslationState.UNTRANSLATED && it.text == null }.assert.isEqualTo(keyIds.size * 2)
     }
   }
@@ -261,13 +272,15 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         "keyIds" to keyIds,
         "sourceLanguageId" to testData.englishLanguage.id,
         "targetLanguageIds" to languagesToChangeStateIds,
-      )
+      ),
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val all = translationService.getTranslations(
-        keys.map { it.id }, allLanguageIds
-      )
+      val all =
+        translationService.getTranslations(
+          keys.map { it.id },
+          allLanguageIds,
+        )
       all.count { it.text?.startsWith("en") == true }.assert.isEqualTo(allKeyIds.size + keyIds.size * 2)
     }
   }
@@ -280,7 +293,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "keyIds" to listOf(1),
         "tags" to listOf("a".repeat(101)),
-      )
+      ),
     ).andIsBadRequest.andPrettyPrint
   }
 
@@ -300,7 +313,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "keyIds" to keyIds,
         "tags" to newTags,
-      )
+      ),
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
@@ -327,8 +340,8 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/untag-keys",
       mapOf(
         "keyIds" to keyIds,
-        "tags" to tagsToRemove
-      )
+        "tags" to tagsToRemove,
+      ),
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
@@ -345,8 +358,8 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/untag-keys",
       mapOf(
         "keyIds" to keyIds,
-        "tags" to listOf("a-tag")
-      )
+        "tags" to listOf("a-tag"),
+      ),
     ).andIsOk
   }
 
@@ -362,8 +375,8 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/untag-keys",
       mapOf(
         "keyIds" to listOf(aKeyId),
-        "tags" to listOf("a-tag")
-      )
+        "tags" to listOf("a-tag"),
+      ),
     ).andIsOk
     waitForNotThrowing { tagService.find(testData.projectBuilder.self, "a-tag").assert.isNull() }
   }
@@ -381,8 +394,8 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "start-batch-job/set-keys-namespace",
       mapOf(
         "keyIds" to keyIds,
-        "namespace" to "other-namespace"
-      )
+        "namespace" to "other-namespace",
+      ),
     ).andIsOk.waitForJobCompleted()
 
     val all = keyService.find(keyIds)
@@ -397,27 +410,29 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val key = testData.projectBuilder.addKey(keyName = "key").self
     saveAndPrepare()
 
-    val jobId = performProjectAuthPost(
-      "start-batch-job/set-keys-namespace",
-      mapOf(
-        "keyIds" to listOf(key.id),
-        "namespace" to "namespace"
-      )
-    ).andIsOk.waitForJobCompleted().jobId
+    val jobId =
+      performProjectAuthPost(
+        "start-batch-job/set-keys-namespace",
+        mapOf(
+          "keyIds" to listOf(key.id),
+          "namespace" to "namespace",
+        ),
+      ).andIsOk.waitForJobCompleted().jobId
     keyService.get(key.id).namespace.assert.isNull()
     batchJobService.findJobDto(jobId)?.status.assert.isEqualTo(BatchJobStatus.FAILED)
   }
 
-  fun ResultActions.waitForJobCompleted() = andAssertThatJson {
-    node("id").isNumber.satisfies(
-      Consumer {
-        waitFor(pollTime = 2000) {
-          val job = batchJobService.findJobDto(it.toLong())
-          job?.status?.completed == true
-        }
-      }
-    )
-  }
+  fun ResultActions.waitForJobCompleted() =
+    andAssertThatJson {
+      node("id").isNumber.satisfies(
+        Consumer {
+          waitFor(pollTime = 2000) {
+            val job = batchJobService.findJobDto(it.toLong())
+            job?.status?.completed == true
+          }
+        },
+      )
+    }
 
   val ResultActions.jobId: Long
     get() {
@@ -426,7 +441,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         node("id").isNumber.satisfies(
           Consumer {
             jobId = it.toLong()
-          }
+          },
         )
       }
       return jobId!!
