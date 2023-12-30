@@ -1,3 +1,10 @@
+## [3.43.1](https://github.com/tolgee/tolgee-platform/compare/v3.43.0...v3.43.1) (2023-12-30)
+
+
+### Bug Fixes
+
+* Snyk security issues (minor), updated ktLint ([#2055](https://github.com/tolgee/tolgee-platform/issues/2055)) ([8e00200](https://github.com/tolgee/tolgee-platform/commit/8e0020012d0b03f47052021101c08e70f43cc48b))
+
 # [3.43.0](https://github.com/tolgee/tolgee-platform/compare/v3.42.7...v3.43.0) (2023-12-28)
 
 
