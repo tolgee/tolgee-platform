@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class TolgeeEmailSender(
   private val tolgeeProperties: TolgeeProperties,
   private val mailSender: JavaMailSender,
-  private val mimeMessageHelperFactory: MimeMessageHelperFactory
+  private val mimeMessageHelperFactory: MimeMessageHelperFactory,
 ) {
   fun sendEmail(params: EmailParams) {
     validateProps()
@@ -18,14 +18,15 @@ class TolgeeEmailSender(
     helper.setFrom(tolgeeProperties.smtp.from!!)
     helper.setTo(params.to)
     helper.setSubject(params.subject)
-    val content = """
+    val content =
+      """
       <html>
       <body style="font-size: 15px">
       ${params.text}
       <img style="max-width: 100%; width:120px" src="cid:logo.png" />
       </body>
       </html>
-    """.trimIndent()
+      """.trimIndent()
     helper.setText(content, true)
 
     params.attachments.forEach {
@@ -35,7 +36,7 @@ class TolgeeEmailSender(
     helper.addInline(
       "logo.png",
       { ClassPathResource("tolgee-logo.png").inputStream },
-      "image/png"
+      "image/png",
     )
 
     mailSender.send(helper.mimeMessage)
@@ -45,7 +46,8 @@ class TolgeeEmailSender(
     if (tolgeeProperties.smtp.from.isNullOrEmpty()) {
       throw IllegalStateException(
         """tolgee.smtp.from property not provided.
-        |You have to configure smtp properties to send an e-mail.""".trimMargin()
+        |You have to configure smtp properties to send an e-mail.
+        """.trimMargin(),
       )
     }
   }

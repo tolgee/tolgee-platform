@@ -31,16 +31,17 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
     Mockito.reset(googleTranslate)
     Mockito.reset(amazonTranslate)
     val googleTranslationMock = mock() as Translation
-    val awsTranslateTextResult = TranslateTextResponse
-      .builder().translatedText("Translated with Amazon").build()
+    val awsTranslateTextResult =
+      TranslateTextResponse
+        .builder().translatedText("Translated with Amazon").build()
 
     whenever(
       googleTranslate.translate(
         any<String>(),
         any(),
         any(),
-        any()
-      )
+        any(),
+      ),
     ).thenReturn(googleTranslationMock)
 
     whenever(googleTranslationMock.translatedText).then {
@@ -61,19 +62,23 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   protected fun createAnotherThisIsBeautifulKey() {
     performCreateKey(
-      translations = mapOf(
-        "en" to "This is beautiful",
-      )
+      translations =
+        mapOf(
+          "en" to "This is beautiful",
+        ),
     ).andIsCreated
   }
 
-  protected fun performCreateKey(keyName: String = CREATE_KEY_NAME, translations: Map<String, String>): ResultActions {
+  protected fun performCreateKey(
+    keyName: String = CREATE_KEY_NAME,
+    translations: Map<String, String>,
+  ): ResultActions {
     return performProjectAuthPost(
       "keys",
       CreateKeyDto(
         name = keyName,
-        translations = translations
-      )
+        translations = translations,
+      ),
     )
   }
 

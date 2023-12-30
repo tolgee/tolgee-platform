@@ -53,7 +53,10 @@ class RateLimitService(
    * @param policy The rate limit policy.
    * @throws RateLimitedException There are no longer any tokens in the bucket.
    */
-  fun consumeBucketUnless(policy: RateLimitPolicy?, cond: () -> Boolean) {
+  fun consumeBucketUnless(
+    policy: RateLimitPolicy?,
+    cond: () -> Boolean,
+  ) {
     if (policy == null) return
 
     val lockName = getLockName(policy)
@@ -88,7 +91,7 @@ class RateLimitService(
         rateLimitProperties.ipRequestLimit,
         Duration.ofMillis(rateLimitProperties.ipRequestWindow),
         true,
-      )
+      ),
     )
   }
 
@@ -99,7 +102,10 @@ class RateLimitService(
    * @param userId The authenticated user ID.
    * @return The applicable rate limit policy, if any.
    */
-  fun consumeGlobalUserRateLimitPolicy(request: HttpServletRequest, userId: Long) {
+  fun consumeGlobalUserRateLimitPolicy(
+    request: HttpServletRequest,
+    userId: Long,
+  ) {
     @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
     if (!rateLimitProperties.enabled) return
     if (!rateLimitProperties.globalLimits) return
@@ -110,7 +116,7 @@ class RateLimitService(
         rateLimitProperties.userRequestLimit,
         Duration.ofMillis(rateLimitProperties.userRequestWindow),
         true,
-      )
+      ),
     )
   }
 
@@ -141,7 +147,10 @@ class RateLimitService(
    * @return The updated rate limit bucket.
    * @throws RateLimitedException There are no longer any tokens in the bucket.
    */
-  private fun doConsumeBucket(policy: RateLimitPolicy, bucket: Bucket?): Bucket {
+  private fun doConsumeBucket(
+    policy: RateLimitPolicy,
+    bucket: Bucket?,
+  ): Bucket {
     val time = currentDateProvider.date.time
     if (bucket == null || bucket.refillAt < time) {
       val tokensRemaining = policy.limit - 1

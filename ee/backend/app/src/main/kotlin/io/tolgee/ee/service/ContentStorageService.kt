@@ -25,10 +25,13 @@ class ContentStorageService(
   private val contentStorageRepository: ContentStorageRepository,
   private val entityManager: EntityManager,
   private val contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider,
-  private val contentStorageConfigProcessors: List<ContentStorageConfigProcessor<*>>
+  private val contentStorageConfigProcessors: List<ContentStorageConfigProcessor<*>>,
 ) {
   @Transactional
-  fun create(projectId: Long, dto: ContentStorageRequest): ContentStorage {
+  fun create(
+    projectId: Long,
+    dto: ContentStorageRequest,
+  ): ContentStorage {
     validateStorage(dto)
     val project = entityManager.getReference(Project::class.java, projectId)
     val storage = ContentStorage(project, dto.name)
@@ -43,7 +46,11 @@ class ContentStorageService(
   fun find(id: Long) = contentStorageRepository.findById(id).orElse(null)
 
   @Transactional
-  fun update(projectId: Long, id: Long, dto: ContentStorageRequest): ContentStorage {
+  fun update(
+    projectId: Long,
+    id: Long,
+    dto: ContentStorageRequest,
+  ): ContentStorage {
     val contentStorage = get(id)
     getProcessor(getStorageType(dto)).fillDtoSecrets(contentStorage, dto)
     validateStorage(dto)
@@ -61,7 +68,10 @@ class ContentStorageService(
   }
 
   @Transactional
-  fun delete(projectId: Long, id: Long) {
+  fun delete(
+    projectId: Long,
+    id: Long,
+  ) {
     val storage = get(projectId, id)
     contentStorageConfigProcessors.forEach { it.clearParentEntity(storage, entityManager) }
     if (contentStorageRepository.isStorageInUse(storage)) {
@@ -70,15 +80,24 @@ class ContentStorageService(
     contentStorageRepository.delete(storage)
   }
 
-  fun getAllInProject(projectId: Long, pageable: Pageable): Page<ContentStorage> {
+  fun getAllInProject(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ContentStorage> {
     return contentStorageRepository.findAllByProjectId(projectId, pageable)
   }
 
-  fun get(projectId: Long, contentDeliveryConfigId: Long): ContentStorage {
+  fun get(
+    projectId: Long,
+    contentDeliveryConfigId: Long,
+  ): ContentStorage {
     return contentStorageRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
   }
 
-  fun testStorage(dto: ContentStorageRequest, id: Long? = null): StorageTestResult {
+  fun testStorage(
+    dto: ContentStorageRequest,
+    id: Long? = null,
+  ): StorageTestResult {
     val config: StorageConfig = getNonNullConfig(dto)
     if (id != null) {
       val existing = get(id)
@@ -99,10 +118,12 @@ class ContentStorageService(
   private fun validateStorage(dto: ContentStorageRequest) {
     val result = testStorage(dto)
     @Suppress("UNCHECKED_CAST")
-    if (!result.success) throw BadRequestException(
-      Message.CONTENT_STORAGE_CONFIG_INVALID,
-      listOf(result.message, result.params) as List<Serializable?>?
-    )
+    if (!result.success) {
+      throw BadRequestException(
+        Message.CONTENT_STORAGE_CONFIG_INVALID,
+        listOf(result.message, result.params) as List<Serializable?>?,
+      )
+    }
   }
 
   private fun getNonNullConfig(dto: ContentStorageRequest): StorageConfig {
@@ -115,13 +136,17 @@ class ContentStorageService(
   fun getStorageType(dto: ContentStorageRequest): ContentStorageType = getNonNullConfig(dto).contentStorageType
 
   private fun validateDto(dto: ContentStorageRequest) {
-    val isSingleConfig = contentStorageConfigProcessors.count {
-      it.getItemFromDto(dto) != null
-    } == 1
+    val isSingleConfig =
+      contentStorageConfigProcessors.count {
+        it.getItemFromDto(dto) != null
+      } == 1
     if (!isSingleConfig) throw BadRequestException(Message.CONTENT_STORAGE_CONFIG_REQUIRED)
   }
 
-  private fun dtoToEntity(dto: ContentStorageRequest, entity: ContentStorage): Any {
+  private fun dtoToEntity(
+    dto: ContentStorageRequest,
+    entity: ContentStorage,
+  ): Any {
     entity.name = dto.name
     entity.publicUrlPrefix = dto.publicUrlPrefix
     return getProcessorForDto(dto).configDtoToEntity(dto, entity, entityManager)!!
@@ -132,6 +157,7 @@ class ContentStorageService(
   }
 
   private val processorCache = mutableMapOf<ContentStorageType, ContentStorageConfigProcessor<*>>()
+
   fun getProcessor(type: ContentStorageType): ContentStorageConfigProcessor<*> {
     return processorCache.computeIfAbsent(type) {
       contentStorageConfigProcessors.find { it.type == type }

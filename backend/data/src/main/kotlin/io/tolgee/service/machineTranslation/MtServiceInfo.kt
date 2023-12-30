@@ -5,5 +5,5 @@ import io.tolgee.model.mtServiceConfig.Formality
 
 data class MtServiceInfo(
   val serviceType: MtServiceType,
-  val formality: Formality? = null
+  val formality: Formality? = null,
 )

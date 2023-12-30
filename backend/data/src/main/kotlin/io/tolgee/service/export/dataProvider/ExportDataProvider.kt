@@ -30,7 +30,7 @@ class ExportDataProvider(
   private val entityManager: EntityManager,
   private val exportParams: IExportParams,
   private val projectId: Long,
-  private val overrideLanguageTag: List<String>? = null
+  private val overrideLanguageTag: List<String>? = null,
 ) {
   private val cb: CriteriaBuilder = entityManager.criteriaBuilder
   val query: CriteriaQuery<ExportDataView> = cb.createQuery(ExportDataView::class.java)
@@ -147,11 +147,11 @@ class ExportDataProvider(
 
   private fun joinTranslation(
     key: Root<Key>,
-    language: SetJoin<Project, Language>
+    language: SetJoin<Project, Language>,
   ): ListJoin<Key, Translation> {
     val translation = key.join(Key_.translations, JoinType.LEFT)
     translation.on(
-      cb.equal(language, translation.get(Translation_.language))
+      cb.equal(language, translation.get(Translation_.language)),
     )
     return translation
   }
@@ -175,17 +175,19 @@ class ExportDataProvider(
   private fun transformResult(resultList: MutableList<ExportDataView>): HashMap<Long, ExportKeyView> {
     val keyMap = LinkedHashMap<Long, ExportKeyView>()
     resultList.forEach { dataView ->
-      val keyView = keyMap.computeIfAbsent(dataView.keyId) {
-        ExportKeyView(dataView.keyId, dataView.keyName, dataView.namespace)
-      }
+      val keyView =
+        keyMap.computeIfAbsent(dataView.keyId) {
+          ExportKeyView(dataView.keyId, dataView.keyName, dataView.namespace)
+        }
 
-      keyView.translations[dataView.languageTag] = ExportTranslationView(
-        id = dataView.translationId,
-        text = dataView.translationText,
-        state = dataView.translationState ?: TranslationState.UNTRANSLATED,
-        key = keyView,
-        languageTag = dataView.languageTag
-      )
+      keyView.translations[dataView.languageTag] =
+        ExportTranslationView(
+          id = dataView.translationId,
+          text = dataView.translationText,
+          state = dataView.translationState ?: TranslationState.UNTRANSLATED,
+          key = keyView,
+          languageTag = dataView.languageTag,
+        )
     }
     return keyMap
   }

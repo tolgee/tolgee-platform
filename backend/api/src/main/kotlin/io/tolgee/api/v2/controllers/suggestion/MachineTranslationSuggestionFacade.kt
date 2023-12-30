@@ -39,7 +39,7 @@ class MachineTranslationSuggestionFacade(
 
     securityService.checkLanguageTranslatePermission(
       projectHolder.project.id,
-      listOf(targetLanguage.id)
+      listOf(targetLanguage.id),
     )
 
     val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
@@ -51,7 +51,7 @@ class MachineTranslationSuggestionFacade(
       SuggestResultModel(
         machineTranslations = resultData?.map { it.key to it.value.output }?.toMap(),
         result = resultData,
-        baseBlank = baseBlank
+        baseBlank = baseBlank,
       )
     }
   }
@@ -68,22 +68,24 @@ class MachineTranslationSuggestionFacade(
    */
   private fun getTranslationResults(
     dto: SuggestRequestDto,
-    targetLanguage: Language
+    targetLanguage: Language,
   ): Map<MtServiceType, TranslationItemModel>? {
     val key = dto.key
 
     val resultMap =
       mtService.getMachineTranslations(
         projectHolder.projectEntity,
-        key, dto.baseText,
+        key,
+        dto.baseText,
         targetLanguage,
-        dto.services
+        dto.services,
       )
 
-    val resultData = resultMap
-      .map { (key, value) ->
-        key to TranslationItemModel(value.translatedText.orEmpty(), value.contextDescription)
-      }.toMap()
+    val resultData =
+      resultMap
+        .map { (key, value) ->
+          key to TranslationItemModel(value.translatedText.orEmpty(), value.contextDescription)
+        }.toMap()
 
     if (resultMap.values.all { it.baseBlank }) {
       return null
@@ -92,7 +94,10 @@ class MachineTranslationSuggestionFacade(
     return resultData
   }
 
-  fun <T> catchingOutOfCredits(balanceBefore: MtCreditBalanceDto, fn: () -> T): T {
+  fun <T> catchingOutOfCredits(
+    balanceBefore: MtCreditBalanceDto,
+    fn: () -> T,
+  ): T {
     try {
       return fn()
     } catch (e: OutOfCreditsException) {
@@ -103,19 +108,20 @@ class MachineTranslationSuggestionFacade(
       }
       throw BadRequestException(
         Message.OUT_OF_CREDITS,
-        listOf(balanceBefore.creditBalance, balanceBefore.extraCreditBalance)
+        listOf(balanceBefore.creditBalance, balanceBefore.extraCreditBalance),
       )
     }
   }
 
   val SuggestRequestDto.key
-    get() = if (this.baseText != null) {
-      null
-    } else {
-      keyService.findOptional(this.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }?.also {
-        it.checkInProject()
+    get() =
+      if (this.baseText != null) {
+        null
+      } else {
+        keyService.findOptional(this.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }?.also {
+          it.checkInProject()
+        }
       }
-    }
 
   val SuggestRequestDto.targetLanguage
     get() = languageService.get(this.targetLanguageId)

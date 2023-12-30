@@ -124,6 +124,7 @@ class ExportServiceTest : AbstractSpringTest() {
     assertThat(result).hasSize(5)
     assertThat(result.map { it.state }).allMatch { it == TranslationState.REVIEWED }
   }
+
   @Test
   fun `filters export data by namespace`() {
     val testData = NamespacesTestData()

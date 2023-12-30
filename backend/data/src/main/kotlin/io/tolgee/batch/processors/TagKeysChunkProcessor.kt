@@ -13,13 +13,13 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class TagKeysChunkProcessor(
   private val entityManager: EntityManager,
-  private val tagService: TagService
+  private val tagService: TagService,
 ) : ChunkProcessor<TagKeysRequest, TagKeysParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     val subChunked = chunk.chunked(100) as List<List<Long>>
     var progress: Int = 0

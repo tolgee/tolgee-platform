@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId}/content-storages",
-  ]
+  ],
 )
 @Tag(name = "Content Storages management (EE)")
 class ContentStorageController(
@@ -43,16 +43,19 @@ class ContentStorageController(
   private val projectHolder: ProjectHolder,
   private val contentStorageModelAssembler: ContentStorageModelAssembler,
   private val pageModelAssembler: PagedResourcesAssembler<ContentStorage>,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping("")
   @Operation(description = "Create Content Storage")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
-  fun create(@Valid @RequestBody dto: ContentStorageRequest): ContentStorageModel {
+  fun create(
+    @Valid @RequestBody
+    dto: ContentStorageRequest,
+  ): ContentStorageModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES
+      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
     )
     val contentStorage = contentStorageService.create(projectHolder.project.id, dto)
     return contentStorageModelAssembler.toModel(contentStorage)
@@ -64,11 +67,12 @@ class ContentStorageController(
   @AllowApiAccess
   fun update(
     @PathVariable contentStorageId: Long,
-    @Valid @RequestBody dto: ContentStorageRequest
+    @Valid @RequestBody
+    dto: ContentStorageRequest,
   ): ContentStorageModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES
+      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
     )
     val contentStorage = contentStorageService.update(projectHolder.project.id, contentStorageId, dto)
     return contentStorageModelAssembler.toModel(contentStorage)
@@ -78,7 +82,9 @@ class ContentStorageController(
   @GetMapping("")
   @Operation(description = "List existing Content Storages")
   @AllowApiAccess
-  fun list(@ParameterObject pageable: Pageable): PagedModel<ContentStorageModel> {
+  fun list(
+    @ParameterObject pageable: Pageable,
+  ): PagedModel<ContentStorageModel> {
     val page = contentStorageService.getAllInProject(projectHolder.project.id, pageable)
     return pageModelAssembler.toModel(page, contentStorageModelAssembler)
   }
@@ -87,7 +93,9 @@ class ContentStorageController(
   @DeleteMapping("/{contentStorageId}")
   @Operation(description = "Delete Content Storage")
   @AllowApiAccess
-  fun delete(@PathVariable contentStorageId: Long) {
+  fun delete(
+    @PathVariable contentStorageId: Long,
+  ) {
     contentStorageService.delete(projectHolder.project.id, contentStorageId)
   }
 
@@ -95,7 +103,9 @@ class ContentStorageController(
   @GetMapping("/{contentStorageId}")
   @Operation(description = "Get Content Storage")
   @AllowApiAccess
-  fun get(@PathVariable contentStorageId: Long): ContentStorageModel {
+  fun get(
+    @PathVariable contentStorageId: Long,
+  ): ContentStorageModel {
     return contentStorageModelAssembler
       .toModel(contentStorageService.get(projectHolder.project.id, contentStorageId))
   }
@@ -104,10 +114,13 @@ class ContentStorageController(
   @PostMapping("/test")
   @Operation(description = "Test Content Storage")
   @AllowApiAccess
-  fun test(@Valid @RequestBody dto: ContentStorageRequest): StorageTestResult {
+  fun test(
+    @Valid @RequestBody
+    dto: ContentStorageRequest,
+  ): StorageTestResult {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES
+      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
     )
     return contentStorageService.testStorage(dto)
   }
@@ -115,14 +128,19 @@ class ContentStorageController(
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @PostMapping("/{id}/test")
   @Operation(
-    description = "Tests existing Content Storage with new configuration." +
-      " (Uses existing secrets, if nulls provided)"
+    description =
+      "Tests existing Content Storage with new configuration." +
+        " (Uses existing secrets, if nulls provided)",
   )
   @AllowApiAccess
-  fun testExisting(@Valid @RequestBody dto: ContentStorageRequest, @PathVariable id: Long): StorageTestResult {
+  fun testExisting(
+    @Valid @RequestBody
+    dto: ContentStorageRequest,
+    @PathVariable id: Long,
+  ): StorageTestResult {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES
+      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
     )
     return contentStorageService.testStorage(dto, id)
   }

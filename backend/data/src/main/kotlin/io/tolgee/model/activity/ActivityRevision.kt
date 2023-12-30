@@ -33,22 +33,21 @@ import java.util.*
   indexes = [
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
-    Index(columnList = "type")
-  ]
+    Index(columnList = "type"),
+  ],
 )
 @EntityListeners(ActivityRevision.Companion.ActivityRevisionListener::class)
 class ActivityRevision : java.io.Serializable {
-
   @Id
   @SequenceGenerator(
     name = "activitySequenceGenerator",
     sequenceName = "activity_sequence",
     initialValue = 0,
-    allocationSize = 10
+    allocationSize = 10,
   )
   @GeneratedValue(
     strategy = GenerationType.SEQUENCE,
-    generator = "activitySequenceGenerator"
+    generator = "activitySequenceGenerator",
   )
   val id: Long = 0
 

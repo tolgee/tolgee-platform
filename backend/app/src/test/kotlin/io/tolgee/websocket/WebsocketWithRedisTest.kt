@@ -11,9 +11,9 @@ import org.springframework.test.context.ContextConfiguration
 @SpringBootTest(
   properties = [
     "spring.redis.port=56379",
-    "tolgee.websocket.use-redis=true"
+    "tolgee.websocket.use-redis=true",
   ],
-  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ContextConfiguration(initializers = [WebsocketWithRedisTest.Companion.Initializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

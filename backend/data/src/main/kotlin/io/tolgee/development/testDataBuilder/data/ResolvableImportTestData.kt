@@ -5,7 +5,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 
 class ResolvableImportTestData : BaseTestData() {
-
   lateinit var key1and2Screenshot: Screenshot
   lateinit var key2Screenshot: Screenshot
   lateinit var enOnlyUser: UserAccount
@@ -19,9 +18,10 @@ class ResolvableImportTestData : BaseTestData() {
 
       addKey("namespace-1", "key-1") {
         addTranslation("de", "existing translation")
-        key1and2Screenshot = addScreenshot {
-          location = "My cool frame"
-        }.self
+        key1and2Screenshot =
+          addScreenshot {
+            location = "My cool frame"
+          }.self
       }
 
       addKey("namespace-1", "key-2") {

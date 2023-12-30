@@ -18,21 +18,23 @@ class UploadedImageModelAssembler(
   private val projectHolder: ProjectHolder,
   private val jwtService: JwtService,
 ) : RepresentationModelAssemblerSupport<UploadedImage, UploadedImageModel>(
-  TranslationsController::class.java, UploadedImageModel::class.java
-) {
+    TranslationsController::class.java,
+    UploadedImageModel::class.java,
+  ) {
   override fun toModel(entity: UploadedImage): UploadedImageModel {
     var filename = entity.filenameWithExtension
 
     if (tolgeeProperties.authentication.securedImageRetrieval) {
-      val token = jwtService.emitTicket(
-        authenticationFacade.authenticatedUser.id,
-        JwtService.TicketType.IMG_ACCESS,
-        tolgeeProperties.authentication.securedImageTimestampMaxAge,
-        mapOf(
-          "fileName" to entity.filenameWithExtension,
-          "projectId" to projectHolder.projectOrNull?.id?.toString(),
+      val token =
+        jwtService.emitTicket(
+          authenticationFacade.authenticatedUser.id,
+          JwtService.TicketType.IMG_ACCESS,
+          tolgeeProperties.authentication.securedImageTimestampMaxAge,
+          mapOf(
+            "fileName" to entity.filenameWithExtension,
+            "projectId" to projectHolder.projectOrNull?.id?.toString(),
+          ),
         )
-      )
 
       filename = "$filename?token=$token"
     }
@@ -40,8 +42,9 @@ class UploadedImageModelAssembler(
     var fileUrl = "${tolgeeProperties.fileStorageUrl}/${FileStoragePath.UPLOADED_IMAGES}/$filename"
     if (!fileUrl.matches(Regex("^https?://.*$"))) {
       val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
-      fileUrl = builder.replacePath(fileUrl)
-        .replaceQuery("").build().toUriString()
+      fileUrl =
+        builder.replacePath(fileUrl)
+          .replaceQuery("").build().toUriString()
     }
 
     return UploadedImageModel(
@@ -50,7 +53,7 @@ class UploadedImageModelAssembler(
       fileUrl = fileUrl,
       filename = entity.filename,
       createdAt = entity.createdAt!!,
-      location = entity.location
+      location = entity.location,
     )
   }
 }

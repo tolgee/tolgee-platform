@@ -12,10 +12,13 @@ import sibModel.UpdateContact
 @Component
 class MarketingEmailServiceManager(
   private val sendInBlueProperties: SendInBlueProperties,
-  private val contactsApi: ContactsApi?
+  private val contactsApi: ContactsApi?,
 ) {
   @Async
-  fun submitNewContact(name: String, email: String) {
+  fun submitNewContact(
+    name: String,
+    email: String,
+  ) {
     runSentryCatching {
       if (contactsApi == null) {
         return
@@ -26,7 +29,11 @@ class MarketingEmailServiceManager(
   }
 
   @Async
-  fun updateContact(oldEmail: String, newEmail: String, newName: String) {
+  fun updateContact(
+    oldEmail: String,
+    newEmail: String,
+    newName: String,
+  ) {
     try {
       if (contactsApi == null) {
         return
@@ -39,13 +46,19 @@ class MarketingEmailServiceManager(
     }
   }
 
-  private fun getUpdateContactDto(newEmail: String, newName: String): UpdateContact {
+  private fun getUpdateContactDto(
+    newEmail: String,
+    newName: String,
+  ): UpdateContact {
     val updateContact = UpdateContact()
     updateContact.attributes = mapOf("EMAIL" to newEmail, "NAME" to newName)
     return updateContact
   }
 
-  private fun getCreateContactDto(email: String, name: String): CreateContact {
+  private fun getCreateContactDto(
+    email: String,
+    name: String,
+  ): CreateContact {
     val createContact = CreateContact()
     createContact.email = email
     createContact.attributes = mapOf("NAME" to name)

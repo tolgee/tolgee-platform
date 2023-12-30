@@ -6,7 +6,6 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 class SimpleLockingProvider : LockingProvider {
-
   companion object {
     val map = WeakHashMap<String, Lock>()
   }
@@ -16,7 +15,10 @@ class SimpleLockingProvider : LockingProvider {
     return map.getOrPut(name) { ReentrantLock() }
   }
 
-  override fun <T> withLocking(name: String, fn: () -> T): T {
+  override fun <T> withLocking(
+    name: String,
+    fn: () -> T,
+  ): T {
     val lock = this.getLock(name)
     lock.lock()
     try {

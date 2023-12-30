@@ -10,10 +10,8 @@ import java.io.Serializable
 open class KeyModel(
   @Schema(description = "Id of key record")
   val id: Long,
-
   @Schema(description = "Name of key", example = "this_is_super_key")
   val name: String,
-
   @Schema(description = "Namespace of key", example = "homepage")
   val namespace: String?,
 ) : RepresentationModel<KeyModel>(), Serializable

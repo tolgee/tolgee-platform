@@ -21,24 +21,22 @@ import java.util.*
 @Table(
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["keyHash"], name = "api_key_hash_unique"),
-    UniqueConstraint(columnNames = ["key"], name = "api_key_unique")
-  ]
+    UniqueConstraint(columnNames = ["key"], name = "api_key_unique"),
+  ],
 )
 class ApiKey(
   @Column(updatable = false, insertable = false, nullable = true)
   var key: String? = null,
-
-  @NotNull
-  @NotEmpty
-  @Enumerated(EnumType.STRING)
-  @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   /**
    * Scope should be never nullable, butthere were entries with null scopes in the production DB, which caused NPEs,
    * so to be sure, lets meke it nullable
    */
-  var scopesEnum: MutableSet<Scope?>
+  @NotNull
+  @NotEmpty
+  @Enumerated(EnumType.STRING)
+  @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
+  var scopesEnum: MutableSet<Scope?>,
 ) : StandardAuditModel() {
-
   @field:NotBlank
   var description: String = ""
 
@@ -69,7 +67,7 @@ class ApiKey(
     key: String,
     scopesEnum: Set<Scope>,
     userAccount: UserAccount,
-    project: Project
+    project: Project,
   ) : this(key, scopesEnum.toMutableSet()) {
     this.userAccount = userAccount
     this.project = project

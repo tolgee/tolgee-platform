@@ -29,9 +29,8 @@ class ProgressManager(
   private val batchJobStateProvider: BatchJobStateProvider,
   private val cachingBatchJobService: CachingBatchJobService,
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
-  private val queue: BatchJobChunkExecutionQueue
+  private val queue: BatchJobChunkExecutionQueue,
 ) : Logging {
-
   /**
    * This method tries to set execution running in the state
    * @param canRunFn function that returns true if execution can be run
@@ -39,7 +38,7 @@ class ProgressManager(
   fun trySetExecutionRunning(
     executionId: Long,
     batchJobId: Long,
-    canRunFn: (Map<Long, ExecutionState>) -> Boolean
+    canRunFn: (Map<Long, ExecutionState>) -> Boolean,
   ): Boolean {
     return batchJobStateProvider.updateState(batchJobId) {
       if (canRunFn(it)) {
@@ -52,7 +51,7 @@ class ProgressManager(
             status = BatchJobChunkExecutionStatus.RUNNING,
             chunkNumber = null,
             retry = null,
-            transactionCommitted = false
+            transactionCommitted = false,
           )
         return@updateState true
       }
@@ -75,13 +74,17 @@ class ProgressManager(
     }
   }
 
-  fun handleProgress(execution: BatchJobChunkExecution, failOnly: Boolean = false) {
+  fun handleProgress(
+    execution: BatchJobChunkExecution,
+    failOnly: Boolean = false,
+  ) {
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
-    val info = batchJobStateProvider.updateState(job.id) {
-      it[execution.id] = batchJobStateProvider.getStateForExecution(execution)
-      it.getInfoForJobResult()
-    }
+    val info =
+      batchJobStateProvider.updateState(job.id) {
+        it[execution.id] = batchJobStateProvider.getStateForExecution(execution)
+        it.getInfoForJobResult()
+      }
 
     if (execution.successTargets.isNotEmpty()) {
       eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
@@ -93,20 +96,24 @@ class ProgressManager(
       isAnyCancelled = info.isAnyCancelled,
       completedChunks = info.completedChunks,
       errorMessage = execution.errorMessage,
-      failOnly = failOnly
+      failOnly = failOnly,
     )
   }
 
-  fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution, triggerJobCompleted: Boolean = true) {
-    val state = batchJobStateProvider.updateState(execution.batchJob.id) {
-      logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
-      it.compute(execution.id) { _, v ->
-        val state = batchJobStateProvider.getStateForExecution(execution)
-        state.transactionCommitted = true
-        state
+  fun handleChunkCompletedCommitted(
+    execution: BatchJobChunkExecution,
+    triggerJobCompleted: Boolean = true,
+  ) {
+    val state =
+      batchJobStateProvider.updateState(execution.batchJob.id) {
+        logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
+        it.compute(execution.id) { _, v ->
+          val state = batchJobStateProvider.getStateForExecution(execution)
+          state.transactionCommitted = true
+          state
+        }
+        it
       }
-      it
-    }
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
     logger.debug {
       val incompleteExecutions =
@@ -141,7 +148,7 @@ class ProgressManager(
     completedChunks: Long,
     isAnyCancelled: Boolean,
     errorMessage: Message? = null,
-    failOnly: Boolean = false
+    failOnly: Boolean = false,
   ) {
     logger.debug { "Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}" }
     logger.debug { "Job ${job.id} progress: $progress of ${job.totalItems}" }
@@ -189,7 +196,10 @@ class ProgressManager(
     return batchJobStateProvider.getCached(jobId)?.getInfoForJobResult()?.progress
   }
 
-  fun publishSingleChunkProgress(jobId: Long, progress: Int) {
+  fun publishSingleChunkProgress(
+    jobId: Long,
+    progress: Int,
+  ) {
     val job = batchJobService.getJobDto(jobId)
     eventPublisher.publishEvent(OnBatchJobProgress(job, progress.toLong(), job.totalItems.toLong()))
   }

@@ -8,5 +8,5 @@ import org.springframework.hateoas.server.core.Relation
 open class ProjectTransferOptionModel(
   val name: String,
   val slug: String,
-  val id: Long
+  val id: Long,
 ) : RepresentationModel<ProjectTransferOptionModel>()

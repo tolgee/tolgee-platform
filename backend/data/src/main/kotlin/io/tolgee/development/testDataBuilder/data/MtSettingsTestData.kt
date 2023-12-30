@@ -9,16 +9,18 @@ class MtSettingsTestData : BaseTestData() {
 
   init {
     projectBuilder.apply {
-      germanLanguage = addLanguage {
-        name = "German"
-        tag = "de"
-        originalName = "Deutsch"
-      }.self
-      spanishLanguage = addLanguage {
-        name = "Sp"
-        tag = "es"
-        originalName = "Spanish"
-      }.self
+      germanLanguage =
+        addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "Deutsch"
+        }.self
+      spanishLanguage =
+        addLanguage {
+          name = "Sp"
+          tag = "es"
+          originalName = "Spanish"
+        }.self
 
       addFrench()
     }

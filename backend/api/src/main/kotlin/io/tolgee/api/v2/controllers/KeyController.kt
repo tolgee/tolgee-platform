@@ -68,8 +68,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId}/keys",
-    "/v2/projects/keys"
-  ]
+    "/v2/projects/keys",
+  ],
 )
 @Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
 class KeyController(
@@ -86,7 +86,7 @@ class KeyController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
   private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val keyWithScreenshotsModelAssembler: KeyWithScreenshotsModelAssembler,
-  private val languageModelAssembler: LanguageModelAssembler
+  private val languageModelAssembler: LanguageModelAssembler,
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @Operation(summary = "Creates new key")
@@ -94,7 +94,10 @@ class KeyController(
   @RequestActivity(ActivityType.CREATE_KEY)
   @RequiresProjectPermissions([Scope.KEYS_CREATE])
   @AllowApiAccess
-  fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
+  fun create(
+    @RequestBody @Valid
+    dto: CreateKeyDto,
+  ): ResponseEntity<KeyWithDataModel> {
     checkScrenshotUploadPermissions(dto)
     checkTranslatePermission(dto)
     checkCanStoreBigMeta(dto)
@@ -136,7 +139,12 @@ class KeyController(
   @Operation(summary = "More")
   @UseDefaultPermissions // Security: key permissions are checked separately in method body
   @AllowApiAccess
-  fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
+  fun complexEdit(
+    @PathVariable
+    id: Long,
+    @RequestBody @Valid
+    dto: ComplexEditKeyDto,
+  ): KeyWithDataModel {
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
@@ -145,7 +153,12 @@ class KeyController(
   @RequestActivity(ActivityType.KEY_NAME_EDIT)
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
-  fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
+  fun edit(
+    @PathVariable
+    id: Long,
+    @RequestBody @Valid
+    dto: EditKeyDto,
+  ): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
     return keyService.edit(id, dto).model
@@ -157,7 +170,9 @@ class KeyController(
   @RequestActivity(ActivityType.KEY_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
-  fun delete(@PathVariable ids: Set<Long>) {
+  fun delete(
+    @PathVariable ids: Set<Long>,
+  ) {
     keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
     keyService.deleteMultiple(ids)
   }
@@ -170,7 +185,7 @@ class KeyController(
   fun getAll(
     @ParameterObject
     @SortDefault("id")
-    pageable: Pageable
+    pageable: Pageable,
   ): PagedModel<KeyModel> {
     val data = keyService.getPaged(projectHolder.project.id, pageable)
     return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
@@ -182,22 +197,29 @@ class KeyController(
   @RequestActivity(ActivityType.KEY_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
-  fun delete(@RequestBody @Valid dto: DeleteKeysDto) {
+  fun delete(
+    @RequestBody @Valid
+    dto: DeleteKeysDto,
+  ) {
     delete(dto.ids.toSet())
   }
 
   @PostMapping("/import")
   @Operation(
-    summary = "Imports new keys with translations. If key already exists, its translations and tags" +
-      " are not updated."
+    summary =
+      "Imports new keys with translations. If key already exists, its translations and tags" +
+        " are not updated.",
   )
   @RequestActivity(ActivityType.IMPORT)
   @RequiresProjectPermissions([Scope.KEYS_CREATE]) // Security: language translate permissions are handled in service
   @AllowApiAccess
-  fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
+  fun importKeys(
+    @RequestBody @Valid
+    dto: ImportKeysDto,
+  ) {
     securityService.checkLanguageTranslatePermissionByTag(
       projectHolder.project.id,
-      dto.keys.flatMap { it.translations.keys }.toSet()
+      dto.keys.flatMap { it.translations.keys }.toSet(),
     )
 
     keyService.importKeys(dto.keys, projectHolder.projectEntity)
@@ -208,24 +230,30 @@ class KeyController(
   @RequestActivity(ActivityType.IMPORT)
   @UseDefaultPermissions // Security: permissions are handled in service
   @AllowApiAccess
-  fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto): KeyImportResolvableResultModel {
+  fun importKeys(
+    @RequestBody @Valid
+    dto: ImportKeysResolvableDto,
+  ): KeyImportResolvableResultModel {
     val uploadedImageToScreenshotMap =
       keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
-    val screenshots = uploadedImageToScreenshotMap.screenshots
-      .map { (uploadedImageId, screenshot) ->
-        uploadedImageId to screenshotModelAssembler.toModel(screenshot)
-      }.toMap()
+    val screenshots =
+      uploadedImageToScreenshotMap.screenshots
+        .map { (uploadedImageId, screenshot) ->
+          uploadedImageId to screenshotModelAssembler.toModel(screenshot)
+        }.toMap()
 
-    val keys = uploadedImageToScreenshotMap.keys
-      .map { key -> keyModelAssembler.toModel(key) }
+    val keys =
+      uploadedImageToScreenshotMap.keys
+        .map { key -> keyModelAssembler.toModel(key) }
 
     return KeyImportResolvableResultModel(keys, screenshots)
   }
 
   @GetMapping("/search")
   @Operation(
-    summary = "This endpoint helps you to find desired key by keyName, " +
-      "base translation or translation in specified language."
+    summary =
+      "This endpoint helps you to find desired key by keyName, " +
+        "base translation or translation in specified language.",
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
@@ -250,8 +278,9 @@ class KeyController(
 
   @PostMapping("/info")
   @Operation(
-    summary = "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
-      "If key is not found, it's not included in the response."
+    summary =
+      "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
+        "If key is not found, it's not included in the response.",
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
@@ -268,7 +297,9 @@ class KeyController(
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @Operation(summary = "Returns languages, in which key is disabled")
-  fun getDisabledLanguages(@PathVariable id: Long): CollectionModel<LanguageModel> {
+  fun getDisabledLanguages(
+    @PathVariable id: Long,
+  ): CollectionModel<LanguageModel> {
     val languages = keyService.getDisabledLanguages(projectHolder.project.id, id)
     return languageModelAssembler.toCollectionModel(languages.toViews())
   }
@@ -279,7 +310,8 @@ class KeyController(
   @Operation(summary = "Sets languages, in which key is disabled")
   fun setDisabledLanguages(
     @PathVariable id: Long,
-    @RequestBody @Valid dto: SetDisabledLanguagesRequest
+    @RequestBody @Valid
+    dto: SetDisabledLanguagesRequest,
   ): CollectionModel<LanguageModel> {
     val languages = keyService.setDisabledLanguages(projectHolder.project.id, id, dto.languageIds)
     return languageModelAssembler.toCollectionModel(languages.toViews())

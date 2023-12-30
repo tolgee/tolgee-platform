@@ -24,7 +24,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         left join fetch ick.keyMeta
         join it.language il on il.id = :languageId
         join il.file if
-        """
+        """,
   )
   fun findAllByImportAndLanguageId(languageId: Long): List<ImportTranslation>
 
@@ -42,14 +42,14 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         and it.language.id = :languageId
         and (:search is null or lower(it.text) like lower(concat('%', cast(:search as text), '%'))
         or lower(ik.name) like lower(concat('%', cast(:search as text), '%')))
-    """
+    """,
   )
   fun findImportTranslationsView(
     languageId: Long,
     pageable: Pageable,
     onlyConflicts: Boolean = false,
     onlyUnresolved: Boolean = false,
-    search: String? = null
+    search: String? = null,
   ): Page<ImportTranslationView>
 
   @Transactional
@@ -60,7 +60,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
   @Transactional
   @Query(
     """delete from ImportTranslation it where it.key.id in 
-        (select k.id from ImportKey k join k.file f where f.import = :import)"""
+        (select k.id from ImportKey k join k.file f where f.import = :import)""",
   )
   @Modifying
   fun deleteAllByImport(import: Import)

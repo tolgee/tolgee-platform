@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(TransactionScopeConfig.SCOPE_TRANSACTION)
 class OutdatedFlagListener(
-  private val translationService: TranslationService
+  private val translationService: TranslationService,
 ) {
   @EventListener
   @Order(1)

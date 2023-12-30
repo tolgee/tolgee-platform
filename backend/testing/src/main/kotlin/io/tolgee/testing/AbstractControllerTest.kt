@@ -25,7 +25,6 @@ import java.io.UnsupportedEncodingException
 @SpringBootTest
 abstract class AbstractControllerTest :
   AbstractSpringTest(), RequestPerformer {
-
   @Autowired
   protected lateinit var mvc: MockMvc
 
@@ -33,7 +32,10 @@ abstract class AbstractControllerTest :
   @Autowired
   protected lateinit var requestPerformer: RequestPerformer
 
-  fun <T> decodeJson(json: String?, clazz: Class<T>?): T {
+  fun <T> decodeJson(
+    json: String?,
+    clazz: Class<T>?,
+  ): T {
     val mapper = jacksonObjectMapper()
     return try {
       mapper.readValue(json, clazz)
@@ -42,16 +44,24 @@ abstract class AbstractControllerTest :
     }
   }
 
-  protected fun login(userName: String, password: String): DefaultAuthenticationResult {
-    val response = doAuthentication(userName, password)
-      .andReturn().response.contentAsString
+  protected fun login(
+    userName: String,
+    password: String,
+  ): DefaultAuthenticationResult {
+    val response =
+      doAuthentication(userName, password)
+        .andReturn().response.contentAsString
     val userAccount = userAccountService.findActive(userName) ?: throw NotFoundException()
     return DefaultAuthenticationResult(
-      mapper.readValue(response, HashMap::class.java)["accessToken"] as String, userAccount
+      mapper.readValue(response, HashMap::class.java)["accessToken"] as String,
+      userAccount,
     )
   }
 
-  protected fun doAuthentication(username: String, password: String): ResultActions {
+  protected fun doAuthentication(
+    username: String,
+    password: String,
+  ): ResultActions {
     val request = LoginRequest()
     request.username = username
     request.password = password
@@ -60,11 +70,14 @@ abstract class AbstractControllerTest :
       MockMvcRequestBuilders.post("/api/public/generatetoken")
         .content(jsonRequest)
         .accept(MediaType.ALL)
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON),
     )
   }
 
-  protected fun <T> mapResponse(result: MvcResult, type: JavaType?): T {
+  protected fun <T> mapResponse(
+    result: MvcResult,
+    type: JavaType?,
+  ): T {
     return try {
       mapper.readValue(result.response.contentAsString, type)
     } catch (e: JsonProcessingException) {
@@ -74,7 +87,10 @@ abstract class AbstractControllerTest :
     }
   }
 
-  protected fun <T> mapResponse(result: MvcResult, clazz: Class<T>?): T {
+  protected fun <T> mapResponse(
+    result: MvcResult,
+    clazz: Class<T>?,
+  ): T {
     return try {
       mapper.readValue(result.response.contentAsString, clazz)
     } catch (e: JsonProcessingException) {
@@ -87,12 +103,12 @@ abstract class AbstractControllerTest :
   protected fun <C : Collection<E>?, E> mapResponse(
     result: MvcResult,
     collectionType: Class<C>?,
-    elementType: Class<E>?
+    elementType: Class<E>?,
   ): C {
     return try {
       mapper.readValue(
         result.response.contentAsString,
-        TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType)
+        TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType),
       )
     } catch (e: JsonProcessingException) {
       throw RuntimeException(e)
@@ -105,19 +121,34 @@ abstract class AbstractControllerTest :
     return requestPerformer.perform(builder)
   }
 
-  override fun performPut(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
+  override fun performPut(
+    url: String,
+    content: Any?,
+    httpHeaders: HttpHeaders,
+  ): ResultActions {
     return requestPerformer.performPut(url, content, httpHeaders)
   }
 
-  override fun performPost(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
+  override fun performPost(
+    url: String,
+    content: Any?,
+    httpHeaders: HttpHeaders,
+  ): ResultActions {
     return requestPerformer.performPost(url, content, httpHeaders)
   }
 
-  override fun performGet(url: String, httpHeaders: HttpHeaders): ResultActions {
+  override fun performGet(
+    url: String,
+    httpHeaders: HttpHeaders,
+  ): ResultActions {
     return requestPerformer.performGet(url, httpHeaders)
   }
 
-  override fun performDelete(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
+  override fun performDelete(
+    url: String,
+    content: Any?,
+    httpHeaders: HttpHeaders,
+  ): ResultActions {
     return requestPerformer.performDelete(url, content, httpHeaders)
   }
 }

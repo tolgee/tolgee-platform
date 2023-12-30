@@ -9,5 +9,5 @@ import org.springframework.hateoas.server.core.Relation
 open class ImportFileIssueModel(
   override val id: Long,
   override val type: FileIssueType,
-  override val params: List<ImportFileIssueParamModel>
+  override val params: List<ImportFileIssueParamModel>,
 ) : RepresentationModel<ImportFileIssueModel>(), ImportFileIssueView

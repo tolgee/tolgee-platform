@@ -22,7 +22,6 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 class RecaptchaValidationDisabledTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var reCaptchaValidationService: ReCaptchaValidationService
 
@@ -33,7 +32,7 @@ class RecaptchaValidationDisabledTest : AbstractSpringTest() {
   @Test
   fun `does not validate`() {
     whenever(
-      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>())
+      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>()),
     ).then {
       ResponseEntity(
         Companion.Response().apply {
@@ -42,7 +41,7 @@ class RecaptchaValidationDisabledTest : AbstractSpringTest() {
           hostname = ""
           errorCodes = null
         },
-        HttpStatus.OK
+        HttpStatus.OK,
       )
     }
 
@@ -50,7 +49,9 @@ class RecaptchaValidationDisabledTest : AbstractSpringTest() {
 
     verify(restTemplate, times(0))
       .postForEntity(
-        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(Companion.Response::class.java)
+        eq("https://www.google.com/recaptcha/api/siteverify"),
+        any(),
+        eq(Companion.Response::class.java),
       )
   }
 }

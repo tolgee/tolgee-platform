@@ -15,8 +15,14 @@ interface ApiKeyRepository : JpaRepository<ApiKey, Long> {
   fun findByKeyHash(hash: String): Optional<ApiKey>
 
   fun getAllByUserAccountIdOrderById(userAccountId: Long): LinkedHashSet<ApiKey>
+
   fun getAllByProjectId(projectId: Long): Set<ApiKey>
-  fun getAllByProjectId(projectId: Long, pageable: Pageable): Page<ApiKey>
+
+  fun getAllByProjectId(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ApiKey>
+
   fun deleteAllByProjectId(projectId: Long)
 
   @EntityGraph(attributePaths = ["project", "userAccount", "scopesEnum"])
@@ -26,11 +32,18 @@ interface ApiKeyRepository : JpaRepository<ApiKey, Long> {
     left join ak.userAccount u
     where u.id = :userAccountId 
     and (p.id = :filterProjectId or :filterProjectId is null)
-  """
+  """,
   )
-  fun getAllByUserAccount(userAccountId: Long, filterProjectId: Long?, pageable: Pageable): Page<ApiKey>
+  fun getAllByUserAccount(
+    userAccountId: Long,
+    filterProjectId: Long?,
+    pageable: Pageable,
+  ): Page<ApiKey>
 
   @Modifying
   @Query("UPDATE ApiKey ak SET ak.lastUsedAt = ?2 WHERE ak.id = ?1")
-  fun updateLastUsedById(id: Long, lastUsed: Date)
+  fun updateLastUsedById(
+    id: Long,
+    lastUsed: Date,
+  )
 }

@@ -61,18 +61,22 @@ class NamespacesTestData : BaseTestData() {
     }
   }
 
-  private fun ProjectBuilder.addKeyWithTranslation(keyName: String, namespace: String?): Key {
-    val keyBuilder = this.addKey {
-      name = keyName
-    }.build {
-      setNamespace(namespace)?.self?.let {
-        namespaces[it.project to it.name] = it
+  private fun ProjectBuilder.addKeyWithTranslation(
+    keyName: String,
+    namespace: String?,
+  ): Key {
+    val keyBuilder =
+      this.addKey {
+        name = keyName
+      }.build {
+        setNamespace(namespace)?.self?.let {
+          namespaces[it.project to it.name] = it
+        }
+        addTranslation {
+          language = englishLanguage
+          text = "hello"
+        }
       }
-      addTranslation {
-        language = englishLanguage
-        text = "hello"
-      }
-    }
     return keyBuilder.self
   }
 }

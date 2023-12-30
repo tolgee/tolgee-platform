@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 class RestTemplateConfiguration {
-
   @Bean
   @Lazy
   @Primary
@@ -20,7 +19,7 @@ class RestTemplateConfiguration {
     return RestTemplate(
       HttpComponentsClientHttpRequestFactory().apply {
         this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
-      }
+      },
     ).removeXmlConverter()
   }
 

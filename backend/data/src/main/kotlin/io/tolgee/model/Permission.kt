@@ -31,16 +31,13 @@ class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
-
   @ManyToOne(fetch = FetchType.LAZY)
   var user: UserAccount? = null,
-
   /**
    * When base permission for organization
    */
   @OneToOne(fetch = FetchType.LAZY)
   var organization: Organization? = null,
-
   @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
 ) : AuditModel(), IPermission {
@@ -49,9 +46,9 @@ class Permission(
     parameters = [
       Parameter(
         name = EnumArrayType.SQL_ARRAY_TYPE,
-        value = "varchar"
-      )
-    ]
+        value = "varchar",
+      ),
+    ],
   )
   @Column(name = "scopes", columnDefinition = "varchar[]")
   private var _scopes: Array<Scope>? = null
@@ -108,12 +105,12 @@ class Permission(
     organization: Organization? = null,
     type: ProjectPermissionType? = ProjectPermissionType.VIEW,
     languagePermissions: LanguagePermissions? = null,
-    scopes: Array<Scope>? = null
+    scopes: Array<Scope>? = null,
   ) : this(
     id = id,
     user = user,
     organization = null,
-    invitation = invitation
+    invitation = invitation,
   ) {
     this._scopes = scopes
     this.project = project
@@ -145,7 +142,6 @@ class Permission(
     get() = this.stateChangeLanguages.map { it.id }.toSet()
 
   companion object {
-
     class PermissionListeners {
       @PrePersist
       @PreUpdate
@@ -157,9 +153,9 @@ class Permission(
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
         if (permission.organization != null && (
-          permission.viewLanguages.isNotEmpty() ||
-            permission.translateLanguages.isNotEmpty() ||
-            permission.stateChangeLanguages.isNotEmpty()
+            permission.viewLanguages.isNotEmpty() ||
+              permission.translateLanguages.isNotEmpty() ||
+              permission.stateChangeLanguages.isNotEmpty()
           )
         ) {
           throw IllegalStateException("Organization base permission cannot have language permissions")

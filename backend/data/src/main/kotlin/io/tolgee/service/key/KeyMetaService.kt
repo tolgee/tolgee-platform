@@ -29,13 +29,15 @@ class KeyMetaService(
 
   fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)
 
-  fun saveAllComments(entities: Iterable<KeyComment>): MutableList<KeyComment> =
-    keyCommentRepository.saveAll(entities)
+  fun saveAllComments(entities: Iterable<KeyComment>): MutableList<KeyComment> = keyCommentRepository.saveAll(entities)
 
   fun saveAllCodeReferences(entities: Iterable<KeyCodeReference>): MutableList<KeyCodeReference> =
     keyCodeReferenceRepository.saveAll(entities)
 
-  fun import(target: KeyMeta, source: KeyMeta) {
+  fun import(
+    target: KeyMeta,
+    source: KeyMeta,
+  ) {
     target.comments.import(target, source.comments.toList()) { a, b ->
       a.text == b.text && a.fromImport == b.fromImport
     }
@@ -47,7 +49,7 @@ class KeyMetaService(
   private inline fun <T : WithKeyMetaReference> List<T>.import(
     target: KeyMeta,
     source: Collection<T>,
-    equalsFn: (a: T, b: T) -> Boolean
+    equalsFn: (a: T, b: T) -> Boolean,
   ) {
     source.forEach { otherItem ->
       if (!this.any { equalsFn(it, otherItem) }) {
@@ -58,53 +60,57 @@ class KeyMetaService(
 
   @Suppress("UNCHECKED_CAST")
   fun getWithFetchedData(import: Import): List<KeyMeta> {
-    var result: List<KeyMeta> = entityManager.createQuery(
-      """
+    var result: List<KeyMeta> =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.importKey ik
             left join fetch ikm.comments ikc
             join ik.file if
             where if.import = :import 
-            """
-    )
-      .setParameter("import", import)
-      .resultList as List<KeyMeta>
+            """,
+      )
+        .setParameter("import", import)
+        .resultList as List<KeyMeta>
 
-    result = entityManager.createQuery(
-      """
+    result =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join ikm.importKey ik
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ikm in :metas 
-        """
-    ).setParameter("metas", result)
-      .resultList as List<KeyMeta>
+        """,
+      ).setParameter("metas", result)
+        .resultList as List<KeyMeta>
 
     return result
   }
 
   fun getWithFetchedData(project: Project): List<KeyMeta> {
-    var result: List<KeyMeta> = entityManager.createQuery(
-      """
+    var result: List<KeyMeta> =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.key k
             left join fetch ikm.comments ikc
             where k.project = :project 
-            """
-    )
-      .setParameter("project", project)
-      .resultList as List<KeyMeta>
+            """,
+      )
+        .setParameter("project", project)
+        .resultList as List<KeyMeta>
 
-    result = entityManager.createQuery(
-      """
+    result =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join ikm.key k
             left join fetch ikm.codeReferences ikc
             where ikm in :metas 
-        """
-    ).setParameter("metas", result)
-      .resultList as List<KeyMeta>
+        """,
+      ).setParameter("metas", result)
+        .resultList as List<KeyMeta>
 
     return result
   }
@@ -141,7 +147,7 @@ class KeyMetaService(
           select id from key where project_id = :projectId
         )
       )
-    """
+    """,
     ).setParameter("projectId", projectId)
       .executeUpdate()
 
@@ -152,7 +158,7 @@ class KeyMetaService(
           select id from key where project_id = :projectId
         )
       )
-    """
+    """,
     ).setParameter("projectId", projectId)
       .executeUpdate()
 
@@ -161,7 +167,7 @@ class KeyMetaService(
       delete from key_meta where key_id in (
         select id from key where project_id = :projectId
       )
-      """
+      """,
     ).setParameter("projectId", projectId)
       .executeUpdate()
   }

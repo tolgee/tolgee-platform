@@ -31,7 +31,7 @@ class AutomationService(
   fun getProjectAutomations(
     projectId: Long,
     automationTriggerType: AutomationTriggerType,
-    activityType: ActivityType? = null
+    activityType: ActivityType? = null,
   ): List<AutomationDto> {
     val automations = getAutomationWithFetchedData(projectId, automationTriggerType, activityType)
     return automations.map { AutomationDto.fromEntity(it) }
@@ -77,7 +77,7 @@ class AutomationService(
       join fetch aa.automation
       where aa.id = :actionId
       """,
-      AutomationAction::class.java
+      AutomationAction::class.java,
     )
       .setParameter("actionId", actionId)
       .singleResult ?: throw NotFoundException()
@@ -121,9 +121,7 @@ class AutomationService(
     return save(automation)
   }
 
-  private fun getAutomationForExistingWebhookConfig(
-    webhookConfig: WebhookConfig,
-  ): Automation {
+  private fun getAutomationForExistingWebhookConfig(webhookConfig: WebhookConfig): Automation {
     val automations = webhookConfig.automationActions.map { it.automation }
     if (automations.size == 1) {
       return automations[0]
@@ -143,14 +141,14 @@ class AutomationService(
         this.type = AutomationTriggerType.ACTIVITY
         this.activityType = null
         this.debounceDurationInMs = 0
-      }
+      },
     )
 
     automation.actions.add(
       AutomationAction(automation).apply {
         this.type = AutomationActionType.WEBHOOK
         this.webhookConfig = webhookConfig
-      }
+      },
     )
   }
 
@@ -181,7 +179,10 @@ class AutomationService(
   }
 
   @Transactional
-  fun delete(projectId: Long, automationId: Long) {
+  fun delete(
+    projectId: Long,
+    automationId: Long,
+  ) {
     val deletedCunt = automationRepository.deleteByIdAndProjectId(automationId, projectId)
     if (deletedCunt == 0L) {
       throw NotFoundException()
@@ -196,7 +197,10 @@ class AutomationService(
   }
 
   @Transactional
-  fun get(projectId: Long, automationId: Long): Automation {
+  fun get(
+    projectId: Long,
+    automationId: Long,
+  ): Automation {
     return automationRepository.findByIdAndProjectId(automationId, projectId)
       ?: throw NotFoundException()
   }
@@ -204,54 +208,55 @@ class AutomationService(
   private fun getAutomationWithFetchedData(
     projectId: Long,
     automationTriggerType: AutomationTriggerType,
-    activityType: ActivityType? = null
+    activityType: ActivityType? = null,
   ): MutableList<Automation> {
     val automations = getAutomationsWithTriggerOfType(projectId, automationTriggerType, activityType)
 
     return entityManager.createQuery(
       """from Automation a join fetch a.actions where a in :automations""",
-      Automation::class.java
+      Automation::class.java,
     ).setParameter("automations", automations).resultList
   }
 
   private fun getAutomationsWithTriggerOfType(
     projectId: Long,
     automationTriggerType: AutomationTriggerType,
-    activityType: ActivityType?
-  ): MutableList<Automation>? = entityManager.createQuery(
-    """
-            from Automation a join fetch a.triggers
-            where a.id in (
-                select a2.id from Automation a2 
-                join a2.triggers at 
-                  where a2.project.id = :projectId
-                   and at.type = :automationTriggerType
-                   and (at.activityType = :activityType or at.activityType is null)
-            )
-    """.trimIndent(),
-    Automation::class.java
-  )
-    .setParameter("projectId", projectId)
-    .setParameter("automationTriggerType", automationTriggerType)
-    .setParameter("activityType", activityType)
-    .resultList
+    activityType: ActivityType?,
+  ): MutableList<Automation>? =
+    entityManager.createQuery(
+      """
+      from Automation a join fetch a.triggers
+      where a.id in (
+          select a2.id from Automation a2 
+          join a2.triggers at 
+            where a2.project.id = :projectId
+             and at.type = :automationTriggerType
+             and (at.activityType = :activityType or at.activityType is null)
+      )
+      """.trimIndent(),
+      Automation::class.java,
+    )
+      .setParameter("projectId", projectId)
+      .setParameter("automationTriggerType", automationTriggerType)
+      .setParameter("activityType", activityType)
+      .resultList
 
   private fun addContentDeliveryTriggersAndActions(
     contentDeliveryConfig: ContentDeliveryConfig,
-    automation: Automation
+    automation: Automation,
   ) {
     automation.triggers.add(
       AutomationTrigger(automation).apply {
         this.type = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION
         this.debounceDurationInMs = 30000
-      }
+      },
     )
 
     automation.actions.add(
       AutomationAction(automation).apply {
         this.type = AutomationActionType.CONTENT_DELIVERY_PUBLISH
         this.contentDeliveryConfig = contentDeliveryConfig
-      }
+      },
     )
   }
 }

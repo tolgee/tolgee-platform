@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component
 @Component
 class PrivateOrganizationModelAssembler(
   private val organizationModelAssembler: OrganizationModelAssembler,
-  private val quickStartModelAssembler: QuickStartModelAssembler
+  private val quickStartModelAssembler: QuickStartModelAssembler,
 ) {
   fun toModel(
     organization: OrganizationView,
     features: Array<Feature>,
-    quickStart: QuickStart?
+    quickStart: QuickStart?,
   ): PrivateOrganizationModel {
     return PrivateOrganizationModel(
       organizationModel = organizationModelAssembler.toModel(organization),
       enabledFeatures = features,
-      quickStart = quickStart?.let { quickStartModelAssembler.toModel(it) }
+      quickStart = quickStart?.let { quickStartModelAssembler.toModel(it) },
     )
   }
 }

@@ -15,7 +15,6 @@ import java.util.*
 
 @Repository
 interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
-
   companion object {
     private const val VIEW_BASE_QUERY = """
             select il.id as id, il.name as name, el.id as existingLanguageId, 
@@ -48,15 +47,18 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             where if.import.id = :importId
             $VIEW_GROUP_BY
             order by il.id
-            """
+            """,
   )
-  fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>
+  fun findImportLanguagesView(
+    importId: Long,
+    pageable: Pageable,
+  ): Page<ImportLanguageView>
 
   @Modifying
   @Transactional
   @Query(
     """delete from ImportLanguage l where l.file in 
-        (select f from ImportFile f where f.import = :import)"""
+        (select f from ImportFile f where f.import = :import)""",
   )
   fun deleteAllByImport(import: Import)
 
@@ -65,7 +67,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             $VIEW_BASE_QUERY
             where il.id = :languageId
             $VIEW_GROUP_BY
-            """
+            """,
   )
   fun findViewById(languageId: Long): Optional<ImportLanguageView>
 
@@ -76,7 +78,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
         join il.file if 
         where if.import.id = :importId 
           and il.existingLanguage.id is not null
-    """
+    """,
   )
   fun findAssignedExistingLanguageIds(importId: Long): List<Long>
 }

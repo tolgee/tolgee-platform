@@ -33,14 +33,14 @@ class ProjectActivityController(
   private val activityService: ActivityService,
   private val projectHolder: ProjectHolder,
   private val pagedResourcesAssembler: PagedResourcesAssembler<ProjectActivityView>,
-  private val projectActivityModelAssembler: ProjectActivityModelAssembler
+  private val projectActivityModelAssembler: ProjectActivityModelAssembler,
 ) {
   @Operation(summary = "Returns project history")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
   @AllowApiAccess
   fun getActivity(
-    @ParameterObject pageable: Pageable
+    @ParameterObject pageable: Pageable,
   ): PagedModel<ProjectActivityModel> {
     val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
     return pagedResourcesAssembler.toModel(views, projectActivityModelAssembler)

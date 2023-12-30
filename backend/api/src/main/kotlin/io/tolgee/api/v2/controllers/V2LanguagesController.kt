@@ -46,13 +46,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/languages",
-    "/v2/projects/languages"
-  ]
+    "/v2/projects/languages",
+  ],
 )
 @Tags(
   value = [
     Tag(name = "Languages", description = "Languages"),
-  ]
+  ],
 )
 class V2LanguagesController(
   private val languageService: LanguageService,
@@ -70,7 +70,8 @@ class V2LanguagesController(
   @AllowApiAccess
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
-    @RequestBody @Valid dto: LanguageDto
+    @RequestBody @Valid
+    dto: LanguageDto,
   ): LanguageModel {
     val project = projectService.get(projectId)
     languageValidator.validateCreate(dto, project)
@@ -84,8 +85,9 @@ class V2LanguagesController(
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun editLanguage(
-    @RequestBody @Valid dto: LanguageDto,
-    @PathVariable("languageId") languageId: Long
+    @RequestBody @Valid
+    dto: LanguageDto,
+    @PathVariable("languageId") languageId: Long,
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
     val view = languageService.getView(languageId)
@@ -100,7 +102,7 @@ class V2LanguagesController(
   @AllowApiAccess
   fun getAll(
     @PathVariable("projectId") pathProjectId: Long?,
-    @ParameterObject pageable: Pageable
+    @ParameterObject pageable: Pageable,
   ): PagedModel<LanguageModel> {
     val data = languageService.getPaged(projectHolder.project.id, pageable)
     return pagedAssembler.toModel(data, languageModelAssembler)
@@ -110,7 +112,9 @@ class V2LanguagesController(
   @Operation(summary = "Returns specific language")
   @UseDefaultPermissions
   @AllowApiAccess
-  fun get(@PathVariable("languageId") id: Long): LanguageModel {
+  fun get(
+    @PathVariable("languageId") id: Long,
+  ): LanguageModel {
     val languageView = languageService.getView(id)
     return languageModelAssembler.toModel(languageView)
   }
@@ -120,7 +124,9 @@ class V2LanguagesController(
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
-  fun deleteLanguage(@PathVariable languageId: Long) {
+  fun deleteLanguage(
+    @PathVariable languageId: Long,
+  ) {
     val language = languageService.get(languageId)
     securityService.checkProjectPermission(language.project.id, Scope.LANGUAGES_EDIT)
 

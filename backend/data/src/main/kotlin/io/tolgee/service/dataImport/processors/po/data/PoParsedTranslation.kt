@@ -8,14 +8,18 @@ class PoParsedTranslation {
   var meta: PoTranslationMeta = PoTranslationMeta()
   var raw: StringBuilder = StringBuilder()
 
-  fun addToPlurals(variant: Int, value: String) {
+  fun addToPlurals(
+    variant: Int,
+    value: String,
+  ) {
     val map = msgstrPlurals ?: mutableMapOf()
     msgstrPlurals = map
-    val builder = map[variant] ?: let {
-      val newBuilder = StringBuilder()
-      map[variant] = newBuilder
-      newBuilder
-    }
+    val builder =
+      map[variant] ?: let {
+        val newBuilder = StringBuilder()
+        map[variant] = newBuilder
+        newBuilder
+      }
     builder.append(value)
   }
 }

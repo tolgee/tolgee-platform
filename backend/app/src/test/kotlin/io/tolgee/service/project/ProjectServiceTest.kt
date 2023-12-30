@@ -33,7 +33,6 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class ProjectServiceTest : AbstractSpringTest() {
-
   @Autowired
   private lateinit var batchJobService: BatchJobService
 
@@ -110,15 +109,15 @@ class ProjectServiceTest : AbstractSpringTest() {
         Permission(
           user = base.userAccount,
           project = customPermissionProject,
-          type = ProjectPermissionType.TRANSLATE
-        )
+          type = ProjectPermissionType.TRANSLATE,
+        ),
       )
       permissionService.create(
         Permission(
           user = base.userAccount,
           project = customPermissionProject2,
-          type = ProjectPermissionType.TRANSLATE
-        )
+          type = ProjectPermissionType.TRANSLATE,
+        ),
       )
 
       val projects = projectService.findAllPermitted(base.userAccount)
@@ -149,11 +148,12 @@ class ProjectServiceTest : AbstractSpringTest() {
 
   @Test
   fun `deletes project with MT Settings`() {
-    val testData = executeInNewTransaction {
-      val testData = MtSettingsTestData()
-      testDataService.saveTestData(testData.root)
-      return@executeInNewTransaction testData
-    }
+    val testData =
+      executeInNewTransaction {
+        val testData = MtSettingsTestData()
+        testDataService.saveTestData(testData.root)
+        return@executeInNewTransaction testData
+      }
     executeInNewTransaction(platformTransactionManager) {
       projectService.hardDeleteProject(testData.projectBuilder.self.id)
     }
@@ -165,14 +165,16 @@ class ProjectServiceTest : AbstractSpringTest() {
     val keys = testData.addTranslationOperationData(10)
     testDataService.saveTestData(testData.root)
 
-    val job = batchJobService.startJob(
-      request = DeleteKeysRequest().apply {
-        keyIds = keys.map { it.id }
-      },
-      project = testData.projectBuilder.self,
-      author = testData.user,
-      type = BatchJobType.DELETE_KEYS,
-    )
+    val job =
+      batchJobService.startJob(
+        request =
+          DeleteKeysRequest().apply {
+            keyIds = keys.map { it.id }
+          },
+        project = testData.projectBuilder.self,
+        author = testData.user,
+        type = BatchJobType.DELETE_KEYS,
+      )
 
     waitFor {
       executeInNewTransaction {
@@ -200,12 +202,13 @@ class ProjectServiceTest : AbstractSpringTest() {
     executeInNewTransaction {
       bigMetaService.store(
         BigMetaDto().apply {
-          relatedKeysInOrder = mutableListOf(
-            RelatedKeyDto(keyName = key1.name),
-            RelatedKeyDto(keyName = key2.name)
-          )
+          relatedKeysInOrder =
+            mutableListOf(
+              RelatedKeyDto(keyName = key1.name),
+              RelatedKeyDto(keyName = key2.name),
+            )
         },
-        testData.projectBuilder.self
+        testData.projectBuilder.self,
       )
     }
     executeInNewTransaction(platformTransactionManager) {

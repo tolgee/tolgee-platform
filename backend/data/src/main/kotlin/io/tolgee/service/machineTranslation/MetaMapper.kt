@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 class MetaMapper {
-
   fun getMeta(data: String): List<MetaKey>? {
     val mapper = jacksonObjectMapper()
     val typeRef = object : TypeReference<List<MetaKey>>() {}
@@ -16,7 +15,7 @@ class MetaMapper {
     @JsonIgnoreProperties(ignoreUnknown = true)
     class MetaKey(
       val keyName: String,
-      val namespace: String?
+      val namespace: String?,
     )
   }
 }

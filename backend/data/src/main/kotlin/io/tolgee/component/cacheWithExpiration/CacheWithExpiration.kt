@@ -6,9 +6,12 @@ import java.time.Duration
 
 class CacheWithExpiration(
   private val cache: Cache,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
-  fun <T : Any?> get(key: Any, type: Class<T>?): T? {
+  fun <T : Any?> get(
+    key: Any,
+    type: Class<T>?,
+  ): T? {
     this.cache.get(key, CachedWithExpiration::class.java)?.let {
       if (it.expiresAt > currentDateProvider.date.time) {
         try {
@@ -24,7 +27,11 @@ class CacheWithExpiration(
     return null
   }
 
-  fun put(key: Any, value: Any?, expiration: Duration) {
+  fun put(
+    key: Any,
+    value: Any?,
+    expiration: Duration,
+  ) {
     this.cache.put(key, CachedWithExpiration(currentDateProvider.date.time + expiration.toMillis(), value))
   }
 }

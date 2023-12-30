@@ -6,7 +6,7 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "tags", itemRelation = "tag")
 open class TagModel(
   val id: Long,
-  val name: String
+  val name: String,
 ) : RepresentationModel<TagModel>() {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

@@ -24,11 +24,14 @@ import kotlin.reflect.full.hasAnnotation
 @RequestMapping(value = ["internal/properties"])
 @Transactional
 class PropertiesController(
-  val tolgeeProperties: TolgeeProperties
+  val tolgeeProperties: TolgeeProperties,
 ) {
   @PutMapping(value = ["/set"])
   @Transactional
-  fun setProperty(@RequestBody @Valid setPropertyDto: SetPropertyDto) {
+  fun setProperty(
+    @RequestBody @Valid
+    setPropertyDto: SetPropertyDto,
+  ) {
     val name = setPropertyDto.name
     var instance: Any = tolgeeProperties
     name.split(".").let { namePath ->

@@ -64,7 +64,7 @@ class Key(
   constructor(
     name: String,
     project: Project,
-    translations: MutableList<Translation> = mutableListOf()
+    translations: MutableList<Translation> = mutableListOf(),
   ) : this(name) {
     this.project = project
     this.translations = translations

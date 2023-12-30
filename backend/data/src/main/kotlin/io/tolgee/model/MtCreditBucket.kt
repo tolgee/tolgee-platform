@@ -11,17 +11,15 @@ import java.util.*
 @Table(
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["organization_id"], name = "mt_credit_bucket_organization_unique"),
-  ]
+  ],
 )
 class MtCreditBucket(
   @OneToOne
   @Deprecated("Only organization can own a credit bucket...")
   var userAccount: UserAccount? = null,
-
   @OneToOne
-  var organization: Organization? = null
+  var organization: Organization? = null,
 ) : StandardAuditModel() {
-
   var credits: Long = 0
 
   /**

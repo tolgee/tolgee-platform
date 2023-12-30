@@ -5,5 +5,5 @@ import org.springframework.context.ApplicationEvent
 
 class OnLanguagePreRemove(
   source: Any,
-  val language: Language
+  val language: Language,
 ) : ApplicationEvent(source)

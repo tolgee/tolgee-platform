@@ -31,9 +31,9 @@ import org.hibernate.annotations.ColumnDefault
   uniqueConstraints = [
     UniqueConstraint(
       columnNames = ["key_id", "language_id"],
-      name = "translation_key_language"
-    )
-  ]
+      name = "translation_key_language",
+    ),
+  ],
 )
 @ActivityLoggedEntity
 @EntityListeners(Translation.Companion.UpdateStatsListener::class, Translation.Companion.StateListener::class)
@@ -42,7 +42,7 @@ class Translation(
   @Column(columnDefinition = "text")
   @ActivityLoggedProp
   @ActivityDescribingProp
-  var text: String? = null
+  var text: String? = null,
 ) : StandardAuditModel() {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @field:NotNull

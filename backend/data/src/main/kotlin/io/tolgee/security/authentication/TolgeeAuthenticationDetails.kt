@@ -20,5 +20,5 @@ data class TolgeeAuthenticationDetails(
   /**
    * Whether the user is super-authenticated
    */
-  val isSuperToken: Boolean
+  val isSuperToken: Boolean,
 )

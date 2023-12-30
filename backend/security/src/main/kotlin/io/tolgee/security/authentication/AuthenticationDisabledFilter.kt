@@ -32,18 +32,24 @@ class AuthenticationDisabledFilter(
   private val userAccountService: UserAccountService,
 ) : OncePerRequestFilter() {
   private val initialUser by lazy {
-    val account = userAccountService.findInitialUser()
-      ?: throw IllegalStateException("Initial user does not exists")
+    val account =
+      userAccountService.findInitialUser()
+        ?: throw IllegalStateException("Initial user does not exists")
     UserAccountDto.fromEntity(account)
   }
 
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     // Set the initial user as current user, always.
-    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-      null,
-      initialUser,
-      TolgeeAuthenticationDetails(true)
-    )
+    SecurityContextHolder.getContext().authentication =
+      TolgeeAuthentication(
+        null,
+        initialUser,
+        TolgeeAuthenticationDetails(true),
+      )
 
     filterChain.doFilter(request, response)
   }

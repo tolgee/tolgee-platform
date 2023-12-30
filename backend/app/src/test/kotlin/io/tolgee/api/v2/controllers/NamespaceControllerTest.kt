@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: NamespacesTestData
 
   @BeforeEach
@@ -67,7 +66,7 @@ class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `updates namespace name`() {
     performProjectAuthPut(
       "namespaces/${testData.namespaces[getNs1Def()]?.id}",
-      mapOf("name" to "ns-new")
+      mapOf("name" to "ns-new"),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("ns-new")
     }
@@ -78,7 +77,7 @@ class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `cannot rename to existing`() {
     performProjectAuthPut(
       "namespaces/${testData.namespaces[getNs1Def()]?.id}",
-      mapOf("name" to "ns-2")
+      mapOf("name" to "ns-2"),
     ).andAssertError.hasCode("namespace_exists")
   }
 
@@ -88,15 +87,15 @@ class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val nsId = testData.namespaces[getNs1Def()]?.id
     performProjectAuthPut(
       "namespaces/$nsId",
-      mapOf("name" to "")
+      mapOf("name" to ""),
     ).andAssertError.isStandardValidation.onField("name")
     performProjectAuthPut(
       "namespaces/$nsId",
-      mapOf("name" to null)
+      mapOf("name" to null),
     ).andAssertError.isStandardValidation.onField("name")
     performProjectAuthPut(
       "namespaces/$nsId",
-      mapOf("name" to "  ")
+      mapOf("name" to "  "),
     ).andAssertError.isStandardValidation.onField("name")
   }
 

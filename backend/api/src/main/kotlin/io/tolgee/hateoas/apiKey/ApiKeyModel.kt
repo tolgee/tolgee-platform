@@ -20,17 +20,14 @@ open class ApiKeyModel(
   override var projectId: Long = 0,
   @Schema(description = "Api key's project name")
   override var projectName: String = "",
-
   @Schema(description = "Timestamp of API key expiraion")
   override val expiresAt: Long? = null,
-
   @Schema(description = "Timestamp of API key last usage")
   override val lastUsedAt: Long? = null,
-
   @Schema(
     description = "Api key's permission scopes",
     example =
-    """
+      """
       [
         "screenshots.upload",
         "screenshots.delete",
@@ -39,7 +36,7 @@ open class ApiKeyModel(
         "translations.view", 
         "keys.edit"
         ]
-  """
+  """,
   )
-  override var scopes: Set<String> = setOf()
+  override var scopes: Set<String> = setOf(),
 ) : RepresentationModel<ApiKeyModel>(), Serializable, IApiKeyModel

@@ -23,17 +23,12 @@ data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
-
   @field:NotBlank
   var username: String = "",
-
   var password: String? = null,
-
   var name: String = "",
-
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
-
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   var accountType: AccountType? = AccountType.LOCAL,
@@ -111,7 +106,7 @@ data class UserAccount(
     accountType: AccountType = AccountType.LOCAL,
     thirdPartyAuthType: String?,
     thirdPartyAuthId: String?,
-    resetPasswordCode: String?
+    resetPasswordCode: String?,
   ) : this(id = 0L, username = "", password, name = "") {
     this.permissions = permissions
     this.role = role
@@ -122,10 +117,13 @@ data class UserAccount(
   }
 
   enum class Role {
-    USER, ADMIN
+    USER,
+    ADMIN,
   }
 
   enum class AccountType {
-    LOCAL, MANAGED, THIRD_PARTY
+    LOCAL,
+    MANAGED,
+    THIRD_PARTY,
   }
 }

@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationContext
 class KeyInfoProvider(
   applicationContext: ApplicationContext,
   val projectId: Long,
-  val dto: GetKeysRequestDto
+  val dto: GetKeysRequestDto,
 ) {
   private val entityManager: EntityManager = applicationContext.getBean(EntityManager::class.java)
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
@@ -35,12 +35,13 @@ class KeyInfoProvider(
     val namespace = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
     val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
     keyMeta.fetch(KeyMeta_.tags, JoinType.LEFT)
-    val predicates = dto.keys.map { key ->
-      cb.and(
-        cb.equal(root.get(Key_.name), key.name),
-        cb.equalNullable(namespace.get(Namespace_.name), key.namespace)
-      )
-    }
+    val predicates =
+      dto.keys.map { key ->
+        cb.and(
+          cb.equal(root.get(Key_.name), key.name),
+          cb.equalNullable(namespace.get(Namespace_.name), key.namespace),
+        )
+      }
 
     val keyPredicates = cb.or(*predicates.toTypedArray())
 
@@ -50,8 +51,9 @@ class KeyInfoProvider(
     val result = entityManager.createQuery(query).resultList
     val screenshots = screenshotService.getScreenshotsForKeys(result.map { it.id })
 
-    val translations = translationService.getForKeys(result.map { it.id }, dto.languageTags)
-      .groupBy { it.key.id }
+    val translations =
+      translationService.getForKeys(result.map { it.id }, dto.languageTags)
+        .groupBy { it.key.id }
 
     result.map {
       it.translations = translations[it.id]?.toMutableList() ?: mutableListOf()

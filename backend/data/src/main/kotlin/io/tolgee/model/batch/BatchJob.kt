@@ -71,7 +71,9 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   var debouncingKey: String? = null
 
   companion object {
-    fun <T> chunkTarget(chunkSize: Int, target: List<T>): List<List<T>> =
-      if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
+    fun <T> chunkTarget(
+      chunkSize: Int,
+      target: List<T>,
+    ): List<List<T>> = if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
   }
 }

@@ -27,24 +27,25 @@ open class ChunkProcessingUtil(
   private val coroutineContext: CoroutineContext,
 ) : Logging {
   open fun processChunk() {
-    val time = measureTimeMillis {
-      handleActivity()
-      try {
-        processor.process(job, toProcess, coroutineContext) {
-          if (it != toProcess.size) {
-            progressManager.publishSingleChunkProgress(job.id, it)
+    val time =
+      measureTimeMillis {
+        handleActivity()
+        try {
+          processor.process(job, toProcess, coroutineContext) {
+            if (it != toProcess.size) {
+              progressManager.publishSingleChunkProgress(job.id, it)
+            }
+          }
+          successfulTargets = toProcess
+          execution.status = BatchJobChunkExecutionStatus.SUCCESS
+        } catch (e: Throwable) {
+          handleException(e)
+        } finally {
+          successfulTargets?.let {
+            execution.successTargets = it
           }
         }
-        successfulTargets = toProcess
-        execution.status = BatchJobChunkExecutionStatus.SUCCESS
-      } catch (e: Throwable) {
-        handleException(e)
-      } finally {
-        successfulTargets?.let {
-          execution.successTargets = it
-        }
       }
-    }
     logger.debug("Chunk ${execution.id} executed in ${time}ms")
   }
 
@@ -83,9 +84,11 @@ open class ChunkProcessingUtil(
   }
 
   private fun logException(exception: Throwable) {
-    val knownCauses = listOf(
-      OutOfCreditsException::class.java, TranslationApiRateLimitException::class.java
-    )
+    val knownCauses =
+      listOf(
+        OutOfCreditsException::class.java,
+        TranslationApiRateLimitException::class.java,
+      )
 
     val isKnownCause = knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }
     if (!isKnownCause) {
@@ -105,7 +108,7 @@ open class ChunkProcessingUtil(
 
     logger.debug(
       "Total retries ${retries.values.sum()}, " +
-        "retries for error key: $errorKeyRetries, max retries $maxRetries"
+        "retries for error key: $errorKeyRetries, max retries $maxRetries",
     )
     if (errorKeyRetries >= maxRetries && maxRetries != -1) {
       logger.debug("Max retries reached for job execution ${execution.id}")
@@ -206,14 +209,14 @@ open class ChunkProcessingUtil(
       where chunkNumber = :chunkNumber 
           and batchJob.id = :batchJobId
           and status = :status
-      """.trimIndent()
+      """.trimIndent(),
     )
       .setParameter("chunkNumber", execution.chunkNumber)
       .setParameter("batchJobId", job.id)
       .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
       .setHint(
         "jakarta.persistence.lock.timeout",
-        LockOptions.NO_WAIT
+        LockOptions.NO_WAIT,
       )
       .resultList as List<BatchJobChunkExecution>
   }

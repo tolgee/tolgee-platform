@@ -21,7 +21,6 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TranslationsTestData
 
   @BeforeEach
@@ -84,12 +83,16 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
     return performGet("/v2/projects/translations/en,de", headers)
   }
 
-  private fun performAndGetLastModified(): String? = performProjectAuthGet("/translations/en,de")
-    .andIsOk.lastModified()
+  private fun performAndGetLastModified(): String? =
+    performProjectAuthGet("/translations/en,de")
+      .andIsOk.lastModified()
 
   private fun ResultActions.lastModified() = this.andReturn().response.getHeader("Last-Modified")
 
-  private fun assertEqualsDate(lastModified: String?, now: Date) {
+  private fun assertEqualsDate(
+    lastModified: String?,
+    now: Date,
+  ) {
     val zdt: ZonedDateTime = ZonedDateTime.parse(lastModified, DateTimeFormatter.RFC_1123_DATE_TIME)
     (zdt.toInstant().toEpochMilli() / 1000).assert.isEqualTo(now.time / 1000)
   }

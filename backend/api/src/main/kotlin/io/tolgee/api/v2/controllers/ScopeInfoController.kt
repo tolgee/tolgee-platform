@@ -13,16 +13,14 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/public/scope-info"
-  ]
+    "/v2/public/scope-info",
+  ],
 )
 @OpenApiTag(name = "Scope Info", description = "Returns info about permission scopes")
 class ScopeInfoController : IController {
   @GetMapping(value = ["/hierarchy"])
   @Operation(summary = "Returns hierarchy of scopes")
-  fun getHierarchy(
-    search: String? = null
-  ): Scope.HierarchyItem {
+  fun getHierarchy(search: String? = null): Scope.HierarchyItem {
     return Scope.hierarchy
   }
 

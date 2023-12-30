@@ -12,13 +12,13 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class DeleteKeysChunkProcessor(
   private val keyService: KeyService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) : ChunkProcessor<DeleteKeysRequest, Any?, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit)
+    onProgress: ((Int) -> Unit),
   ) {
     coroutineContext.ensureActive()
     val subChunked = chunk.chunked(100)

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 @Suppress("MVCPathVariableInspection")
 @RestController
 @RequestMapping(
-  value = ["/v2/projects/{projectId:\\d+}", "/v2/projects"]
+  value = ["/v2/projects/{projectId:\\d+}", "/v2/projects"],
 )
 @Tag(name = "Big Meta data about the keys in project")
 class BigMetaController(
@@ -35,7 +35,10 @@ class BigMetaController(
   @Operation(summary = "Stores a bigMeta for a project")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
-  fun store(@RequestBody @Valid data: BigMetaDto) {
+  fun store(
+    @RequestBody @Valid
+    data: BigMetaDto,
+  ) {
     bigMetaService.store(data, projectHolder.projectEntity)
   }
 
@@ -44,7 +47,7 @@ class BigMetaController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getBigMeta(
-    @PathVariable("id") id: Long
+    @PathVariable("id") id: Long,
   ): CollectionModel<KeyWithBaseTranslationModel> {
     val projectId = projectHolder.project.id
     val result = bigMetaService.getCloseKeysWithBaseTranslation(id, projectId)

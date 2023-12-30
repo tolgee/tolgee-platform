@@ -22,7 +22,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -42,7 +42,7 @@ class TranslationService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val entityManager: EntityManager,
-  private val translationCommentService: TranslationCommentService
+  private val translationCommentService: TranslationCommentService,
 ) {
   @set:Autowired
   @set:Lazy
@@ -62,16 +62,17 @@ class TranslationService(
     languageTags: Set<String>,
     namespace: String?,
     projectId: Long,
-    structureDelimiter: Char?
+    structureDelimiter: Char?,
   ): Map<String, Any> {
     val safeNamespace = if (namespace == "") null else namespace
     val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId)
     val langTranslations: HashMap<String, Any> = LinkedHashMap()
     for (translation in allByLanguages) {
-      val map = langTranslations
-        .computeIfAbsent(
-          translation.languageTag
-        ) { LinkedHashMap<String, Any>() } as MutableMap<String, Any?>
+      val map =
+        langTranslations
+          .computeIfAbsent(
+            translation.languageTag,
+          ) { LinkedHashMap<String, Any>() } as MutableMap<String, Any?>
       addToMap(translation, map, structureDelimiter)
     }
     return langTranslations
@@ -81,19 +82,31 @@ class TranslationService(
     return translationRepository.getAllByLanguageId(languageId)
   }
 
-  fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
+  fun getKeyTranslations(
+    languages: Set<Language>,
+    project: Project,
+    key: Key?,
+  ): Set<Translation> {
     return if (key != null) {
       translationRepository.getTranslations(key, project, languages)
-    } else LinkedHashSet()
+    } else {
+      LinkedHashSet()
+    }
   }
 
-  fun getOrCreate(key: Key, language: Language): Translation {
+  fun getOrCreate(
+    key: Key,
+    language: Language,
+  ): Translation {
     return find(key, language).orElseGet {
       Translation(language = language, key = key)
     }
   }
 
-  fun getOrCreate(keyId: Long, languageId: Long): Translation {
+  fun getOrCreate(
+    keyId: Long,
+    languageId: Long,
+  ): Translation {
     return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
       ?: let {
         val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
@@ -105,7 +118,10 @@ class TranslationService(
       }
   }
 
-  fun find(key: Key, language: Language): Optional<Translation> {
+  fun find(
+    key: Key,
+    language: Language,
+  ): Optional<Translation> {
     return translationRepository.findOneByKeyAndLanguage(key, language)
   }
 
@@ -121,7 +137,7 @@ class TranslationService(
     projectId: Long,
     pageable: Pageable,
     params: GetTranslationsParams,
-    languages: Set<Language>
+    languages: Set<Language>,
   ): Page<KeyWithTranslationsView> {
     return translationViewDataProvider.getData(projectId, languages, pageable, params, params.cursor)
   }
@@ -129,18 +145,27 @@ class TranslationService(
   fun getSelectAllKeys(
     projectId: Long,
     params: TranslationFilters,
-    languages: Set<Language>
+    languages: Set<Language>,
   ): List<Long> {
     return translationViewDataProvider.getSelectAllKeys(projectId, languages, params)
   }
 
-  fun setTranslation(key: Key, languageTag: String?, text: String?): Translation? {
-    val language = languageService.findByTag(languageTag!!, key.project)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+  fun setTranslation(
+    key: Key,
+    languageTag: String?,
+    text: String?,
+  ): Translation? {
+    val language =
+      languageService.findByTag(languageTag!!, key.project)
+        .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
     return setTranslation(key, language, text)
   }
 
-  fun setTranslation(key: Key, language: Language, text: String?): Translation {
+  fun setTranslation(
+    key: Key,
+    language: Language,
+    text: String?,
+  ): Translation {
     val translation = getOrCreate(key, language)
     setTranslation(translation, text)
     key.translations.add(translation)
@@ -149,7 +174,7 @@ class TranslationService(
 
   fun setTranslation(
     translation: Translation,
-    text: String?
+    text: String?,
   ): Translation {
     if (translation.text !== text) {
       translation.resetFlags()
@@ -174,57 +199,73 @@ class TranslationService(
   }
 
   @Transactional
-  fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
+  fun setForKey(
+    key: Key,
+    translations: Map<String, String?>,
+  ): Map<String, Translation> {
     val languages = languageService.findByTags(translations.keys, key.project.id)
-    val oldTranslations = getKeyTranslations(languages, key.project, key).associate {
-      languageByIdFromLanguages(
-        it.language.id,
-        languages
-      ) to it.text
-    }
+    val oldTranslations =
+      getKeyTranslations(languages, key.project, key).associate {
+        languageByIdFromLanguages(
+          it.language.id,
+          languages,
+        ) to it.text
+      }
 
     return setForKey(
       key,
       translations.map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
-      oldTranslations
+      oldTranslations,
     ).mapKeys { it.key.tag }
   }
 
-  fun findForKeyByLanguages(key: Key, languageTags: Collection<String>): List<Translation> {
+  fun findForKeyByLanguages(
+    key: Key,
+    languageTags: Collection<String>,
+  ): List<Translation> {
     return translationRepository.findForKeyByLanguages(key, languageTags)
   }
 
-  private fun languageByTagFromLanguages(tag: String, languages: Collection<Language>) =
-    languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  private fun languageByTagFromLanguages(
+    tag: String,
+    languages: Collection<Language>,
+  ) = languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
-  private fun languageByIdFromLanguages(id: Long, languages: Collection<Language>) =
-    languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  private fun languageByIdFromLanguages(
+    id: Long,
+    languages: Collection<Language>,
+  ) = languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
   @Transactional
   fun setForKey(
     key: Key,
     translations: Map<Language, String?>,
-    oldTranslations: Map<Language, String?>
+    oldTranslations: Map<Language, String?>,
   ): Map<Language, Translation> {
-    val result = translations.entries.associate { (language, value) ->
-      language to setTranslation(key, language, value)
-    }.filterValues { it != null }.mapValues { it.value }
+    val result =
+      translations.entries.associate { (language, value) ->
+        language to setTranslation(key, language, value)
+      }.filterValues { it != null }.mapValues { it.value }
 
     applicationEventPublisher.publishEvent(
       OnTranslationsSet(
         source = this,
         key = key,
         oldValues = oldTranslations.map { it.key.tag to it.value }.toMap(),
-        translations = result.values.toList()
-      )
+        translations = result.values.toList(),
+      ),
     )
 
     return result
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun addToMap(translation: SimpleTranslationView, map: MutableMap<String, Any?>, delimiter: Char?) {
+  private fun addToMap(
+    translation: SimpleTranslationView,
+    map: MutableMap<String, Any?>,
+    delimiter: Char?,
+  ) {
     var currentMap = map
     val path = TextHelper.splitOnNonEscapedDelimiter(translation.key, delimiter).toMutableList()
     val name = path.removeLast()
@@ -267,7 +308,10 @@ class TranslationService(
     entities.forEach { save(it) }
   }
 
-  fun setStateBatch(translation: Translation, state: TranslationState): Translation {
+  fun setStateBatch(
+    translation: Translation,
+    state: TranslationState,
+  ): Translation {
     translation.state = state
     translation.resetFlags()
     return this.save(translation)
@@ -292,8 +336,9 @@ class TranslationService(
     key: Key,
     targetLanguage: Language,
   ): TranslationMemoryItemView? {
-    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
-      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+    val baseLanguage =
+      projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
+        ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
 
     val baseTranslationText = findBaseTranslation(key)?.text ?: return null
 
@@ -301,14 +346,14 @@ class TranslationService(
       baseTranslationText,
       key,
       baseLanguage,
-      targetLanguage
+      targetLanguage,
     ).firstOrNull()
   }
 
   fun getTranslationMemorySuggestions(
     key: Key,
     targetLanguage: Language,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     val baseTranslation = findBaseTranslation(key) ?: return Page.empty()
 
@@ -321,10 +366,11 @@ class TranslationService(
     baseTranslationText: String,
     key: Key?,
     targetLanguage: Language,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
-    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
-      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+    val baseLanguage =
+      projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
+        ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
 
     return getTranslationMemorySuggestions(baseTranslationText, key, baseLanguage, targetLanguage, pageable)
   }
@@ -334,7 +380,7 @@ class TranslationService(
     key: Key?,
     sourceLanguage: Language,
     targetLanguage: Language,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     if ((sourceTranslationText.length) < 3) {
       return Page.empty(pageable)
@@ -345,7 +391,7 @@ class TranslationService(
       key = key,
       baseLanguage = sourceLanguage,
       targetLanguage = targetLanguage,
-      pageable = pageable
+      pageable = pageable,
     )
   }
 
@@ -357,12 +403,18 @@ class TranslationService(
   }
 
   @Transactional
-  fun setOutdated(translation: Translation, value: Boolean) {
+  fun setOutdated(
+    translation: Translation,
+    value: Boolean,
+  ) {
     translation.outdated = value
     save(translation)
   }
 
-  fun setOutdated(key: Key, excludeTranslationIds: Set<Long> = emptySet()) {
+  fun setOutdated(
+    key: Key,
+    excludeTranslationIds: Set<Long> = emptySet(),
+  ) {
     val baseLanguage = key.project.baseLanguage
     key.translations.forEach {
       val isBase = it.language.id == baseLanguage?.id
@@ -386,31 +438,39 @@ class TranslationService(
     val query = cb.createQuery(Translation::class.java)
     val root = query.from(Translation::class.java)
 
-    val predicates = keyLanguagesMap.map { (key, languages) ->
-      cb.and(
-        cb.equal(root.get(Translation_.key), key),
-        root.get(Translation_.language).`in`(languages)
-      )
-    }.toTypedArray()
+    val predicates =
+      keyLanguagesMap.map { (key, languages) ->
+        cb.and(
+          cb.equal(root.get(Translation_.key), key),
+          root.get(Translation_.language).`in`(languages),
+        )
+      }.toTypedArray()
 
     query.where(cb.or(*predicates))
 
     return entityManager.createQuery(query).resultList
   }
 
-  fun getForKeys(keyIds: List<Long>, languageTags: List<String>): List<Translation> {
+  fun getForKeys(
+    keyIds: List<Long>,
+    languageTags: List<String>,
+  ): List<Translation> {
     return translationRepository.getForKeys(keyIds, languageTags)
   }
 
   fun findAllByKeyIdsAndLanguageIds(
     keyIds: List<Long>,
-    languageIds: List<Long>
+    languageIds: List<Long>,
   ): List<Translation> {
     return translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
   }
 
   @Transactional
-  fun setStateBatch(keyIds: List<Long>, languageIds: List<Long>, state: TranslationState) {
+  fun setStateBatch(
+    keyIds: List<Long>,
+    languageIds: List<Long>,
+    state: TranslationState,
+  ) {
     val translations = getTargetTranslations(keyIds, languageIds)
     translations.filter { it.state != TranslationState.DISABLED }.forEach { it.state = state }
     saveAll(translations)
@@ -418,10 +478,13 @@ class TranslationService(
 
   fun getTranslations(
     keyIds: List<Long>,
-    languageIds: List<Long>
+    languageIds: List<Long>,
   ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
-  fun clearBatch(keyIds: List<Long>, languageIds: List<Long>) {
+  fun clearBatch(
+    keyIds: List<Long>,
+    languageIds: List<Long>,
+  ) {
     val translations = getTargetTranslations(keyIds, languageIds)
     translations.forEach {
       it.clear()
@@ -429,35 +492,41 @@ class TranslationService(
     saveAll(translations)
   }
 
-  fun copyBatch(keyIds: List<Long>, sourceLanguageId: Long, targetLanguageIds: List<Long>) {
+  fun copyBatch(
+    keyIds: List<Long>,
+    sourceLanguageId: Long,
+    targetLanguageIds: List<Long>,
+  ) {
     val sourceTranslations = getTargetTranslations(keyIds, listOf(sourceLanguageId)).associateBy { it.key.id }
-    val targetTranslations = getTargetTranslations(keyIds, targetLanguageIds).onEach {
-      it.text = sourceTranslations[it.key.id]?.text
-      if (!it.text.isNullOrEmpty()) {
-        it.state = TranslationState.TRANSLATED
+    val targetTranslations =
+      getTargetTranslations(keyIds, targetLanguageIds).onEach {
+        it.text = sourceTranslations[it.key.id]?.text
+        if (!it.text.isNullOrEmpty()) {
+          it.state = TranslationState.TRANSLATED
+        }
+        it.auto = false
+        it.mtProvider = null
+        it.outdated = false
       }
-      it.auto = false
-      it.mtProvider = null
-      it.outdated = false
-    }
     saveAll(targetTranslations)
   }
 
   private fun getTargetTranslations(
     keyIds: List<Long>,
-    targetLanguageIds: List<Long>
+    targetLanguageIds: List<Long>,
   ): List<Translation> {
     val existing = getTranslations(keyIds, targetLanguageIds)
-    val existingMap = existing.groupBy { it.key.id }
-      .map { entry ->
-        entry.key to
-          entry.value.associateBy { translation -> translation.language.id }
-      }.toMap()
+    val existingMap =
+      existing.groupBy { it.key.id }
+        .map { entry ->
+          entry.key to
+            entry.value.associateBy { translation -> translation.language.id }
+        }.toMap()
     return keyIds.flatMap { keyId ->
       targetLanguageIds.map { languageId ->
         existingMap[keyId]?.get(languageId) ?: getOrCreate(
           entityManager.getReference(Key::class.java, keyId),
-          entityManager.getReference(Language::class.java, languageId)
+          entityManager.getReference(Language::class.java, languageId),
         )
       }.filter { it.state !== TranslationState.DISABLED }
     }
@@ -469,7 +538,7 @@ class TranslationService(
       "DELETE FROM translation " +
         "WHERE " +
         "key_id IN (SELECT id FROM key WHERE project_id = :projectId) or " +
-        "language_id IN (SELECT id FROM language WHERE project_id = :projectId)"
+        "language_id IN (SELECT id FROM language WHERE project_id = :projectId)",
     ).setParameter("projectId", projectId).executeUpdate()
   }
 }

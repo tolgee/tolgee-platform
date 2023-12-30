@@ -17,13 +17,14 @@ class ServerAdminFilterTest : AuthorizedControllerTest() {
 
   @Test
   fun allowsAccessToServerAdmin() {
-    val serverAdmin = userAccountService.createUser(
-      UserAccount(
-        username = "serverAdmin",
-        password = "admin",
-        role = UserAccount.Role.ADMIN
+    val serverAdmin =
+      userAccountService.createUser(
+        UserAccount(
+          username = "serverAdmin",
+          password = "admin",
+          role = UserAccount.Role.ADMIN,
+        ),
       )
-    )
     loginAsUser(serverAdmin)
     performAuthGet("/v2/administration/organizations").andIsOk
   }

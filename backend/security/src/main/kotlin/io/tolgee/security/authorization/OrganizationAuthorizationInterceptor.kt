@@ -50,14 +50,15 @@ class OrganizationAuthorizationInterceptor(
   override fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
-    handler: HandlerMethod
+    handler: HandlerMethod,
   ): Boolean {
     val userId = authenticationFacade.authenticatedUser.id
-    val organization = requestContextService.getTargetOrganization(request)
-      // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
-      // In both cases, there is no authorization to perform and we simply continue.
-      // It is not the job of the interceptor to return a 404 error.
-      ?: return true
+    val organization =
+      requestContextService.getTargetOrganization(request)
+        // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
+        // In both cases, there is no authorization to perform and we simply continue.
+        // It is not the job of the interceptor to return a 404 error.
+        ?: return true
 
     var bypassed = false
     val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
@@ -66,7 +67,7 @@ class OrganizationAuthorizationInterceptor(
       "Checking access to org#{} by user#{} (Requires {})",
       organization.id,
       userId,
-      requiredRole ?: "read-only"
+      requiredRole ?: "read-only",
     )
 
     if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
@@ -112,7 +113,10 @@ class OrganizationAuthorizationInterceptor(
     return true
   }
 
-  private fun getRequiredRole(request: HttpServletRequest, handler: HandlerMethod): OrganizationRoleType? {
+  private fun getRequiredRole(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+  ): OrganizationRoleType? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
     val orgPermission = AnnotationUtils.getAnnotation(handler.method, RequiresOrganizationRole::class.java)
 
@@ -124,7 +128,7 @@ class OrganizationAuthorizationInterceptor(
     if (defaultPerms != null && orgPermission != null) {
       // Policy doesn't make sense
       throw RuntimeException(
-        "Both `@UseDefaultPermissions` and `@RequiresOrganizationRole` have been set for this endpoint!"
+        "Both `@UseDefaultPermissions` and `@RequiresOrganizationRole` have been set for this endpoint!",
       )
     }
 

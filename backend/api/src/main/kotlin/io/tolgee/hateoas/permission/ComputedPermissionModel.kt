@@ -5,5 +5,5 @@ import org.springframework.hateoas.RepresentationModel
 
 open class ComputedPermissionModel(
   permissionModel: PermissionModel,
-  val origin: ComputedPermissionOrigin
+  val origin: ComputedPermissionOrigin,
 ) : RepresentationModel<ComputedPermissionModel>(), IDeprecatedPermissionModel by permissionModel

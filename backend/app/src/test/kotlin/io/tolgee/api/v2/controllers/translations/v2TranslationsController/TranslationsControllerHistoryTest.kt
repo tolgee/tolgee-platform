@@ -22,7 +22,6 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var translation: Translation
 
   lateinit var testUser: UserAccount
@@ -49,10 +48,11 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
             type = ProjectPermissionType.TRANSLATE
             project = testProject
           }
-          lang = addLanguage {
-            name = "Deutsch"
-            tag = "de"
-          }.self
+          lang =
+            addLanguage {
+              name = "Deutsch"
+              tag = "de"
+            }.self
 
           addKey {
             name = "yey"
@@ -111,24 +111,30 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
   fun `does not return comment added events`() {
     performProjectAuthPost(
       "/translations/create-comment",
-      mapOf("keyId" to emptyKey.id, "languageId" to lang.id, "text" to "Yey!")
+      mapOf("keyId" to emptyKey.id, "languageId" to lang.id, "text" to "Yey!"),
     )
 
-    val translation = transactionTemplate.execute {
-      translationService.find(emptyKey, lang).get()
-    }
+    val translation =
+      transactionTemplate.execute {
+        translationService.find(emptyKey, lang).get()
+      }
 
     performProjectAuthGet("/translations/${translation.id}/history").andPrettyPrint.andAssertThatJson {
       node("page.totalElements").isEqualTo(0)
     }
   }
 
-  private fun updateTranslation(testTranslation: Translation, newText: String) {
+  private fun updateTranslation(
+    testTranslation: Translation,
+    newText: String,
+  ) {
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        testTranslation.key.name, null, mutableMapOf(testTranslation.language.tag to newText)
-      )
+        testTranslation.key.name,
+        null,
+        mutableMapOf(testTranslation.language.tag to newText),
+      ),
     ).andIsOk
   }
 }

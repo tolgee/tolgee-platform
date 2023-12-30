@@ -10,5 +10,5 @@ data class SuggestRequestDto(
   @Schema(description = "Text value of base translation. Useful, when base translation is not stored yet.")
   var baseText: String? = null,
   @Schema(description = "List of services to use. If null, then all enabled services are used.")
-  var services: Set<MtServiceType>? = null
+  var services: Set<MtServiceType>? = null,
 )

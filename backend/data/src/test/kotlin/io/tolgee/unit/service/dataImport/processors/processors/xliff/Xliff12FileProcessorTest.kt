@@ -33,11 +33,12 @@ class Xliff12FileProcessorTest {
   fun setup() {
     importMock = mock()
     importFile = ImportFile("exmample.xliff", importMock)
-    importFileDto = ImportFileDto(
-      "exmample.xliff",
-      File("src/test/resources/import/xliff/example.xliff")
-        .inputStream()
-    )
+    importFileDto =
+      ImportFileDto(
+        "exmample.xliff",
+        File("src/test/resources/import/xliff/example.xliff")
+          .inputStream(),
+      )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 
@@ -55,28 +56,29 @@ class Xliff12FileProcessorTest {
     assertThat(keyMeta.comments).hasSize(1)
     assertThat(keyMeta.comments[0].text).isEqualTo(
       "Refers to the installed version." +
-        " For example: \"Release Version: 1.23\""
+        " For example: \"Release Version: 1.23\"",
     )
     assertThat(keyMeta.codeReferences).hasSize(1)
     assertThat(keyMeta.codeReferences[0].path).isEqualTo("../src/ui/components/VPNAboutUs.qml")
     assertThat(fileProcessorContext.translations["systray.quit"]!![0].text).isEqualTo(
       "<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
-        " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>"
+        " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>",
     )
     assertThat(fileProcessorContext.translations["systray.quit"]!![1].text)
       .isEqualTo(
         "<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
-          " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>"
+          " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>",
       )
   }
 
   @Test
   fun `processes xliff 12 fast enough`() {
-    importFileDto = ImportFileDto(
-      "exmample.xliff",
-      File("src/test/resources/import/xliff/larger.xlf")
-        .inputStream()
-    )
+    importFileDto =
+      ImportFileDto(
+        "exmample.xliff",
+        File("src/test/resources/import/xliff/larger.xlf")
+          .inputStream(),
+      )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
     val start = System.currentTimeMillis()
@@ -86,11 +88,12 @@ class Xliff12FileProcessorTest {
 
   @Test
   fun `handles errors correctly`() {
-    importFileDto = ImportFileDto(
-      "exmample.xliff",
-      File("src/test/resources/import/xliff/error_example.xliff")
-        .inputStream()
-    )
+    importFileDto =
+      ImportFileDto(
+        "exmample.xliff",
+        File("src/test/resources/import/xliff/error_example.xliff")
+          .inputStream(),
+      )
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()

@@ -35,7 +35,7 @@ import kotlin.reflect.full.hasAnnotation
 @Component
 @Scope(SCOPE_SINGLETON)
 class InterceptedEventsManager(
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -43,7 +43,10 @@ class InterceptedEventsManager(
     activityHolder.transactionRollbackOnly = tx.rollbackOnly
   }
 
-  fun onCollectionModification(collection: Any?, key: Any?) {
+  fun onCollectionModification(
+    collection: Any?,
+    key: Any?,
+  ) {
     if (collection !is AbstractPersistentCollection<*> || collection !is Collection<*> || key !is Long) {
       return
     }
@@ -55,17 +58,19 @@ class InterceptedEventsManager(
       return
     }
 
-    val ownerField = collectionOwner::class.members.find {
-      it.parameters.size == 1 && it.call(collectionOwner) === collection
-    } ?: return
+    val ownerField =
+      collectionOwner::class.members.find {
+        it.parameters.size == 1 && it.call(collectionOwner) === collection
+      } ?: return
 
     val provider = getChangesProvider(collectionOwner, ownerField.name) ?: return
 
     val stored = (collection.storedSnapshot as? HashMap<*, *>)?.values?.toList()
 
-    val old = activityHolder.modifiedCollections.computeIfAbsent(collectionOwner to ownerField.name) {
-      stored
-    }
+    val old =
+      activityHolder.modifiedCollections.computeIfAbsent(collectionOwner to ownerField.name) {
+        stored
+      }
 
     val changes = provider.getChanges(old, collection) ?: return
     val activityModifiedEntity = getModifiedEntity(collectionOwner, RevisionType.MOD)
@@ -81,7 +86,7 @@ class InterceptedEventsManager(
     currentState: Array<out Any>?,
     previousState: Array<out Any>?,
     propertyNames: Array<out String>?,
-    revisionType: RevisionType
+    revisionType: RevisionType,
   ) {
     if (!shouldHandleActivity(entity)) {
       return
@@ -99,66 +104,73 @@ class InterceptedEventsManager(
     activityModifiedEntity.setEntityDescription(entity)
   }
 
-  private fun ActivityModifiedEntity.setEntityDescription(
-    entity: EntityWithId,
-  ) {
+  private fun ActivityModifiedEntity.setEntityDescription(entity: EntityWithId) {
     val describingData = getChangeEntityDescription(entity, activityRevision)
     this.describingData = describingData.first?.filter { !this.modifications.keys.contains(it.key) }
     this.describingRelations = describingData.second
   }
 
-  private fun getModifiedEntity(entity: EntityWithId, revisionType: RevisionType): ActivityModifiedEntity {
-    val activityModifiedEntity = activityHolder.modifiedEntities
-      .computeIfAbsent(entity::class) { mutableMapOf() }
-      .computeIfAbsent(
-        entity.id
-      ) {
-        ActivityModifiedEntity(
-          activityRevision,
-          entity::class.simpleName!!,
-          entity.id
-        ).also { it.revisionType = revisionType }
-      }
+  private fun getModifiedEntity(
+    entity: EntityWithId,
+    revisionType: RevisionType,
+  ): ActivityModifiedEntity {
+    val activityModifiedEntity =
+      activityHolder.modifiedEntities
+        .computeIfAbsent(entity::class) { mutableMapOf() }
+        .computeIfAbsent(
+          entity.id,
+        ) {
+          ActivityModifiedEntity(
+            activityRevision,
+            entity::class.simpleName!!,
+            entity.id,
+          ).also { it.revisionType = revisionType }
+        }
 
     return activityModifiedEntity
   }
 
   private fun getChangeEntityDescription(
     entity: EntityWithId,
-    activityRevision: ActivityRevision
+    activityRevision: ActivityRevision,
   ): Pair<Map<String, Any?>?, Map<String, EntityDescriptionRef>?> {
-    val rootDescription = applicationContext.getBean(EntityDescriptionProvider::class.java).getDescriptionWithRelations(
-      entity
-    )
-    val relations = rootDescription?.relations
-      ?.map { it.key to compressRelation(it.value, activityRevision) }
-      ?.toMap()
+    val rootDescription =
+      applicationContext.getBean(EntityDescriptionProvider::class.java).getDescriptionWithRelations(
+        entity,
+      )
+    val relations =
+      rootDescription?.relations
+        ?.map { it.key to compressRelation(it.value, activityRevision) }
+        ?.toMap()
 
     return (rootDescription?.data to relations)
   }
 
   private fun compressRelation(
     value: EntityDescriptionWithRelations,
-    activityRevision: ActivityRevision
+    activityRevision: ActivityRevision,
   ): EntityDescriptionRef {
-    val activityDescribingEntity = activityHolder
-      .getDescribingRelationFromCache(value.entityId, value.entityClass) {
-        val compressedRelations = value.relations.map { relation ->
-          relation.key to compressRelation(relation.value, activityRevision)
-        }.toMap()
+    val activityDescribingEntity =
+      activityHolder
+        .getDescribingRelationFromCache(value.entityId, value.entityClass) {
+          val compressedRelations =
+            value.relations.map { relation ->
+              relation.key to compressRelation(relation.value, activityRevision)
+            }.toMap()
 
-        val activityDescribingEntity = ActivityDescribingEntity(
-          activityRevision,
-          value.entityClass,
-          value.entityId
-        )
+          val activityDescribingEntity =
+            ActivityDescribingEntity(
+              activityRevision,
+              value.entityClass,
+              value.entityId,
+            )
 
-        activityDescribingEntity.data = value.data
-        activityDescribingEntity.describingRelations = compressedRelations
-        activityRevision.describingRelations.add(activityDescribingEntity)
+          activityDescribingEntity.data = value.data
+          activityDescribingEntity.describingRelations = compressedRelations
+          activityRevision.describingRelations.add(activityDescribingEntity)
 
-        activityDescribingEntity
-      }
+          activityDescribingEntity
+        }
     return EntityDescriptionRef(activityDescribingEntity.entityClass, activityDescribingEntity.entityId)
   }
 
@@ -166,7 +178,7 @@ class InterceptedEventsManager(
     entity: Any,
     currentState: Array<out Any>?,
     previousState: Array<out Any>?,
-    propertyNames: Array<out String>?
+    propertyNames: Array<out String>?,
   ): Map<String, PropertyModification> {
     if (propertyNames == null) {
       return mapOf()
@@ -180,11 +192,15 @@ class InterceptedEventsManager(
     }.toMap()
   }
 
-  fun getChangesProvider(entity: Any, propertyName: String): PropChangesProvider? {
-    val propertyAnnotation = entity::class.members
-      .find { it.name == propertyName }
-      ?.findAnnotation<ActivityLoggedProp>()
-      ?: return null
+  fun getChangesProvider(
+    entity: Any,
+    propertyName: String,
+  ): PropChangesProvider? {
+    val propertyAnnotation =
+      entity::class.members
+        .find { it.name == propertyName }
+        ?.findAnnotation<ActivityLoggedProp>()
+        ?: return null
 
     val providerClass = propertyAnnotation.modificationProvider
     return applicationContext.getBean(providerClass.java)
@@ -229,8 +245,9 @@ class InterceptedEventsManager(
             return@BeforeTransactionCompletionProcess
           }
           val activityRevision = activityHolder.activityRevision
-          if (!activityRevision.isInitializedByInterceptor)
+          if (!activityRevision.isInitializedByInterceptor) {
             return@BeforeTransactionCompletionProcess
+          }
           logger.debug("Publishing project activity event")
           try {
             publishOnActivityEvent(activityRevision)
@@ -243,7 +260,7 @@ class InterceptedEventsManager(
             throw e
           }
         }
-      }
+      },
     )
   }
 
@@ -254,8 +271,8 @@ class InterceptedEventsManager(
         activityHolder.modifiedEntities,
         activityHolder.organizationId,
         activityHolder.utmData,
-        activityHolder.sdkInfo
-      )
+        activityHolder.sdkInfo,
+      ),
     )
   }
 

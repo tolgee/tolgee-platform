@@ -10,5 +10,5 @@ data class ExportDataView(
   val languageTag: String,
   val translationId: Long?,
   val translationText: String?,
-  val translationState: TranslationState?
+  val translationState: TranslationState?,
 )

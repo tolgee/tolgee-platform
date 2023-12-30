@@ -41,7 +41,7 @@ class InvitationService(
     return create(params) { invitation ->
       permissionService.createForInvitation(
         invitation = invitation,
-        params
+        params,
       )
     }
   }
@@ -55,7 +55,7 @@ class InvitationService(
   @Transactional
   fun create(
     params: CreateProjectInvitationParams,
-    setPermissionFn: (invitation: Invitation) -> Permission
+    setPermissionFn: (invitation: Invitation) -> Permission,
   ): Invitation {
     checkEmailNotAlreadyInvited(params)
     val invitation = getInvitationInstance(params)
@@ -70,11 +70,12 @@ class InvitationService(
 
     val invitation = getInvitationInstance(params)
 
-    invitation.organizationRole = organizationRoleService.createForInvitation(
-      invitation = invitation,
-      type = params.type,
-      organization = params.organization
-    )
+    invitation.organizationRole =
+      organizationRoleService.createForInvitation(
+        invitation = invitation,
+        type = params.type,
+        organization = params.organization,
+      )
     invitationRepository.save(invitation)
 
     invitationEmailSender.sendInvitation(invitation)
@@ -101,7 +102,10 @@ class InvitationService(
   }
 
   @Transactional
-  fun accept(code: String?, userAccount: UserAccount) {
+  fun accept(
+    code: String?,
+    userAccount: UserAccount,
+  ) {
     val invitation = getInvitation(code)
     val permission = invitation.permission
     val organizationRole = invitation.organizationRole
@@ -117,20 +121,26 @@ class InvitationService(
     invitationRepository.delete(invitation)
   }
 
-  private fun acceptProjectInvitation(permission: Permission?, userAccount: UserAccount) {
+  private fun acceptProjectInvitation(
+    permission: Permission?,
+    userAccount: UserAccount,
+  ) {
     permission?.let {
       acceptProjectInvitation(permission, userAccount)
       businessEventPublisher.publish(
         OnBusinessEventToCaptureEvent(
           eventName = "PROJECT_INVITATION_ACCEPTED",
           userAccountId = userAccount.id,
-          userAccountDto = UserAccountDto.fromEntity(userAccount)
-        )
+          userAccountDto = UserAccountDto.fromEntity(userAccount),
+        ),
       )
     }
   }
 
-  private fun acceptOrganizationInvitation(organizationRole: OrganizationRole?, userAccount: UserAccount) {
+  private fun acceptOrganizationInvitation(
+    organizationRole: OrganizationRole?,
+    userAccount: UserAccount,
+  ) {
     organizationRole?.let {
       acceptOrganizationInvitation(userAccount, organizationRole)
       businessEventPublisher.publish(
@@ -139,15 +149,15 @@ class InvitationService(
           userAccountId = userAccount.id,
           userAccountDto = UserAccountDto.fromEntity(userAccount),
           organizationId = it.organization?.id,
-          organizationName = it.organization?.name
-        )
+          organizationName = it.organization?.name,
+        ),
       )
     }
   }
 
   private fun validateProjectXorOrganization(
     permission: Permission?,
-    organizationRole: OrganizationRole?
+    organizationRole: OrganizationRole?,
   ) {
     if (!(permission == null).xor(organizationRole == null)) {
       throw IllegalStateException("Exactly of permission and organizationRole may be set")
@@ -156,7 +166,7 @@ class InvitationService(
 
   private fun acceptOrganizationInvitation(
     userAccount: UserAccount,
-    organizationRole: OrganizationRole
+    organizationRole: OrganizationRole,
   ) {
     if (organizationRoleService.isUserMemberOrOwner(userAccount.id, organizationRole.organization!!.id)) {
       throw BadRequestException(Message.USER_ALREADY_HAS_ROLE)
@@ -166,7 +176,7 @@ class InvitationService(
 
   private fun acceptProjectInvitation(
     permission: Permission,
-    userAccount: UserAccount
+    userAccount: UserAccount,
   ): Permission {
     if (permissionService.find(projectId = permission.project!!.id, userId = userAccount.id) != null) {
       throw BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS)
@@ -223,11 +233,17 @@ class InvitationService(
     }
   }
 
-  fun userOrInvitationWithEmailExists(email: String, project: Project): Boolean {
+  fun userOrInvitationWithEmailExists(
+    email: String,
+    project: Project,
+  ): Boolean {
     return invitationRepository.countByUserOrInvitationWithEmailAndProject(email, project) > 0
   }
 
-  fun userOrInvitationWithEmailExists(email: String, organization: Organization): Boolean {
+  fun userOrInvitationWithEmailExists(
+    email: String,
+    organization: Organization,
+  ): Boolean {
     return invitationRepository.countByUserOrInvitationWithEmailAndOrganization(email, organization) > 0
   }
 }

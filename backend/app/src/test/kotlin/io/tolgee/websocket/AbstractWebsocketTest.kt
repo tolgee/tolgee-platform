@@ -33,11 +33,12 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @BeforeEach
   fun beforeEach() {
     prepareTestData()
-    helper = WebsocketTestHelper(
-      port,
-      jwtService.emitToken(testData.user.id),
-      testData.projectBuilder.self.id
-    )
+    helper =
+      WebsocketTestHelper(
+        port,
+        jwtService.emitToken(testData.user.id),
+        testData.projectBuilder.self.id,
+      )
     helper.listenForTranslationDataModified()
   }
 
@@ -52,7 +53,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     helper.assertNotified(
       {
         performProjectAuthPut("keys/${key.id}", mapOf("name" to "name edited"))
-      }
+      },
     ) {
       assertThatJson(it.poll()).apply {
         node("actor") {
@@ -87,7 +88,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     helper.assertNotified(
       {
         performProjectAuthDelete("keys/${key.id}")
-      }
+      },
     ) {
       assertThatJson(it.poll()).apply {
         node("data") {
@@ -115,7 +116,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     helper.assertNotified(
       {
         performProjectAuthPost("keys", mapOf("name" to "new key"))
-      }
+      },
     ) {
       assertThatJson(it.poll()).apply {
         node("data") {
@@ -146,10 +147,10 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
           "translations",
           mapOf(
             "key" to key.name,
-            "translations" to mapOf("en" to "haha")
-          )
+            "translations" to mapOf("en" to "haha"),
+          ),
         ).andIsOk
-      }
+      },
     ) {
       assertThatJson(it.poll()).apply {
         node("data") {
@@ -190,18 +191,19 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesn't subscribe without permissions`() {
-    val notPermittedSubscriptionHelper = WebsocketTestHelper(
-      port,
-      jwtService.emitToken(notPermittedUser.id),
-      testData.projectBuilder.self.id
-    )
+    val notPermittedSubscriptionHelper =
+      WebsocketTestHelper(
+        port,
+        jwtService.emitToken(notPermittedUser.id),
+        testData.projectBuilder.self.id,
+      )
     notPermittedSubscriptionHelper.listenForTranslationDataModified()
     performProjectAuthPut(
       "translations",
       mapOf(
         "key" to key.name,
-        "translations" to mapOf("en" to "haha")
-      )
+        "translations" to mapOf("en" to "haha"),
+      ),
     ).andIsOk
     Thread.sleep(1000)
     notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()

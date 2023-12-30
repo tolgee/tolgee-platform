@@ -46,7 +46,10 @@ class BatchJobProjectLockingManager(
     }
   }
 
-  fun unlockJobForProject(projectId: Long, jobId: Long) {
+  fun unlockJobForProject(
+    projectId: Long,
+    jobId: Long,
+  ) {
     getMap().compute(projectId) { _, lockedJobId ->
       logger.debug("Unlocking job: $jobId for project $projectId")
       if (lockedJobId == jobId) {
@@ -66,9 +69,10 @@ class BatchJobProjectLockingManager(
   }
 
   private fun tryLockWithRedisson(batchJobDto: BatchJobDto): Boolean {
-    val computed = getRedissonProjectLocks().compute(batchJobDto.projectId) { _, value ->
-      computeFnBody(batchJobDto, value)
-    }
+    val computed =
+      getRedissonProjectLocks().compute(batchJobDto.projectId) { _, value ->
+        computeFnBody(batchJobDto, value)
+      }
     return computed == batchJobDto.id
   }
 
@@ -80,15 +84,19 @@ class BatchJobProjectLockingManager(
   }
 
   private fun tryLockLocal(toLock: BatchJobDto): Boolean {
-    val computed = localProjectLocks.compute(toLock.projectId) { _, value ->
-      val newLocked = computeFnBody(toLock, value)
-      logger.debug("While trying to lock ${toLock.id} for project ${toLock.projectId} new lock value is $newLocked")
-      newLocked
-    }
+    val computed =
+      localProjectLocks.compute(toLock.projectId) { _, value ->
+        val newLocked = computeFnBody(toLock, value)
+        logger.debug("While trying to lock ${toLock.id} for project ${toLock.projectId} new lock value is $newLocked")
+        newLocked
+      }
     return computed == toLock.id
   }
 
-  private fun computeFnBody(toLock: BatchJobDto, currentValue: Long?): Long {
+  private fun computeFnBody(
+    toLock: BatchJobDto,
+    currentValue: Long?,
+  ): Long {
     // nothing is locked
     if (currentValue == 0L) {
       logger.debug("Locking job ${toLock.id} for project ${toLock.projectId}, nothing is locked")
@@ -117,9 +125,10 @@ class BatchJobProjectLockingManager(
 
   private fun getInitialJobId(projectId: Long): Long? {
     val jobs = batchJobService.getAllIncompleteJobIds(projectId)
-    val unlockedChunkCounts = batchJobService
-      .getAllUnlockedChunksForJobs(jobs.map { it.jobId })
-      .groupBy { it.batchJobId }.map { it.key to it.value.count() }.toMap()
+    val unlockedChunkCounts =
+      batchJobService
+        .getAllUnlockedChunksForJobs(jobs.map { it.jobId })
+        .groupBy { it.batchJobId }.map { it.key to it.value.count() }.toMap()
     // we are looking for a job that has already started and preferably for a locked one
     return jobs.find { it.totalChunks != unlockedChunkCounts[it.jobId] }?.jobId ?: jobs.firstOrNull()?.jobId
   }

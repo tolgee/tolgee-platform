@@ -24,7 +24,6 @@ class StoredDataImporter(
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
 ) {
-
   private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
@@ -142,9 +141,10 @@ class StoredDataImporter(
         keysToSave[fileNamePair.first.namespace to importKey.name]?.let { newKey ->
           // if key is obtained or created and meta exists, take it and import the data from the imported one
           // persist is cascaded on key, so it should be fine
-          val keyMeta = importDataManager.existingMetas[fileNamePair.first.namespace to importKey.name]?.also {
-            keyMetaService.import(it, importedKeyMeta)
-          } ?: importedKeyMeta
+          val keyMeta =
+            importDataManager.existingMetas[fileNamePair.first.namespace to importKey.name]?.also {
+              keyMetaService.import(it, importedKeyMeta)
+            } ?: importedKeyMeta
           // also set key and remove import key
           keyMeta.also {
             it.key = newKey
@@ -172,11 +172,13 @@ class StoredDataImporter(
   private fun ImportTranslation.doImport() {
     this.checkConflictResolved()
     if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
-      val language = this.language.existingLanguage
-        ?: throw BadRequestException(io.tolgee.constants.Message.EXISTING_LANGUAGE_NOT_SELECTED)
-      val translation = this.conflict ?: Translation().apply {
-        this.language = language
-      }
+      val language =
+        this.language.existingLanguage
+          ?: throw BadRequestException(io.tolgee.constants.Message.EXISTING_LANGUAGE_NOT_SELECTED)
+      val translation =
+        this.conflict ?: Translation().apply {
+          this.language = language
+        }
       translation.key = existingKey
       if (language == language.project.baseLanguage && translation.text != this.text) {
         outdatedFlagKeys.add(translation.key.id)
@@ -192,17 +194,21 @@ class StoredDataImporter(
       // get key from already saved keys to save
       return keysToSave.computeIfAbsent(this.key.file.namespace to this.key.name) {
         // or get it from conflict or create new one
-        val newKey = this.conflict?.key
-          ?: importDataManager.existingKeys[this.key.file.namespace to this.key.name]
-          ?: Key(name = this.key.name).apply {
-            project = import.project
-            namespace = getNamespace(this@existingKey.key.file.namespace)
-          }
+        val newKey =
+          this.conflict?.key
+            ?: importDataManager.existingKeys[this.key.file.namespace to this.key.name]
+            ?: Key(name = this.key.name).apply {
+              project = import.project
+              namespace = getNamespace(this@existingKey.key.file.namespace)
+            }
         newKey
       }
     }
 
-  private fun addKeyToSave(namespace: String?, keyName: String): Key {
+  private fun addKeyToSave(
+    namespace: String?,
+    keyName: String,
+  ): Key {
     return keysToSave.computeIfAbsent(namespace to keyName) {
       importDataManager.existingKeys[namespace to keyName] ?: Key(name = keyName).apply {
         project = import.project
@@ -215,7 +221,7 @@ class StoredDataImporter(
     if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
       importDataManager.saveAllStoredTranslations()
       throw ImportConflictNotResolvedException(
-        mutableListOf(this.key.name, this.language.name, this.text).filterNotNull().toMutableList()
+        mutableListOf(this.key.name, this.language.name, this.text).filterNotNull().toMutableList(),
       )
     }
   }

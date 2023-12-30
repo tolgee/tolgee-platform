@@ -12,15 +12,15 @@ import org.junit.jupiter.api.Test
 import java.io.InputStream
 
 class JsonFileExporterTest {
-
   @Suppress("UNCHECKED_CAST")
   @Test
   fun `it scopes and handles collisions`() {
     val data = generateTranslationsForKeys(listOf("a.a.a.a", "a.a", "a.a.a", "a.b.b", "a.c.c", "b", "b.b"))
     val exported = JsonFileExporter(data, ExportParams()).produceFiles()
     val json = exported.getFileTextContent("en.json")
-    val parsed = jacksonObjectMapper()
-      .readValue<Map<String, Any>>(json)
+    val parsed =
+      jacksonObjectMapper()
+        .readValue<Map<String, Any>>(json)
 
     val a = (parsed["a"] as Map<String, String>)
     val aa = a["a"]
@@ -40,8 +40,9 @@ class JsonFileExporterTest {
     val data = generateTranslationsForKeys(listOf(".a"))
     val exported = JsonFileExporter(data, ExportParams()).produceFiles()
     val json = exported.getFileTextContent("en.json")
-    val parsed = jacksonObjectMapper()
-      .readValue<Map<String, Any>>(json)
+    val parsed =
+      jacksonObjectMapper()
+        .readValue<Map<String, Any>>(json)
 
     val map = (parsed[""] as Map<String, String>)
     val a = map["a"]
@@ -52,10 +53,11 @@ class JsonFileExporterTest {
   @Test
   fun `it scopes by namespaces`() {
     val data = generateTranslationsForKeys(listOf("a:a.a", "a", "a:a", "a:b.a"))
-    val exported = JsonFileExporter(
-      data,
-      ExportParams().apply {}
-    ).produceFiles()
+    val exported =
+      JsonFileExporter(
+        data,
+        ExportParams().apply {},
+      ).produceFiles()
 
     val ajson = exported.getFileTextContent("en.json")
     assertThatJson(ajson) {
@@ -74,10 +76,11 @@ class JsonFileExporterTest {
   fun `it returns result in the same order as it comes from DB`() {
     val keys = listOf("a", "b", "c", "d", "e", "f")
     val data = generateTranslationsForKeys(keys)
-    val exported = JsonFileExporter(
-      data,
-      ExportParams()
-    ).produceFiles()
+    val exported =
+      JsonFileExporter(
+        data,
+        ExportParams(),
+      ).produceFiles()
     val parsed: LinkedHashMap<String, String> = exported.parseFileContent("en.json")
     assertThat(parsed.keys.toList()).isEqualTo(keys)
   }
@@ -87,10 +90,11 @@ class JsonFileExporterTest {
   fun `it is formatted`() {
     val keys = listOf("a", "b")
     val data = generateTranslationsForKeys(keys)
-    val exported = JsonFileExporter(
-      data,
-      ExportParams()
-    ).produceFiles()
+    val exported =
+      JsonFileExporter(
+        data,
+        ExportParams(),
+      ).produceFiles()
     assertThat(exported.getFileTextContent("en.json")).contains("\n").contains("  ")
   }
 

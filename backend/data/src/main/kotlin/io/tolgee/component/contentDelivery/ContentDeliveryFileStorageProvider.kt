@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 class ContentDeliveryFileStorageProvider(
   private val tolgeeProperties: TolgeeProperties,
   private val s3FileStorageFactory: S3FileStorageFactory,
-  private val azureFileStorageFactory: AzureFileStorageFactory
+  private val azureFileStorageFactory: AzureFileStorageFactory,
 ) {
   fun getContentStorageWithDefaultClient(): FileStorage {
     return bypassForTesting() ?: defaultStorage

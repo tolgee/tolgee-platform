@@ -5,12 +5,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.recaptcha")
 @DocProperty(
-  description = "When configured, reCAPTCHA v3 is used to protect the sign up page against bots. " +
-    "By default, reCAPTCHA is disabled.\n" +
-    "\n" +
-    "To enable it, you first need to [register a new site on reCAPTCHA](https://www.google.com/recaptcha/admin). " +
-    "Make sure to select reCAPTCHA v3 when registering your site.",
-  displayName = "reCAPTCHA"
+  description =
+    "When configured, reCAPTCHA v3 is used to protect the sign up page against bots. " +
+      "By default, reCAPTCHA is disabled.\n" +
+      "\n" +
+      "To enable it, you first need to [register a new site on reCAPTCHA](https://www.google.com/recaptcha/admin). " +
+      "Make sure to select reCAPTCHA v3 when registering your site.",
+  displayName = "reCAPTCHA",
 )
 class ReCaptchaProperties {
   @E2eRuntimeMutable

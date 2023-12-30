@@ -17,9 +17,8 @@ import java.util.*
 class Import(
   @field:NotNull
   @ManyToOne(optional = false)
-  val project: Project
+  val project: Project,
 ) : StandardAuditModel(), SoftDeletable {
-
   @field:NotNull
   @ManyToOne(optional = false)
   lateinit var author: UserAccount

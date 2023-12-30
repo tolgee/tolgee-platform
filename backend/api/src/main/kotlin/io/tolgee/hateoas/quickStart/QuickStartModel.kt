@@ -5,5 +5,5 @@ import org.springframework.hateoas.RepresentationModel
 data class QuickStartModel(
   val finished: Boolean,
   val completedSteps: MutableList<String>,
-  val open: Boolean
+  val open: Boolean,
 ) : RepresentationModel<QuickStartModel>()

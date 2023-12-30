@@ -11,9 +11,21 @@ import java.util.*
 
 @Repository
 interface LanguageRepository : JpaRepository<Language, Long> {
-  fun findByTagAndProject(abbreviation: String, project: io.tolgee.model.Project): Optional<Language>
-  fun findByNameAndProject(name: String?, project: io.tolgee.model.Project): Optional<Language>
-  fun findByTagAndProjectId(abbreviation: String?, projectId: Long): Optional<Language>
+  fun findByTagAndProject(
+    abbreviation: String,
+    project: io.tolgee.model.Project,
+  ): Optional<Language>
+
+  fun findByNameAndProject(
+    name: String?,
+    project: io.tolgee.model.Project,
+  ): Optional<Language>
+
+  fun findByTagAndProjectId(
+    abbreviation: String?,
+    projectId: Long,
+  ): Optional<Language>
+
   fun findAllByProjectId(projectId: Long?): Set<Language>
 
   @Query(
@@ -23,10 +35,18 @@ interface LanguageRepository : JpaRepository<Language, Long> {
       join l.project p
       left join p.baseLanguage pb
     where l.project.id = :projectId
-  """
+  """,
   )
-  fun findAllByProjectId(projectId: Long?, pageable: Pageable): Page<LanguageView>
-  fun findAllByTagInAndProjectId(abbreviation: Collection<String?>?, projectId: Long?): List<Language>
+  fun findAllByProjectId(
+    projectId: Long?,
+    pageable: Pageable,
+  ): Page<LanguageView>
+
+  fun findAllByTagInAndProjectId(
+    abbreviation: Collection<String?>?,
+    projectId: Long?,
+  ): List<Language>
+
   fun deleteAllByProjectId(projectId: Long?)
 
   @Query(
@@ -36,7 +56,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     join l.project p
     join p.baseLanguage bl
     where l.id = :id
-  """
+  """,
   )
   fun findView(id: Long): LanguageView?
 
@@ -47,9 +67,17 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     join l.project p
     left join p.baseLanguage bl
     where l.project.id in :projectIds
-  """
+  """,
   )
   fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView>
-  fun countByIdInAndProjectId(languageIds: Set<Long>, projectId: Long): Int
-  fun findAllByProjectIdAndIdInOrderById(projectId: Long, languageIds: List<Long>): List<Language>
+
+  fun countByIdInAndProjectId(
+    languageIds: Set<Long>,
+    projectId: Long,
+  ): Int
+
+  fun findAllByProjectIdAndIdInOrderById(
+    projectId: Long,
+    languageIds: List<Long>,
+  ): List<Language>
 }

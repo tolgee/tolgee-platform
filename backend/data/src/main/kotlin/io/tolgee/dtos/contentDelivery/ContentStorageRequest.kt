@@ -13,5 +13,5 @@ data class ContentStorageRequest(
   @field:Valid
   val s3ContentStorageConfig: S3ContentStorageConfigDto?,
   @field:Size(max = 255)
-  val publicUrlPrefix: String? = null
+  val publicUrlPrefix: String? = null,
 )

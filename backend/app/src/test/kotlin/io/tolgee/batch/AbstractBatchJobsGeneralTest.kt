@@ -22,7 +22,6 @@ import kotlin.math.ceil
 
 @WebsocketTest
 abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
-
   private lateinit var testData: BatchJobsTestData
 
   @Autowired

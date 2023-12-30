@@ -8,7 +8,10 @@ interface OrganizationView {
   val currentUserRole: OrganizationRoleType?
 
   companion object {
-    fun of(entity: Organization, currentUserRole: OrganizationRoleType?): OrganizationView {
+    fun of(
+      entity: Organization,
+      currentUserRole: OrganizationRoleType?,
+    ): OrganizationView {
       return object : OrganizationView {
         override val organization = entity
         override val currentUserRole = currentUserRole

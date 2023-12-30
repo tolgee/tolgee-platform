@@ -18,44 +18,48 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/public/")
 @Tag(name = "Public configuration controller")
-class ConfigurationController @Autowired constructor(
-  private val configuration: TolgeeProperties,
-  private val applicationContext: ApplicationContext,
-  private val publicBillingConfProvider: PublicBillingConfProvider,
-  private val versionProvider: VersionProvider
-) : IController {
-
-  @GetMapping(value = ["configuration"])
-  @Operation(summary = "Returns server configuration information")
-  fun getPublicConfiguration(): PublicConfigurationDTO {
-    val machineTranslationServices = PublicConfigurationDTO.MtServicesDTO(
-      defaultPrimaryService = getPrimaryMtService(),
-      services = getMtServices()
-    )
-    return PublicConfigurationDTO(
-      properties = configuration,
-      machineTranslationServices = machineTranslationServices,
-      billing = publicBillingConfProvider(),
-      versionProvider.version
-    )
-  }
-
-  private fun getPrimaryMtService(): MtServiceType? {
-    val primaryMtService = MtServiceType.values().find {
-      applicationContext.getBean(it.propertyClass).defaultPrimary
-    }
-    return primaryMtService
-  }
-
-  private fun getMtServices(): Map<MtServiceType, PublicConfigurationDTO.MtServiceDTO> {
-    val mtServices = MtServiceType.values()
-      .sortedBy { it.order }
-      .associateWith {
-        PublicConfigurationDTO.MtServiceDTO(
-          applicationContext.getBean(it.providerClass).isEnabled,
-          applicationContext.getBean(it.propertyClass).defaultEnabled
+class ConfigurationController
+  @Autowired
+  constructor(
+    private val configuration: TolgeeProperties,
+    private val applicationContext: ApplicationContext,
+    private val publicBillingConfProvider: PublicBillingConfProvider,
+    private val versionProvider: VersionProvider,
+  ) : IController {
+    @GetMapping(value = ["configuration"])
+    @Operation(summary = "Returns server configuration information")
+    fun getPublicConfiguration(): PublicConfigurationDTO {
+      val machineTranslationServices =
+        PublicConfigurationDTO.MtServicesDTO(
+          defaultPrimaryService = getPrimaryMtService(),
+          services = getMtServices(),
         )
-      }
-    return mtServices
+      return PublicConfigurationDTO(
+        properties = configuration,
+        machineTranslationServices = machineTranslationServices,
+        billing = publicBillingConfProvider(),
+        versionProvider.version,
+      )
+    }
+
+    private fun getPrimaryMtService(): MtServiceType? {
+      val primaryMtService =
+        MtServiceType.values().find {
+          applicationContext.getBean(it.propertyClass).defaultPrimary
+        }
+      return primaryMtService
+    }
+
+    private fun getMtServices(): Map<MtServiceType, PublicConfigurationDTO.MtServiceDTO> {
+      val mtServices =
+        MtServiceType.values()
+          .sortedBy { it.order }
+          .associateWith {
+            PublicConfigurationDTO.MtServiceDTO(
+              applicationContext.getBean(it.providerClass).isEnabled,
+              applicationContext.getBean(it.propertyClass).defaultEnabled,
+            )
+          }
+      return mtServices
+    }
   }
-}

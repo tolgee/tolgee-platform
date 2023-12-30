@@ -16,7 +16,7 @@ class MtEventListener(
   private val mtCreditBucketService: MtCreditBucketService,
   private val machineTranslationProperties: MachineTranslationProperties,
   private val publicBillingConfProvider: PublicBillingConfProvider,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
   @EventListener(OnBeforeMachineTranslationEvent::class)
   @ExperimentalTime

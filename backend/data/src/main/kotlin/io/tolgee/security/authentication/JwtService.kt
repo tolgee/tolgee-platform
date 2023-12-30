@@ -16,7 +16,13 @@
 
 package io.tolgee.security.authentication
 
-import io.jsonwebtoken.*
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Jws
+import io.jsonwebtoken.JwtParser
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.SignatureException
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
@@ -37,10 +43,11 @@ class JwtService(
   private val currentDateProvider: CurrentDateProvider,
   private val userAccountService: UserAccountService,
 ) {
-  private val jwtParser: JwtParser = Jwts.parserBuilder()
-    .setClock { currentDateProvider.date }
-    .setSigningKey(signingKey)
-    .build()
+  private val jwtParser: JwtParser =
+    Jwts.parserBuilder()
+      .setClock { currentDateProvider.date }
+      .setSigningKey(signingKey)
+      .build()
 
   /**
    * Emits an authentication token for the given user.
@@ -49,16 +56,20 @@ class JwtService(
    * @param isSuper Whether to emit a super-powered token or not.
    * @return An authentication token.
    */
-  fun emitToken(userAccountId: Long, isSuper: Boolean = false): String {
+  fun emitToken(
+    userAccountId: Long,
+    isSuper: Boolean = false,
+  ): String {
     val now = currentDateProvider.date
 
     val expiration = Date(now.time + authenticationProperties.jwtExpiration)
-    val builder = Jwts.builder()
-      .signWith(signingKey)
-      .setIssuedAt(now)
-      .setAudience(JWT_TOKEN_AUDIENCE)
-      .setSubject(userAccountId.toString())
-      .setExpiration(expiration)
+    val builder =
+      Jwts.builder()
+        .signWith(signingKey)
+        .setIssuedAt(now)
+        .setAudience(JWT_TOKEN_AUDIENCE)
+        .setSubject(userAccountId.toString())
+        .setExpiration(expiration)
 
     if (isSuper) {
       val superExpiration = Date(now.time + authenticationProperties.jwtSuperExpiration)
@@ -85,13 +96,14 @@ class JwtService(
   ): String {
     val now = currentDateProvider.date
 
-    val builder = Jwts.builder()
-      .signWith(signingKey)
-      .setIssuedAt(now)
-      .setAudience(JWT_TICKET_AUDIENCE)
-      .setSubject(userAccountId.toString())
-      .setExpiration(Date(now.time + expiresAfter))
-      .claim(JWT_TICKET_TYPE_CLAIM, ticketType.name)
+    val builder =
+      Jwts.builder()
+        .signWith(signingKey)
+        .setIssuedAt(now)
+        .setAudience(JWT_TICKET_AUDIENCE)
+        .setSubject(userAccountId.toString())
+        .setExpiration(Date(now.time + expiresAfter))
+        .claim(JWT_TICKET_TYPE_CLAIM, ticketType.name)
 
     if (data != null) {
       builder.claim(JWT_TICKET_DATA_CLAIM, data)
@@ -126,7 +138,7 @@ class JwtService(
     return TolgeeAuthentication(
       jws,
       account,
-      TolgeeAuthenticationDetails(hasSuperPowers)
+      TolgeeAuthenticationDetails(hasSuperPowers),
     )
   }
 
@@ -138,15 +150,19 @@ class JwtService(
    * @return The authenticated user account.
    * @throws AuthenticationException The ticket is invalid or expired.
    */
-  fun validateTicket(token: String, expectedType: TicketType): TicketAuthentication {
+  fun validateTicket(
+    token: String,
+    expectedType: TicketType,
+  ): TicketAuthentication {
     val jws = parseJwt(token)
     if (jws.body.audience != JWT_TICKET_AUDIENCE) {
       // This is not a token - possibly a token or something else.
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
-    val rawJwsType = jws.body[JWT_TICKET_TYPE_CLAIM] as? String
-      ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    val rawJwsType =
+      jws.body[JWT_TICKET_TYPE_CLAIM] as? String
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
     val jwsType = TicketType.valueOf(rawJwsType)
     if (jwsType != expectedType) {
@@ -162,8 +178,9 @@ class JwtService(
   }
 
   private fun validateJwt(claims: Claims): UserAccountDto {
-    val account = userAccountService.findDto(claims.subject.toLong())
-      ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    val account =
+      userAccountService.findDto(claims.subject.toLong())
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
     if (account.tokensValidNotBefore != null && claims.issuedAt.before(account.tokensValidNotBefore)) {
       throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
@@ -180,7 +197,8 @@ class JwtService(
         is SignatureException,
         is MalformedJwtException,
         is UnsupportedJwtException,
-        is IllegalArgumentException -> throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+        is IllegalArgumentException,
+        -> throw AuthenticationException(Message.INVALID_JWT_TOKEN)
         is ExpiredJwtException -> throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
         else -> throw ex
       }

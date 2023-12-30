@@ -7,5 +7,5 @@ class KeyInScreenshotModel(
   val position: KeyInScreenshotPosition?,
   val keyName: String,
   val keyNamespace: String?,
-  val originalText: String?
+  val originalText: String?,
 )

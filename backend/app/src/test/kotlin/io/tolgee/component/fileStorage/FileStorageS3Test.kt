@@ -29,7 +29,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception
     "tolgee.file-storage.s3.signing-region=dummy_signing_region",
     "tolgee.file-storage.s3.bucket-name=$BUCKET_NAME",
     "tolgee.authentication.initial-password=hey password manager, please don't use the filesystem :3",
-  ]
+  ],
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FileStorageS3Test : AbstractFileStorageServiceTest() {
@@ -78,7 +78,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   fun testStoreFile() {
     fileStorage.storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
     assertThat(
-      s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) }.readAllBytes()
+      s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) }.readAllBytes(),
     ).isEqualTo(testFileContent.toByteArray())
   }
 

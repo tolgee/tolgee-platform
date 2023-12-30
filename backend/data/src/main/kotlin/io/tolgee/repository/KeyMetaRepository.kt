@@ -9,12 +9,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface KeyMetaRepository : JpaRepository<KeyMeta?, Long?> {
-
   @Modifying
   @Transactional
   @Query(
     """delete from KeyComment kc where kc.keyMeta in 
-        (select km from kc.keyMeta km join km.key k where k.project.id = :projectId)"""
+        (select km from kc.keyMeta km join km.key k where k.project.id = :projectId)""",
   )
   fun deleteAllKeyCommentsByProjectId(projectId: Long)
 
@@ -22,7 +21,7 @@ interface KeyMetaRepository : JpaRepository<KeyMeta?, Long?> {
   @Transactional
   @Query(
     """delete from KeyCodeReference kcr where kcr.keyMeta in 
-        (select km from kcr.keyMeta km join km.key k where k.project.id = :projectId)"""
+        (select km from kcr.keyMeta km join km.key k where k.project.id = :projectId)""",
   )
   fun deleteAllKeyCodeReferencesByProjectId(projectId: Long)
 

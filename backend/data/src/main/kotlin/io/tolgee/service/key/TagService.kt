@@ -22,24 +22,28 @@ class TagService(
   private val keyMetaService: KeyMetaService,
   @Lazy
   private val keyService: KeyService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) : Logging {
-  fun tagKey(key: Key, tagName: String): Tag {
+  fun tagKey(
+    key: Key,
+    tagName: String,
+  ): Tag {
     val keyMeta = keyMetaService.getOrCreateForKey(key)
-    val tag = find(key.project, tagName)?.let {
-      if (!keyMeta.tags.contains(it)) {
-        it.keyMetas.add(keyMeta)
-        keyMeta.tags.add(it)
+    val tag =
+      find(key.project, tagName)?.let {
+        if (!keyMeta.tags.contains(it)) {
+          it.keyMetas.add(keyMeta)
+          keyMeta.tags.add(it)
+        }
+        it
+      } ?: let {
+        Tag().apply {
+          project = key.project
+          keyMetas.add(keyMeta)
+          name = tagName
+          keyMeta.tags.add(this)
+        }
       }
-      it
-    } ?: let {
-      Tag().apply {
-        project = key.project
-        keyMetas.add(keyMeta)
-        name = tagName
-        keyMeta.tags.add(this)
-      }
-    }
 
     if (tag.name.length > 100) {
       throw BadRequestException(io.tolgee.constants.Message.TAG_TOO_LOG)
@@ -74,7 +78,10 @@ class TagService(
     tagKeys(keysWithTags, map)
   }
 
-  private fun tagKeys(keysWithFetchedTags: Iterable<Key>, map: Map<Long, List<String>>) {
+  private fun tagKeys(
+    keysWithFetchedTags: Iterable<Key>,
+    map: Map<Long, List<String>>,
+  ) {
     val keysByIdMap = keysWithFetchedTags.associateBy { it.id }
     val projectId = getSingleProjectId(keysByIdMap)
 
@@ -85,21 +92,22 @@ class TagService(
       tagsToAdd.forEach { tagToAdd ->
         val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
         val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
-        val tag = existingTags[tagToAdd]?.let {
-          if (!keyMeta.tags.contains(it)) {
-            it.keyMetas.add(keyMeta)
-            keyMeta.tags.add(it)
+        val tag =
+          existingTags[tagToAdd]?.let {
+            if (!keyMeta.tags.contains(it)) {
+              it.keyMetas.add(keyMeta)
+              keyMeta.tags.add(it)
+            }
+            it
+          } ?: let {
+            Tag().apply {
+              project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+              keyMetas.add(keyMeta)
+              name = tagToAdd
+              keyMeta.tags.add(this)
+              existingTags[tagToAdd] = this
+            }
           }
-          it
-        } ?: let {
-          Tag().apply {
-            project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-            keyMetas.add(keyMeta)
-            name = tagToAdd
-            keyMeta.tags.add(this)
-            existingTags[tagToAdd] = this
-          }
-        }
         tagRepository.save(tag)
         keyMetaService.save(keyMeta)
       }
@@ -115,7 +123,10 @@ class TagService(
     untagKeys(keysWithTags, map)
   }
 
-  private fun untagKeys(keysWithFetchedTags: Iterable<Key>, map: Map<Long, List<String>>) {
+  private fun untagKeys(
+    keysWithFetchedTags: Iterable<Key>,
+    map: Map<Long, List<String>>,
+  ) {
     val keysByIdMap = keysWithFetchedTags.associateBy { it.id }
 
     map.forEach { (keyId, tagsToRemove) ->
@@ -148,11 +159,17 @@ class TagService(
     return projectIds.single()
   }
 
-  private fun getFromProject(projectId: Long, tags: Collection<String>): List<Tag> {
+  private fun getFromProject(
+    projectId: Long,
+    tags: Collection<String>,
+  ): List<Tag> {
     return tagRepository.findAllByProject(projectId, tags)
   }
 
-  fun remove(key: Key, tag: Tag) {
+  fun remove(
+    key: Key,
+    tag: Tag,
+  ) {
     key.keyMeta?.let { keyMeta ->
       tag.keyMetas.remove(keyMeta)
       keyMeta.tags.remove(tag)
@@ -165,7 +182,10 @@ class TagService(
   }
 
   @Transactional
-  fun updateTags(key: Key, newTags: List<String>) {
+  fun updateTags(
+    key: Key,
+    newTags: List<String>,
+  ) {
     key.keyMeta?.tags?.forEach { oldTag ->
       if (newTags.find { oldTag.name == it } == null) {
         this.remove(key, oldTag)
@@ -176,7 +196,11 @@ class TagService(
     }
   }
 
-  fun getProjectTags(projectId: Long, search: String? = null, pageable: Pageable): Page<Tag> {
+  fun getProjectTags(
+    projectId: Long,
+    search: String? = null,
+    pageable: Pageable,
+  ): Page<Tag> {
     return tagRepository.findAllByProject(projectId, search, pageable)
   }
 
@@ -201,7 +225,10 @@ class TagService(
     return tagRepository.findAllByProjectId(projectId)
   }
 
-  fun find(project: Project, tagName: String): Tag? {
+  fun find(
+    project: Project,
+    tagName: String,
+  ): Tag? {
     return tagRepository.findByProjectAndName(project, tagName)
   }
 
@@ -211,9 +238,10 @@ class TagService(
   }
 
   fun deleteAllByKeyIdIn(keyIds: Collection<Long>) {
-    val keys = traceLogMeasureTime("tagService: deleteAllByKeyIdIn: getKeysWithTags") {
-      tagRepository.getKeysWithTags(keyIds)
-    }
+    val keys =
+      traceLogMeasureTime("tagService: deleteAllByKeyIdIn: getKeysWithTags") {
+        tagRepository.getKeysWithTags(keyIds)
+      }
     deleteAllTagsForKeys(keys)
   }
 
@@ -251,12 +279,12 @@ class TagService(
       """
       delete from key_meta_tags kmt 
         where kmt.key_metas_id in 
-        (select km.id from key_meta km join key k on km.key_id = k.id where k.project_id = :projectId)"""
+        (select km.id from key_meta km join key k on km.key_id = k.id where k.project_id = :projectId)""",
     ).setParameter("projectId", projectId).executeUpdate()
     entityManager.createNativeQuery(
       """
       delete from tag where project_id = :projectId
-      """
+      """,
     ).setParameter("projectId", projectId).executeUpdate()
   }
 }

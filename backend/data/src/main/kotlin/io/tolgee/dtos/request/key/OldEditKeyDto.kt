@@ -11,7 +11,7 @@ data class OldEditKeyDto(
   var currentName: String = "",
   @field:NotBlank
   @field:Length(max = 2000)
-  var newName: String = ""
+  var newName: String = "",
 ) {
   @get:Hidden
   @get:JsonIgnore

@@ -17,11 +17,11 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
     name = "sequenceGenerator",
     sequenceName = SEQUENCE_NAME,
     initialValue = 1000000000,
-    allocationSize = ALLOCATION_SIZE
+    allocationSize = ALLOCATION_SIZE,
   )
   @GeneratedValue(
     strategy = GenerationType.SEQUENCE,
-    generator = "sequenceGenerator"
+    generator = "sequenceGenerator",
   )
   override var id: Long = 0
 

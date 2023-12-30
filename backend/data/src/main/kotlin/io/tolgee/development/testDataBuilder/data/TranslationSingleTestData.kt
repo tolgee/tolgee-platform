@@ -22,85 +22,96 @@ class TranslationSingleTestData {
   lateinit var projectBuilder: ProjectBuilder
   lateinit var translation: Translation
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    val userAccountBuilder = addUserAccount {
-      username = "franta"
-      user = this
-    }
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      val userAccountBuilder =
+        addUserAccount {
+          username = "franta"
+          user = this
+        }
 
-    pepa = addUserAccount {
-      username = "pepa"
-    }.self
-
-    val jindra = addUserAccount {
-
-      username = "jindra"
-    }
-
-    val vojta = addUserAccount {
-      username = "vojta"
-    }
-
-    project = addProject {
-      name = "Franta's project"
-      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-    }.build {
-      addPermission {
-        user = this@TranslationSingleTestData.user
-        type = ProjectPermissionType.MANAGE
-      }
-
-      addPermission {
-        user = this@TranslationSingleTestData.pepa
-        type = ProjectPermissionType.EDIT
-      }
-
-      addPermission {
-        user = jindra.self
-        type = ProjectPermissionType.TRANSLATE
-      }
-
-      addPermission {
-        user = vojta.self
-        type = ProjectPermissionType.VIEW
-      }
-
-      englishLanguage = addLanguage {
-        name = "English"
-        tag = "en"
-        originalName = "English"
-      }.self
-
-      addLanguage {
-        name = "Czech"
-        tag = "cs"
-        originalName = "Čeština"
-      }
-
-      val keyBuilder = addKey {
-        name = "A key"
-        aKey = this
-      }
-
-      keyBuilder.apply {
-        translation = addTranslation {
-          key = aKey
-          language = englishLanguage
-          text = "Z translation"
-          state = TranslationState.REVIEWED
-        }.build {
-          firstComment = addComment {
-            text = "First comment"
-            author = this@TranslationSingleTestData.user
-          }.self
-          secondComment = addComment {
-            text = "Second comment"
-            author = this@TranslationSingleTestData.pepa
-          }.self
+      pepa =
+        addUserAccount {
+          username = "pepa"
         }.self
-      }
 
-      projectBuilder = this
-    }.self
-  }
+      val jindra =
+        addUserAccount {
+
+          username = "jindra"
+        }
+
+      val vojta =
+        addUserAccount {
+          username = "vojta"
+        }
+
+      project =
+        addProject {
+          name = "Franta's project"
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        }.build {
+          addPermission {
+            user = this@TranslationSingleTestData.user
+            type = ProjectPermissionType.MANAGE
+          }
+
+          addPermission {
+            user = this@TranslationSingleTestData.pepa
+            type = ProjectPermissionType.EDIT
+          }
+
+          addPermission {
+            user = jindra.self
+            type = ProjectPermissionType.TRANSLATE
+          }
+
+          addPermission {
+            user = vojta.self
+            type = ProjectPermissionType.VIEW
+          }
+
+          englishLanguage =
+            addLanguage {
+              name = "English"
+              tag = "en"
+              originalName = "English"
+            }.self
+
+          addLanguage {
+            name = "Czech"
+            tag = "cs"
+            originalName = "Čeština"
+          }
+
+          val keyBuilder =
+            addKey {
+              name = "A key"
+              aKey = this
+            }
+
+          keyBuilder.apply {
+            translation =
+              addTranslation {
+                key = aKey
+                language = englishLanguage
+                text = "Z translation"
+                state = TranslationState.REVIEWED
+              }.build {
+                firstComment =
+                  addComment {
+                    text = "First comment"
+                    author = this@TranslationSingleTestData.user
+                  }.self
+                secondComment =
+                  addComment {
+                    text = "Second comment"
+                    author = this@TranslationSingleTestData.pepa
+                  }.self
+              }.self
+          }
+
+          projectBuilder = this
+        }.self
+    }
 }

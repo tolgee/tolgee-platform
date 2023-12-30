@@ -63,10 +63,11 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
   val unwrappedCacheManager
-    get() = TransactionAwareCacheManagerProxy::class.java.getDeclaredField("targetCacheManager").run {
-      this.isAccessible = true
-      this.get(cacheManager) as CacheManager
-    }
+    get() =
+      TransactionAwareCacheManagerProxy::class.java.getDeclaredField("targetCacheManager").run {
+        this.isAccessible = true
+        this.get(cacheManager) as CacheManager
+      }
 
   private final val paramsEnGoogle by lazy {
     mtServiceManager.getParams(
@@ -76,7 +77,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       sourceLanguageTag = "en",
       targetLanguageTag = "de",
       serviceInfo = MtServiceInfo(MtServiceType.GOOGLE, null),
-      isBatch = false
+      isBatch = false,
     )
   }
 
@@ -92,10 +93,11 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `caches user account`() {
-    val user = UserAccount().apply {
-      name = "Account"
-      id = 10
-    }
+    val user =
+      UserAccount().apply {
+        name = "Account"
+        id = 10
+      }
     whenever(userAccountRepository.findActive(user.id)).then { user }
     userAccountService.findDto(user.id)
     Mockito.verify(userAccountRepository, times(1)).findActive(user.id)
@@ -132,7 +134,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     val permission = Permission(id = 1)
     whenever(
       permissionRepository
-        .findOneByProjectIdAndUserIdAndOrganizationId(null, null, organizationId = 1)
+        .findOneByProjectIdAndUserIdAndOrganizationId(null, null, organizationId = 1),
     ).then { permission }
 
     permissionService.find(organizationId = 1)
@@ -140,14 +142,14 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,
-        organizationId = 1
+        organizationId = 1,
       )
     permissionService.find(organizationId = 1)
     Mockito.verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,
-        1
+        1,
       )
   }
 

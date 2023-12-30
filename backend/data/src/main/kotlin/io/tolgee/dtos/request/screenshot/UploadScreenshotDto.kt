@@ -6,5 +6,5 @@ import org.springframework.validation.annotation.Validated
 @Validated
 data class UploadScreenshotDto(
   @field:NotBlank
-  var key: String? = null
+  var key: String? = null,
 )

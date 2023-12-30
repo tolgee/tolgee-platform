@@ -7,7 +7,7 @@ import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class AsyncImportHardDeleter(
-  private val importService: ImportService
+  private val importService: ImportService,
 ) {
   @Async
   @TransactionalEventListener

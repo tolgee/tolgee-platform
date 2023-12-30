@@ -10,13 +10,10 @@ import org.springframework.context.ApplicationEvent
  */
 class OnTranslationsSet(
   source: Any,
-
   val key: Key,
-
   /**
    * Map of old values languageTag -> String
    */
   val oldValues: Map<String, String?>,
-
-  val translations: List<Translation>
+  val translations: List<Translation>,
 ) : ApplicationEvent(source)

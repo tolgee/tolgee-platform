@@ -5,10 +5,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.authentication.oauth2")
 @DocProperty(
-  description = "OAuth 2.0 is the industry-standard protocol for authorization.\n" +
-    "This enables the integration of a wide range of authorization providers into tolgee, " +
-    "such as Auth0, KeyCloak, Okta and others.",
-  displayName = "OAuth2"
+  description =
+    "OAuth 2.0 is the industry-standard protocol for authorization.\n" +
+      "This enables the integration of a wide range of authorization providers into tolgee, " +
+      "such as Auth0, KeyCloak, Okta and others.",
+  displayName = "OAuth2",
 )
 class OAuth2AuthenticationProperties {
   @DocProperty(description = "OAuth2 Client ID")
@@ -18,10 +19,11 @@ class OAuth2AuthenticationProperties {
   var clientSecret: String? = null
 
   @DocProperty(
-    description = "Oauth2 scopes (as list)\n" +
-      "Tolgee absolutely requires rights to view the email and user information (also known as openid data).\n" +
-      "In most cases the scopes `openid email profile` is used for this. " +
-      "(But can also be different depending on the provider)"
+    description =
+      "Oauth2 scopes (as list)\n" +
+        "Tolgee absolutely requires rights to view the email and user information (also known as openid data).\n" +
+        "In most cases the scopes `openid email profile` is used for this. " +
+        "(But can also be different depending on the provider)",
   )
   val scopes: MutableList<String> = mutableListOf()
 

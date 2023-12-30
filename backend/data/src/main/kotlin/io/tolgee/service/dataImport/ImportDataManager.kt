@@ -52,10 +52,11 @@ class ImportDataManager(
     val result = mutableMapOf<Long, MutableMap<Pair<String?, String>, Translation>>()
     this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
       if (language != null && result[language.id] == null) {
-        result[language.id] = mutableMapOf<Pair<String?, String>, Translation>().apply {
-          translationService.getAllByLanguageId(language.id)
-            .forEach { translation -> put(translation.key.namespace?.name to translation.key.name, translation) }
-        }
+        result[language.id] =
+          mutableMapOf<Pair<String?, String>, Translation>().apply {
+            translationService.getAllByLanguageId(language.id)
+              .forEach { translation -> put(translation.key.namespace?.name to translation.key.name, translation) }
+          }
       }
     }
     result
@@ -87,7 +88,10 @@ class ImportDataManager(
    * It returns collection since translations could collide, when a user uploads multiple files with different values
    * for a key
    */
-  fun getStoredTranslations(key: ImportKey, language: ImportLanguage): MutableList<ImportTranslation> {
+  fun getStoredTranslations(
+    key: ImportKey,
+    language: ImportLanguage,
+  ): MutableList<ImportTranslation> {
     this.populateStoredTranslations(language)
     val languageData = this.storedTranslations[language]!!
 
@@ -111,10 +115,11 @@ class ImportDataManager(
     storedTranslations[language] = languageData
     val translations = importService.findTranslations(language.id)
     translations.forEach { importTranslation ->
-      val keyTranslations = languageData[importTranslation.key] ?: let {
-        languageData[importTranslation.key] = mutableListOf()
-        languageData[importTranslation.key]!!
-      }
+      val keyTranslations =
+        languageData[importTranslation.key] ?: let {
+          languageData[importTranslation.key] = mutableListOf()
+          languageData[importTranslation.key]!!
+        }
       keyTranslations.add(importTranslation)
     }
     return languageData
@@ -129,8 +134,9 @@ class ImportDataManager(
       languageTranslations.forEach { importedTranslation ->
         val existingLanguage = importedTranslation.language.existingLanguage
         if (existingLanguage != null) {
-          val existingTranslation = existingTranslations[existingLanguage.id]
-            ?.let { it[importedTranslation.language.file.namespace to importedTranslation.key.name] }
+          val existingTranslation =
+            existingTranslations[existingLanguage.id]
+              ?.let { it[importedTranslation.language.file.namespace to importedTranslation.key.name] }
           if (existingTranslation != null) {
             // remove if text is the same
             if (existingTranslation.text == importedTranslation.text) {
@@ -178,9 +184,7 @@ class ImportDataManager(
     }
   }
 
-  fun resetLanguage(
-    importLanguage: ImportLanguage
-  ) {
+  fun resetLanguage(importLanguage: ImportLanguage) {
     this.populateStoredTranslations(importLanguage)
     this.resetConflicts(importLanguage)
     this.handleConflicts(false)
@@ -191,7 +195,10 @@ class ImportDataManager(
     this.saveAllStoredTranslations()
   }
 
-  private fun isExistingLanguageUsed(existing: Language?, imported: ImportLanguage): Boolean {
+  private fun isExistingLanguageUsed(
+    existing: Language?,
+    imported: ImportLanguage,
+  ): Boolean {
     existing ?: return false
     return this.storedLanguages.any { storedLang ->
       imported != storedLang && // ignore when is assigned to self
@@ -201,9 +208,10 @@ class ImportDataManager(
   }
 
   fun findMatchingExistingLanguage(importLanguage: ImportLanguage): Language? {
-    val possibleTag = """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
-      .matchEntire(importLanguage.name)?.groups?.get(1)?.value
-      ?: return null
+    val possibleTag =
+      """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
+        .matchEntire(importLanguage.name)?.groups?.get(1)?.value
+        ?: return null
 
     val candidate = languageService.findByTag(possibleTag, import.project.id).orElse(null) ?: return null
 

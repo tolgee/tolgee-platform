@@ -13,9 +13,8 @@ import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class LanguageStatsListener(
-  private var languageStatsService: LanguageStatsService
+  private var languageStatsService: LanguageStatsService,
 ) {
-
   var bypass = false
 
   @TransactionalEventListener
@@ -26,10 +25,11 @@ class LanguageStatsListener(
       val projectId = event.activityRevision.projectId ?: return
 
       val modifiedEntityClasses = event.modifiedEntities.keys.toSet()
-      val isStatsModified = modifiedEntityClasses.contains(Language::class) ||
-        modifiedEntityClasses.contains(Translation::class) ||
-        modifiedEntityClasses.contains(Key::class) ||
-        modifiedEntityClasses.contains(Project::class)
+      val isStatsModified =
+        modifiedEntityClasses.contains(Language::class) ||
+          modifiedEntityClasses.contains(Translation::class) ||
+          modifiedEntityClasses.contains(Key::class) ||
+          modifiedEntityClasses.contains(Project::class)
 
       if (isStatsModified) {
         languageStatsService.refreshLanguageStats(projectId)

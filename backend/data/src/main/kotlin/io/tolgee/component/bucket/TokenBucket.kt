@@ -6,7 +6,7 @@ class TokenBucket(
   currentTimestamp: Long,
   var size: Long,
   var tokens: Long,
-  var period: Duration
+  var period: Duration,
 ) {
   var refillAt: Long
 
@@ -14,7 +14,11 @@ class TokenBucket(
     refillAt = currentTimestamp + period.toMillis()
   }
 
-  fun refillIfItsTime(currentTimestamp: Long, newTokens: Long, renewPeriod: Duration): TokenBucket {
+  fun refillIfItsTime(
+    currentTimestamp: Long,
+    newTokens: Long,
+    renewPeriod: Duration,
+  ): TokenBucket {
     if (isTimeToRefill(currentTimestamp)) {
       this.tokens = newTokens
       this.size = newTokens

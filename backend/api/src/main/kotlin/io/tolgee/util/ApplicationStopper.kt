@@ -13,9 +13,8 @@ import kotlin.system.exitProcess
 @Component
 class ApplicationStopper(
   val internalProperties: InternalProperties,
-  val applicationContext: ApplicationContext
+  val applicationContext: ApplicationContext,
 ) {
-
   private val log = LoggerFactory.getLogger(ApplicationStopper::class.java)
 
   @EventListener(ApplicationReadyEvent::class)

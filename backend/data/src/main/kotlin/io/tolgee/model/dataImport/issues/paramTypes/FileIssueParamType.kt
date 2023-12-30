@@ -7,5 +7,5 @@ enum class FileIssueParamType {
   KEY_INDEX,
   VALUE,
   LINE,
-  FILE_NODE_ORIGINAL
+  FILE_NODE_ORIGINAL,
 }

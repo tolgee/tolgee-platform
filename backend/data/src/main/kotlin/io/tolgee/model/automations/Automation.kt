@@ -12,7 +12,6 @@ class Automation(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
 ) : StandardAuditModel() {
-
   @OneToMany(mappedBy = "automation", orphanRemoval = true)
   var triggers: MutableList<AutomationTrigger> = mutableListOf()
 

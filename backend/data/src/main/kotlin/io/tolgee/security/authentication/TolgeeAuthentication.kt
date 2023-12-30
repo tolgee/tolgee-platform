@@ -40,10 +40,11 @@ class TolgeeAuthentication(
   override fun getAuthorities(): Collection<GrantedAuthority> {
     return when (userAccount.role) {
       UserAccount.Role.USER -> listOf(SimpleGrantedAuthority(ROLE_USER))
-      UserAccount.Role.ADMIN -> listOf(
-        SimpleGrantedAuthority(ROLE_USER),
-        SimpleGrantedAuthority(ROLE_ADMIN)
-      )
+      UserAccount.Role.ADMIN ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_ADMIN),
+        )
       null -> emptyList()
     }
   }

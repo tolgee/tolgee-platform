@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerLanguageDisablingTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: KeyLanguageDisablingTestData
 
   @BeforeEach
@@ -47,8 +46,8 @@ class KeyControllerLanguageDisablingTest : ProjectAuthControllerTest("/v2/projec
       "keys/${testData.key.self.id}/disabled-languages",
       mapOf(
         "languageIds" to
-          listOf(testData.french.self.id, testData.czech.self.id)
-      )
+          listOf(testData.french.self.id, testData.czech.self.id),
+      ),
     ).andIsOk.andAssertThatJson {
       node("_embedded.languages[0].id").isEqualTo(testData.french.self.id)
       node("_embedded.languages[1].id").isEqualTo(testData.czech.self.id)
@@ -70,8 +69,8 @@ class KeyControllerLanguageDisablingTest : ProjectAuthControllerTest("/v2/projec
       SetTranslationsWithKeyDto(
         testData.key.self.name,
         null,
-        translations = mapOf("de" to "bla")
-      )
+        translations = mapOf("de" to "bla"),
+      ),
     ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_MODIFY_DISABLED_TRANSLATION)
   }
 }

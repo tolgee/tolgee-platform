@@ -31,7 +31,10 @@ class InMemoryFileStorage : FileStorage {
     files.remove(storageFilePath)
   }
 
-  override fun storeFile(storageFilePath: String, bytes: ByteArray) {
+  override fun storeFile(
+    storageFilePath: String,
+    bytes: ByteArray,
+  ) {
     files[storageFilePath] = bytes
   }
 

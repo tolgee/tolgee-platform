@@ -11,9 +11,15 @@ import java.util.*
 interface PatRepository : JpaRepository<Pat, Long> {
   fun findByTokenHash(tokenHash: String): Pat?
 
-  fun findAllByUserAccountId(userId: Long, pageable: Pageable): Page<Pat>
+  fun findAllByUserAccountId(
+    userId: Long,
+    pageable: Pageable,
+  ): Page<Pat>
 
   @Modifying
   @Query("UPDATE Pat p SET p.lastUsedAt = ?2 WHERE p.id = ?1")
-  fun updateLastUsedById(id: Long, lastUsed: Date)
+  fun updateLastUsedById(
+    id: Long,
+    lastUsed: Date,
+  )
 }

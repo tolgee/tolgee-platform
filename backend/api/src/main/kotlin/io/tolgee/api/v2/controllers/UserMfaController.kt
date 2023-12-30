@@ -26,25 +26,34 @@ class UserMfaController(
 ) {
   @PutMapping("/totp")
   @Operation(summary = "Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
-  fun enableMfa(@RequestBody @Valid dto: UserTotpEnableRequestDto): JwtAuthenticationResponse {
+  fun enableMfa(
+    @RequestBody @Valid
+    dto: UserTotpEnableRequestDto,
+  ): JwtAuthenticationResponse {
     mfaService.enableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
     )
   }
 
   @DeleteMapping("/totp")
   @Operation(summary = "Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
-  fun disableMfa(@RequestBody @Valid dto: UserTotpDisableRequestDto): JwtAuthenticationResponse {
+  fun disableMfa(
+    @RequestBody @Valid
+    dto: UserTotpDisableRequestDto,
+  ): JwtAuthenticationResponse {
     mfaService.disableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
     )
   }
 
   @PutMapping("/recovery")
   @Operation(summary = "Regenerates multi-factor authentication recovery codes")
-  fun regenerateRecoveryCodes(@RequestBody @Valid dto: UserMfaRecoveryRequestDto): List<String> {
+  fun regenerateRecoveryCodes(
+    @RequestBody @Valid
+    dto: UserMfaRecoveryRequestDto,
+  ): List<String> {
     return mfaService.regenerateRecoveryCodes(authenticationFacade.authenticatedUserEntity, dto)
   }
 }

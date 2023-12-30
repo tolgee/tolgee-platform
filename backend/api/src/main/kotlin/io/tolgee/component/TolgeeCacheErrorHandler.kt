@@ -24,7 +24,11 @@ import org.springframework.cache.interceptor.SimpleCacheErrorHandler
 class TolgeeCacheErrorHandler : SimpleCacheErrorHandler() {
   private val logger = LoggerFactory.getLogger(TolgeeCacheErrorHandler::class.java)
 
-  override fun handleCacheGetError(exception: RuntimeException, cache: Cache, key: Any) {
+  override fun handleCacheGetError(
+    exception: RuntimeException,
+    cache: Cache,
+    key: Any,
+  ) {
     if (exception is RedisException) {
       logger.warn(
         "Suppressing RedisException for cache {} on key {}. " +

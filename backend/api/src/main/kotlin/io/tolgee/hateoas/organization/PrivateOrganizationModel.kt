@@ -10,10 +10,8 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "organizations", itemRelation = "organization")
 open class PrivateOrganizationModel(
   organizationModel: OrganizationModel,
-
   @get:Schema(example = "Features organization has enabled")
   val enabledFeatures: Array<Feature>,
-
   @get:Schema(example = "Quick start data for current user")
-  val quickStart: QuickStartModel?
+  val quickStart: QuickStartModel?,
 ) : IOrganizationModel by organizationModel, RepresentationModel<PrivateOrganizationModel>()

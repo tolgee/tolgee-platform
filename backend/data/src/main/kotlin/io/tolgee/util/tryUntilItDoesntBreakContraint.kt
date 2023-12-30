@@ -4,7 +4,10 @@ import jakarta.persistence.PersistenceException
 import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.DataIntegrityViolationException
 
-inline fun <T> tryUntilItDoesntBreakConstraint(maxRepeats: Int = 100, fn: () -> T): T {
+inline fun <T> tryUntilItDoesntBreakConstraint(
+  maxRepeats: Int = 100,
+  fn: () -> T,
+): T {
   var exception: Exception? = null
   var repeats = 0
   for (it in 1..maxRepeats) {

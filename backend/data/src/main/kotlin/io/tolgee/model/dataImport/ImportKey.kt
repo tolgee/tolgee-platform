@@ -16,11 +16,9 @@ class ImportKey(
   @field:Size(max = 2000)
   @Column(length = 2000)
   var name: String,
-
   @ManyToOne
-  var file: ImportFile
+  var file: ImportFile,
 ) : StandardAuditModel(), WithKeyMeta {
-
   @OneToMany(mappedBy = "key", orphanRemoval = true)
   var translations: MutableList<ImportTranslation> = mutableListOf()
 

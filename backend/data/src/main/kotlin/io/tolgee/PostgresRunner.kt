@@ -2,6 +2,7 @@ package io.tolgee
 
 interface PostgresRunner {
   fun run()
+
   fun stop()
 
   /**

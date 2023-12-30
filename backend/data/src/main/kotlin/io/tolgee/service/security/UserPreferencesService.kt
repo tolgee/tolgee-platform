@@ -18,7 +18,10 @@ class UserPreferencesService(
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
 ) {
-  fun setLanguage(tag: String, userAccount: UserAccount) {
+  fun setLanguage(
+    tag: String,
+    userAccount: UserAccount,
+  ) {
     val preferences = findOrCreate(userAccount.id)
     preferences.language = tag
     userPreferencesRepository.save(preferences)
@@ -26,7 +29,7 @@ class UserPreferencesService(
 
   fun setPreferredOrganization(
     organization: Organization,
-    userAccount: UserAccount
+    userAccount: UserAccount,
   ) {
     val preferences = find(userAccount.id) ?: create(userAccount, organization)
     preferences.preferredOrganization = organization
@@ -40,11 +43,15 @@ class UserPreferencesService(
     }
   }
 
-  private fun create(userAccount: UserAccount, preferredOrganization: Organization? = null): UserPreferences {
-    val preferences = UserPreferences(
-      userAccount = userAccount,
-      preferredOrganization = preferredOrganization ?: organizationService.findOrCreatePreferred(userAccount)
-    )
+  private fun create(
+    userAccount: UserAccount,
+    preferredOrganization: Organization? = null,
+  ): UserPreferences {
+    val preferences =
+      UserPreferences(
+        userAccount = userAccount,
+        preferredOrganization = preferredOrganization ?: organizationService.findOrCreatePreferred(userAccount),
+      )
     return save(preferences)
   }
 
@@ -68,17 +75,19 @@ class UserPreferencesService(
    * Sets different organization as preferred if user has no access to the current one
    */
   fun refreshPreferredOrganization(preferences: UserPreferences): Organization? {
-    val canUserView = preferences.preferredOrganization?.let { po ->
-      organizationRoleService.canUserView(
-        preferences.userAccount.id,
-        po.id
-      )
-    } ?: false
+    val canUserView =
+      preferences.preferredOrganization?.let { po ->
+        organizationRoleService.canUserView(
+          preferences.userAccount.id,
+          po.id,
+        )
+      } ?: false
 
     if (!canUserView) {
-      preferences.preferredOrganization = organizationService.findOrCreatePreferred(
-        userAccount = preferences.userAccount
-      )
+      preferences.preferredOrganization =
+        organizationService.findOrCreatePreferred(
+          userAccount = preferences.userAccount,
+        )
       save(preferences)
     }
 

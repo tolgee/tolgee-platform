@@ -25,95 +25,105 @@ class TranslationCommentsTestData {
   lateinit var projectBuilder: ProjectBuilder
   lateinit var translation: Translation
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    var userAccountBuilder = addUserAccount {
-      username = "franta"
-      user = this
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      var userAccountBuilder =
+        addUserAccount {
+          username = "franta"
+          user = this
+        }
+      pepa =
+        addUserAccount {
+          username = "pepa"
+        }.self
+
+      project =
+        addProject {
+          name = "Franta's project"
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        }.build {
+          addPermission {
+            user = this@TranslationCommentsTestData.user
+            type = ProjectPermissionType.MANAGE
+          }
+
+          addPermission {
+            user = this@TranslationCommentsTestData.pepa
+            type = null
+            scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+          }
+
+          englishLanguage =
+            addLanguage {
+              name = "English"
+              tag = "en"
+              originalName = "English"
+            }.self
+
+          czechLanguage =
+            addLanguage {
+              name = "Czech"
+              tag = "cs"
+              originalName = "Čeština"
+            }.self
+
+          self.baseLanguage = czechLanguage
+
+          addKey {
+            name = "A key"
+            this@TranslationCommentsTestData.aKey = this
+          }.build {
+            addTranslation {
+              language = englishLanguage
+              text = "Z translation"
+              state = TranslationState.REVIEWED
+              this@TranslationCommentsTestData.translation = this
+            }.build {
+              firstComment =
+                addComment {
+                  text = "First comment"
+                }.self
+              secondComment =
+                addComment {
+                  text = "Second comment"
+                }.self
+            }
+
+            addTranslation {
+              language = czechLanguage
+              text = "Z překlad"
+              state = TranslationState.REVIEWED
+              this@TranslationCommentsTestData.translation = this
+            }.build {
+              firstComment =
+                addComment {
+                  text = "First comment"
+                }.self
+              secondComment =
+                addComment {
+                  text = "Second comment"
+                }.self
+            }
+          }
+
+          addKey {
+            name = "B key"
+            this@TranslationCommentsTestData.bKey = this
+          }
+          projectBuilder = this
+        }.self
     }
-    pepa = addUserAccount {
-      username = "pepa"
-    }.self
-
-    project = addProject {
-      name = "Franta's project"
-      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-    }.build {
-      addPermission {
-        user = this@TranslationCommentsTestData.user
-        type = ProjectPermissionType.MANAGE
-      }
-
-      addPermission {
-        user = this@TranslationCommentsTestData.pepa
-        type = null
-        scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
-      }
-
-      englishLanguage = addLanguage {
-        name = "English"
-        tag = "en"
-        originalName = "English"
-      }.self
-
-      czechLanguage = addLanguage {
-        name = "Czech"
-        tag = "cs"
-        originalName = "Čeština"
-      }.self
-
-      self.baseLanguage = czechLanguage
-
-      addKey {
-        name = "A key"
-        this@TranslationCommentsTestData.aKey = this
-      }.build {
-        addTranslation {
-          language = englishLanguage
-          text = "Z translation"
-          state = TranslationState.REVIEWED
-          this@TranslationCommentsTestData.translation = this
-        }.build {
-          firstComment = addComment {
-            text = "First comment"
-          }.self
-          secondComment = addComment {
-            text = "Second comment"
-          }.self
-        }
-
-        addTranslation {
-          language = czechLanguage
-          text = "Z překlad"
-          state = TranslationState.REVIEWED
-          this@TranslationCommentsTestData.translation = this
-        }.build {
-          firstComment = addComment {
-            text = "First comment"
-          }.self
-          secondComment = addComment {
-            text = "Second comment"
-          }.self
-        }
-      }
-
-      addKey {
-        name = "B key"
-        this@TranslationCommentsTestData.bKey = this
-      }
-      projectBuilder = this
-    }.self
-  }
 
   fun addE2eTestData() {
     this.root.apply {
-      val jindra = addUserAccount {
-
-        username = "jindra"
-      }
-      val vojta = addUserAccount {
-
-        username = "vojta"
-      }
+      val jindra =
+        addUserAccount {
+          username = "jindra"
+        }
+      val vojta =
+        addUserAccount {
+          username = "vojta"
+        }
       projectBuilder.apply {
         addPermission {
           project = projectBuilder.self
@@ -122,7 +132,6 @@ class TranslationCommentsTestData {
           translateLanguages = mutableSetOf(englishLanguage)
         }
         addPermission {
-
           project = projectBuilder.self
           user = vojta.self
           type = ProjectPermissionType.VIEW
@@ -135,13 +144,15 @@ class TranslationCommentsTestData {
             text = "Bla translation"
             state = TranslationState.REVIEWED
           }.build {
-            firstComment = addComment {
-              text = "First comment"
-              author = jindra.self
-            }.self
-            secondComment = addComment {
-              text = "Second comment"
-            }.self
+            firstComment =
+              addComment {
+                text = "First comment"
+                author = jindra.self
+              }.self
+            secondComment =
+              addComment {
+                text = "Second comment"
+              }.self
           }.self
         }.self
 

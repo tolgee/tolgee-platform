@@ -7,9 +7,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class DefaultPropChangesProvider(
-  val entityDescriptionProvider: EntityDescriptionProvider
+  val entityDescriptionProvider: EntityDescriptionProvider,
 ) : PropChangesProvider {
-  override fun getChanges(old: Any?, new: Any?): PropertyModification? {
+  override fun getChanges(
+    old: Any?,
+    new: Any?,
+  ): PropertyModification? {
     if (old != new) {
       return PropertyModification(old.description, new.description)
     }

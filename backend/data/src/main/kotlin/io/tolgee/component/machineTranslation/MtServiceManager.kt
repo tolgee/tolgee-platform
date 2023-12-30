@@ -31,9 +31,8 @@ import org.springframework.stereotype.Component
 class MtServiceManager(
   private val applicationContext: ApplicationContext,
   private val internalProperties: InternalProperties,
-  private val cacheManager: CacheManager
+  private val cacheManager: CacheManager,
 ) {
-
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   /**
@@ -47,36 +46,35 @@ class MtServiceManager(
     targetLanguageTag: String,
     serviceInfos: Collection<MtServiceInfo>,
     metadata: Metadata?,
-    isBatch: Boolean
+    isBatch: Boolean,
   ): Map<MtServiceInfo, TranslateResult> {
     return runBlocking(Dispatchers.IO) {
       serviceInfos.map { service ->
         async {
-          service to translate(
-            text = text,
-            textRaw = textRaw,
-            keyName = keyName,
-            sourceLanguageTag = sourceLanguageTag,
-            targetLanguageTag = targetLanguageTag,
-            serviceInfo = service,
-            metadata = metadata,
-            isBatch = isBatch
-          )
+          service to
+            translate(
+              text = text,
+              textRaw = textRaw,
+              keyName = keyName,
+              sourceLanguageTag = sourceLanguageTag,
+              targetLanguageTag = targetLanguageTag,
+              serviceInfo = service,
+              metadata = metadata,
+              isBatch = isBatch,
+            )
         }
       }.awaitAll().toMap()
     }
   }
 
-  private fun findInCache(
-    params: TranslationParams
-  ): TranslateResult? {
+  private fun findInCache(params: TranslationParams): TranslateResult? {
     return params.findInCacheByParams()?.let {
       TranslateResult(
         translatedText = it.translatedText,
         contextDescription = it.contextDescription,
         actualPrice = 0,
         usedService = params.serviceInfo.serviceType,
-        params.textRaw.isEmpty()
+        params.textRaw.isEmpty(),
       )
     }
   }
@@ -106,26 +104,28 @@ class MtServiceManager(
     }
 
     return try {
-      val translated = provider.translate(
-        ProviderTranslateParams(
-          params.text,
-          params.textRaw,
-          params.keyName,
-          params.sourceLanguageTag,
-          params.targetLanguageTag,
-          params.metadata,
-          params.serviceInfo.formality,
-          params.isBatch
+      val translated =
+        provider.translate(
+          ProviderTranslateParams(
+            params.text,
+            params.textRaw,
+            params.keyName,
+            params.sourceLanguageTag,
+            params.targetLanguageTag,
+            params.metadata,
+            params.serviceInfo.formality,
+            params.isBatch,
+          ),
         )
-      )
 
-      val translateResult = TranslateResult(
-        translated.translated,
-        translated.contextDescription,
-        translated.price,
-        params.serviceInfo.serviceType,
-        params.textRaw.isBlank()
-      )
+      val translateResult =
+        TranslateResult(
+          translated.translated,
+          translated.contextDescription,
+          translated.price,
+          params.serviceInfo.serviceType,
+          params.textRaw.isBlank(),
+        )
 
       params.cacheResult(translateResult)
 
@@ -144,22 +144,26 @@ class MtServiceManager(
 
   private fun validate(
     provider: MtValueProvider,
-    params: TranslationParams
+    params: TranslationParams,
   ) {
     if (!provider.isLanguageSupported(params.targetLanguageTag)) {
       throw LanguageNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
     }
 
     val formality = params.serviceInfo.formality
-    val requiresFormality = formality != null &&
-      formality != Formality.DEFAULT
+    val requiresFormality =
+      formality != null &&
+        formality != Formality.DEFAULT
 
     if (!provider.isLanguageFormalitySupported(params.targetLanguageTag) && requiresFormality) {
       throw FormalityNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
     }
   }
 
-  private fun handleSilentFail(params: TranslationParams, e: Exception) {
+  private fun handleSilentFail(
+    params: TranslationParams,
+    e: Exception,
+  ) {
     val silentFail = !params.isBatch
     if (!silentFail) {
       throw e
@@ -169,7 +173,7 @@ class MtServiceManager(
             |text "${params.text}" 
             |from ${params.sourceLanguageTag} 
             |to ${params.targetLanguageTag}"
-        """.trimMargin()
+        """.trimMargin(),
       )
       logger.error(e.stackTraceToString())
       Sentry.captureException(e)
@@ -184,7 +188,7 @@ class MtServiceManager(
     targetLanguageTag: String,
     serviceInfo: MtServiceInfo,
     metadata: Metadata? = null,
-    isBatch: Boolean
+    isBatch: Boolean,
   ) = TranslationParams(
     text = text,
     textRaw = textRaw,
@@ -193,14 +197,13 @@ class MtServiceManager(
     serviceInfo = serviceInfo,
     metadata = metadata,
     keyName = keyName,
-    isBatch = isBatch
+    isBatch = isBatch,
   )
 
-  private fun getFaked(
-    params: TranslationParams
-  ): TranslateResult {
-    var fakedText = "${params.text} translated with ${params.serviceInfo.serviceType.name} " +
-      "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}"
+  private fun getFaked(params: TranslationParams): TranslateResult {
+    var fakedText =
+      "${params.text} translated with ${params.serviceInfo.serviceType.name} " +
+        "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}"
     if ((params.serviceInfo.formality ?: Formality.DEFAULT) !== Formality.DEFAULT) {
       fakedText += " ${params.serviceInfo.formality}"
     }
@@ -209,7 +212,7 @@ class MtServiceManager(
       contextDescription = null,
       actualPrice = params.text.length * 100,
       usedService = params.serviceInfo.serviceType,
-      baseBlank = params.textRaw.isEmpty()
+      baseBlank = params.textRaw.isEmpty(),
     )
   }
 
@@ -235,7 +238,7 @@ class MtServiceManager(
     targetLanguageTag: String,
     serviceInfo: MtServiceInfo,
     metadata: Metadata? = null,
-    isBatch: Boolean = false
+    isBatch: Boolean = false,
   ): TranslateResult {
     val params = getParams(text, textRaw, keyName, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata, isBatch)
 
@@ -253,7 +256,7 @@ class MtServiceManager(
     targetLanguageTags: List<String>,
     service: MtServiceInfo,
     metadata: Map<String, Metadata>? = null,
-    isBatch: Boolean
+    isBatch: Boolean,
   ): List<TranslateResult> {
     return translateToMultipleTargets(
       serviceInfo = service,
@@ -263,7 +266,7 @@ class MtServiceManager(
       sourceLanguageTag = sourceLanguageTag,
       targetLanguageTags = targetLanguageTags,
       metadata = metadata,
-      isBatch = isBatch
+      isBatch = isBatch,
     )
   }
 
@@ -275,7 +278,7 @@ class MtServiceManager(
     sourceLanguageTag: String,
     targetLanguageTags: List<String>,
     metadata: Map<String, Metadata>? = null,
-    isBatch: Boolean
+    isBatch: Boolean,
   ): List<TranslateResult> {
     return runBlocking(Dispatchers.IO) {
       targetLanguageTags.map { targetLanguageTag ->
@@ -288,7 +291,7 @@ class MtServiceManager(
             targetLanguageTag,
             serviceInfo,
             metadata?.get(targetLanguageTag),
-            isBatch
+            isBatch,
           )
         }
       }.awaitAll()

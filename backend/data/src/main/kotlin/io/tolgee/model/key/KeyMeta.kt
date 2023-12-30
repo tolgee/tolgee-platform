@@ -23,11 +23,9 @@ import jakarta.persistence.PreUpdate
 class KeyMeta(
   @OneToOne
   var key: Key? = null,
-
   @OneToOne
   var importKey: ImportKey? = null,
 ) : StandardAuditModel() {
-
   @OneToMany(mappedBy = "keyMeta")
   @OrderBy("id")
   var comments = mutableListOf<KeyComment>()
@@ -41,14 +39,20 @@ class KeyMeta(
   @ActivityLoggedProp(TagsPropChangesProvider::class)
   var tags: MutableSet<Tag> = mutableSetOf()
 
-  fun addComment(author: UserAccount? = null, ft: KeyComment.() -> Unit) {
+  fun addComment(
+    author: UserAccount? = null,
+    ft: KeyComment.() -> Unit,
+  ) {
     KeyComment(this, author).apply {
       ft()
       comments.add(this)
     }
   }
 
-  fun addCodeReference(author: UserAccount? = null, ft: KeyCodeReference.() -> Unit) {
+  fun addCodeReference(
+    author: UserAccount? = null,
+    ft: KeyCodeReference.() -> Unit,
+  ) {
     KeyCodeReference(this, author).apply {
       ft()
       codeReferences.add(this)

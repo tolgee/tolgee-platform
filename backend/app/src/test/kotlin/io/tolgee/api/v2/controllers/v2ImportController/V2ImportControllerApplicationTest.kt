@@ -157,8 +157,9 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
     performAuthPut(path, null).andIsOk
 
     executeInNewTransaction {
-      val key = projectService.get(testData.project.id)
-        .keys.find { it.name == "what a nice key" }!!
+      val key =
+        projectService.get(testData.project.id)
+          .keys.find { it.name == "what a nice key" }!!
 
       val untouched = key.translations.find { it.language == testData.french }!!
       untouched.outdated.assert.isEqualTo(true)

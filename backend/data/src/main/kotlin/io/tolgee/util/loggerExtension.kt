@@ -15,7 +15,10 @@ interface Logging {
     val timeSums = mutableMapOf<Pair<KClass<*>, String>, Duration>()
   }
 
-  fun <T> traceLogMeasureTime(operationName: String, fn: () -> T): T {
+  fun <T> traceLogMeasureTime(
+    operationName: String,
+    fn: () -> T,
+  ): T {
     if (logger.isTraceEnabled) {
       val start = System.currentTimeMillis()
       logger.trace("Operation $operationName started")
@@ -42,24 +45,37 @@ fun Logger.debug(message: () -> String) {
   }
 }
 
-inline fun <reified T> Logger.traceMeasureTime(message: String, block: () -> T): T {
+inline fun <reified T> Logger.traceMeasureTime(
+  message: String,
+  block: () -> T,
+): T {
   if (this.isTraceEnabled) {
     return measureTime(message, this::trace, block)
   }
   return block()
 }
 
-inline fun <reified T> Logger.infoMeasureTime(message: String, block: () -> T): T {
+inline fun <reified T> Logger.infoMeasureTime(
+  message: String,
+  block: () -> T,
+): T {
   return measureTime(message, this::info, block)
 }
 
-inline fun <reified T> Logger.measureTime(message: String, printFn: (String) -> Unit, block: () -> T): T {
+inline fun <reified T> Logger.measureTime(
+  message: String,
+  printFn: (String) -> Unit,
+  block: () -> T,
+): T {
   val (result, duration) = measureTimedValue(block)
   printFn("$message: $duration")
   return result
 }
 
-inline fun <reified T> Logger.storeTraceTimeSum(id: String, block: () -> T): T {
+inline fun <reified T> Logger.storeTraceTimeSum(
+  id: String,
+  block: () -> T,
+): T {
   return if (this.isTraceEnabled) {
     val (result, duration) = measureTimedValue(block)
     Logging.timeSums.compute(this::class to id) { _, v ->
@@ -71,7 +87,10 @@ inline fun <reified T> Logger.storeTraceTimeSum(id: String, block: () -> T): T {
   }
 }
 
-fun Logger.traceLogTimeSum(id: String, unit: DurationUnit = DurationUnit.MILLISECONDS) {
+fun Logger.traceLogTimeSum(
+  id: String,
+  unit: DurationUnit = DurationUnit.MILLISECONDS,
+) {
   if (this.isTraceEnabled) {
     val duration = Logging.timeSums[this::class to id]
     if (duration != null) {

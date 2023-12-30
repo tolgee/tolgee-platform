@@ -9,5 +9,5 @@ data class ProjectActivityAuthorModel(
   override val username: String?,
   override var name: String?,
   override var avatar: Avatar?,
-  override var deleted: Boolean
+  override var deleted: Boolean,
 ) : RepresentationModel<ProjectActivityAuthorModel>(), IProjectActivityAuthorModel

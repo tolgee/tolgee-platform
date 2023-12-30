@@ -7,7 +7,7 @@ package io.tolgee.security
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.stereotype.Component
-import kotlin.random.Random
+import java.security.SecureRandom
 
 @Component
 class InitialPasswordManager(
@@ -40,7 +40,18 @@ class InitialPasswordManager(
     }
 
   private fun generatePassword(): String {
-    val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    return (1..40).map { charPool[Random.nextInt(0, charPool.size)] }.joinToString("")
+    return (1..40)
+      .asSequence()
+      .map { secureRandom.nextInt(charPool.size) }
+      .map(charPool::get)
+      .joinToString("")
+  }
+
+  val charPool by lazy {
+    ('a'..'z') + ('A'..'Z') + ('0'..'9')
+  }
+
+  val secureRandom by lazy {
+    SecureRandom()
   }
 }

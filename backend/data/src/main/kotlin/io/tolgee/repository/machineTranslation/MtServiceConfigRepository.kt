@@ -16,7 +16,7 @@ interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
             ptsc.targetLanguage.id = :languageId 
             or (ptsc.targetLanguage.id is null and ptsc.project.id = l.project.id)
             )
-  """
+  """,
   )
   fun findAllByTargetLanguageId(languageId: Long): List<MtServiceConfig>
 
@@ -31,7 +31,10 @@ interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
     select ptsc from MtServiceConfig ptsc
     where ptsc.targetLanguage.id in :languageIds 
         or (ptsc.targetLanguage.id is null and ptsc.project = :project)
-  """
+  """,
   )
-  fun findAllByTargetLanguageIdIn(languageIds: List<Long>, project: Project): List<MtServiceConfig>
+  fun findAllByTargetLanguageIdIn(
+    languageIds: List<Long>,
+    project: Project,
+  ): List<MtServiceConfig>
 }

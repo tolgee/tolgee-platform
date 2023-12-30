@@ -15,7 +15,6 @@ import java.util.*
 class ImportTranslation(
   @Column(columnDefinition = "text")
   var text: String?,
-
   @ManyToOne
   var language: ImportLanguage,
 ) : StandardAuditModel() {
@@ -52,11 +51,12 @@ class ImportTranslation(
     if (this == null) {
       return "__null_value"
     }
-    val hash = MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
-      val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
-      buffer.putLong(it)
-      buffer.array().asSequence()
-    }.toList().toByteArray()
+    val hash =
+      MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
+        val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
+        buffer.putLong(it)
+        buffer.array().asSequence()
+      }.toList().toByteArray()
     return Base64.getEncoder().encodeToString(hash)
   }
 }

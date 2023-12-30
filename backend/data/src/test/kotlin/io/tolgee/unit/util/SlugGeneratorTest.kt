@@ -7,7 +7,6 @@ import io.tolgee.util.SlugGenerator
 import org.junit.jupiter.api.Test
 
 class SlugGeneratorTest {
-
   private val slugGenerator: SlugGenerator = SlugGenerator()
 
   @Test

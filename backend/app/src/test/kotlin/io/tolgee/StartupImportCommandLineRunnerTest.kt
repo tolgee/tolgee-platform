@@ -21,7 +21,6 @@ import org.springframework.core.io.Resource
 @Suppress("LateinitVarOverridesLateinitVar")
 @CleanDbBeforeClass
 class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
-
   private lateinit var base: Base
 
   @Value("classpath:startup-import")
@@ -42,7 +41,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
           dir = importDir.file.absolutePath
           createImplicitApiKey = true
           baseLanguageTag = "de"
-        }
+        },
       )
       base = dbPopulator.createBase("labaala", "admin")
       startupImportCommandLineRunner.run()

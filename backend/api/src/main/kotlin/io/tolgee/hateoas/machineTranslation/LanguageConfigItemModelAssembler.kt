@@ -9,15 +9,16 @@ import org.springframework.stereotype.Component
 @Component
 class LanguageConfigItemModelAssembler : RepresentationModelAssemblerSupport<MtServiceConfig, LanguageConfigItemModel>(
   V2ProjectsController::class.java,
-  LanguageConfigItemModel::class.java
+  LanguageConfigItemModel::class.java,
 ) {
-  override fun toModel(entity: MtServiceConfig) = LanguageConfigItemModel(
-    targetLanguageId = entity.targetLanguage?.id,
-    targetLanguageTag = entity.targetLanguage?.tag,
-    targetLanguageName = entity.targetLanguage?.name,
-    primaryService = entity.primaryService,
-    enabledServices = entity.enabledServices,
-    enabledServicesInfo = entity.enabledServicesInfo.toSet(),
-    primaryServiceInfo = entity.primaryServiceInfo
-  )
+  override fun toModel(entity: MtServiceConfig) =
+    LanguageConfigItemModel(
+      targetLanguageId = entity.targetLanguage?.id,
+      targetLanguageTag = entity.targetLanguage?.tag,
+      targetLanguageName = entity.targetLanguage?.name,
+      primaryService = entity.primaryService,
+      enabledServices = entity.enabledServices,
+      enabledServicesInfo = entity.enabledServicesInfo.toSet(),
+      primaryServiceInfo = entity.primaryServiceInfo,
+    )
 }

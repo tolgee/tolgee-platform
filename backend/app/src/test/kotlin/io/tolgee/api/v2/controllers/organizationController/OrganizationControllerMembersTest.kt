@@ -98,7 +98,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
       loginAsUser(owner)
       performAuthPut(
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
-        SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
+        SetOrganizationRoleDto(OrganizationRoleType.MEMBER),
       ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_YOUR_OWN_ROLE)
     }
   }
@@ -127,7 +127,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
     userAccount = testData.admin.self
     permissionService.getProjectPermissionData(
       testData.projectBuilder.self.id,
-      me.id
+      me.id,
     ).directPermissions.assert.isNotNull
     performAuthDelete("/v2/organizations/${testData.organizationBuilder.self.id}/users/${me.id}", null)
       .andIsOk
@@ -163,7 +163,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
 
     performAuthPut(
       "/v2/projects/${testData.projectBuilder.self.id}/users/${testData.franta.id}/revoke-access",
-      null
+      null,
     ).andIsOk
 
     assertThat(userPreferencesService.find(testData.franta.id)!!.preferredOrganization)

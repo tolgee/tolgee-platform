@@ -15,16 +15,17 @@ data class UserAccountDto(
   val tokensValidNotBefore: Date?,
 ) : Serializable {
   companion object {
-    fun fromEntity(entity: UserAccount) = UserAccountDto(
-      name = entity.name,
-      username = entity.username,
-      role = entity.role,
-      id = entity.id,
-      needsSuperJwt = entity.needsSuperJwt,
-      avatarHash = entity.avatarHash,
-      deleted = entity.deletedAt != null,
-      tokensValidNotBefore = entity.tokensValidNotBefore,
-    )
+    fun fromEntity(entity: UserAccount) =
+      UserAccountDto(
+        name = entity.name,
+        username = entity.username,
+        role = entity.role,
+        id = entity.id,
+        needsSuperJwt = entity.needsSuperJwt,
+        avatarHash = entity.avatarHash,
+        deleted = entity.deletedAt != null,
+        tokensValidNotBefore = entity.tokensValidNotBefore,
+      )
   }
 
   override fun toString(): String {

@@ -10,7 +10,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 @Configuration
 class WebsocketPublisherConfiguration(
   private val websocketProperties: WebsocketProperties,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
   @Bean
   fun websocketEventPublisher(): WebsocketEventPublisher {

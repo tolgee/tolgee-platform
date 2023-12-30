@@ -7,7 +7,7 @@ import io.tolgee.model.UserPreferences
 import org.springframework.core.io.ClassPathResource
 
 class UserAccountBuilder(
-  val testDataBuilder: TestDataBuilder
+  val testDataBuilder: TestDataBuilder,
 ) : BaseEntityDataBuilder<UserAccount, UserAccountBuilder>() {
   var rawPassword = "admin"
   override var self: UserAccount = UserAccount()
@@ -26,8 +26,9 @@ class UserAccountBuilder(
   }
 
   fun setUserPreferences(ft: UserPreferences.() -> Unit) {
-    data.userPreferences = UserPreferencesBuilder(this)
-      .also { ft(it.self) }
+    data.userPreferences =
+      UserPreferencesBuilder(this)
+        .also { ft(it.self) }
   }
 
   fun addPat(ft: FT<Pat>) = addOperation(data.pats, ft)

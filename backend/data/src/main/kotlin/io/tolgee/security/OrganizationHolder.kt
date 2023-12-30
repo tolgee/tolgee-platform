@@ -5,7 +5,7 @@ import io.tolgee.model.Organization
 import io.tolgee.service.organization.OrganizationService
 
 open class OrganizationHolder(
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
 ) {
   open val organizationEntity: Organization by lazy {
     organizationService.get(organization.id)

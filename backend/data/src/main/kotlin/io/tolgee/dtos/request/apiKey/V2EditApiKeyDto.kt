@@ -13,12 +13,11 @@ data class V2EditApiKeyDto(
   @Schema(
     example = """
     ["screenshots.upload", "screenshots.delete", "translations.edit", "screenshots.view", "translations.view", "keys.edit"]
-    """
+    """,
   )
   var scopes: Set<Scope> = setOf(),
-  var description: String? = null
+  var description: String? = null,
 ) {
-
   @Suppress("unused")
   @JsonSetter("scopes")
   fun jsonSetScopes(scopes: Set<String>) {

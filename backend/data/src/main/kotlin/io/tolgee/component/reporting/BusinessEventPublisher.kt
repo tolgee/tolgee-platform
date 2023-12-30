@@ -24,9 +24,8 @@ class BusinessEventPublisher(
   private val authenticationFacade: AuthenticationFacade,
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
-  private val sdkInfoProvider: SdkInfoProvider
+  private val sdkInfoProvider: SdkInfoProvider,
 ) : Logging {
-
   fun publish(request: BusinessEventReportRequest) {
     publish(
       OnBusinessEventToCaptureEvent(
@@ -35,8 +34,8 @@ class BusinessEventPublisher(
         organizationId = request.organizationId,
         utmData = getUtmData(),
         data = request.data,
-        anonymousUserId = request.anonymousUserId
-      )
+        anonymousUserId = request.anonymousUserId,
+      ),
     )
   }
 
@@ -44,12 +43,13 @@ class BusinessEventPublisher(
     applicationEventPublisher.publishEvent(
       event.copy(
         utmData = event.utmData ?: getUtmData(),
-        userAccountId = event.userAccountId
-          ?: event.userAccountDto?.id
-          ?: authenticationFacade.authenticatedUserOrNull?.id,
+        userAccountId =
+          event.userAccountId
+            ?: event.userAccountDto?.id
+            ?: authenticationFacade.authenticatedUserOrNull?.id,
         userAccountDto = event.userAccountDto ?: authenticationFacade.authenticatedUserOrNull,
-        data = getDataWithSdkInfo(event.data)
-      )
+        data = getDataWithSdkInfo(event.data),
+      ),
     )
   }
 
@@ -58,8 +58,8 @@ class BusinessEventPublisher(
       applicationEventPublisher.publishEvent(
         OnIdentifyEvent(
           userAccountId = userId,
-          anonymousUserId = event.anonymousUserId
-        )
+          anonymousUserId = event.anonymousUserId,
+        ),
       )
     }
   }
@@ -67,7 +67,7 @@ class BusinessEventPublisher(
   fun publishOnceInTime(
     event: OnBusinessEventToCaptureEvent,
     onceIn: Duration,
-    keyProvider: (e: OnBusinessEventToCaptureEvent) -> String = { it.eventName + "_" + it.userAccountId }
+    keyProvider: (e: OnBusinessEventToCaptureEvent) -> String = { it.eventName + "_" + it.userAccountId },
   ) {
     val key = keyProvider(event)
     if (shouldPublishOnceInTime(key, onceIn)) {
@@ -82,7 +82,7 @@ class BusinessEventPublisher(
 
   private fun shouldPublishOnceInTime(
     key: String,
-    onceIn: Duration
+    onceIn: Duration,
   ): Boolean {
     val cache = getEventThrottlingCache()
     val cached =
@@ -116,7 +116,7 @@ class BusinessEventPublisher(
 
   fun getDataWithSdkInfo(
     sdkInfoMap: Map<String, String?>,
-    data: Map<String, Any?>?
+    data: Map<String, Any?>?,
   ): Map<String, Any?>? {
     if (sdkInfoMap.values.all { it == null }) {
       return data

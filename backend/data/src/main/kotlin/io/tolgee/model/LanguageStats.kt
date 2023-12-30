@@ -13,9 +13,8 @@ import jakarta.persistence.UniqueConstraint
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["language_id"], name = "language_stats_language_id_key")])
 class LanguageStats(
   @OneToOne
-  val language: Language
+  val language: Language,
 ) : StandardAuditModel() {
-
   var untranslatedWords: Long = 0
 
   var translatedWords: Long = 0

@@ -7,15 +7,16 @@ import org.springframework.stereotype.Component
 
 @Component
 class ImportFileIssueModelAssembler(
-  val importFileIssueParamModelAssembler: ImportFileIssueParamModelAssembler
+  val importFileIssueParamModelAssembler: ImportFileIssueParamModelAssembler,
 ) : RepresentationModelAssemblerSupport<ImportFileIssueView, ImportFileIssueModel>(
-  V2ImportController::class.java, ImportFileIssueModel::class.java
-) {
+    V2ImportController::class.java,
+    ImportFileIssueModel::class.java,
+  ) {
   override fun toModel(view: ImportFileIssueView): ImportFileIssueModel {
     return ImportFileIssueModel(
       id = view.id,
       type = view.type,
-      params = view.params.map { importFileIssueParamModelAssembler.toModel(it) }
+      params = view.params.map { importFileIssueParamModelAssembler.toModel(it) },
     )
   }
 }

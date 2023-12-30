@@ -11,15 +11,14 @@ import org.springframework.transaction.event.TransactionalEventListener
 @Component
 class MailServiceUserListener(
   private val tolgeeProperties: TolgeeProperties,
-  private val marketingEmailServiceManager: MarketingEmailServiceManager
+  private val marketingEmailServiceManager: MarketingEmailServiceManager,
 ) {
-
   @TransactionalEventListener(OnUserCreated::class)
   fun onUserCreated(event: OnUserCreated) {
     if (!tolgeeProperties.authentication.needsEmailVerification || event.userAccount.emailVerification == null) {
       marketingEmailServiceManager.submitNewContact(
         name = event.userAccount.name,
-        email = event.userAccount.username
+        email = event.userAccount.username,
       )
     }
   }
@@ -28,7 +27,7 @@ class MailServiceUserListener(
   fun onUserEmailVerifiedFirst(event: OnUserEmailVerifiedFirst) {
     marketingEmailServiceManager.submitNewContact(
       name = event.userAccount.name,
-      email = event.userAccount.username
+      email = event.userAccount.username,
     )
   }
 
@@ -41,7 +40,7 @@ class MailServiceUserListener(
       marketingEmailServiceManager.updateContact(
         oldEmail = event.oldUserAccount.username,
         newEmail = event.newUserAccount.username,
-        newName = event.newUserAccount.name
+        newName = event.newUserAccount.name,
       )
     }
   }

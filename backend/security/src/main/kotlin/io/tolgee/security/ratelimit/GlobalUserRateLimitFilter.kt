@@ -28,7 +28,11 @@ class GlobalUserRateLimitFilter(
   private val rateLimitService: RateLimitService,
   private val authenticationFacade: AuthenticationFacade,
 ) : OncePerRequestFilter() {
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     if (authenticationFacade.isAuthenticated) {
       rateLimitService.consumeGlobalUserRateLimitPolicy(request, authenticationFacade.authenticatedUser.id)
     }

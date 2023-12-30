@@ -49,7 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
 class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
-
   lateinit var testData: BatchJobsTestData
 
   @Autowired
@@ -101,7 +100,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       autoTranslationService,
       machineTranslationChunkProcessor,
       preTranslationByTmChunkProcessor,
-      batchJobActivityFinalizer
+      batchJobActivityFinalizer,
     )
   }
 
@@ -136,10 +135,11 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       "start-batch-job/machine-translate",
       mapOf(
         "keyIds" to keyIds,
-        "targetLanguageIds" to listOf(
-          testData.projectBuilder.getLanguageByTag("cs")!!.self.id
-        )
-      )
+        "targetLanguageIds" to
+          listOf(
+            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+          ),
+      ),
     ).andIsOk
 
     Thread.sleep(500)
@@ -179,10 +179,11 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         "start-batch-job/machine-translate",
         mapOf(
           "keyIds" to keyIds,
-          "targetLanguageIds" to listOf(
-            testData.projectBuilder.getLanguageByTag("cs")!!.self.id
-          )
-        )
+          "targetLanguageIds" to
+            listOf(
+              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+            ),
+        ),
       ).andIsOk
 
       waitForNotThrowing(pollTime = 100) {
@@ -253,7 +254,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         dtos.forEach {
           val state = batchJobStateProvider.getCached(it.id)
           println(
-            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}"
+            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}",
           )
         }
         dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(2)
@@ -422,16 +423,20 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     this.projectSupplier = { testData.projectBuilder.self }
   }
 
-  protected fun runChunkedJob(keyCount: Int, author: UserAccount = testData.user): BatchJob {
+  protected fun runChunkedJob(
+    keyCount: Int,
+    author: UserAccount = testData.user,
+  ): BatchJob {
     return executeInNewTransaction {
       batchJobService.startJob(
-        request = PreTranslationByTmRequest().apply {
-          keyIds = (1L..keyCount).map { it }
-        },
+        request =
+          PreTranslationByTmRequest().apply {
+            keyIds = (1L..keyCount).map { it }
+          },
         project = testData.projectBuilder.self,
         author = author,
         type = BatchJobType.PRE_TRANSLATE_BT_TM,
-        isHidden = false
+        isHidden = false,
       )
     }
   }

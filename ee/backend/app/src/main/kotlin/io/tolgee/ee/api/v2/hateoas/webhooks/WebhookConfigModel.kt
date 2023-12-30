@@ -12,13 +12,13 @@ class WebhookConfigModel(
   val url: String,
   val webhookSecret: String,
   @Schema(
-    description = "Date of the first failed webhook request. " +
-      "If the last webhook request is successful, this value is set to null."
+    description =
+      "Date of the first failed webhook request. " +
+        "If the last webhook request is successful, this value is set to null.",
   )
   val firstFailed: Long?,
-
   @Schema(
-    description = """Date of the last webhook request."""
+    description = """Date of the last webhook request.""",
   )
-  var lastExecuted: Long?
+  var lastExecuted: Long?,
 ) : RepresentationModel<WebhookConfigModel>(), Serializable

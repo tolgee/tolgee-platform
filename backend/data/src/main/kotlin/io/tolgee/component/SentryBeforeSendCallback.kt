@@ -7,7 +7,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class SentryBeforeSendCallback : SentryOptions.BeforeSendCallback {
-  override fun execute(event: SentryEvent, hint: Hint): SentryEvent? {
+  override fun execute(
+    event: SentryEvent,
+    hint: Hint,
+  ): SentryEvent? {
     if (event.containsMessage("Failed to send message to MessageChannel")) {
       return null
     }

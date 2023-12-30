@@ -7,5 +7,5 @@ class AutomationTriggerModel(
   var id: Long,
   var type: AutomationTriggerType = AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
   var activityType: ActivityType? = null,
-  var debounceDurationInMs: Long? = null
+  var debounceDurationInMs: Long? = null,
 )

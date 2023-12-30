@@ -14,7 +14,7 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
     from LanguageStats ls
     join ls.language l
     where l.project.id = :projectId
-  """
+  """,
   )
   fun getAllByProjectId(projectId: Long): List<LanguageStats>
 
@@ -23,7 +23,7 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
   @Query(
     """
     delete from LanguageStats ls where ls.language.id = :languageId
-  """
+  """,
   )
   fun deleteAllByLanguage(languageId: Long)
 
@@ -33,7 +33,7 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
     join fetch ls.language l
     join fetch l.project
     where l.project.id in :projectIds
-  """
+  """,
   )
   fun getAllByProjectIds(projectIds: List<Long>): List<LanguageStats>
 }

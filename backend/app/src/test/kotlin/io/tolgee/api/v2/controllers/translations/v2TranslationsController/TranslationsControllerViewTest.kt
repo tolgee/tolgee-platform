@@ -24,7 +24,6 @@ import kotlin.system.measureTimeMillis
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TranslationsTestData
 
   @BeforeEach
@@ -337,11 +336,12 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testData.generateLotOfData(2000)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    val time = measureTimeMillis {
-      performProjectAuthGet("/translations/select-all").andAssertThatJson {
-        node("ids").isArray.hasSize(2002)
+    val time =
+      measureTimeMillis {
+        performProjectAuthGet("/translations/select-all").andAssertThatJson {
+          node("ids").isArray.hasSize(2002)
+        }
       }
-    }
     assertThat(time).isLessThan(3000)
   }
 

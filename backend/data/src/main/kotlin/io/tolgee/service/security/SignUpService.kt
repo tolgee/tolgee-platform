@@ -26,7 +26,7 @@ class SignUpService(
   private val emailVerificationService: EmailVerificationService,
   private val organizationService: OrganizationService,
   private val quickStartService: QuickStartService,
-  private val passwordEncoder: PasswordEncoder
+  private val passwordEncoder: PasswordEncoder,
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
@@ -46,7 +46,11 @@ class SignUpService(
     return null
   }
 
-  fun signUp(entity: UserAccount, invitationCode: String?, organizationName: String?): UserAccount {
+  fun signUp(
+    entity: UserAccount,
+    invitationCode: String?,
+    organizationName: String?,
+  ): UserAccount {
     val invitation = findAndCheckInvitationOnRegistration(invitationCode)
     val user = userAccountService.createUser(entity)
     if (invitation != null) {

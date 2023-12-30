@@ -25,12 +25,15 @@ abstract class AbstractV2ImageUploadControllerTest : AuthorizedControllerTest() 
   protected fun performStoreImage(): ResultActions {
     return performAuthMultipart(
       url = "/v2/image-upload",
-      files = listOf(
-        MockMultipartFile(
-          "image", "originalShot.png", "image/png",
-          screenshotFile.inputStream
-        )
-      )
+      files =
+        listOf(
+          MockMultipartFile(
+            "image",
+            "originalShot.png",
+            "image/png",
+            screenshotFile.inputStream,
+          ),
+        ),
     )
   }
 }

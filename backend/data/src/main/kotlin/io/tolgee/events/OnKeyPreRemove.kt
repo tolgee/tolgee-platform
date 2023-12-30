@@ -5,5 +5,5 @@ import org.springframework.context.ApplicationEvent
 
 class OnKeyPreRemove(
   source: Any,
-  val key: Key
+  val key: Key,
 ) : ApplicationEvent(source)

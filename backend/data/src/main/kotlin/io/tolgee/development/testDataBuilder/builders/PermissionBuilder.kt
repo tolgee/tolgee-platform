@@ -5,9 +5,10 @@ import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 
 class PermissionBuilder(
-  val projectBuilder: ProjectBuilder
+  val projectBuilder: ProjectBuilder,
 ) : EntityDataBuilder<Permission, PermissionBuilder> {
-  override var self: Permission = Permission(user = projectBuilder.onlyUser ?: UserAccount()).apply {
-    project = projectBuilder.self
-  }
+  override var self: Permission =
+    Permission(user = projectBuilder.onlyUser ?: UserAccount()).apply {
+      project = projectBuilder.self
+    }
 }

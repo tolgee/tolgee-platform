@@ -7,5 +7,5 @@ package io.tolgee.exceptions
 class FileStoreException(
   message: String,
   val storageFilePath: String,
-  val e: Exception? = null
+  val e: Exception? = null,
 ) : RuntimeException(message, e)

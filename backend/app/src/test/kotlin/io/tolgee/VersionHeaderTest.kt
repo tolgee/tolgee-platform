@@ -22,7 +22,7 @@ class VersionHeaderTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_nopat")
-      }
+      },
     ).andIsUnauthorized.andReturn().response.getHeader("X-Tolgee-Version").assert.isEqualTo("??")
   }
 }

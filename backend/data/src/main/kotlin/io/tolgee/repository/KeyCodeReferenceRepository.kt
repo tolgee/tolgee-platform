@@ -13,7 +13,7 @@ interface KeyCodeReferenceRepository : JpaRepository<KeyCodeReference, Long> {
   @Transactional
   @Query(
     """delete from KeyCodeReference kcr where kcr.keyMeta in 
-        (select km from kcr.keyMeta km where km.importKey.id in :keyIds)"""
+        (select km from kcr.keyMeta km where km.importKey.id in :keyIds)""",
   )
   fun deleteAllByImportKeyIds(keyIds: List<Long>)
 
@@ -21,7 +21,7 @@ interface KeyCodeReferenceRepository : JpaRepository<KeyCodeReference, Long> {
   @Transactional
   @Query(
     """delete from KeyCodeReference kcr where kcr.keyMeta in 
-        (select km from kcr.keyMeta km where km.key.id in :keyIds)"""
+        (select km from kcr.keyMeta km where km.key.id in :keyIds)""",
   )
   fun deleteAllByKeyIds(keyIds: Collection<Long>)
 
@@ -29,7 +29,7 @@ interface KeyCodeReferenceRepository : JpaRepository<KeyCodeReference, Long> {
   @Query(
     """delete from KeyCodeReference kcr where kcr.keyMeta in 
         (select km from kcr.keyMeta km where km.key.id in 
-        (select k.id from Key k where k.project.id = :projectId))"""
+        (select k.id from Key k where k.project.id = :projectId))""",
   )
   fun deleteAllByProject(projectId: Long)
 }

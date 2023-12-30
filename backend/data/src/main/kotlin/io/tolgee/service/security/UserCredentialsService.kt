@@ -14,22 +14,33 @@ class UserCredentialsService(
   @set:Autowired
   lateinit var userAccountService: UserAccountService
 
-  fun checkUserCredentials(username: String, password: String): UserAccount {
-    val userAccount = userAccountService.findActive(username)
-      ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
+  fun checkUserCredentials(
+    username: String,
+    password: String,
+  ): UserAccount {
+    val userAccount =
+      userAccountService.findActive(username)
+        ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
 
-    if (userAccount.accountType == UserAccount.AccountType.MANAGED)
+    if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+    }
 
     checkNativeUserCredentials(userAccount, password)
     return userAccount
   }
 
-  fun checkUserCredentials(user: UserAccount, password: String) {
+  fun checkUserCredentials(
+    user: UserAccount,
+    password: String,
+  ) {
     checkNativeUserCredentials(user, password)
   }
 
-  private fun checkNativeUserCredentials(user: UserAccount, password: String) {
+  private fun checkNativeUserCredentials(
+    user: UserAccount,
+    password: String,
+  ) {
     if (!passwordEncoder.matches(password, user.password)) {
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }

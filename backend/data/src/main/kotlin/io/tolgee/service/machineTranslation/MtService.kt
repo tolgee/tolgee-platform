@@ -32,7 +32,7 @@ class MtService(
   private val mtServiceConfigService: MtServiceConfigService,
   private val tolgeeProperties: TolgeeProperties,
   private val bigMetaService: BigMetaService,
-  private val keyService: KeyService
+  private val keyService: KeyService,
 ) {
   @Transactional
   fun getMachineTranslations(
@@ -40,7 +40,7 @@ class MtService(
     key: Key?,
     baseTranslationText: String?,
     targetLanguage: Language,
-    services: Set<MtServiceType>?
+    services: Set<MtServiceType>?,
   ): Map<MtServiceType, TranslateResult> {
     val baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(project.id)
 
@@ -52,33 +52,38 @@ class MtService(
       keyId = key?.id,
       baseLanguage = baseLanguage,
       targetLanguage = targetLanguage,
-      services = services
+      services = services,
     )
   }
 
   fun getBaseTranslation(
     baseTranslationText: String?,
     key: Key?,
-    baseLanguage: Language
+    baseLanguage: Language,
   ): String? {
-    val baseTranslationTextSafe = baseTranslationText ?: key?.let {
-      translationService.find(it, baseLanguage).orElse(null)?.text
-    }
+    val baseTranslationTextSafe =
+      baseTranslationText ?: key?.let {
+        translationService.find(it, baseLanguage).orElse(null)?.text
+      }
     return baseTranslationTextSafe
   }
 
-  fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>, isBatch: Boolean):
-    List<TranslateResult?> {
+  fun getPrimaryMachineTranslations(
+    key: Key,
+    targetLanguages: List<Language>,
+    isBatch: Boolean,
+  ): List<TranslateResult?> {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
-    val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
-      ?: return targetLanguages.map { null }
+    val baseTranslationText =
+      translationService.find(key, baseLanguage).orElse(null)?.text
+        ?: return targetLanguages.map { null }
     return getPrimaryMachineTranslations(
       key.project,
       baseTranslationText,
       key.id,
       baseLanguage,
       targetLanguages,
-      isBatch
+      isBatch,
     )
   }
 
@@ -88,7 +93,7 @@ class MtService(
     keyId: Long?,
     baseLanguage: Language,
     targetLanguages: List<Language>,
-    isBatch: Boolean
+    isBatch: Boolean,
   ): List<TranslateResult?> {
     publishBeforeEvent(project)
 
@@ -100,45 +105,50 @@ class MtService(
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguageIds, project)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
-    val serviceIndexedLanguagesMap = targetLanguages
-      .asSequence()
-      .mapIndexed { idx, lang -> idx to lang }
-      .groupBy { primaryServices[it.second.id] }
+    val serviceIndexedLanguagesMap =
+      targetLanguages
+        .asSequence()
+        .mapIndexed { idx, lang -> idx to lang }
+        .groupBy { primaryServices[it.second.id] }
 
     val keyName = keyId?.let { projectService.keyService.get(it) }?.name
 
-    val metadata = getMetadata(
-      baseLanguage,
-      targetLanguages.filter { primaryServices[it.id]?.serviceType?.usesMetadata == true },
-      baseTranslationText,
-      keyId,
-      true,
-    )
+    val metadata =
+      getMetadata(
+        baseLanguage,
+        targetLanguages.filter { primaryServices[it.id]?.serviceType?.usesMetadata == true },
+        baseTranslationText,
+        keyId,
+        true,
+      )
 
-    val translationResults = serviceIndexedLanguagesMap
-      .map { (service, languageIdxPairs) ->
-        service?.let {
-          val translateResults = machineTranslationManager.translate(
-            prepared.text,
-            baseTranslationText,
-            keyName,
-            baseLanguage.tag,
-            languageIdxPairs.map { it.second.tag },
-            service,
-            metadata = metadata,
-            isBatch = isBatch
-          )
+    val translationResults =
+      serviceIndexedLanguagesMap
+        .map { (service, languageIdxPairs) ->
+          service?.let {
+            val translateResults =
+              machineTranslationManager.translate(
+                prepared.text,
+                baseTranslationText,
+                keyName,
+                baseLanguage.tag,
+                languageIdxPairs.map { it.second.tag },
+                service,
+                metadata = metadata,
+                isBatch = isBatch,
+              )
 
-          val withReplacedParams = translateResults.map { translateResult ->
-            translateResult.translatedText = translateResult.translatedText?.replaceParams(prepared.params)
-            translateResult
-          }
-          languageIdxPairs.map { it.first }.zip(withReplacedParams)
-        } ?: languageIdxPairs.map { it.first to null }
-      }
-      .flatten()
-      .sortedBy { it.first }
-      .map { it.second }
+            val withReplacedParams =
+              translateResults.map { translateResult ->
+                translateResult.translatedText = translateResult.translatedText?.replaceParams(prepared.params)
+                translateResult
+              }
+            languageIdxPairs.map { it.first }.zip(withReplacedParams)
+          } ?: languageIdxPairs.map { it.first to null }
+        }
+        .flatten()
+        .sortedBy { it.first }
+        .map { it.second }
 
     val actualPrice = translationResults.sumOf { it?.actualPrice ?: 0 }
 
@@ -153,7 +163,7 @@ class MtService(
     keyId: Long?,
     baseLanguage: Language,
     targetLanguage: Language,
-    services: Set<MtServiceType>?
+    services: Set<MtServiceType>?,
   ): Map<MtServiceType, TranslateResult> {
     checkTextLength(baseTranslationText)
     val servicesToUse = getServicesToUse(targetLanguage, services)
@@ -173,17 +183,18 @@ class MtService(
 
     val keyName = keyId?.let { keyService.get(it) }?.name
 
-    val results = machineTranslationManager
-      .translate(
-        text = prepared.text,
-        textRaw = baseTranslationText,
-        keyName = keyName,
-        sourceLanguageTag = baseLanguage.tag,
-        targetLanguageTag = targetLanguage.tag,
-        serviceInfos = servicesToUse,
-        metadata = metadata,
-        isBatch = false
-      )
+    val results =
+      machineTranslationManager
+        .translate(
+          text = prepared.text,
+          textRaw = baseTranslationText,
+          keyName = keyName,
+          sourceLanguageTag = baseLanguage.tag,
+          targetLanguageTag = targetLanguage.tag,
+          serviceInfos = servicesToUse,
+          metadata = metadata,
+          isBatch = false,
+        )
 
     val actualPrice = results.entries.sumOf { it.value.actualPrice }
 
@@ -203,14 +214,14 @@ class MtService(
           contextDescription = null,
           actualPrice = 0,
           usedService = it.serviceType,
-          baseBlank = true
+          baseBlank = true,
         )
     }
   }
 
   fun getServicesToUse(
     targetLanguage: Language,
-    desiredServices: Set<MtServiceType>?
+    desiredServices: Set<MtServiceType>?,
   ): Set<MtServiceInfo> {
     val enabledServices = mtServiceConfigService.getEnabledServiceInfos(targetLanguage)
     checkServices(desired = desiredServices?.toSet(), enabled = enabledServices.map { it.serviceType })
@@ -218,7 +229,10 @@ class MtService(
       .toSet()
   }
 
-  private fun checkServices(desired: Set<MtServiceType>?, enabled: List<MtServiceType>) {
+  private fun checkServices(
+    desired: Set<MtServiceType>?,
+    enabled: List<MtServiceType>,
+  ) {
     if (desired != null && desired.any { !enabled.contains(it) }) {
       throw BadRequestException(Message.MT_SERVICE_NOT_ENABLED)
     }
@@ -226,18 +240,16 @@ class MtService(
 
   private fun publishAfterEvent(
     project: Project,
-    actualPrice: Int
+    actualPrice: Int,
   ) {
     applicationEventPublisher.publishEvent(
-      OnAfterMachineTranslationEvent(this, project, actualPrice)
+      OnAfterMachineTranslationEvent(this, project, actualPrice),
     )
   }
 
-  private fun publishBeforeEvent(
-    project: Project,
-  ) {
+  private fun publishBeforeEvent(project: Project) {
     applicationEventPublisher.publishEvent(
-      OnBeforeMachineTranslationEvent(this, project)
+      OnBeforeMachineTranslationEvent(this, project),
     )
   }
 
@@ -260,14 +272,14 @@ class MtService(
     sourceLanguage: Language,
     targetLanguage: Language,
     text: String,
-    keyId: Long?
+    keyId: Long?,
   ): List<ExampleItem> {
     return translationService.getTranslationMemorySuggestions(
       sourceTranslationText = text,
       key = null,
       sourceLanguage = sourceLanguage,
       targetLanguage = targetLanguage,
-      pageable = PageRequest.of(0, 5)
+      pageable = PageRequest.of(0, 5),
     ).content
       .filter { it.keyId != keyId }
       .map {
@@ -279,13 +291,13 @@ class MtService(
     sourceLanguage: Language,
     targetLanguage: Language,
     closeKeyIds: List<Long>,
-    keyId: Long?
+    keyId: Long?,
   ): List<ExampleItem> {
-
-    val translations = this.translationService.findAllByKeyIdsAndLanguageIds(
-      closeKeyIds,
-      languageIds = listOf(sourceLanguage.id, targetLanguage.id)
-    )
+    val translations =
+      this.translationService.findAllByKeyIdsAndLanguageIds(
+        closeKeyIds,
+        languageIds = listOf(sourceLanguage.id, targetLanguage.id),
+      )
 
     val sourceTranslations = translations.filter { it.language.id == sourceLanguage.id }
 
@@ -297,9 +309,12 @@ class MtService(
         ExampleItem(
           key = it.key.name,
           source = it.text ?: "",
-          target = if (it.key.id != keyId) {
-            targetTranslations.find { target -> target.key.id == it.key.id }?.text ?: ""
-          } else ""
+          target =
+            if (it.key.id != keyId) {
+              targetTranslations.find { target -> target.key.id == it.key.id }?.text ?: ""
+            } else {
+              ""
+            },
         )
       }
   }
@@ -334,7 +349,7 @@ class MtService(
     needsMetadata: Boolean = true,
   ): Metadata? {
     return getMetadata(sourceLanguage, listOf(targetLanguages), text, keyId, needsMetadata)?.get(
-      targetLanguages.tag
+      targetLanguages.tag,
     )
   }
 }

@@ -14,15 +14,14 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 @Configuration
 @ConditionalOnExpression(
   "\${tolgee.websocket.use-redis:false} or " +
-    "(\${tolgee.cache.use-redis:false} and \${tolgee.cache.enabled:false})"
+    "(\${tolgee.cache.use-redis:false} and \${tolgee.cache.enabled:false})",
 )
 class RedisPubSubReceiverConfiguration(
   private val template: SimpMessagingTemplate,
   private val connectionFactory: RedisConnectionFactory,
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
 ) {
-
   companion object {
     const val WEBSOCKET_TOPIC = "websocket"
     const val JOB_QUEUE_TOPIC = "job_queue"

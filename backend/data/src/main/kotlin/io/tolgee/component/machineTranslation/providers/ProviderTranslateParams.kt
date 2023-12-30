@@ -11,7 +11,6 @@ data class ProviderTranslateParams(
   var targetLanguageTag: String,
   val metadata: Metadata? = null,
   val formality: Formality? = null,
-
   /**
    * Whether translation is executed as a part of batch translation task
    */

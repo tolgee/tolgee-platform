@@ -6,7 +6,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 @Component
 class FrontendUrlProvider(
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   val url: String
     get() {

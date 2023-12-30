@@ -14,12 +14,13 @@ class ContentDeliveryCachePurgingProvider(
   }
 
   private fun getDefaultFactory(): ContentDeliveryCachePurging? {
-    val purgings = configs.mapNotNull {
-      if (!it.enabled) {
-        return@mapNotNull null
+    val purgings =
+      configs.mapNotNull {
+        if (!it.enabled) {
+          return@mapNotNull null
+        }
+        applicationContext.getBean(it.contentDeliveryCachePurgingType.factory.java).create(it)
       }
-      applicationContext.getBean(it.contentDeliveryCachePurgingType.factory.java).create(it)
-    }
     if (purgings.size > 1) {
       throw RuntimeException("Exactly one content delivery purging must be set")
     }

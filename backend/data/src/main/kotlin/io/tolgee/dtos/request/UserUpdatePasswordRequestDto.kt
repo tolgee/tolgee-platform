@@ -9,7 +9,6 @@ data class UserUpdatePasswordRequestDto(
   @field:NotBlank
   @field:Size(max = 50)
   var currentPassword: String = "",
-
   @field:Size(min = 8, max = 50)
-  var password: String = ""
+  var password: String = "",
 )

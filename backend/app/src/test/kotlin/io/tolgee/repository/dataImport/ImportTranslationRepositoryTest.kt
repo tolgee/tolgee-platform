@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest
 
 @SpringBootTest
 class ImportTranslationRepositoryTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var importTranslationRepository: ImportTranslationRepository
 
@@ -19,8 +18,9 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
     val importTestData = ImportTestData()
     testDataService.saveTestData(importTestData.root)
 
-    val result = importTranslationRepository
-      .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10))
+    val result =
+      importTranslationRepository
+        .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10))
     assertThat(result.content).hasSize(5)
 
     result.content[0].let {
@@ -39,8 +39,9 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
     val importTestData = ImportTestData()
     testDataService.saveTestData(importTestData.root)
 
-    val result = importTranslationRepository
-      .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), true)
+    val result =
+      importTranslationRepository
+        .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), true)
     assertThat(result.content).hasSize(3)
   }
 }

@@ -8,12 +8,16 @@ import org.springframework.stereotype.Component
 
 @Component
 class RevealedApiKeyModelAssembler(
-  private val apiKeyModelAssembler: ApiKeyModelAssembler
+  private val apiKeyModelAssembler: ApiKeyModelAssembler,
 ) : RepresentationModelAssemblerSupport<ApiKey, RevealedApiKeyModel>(
-  ApiKeyController::class.java, RevealedApiKeyModel::class.java
-) {
-  override fun toModel(entity: ApiKey) = RevealedApiKeyModel(
-    apiKeyModel = apiKeyModelAssembler.toModel(entity),
-    key = entity.encodedKey?.let { PROJECT_API_KEY_PREFIX + it } ?: throw IllegalStateException("Api key not present"),
-  )
+    ApiKeyController::class.java,
+    RevealedApiKeyModel::class.java,
+  ) {
+  override fun toModel(entity: ApiKey) =
+    RevealedApiKeyModel(
+      apiKeyModel = apiKeyModelAssembler.toModel(entity),
+      key =
+        entity.encodedKey?.let { PROJECT_API_KEY_PREFIX + it }
+          ?: throw IllegalStateException("Api key not present"),
+    )
 }

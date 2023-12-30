@@ -6,9 +6,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class EntityUtil(
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
-
   companion object {
     val REGEX = "\\$.*$".toRegex()
   }

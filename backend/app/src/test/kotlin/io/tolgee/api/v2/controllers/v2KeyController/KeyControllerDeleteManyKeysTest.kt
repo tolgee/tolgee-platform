@@ -34,11 +34,13 @@ class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/
   @Test
   fun `deletes multiple keys via post fast enough`() {
     projectSupplier = { testData.project }
-    val time = measureTimeMillis {
-      performProjectAuthDelete(
-        "keys", mapOf("ids" to testData.root.data.projects[0].data.keys.map { it.self.id })
-      ).andIsOk
-    }
+    val time =
+      measureTimeMillis {
+        performProjectAuthDelete(
+          "keys",
+          mapOf("ids" to testData.root.data.projects[0].data.keys.map { it.self.id }),
+        ).andIsOk
+      }
     assertThat(time).isLessThan(2000)
   }
 }

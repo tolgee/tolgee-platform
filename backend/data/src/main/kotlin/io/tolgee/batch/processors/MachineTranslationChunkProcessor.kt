@@ -17,13 +17,13 @@ import kotlin.coroutines.CoroutineContext
 class MachineTranslationChunkProcessor(
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
   private val mtServiceConfigService: MtServiceConfigService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) : ChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     @Suppress("UNCHECKED_CAST")
     genericAutoTranslationChunkProcessor.process(
@@ -32,7 +32,7 @@ class MachineTranslationChunkProcessor(
       coroutineContext,
       onProgress,
       useMachineTranslation = true,
-      useTranslationMemory = false
+      useTranslationMemory = false,
     )
   }
 
@@ -56,7 +56,10 @@ class MachineTranslationChunkProcessor(
     return JobCharacter.SLOW
   }
 
-  override fun getChunkSize(request: MachineTranslationRequest, projectId: Long): Int {
+  override fun getChunkSize(
+    request: MachineTranslationRequest,
+    projectId: Long,
+  ): Int {
     val languageIds = request.targetLanguageIds
     val project = entityManager.getReference(Project::class.java, projectId)
     val services = mtServiceConfigService.getPrimaryServices(languageIds, project).values.toSet()

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class UsingRedisProvider(
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
   val areWeUsingRedis: Boolean by lazy {
     try {

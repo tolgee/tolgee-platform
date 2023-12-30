@@ -9,7 +9,10 @@ class RedissonLockingProvider(private val redissonClient: RedissonClient) : Lock
     return redissonClient.getLock(name)
   }
 
-  override fun <T> withLocking(name: String, fn: () -> T): T {
+  override fun <T> withLocking(
+    name: String,
+    fn: () -> T,
+  ): T {
     val lock = this.getLock(name)
     lock.lock()
     try {

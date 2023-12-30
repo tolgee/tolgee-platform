@@ -7,8 +7,8 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.TRANSLATIONS_VIEW,
       Scope.SCREENSHOTS_VIEW,
       Scope.ACTIVITY_VIEW,
-      Scope.KEYS_VIEW
-    )
+      Scope.KEYS_VIEW,
+    ),
   ),
   TRANSLATE(
     arrayOf(
@@ -19,7 +19,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.ACTIVITY_VIEW,
       Scope.TRANSLATIONS_COMMENTS_ADD,
       Scope.TRANSLATIONS_COMMENTS_SET_STATE,
-    )
+    ),
   ),
   REVIEW(
     arrayOf(
@@ -30,8 +30,8 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.ACTIVITY_VIEW,
       Scope.TRANSLATIONS_COMMENTS_ADD,
       Scope.TRANSLATIONS_COMMENTS_SET_STATE,
-      Scope.TRANSLATIONS_STATE_EDIT
-    )
+      Scope.TRANSLATIONS_STATE_EDIT,
+    ),
   ),
   EDIT(
     arrayOf(
@@ -52,11 +52,12 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.BATCH_PRE_TRANSLATE_BY_TM,
       Scope.BATCH_MACHINE_TRANSLATE,
       Scope.BATCH_JOBS_VIEW,
-    )
+    ),
   ),
   MANAGE(
-    arrayOf(Scope.ADMIN)
-  );
+    arrayOf(Scope.ADMIN),
+  ),
+  ;
 
   companion object {
     fun getRoles(): Map<String, Array<Scope>> {

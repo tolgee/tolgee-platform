@@ -20,12 +20,14 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "EE Licence (only for self-hosted instances)")
 class EeLicenseController(
   private val eeSubscriptionService: EeSubscriptionService,
-  private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler
+  private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler,
 ) {
   @PutMapping("set-license-key")
   @Operation(summary = "Sets the EE licence key for this instance")
   @RequiresSuperAuthentication
-  fun setLicenseKey(@RequestBody body: SetLicenseKeyDto): EeSubscriptionModel {
+  fun setLicenseKey(
+    @RequestBody body: SetLicenseKeyDto,
+  ): EeSubscriptionModel {
     val eeSubscription = eeSubscriptionService.setLicenceKey(body.licenseKey)
     return eeSubscriptionModelAssembler.toModel(eeSubscription)
   }
@@ -33,7 +35,9 @@ class EeLicenseController(
   @PostMapping("prepare-set-license-key")
   @Operation(summary = "Returns info about the upcoming EE subscription")
   @RequiresSuperAuthentication
-  fun prepareSetLicenseKey(@RequestBody body: SetLicenseKeyDto): PrepareSetEeLicenceKeyModel {
+  fun prepareSetLicenseKey(
+    @RequestBody body: SetLicenseKeyDto,
+  ): PrepareSetEeLicenceKeyModel {
     return eeSubscriptionService.prepareSetLicenceKey(body.licenseKey)
   }
 

@@ -23,9 +23,10 @@ import java.util.concurrent.TimeUnit
 class CaffeineCacheConfiguration(val tolgeeProperties: TolgeeProperties) {
   @Bean
   fun caffeineConfig(): Caffeine<Any, Any> {
-    val builder = Caffeine.newBuilder()
-      .expireAfterWrite(tolgeeProperties.cache.defaultTtl, TimeUnit.MILLISECONDS)
-      .expireAfterAccess(tolgeeProperties.cache.defaultTtl, TimeUnit.MILLISECONDS)
+    val builder =
+      Caffeine.newBuilder()
+        .expireAfterWrite(tolgeeProperties.cache.defaultTtl, TimeUnit.MILLISECONDS)
+        .expireAfterAccess(tolgeeProperties.cache.defaultTtl, TimeUnit.MILLISECONDS)
     if (tolgeeProperties.cache.caffeineMaxSize > 0) {
       builder.maximumSize(tolgeeProperties.cache.caffeineMaxSize)
     }

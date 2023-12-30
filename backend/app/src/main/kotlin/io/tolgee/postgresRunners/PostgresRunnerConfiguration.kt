@@ -11,7 +11,7 @@ class PostgresRunnerConfiguration {
   @Bean
   fun postgresRunner(
     postgresAutostartProperties: PostgresAutostartProperties,
-    storageProperties: FileStorageProperties
+    storageProperties: FileStorageProperties,
   ): PostgresRunner? {
     if (!postgresAutostartProperties.enabled) {
       return null

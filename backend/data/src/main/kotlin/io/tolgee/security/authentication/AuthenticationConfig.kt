@@ -28,10 +28,12 @@ import java.security.Key
 @Configuration
 class AuthenticationConfig(
   private val authenticationProperties: AuthenticationProperties,
-  private val fileStorage: FileStorage
+  private val fileStorage: FileStorage,
 ) {
   @Bean("jwt_signing_key")
-  fun jwtSigningKey(@Qualifier("jwt_signing_secret") bytes: ByteArray): Key {
+  fun jwtSigningKey(
+    @Qualifier("jwt_signing_secret") bytes: ByteArray,
+  ): Key {
     return Keys.hmacShaKeyFor(bytes)
   }
 

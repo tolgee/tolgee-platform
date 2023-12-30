@@ -39,10 +39,13 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
-    val languageDTO = LanguageDto(
-      name = "newEnglish", tag = "newEn", originalName = "newOriginalEnglish",
-      flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7"
-    )
+    val languageDTO =
+      LanguageDto(
+        name = "newEnglish",
+        tag = "newEn",
+        originalName = "newOriginalEnglish",
+        flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7",
+      )
     performEdit(project.id, en.id, languageDTO).andIsOk.andAssertThatJson {
       node("name").isEqualTo(languageDTO.name)
       node("originalName").isEqualTo(languageDTO.originalName)
@@ -140,7 +143,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val project = base.project
     performCreate(
       project.id,
-      LanguageDto(originalName = "Original name", name = "Name", tag = "aa,aa")
+      LanguageDto(originalName = "Original name", name = "Name", tag = "aa,aa"),
     ).andIsBadRequest.andAssertThatJson {
       node("STANDARD_VALIDATION.tag").isEqualTo("can not contain coma")
     }
@@ -157,8 +160,9 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   fun createLanguageTestValidation(repoId: Long) {
-    val mvcResult = performCreate(repoId, languageDTO)
-      .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+    val mvcResult =
+      performCreate(repoId, languageDTO)
+        .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
     Assertions.assertThat(mvcResult.response.contentAsString).contains("language_tag_exists")
     Assertions.assertThat(mvcResult.response.contentAsString).contains("language_name_exists")
     performCreate(repoId, languageDTOBlank).andIsBadRequest.andAssertThatJson {
@@ -178,15 +182,25 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-  private fun performCreate(projectId: Long, content: LanguageDto): ResultActions {
+  private fun performCreate(
+    projectId: Long,
+    content: LanguageDto,
+  ): ResultActions {
     return performAuthPost("/v2/projects/$projectId/languages", content)
   }
 
-  private fun performEdit(projectId: Long, languageId: Long, content: LanguageDto): ResultActions {
+  private fun performEdit(
+    projectId: Long,
+    languageId: Long,
+    content: LanguageDto,
+  ): ResultActions {
     return performAuthPut("/v2/projects/$projectId/languages/$languageId", content)
   }
 
-  private fun performDelete(projectId: Long, languageId: Long): ResultActions {
+  private fun performDelete(
+    projectId: Long,
+    languageId: Long,
+  ): ResultActions {
     return performAuthDelete("/v2/projects/$projectId/languages/$languageId", null)
   }
 

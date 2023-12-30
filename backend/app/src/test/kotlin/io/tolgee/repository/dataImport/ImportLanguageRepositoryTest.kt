@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest
 
 @SpringBootTest
 class ImportLanguageRepositoryTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var importLanguageRepository: ImportLanguageRepository
 
@@ -19,8 +18,9 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
     val testData = ImportTestData()
     testData.addFileIssues()
     testDataService.saveTestData(testData.root)
-    val result = importLanguageRepository
-      .findImportLanguagesView(testData.import.id, PageRequest.of(0, 10)).content
+    val result =
+      importLanguageRepository
+        .findImportLanguagesView(testData.import.id, PageRequest.of(0, 10)).content
 
     assertThat(result).hasSize(3)
     assertThat(result[0].existingLanguageName).isEqualTo("English")

@@ -1,7 +1,7 @@
 package io.tolgee.repository.activity
 
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.dtos.query_results.TranslationHistoryView
+import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntityId
 import org.springframework.data.domain.Page
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntity, ActivityModifiedEntityId> {
-
   @Query(
     """
     select ame.modifications as modifications, ar.timestamp as timestamp,
@@ -23,11 +22,11 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     join UserAccount u on ar.authorId = u.id
     where ame.entityClass = 'Translation' and ame.entityId = :translationId
     and ar.type not in :ignoredActivityTypes
-  """
+  """,
   )
   fun getTranslationHistory(
     translationId: Long,
     pageable: Pageable,
-    ignoredActivityTypes: List<ActivityType>
+    ignoredActivityTypes: List<ActivityType>,
   ): Page<TranslationHistoryView>
 }

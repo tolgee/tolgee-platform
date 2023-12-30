@@ -13,21 +13,15 @@ import java.io.Serializable
 open class TranslationSocketModel(
   @Schema(description = "Id of translation record")
   val id: Long,
-
   @Schema(description = "Translation text")
   val text: String?,
-
   @Schema(description = "Tag of translation language")
   val languageTag: String,
-
   @Schema(description = "State of translation")
   val state: TranslationState,
-
   @Schema(description = "Was translated using Translation Memory or Machine translation service?")
   val auto: Boolean,
-
   @Schema(description = "Which machine translation service was used to auto translate this")
   val mtProvider: MtServiceType?,
-
-  val key: KeyModel
+  val key: KeyModel,
 ) : RepresentationModel<TranslationSocketModel>(), Serializable

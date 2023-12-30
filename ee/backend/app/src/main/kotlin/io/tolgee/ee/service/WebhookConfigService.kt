@@ -21,7 +21,10 @@ class WebhookConfigService(
   private val webhookExecutor: WebhookExecutor,
   private val automationService: AutomationService,
 ) {
-  fun get(projectId: Long, id: Long): WebhookConfig {
+  fun get(
+    projectId: Long,
+    id: Long,
+  ): WebhookConfig {
     return webhookConfigRepository.findByIdAndProjectId(id, projectId)
       ?: throw NotFoundException()
   }
@@ -30,23 +33,32 @@ class WebhookConfigService(
     return webhookConfigRepository.findById(id).orElseThrow { NotFoundException() }
   }
 
-  fun findAllInProject(projectId: Long, pageable: Pageable): Page<WebhookConfig> {
+  fun findAllInProject(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<WebhookConfig> {
     return webhookConfigRepository.findByProjectId(projectId, pageable)
   }
 
-  fun create(project: Project, dto: WebhookConfigRequest): WebhookConfig {
+  fun create(
+    project: Project,
+    dto: WebhookConfigRequest,
+  ): WebhookConfig {
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
     return webhookConfigRepository.save(webhookConfig)
   }
 
-  fun test(projectId: Long, webhookConfigId: Long): Boolean {
+  fun test(
+    projectId: Long,
+    webhookConfigId: Long,
+  ): Boolean {
     val webhookConfig = get(projectId, webhookConfigId)
     try {
       webhookExecutor.signAndExecute(
         config = webhookConfig,
-        data = WebhookRequest(webhookConfigId, WebhookEventType.TEST, null)
+        data = WebhookRequest(webhookConfigId, WebhookEventType.TEST, null),
       )
     } catch (e: WebhookException) {
       return false
@@ -55,7 +67,11 @@ class WebhookConfigService(
   }
 
   @Transactional
-  fun update(projectId: Long, id: Long, dto: WebhookConfigRequest): WebhookConfig {
+  fun update(
+    projectId: Long,
+    id: Long,
+    dto: WebhookConfigRequest,
+  ): WebhookConfig {
     val webhookConfig = get(projectId, id)
     webhookConfig.url = dto.url
     automationService.updateForWebhookConfig(webhookConfig)
@@ -63,7 +79,10 @@ class WebhookConfigService(
   }
 
   @Transactional
-  fun delete(projectId: Long, id: Long) {
+  fun delete(
+    projectId: Long,
+    id: Long,
+  ) {
     val webhookConfig = get(projectId, id)
     automationService.deleteForWebhookConfig(webhookConfig)
     webhookConfigRepository.delete(webhookConfig)

@@ -29,13 +29,15 @@ class ProjectModelAssembler(
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
 ) : RepresentationModelAssemblerSupport<ProjectWithLanguagesView, ProjectModel>(
-  V2ProjectsController::class.java, ProjectModel::class.java
-) {
+    V2ProjectsController::class.java,
+    ProjectModel::class.java,
+  ) {
   override fun toModel(view: ProjectWithLanguagesView): ProjectModel {
     val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
-    val baseLanguage = view.baseLanguage ?: let {
-      projectService.getOrCreateBaseLanguage(view.id)
-    }
+    val baseLanguage =
+      view.baseLanguage ?: let {
+        projectService.getOrCreateBaseLanguage(view.id)
+      }
 
     val computedPermissions = getComputedPermissions(view)
 
@@ -60,7 +62,7 @@ class ProjectModelAssembler(
       view.organizationRole,
       view.organizationOwner.basePermission,
       view.directPermission,
-      UserAccount.Role.USER
+      UserAccount.Role.USER,
     ).getAdminPermissions(authenticationFacade.authenticatedUserOrNull?.role)
   }
 }

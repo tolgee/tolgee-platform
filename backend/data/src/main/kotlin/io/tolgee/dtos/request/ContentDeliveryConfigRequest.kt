@@ -11,13 +11,14 @@ class ContentDeliveryConfigRequest : IExportParams {
   var name: String = ""
 
   @Schema(
-    description = "Id of custom storage to use for content delivery. If null, default server storage is used. " +
-      "Tolgee Cloud provides default Content Storage."
+    description =
+      "Id of custom storage to use for content delivery. If null, default server storage is used. " +
+        "Tolgee Cloud provides default Content Storage.",
   )
   var contentStorageId: Long? = null
 
   @Schema(
-    description = "If true, data are published to the content delivery automatically after each change."
+    description = "If true, data are published to the content delivery automatically after each change.",
   )
   var autoPublish: Boolean = false
 
@@ -33,10 +34,11 @@ class ContentDeliveryConfigRequest : IExportParams {
 
   override var filterKeyPrefix: String? = null
 
-  override var filterState: List<TranslationState>? = listOf(
-    TranslationState.TRANSLATED,
-    TranslationState.REVIEWED,
-  )
+  override var filterState: List<TranslationState>? =
+    listOf(
+      TranslationState.TRANSLATED,
+      TranslationState.REVIEWED,
+    )
 
   override var filterNamespace: List<String?>? = null
 }

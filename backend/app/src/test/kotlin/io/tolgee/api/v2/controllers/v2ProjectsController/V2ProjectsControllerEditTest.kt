@@ -16,11 +16,12 @@ class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
   @Test
   fun `edits project`() {
     val base = dbPopulator.createBase("What a project")
-    val content = EditProjectDTO(
-      name = "new name",
-      baseLanguageId = base.project.languages.toList()[1].id,
-      slug = "new-slug"
-    )
+    val content =
+      EditProjectDTO(
+        name = "new name",
+        baseLanguageId = base.project.languages.toList()[1].id,
+        slug = "new-slug",
+      )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
       node("slug").isEqualTo(content.slug)
@@ -31,10 +32,11 @@ class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
   @Test
   fun `validates project on edit`() {
     val base = dbPopulator.createBase("What a project")
-    val content = EditProjectDTO(
-      name = "",
-      baseLanguageId = base.project.languages.toList()[0].id,
-    )
+    val content =
+      EditProjectDTO(
+        name = "",
+        baseLanguageId = base.project.languages.toList()[0].id,
+      )
     performAuthPut("/v2/projects/${base.project.id}", content).andIsBadRequest.andAssertThatJson {
       node("STANDARD_VALIDATION.name").isNotNull
     }
@@ -43,9 +45,10 @@ class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
   @Test
   fun `automatically chooses base language`() {
     val base = dbPopulator.createBase("What a project")
-    val content = EditProjectDTO(
-      name = "test",
-    )
+    val content =
+      EditProjectDTO(
+        name = "test",
+      )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
       node("baseLanguage.id").isEqualTo(base.project.languages.toList()[0].id)

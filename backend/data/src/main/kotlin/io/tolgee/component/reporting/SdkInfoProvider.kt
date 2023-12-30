@@ -11,7 +11,7 @@ class SdkInfoProvider() {
     val safeRequest = request ?: getRequest() ?: return null
     return mapOf(
       "sdkType" to safeRequest.getHeader("X-Tolgee-SDK-Type"),
-      "sdkVersion" to safeRequest.getHeader("X-Tolgee-SDK-Version")
+      "sdkVersion" to safeRequest.getHeader("X-Tolgee-SDK-Version"),
     )
   }
 

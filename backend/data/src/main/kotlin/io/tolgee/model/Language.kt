@@ -10,7 +10,18 @@ import io.tolgee.events.OnLanguagePreRemove
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.FetchType
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreRemove
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import org.springframework.beans.factory.ObjectFactory
@@ -25,25 +36,24 @@ import org.springframework.transaction.annotation.Transactional
   uniqueConstraints = [
     UniqueConstraint(
       columnNames = ["project_id", "name"],
-      name = "language_project_name"
+      name = "language_project_name",
     ),
     UniqueConstraint(
       columnNames = ["project_id", "tag"],
-      name = "language_tag_name"
-    )
+      name = "language_tag_name",
+    ),
   ],
   indexes = [
     Index(
       columnList = "tag",
-      name = "index_tag"
+      name = "index_tag",
     ),
     Index(
       columnList = "tag, project_id",
-      name = "index_tag_project"
-    )
-  ]
+      name = "index_tag_project",
+    ),
+  ],
 )
-
 @ActivityLoggedEntity
 @ActivityReturnsExistence
 class Language : StandardAuditModel() {

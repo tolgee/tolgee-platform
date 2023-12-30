@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class MigrationJobsCommandLineRunner(
-  val jobRunners: List<MigrationJobRunner>
+  val jobRunners: List<MigrationJobRunner>,
 ) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
-
   override fun run(vararg args: String) {
     jobRunners.forEach { it.run() }
   }

@@ -19,14 +19,14 @@ import java.util.*
 @RequestMapping(value = ["internal/time"])
 @Transactional
 class TestClockController(
-  val currentDateProvider: CurrentDateProvider
+  val currentDateProvider: CurrentDateProvider,
 ) {
   @PutMapping(value = ["/{dateTimeString}"])
   @Operation(description = "Set's the time machine, so the app is using this date as current date")
   fun setTime(
     @PathVariable
     @Schema(description = "Current unix timestamp (milliseconds), or in yyyy-MM-dd HH:mm:ss z")
-    dateTimeString: String
+    dateTimeString: String,
   ) {
     try {
       currentDateProvider.forcedDate = Date(dateTimeString.toLong())

@@ -9,10 +9,10 @@ data class UsageData(
   val subscriptionPrice: BigDecimal?,
   val appliedStripeCredits: BigDecimal?,
 ) {
-
   val total: BigDecimal
-    get() = seatsUsage.sumOf { it.total } + translationsUsage.sumOf { it.total } + (
-      subscriptionPrice
-        ?: 0.toBigDecimal()
+    get() =
+      seatsUsage.sumOf { it.total } + translationsUsage.sumOf { it.total } + (
+        subscriptionPrice
+          ?: 0.toBigDecimal()
       ) + (creditsUsage?.total ?: 0.toBigDecimal())
 }

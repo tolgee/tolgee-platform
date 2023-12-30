@@ -17,5 +17,5 @@ open class EeSubscriptionModel(
   val cancelAtPeriodEnd: Boolean,
   val currentUserCount: Long,
   val status: SubscriptionStatus,
-  var lastValidCheck: Date?
+  var lastValidCheck: Date?,
 ) : RepresentationModel<EeSubscriptionModel>(), Serializable

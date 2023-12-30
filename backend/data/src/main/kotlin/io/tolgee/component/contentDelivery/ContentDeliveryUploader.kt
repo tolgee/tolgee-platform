@@ -15,7 +15,7 @@ class ContentDeliveryUploader(
   private val exportService: ExportService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   fun upload(contentDeliveryConfigId: Long) {
     val config = contentDeliveryConfigService.get(contentDeliveryConfigId)
@@ -31,7 +31,7 @@ class ContentDeliveryUploader(
 
   private fun purgeCacheIfConfigured(
     contentDeliveryConfig: ContentDeliveryConfig,
-    paths: Set<String>
+    paths: Set<String>,
   ) {
     val isDefaultStorage = contentDeliveryConfig.contentStorage == null
     if (isDefaultStorage) {
@@ -41,21 +41,22 @@ class ContentDeliveryUploader(
 
   private fun storeToStorage(
     withFullPaths: Map<String, InputStream>,
-    storage: FileStorage
+    storage: FileStorage,
   ) {
     withFullPaths.forEach {
       storage.storeFile(
         storageFilePath = it.key,
-        bytes = it.value.readBytes()
+        bytes = it.value.readBytes(),
       )
     }
   }
 
-  private fun getStorage(contentDeliveryConfig: ContentDeliveryConfig) = contentDeliveryConfig.contentStorage
-    ?.let {
-      contentDeliveryFileStorageProvider.getStorage(
-        config = it.storageConfig ?: throw IllegalStateException("No storage config stored")
-      )
-    }
-    ?: contentDeliveryFileStorageProvider.getContentStorageWithDefaultClient()
+  private fun getStorage(contentDeliveryConfig: ContentDeliveryConfig) =
+    contentDeliveryConfig.contentStorage
+      ?.let {
+        contentDeliveryFileStorageProvider.getStorage(
+          config = it.storageConfig ?: throw IllegalStateException("No storage config stored"),
+        )
+      }
+      ?: contentDeliveryFileStorageProvider.getContentStorageWithDefaultClient()
 }

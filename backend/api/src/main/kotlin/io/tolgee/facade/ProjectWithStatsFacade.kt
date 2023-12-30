@@ -1,7 +1,7 @@
 package io.tolgee.facade
 
 import io.sentry.Sentry
-import io.tolgee.dtos.query_results.ProjectStatistics
+import io.tolgee.dtos.queryResults.ProjectStatistics
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.model.enums.TranslationState
@@ -25,56 +25,60 @@ class ProjectWithStatsFacade(
   private val pagedWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
   private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
   private val languageStatsService: LanguageStatsService,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
 ) {
-  fun getPagedModelWithStats(
-    projects: Page<ProjectWithLanguagesView>,
-  ): PagedModel<ProjectWithStatsModel> {
+  fun getPagedModelWithStats(projects: Page<ProjectWithLanguagesView>): PagedModel<ProjectWithStatsModel> {
     val projectIds = projects.content.map { it.id }
     val totals = projectStatsService.getProjectsTotals(projectIds)
-    val languages = languageService.getViewsOfProjects(projectIds)
-      .groupBy { it.language.project.id }
+    val languages =
+      languageService.getViewsOfProjects(projectIds)
+        .groupBy { it.language.project.id }
 
     val languageStats = languageStatsService.getLanguageStats(projectIds)
 
-    val projectsWithStatsContent = projects.content.map { projectWithLanguagesView ->
-      val projectTotals = totals[projectWithLanguagesView.id]
-      val baseLanguage = projectWithLanguagesView.baseLanguage
-      val projectLanguageStats = languageStats[projectWithLanguagesView.id]
+    val projectsWithStatsContent =
+      projects.content.map { projectWithLanguagesView ->
+        val projectTotals = totals[projectWithLanguagesView.id]
+        val baseLanguage = projectWithLanguagesView.baseLanguage
+        val projectLanguageStats = languageStats[projectWithLanguagesView.id]
 
-      var stateTotals: ProjectStatsService.ProjectStateTotals? = null
-      if (baseLanguage != null && projectLanguageStats != null) {
-        stateTotals = projectStatsService.computeProjectTotals(
-          baseLanguage,
-          projectLanguageStats
-            .sortedBy { it.language.name }
-            .sortedBy { it.language.id != baseLanguage.id }
+        var stateTotals: ProjectStatsService.ProjectStateTotals? = null
+        if (baseLanguage != null && projectLanguageStats != null) {
+          stateTotals =
+            projectStatsService.computeProjectTotals(
+              baseLanguage,
+              projectLanguageStats
+                .sortedBy { it.language.name }
+                .sortedBy { it.language.id != baseLanguage.id },
+            )
+        }
+
+        val translatedPercent = stateTotals?.translatedPercent.toPercentValue()
+        val reviewedPercent = stateTotals?.reviewedPercent.toPercentValue()
+        val untranslatedPercent =
+          (BigDecimal(100) - translatedPercent - reviewedPercent).setScale(
+            2,
+            RoundingMode.HALF_UP,
+          )
+
+        val projectStatistics =
+          ProjectStatistics(
+            projectId = projectWithLanguagesView.id,
+            keyCount = projectTotals?.keyCount ?: 0,
+            languageCount = projectTotals?.languageCount ?: 0,
+            translationStatePercentages =
+              mapOf(
+                TranslationState.TRANSLATED to translatedPercent,
+                TranslationState.REVIEWED to reviewedPercent,
+                TranslationState.UNTRANSLATED to untranslatedPercent,
+              ),
+          )
+        ProjectWithStatsView(
+          view = projectWithLanguagesView,
+          stats = projectStatistics,
+          languages = languages[projectWithLanguagesView.id] ?: listOf(),
         )
       }
-
-      val translatedPercent = stateTotals?.translatedPercent.toPercentValue()
-      val reviewedPercent = stateTotals?.reviewedPercent.toPercentValue()
-      val untranslatedPercent = (BigDecimal(100) - translatedPercent - reviewedPercent).setScale(
-        2,
-        RoundingMode.HALF_UP
-      )
-
-      val projectStatistics = ProjectStatistics(
-        projectId = projectWithLanguagesView.id,
-        keyCount = projectTotals?.keyCount ?: 0,
-        languageCount = projectTotals?.languageCount ?: 0,
-        translationStatePercentages = mapOf(
-          TranslationState.TRANSLATED to translatedPercent,
-          TranslationState.REVIEWED to reviewedPercent,
-          TranslationState.UNTRANSLATED to untranslatedPercent
-        )
-      )
-      ProjectWithStatsView(
-        view = projectWithLanguagesView,
-        stats = projectStatistics,
-        languages = languages[projectWithLanguagesView.id] ?: listOf()
-      )
-    }
     val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
     return pagedWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
   }

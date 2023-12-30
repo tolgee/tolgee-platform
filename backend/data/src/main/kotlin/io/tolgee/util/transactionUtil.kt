@@ -12,7 +12,7 @@ fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
   isolationLevel: Int = TransactionDefinition.ISOLATION_READ_COMMITTED,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
-  fn: (ts: TransactionStatus) -> T
+  fn: (ts: TransactionStatus) -> T,
 ): T {
   val tt = TransactionTemplate(transactionManager)
   tt.propagationBehavior = propagationBehavior
@@ -25,12 +25,12 @@ fun <T> executeInNewTransaction(
 
 fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
-  fn: (ts: TransactionStatus) -> T
+  fn: (ts: TransactionStatus) -> T,
 ): T {
   return executeInNewTransaction(
     transactionManager = transactionManager,
     fn = fn,
-    propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
+    propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
   )
 }
 
@@ -38,7 +38,7 @@ fun <T> executeInNewRepeatableTransaction(
   transactionManager: PlatformTransactionManager,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
   isolationLevel: Int = TransactionDefinition.ISOLATION_READ_COMMITTED,
-  fn: () -> T
+  fn: () -> T,
 ): T {
   var exception: Exception? = null
   var repeats = 0
@@ -47,7 +47,7 @@ fun <T> executeInNewRepeatableTransaction(
       return executeInNewTransaction(
         transactionManager,
         propagationBehavior = propagationBehavior,
-        isolationLevel = isolationLevel
+        isolationLevel = isolationLevel,
       ) {
         fn()
       }

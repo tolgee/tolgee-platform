@@ -30,11 +30,12 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   @Test
   fun `it enables MFA`() {
     retry {
-      val requestDto = UserTotpEnableRequestDto(
-        totpKey = TOTP_KEY,
-        otp = mfaService.generateStringCode(encodedKey),
-        password = initialPassword
-      )
+      val requestDto =
+        UserTotpEnableRequestDto(
+          totpKey = TOTP_KEY,
+          otp = mfaService.generateStringCode(encodedKey),
+          password = initialPassword,
+        )
 
       performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
       val fromDb = userAccountService.findActive(initialUsername)
@@ -45,9 +46,10 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   @Test
   fun `it disables MFA`() {
     enableMfa()
-    val requestDto = UserTotpDisableRequestDto(
-      password = initialPassword
-    )
+    val requestDto =
+      UserTotpDisableRequestDto(
+        password = initialPassword,
+      )
     performAuthDelete("/v2/user/mfa/totp", requestDto).andIsOk
     val fromDb = userAccountService.findActive(initialUsername)
     Assertions.assertThat(fromDb!!.totpKey).isNull()
@@ -56,9 +58,10 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   @Test
   fun `it regenerates MFA recovery codes`() {
     enableMfa()
-    val requestDto = UserMfaRecoveryRequestDto(
-      password = initialPassword
-    )
+    val requestDto =
+      UserMfaRecoveryRequestDto(
+        password = initialPassword,
+      )
 
     var fromDb = userAccountService.findActive(initialUsername)
     Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
@@ -71,15 +74,17 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   @Test
   fun `it requires valid TOTP code for activation`() {
     retry {
-      val requestDto = UserTotpEnableRequestDto(
-        totpKey = TOTP_KEY,
-        otp = (mfaService.generateCode(encodedKey) + 1).toString().padStart(6, '0'),
-        password = initialPassword
-      )
+      val requestDto =
+        UserTotpEnableRequestDto(
+          totpKey = TOTP_KEY,
+          otp = (mfaService.generateCode(encodedKey) + 1).toString().padStart(6, '0'),
+          password = initialPassword,
+        )
 
-      val res = performAuthPut("/v2/user/mfa/totp", requestDto)
-        .andIsBadRequest
-        .andReturn()
+      val res =
+        performAuthPut("/v2/user/mfa/totp", requestDto)
+          .andIsBadRequest
+          .andReturn()
 
       assertThat(res).error().isCustomValidation.hasMessage("invalid_otp_code")
       val fromDb = userAccountService.findActive(initialUsername)
@@ -89,19 +94,22 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it requires valid password`() {
-    val enableRequestDto = UserTotpEnableRequestDto(
-      totpKey = TOTP_KEY,
-      otp = mfaService.generateStringCode(encodedKey),
-      password = "pwease let me innn!!!! >:("
-    )
+    val enableRequestDto =
+      UserTotpEnableRequestDto(
+        totpKey = TOTP_KEY,
+        otp = mfaService.generateStringCode(encodedKey),
+        password = "pwease let me innn!!!! >:(",
+      )
 
-    val disableRequestDto = UserTotpEnableRequestDto(
-      password = "pwease let me innn!!!! >:("
-    )
+    val disableRequestDto =
+      UserTotpEnableRequestDto(
+        password = "pwease let me innn!!!! >:(",
+      )
 
-    val recoveryRequestDto = UserMfaRecoveryRequestDto(
-      password = "pwease let me innn!!!! >:("
-    )
+    val recoveryRequestDto =
+      UserMfaRecoveryRequestDto(
+        password = "pwease let me innn!!!! >:(",
+      )
 
     performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsForbidden
     var fromDb = userAccountService.findActive(initialUsername)
@@ -126,11 +134,12 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       loginAsAdminIfNotLogged()
       Thread.sleep(1000)
 
-      val enableRequestDto = UserTotpEnableRequestDto(
-        totpKey = TOTP_KEY,
-        otp = mfaService.generateStringCode(encodedKey),
-        password = initialPassword
-      )
+      val enableRequestDto =
+        UserTotpEnableRequestDto(
+          totpKey = TOTP_KEY,
+          otp = mfaService.generateStringCode(encodedKey),
+          password = initialPassword,
+        )
 
       performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsOk
       refreshUser()
@@ -140,9 +149,10 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       loginAsAdminIfNotLogged()
       Thread.sleep(1000)
 
-      val disableRequestDto = UserTotpDisableRequestDto(
-        password = initialPassword
-      )
+      val disableRequestDto =
+        UserTotpDisableRequestDto(
+          password = initialPassword,
+        )
       performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsOk
       refreshUser()
       performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)

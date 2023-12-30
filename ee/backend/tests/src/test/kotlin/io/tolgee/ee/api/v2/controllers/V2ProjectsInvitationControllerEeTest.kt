@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/projects/") {
-
   val invitationTestUtil: InvitationTestUtil by lazy {
     InvitationTestUtil(this, applicationContext)
   }
@@ -33,9 +32,10 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
   @Test
   @ProjectJWTAuthTestMethod
   fun `invites user to project with scopes`() {
-    val result = invitationTestUtil.perform {
-      scopes = setOf("translations.edit")
-    }.andIsOk
+    val result =
+      invitationTestUtil.perform {
+        scopes = setOf("translations.edit")
+      }.andIsOk
 
     val invitation = invitationTestUtil.getInvitation(result)
     invitation.permission!!.scopes.assert.containsExactlyInAnyOrder(Scope.TRANSLATIONS_EDIT)
@@ -53,10 +53,11 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
   @Test
   @ProjectJWTAuthTestMethod
   fun `adds the languages to view`() {
-    val result = invitationTestUtil.perform { getLang ->
-      scopes = setOf("translations.edit")
-      translateLanguages = setOf(getLang("en"))
-    }.andIsOk
+    val result =
+      invitationTestUtil.perform { getLang ->
+        scopes = setOf("translations.edit")
+        translateLanguages = setOf(getLang("en"))
+      }.andIsOk
 
     val invitation = invitationTestUtil.getInvitation(result)
     invitation.permission!!.translateLanguages.map { it.tag }.assert.containsExactlyInAnyOrder("en")

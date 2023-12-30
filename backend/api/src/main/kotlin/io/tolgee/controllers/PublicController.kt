@@ -17,9 +17,9 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
-import io.tolgee.security.third_party.GithubOAuthDelegate
-import io.tolgee.security.third_party.GoogleOAuthDelegate
-import io.tolgee.security.third_party.OAuth2Delegate
+import io.tolgee.security.thirdParty.GithubOAuthDelegate
+import io.tolgee.security.thirdParty.GoogleOAuthDelegate
+import io.tolgee.security.thirdParty.OAuth2Delegate
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.ReCaptchaValidationService
@@ -61,7 +61,10 @@ class PublicController(
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
   @RateLimited(5, isAuthentication = true)
-  fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): JwtAuthenticationResponse {
+  fun authenticateUser(
+    @RequestBody @Valid
+    loginRequest: LoginRequest,
+  ): JwtAuthenticationResponse {
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     emailVerificationService.check(userAccount)
     mfaService.checkMfa(userAccount, loginRequest.otp)
@@ -73,7 +76,10 @@ class PublicController(
 
   @Operation(summary = "Reset password request")
   @PostMapping("/reset_password_request")
-  fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
+  fun resetPasswordRequest(
+    @RequestBody @Valid
+    request: ResetPasswordRequest,
+  ) {
     val userAccount = userAccountService.findActive(request.email!!) ?: return
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
@@ -82,19 +88,21 @@ class PublicController(
     val url = request.callbackUrl + "/" + Base64.getEncoder().encodeToString(callbackString.toByteArray())
     val isInitial = userAccount.accountType == UserAccount.AccountType.THIRD_PARTY
 
-    val params = EmailParams(
-      to = request.email!!,
-      subject = if (isInitial) "Initial password configuration" else "Password reset",
-      text = """
-        Hello! 👋<br/><br/>
-        ${if (isInitial) "To set a password for your account, <b>follow this link</b>:<br/>" else "To reset your password, <b>follow this link</b>:<br/>"}
-        <a href="$url">$url</a><br/><br/>
-        If you have not requested this e-mail, please ignore it.<br/><br/>
-        
-        Regards,<br/>
-        Tolgee<br/><br/>
-      """.trimIndent()
-    )
+    val params =
+      EmailParams(
+        to = request.email!!,
+        subject = if (isInitial) "Initial password configuration" else "Password reset",
+        text =
+          """
+          Hello! 👋<br/><br/>
+          ${if (isInitial) "To set a password for your account, <b>follow this link</b>:<br/>" else "To reset your password, <b>follow this link</b>:<br/>"}
+          <a href="$url">$url</a><br/><br/>
+          If you have not requested this e-mail, please ignore it.<br/><br/>
+          
+          Regards,<br/>
+          Tolgee<br/><br/>
+          """.trimIndent(),
+      )
 
     tolgeeEmailSender.sendEmail(params)
   }
@@ -103,17 +111,21 @@ class PublicController(
   @Operation(summary = "Validates key sent by email")
   fun resetPasswordValidate(
     @PathVariable("code") code: String,
-    @PathVariable("email") email: String
+    @PathVariable("email") email: String,
   ) {
     validateEmailCode(code, email)
   }
 
   @PostMapping("/reset_password_set")
   @Operation(summary = "Sets new password with password reset code from e-mail")
-  fun resetPasswordSet(@RequestBody @Valid request: ResetPassword) {
+  fun resetPasswordSet(
+    @RequestBody @Valid
+    request: ResetPassword,
+  ) {
     val userAccount = validateEmailCode(request.code!!, request.email!!)
-    if (userAccount.accountType === UserAccount.AccountType.THIRD_PARTY)
+    if (userAccount.accountType === UserAccount.AccountType.THIRD_PARTY) {
       userAccountService.setAccountType(userAccount, UserAccount.AccountType.LOCAL)
+    }
     userAccountService.setUserPassword(userAccount, request.password)
     userAccountService.removeResetCode(userAccount)
   }
@@ -125,9 +137,12 @@ class PublicController(
 Creates new user account.
 
 When E-mail verification is enabled, null is returned. Otherwise JWT token is provided.
-    """
+    """,
   )
-  fun signUp(@RequestBody @Valid dto: SignUpDto): JwtAuthenticationResponse? {
+  fun signUp(
+    @RequestBody @Valid
+    dto: SignUpDto,
+  ): JwtAuthenticationResponse? {
     if (!reCaptchaValidationService.validate(dto.recaptchaToken, "")) {
       throw BadRequestException(Message.INVALID_RECAPTCHA_TOKEN)
     }
@@ -138,7 +153,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   @Operation(summary = "Sets user account as verified, when code from email is OK")
   fun verifyEmail(
     @PathVariable("userId") @NotNull userId: Long,
-    @PathVariable("code") @NotBlank code: String
+    @PathVariable("code") @NotBlank code: String,
   ): JwtAuthenticationResponse {
     emailVerificationService.verify(userId, code)
     return JwtAuthenticationResponse(jwtService.emitToken(userId))
@@ -146,7 +161,9 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
 
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Validates if email is not in use")
-  fun validateEmail(@RequestBody email: TextNode): Boolean {
+  fun validateEmail(
+    @RequestBody email: TextNode,
+  ): Boolean {
     return userAccountService.findActive(email.asText()) == null
   }
 
@@ -157,7 +174,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     @PathVariable("serviceType") serviceType: String?,
     @RequestParam(value = "code", required = true) code: String?,
     @RequestParam(value = "redirect_uri", required = true) redirectUri: String?,
-    @RequestParam(value = "invitationCode", required = false) invitationCode: String?
+    @RequestParam(value = "invitationCode", required = false) invitationCode: String?,
   ): JwtAuthenticationResponse {
     if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
       val user = getFakeGithubUser()
@@ -184,18 +201,22 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
 
   private fun getFakeGithubUser(): UserAccount {
     val username = "johndoe@doe.com"
-    val user = userAccountService.findActive(username) ?: let {
-      UserAccount().apply {
-        this.username = username
-        name = "john"
-        accountType = UserAccount.AccountType.THIRD_PARTY
-        userAccountService.save(this)
+    val user =
+      userAccountService.findActive(username) ?: let {
+        UserAccount().apply {
+          this.username = username
+          name = "john"
+          accountType = UserAccount.AccountType.THIRD_PARTY
+          userAccountService.save(this)
+        }
       }
-    }
     return user
   }
 
-  private fun validateEmailCode(code: String, email: String): UserAccount {
+  private fun validateEmailCode(
+    code: String,
+    email: String,
+  ): UserAccount {
     val userAccount = userAccountService.findActive(email) ?: throw BadRequestException(Message.BAD_CREDENTIALS)
     val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
     if (!resetCodeValid) {

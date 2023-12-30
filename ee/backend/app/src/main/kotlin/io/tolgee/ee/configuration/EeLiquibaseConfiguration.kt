@@ -12,9 +12,11 @@ import javax.sql.DataSource
 @EnableJpaRepositories("io.tolgee.ee.repository")
 @EntityScan(basePackages = ["io.tolgee.ee.model"])
 class EeLiquibaseConfiguration {
-
   @Bean("ee-liquibase")
-  fun liquibase(dataSource: DataSource, postgresRunner: PostgresRunner?): SpringLiquibase {
+  fun liquibase(
+    dataSource: DataSource,
+    postgresRunner: PostgresRunner?,
+  ): SpringLiquibase {
     val liquibase = SpringLiquibase()
 
     liquibase.setShouldRun(postgresRunner?.shouldRunMigrations != false)

@@ -25,7 +25,7 @@ import org.springframework.test.context.ContextConfiguration
     "spring.redis.port=56379",
     "tolgee.rate-limits.ip-request-limit=2",
     "tolgee.rate-limits.ip-request-window=10000",
-  ]
+  ],
 )
 @ContextConfiguration(initializers = [RedisRateLimitsTest.Companion.Initializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

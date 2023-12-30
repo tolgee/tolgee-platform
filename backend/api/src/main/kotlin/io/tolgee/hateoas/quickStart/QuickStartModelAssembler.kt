@@ -6,13 +6,14 @@ import org.springframework.stereotype.Component
 
 @Component
 class QuickStartModelAssembler() : RepresentationModelAssemblerSupport<QuickStart, QuickStartModel>(
-  QuickStart::class.java, QuickStartModel::class.java
+  QuickStart::class.java,
+  QuickStartModel::class.java,
 ) {
   override fun toModel(entity: QuickStart): QuickStartModel {
     return QuickStartModel(
       finished = entity.finished,
       completedSteps = entity.completedSteps.toMutableList(),
-      open = entity.open
+      open = entity.open,
     )
   }
 }

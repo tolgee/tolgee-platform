@@ -5,10 +5,7 @@ import io.tolgee.model.automations.AutomationTriggerType
 
 class AutomationTriggerDto(
   var id: Long,
-
   var type: AutomationTriggerType,
-
   var activityType: ActivityType? = null,
-
-  var debounceDurationInMs: Long? = null
+  var debounceDurationInMs: Long? = null,
 )

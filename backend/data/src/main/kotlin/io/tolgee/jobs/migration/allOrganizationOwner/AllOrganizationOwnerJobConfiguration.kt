@@ -27,7 +27,6 @@ import org.springframework.transaction.PlatformTransactionManager
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Configuration
 class AllOrganizationOwnerJobConfiguration {
-
   companion object {
     const val JOB_NAME = "allOrganizationOwnerJob"
     const val STEP_SIZE = 100
@@ -67,35 +66,40 @@ class AllOrganizationOwnerJobConfiguration {
   }
 
   val noOrgProjectReader: ItemReader<Project>
-    get() = RepositoryItemReader<Project>().apply {
-      setRepository(projectRepository)
-      setMethodName(projectRepository::findAllWithUserOwner.name)
-      setSort(mapOf("id" to Direction.ASC))
-      setPageSize(STEP_SIZE)
-    }
+    get() =
+      RepositoryItemReader<Project>().apply {
+        setRepository(projectRepository)
+        setMethodName(projectRepository::findAllWithUserOwner.name)
+        setSort(mapOf("id" to Direction.ASC))
+        setPageSize(STEP_SIZE)
+      }
 
-  val noOrgProjectWriter: ItemWriter<Project> = ItemWriter { items ->
-    items.forEach { project ->
-      val organization = organizationRepository.findUsersDefaultOrganization(project.userOwner!!)
-        ?: let {
-          val ownerName = project.userOwner!!.name
-          val ownerNameSafe = if (ownerName.length >= 3) ownerName else "$ownerName Organization"
-          organizationService.create(
-            OrganizationDto(name = ownerNameSafe), project.userOwner!!
+  val noOrgProjectWriter: ItemWriter<Project> =
+    ItemWriter { items ->
+      items.forEach { project ->
+        val organization =
+          organizationRepository.findUsersDefaultOrganization(project.userOwner!!)
+            ?: let {
+              val ownerName = project.userOwner!!.name
+              val ownerNameSafe = if (ownerName.length >= 3) ownerName else "$ownerName Organization"
+              organizationService.create(
+                OrganizationDto(name = ownerNameSafe),
+                project.userOwner!!,
+              )
+            }
+
+        val permission =
+          permissionService.find(
+            projectId = project.id,
+            userId = project.userOwner!!.id,
           )
-        }
+        permission?.let { permissionService.delete(it.id) }
 
-      val permission = permissionService.find(
-        projectId = project.id,
-        userId = project.userOwner!!.id
-      )
-      permission?.let { permissionService.delete(it.id) }
-
-      project.organizationOwner = organization
-      project.userOwner = null
-      projectService.save(project)
+        project.organizationOwner = organization
+        project.userOwner = null
+        projectService.save(project)
+      }
     }
-  }
 
   fun getNoOrgProjectsStep(jobRepository: JobRepository): Step {
     return StepBuilder("noOrProjectStep", jobRepository)
@@ -106,22 +110,25 @@ class AllOrganizationOwnerJobConfiguration {
   }
 
   val noRoleUserReader: ItemReader<UserAccount>
-    get() = RepositoryItemReader<UserAccount>().apply {
-      setRepository(userAccountRepository)
-      setMethodName(userAccountRepository::findAllWithoutAnyOrganization.name)
-      setSort(mapOf("id" to Direction.ASC))
-      setPageSize(STEP_SIZE)
+    get() =
+      RepositoryItemReader<UserAccount>().apply {
+        setRepository(userAccountRepository)
+        setMethodName(userAccountRepository::findAllWithoutAnyOrganization.name)
+        setSort(mapOf("id" to Direction.ASC))
+        setPageSize(STEP_SIZE)
+      }
+
+  val noRoleUserWriter: ItemWriter<UserAccount> =
+    ItemWriter { items ->
+      items.forEach { userAccount ->
+        organizationService.create(OrganizationDto(name = userAccount.name), userAccount)
+      }
     }
 
-  val noRoleUserWriter: ItemWriter<UserAccount> = ItemWriter { items ->
-    items.forEach { userAccount ->
-      organizationService.create(OrganizationDto(name = userAccount.name), userAccount)
-    }
-  }
-
-  fun getNoRoleUserStep(jobRepository: JobRepository): Step = StepBuilder("noRoleUserStep", jobRepository)
-    .chunk<UserAccount, UserAccount>(STEP_SIZE, platformTransactionManager)
-    .reader(noRoleUserReader)
-    .writer(noRoleUserWriter)
-    .build()
+  fun getNoRoleUserStep(jobRepository: JobRepository): Step =
+    StepBuilder("noRoleUserStep", jobRepository)
+      .chunk<UserAccount, UserAccount>(STEP_SIZE, platformTransactionManager)
+      .reader(noRoleUserReader)
+      .writer(noRoleUserWriter)
+      .build()
 }

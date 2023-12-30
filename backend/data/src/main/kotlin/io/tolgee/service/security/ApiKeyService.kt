@@ -51,17 +51,18 @@ class ApiKeyService(
     scopes: Set<Scope>,
     project: Project,
     expiresAt: Long? = null,
-    description: String? = null
+    description: String? = null,
   ): ApiKey {
-    val apiKey = ApiKey(
-      key = generateKey(),
-      project = project,
-      userAccount = userAccount,
-      scopesEnum = scopes
-    ).apply {
-      this.description = description ?: ""
-      this.expiresAt = expiresAt?.let { Date(expiresAt) }
-    }
+    val apiKey =
+      ApiKey(
+        key = generateKey(),
+        project = project,
+        userAccount = userAccount,
+        scopesEnum = scopes,
+      ).apply {
+        this.description = description ?: ""
+        this.expiresAt = expiresAt?.let { Date(expiresAt) }
+      }
     return save(apiKey)
   }
 
@@ -71,7 +72,11 @@ class ApiKeyService(
     return apiKeyRepository.getAllByUserAccountIdOrderById(userAccountId)
   }
 
-  fun getAllByUser(userAccountId: Long, filterProjectId: Long?, pageable: Pageable): Page<ApiKey> {
+  fun getAllByUser(
+    userAccountId: Long,
+    filterProjectId: Long?,
+    pageable: Pageable,
+  ): Page<ApiKey> {
     return apiKeyRepository.getAllByUserAccount(userAccountId, filterProjectId, pageable)
   }
 
@@ -79,7 +84,10 @@ class ApiKeyService(
     return apiKeyRepository.getAllByProjectId(projectId)
   }
 
-  fun getAllByProject(projectId: Long, pageable: Pageable): Page<ApiKey> {
+  fun getAllByProject(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ApiKey> {
     return apiKeyRepository.getAllByProjectId(projectId, pageable)
   }
 
@@ -113,14 +121,21 @@ class ApiKeyService(
     apiKeyRepository.delete(apiKey)
   }
 
-  fun getAvailableScopes(userAccountId: Long, project: Project): Array<Scope> {
-    val permittedScopes = permissionService.getProjectPermissionScopes(project.id, userAccountId)
-      ?: throw NotFoundException()
+  fun getAvailableScopes(
+    userAccountId: Long,
+    project: Project,
+  ): Array<Scope> {
+    val permittedScopes =
+      permissionService.getProjectPermissionScopes(project.id, userAccountId)
+        ?: throw NotFoundException()
     return Scope.expand(permittedScopes)
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#apiKey.keyHash")
-  fun editApiKey(apiKey: ApiKey, dto: V2EditApiKeyDto): ApiKey {
+  fun editApiKey(
+    apiKey: ApiKey,
+    dto: V2EditApiKeyDto,
+  ): ApiKey {
     apiKey.scopesEnum = dto.scopes.toMutableSet()
     dto.description?.let {
       apiKey.description = it
@@ -153,7 +168,10 @@ class ApiKeyService(
     return this.apiKeyRepository.save(entity)
   }
 
-  fun encodeKey(key: String, projectId: Long): String {
+  fun encodeKey(
+    key: String,
+    projectId: Long,
+  ): String {
     val stringToEncode = "${projectId}_$key"
     return BaseEncoding.base32().omitPadding().lowerCase().encode(stringToEncode.toByteArray())
   }
@@ -188,7 +206,10 @@ class ApiKeyService(
     apiKeyRepository.updateLastUsedById(apiKeyId, currentDateProvider.date)
   }
 
-  fun regenerate(id: Long, expiresAt: Long?): ApiKey {
+  fun regenerate(
+    id: Long,
+    expiresAt: Long?,
+  ): ApiKey {
     val apiKey = get(id)
     // Manual cache eviction
     cache?.evict(apiKey.keyHash)
@@ -221,14 +242,15 @@ class ApiKeyService(
 
   private fun logTransactionIsolation() {
     if (logger.isDebugEnabled) {
-      val isolationLevel = entityManager.createNativeQuery("show transaction_isolation")
-        .singleResult as String
+      val isolationLevel =
+        entityManager.createNativeQuery("show transaction_isolation")
+          .singleResult as String
       logger.debug("Transaction isolation level: $isolationLevel")
     }
   }
 
   class DecodedApiKey(
     val projectId: Long,
-    val apiKey: String
+    val apiKey: String,
   )
 }

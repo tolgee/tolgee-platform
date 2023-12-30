@@ -4,9 +4,8 @@ import java.sql.Connection
 
 class SequenceIdProvider(
   private val sequenceName: String,
-  private val allocationSize: Int
+  private val allocationSize: Int,
 ) {
-
   private var currentId: Long? = null
   private var currentMaxId: Long? = null
 

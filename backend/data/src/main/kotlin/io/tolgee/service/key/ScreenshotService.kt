@@ -38,18 +38,22 @@ class ScreenshotService(
   private val imageUploadService: ImageUploadService,
   private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
-  private val keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository
+  private val keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository,
 ) {
   companion object {
     const val SCREENSHOTS_STORAGE_FOLDER_NAME = "screenshots"
   }
 
   @Transactional
-  fun store(screenshotImage: InputStreamSource, key: Key, info: ScreenshotInfoDto?): Screenshot {
+  fun store(
+    screenshotImage: InputStreamSource,
+    key: Key,
+    info: ScreenshotInfoDto?,
+  ): Screenshot {
     if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
       throw BadRequestException(
         io.tolgee.constants.Message.MAX_SCREENSHOTS_EXCEEDED,
-        listOf(tolgeeProperties.maxScreenshotsPerKey)
+        listOf(tolgeeProperties.maxScreenshotsPerKey),
       )
     }
 
@@ -57,19 +61,20 @@ class ScreenshotService(
     val image = converter.getImage()
     val thumbnail = converter.getThumbnail()
 
-    val screenshot = saveScreenshot(
-      image.toByteArray(),
-      thumbnail.toByteArray(),
-      info?.location,
-      converter.targetDimension
-    )
+    val screenshot =
+      saveScreenshot(
+        image.toByteArray(),
+        thumbnail.toByteArray(),
+        info?.location,
+        converter.targetDimension,
+      )
 
     return addReference(
       key = key,
       screenshot = screenshot,
       info = info,
       originalDimension = converter.originalDimension,
-      targetDimension = converter.targetDimension
+      targetDimension = converter.targetDimension,
     )
   }
 
@@ -78,7 +83,7 @@ class ScreenshotService(
     screenshot: Screenshot,
     info: ScreenshotInfoDto?,
     originalDimension: Dimension?,
-    targetDimension: Dimension?
+    targetDimension: Dimension?,
   ): Screenshot {
     val reference = KeyScreenshotReference()
     reference.key = key
@@ -93,15 +98,17 @@ class ScreenshotService(
   private fun KeyScreenshotReference.setInfo(
     info: ScreenshotInfoDto?,
     originalDimension: Dimension?,
-    newDimension: Dimension?
+    newDimension: Dimension?,
   ) {
     info?.let {
       this.originalText = info.text
       it.positions?.forEach { positionDto ->
-        val xRatio = newDimension?.width?.toDouble()
-          ?.div(originalDimension?.width?.toDouble() ?: 1.0) ?: 1.0
-        val yRatio = newDimension?.height?.toDouble()
-          ?.div(originalDimension?.height?.toDouble() ?: 1.0) ?: 1.0
+        val xRatio =
+          newDimension?.width?.toDouble()
+            ?.div(originalDimension?.width?.toDouble() ?: 1.0) ?: 1.0
+        val yRatio =
+          newDimension?.height?.toDouble()
+            ?.div(originalDimension?.height?.toDouble() ?: 1.0) ?: 1.0
         positions = positions ?: mutableListOf()
         positions!!.add(
           KeyInScreenshotPosition(
@@ -109,7 +116,7 @@ class ScreenshotService(
             positionDto.y.adjustByRation(yRatio),
             positionDto.width.adjustByRation(xRatio),
             positionDto.height.adjustByRation(yRatio),
-          )
+          ),
         )
       }
     }
@@ -120,30 +127,39 @@ class ScreenshotService(
   }
 
   @Transactional
-  fun saveUploadedImages(uploadedImageIds: Collection<Long>, key: Key): Map<Long, Screenshot> {
-    val screenshots = uploadedImageIds.map {
-      KeyScreenshotDto().apply { uploadedImageId = it }
-    }
+  fun saveUploadedImages(
+    uploadedImageIds: Collection<Long>,
+    key: Key,
+  ): Map<Long, Screenshot> {
+    val screenshots =
+      uploadedImageIds.map {
+        KeyScreenshotDto().apply { uploadedImageId = it }
+      }
     return saveUploadedImages(screenshots, key)
   }
 
   /**
    * @return Map of uploaded image id and screenshot
    */
-  fun saveUploadedImages(screenshots: List<KeyScreenshotDto>, key: Key): Map<Long, Screenshot> {
+  fun saveUploadedImages(
+    screenshots: List<KeyScreenshotDto>,
+    key: Key,
+  ): Map<Long, Screenshot> {
     val imageIds = screenshots.map { it.uploadedImageId }
     val images = imageUploadService.find(imageIds).associateBy { it.id }
     return screenshots.map { screenshotInfo ->
-      val image = images[screenshotInfo.uploadedImageId]
-        ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+      val image =
+        images[screenshotInfo.uploadedImageId]
+          ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
 
       if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
         throw PermissionException()
       }
 
-      val info = screenshotInfo.let {
-        ScreenshotInfoDto(it.text, it.positions)
-      }
+      val info =
+        screenshotInfo.let {
+          ScreenshotInfoDto(it.text, it.positions)
+        }
 
       val (screenshot, originalDimension, targetDimension) = saveScreenshot(image)
 
@@ -157,20 +173,22 @@ class ScreenshotService(
    * Creates and saves screenshot entity and the corresponding file
    */
   fun saveScreenshot(image: UploadedImage): CreateScreenshotResult {
-    val img = fileStorage
-      .readFile(
-        UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.filenameWithExtension
-      )
-    val thumbnail = fileStorage
-      .readFile(
-        UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.thumbnailFilenameWithExtension
-      )
+    val img =
+      fileStorage
+        .readFile(
+          UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.filenameWithExtension,
+        )
+    val thumbnail =
+      fileStorage
+        .readFile(
+          UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.thumbnailFilenameWithExtension,
+        )
     val screenshot = saveScreenshot(img, thumbnail, image.location, Dimension(image.width, image.height))
     imageUploadService.delete(image)
     return CreateScreenshotResult(
       screenshot = screenshot,
       originalDimension = Dimension(image.originalWidth, image.originalHeight),
-      targetDimension = Dimension(image.width, image.height)
+      targetDimension = Dimension(image.width, image.height),
     )
   }
 
@@ -181,7 +199,7 @@ class ScreenshotService(
     image: ByteArray,
     thumbnail: ByteArray,
     location: String?,
-    dimension: Dimension
+    dimension: Dimension,
   ): Screenshot {
     val screenshot = Screenshot()
     screenshot.extension = "png"
@@ -193,7 +211,11 @@ class ScreenshotService(
     return screenshot
   }
 
-  fun storeFiles(screenshot: Screenshot, image: ByteArray?, thumbnail: ByteArray?) {
+  fun storeFiles(
+    screenshot: Screenshot,
+    image: ByteArray?,
+    thumbnail: ByteArray?,
+  ) {
     thumbnail?.let { fileStorage.storeFile(screenshot.getThumbnailPath(), it) }
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
@@ -216,23 +238,33 @@ class ScreenshotService(
     deleteFile(screenshot)
   }
 
-  fun removeScreenshotReference(key: Key, screenshot: Screenshot) {
+  fun removeScreenshotReference(
+    key: Key,
+    screenshot: Screenshot,
+  ) {
     removeScreenshotReferences(key, listOf(screenshot))
   }
 
   @Transactional
-  fun removeScreenshotReferences(key: Key, screenshots: List<Screenshot>) {
+  fun removeScreenshotReferences(
+    key: Key,
+    screenshots: List<Screenshot>,
+  ) {
     removeScreenshotReferencesById(key, screenshots.map { it.id })
   }
 
   @Transactional
-  fun removeScreenshotReferencesById(key: Key, screenshotIds: List<Long>?) {
+  fun removeScreenshotReferencesById(
+    key: Key,
+    screenshotIds: List<Long>?,
+  ) {
     screenshotIds ?: return
     val references = keyScreenshotReferenceRepository.findAll(key, screenshotIds)
     keyScreenshotReferenceRepository.deleteAll(references)
-    val screenshotReferences = keyScreenshotReferenceRepository
-      .findAll(screenshotIds)
-      .groupBy { it.screenshot.id }
+    val screenshotReferences =
+      keyScreenshotReferenceRepository
+        .findAll(screenshotIds)
+        .groupBy { it.screenshot.id }
     screenshotIds.forEach {
       if (screenshotReferences[it] == null) {
         delete(it)
@@ -244,9 +276,10 @@ class ScreenshotService(
   fun removeScreenshotReferences(references: List<KeyScreenshotReference>) {
     val screenshotIds = references.map { it.screenshot.id }.toSet()
     keyScreenshotReferenceRepository.deleteAll(references)
-    val screenshotReferences = keyScreenshotReferenceRepository
-      .findAll(screenshotIds)
-      .groupBy { it.screenshot.id }
+    val screenshotReferences =
+      keyScreenshotReferenceRepository
+        .findAll(screenshotIds)
+        .groupBy { it.screenshot.id }
     screenshotIds.forEach {
       if (screenshotReferences[it].isNullOrEmpty()) {
         delete(it)
@@ -275,7 +308,7 @@ class ScreenshotService(
       DELETE FROM key_screenshot_reference WHERE key_id IN (
         SELECT id FROM key WHERE project_id = :projectId
       )
-    """
+    """,
     ).setParameter("projectId", projectId)
       .executeUpdate()
 
@@ -286,7 +319,7 @@ class ScreenshotService(
           SELECT id FROM key WHERE project_id = :projectId
         )
       )
-    """
+    """,
     ).setParameter("projectId", projectId)
       .executeUpdate()
   }
@@ -333,7 +366,10 @@ class ScreenshotService(
       .associate { it.id to it.keyScreenshotReferences.map { it.screenshot }.toSet().toList() }
   }
 
-  fun getKeyScreenshotReferences(importedKeys: List<Key>, locations: List<String?>): List<KeyScreenshotReference> {
+  fun getKeyScreenshotReferences(
+    importedKeys: List<Key>,
+    locations: List<String?>,
+  ): List<KeyScreenshotReference> {
     return screenshotRepository.getKeyScreenshotReferences(importedKeys, locations)
   }
 }

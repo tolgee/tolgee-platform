@@ -11,13 +11,13 @@ import kotlin.coroutines.CoroutineContext
 
 @Component
 class AutomationChunkProcessor(
-  private val automationRunner: AutomationRunner
+  private val automationRunner: AutomationRunner,
 ) : ChunkProcessor<AutomationBjRequest, AutomationBjParams, AutomationTargetItem> {
   override fun process(
     job: BatchJobDto,
     chunk: List<AutomationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     chunk.forEach {
       automationRunner.run(it.actionId, it.activityRevisionId)

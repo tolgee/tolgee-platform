@@ -55,13 +55,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/translations/",
-    "/v2/projects/translations/"
-  ]
+    "/v2/projects/translations/",
+  ],
 )
 @Tags(
   value = [
     Tag(name = "Translation Comments", description = "Operations related to translation comments"),
-  ]
+  ],
 )
 class TranslationCommentController(
   private val projectHolder: ProjectHolder,
@@ -71,22 +71,21 @@ class TranslationCommentController(
   private val translationCommentModelAssembler: TranslationCommentModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
-  private val translationModelAssembler: TranslationModelAssembler
+  private val translationModelAssembler: TranslationModelAssembler,
 ) {
-
   @GetMapping(value = ["{translationId}/comments"])
   @Operation(summary = "Returns translation comments of translation")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAll(
     @PathVariable translationId: Long,
-    @ParameterObject pageable: Pageable
+    @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationCommentModel> {
     val translation = translationService.find(translationId) ?: throw NotFoundException()
     translation.checkFromProject()
     return pagedResourcesAssembler.toModel(
       translationCommentService.getPaged(translation, pageable),
-      translationCommentModelAssembler
+      translationCommentModelAssembler,
     )
   }
 
@@ -94,7 +93,10 @@ class TranslationCommentController(
   @Operation(summary = "Returns single translation comment")
   @UseDefaultPermissions
   @AllowApiAccess
-  fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
+  fun get(
+    @PathVariable translationId: Long,
+    @PathVariable commentId: Long,
+  ): TranslationCommentModel {
     val comment = translationCommentService.getWithAuthorFetched(commentId)
     comment.checkFromProject()
     return translationCommentModelAssembler.toModel(comment)
@@ -105,7 +107,12 @@ class TranslationCommentController(
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_EDIT)
   @UseDefaultPermissions // Security: Permission check done inside; users should be able to edit their comments
   @AllowApiAccess
-  fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
+  fun update(
+    @PathVariable
+    commentId: Long,
+    @RequestBody @Valid
+    dto: TranslationCommentDto,
+  ): TranslationCommentModel {
     val comment = translationCommentService.getWithAuthorFetched(commentId)
     if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
@@ -117,11 +124,11 @@ class TranslationCommentController(
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Sets state of translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_COMMENTS_SET_STATE ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_SET_STATE])
   @AllowApiAccess
   fun setState(
     @PathVariable commentId: Long,
-    @PathVariable state: TranslationCommentState
+    @PathVariable state: TranslationCommentState,
   ): TranslationCommentModel {
     val comment = translationCommentService.getWithAuthorFetched(commentId)
     comment.checkFromProject()
@@ -135,7 +142,9 @@ class TranslationCommentController(
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_DELETE)
   @UseDefaultPermissions // Security: Permission check done inside; users should be able to delete their comments
   @AllowApiAccess
-  fun delete(@PathVariable commentId: Long) {
+  fun delete(
+    @PathVariable commentId: Long,
+  ) {
     val comment = translationCommentService.get(commentId)
     comment.checkFromProject()
     if (comment.author.id != authenticationFacade.authenticatedUser.id) {
@@ -151,7 +160,7 @@ class TranslationCommentController(
   private fun checkEditPermission() {
     securityService.checkProjectPermission(
       projectHolder.project.id,
-      Scope.TRANSLATIONS_COMMENTS_EDIT
+      Scope.TRANSLATIONS_COMMENTS_EDIT,
     )
   }
 
@@ -159,10 +168,11 @@ class TranslationCommentController(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_COMMENTS_ADD ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_ADD])
   @AllowApiAccess
   fun create(
-    @RequestBody @Valid dto: TranslationCommentWithLangKeyDto
+    @RequestBody @Valid
+    dto: TranslationCommentWithLangKeyDto,
   ): ResponseEntity<TranslationWithCommentModel> {
     val translation = translationService.getOrCreate(dto.keyId, dto.languageId)
     if (translation.key.project.id != projectHolder.project.id) {
@@ -184,9 +194,9 @@ class TranslationCommentController(
     return ResponseEntity(
       TranslationWithCommentModel(
         comment = translationCommentModelAssembler.toModel(comment),
-        translation = translationModelAssembler.toModel(translation)
+        translation = translationModelAssembler.toModel(translation),
       ),
-      HttpStatus.CREATED
+      HttpStatus.CREATED,
     )
   }
 
@@ -194,11 +204,12 @@ class TranslationCommentController(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_COMMENTS_ADD ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_ADD])
   @AllowApiAccess
   fun create(
     @PathVariable translationId: Long,
-    @RequestBody @Valid dto: TranslationCommentDto
+    @RequestBody @Valid
+    dto: TranslationCommentDto,
   ): ResponseEntity<TranslationCommentModel> {
     val translation = translationService.find(translationId) ?: throw NotFoundException()
     translation.checkFromProject()

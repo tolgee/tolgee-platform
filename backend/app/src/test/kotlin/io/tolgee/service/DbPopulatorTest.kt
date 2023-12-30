@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 class DbPopulatorTest : AbstractTransactionalTest() {
-
   @Autowired
   lateinit var populator: DbPopulatorReal
 
@@ -38,8 +37,9 @@ class DbPopulatorTest : AbstractTransactionalTest() {
   @BeforeEach
   fun setup() {
     populator.autoPopulate()
-    userAccount = userAccountRepository.findByUsername(tolgeeProperties.authentication.initialUsername)
-      .orElseThrow { NotFoundException() }
+    userAccount =
+      userAccountRepository.findByUsername(tolgeeProperties.authentication.initialUsername)
+        .orElseThrow { NotFoundException() }
   }
 
   @Test

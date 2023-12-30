@@ -5,7 +5,11 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 
-fun <T> withTimeoutRetrying(timeout: Long, retries: Int = 3, fn: () -> T): T {
+fun <T> withTimeoutRetrying(
+  timeout: Long,
+  retries: Int = 3,
+  fn: () -> T,
+): T {
   var repeats = 0
   for (it in 0..retries) {
     try {

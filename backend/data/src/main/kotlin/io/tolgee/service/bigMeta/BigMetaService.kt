@@ -3,7 +3,7 @@ package io.tolgee.service.bigMeta
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
-import io.tolgee.dtos.query_results.KeyIdFindResult
+import io.tolgee.dtos.queryResults.KeyIdFindResult
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -35,7 +35,7 @@ class BigMetaService(
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
   private val jdbcTemplate: JdbcTemplate,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   companion object {
     const val MAX_DISTANCE_SCORE = 10000L
@@ -48,14 +48,17 @@ class BigMetaService(
   }
 
   @Transactional
-  fun store(data: BigMetaDto, project: Project) {
+  fun store(
+    data: BigMetaDto,
+    project: Project,
+  ) {
     store(data.relatedKeysInOrder, project)
   }
 
   @Transactional
   fun store(
     relatedKeysInOrder: MutableList<RelatedKeyDto>?,
-    project: Project
+    project: Project,
   ) {
     if (relatedKeysInOrder.isNullOrEmpty()) {
       return
@@ -75,7 +78,7 @@ class BigMetaService(
       on conflict (key1id, key2id) do update set score = excluded.score, hits = excluded.hits, updated_at = ?
       """,
       toInsert,
-      100
+      100,
     ) { ps, dto ->
       ps.setLong(1, dto.key1Id)
       ps.setLong(2, dto.key2Id)
@@ -90,7 +93,7 @@ class BigMetaService(
 
   fun getKeyIdsForItems(
     relatedKeysInOrder: List<RelatedKeyDto>,
-    projectId: Long
+    projectId: Long,
   ): List<KeyIdFindResult> {
     // we need to chunk it to avoid stack overflow
     return relatedKeysInOrder.chunked(1000)
@@ -101,7 +104,10 @@ class BigMetaService(
   }
 
   @Transactional
-  fun findExistingKeyDistances(keys: List<KeyIdFindResult>, project: Project): Set<KeysDistanceDto> {
+  fun findExistingKeyDistances(
+    keys: List<KeyIdFindResult>,
+    project: Project,
+  ): Set<KeysDistanceDto> {
     val keyIds = keys.map { it.id }
     return findExistingKeysDistancesDtosByIds(keyIds)
   }
@@ -117,7 +123,7 @@ class BigMetaService(
             select kd3.key2Id from KeysDistance kd3 where kd3.key1Id in :data or kd3.key2Id in :data
         )
     """,
-      KeysDistanceDto::class.java
+      KeysDistanceDto::class.java,
     )
       .setParameter("data", keyIds)
       .resultList.toSet()
@@ -131,11 +137,12 @@ class BigMetaService(
     return this.keysDistanceRepository.findById(id).orElse(null)
   }
 
-  fun getCloseKeyIds(keyId: Long): List<Long> =
-    this.keysDistanceRepository.getCloseKeys(keyId)
+  fun getCloseKeyIds(keyId: Long): List<Long> = this.keysDistanceRepository.getCloseKeys(keyId)
 
-  fun getCloseKeysWithBaseTranslation(keyId: Long, projectId: Long) =
-    this.keysDistanceRepository.getCloseKeysWithBaseTranslation(keyId, projectId)
+  fun getCloseKeysWithBaseTranslation(
+    keyId: Long,
+    projectId: Long,
+  ) = this.keysDistanceRepository.getCloseKeysWithBaseTranslation(keyId, projectId)
 
   @EventListener(OnProjectActivityEvent::class)
   @Async
@@ -154,7 +161,7 @@ class BigMetaService(
           """
       delete from KeysDistance kd 
       where kd.key1Id in :ids or kd.key2Id in :ids
-      """
+      """,
         ).setParameter("ids", ids).executeUpdate()
       }
     }
@@ -162,18 +169,19 @@ class BigMetaService(
 
   private fun getKeyIdsForItemsQuery(
     relatedKeysInOrderChunk: List<RelatedKeyDto>,
-    projectId: Long
+    projectId: Long,
   ): CriteriaQuery<KeyIdFindResult>? {
     val cb: CriteriaBuilder = entityManager.criteriaBuilder
     val query = cb.createQuery(KeyIdFindResult::class.java)
     val root = query.from(Key::class.java)
     val namespace = root.join(Key_.namespace, JoinType.LEFT)
-    val predicates = relatedKeysInOrderChunk.map { key ->
-      cb.and(
-        cb.equal(root.get(Key_.name), key.keyName),
-        cb.equalNullable(namespace.get(Namespace_.name), key.namespace)
-      )
-    }
+    val predicates =
+      relatedKeysInOrderChunk.map { key ->
+        cb.and(
+          cb.equal(root.get(Key_.name), key.keyName),
+          cb.equalNullable(namespace.get(Namespace_.name), key.namespace),
+        )
+      }
     val keyPredicates = cb.or(*predicates.toTypedArray())
     query.where(cb.and(keyPredicates, cb.equal(root.get(Key_.project).get(Project_.id), projectId)))
     query.multiselect(

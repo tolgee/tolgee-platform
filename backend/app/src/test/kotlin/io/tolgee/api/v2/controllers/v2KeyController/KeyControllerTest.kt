@@ -195,7 +195,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project }
     performProjectAuthDelete(
-      "keys", mapOf("ids" to listOf(testData.firstKey.id, testData.secondKey.id))
+      "keys",
+      mapOf("ids" to listOf(testData.firstKey.id, testData.secondKey.id)),
     ).andIsOk
     assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
     assertThat(keyService.findOptional(testData.secondKey.id)).isEmpty
@@ -228,13 +229,13 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
               "name" to "first_key",
               "translations" to
                 mapOf("en" to "hello"),
-              "tags" to listOf("tag1", "tag2")
+              "tags" to listOf("tag1", "tag2"),
             ),
             mapOf(
               "name" to "new_key",
               "translations" to
                 mapOf("en" to "hello"),
-              "tags" to listOf("tag1", "tag2", "test")
+              "tags" to listOf("tag1", "tag2", "test"),
             ),
             mapOf(
               "name" to "key_without_tags",
@@ -245,17 +246,18 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
               "name" to "key_with_empty_tags",
               "translations" to
                 mapOf("en" to "hello"),
-              "tags" to listOf<String>()
+              "tags" to listOf<String>(),
             ),
-          )
-      )
+          ),
+      ),
     ).andIsOk
 
     executeInNewTransaction {
       keyService.get(testData.firstKey.id).translations.find { it.language.tag == "en" }.assert.isNull()
-      val key = projectService.get(testData.project.id).keys.find {
-        it.name == "new_key"
-      }
+      val key =
+        projectService.get(testData.project.id).keys.find {
+          it.name == "new_key"
+        }
       key.assert.isNotNull()
       key!!.keyMeta!!.tags.assert.hasSize(3)
       key.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
@@ -278,8 +280,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
               "translations" to
                 mapOf("en" to "hello"),
             ),
-          )
-      )
+          ),
+      ),
     ).andIsOk
   }
 
@@ -321,8 +323,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         		}
         	]
         }
-        """.trimIndent()
-      )
+        """.trimIndent(),
+      ),
     ).andIsOk
   }
 
@@ -332,7 +334,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
     performProjectAuthPost(
       "keys",
-      CreateKeyDto(name = "super_key", translations = mapOf("en" to "Hello", "de" to "Hallo"))
+      CreateKeyDto(name = "super_key", translations = mapOf("en" to "Hello", "de" to "Hallo")),
     ).andIsCreated
 
     executeInNewTransaction {
@@ -358,10 +360,10 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
             mapOf(
               "name" to "first_key",
               "translations" to
-                mapOf("de" to "hello")
+                mapOf("de" to "hello"),
             ),
-          )
-      )
+          ),
+      ),
     ).andIsForbidden
   }
 

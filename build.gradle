@@ -10,17 +10,16 @@ buildscript {
     }
 }
 
-
 plugins {
-    id("org.openrewrite.rewrite") version("6.3.16")
+    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
-rewrite {
-    activeRecipe("org.openrewrite.java.migrate.jakarta.JavaxMigrationToJakarta")
-}
-
-dependencies {
-    rewrite("org.openrewrite.recipe:rewrite-migrate-java:2.1.0")
+subprojects {
+    if (project.projectDir.exists()) {
+        apply {
+            plugin("org.jlleitschuh.gradle.ktlint")
+        }
+    }
 }
 
 project.ext {
@@ -33,10 +32,6 @@ if (System.getenv().containsKey("VERSION")) {
     project.version = 'local'
 }
 
-configurations {
-    ktlint
-}
-
 apply plugin: 'idea'
 
 repositories {
@@ -44,14 +39,6 @@ repositories {
 }
 
 def unpackTarget = "${project.buildDir}/dependency"
-
-dependencies {
-    ktlint("com.pinterest:ktlint:0.43.2") {
-        attributes {
-            attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
-        }
-    }
-}
 
 project(':server-app').afterEvaluate {
     task unpack(type: Copy) {
@@ -144,19 +131,9 @@ project(':server-app').afterEvaluate {
     }
 }
 
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
-    args "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
-}
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
-    args "-F", "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
-    jvmArgs = ["--add-opens=java.base/java.lang=ALL-UNNAMED"]
+ktlint {
+    debug = true
+    verbose = true
 }
 
 subprojects {

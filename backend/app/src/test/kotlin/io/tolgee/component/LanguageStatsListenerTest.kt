@@ -35,16 +35,17 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
         testData.project,
         CreateKeyDto(
           name = "ho ho ho new key",
-          translations = mapOf("en" to "hello")
-        )
+          translations = mapOf("en" to "hello"),
+        ),
       )
     }
 
     // it's async so lets wait until it passes
     waitForNotThrowing(AssertionFailedError::class) {
       executeInNewTransaction(platformTransactionManager) {
-        val newDeutschStats = languageStatsService.getLanguageStats(projectId = testData.project.id)
-          .find { it.language.tag == "de" }
+        val newDeutschStats =
+          languageStatsService.getLanguageStats(projectId = testData.project.id)
+            .find { it.language.tag == "de" }
         assertThat(newDeutschStats!!.untranslatedWords - 1).isEqualTo(deutschStats?.untranslatedWords)
       }
     }

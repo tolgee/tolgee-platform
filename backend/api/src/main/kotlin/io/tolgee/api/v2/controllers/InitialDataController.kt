@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/public/initial-data",
-  ]
+  ],
 )
 @Tag(name = "Initial data")
 class InitialDataController(
@@ -34,11 +34,16 @@ class InitialDataController(
   @GetMapping(value = [""])
   @Operation(description = "Returns initial data always required by frontend")
   fun get(): InitialDataModel {
-
-    val data = InitialDataModel(
-      serverConfiguration = configurationController.getPublicConfiguration(),
-      eeSubscription = eeSubscriptionService.findSubscriptionEntity()?.let { eeSubscriptionModelAssembler.toModel(it) }
-    )
+    val data =
+      InitialDataModel(
+        serverConfiguration = configurationController.getPublicConfiguration(),
+        eeSubscription =
+          eeSubscriptionService.findSubscriptionEntity()?.let {
+            eeSubscriptionModelAssembler.toModel(
+              it,
+            )
+          },
+      )
 
     val userAccount = authenticationFacade.authenticatedUserOrNull
     if (userAccount != null) {

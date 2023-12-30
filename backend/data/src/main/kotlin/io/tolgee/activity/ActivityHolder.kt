@@ -56,7 +56,7 @@ open class ActivityHolder(val applicationContext: ApplicationContext) {
   fun getDescribingRelationFromCache(
     entityId: Long,
     entityClass: String,
-    provider: () -> ActivityDescribingEntity
+    provider: () -> ActivityDescribingEntity,
   ): ActivityDescribingEntity {
     return describingRelationCache.getOrPut(entityId to entityClass, provider)
   }

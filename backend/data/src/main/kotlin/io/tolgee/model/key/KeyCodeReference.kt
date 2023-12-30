@@ -13,7 +13,6 @@ import jakarta.validation.constraints.NotNull
 class KeyCodeReference(
   @ManyToOne(optional = false)
   override var keyMeta: KeyMeta,
-
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   var author: UserAccount? = null,

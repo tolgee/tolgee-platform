@@ -16,7 +16,7 @@ import org.springframework.context.ApplicationContext
 class KeysImporter(
   applicationContext: ApplicationContext,
   val keys: List<ImportKeysItemDto>,
-  val project: Project
+  val project: Project,
 ) {
   private val translationService: TranslationService = applicationContext.getBean(TranslationService::class.java)
   private val keyService: KeyService = applicationContext.getBean(KeyService::class.java)
@@ -26,9 +26,10 @@ class KeysImporter(
   private val securityService: SecurityService = applicationContext.getBean(SecurityService::class.java)
 
   fun import() {
-    val existing = keyService.getAll(project.id)
-      .associateBy { ((it.namespace?.name to it.name)) }
-      .toMutableMap()
+    val existing =
+      keyService.getAll(project.id)
+        .associateBy { ((it.namespace?.name to it.name)) }
+        .toMutableMap()
     val namespaces = mutableMapOf<String, Namespace>()
     namespaceService.getAllInProject(project.id).associateByTo(namespaces) { it.name }
     val languageTags = keys.flatMap { it.translations.keys }.toSet()
@@ -41,18 +42,19 @@ class KeysImporter(
     keys.forEach { keyDto ->
       val safeNamespace = getSafeNamespace(keyDto.namespace)
       if (!existing.containsKey(safeNamespace to keyDto.name)) {
-        val key = Key(
-          name = keyDto.name,
-          project = project
-        ).apply {
-          if (safeNamespace != null && !namespaces.containsKey(safeNamespace)) {
-            val ns = namespaceService.create(safeNamespace, project.id)
-            if (ns != null) {
-              namespaces[safeNamespace] = ns
+        val key =
+          Key(
+            name = keyDto.name,
+            project = project,
+          ).apply {
+            if (safeNamespace != null && !namespaces.containsKey(safeNamespace)) {
+              val ns = namespaceService.create(safeNamespace, project.id)
+              if (ns != null) {
+                namespaces[safeNamespace] = ns
+              }
             }
+            this.namespace = namespaces[safeNamespace]
           }
-          this.namespace = namespaces[safeNamespace]
-        }
         keyService.save(key)
         keyDto.translations.entries.forEach { (languageTag, value) ->
           languages[languageTag]?.let { language ->

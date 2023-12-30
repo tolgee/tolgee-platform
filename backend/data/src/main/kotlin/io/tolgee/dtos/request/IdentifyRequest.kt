@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotBlank
 
 data class IdentifyRequest(
   @NotBlank
-  var anonymousUserId: String = ""
+  var anonymousUserId: String = "",
 )

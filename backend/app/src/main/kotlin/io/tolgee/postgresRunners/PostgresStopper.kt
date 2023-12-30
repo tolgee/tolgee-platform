@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class PostgresStopper(
   private val postgresAutostartProperties: PostgresAutostartProperties,
-  private val postgresRunner: PostgresRunner?
+  private val postgresRunner: PostgresRunner?,
 ) {
   @EventListener(ContextClosedEvent::class)
   fun onAppStop() {

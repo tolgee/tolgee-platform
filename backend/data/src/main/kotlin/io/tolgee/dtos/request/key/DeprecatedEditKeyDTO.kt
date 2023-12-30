@@ -10,7 +10,7 @@ data class DeprecatedEditKeyDTO(
   @field:NotBlank
   var oldFullPathString: String = "",
   @field:NotBlank
-  var newFullPathString: String = ""
+  var newFullPathString: String = "",
 ) {
   @get:Hidden
   @get:JsonIgnore

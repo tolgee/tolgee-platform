@@ -11,5 +11,5 @@ annotation class DocProperty(
   val prefix: String = "",
   val removedIn: String = "",
   val removalReason: String = "",
-  val hidden: Boolean = false
+  val hidden: Boolean = false,
 )

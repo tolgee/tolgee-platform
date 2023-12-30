@@ -18,7 +18,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
-
   lateinit var testData: BigMetaTestData
 
   @Autowired
@@ -42,16 +41,17 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
     performProjectAuthPost(
       "big-meta",
       mapOf(
-        "relatedKeysInOrder" to listOf(
-          mapOf(
-            "keyName" to "key"
+        "relatedKeysInOrder" to
+          listOf(
+            mapOf(
+              "keyName" to "key",
+            ),
+            mapOf(
+              "namespace" to "yep",
+              "keyName" to "key",
+            ),
           ),
-          mapOf(
-            "namespace" to "yep",
-            "keyName" to "key"
-          ),
-        )
-      )
+      ),
     ).andIsOk
 
     bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
@@ -87,17 +87,22 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
     bigMetaService.findExistingKeysDistancesDtosByIds(keys.map { it.id }).assert.hasSize(104790)
   }
 
-  private fun storeLogOfBigMeta(keys: List<Key>, drop: Int, take: Int) {
+  private fun storeLogOfBigMeta(
+    keys: List<Key>,
+    drop: Int,
+    take: Int,
+  ) {
     performProjectAuthPost(
       "big-meta",
       mapOf(
-        "relatedKeysInOrder" to keys.drop(drop).take(take).map {
-          mapOf(
-            "namespace" to it.namespace,
-            "keyName" to it.name
-          )
-        }
-      )
+        "relatedKeysInOrder" to
+          keys.drop(drop).take(take).map {
+            mapOf(
+              "namespace" to it.namespace,
+              "keyName" to it.name,
+            )
+          },
+      ),
     ).andIsOk
   }
 

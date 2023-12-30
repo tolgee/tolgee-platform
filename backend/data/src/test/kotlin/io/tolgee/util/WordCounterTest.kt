@@ -4,7 +4,6 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class WordCounterTest {
-
   @Test
   fun `returns ULocale from tag`() {
     assertThat(WordCounter.getLocaleFromTag("cs_CZ").language).isEqualTo("cs")

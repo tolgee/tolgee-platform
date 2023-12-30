@@ -15,28 +15,25 @@ data class CreateApiKeyDto(
   @field:NotNull
   @field:Min(1)
   var projectId: Long = 0,
-
   @field:NotEmpty
   @JsonIgnore
   @Schema(
     example = """
     ["screenshots.upload", "screenshots.delete", "translations.edit", "screenshots.view", "translations.view", "keys.edit"]
-    """
+    """,
   )
   var scopes: Set<Scope> = setOf(),
-
   @Schema(description = "Description of the project API key")
   @field:Length(max = 250, min = 1)
   var description: String? = null,
-
   @Schema(
-    description = "Expiration date in epoch format (milliseconds)." +
-      " When null key never expires.",
-    example = "1661172869000"
+    description =
+      "Expiration date in epoch format (milliseconds)." +
+        " When null key never expires.",
+    example = "1661172869000",
   )
-  val expiresAt: Long? = null
+  val expiresAt: Long? = null,
 ) {
-
   @Suppress("unused")
   @JsonSetter("scopes")
   fun jsonSetScopes(scopes: Set<String>) {

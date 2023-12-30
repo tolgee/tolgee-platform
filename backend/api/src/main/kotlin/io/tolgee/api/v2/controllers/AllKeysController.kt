@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId}/all-keys",
-  ]
+  ],
 )
 @Tag(name = "All localization keys", description = "All localization keys in the project")
 class AllKeysController(

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PermissionRepository : JpaRepository<Permission, Long> {
-
   @Query(
     """
     from Permission p 
@@ -16,12 +15,12 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
         ((:projectId is null and p.project.id is null) or p.project.id = :projectId) and 
         ((:userId is null and p.user.id is null) or p.user.id = :userId) and 
         ((:organizationId is null and p.organization.id is null) or p.organization.id = :organizationId)
-  """
+  """,
   )
   fun findOneByProjectIdAndUserIdAndOrganizationId(
     projectId: Long?,
     userId: Long?,
-    organizationId: Long? = null
+    organizationId: Long? = null,
   ): Permission?
 
   fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
@@ -36,7 +35,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
         left join fetch p.viewLanguages
         left join fetch p.translateLanguages
         left join fetch p.stateChangeLanguages
-        where p.project.id = :projectId"""
+        where p.project.id = :projectId""",
   )
   fun getByProjectWithFetchedLanguages(projectId: Long): List<Permission>
 
@@ -47,7 +46,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     left join p.viewLanguages vl on vl = :language
     left join p.stateChangeLanguages scl on scl = :language
     where tl.id is not null or vl.id is not null or scl.id is not null
-  """
+  """,
   )
   fun findAllByPermittedLanguage(language: Language): List<Permission>
 
@@ -57,9 +56,12 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
       join p.translateLanguages l
       where p.user.id in :userIds
       and p.project.id = :projectId
-    """
+    """,
   )
-  fun getUserPermittedLanguageIds(userIds: List<Long>, projectId: Long): List<Array<Long>>
+  fun getUserPermittedLanguageIds(
+    userIds: List<Long>,
+    projectId: Long,
+  ): List<Array<Long>>
 
   @Query(
     """
@@ -67,14 +69,17 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
       join p.translateLanguages l
       where p.project.id in :projectIds
       and p.user.id = :userId
-    """
+    """,
   )
-  fun getProjectPermittedLanguageIds(projectIds: List<Long>, userId: Long): List<Array<Long>>
+  fun getProjectPermittedLanguageIds(
+    projectIds: List<Long>,
+    userId: Long,
+  ): List<Array<Long>>
 
   @Query(
     """
       from Permission p where p.organization.id in :ids
-    """
+    """,
   )
   fun getOrganizationBasePermissions(ids: Iterable<Long>): List<Permission>
 
@@ -84,7 +89,10 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     join p.project pr
     join pr.organizationOwner oo on oo.id = :organizationId 
     where p.user.id = :userId
-  """
+  """,
   )
-  fun findAllByOrganizationAndUserId(organizationId: Long, userId: Long): List<Permission>
+  fun findAllByOrganizationAndUserId(
+    organizationId: Long,
+    userId: Long,
+  ): List<Permission>
 }

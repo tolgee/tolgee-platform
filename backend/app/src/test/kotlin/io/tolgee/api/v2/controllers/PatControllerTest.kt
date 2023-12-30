@@ -22,7 +22,6 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureMockMvc
 class PatControllerTest : AuthorizedControllerTest() {
-
   lateinit var testData: PatTestData
 
   @BeforeEach
@@ -64,8 +63,8 @@ class PatControllerTest : AuthorizedControllerTest() {
       "/v2/pats",
       mapOf(
         "description" to description,
-        "expiresAt" to expiresAt
-      )
+        "expiresAt" to expiresAt,
+      ),
     ).andIsCreated.andAssertThatJson {
       node("description").isEqualTo(description)
       node("expiresAt").isEqualTo(expiresAt)
@@ -77,7 +76,7 @@ class PatControllerTest : AuthorizedControllerTest() {
   @Test
   fun `delete works`() {
     performAuthDelete(
-      "/v2/pats/${testData.expiredPat.id}"
+      "/v2/pats/${testData.expiredPat.id}",
     ).andIsOk
 
     assertThat(patService.find(testData.expiredPat.id)).isNull()
@@ -90,8 +89,8 @@ class PatControllerTest : AuthorizedControllerTest() {
     performAuthPut(
       "/v2/pats/${testData.expiredPat.id}/regenerate",
       mapOf(
-        "expiresAt" to expiresAt
-      )
+        "expiresAt" to expiresAt,
+      ),
     ).andIsOk.andAssertThatJson {
       node("token").isString.startsWith("tgpat_")
       node("expiresAt").isEqualTo(expiresAt)
@@ -106,8 +105,8 @@ class PatControllerTest : AuthorizedControllerTest() {
     performAuthPut(
       "/v2/pats/${testData.expiredPat.id}/regenerate",
       mapOf(
-        "expiresAt" to null
-      )
+        "expiresAt" to null,
+      ),
     ).andIsOk.andAssertThatJson {
       node("token").isString.startsWith("tgpat_")
       node("expiresAt").isEqualTo(null)
@@ -123,7 +122,7 @@ class PatControllerTest : AuthorizedControllerTest() {
       "/v2/pats/${testData.expiredPat.id}",
       mapOf(
         "description" to description,
-      )
+      ),
     ).andIsOk.andAssertThatJson {
       node("description").isString.isEqualTo(description)
     }

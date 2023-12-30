@@ -11,22 +11,25 @@ import org.springframework.stereotype.Component
 @Component
 class UserAccountWithOrganizationRoleModelAssembler(
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
 ) :
   RepresentationModelAssemblerSupport<
-    Pair<UserAccountWithOrganizationRoleView, List<Project>>, UserAccountWithOrganizationRoleModel
-    >(
-    V2UserController::class.java, UserAccountWithOrganizationRoleModel::class.java
-  ) {
-  override fun toModel(data: Pair<UserAccountWithOrganizationRoleView, List<Project>>):
-    UserAccountWithOrganizationRoleModel {
+      Pair<UserAccountWithOrganizationRoleView, List<Project>>,
+      UserAccountWithOrganizationRoleModel,
+      >(
+      V2UserController::class.java,
+      UserAccountWithOrganizationRoleModel::class.java,
+    ) {
+  override fun toModel(
+    data: Pair<UserAccountWithOrganizationRoleView, List<Project>>,
+  ): UserAccountWithOrganizationRoleModel {
     return UserAccountWithOrganizationRoleModel(
       id = data.first.id,
       name = data.first.name,
       username = data.first.username,
       organizationRole = data.first.organizationRole,
       projectsWithDirectPermission = data.second.map { simpleProjectModelAssembler.toModel(it) },
-      avatar = avatarService.getAvatarLinks(data.first.avatarHash)
+      avatar = avatarService.getAvatarLinks(data.first.avatarHash),
     )
   }
 }

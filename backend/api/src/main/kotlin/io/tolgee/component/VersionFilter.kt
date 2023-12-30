@@ -9,13 +9,17 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class VersionFilter(
-  private val versionProvider: VersionProvider
+  private val versionProvider: VersionProvider,
 ) : OncePerRequestFilter() {
   companion object {
     const val TOLGEE_VERSION_HEADER_NAME = "X-Tolgee-Version"
   }
 
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     response.addHeader(TOLGEE_VERSION_HEADER_NAME, versionProvider.version)
     filterChain.doFilter(request, response)
   }

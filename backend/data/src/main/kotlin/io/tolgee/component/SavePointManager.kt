@@ -9,7 +9,7 @@ import java.util.*
 
 @Component
 class SavePointManager(
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
   fun setSavepoint(): Savepoint? {
     var savepoint: Savepoint? = null
@@ -25,8 +25,9 @@ class SavePointManager(
     val session = getSession()
     val coordinatorGetter = session::class.java.getMethod("getTransactionCoordinator")
     coordinatorGetter.isAccessible = true
-    val coordinator = coordinatorGetter.invoke(session) as? JdbcResourceLocalTransactionCoordinatorImpl
-      ?: throw IllegalStateException("Transaction coordinator is not JdbcResourceLocalTransactionCoordinatorImpl")
+    val coordinator =
+      coordinatorGetter.invoke(session) as? JdbcResourceLocalTransactionCoordinatorImpl
+        ?: throw IllegalStateException("Transaction coordinator is not JdbcResourceLocalTransactionCoordinatorImpl")
     val delegateField = coordinator::class.java.getDeclaredField("physicalTransactionDelegate")
     delegateField.isAccessible = true
     val delegate =

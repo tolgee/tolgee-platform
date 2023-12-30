@@ -28,11 +28,10 @@ import java.util.*
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
-    "tolgee.front-end-url=https://fake.frontend.url"
-  ]
+    "tolgee.front-end-url=https://fake.frontend.url",
+  ],
 )
 class V2UserControllerTest : AuthorizedControllerTest() {
-
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
 
@@ -49,11 +48,12 @@ class V2UserControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it updates the user profile`() {
-    val requestDTO = UserUpdateRequestDto(
-      email = "ben@ben.aa",
-      name = "Ben's new name",
-      currentPassword = initialPassword
-    )
+    val requestDTO =
+      UserUpdateRequestDto(
+        email = "ben@ben.aa",
+        name = "Ben's new name",
+        currentPassword = initialPassword,
+      )
     performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     val fromDb = userAccountService.findActive(requestDTO.email)
     Assertions.assertThat(fromDb!!.name).isEqualTo(requestDTO.name)
@@ -61,10 +61,11 @@ class V2UserControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it updates the user password`() {
-    val requestDTO = UserUpdatePasswordRequestDto(
-      password = "super new password",
-      currentPassword = initialPassword
-    )
+    val requestDTO =
+      UserUpdatePasswordRequestDto(
+        password = "super new password",
+        currentPassword = initialPassword,
+      )
     performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     val fromDb = userAccountService.findActive(initialUsername)
     Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb!!.password))
@@ -73,36 +74,42 @@ class V2UserControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it validates the user update request data`() {
-    var requestDTO = UserUpdateRequestDto(
-      email = "ben@ben.aa",
-      name = "",
-      currentPassword = initialPassword
-    )
-    var mvcResult = performAuthPut("/v2/user", requestDTO)
-      .andIsBadRequest.andReturn()
+    var requestDTO =
+      UserUpdateRequestDto(
+        email = "ben@ben.aa",
+        name = "",
+        currentPassword = initialPassword,
+      )
+    var mvcResult =
+      performAuthPut("/v2/user", requestDTO)
+        .andIsBadRequest.andReturn()
     val standardValidation = assertThat(mvcResult).error().isStandardValidation
     standardValidation.onField("name")
 
-    requestDTO = UserUpdateRequestDto(
-      email = "ben@ben.aa",
-      name = "a",
-      currentPassword = initialPassword
-    )
+    requestDTO =
+      UserUpdateRequestDto(
+        email = "ben@ben.aa",
+        name = "a",
+        currentPassword = initialPassword,
+      )
     dbPopulator.createUserIfNotExists(requestDTO.email)
-    mvcResult = performAuthPut("/v2/user", requestDTO)
-      .andIsBadRequest.andReturn()
+    mvcResult =
+      performAuthPut("/v2/user", requestDTO)
+        .andIsBadRequest.andReturn()
     assertThat(mvcResult)
       .error().isCustomValidation.hasMessage("username_already_exists")
   }
 
   @Test
   fun `it validates the password change request data`() {
-    val requestDto = UserUpdatePasswordRequestDto(
-      password = "",
-      currentPassword = initialPassword
-    )
-    val mvcResult = performAuthPut("/v2/user/password", requestDto)
-      .andIsBadRequest.andReturn()
+    val requestDto =
+      UserUpdatePasswordRequestDto(
+        password = "",
+        currentPassword = initialPassword,
+      )
+    val mvcResult =
+      performAuthPut("/v2/user/password", requestDto)
+        .andIsBadRequest.andReturn()
     val standardValidation = assertThat(mvcResult).error().isStandardValidation
     standardValidation.onField("password")
   }
@@ -112,11 +119,12 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     val oldNeedsVerification = tolgeeProperties.authentication.needsEmailVerification
     tolgeeProperties.authentication.needsEmailVerification = true
 
-    val requestDTO = UserUpdateRequestDto(
-      email = "ben@ben.aaa",
-      name = "Ben Ben",
-      currentPassword = initialPassword
-    )
+    val requestDTO =
+      UserUpdateRequestDto(
+        email = "ben@ben.aaa",
+        name = "Ben Ben",
+        currentPassword = initialPassword,
+      )
     performAuthPut("/v2/user", requestDTO).andIsOk
 
     emailTestUtil.verifyEmailSent()
@@ -163,10 +171,11 @@ class V2UserControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it invalidates tokens generated prior a password change`() {
-    val requestDTO = UserUpdatePasswordRequestDto(
-      password = "super new password",
-      currentPassword = initialPassword
-    )
+    val requestDTO =
+      UserUpdatePasswordRequestDto(
+        password = "super new password",
+        currentPassword = initialPassword,
+      )
 
     loginAsAdminIfNotLogged()
     Thread.sleep(2000)
@@ -203,9 +212,10 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     assertSingleOwned(testData.franta, listOf("Franta"))
     assertSingleOwned(testData.olga, listOf("Olga"))
-    val roles = executeInNewTransaction {
-      userAccountService.get(testData.pepa.id).organizationRoles
-    }
+    val roles =
+      executeInNewTransaction {
+        userAccountService.get(testData.pepa.id).organizationRoles
+      }
     executeInNewTransaction {
       userAccountService.delete(userAccountService.get(testData.franta.id))
     }
@@ -227,8 +237,8 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     performAuthPost(
       "/v2/user/generate-super-token",
       mapOf(
-        "password" to initialPassword
-      )
+        "password" to initialPassword,
+      ),
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
         val authentication = jwtService.validateToken(token)
@@ -245,8 +255,8 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     performAuthPost(
       "/v2/user/generate-super-token",
       mapOf(
-        "otp" to mfaService.generateStringCode(SensitiveOperationProtectionTestData.TOTP_KEY)
-      )
+        "otp" to mfaService.generateStringCode(SensitiveOperationProtectionTestData.TOTP_KEY),
+      ),
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
         val authentication = jwtService.validateToken(token)
@@ -255,7 +265,10 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     }
   }
 
-  private fun assertSingleOwned(user: UserAccount, names: List<String>) {
+  private fun assertSingleOwned(
+    user: UserAccount,
+    names: List<String>,
+  ) {
     userAccount = user
     performAuthGet("/v2/user/single-owned-organizations").andIsOk.andAssertThatJson {
       node("_embedded.organizations") {

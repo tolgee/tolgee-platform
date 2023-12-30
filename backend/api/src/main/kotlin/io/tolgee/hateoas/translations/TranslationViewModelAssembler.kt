@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class TranslationViewModelAssembler : RepresentationModelAssemblerSupport<TranslationView, TranslationViewModel>(
-  TranslationsController::class.java, TranslationViewModel::class.java
+  TranslationsController::class.java,
+  TranslationViewModel::class.java,
 ) {
   override fun toModel(view: TranslationView): TranslationViewModel {
     return TranslationViewModel(
@@ -18,7 +19,7 @@ class TranslationViewModelAssembler : RepresentationModelAssemblerSupport<Transl
       outdated = view.outdated,
       mtProvider = view.mtProvider,
       commentCount = view.commentCount,
-      unresolvedCommentCount = view.unresolvedCommentCount
+      unresolvedCommentCount = view.unresolvedCommentCount,
     )
   }
 }

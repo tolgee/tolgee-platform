@@ -7,10 +7,11 @@ import io.tolgee.model.keyBigMeta.KeysDistance
 class KeysDistanceBuilder(
   val projectBuilder: ProjectBuilder,
   val key1: Key,
-  val key2: Key
+  val key2: Key,
 ) : EntityDataBuilder<KeysDistance, KeysDistanceBuilder> {
-  override var self: KeysDistance = KeysDistance().apply {
-    project = projectBuilder.self
-    new = true
-  }
+  override var self: KeysDistance =
+    KeysDistance().apply {
+      project = projectBuilder.self
+      new = true
+    }
 }

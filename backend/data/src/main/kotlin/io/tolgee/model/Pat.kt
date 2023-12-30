@@ -16,21 +16,16 @@ class Pat(
   @field:NotEmpty
   @field:NotNull
   var tokenHash: String = "",
-
   @field:NotEmpty
   @field:NotNull
   var description: String = "",
-
   @Temporal(value = TemporalType.TIMESTAMP)
   var expiresAt: Date? = null,
-
   @Temporal(value = TemporalType.TIMESTAMP)
   var lastUsedAt: Date? = null,
-
   @Transient
-  var token: String? = null
+  var token: String? = null,
 ) : StandardAuditModel() {
-
   @ManyToOne
   @NotNull
   lateinit var userAccount: UserAccount

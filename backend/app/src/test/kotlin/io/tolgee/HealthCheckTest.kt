@@ -10,7 +10,6 @@ import io.tolgee.testing.AbstractControllerTest
 import org.junit.jupiter.api.Test
 
 class HealthCheckTest : AbstractControllerTest() {
-
   @Test
   fun `health check works`() {
     performGet("/actuator/health").andPrettyPrint.andIsOk

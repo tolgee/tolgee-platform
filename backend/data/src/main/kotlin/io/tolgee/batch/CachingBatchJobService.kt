@@ -19,13 +19,12 @@ class CachingBatchJobService(
   private val batchJobRepository: BatchJobRepository,
   @Lazy
   private val batchJobService: BatchJobService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) : Logging {
-
   @Transactional
   @CacheEvict(
     cacheNames = [Caches.BATCH_JOBS],
-    key = "#result.id"
+    key = "#result.id",
   )
   fun saveJob(batchJob: BatchJob): BatchJob {
     logger.debug("Saving job ${batchJob.id}, status: ${batchJob.status}")
@@ -35,7 +34,7 @@ class CachingBatchJobService(
   @Transactional
   @CacheEvict(
     cacheNames = [Caches.BATCH_JOBS],
-    key = "#jobId"
+    key = "#jobId",
   )
   fun setRunningState(jobId: Long) {
     logger.debug("Setting running state for job $jobId")
@@ -48,7 +47,7 @@ class CachingBatchJobService(
 
   @Cacheable(
     cacheNames = [Caches.BATCH_JOBS],
-    key = "#id"
+    key = "#id",
   )
   fun findJobDto(id: Long): BatchJobDto? {
     val entity = batchJobService.findJobEntity(id) ?: return null
@@ -58,7 +57,7 @@ class CachingBatchJobService(
 
   @CacheEvict(
     cacheNames = [Caches.BATCH_JOBS],
-    key = "#jobId"
+    key = "#jobId",
   )
   fun evictJobCache(jobId: Long) {
   }

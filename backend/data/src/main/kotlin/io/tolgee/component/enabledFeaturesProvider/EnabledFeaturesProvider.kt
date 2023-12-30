@@ -7,11 +7,17 @@ import io.tolgee.exceptions.BadRequestException
 interface EnabledFeaturesProvider {
   fun get(organizationId: Long): Array<Feature>
 
-  fun isFeatureEnabled(organizationId: Long, feature: Feature): Boolean {
+  fun isFeatureEnabled(
+    organizationId: Long,
+    feature: Feature,
+  ): Boolean {
     return this.get(organizationId).contains(feature)
   }
 
-  fun checkFeatureEnabled(organizationId: Long, feature: Feature) {
+  fun checkFeatureEnabled(
+    organizationId: Long,
+    feature: Feature,
+  ) {
     if (!this.isFeatureEnabled(organizationId, feature)) {
       throw BadRequestException(Message.FEATURE_NOT_ENABLED, listOf(feature))
     }

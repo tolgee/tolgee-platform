@@ -10,14 +10,15 @@ class PathDTO private constructor() {
   val name: String
     get() = fullPath.last()
   val fullPathString: String
-    get() = fullPath.stream().map { i: String ->
-      i.replace(
-        ("\\" + DELIMITER).toRegex(),
-        "\\\\" + DELIMITER
+    get() =
+      fullPath.stream().map { i: String ->
+        i.replace(
+          ("\\" + DELIMITER).toRegex(),
+          "\\\\" + DELIMITER,
+        )
+      }.collect(
+        Collectors.joining("."),
       )
-    }.collect(
-      Collectors.joining(".")
-    )
   val path: List<String>
     get() {
       val path = LinkedList(fullPath)
@@ -43,6 +44,7 @@ class PathDTO private constructor() {
 
   companion object {
     const val DELIMITER = '.'
+
     fun fromFullPath(fullPath: String?): PathDTO {
       val pathDTO = PathDTO()
       pathDTO.add(splitOnNonEscapedDelimiter(fullPath!!, DELIMITER))
@@ -55,7 +57,10 @@ class PathDTO private constructor() {
       return pathDTO
     }
 
-    fun fromPathAndName(path: String, name: String): PathDTO {
+    fun fromPathAndName(
+      path: String,
+      name: String,
+    ): PathDTO {
       val pathDTO = PathDTO()
       var items = splitOnNonEscapedDelimiter(path, DELIMITER)
       if (path.isEmpty()) {
@@ -66,7 +71,10 @@ class PathDTO private constructor() {
       return pathDTO
     }
 
-    fun fromPathAndName(path: List<String>, name: String): PathDTO {
+    fun fromPathAndName(
+      path: List<String>,
+      name: String,
+    ): PathDTO {
       val pathDTO = PathDTO()
       pathDTO.add(path)
       pathDTO.add(name)

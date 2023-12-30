@@ -9,6 +9,7 @@ class PoTranslationMeta {
 
   override fun toString(): String {
     return """PoTranslationMeta(translatorComments=$translatorComments, 
-            |extractedComments=$extractedComments, reference=$references, flags=$flags)""".trimMargin()
+            |extractedComments=$extractedComments, reference=$references, flags=$flags)
+      """.trimMargin()
   }
 }

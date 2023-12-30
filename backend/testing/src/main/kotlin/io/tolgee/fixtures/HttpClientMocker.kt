@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 
 class HttpClientMocker(private val restTemplate: RestTemplate) {
   data class VerifyTools(
-    val captor: KArgumentCaptor<HttpEntity<*>> = argumentCaptor()
+    val captor: KArgumentCaptor<HttpEntity<*>> = argumentCaptor(),
   )
 
   data class Definition(
@@ -34,8 +34,8 @@ class HttpClientMocker(private val restTemplate: RestTemplate) {
         argThat<String> { definition.url(this) },
         argThat { definition.method(this) },
         verifyTools.captor.capture(),
-        eq(String::class.java)
-      )
+        eq(String::class.java),
+      ),
     ).apply {
       if (toThrow != null) {
         thenThrow(toThrow!!)

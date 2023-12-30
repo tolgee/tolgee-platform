@@ -8,5 +8,5 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "fileIssues", itemRelation = "fileIssue")
 open class ImportAddFilesResultModel(
   val errors: List<ErrorResponseBody>,
-  val result: PagedModel<ImportLanguageModel>?
+  val result: PagedModel<ImportLanguageModel>?,
 ) : RepresentationModel<ImportAddFilesResultModel>()

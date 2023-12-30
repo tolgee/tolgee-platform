@@ -13,13 +13,13 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class CopyTranslationsChunkProcessor(
   private val translationService: TranslationService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) : ChunkProcessor<CopyTranslationRequest, CopyTranslationJobParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit)
+    onProgress: ((Int) -> Unit),
   ) {
     val subChunked = chunk.chunked(1000)
     var progress: Int = 0

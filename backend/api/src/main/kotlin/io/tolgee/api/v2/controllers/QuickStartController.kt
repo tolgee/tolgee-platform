@@ -15,18 +15,21 @@ import org.springframework.web.bind.annotation.RestController
 class QuickStartController(
   private val quickStartService: QuickStartService,
   private val quickStartModelAssembler: QuickStartModelAssembler,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @PutMapping("/steps/{step}/complete")
-  fun completeGuideStep(@PathVariable("step") step: String): QuickStartModel {
-    val entity = quickStartService.completeStep(authenticationFacade.authenticatedUser, step)
-      ?: throw NotFoundException()
+  fun completeGuideStep(
+    @PathVariable("step") step: String,
+  ): QuickStartModel {
+    val entity =
+      quickStartService.completeStep(authenticationFacade.authenticatedUser, step)
+        ?: throw NotFoundException()
     return quickStartModelAssembler.toModel(entity)
   }
 
   @PutMapping("/set-finished/{finished}")
   fun setFinishedState(
-    @PathVariable finished: Boolean
+    @PathVariable finished: Boolean,
   ): QuickStartModel {
     val entity = quickStartService.setFinishState(authenticationFacade.authenticatedUser, finished)
     return quickStartModelAssembler.toModel(entity)
@@ -34,7 +37,7 @@ class QuickStartController(
 
   @PutMapping("/set-open/{open}")
   fun setOpenState(
-    @PathVariable open: Boolean
+    @PathVariable open: Boolean,
   ): QuickStartModel {
     val entity = quickStartService.setOpenState(authenticationFacade.authenticatedUser, open)
     return quickStartModelAssembler.toModel(entity)

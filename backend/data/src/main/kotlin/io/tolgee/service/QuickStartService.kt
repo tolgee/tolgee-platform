@@ -13,16 +13,22 @@ import org.springframework.stereotype.Component
 @Component
 class QuickStartService(
   private val quickStartRepository: QuickStartRepository,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
-  fun create(userAccount: UserAccount, organization: Organization) {
+  fun create(
+    userAccount: UserAccount,
+    organization: Organization,
+  ) {
     val quickStart = QuickStart(userAccount)
     quickStart.organization = organization
     quickStartRepository.save(quickStart)
     DemoProjectCreator(organization, applicationContext).createDemoProject()
   }
 
-  fun completeStep(userAccount: UserAccountDto, step: String): QuickStart? {
+  fun completeStep(
+    userAccount: UserAccountDto,
+    step: String,
+  ): QuickStart? {
     val quickStart = quickStartRepository.findByUserAccountId(userAccount.id)
     if (quickStart?.completedSteps?.let { !it.contains(step) } == true) {
       quickStart.completedSteps = quickStart.completedSteps.plus(step)
@@ -31,23 +37,34 @@ class QuickStartService(
     return quickStart
   }
 
-  fun setFinishState(userAccount: UserAccountDto, finished: Boolean): QuickStart {
-    val quickStart = quickStartRepository.findByUserAccountId(userAccount.id)
-      ?: throw ChangeSetPersister.NotFoundException()
+  fun setFinishState(
+    userAccount: UserAccountDto,
+    finished: Boolean,
+  ): QuickStart {
+    val quickStart =
+      quickStartRepository.findByUserAccountId(userAccount.id)
+        ?: throw ChangeSetPersister.NotFoundException()
     quickStart.finished = finished
     quickStartRepository.save(quickStart)
     return quickStart
   }
 
-  fun setOpenState(userAccount: UserAccountDto, open: Boolean): QuickStart {
-    val quickStart = quickStartRepository.findByUserAccountId(userAccount.id)
-      ?: throw ChangeSetPersister.NotFoundException()
+  fun setOpenState(
+    userAccount: UserAccountDto,
+    open: Boolean,
+  ): QuickStart {
+    val quickStart =
+      quickStartRepository.findByUserAccountId(userAccount.id)
+        ?: throw ChangeSetPersister.NotFoundException()
     quickStart.open = open
     quickStartRepository.save(quickStart)
     return quickStart
   }
 
-  fun find(userAccountId: Long, organizationId: Long?): QuickStart? {
+  fun find(
+    userAccountId: Long,
+    organizationId: Long?,
+  ): QuickStart? {
     organizationId ?: return null
     return quickStartRepository.findByUserAccountIdAndOrganizationId(userAccountId, organizationId)
   }

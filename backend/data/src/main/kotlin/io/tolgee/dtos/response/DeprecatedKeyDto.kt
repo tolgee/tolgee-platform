@@ -11,7 +11,7 @@ data class DeprecatedKeyDto(
   @field:NotBlank
   @field:Size(min = 1, max = 300)
   @Schema(description = "This means name of key. Will be renamed in v2")
-  var fullPathString: String = ""
+  var fullPathString: String = "",
 ) {
   @get:JsonIgnore
   val pathDto: PathDTO

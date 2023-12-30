@@ -11,19 +11,14 @@ import org.springframework.hateoas.server.core.Relation
 open class TranslationModel(
   @Schema(description = "Id of translation record")
   val id: Long,
-
   @Schema(description = "Translation text")
   val text: String?,
-
   @Schema(description = "State of translation")
   val state: TranslationState,
-
   @Schema(description = "Whether base language translation was changed after this translation was updated")
   val outdated: Boolean,
-
   @Schema(description = "Was translated using Translation Memory or Machine translation service?")
   val auto: Boolean,
-
   @Schema(description = "Which machine translation service was used to auto translate this")
   val mtProvider: MtServiceType?,
 ) : RepresentationModel<TranslationModel>()

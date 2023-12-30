@@ -18,18 +18,25 @@ import java.time.Duration
 class AutomationsBatchJobCreator(
   val batchJobService: BatchJobService,
   val automationService: AutomationService,
-  val entityManager: EntityManager
+  val entityManager: EntityManager,
 ) {
-  fun executeActivityAutomation(projectId: Long, type: ActivityType, activityRevisionId: Long) {
+  fun executeActivityAutomation(
+    projectId: Long,
+    type: ActivityType,
+    activityRevisionId: Long,
+  ) {
     startBatchJobForAutomations(projectId, AutomationTriggerType.ACTIVITY, type, activityRevisionId)
   }
 
-  fun executeTranslationDataModificationAutomation(projectId: Long, activityRevisionId: Long) {
+  fun executeTranslationDataModificationAutomation(
+    projectId: Long,
+    activityRevisionId: Long,
+  ) {
     startBatchJobForAutomations(
       projectId,
       AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
       null,
-      activityRevisionId
+      activityRevisionId,
     )
   }
 
@@ -37,7 +44,7 @@ class AutomationsBatchJobCreator(
     projectId: Long,
     triggerType: AutomationTriggerType,
     activityType: ActivityType? = null,
-    activityRevisionId: Long
+    activityRevisionId: Long,
   ) {
     val automations =
       automationService.getProjectAutomations(projectId, triggerType, activityType)
@@ -59,7 +66,7 @@ class AutomationsBatchJobCreator(
     trigger: AutomationTriggerDto,
     action: AutomationActionDto,
     projectId: Long,
-    activityRevisionId: Long
+    activityRevisionId: Long,
   ) {
     batchJobService.startJob(
       AutomationBjRequest(trigger.id, action.id, activityRevisionId),
@@ -67,7 +74,7 @@ class AutomationsBatchJobCreator(
       author = null,
       type = BatchJobType.AUTOMATION,
       isHidden = true,
-      debounceDuration = trigger.debounceDurationInMs?.let { Duration.ofMillis(it) }
+      debounceDuration = trigger.debounceDurationInMs?.let { Duration.ofMillis(it) },
     )
   }
 }

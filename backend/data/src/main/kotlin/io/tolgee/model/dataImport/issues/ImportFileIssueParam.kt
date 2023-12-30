@@ -11,10 +11,8 @@ import jakarta.validation.constraints.NotBlank
 class ImportFileIssueParam(
   @ManyToOne(optional = false)
   val issue: ImportFileIssue,
-
   @Enumerated
   val type: FileIssueParamType,
-
   @field:NotBlank
-  val value: String
+  val value: String,
 ) : StandardAuditModel()

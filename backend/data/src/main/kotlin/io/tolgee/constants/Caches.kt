@@ -17,19 +17,20 @@ interface Caches {
     const val DISMISSED_ANNOUNCEMENT = "dismissedAnnouncement"
     const val AUTOMATIONS = "automations"
 
-    val caches = listOf(
-      USER_ACCOUNTS,
-      PROJECT_API_KEYS,
-      PERSONAL_ACCESS_TOKENS,
-      ORGANIZATIONS,
-      PROJECTS,
-      PERMISSIONS,
-      MACHINE_TRANSLATIONS,
-      PROJECT_TRANSLATIONS_MODIFIED,
-      BUSINESS_EVENT_THROTTLING,
-      USAGE,
-      DISMISSED_ANNOUNCEMENT,
-      AUTOMATIONS
-    )
+    val caches =
+      listOf(
+        USER_ACCOUNTS,
+        PROJECT_API_KEYS,
+        PERSONAL_ACCESS_TOKENS,
+        ORGANIZATIONS,
+        PROJECTS,
+        PERMISSIONS,
+        MACHINE_TRANSLATIONS,
+        PROJECT_TRANSLATIONS_MODIFIED,
+        BUSINESS_EVENT_THROTTLING,
+        USAGE,
+        DISMISSED_ANNOUNCEMENT,
+        AUTOMATIONS,
+      )
   }
 }

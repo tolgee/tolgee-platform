@@ -4,7 +4,6 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 
 class BatchJobsTestData : BaseTestData() {
-
   val anotherUser = root.addUserAccount { username = "anotherUser" }.self
   val germanLanguage = projectBuilder.addGerman().self
   val czechLanguage = projectBuilder.addCzech().self

@@ -65,32 +65,44 @@ class PatService(
     return keyGenerator.generate(256)
   }
 
-  fun create(dto: CreatePatDto, userAccount: UserAccount): Pat {
-    val pat = Pat().apply {
-      expiresAt = dto.expiresAt.epochToDate()
-      description = dto.description
-      this.userAccount = userAccount
-    }
+  fun create(
+    dto: CreatePatDto,
+    userAccount: UserAccount,
+  ): Pat {
+    val pat =
+      Pat().apply {
+        expiresAt = dto.expiresAt.epochToDate()
+        description = dto.description
+        this.userAccount = userAccount
+      }
     return save(pat)
   }
 
-  fun regenerate(id: Long, expiresAt: Long?): Pat {
-    val pat = get(id).apply {
-      // Manual cache eviction
-      cache?.evict(this.tokenHash)
+  fun regenerate(
+    id: Long,
+    expiresAt: Long?,
+  ): Pat {
+    val pat =
+      get(id).apply {
+        // Manual cache eviction
+        cache?.evict(this.tokenHash)
 
-      this.expiresAt = expiresAt.epochToDate()
-      this.regenerateToken()
-      save(this)
-    }
+        this.expiresAt = expiresAt.epochToDate()
+        this.regenerateToken()
+        save(this)
+      }
     return pat
   }
 
-  fun update(id: Long, updatePatDto: UpdatePatDto): Pat {
+  fun update(
+    id: Long,
+    updatePatDto: UpdatePatDto,
+  ): Pat {
     // Cache eviction: Not necessary, description is not cached
-    val pat = get(id).apply {
-      this.description = updatePatDto.description
-    }
+    val pat =
+      get(id).apply {
+        this.description = updatePatDto.description
+      }
     return save(pat)
   }
 
@@ -103,7 +115,10 @@ class PatService(
     return patRepository.deleteById(pat.id)
   }
 
-  fun findAll(userId: Long, pageable: Pageable): Page<Pat> {
+  fun findAll(
+    userId: Long,
+    pageable: Pageable,
+  ): Page<Pat> {
     return patRepository.findAllByUserAccountId(userId, pageable)
   }
 

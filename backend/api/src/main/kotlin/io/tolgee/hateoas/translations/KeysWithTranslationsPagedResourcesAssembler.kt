@@ -22,21 +22,22 @@ class KeysWithTranslationsPagedResourcesAssembler(
     entities: Page<KeyWithTranslationsView>,
     selectedLanguages: Collection<Language>,
     nextCursor: String?,
-    baseLanguage: Language?
+    baseLanguage: Language?,
   ): KeysWithTranslationsPageModel {
     val pageModel = toModel(entities, keyWithTranslationsModelAssembler)
     return KeysWithTranslationsPageModel(
       content = pageModel.content,
       metadata = pageModel.metadata,
       links = pageModel.links.toList().toTypedArray(),
-      selectedLanguages = selectedLanguages.map {
-        languageModelAssembler.toModel(
-          LanguageViewImpl(
-            it,
-            it.id == baseLanguage?.id
+      selectedLanguages =
+        selectedLanguages.map {
+          languageModelAssembler.toModel(
+            LanguageViewImpl(
+              it,
+              it.id == baseLanguage?.id,
+            ),
           )
-        )
-      },
+        },
       nextCursor = nextCursor,
     )
   }

@@ -6,5 +6,5 @@ import org.springframework.validation.annotation.Validated
 @Validated
 data class ImportKeysDto(
   @field:Valid
-  val keys: List<ImportKeysItemDto> = listOf()
+  val keys: List<ImportKeysItemDto> = listOf(),
 )

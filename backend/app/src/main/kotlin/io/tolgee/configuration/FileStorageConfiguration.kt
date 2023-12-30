@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration
 class FileStorageConfiguration(
   private val properties: TolgeeProperties,
 ) {
-
   private val s3config = properties.fileStorage.s3
 
   @Bean

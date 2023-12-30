@@ -17,15 +17,14 @@ import org.springframework.data.domain.Persistable
     Index(columnList = "key1Id, key2Id", unique = true),
     Index(columnList = "key1Id"),
     Index(columnList = "key2Id"),
-  ]
+  ],
 )
 @IdClass(KeysDistanceId::class)
 class KeysDistance(
   @Id
   var key1Id: Long = 0,
-
   @Id
-  var key2Id: Long = 0
+  var key2Id: Long = 0,
 ) : AuditModel(), Persistable<KeysDistanceId> {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -33,6 +32,7 @@ class KeysDistance(
   var score: Long = MAX_SCORE
 
   var hits: Long = 1
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false

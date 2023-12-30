@@ -15,7 +15,10 @@ class ProcessorFactory {
     }
   }
 
-  fun getProcessor(file: ImportFileDto, context: FileProcessorContext): ImportFileProcessor {
+  fun getProcessor(
+    file: ImportFileDto,
+    context: FileProcessorContext,
+  ): ImportFileProcessor {
     return when (file.name.fileNameExtension) {
       "json" -> JsonFileProcessor(context)
       "po" -> PoFileProcessor(context)

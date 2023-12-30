@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 class OrganizationServiceTest : AbstractSpringTest() {
-
   @Test
   fun `deletes organization with preferences`() {
     val testData = OrganizationTestData()

@@ -8,5 +8,5 @@ data class WebsocketEvent(
   val sourceActivity: ActivityType?,
   val activityId: Long?,
   val dataCollapsed: Boolean,
-  val timestamp: Long
+  val timestamp: Long,
 )

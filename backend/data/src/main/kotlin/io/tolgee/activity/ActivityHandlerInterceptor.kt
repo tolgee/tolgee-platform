@@ -18,11 +18,15 @@ import java.util.*
 @Component
 class ActivityHandlerInterceptor(
   private val activityHolder: ActivityHolder,
-  private val sdkInfoProvider: SdkInfoProvider
+  private val sdkInfoProvider: SdkInfoProvider,
 ) : HandlerInterceptor {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+  override fun preHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+  ): Boolean {
     if (handler !is HandlerMethod) {
       return super.preHandle(request, response, handler)
     }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["internal/webhook-testing"])
 @Transactional
 class WebhookTestingController(
-  val tolgeeProperties: TolgeeProperties
+  val tolgeeProperties: TolgeeProperties,
 ) {
   @PostMapping(value = [""])
   @Transactional

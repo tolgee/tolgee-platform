@@ -12,7 +12,6 @@ import java.io.File
 
 @SpringBootTest
 class FileStorageFsTest : AbstractFileStorageServiceTest() {
-
   lateinit var file: File
 
   @BeforeEach

@@ -15,10 +15,13 @@ open class ProjectWithLanguagesView(
   override val organizationOwner: Organization,
   override val organizationRole: OrganizationRoleType?,
   override val directPermission: Permission?,
-  val permittedLanguageIds: List<Long>?
+  val permittedLanguageIds: List<Long>?,
 ) : ProjectView {
   companion object {
-    fun fromProjectView(view: ProjectView, permittedLanguageIds: List<Long>?): ProjectWithLanguagesView {
+    fun fromProjectView(
+      view: ProjectView,
+      permittedLanguageIds: List<Long>?,
+    ): ProjectWithLanguagesView {
       return ProjectWithLanguagesView(
         id = view.id,
         name = view.name,
@@ -29,7 +32,7 @@ open class ProjectWithLanguagesView(
         organizationOwner = view.organizationOwner,
         organizationRole = view.organizationRole,
         directPermission = view.directPermission,
-        permittedLanguageIds = permittedLanguageIds
+        permittedLanguageIds = permittedLanguageIds,
       )
     }
   }

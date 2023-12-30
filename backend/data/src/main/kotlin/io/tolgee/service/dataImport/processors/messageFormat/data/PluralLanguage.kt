@@ -6,5 +6,5 @@ data class PluralLanguage(
   val examples: List<PluralExample>,
   val nplurals: Int,
   val pluralsText: String,
-  val pluralsFunc: (n: Int) -> Int
+  val pluralsFunc: (n: Int) -> Int,
 )

@@ -10,5 +10,5 @@ data class CreateProjectInvitationParams(
   var languagePermissions: LanguagePermissions = LanguagePermissions(null, null, null),
   var scopes: Set<String>? = null,
   override val email: String? = null,
-  override val name: String? = null
+  override val name: String? = null,
 ) : CreateInvitationParams

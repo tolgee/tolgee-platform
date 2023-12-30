@@ -14,9 +14,8 @@ import javax.xml.stream.events.StartElement
 
 class Xliff12FileProcessor(
   override val context: FileProcessorContext,
-  val xmlEventReader: XMLEventReader
+  val xmlEventReader: XMLEventReader,
 ) : ImportFileProcessor() {
-
   private val openElements = mutableListOf("xliff")
   private val currentOpenElement: String?
     get() = openElements.lastOrNull()
@@ -46,12 +45,15 @@ class Xliff12FileProcessor(
             openElements.add(startElement.name.localPart.lowercase(Locale.getDefault()))
             when (currentOpenElement) {
               "file" -> {
-                fileOriginal = startElement
-                  .getAttributeByName(QName(null, "original"))?.value
-                sourceLanguage = startElement
-                  .getAttributeByName(QName(null, "source-language"))?.value
-                targetLanguage = startElement
-                  .getAttributeByName(QName(null, "target-language"))?.value
+                fileOriginal =
+                  startElement
+                    .getAttributeByName(QName(null, "original"))?.value
+                sourceLanguage =
+                  startElement
+                    .getAttributeByName(QName(null, "source-language"))?.value
+                targetLanguage =
+                  startElement
+                    .getAttributeByName(QName(null, "target-language"))?.value
               }
               "trans-unit" -> {
                 id = startElement.getAttributeByName(QName(null, "id"))?.value
@@ -61,7 +63,7 @@ class Xliff12FileProcessor(
                 if (fileOriginal != null && id == null) {
                   context.fileEntity.addIssue(
                     FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED,
-                    mapOf(FileIssueParamType.FILE_NODE_ORIGINAL to fileOriginal!!)
+                    mapOf(FileIssueParamType.FILE_NODE_ORIGINAL to fileOriginal!!),
                   )
                 }
               }
@@ -69,12 +71,13 @@ class Xliff12FileProcessor(
           }
         }
         event.isCharacters -> {
-          if (currentOpenElement != null)
+          if (currentOpenElement != null) {
             when (currentOpenElement!!) {
               in "source", "target", "note" -> {
                 currentTextValue = (currentTextValue ?: "") + event.asCharacters().data
               }
             }
+          }
         }
         event.isEndElement ->
           if (event.isEndElement) {
@@ -90,7 +93,7 @@ class Xliff12FileProcessor(
                 if (id != null && !targetProvided) {
                   context.fileEntity.addIssue(
                     FileIssueType.TARGET_NOT_PROVIDED,
-                    mapOf(FileIssueParamType.KEY_NAME to id!!)
+                    mapOf(FileIssueParamType.KEY_NAME to id!!),
                   )
                   id = null
                 }

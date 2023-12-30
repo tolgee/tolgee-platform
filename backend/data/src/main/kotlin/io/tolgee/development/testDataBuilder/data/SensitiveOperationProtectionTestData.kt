@@ -14,29 +14,30 @@ class SensitiveOperationProtectionTestData {
   lateinit var frantasProject: Project
   lateinit var pepasProject: Project
 
-  val root = TestDataBuilder {
-    addUserAccount {
-      username = "franta"
-      name = "Franta"
-      franta = this
-    }.build {
-      addProject {
-        name = "Project"
-        organizationOwner = this@build.defaultOrganizationBuilder.self
-        frantasProject = this
+  val root =
+    TestDataBuilder {
+      addUserAccount {
+        username = "franta"
+        name = "Franta"
+        franta = this
+      }.build {
+        addProject {
+          name = "Project"
+          organizationOwner = this@build.defaultOrganizationBuilder.self
+          frantasProject = this
+        }
+      }
+      addUserAccount {
+        username = "pepa"
+        name = "Pepa"
+        totpKey = TOTP_KEY
+        pepa = this
+      }.build {
+        addProject {
+          name = "Project"
+          organizationOwner = this@build.defaultOrganizationBuilder.self
+          pepasProject = this
+        }
       }
     }
-    addUserAccount {
-      username = "pepa"
-      name = "Pepa"
-      totpKey = TOTP_KEY
-      pepa = this
-    }.build {
-      addProject {
-        name = "Project"
-        organizationOwner = this@build.defaultOrganizationBuilder.self
-        pepasProject = this
-      }
-    }
-  }
 }
