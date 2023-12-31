@@ -30,7 +30,7 @@ class ZipTypeProcessor : ImportArchiveProcessor {
         files[fileName] =
           ImportFileDto(
             name = fileName,
-            data = data
+            data = data,
           )
       }
     }

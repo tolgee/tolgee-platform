@@ -88,9 +88,10 @@ class Xliff12FileProcessorTest {
 
   @Test
   fun `handles errors correctly`() {
-    importFileDto = ImportFileDto(
-      "exmample.xliff",
-      File("src/test/resources/import/xliff/error_example.xliff").readBytes(),
+    importFileDto =
+      ImportFileDto(
+        "exmample.xliff",
+        File("src/test/resources/import/xliff/error_example.xliff").readBytes(),
       )
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.data.inputStream())
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)

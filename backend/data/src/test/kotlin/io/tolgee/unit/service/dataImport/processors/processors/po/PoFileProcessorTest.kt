@@ -80,10 +80,11 @@ class PoFileProcessorTest {
   private fun mockImportFile(inputStream: InputStream) {
     importMock = mock()
     importFile = ImportFile("exmample.po", importMock)
-    importFileDto = ImportFileDto(
-      "exmample.po",
-      inputStream.readAllBytes()
-    )
+    importFileDto =
+      ImportFileDto(
+        "exmample.po",
+        inputStream.readAllBytes(),
+      )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 }

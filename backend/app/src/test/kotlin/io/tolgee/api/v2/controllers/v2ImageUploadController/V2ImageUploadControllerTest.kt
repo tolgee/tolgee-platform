@@ -86,7 +86,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
         .andReturn()
     assertThat(result.response.contentAsByteArray)
       .isEqualTo(
-        fileStorage.readFile("uploadedImages/${image.filenameWithExtension}")
+        fileStorage.readFile("uploadedImages/${image.filenameWithExtension}"),
       )
   }
 

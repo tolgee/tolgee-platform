@@ -65,7 +65,7 @@ class ImportService(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: ImportService,
   private val fileStorage: FileStorage,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   @Transactional
   fun addFiles(
@@ -109,7 +109,7 @@ class ImportService(
     projectId: Long,
     authorId: Long,
     forceMode: ForceMode = ForceMode.NO_FORCE,
-    reportStatus: (ImportApplicationStatus) -> Unit = {}
+    reportStatus: (ImportApplicationStatus) -> Unit = {},
   ) {
     import(getNotExpired(projectId, authorId), forceMode, reportStatus)
   }
@@ -118,7 +118,7 @@ class ImportService(
   fun import(
     import: Import,
     forceMode: ForceMode = ForceMode.NO_FORCE,
-    reportStatus: (ImportApplicationStatus) -> Unit = {}
+    reportStatus: (ImportApplicationStatus) -> Unit = {},
   ) {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     StoredDataImporter(applicationContext, import, forceMode, reportStatus).doImport()
@@ -395,7 +395,10 @@ class ImportService(
    * When import fails, we need the files for future debugging
    */
   @Async
-  fun saveFilesToFileStorage(importId: Long, files: List<ImportFileDto>) {
+  fun saveFilesToFileStorage(
+    importId: Long,
+    files: List<ImportFileDto>,
+  ) {
     if (tolgeeProperties.import.storeFilesForDebugging) {
       files.forEach {
         fileStorage.storeFile(getFileStoragePath(importId, it.name), it.data)
@@ -403,7 +406,10 @@ class ImportService(
     }
   }
 
-  fun getFileStoragePath(importId: Long, fileName: String): String {
+  fun getFileStoragePath(
+    importId: Long,
+    fileName: String,
+  ): String {
     val notBlankFilename = fileName.ifBlank { "blank_name" }
     return "${getFileStorageImportRoot(importId)}/$notBlankFilename"
   }

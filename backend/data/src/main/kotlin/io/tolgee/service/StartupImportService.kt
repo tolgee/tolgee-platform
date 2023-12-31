@@ -109,7 +109,7 @@ class StartupImportService(
       files = fileDtos,
       project = project,
       userAccount = userAccount,
-      params = ImportAddFilesParams(storeFilesToFileStorage = false)
+      params = ImportAddFilesParams(storeFilesToFileStorage = false),
     )
     entityManager.flush()
     entityManager.clear()

@@ -96,7 +96,10 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     doesStoredFileExists(fileName, base.project.id).assert.isFalse()
   }
 
-  fun doesStoredFileExists(fileName: String, projectId: Long): Boolean {
+  fun doesStoredFileExists(
+    fileName: String,
+    projectId: Long,
+  ): Boolean {
     val import = importService.find(projectId, userAccount!!.id)
     return fileStorage.fileExists("importFiles/${import!!.id}/$fileName")
   }

@@ -66,13 +66,13 @@ class StreamingResponseBodyProvider(
             }
           }
         }
-      }
+      },
     )
   }
 
   fun OutputStreamWriter.writeJson(message: Any?) {
     this.write(
-      (objectMapper.writeValueAsString(message) + "\n")
+      (objectMapper.writeValueAsString(message) + "\n"),
     )
     this.flush()
   }
@@ -81,10 +81,11 @@ class StreamingResponseBodyProvider(
     when (e) {
       is NotFoundException -> ErrorResponseBody(e.msg.code, null)
       is ErrorException -> e.errorResponseBody
-      else -> ErrorResponseBody(
-        "unexpected_error_occurred",
-        listOf(e::class.java.name)
-      )
+      else ->
+        ErrorResponseBody(
+          "unexpected_error_occurred",
+          listOf(e::class.java.name),
+        )
     }
 
   data class StreamedErrorMessage(val error: ErrorResponseBody)

@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
 
 @SpringBootTest(
-  properties = ["tolgee.internal.use-in-memory-file-storage=false"]
+  properties = ["tolgee.internal.use-in-memory-file-storage=false"],
 )
 class FileStorageFsTest : AbstractFileStorageServiceTest() {
   lateinit var file: File

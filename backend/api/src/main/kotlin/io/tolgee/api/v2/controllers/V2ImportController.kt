@@ -92,7 +92,7 @@ class V2ImportController(
   private val namespaceService: NamespaceService,
   private val importFileIssueModelAssembler: ImportFileIssueModelAssembler,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
-  private val objectMapper: ObjectMapper
+  private val objectMapper: ObjectMapper,
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
