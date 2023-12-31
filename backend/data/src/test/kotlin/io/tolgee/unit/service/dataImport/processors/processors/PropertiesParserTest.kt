@@ -25,7 +25,7 @@ class PropertiesParserTest {
       ImportFileDto(
         "messages_en.properties",
         File("src/test/resources/import/example.properties")
-          .inputStream(),
+          .readBytes(),
       )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
