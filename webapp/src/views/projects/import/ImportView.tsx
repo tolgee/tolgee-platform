@@ -88,7 +88,7 @@ export const ImportView: FunctionComponent = () => {
         ],
       ]}
       maxWidth="wide"
-      overflow="scroll"
+      overflow="auto"
     >
       <ImportConflictResolutionDialog
         row={resolveRow}
