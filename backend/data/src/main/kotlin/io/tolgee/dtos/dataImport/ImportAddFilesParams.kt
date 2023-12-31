@@ -9,4 +9,5 @@ class ImportAddFilesParams(
         "the delimiter which will be used in names of improted keys.",
   )
   var structureDelimiter: Char? = '.',
+  var storeFilesToFileStorage: Boolean = true,
 )

@@ -18,6 +18,9 @@ declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
+import { colors } from './colors';
+
+const all = { ...colors.light, ...colors.dark };
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -36,6 +39,7 @@ declare module '@mui/material/styles/createPalette' {
     marker: Marker;
     topBanner: TopBanner;
     quickStart: QuickStart;
+    import: typeof all.import;
   }
 
   interface PaletteOptions {
@@ -54,6 +58,7 @@ declare module '@mui/material/styles/createPalette' {
     marker: Marker;
     topBanner: TopBanner;
     quickStart: QuickStart;
+    import: typeof all.import;
   }
 }
 

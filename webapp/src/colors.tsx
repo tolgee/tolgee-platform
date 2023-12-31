@@ -159,6 +159,11 @@ export const colors = {
       progressBackground: '#bcbcbc70',
       itemBorder: '#EDF0F7',
     } as QuickStart,
+    import: {
+      progressDone: '#00B962',
+      progressWorking: '#EC407A',
+      progressBackground: '#D9D9D9',
+    },
   },
   dark: {
     white: '#dddddd',
@@ -241,5 +246,10 @@ export const colors = {
       topBorder: '#2a384c',
       progressBackground: '#2c3c52',
     } as QuickStart,
+    import: {
+      progressDone: '#00B962',
+      progressWorking: '#EC407A',
+      progressBackground: '#D9D9D9',
+    },
   },
 } as const;

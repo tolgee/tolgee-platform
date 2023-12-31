@@ -184,6 +184,8 @@ declare namespace DataCy {
         "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
+        "import-progress" |
+        "import-progress-overlay" |
         "import-resolution-dialog-accept-imported-button" |
         "import-resolution-dialog-accept-old-button" |
         "import-resolution-dialog-close-button" |

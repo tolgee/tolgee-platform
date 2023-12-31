@@ -17,7 +17,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
-import java.io.File
 import java.time.Duration
 import java.util.*
 
@@ -103,9 +102,8 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       executeInNewTransaction {
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
-        assertThat(file).exists()
-        assertThat(file.readBytes().size).isCloseTo(1070, Offset.offset(500))
+        val bytes = fileStorage.readFile("screenshots/" + screenshots[0].filename)
+        assertThat(bytes.size).isCloseTo(1070, Offset.offset(500))
         node("filename").isString.startsWith(screenshots[0].filename).satisfies {
           val parts = it.split("?token=")
           val auth = jwtService.validateTicket(parts[1], JwtService.TicketType.IMG_ACCESS)

@@ -25,7 +25,7 @@ class XliffFileProcessorTest {
       ImportFileDto(
         "exmample.xliff",
         File("src/test/resources/import/xliff/example.xliff")
-          .inputStream(),
+          .readBytes(),
       )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }

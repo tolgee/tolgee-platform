@@ -150,6 +150,7 @@ const getTheme = (mode: PaletteMode) => {
       marker: c.marker,
       topBanner: c.topBanner,
       quickStart: c.quickStart,
+      import: c.import,
     },
     mixins: {
       toolbar: {

@@ -89,7 +89,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun `it force replaces translations`() {
     storedDataImporter =
       StoredDataImporter(
-        applicationContext!!,
+        applicationContext,
         importTestData.import,
         ForceMode.OVERRIDE,
       )

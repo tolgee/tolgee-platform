@@ -18,8 +18,11 @@ package io.tolgee.security.ratelimit
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.ExpectedException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-class RateLimitedException(val retryAfter: Long, val global: Boolean) : ExceptionWithMessage(Message.RATE_LIMITED)
+class RateLimitedException(val retryAfter: Long, val global: Boolean) :
+  ExceptionWithMessage(Message.RATE_LIMITED),
+  ExpectedException

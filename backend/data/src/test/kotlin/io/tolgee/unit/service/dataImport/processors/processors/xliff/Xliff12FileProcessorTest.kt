@@ -26,7 +26,7 @@ class Xliff12FileProcessorTest {
   private val xmlEventReader: XMLEventReader
     get() {
       val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
-      return inputFactory.createXMLEventReader(importFileDto.inputStream)
+      return inputFactory.createXMLEventReader(importFileDto.data.inputStream())
     }
 
   @BeforeEach
@@ -37,7 +37,7 @@ class Xliff12FileProcessorTest {
       ImportFileDto(
         "exmample.xliff",
         File("src/test/resources/import/xliff/example.xliff")
-          .inputStream(),
+          .readBytes(),
       )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
@@ -77,10 +77,10 @@ class Xliff12FileProcessorTest {
       ImportFileDto(
         "exmample.xliff",
         File("src/test/resources/import/xliff/larger.xlf")
-          .inputStream(),
+          .readBytes(),
       )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
-    xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
+    xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.data.inputStream())
     val start = System.currentTimeMillis()
     Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
     assertThat(System.currentTimeMillis() - start).isLessThan(4000)
@@ -91,10 +91,9 @@ class Xliff12FileProcessorTest {
     importFileDto =
       ImportFileDto(
         "exmample.xliff",
-        File("src/test/resources/import/xliff/error_example.xliff")
-          .inputStream(),
+        File("src/test/resources/import/xliff/error_example.xliff").readBytes(),
       )
-    xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
+    xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.data.inputStream())
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
     assertThat(fileProcessorContext.translations).hasSize(2)

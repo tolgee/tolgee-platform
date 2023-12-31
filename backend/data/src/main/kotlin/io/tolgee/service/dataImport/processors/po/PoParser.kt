@@ -93,7 +93,7 @@ class PoParser(
   }
 
   private fun processInputStream() {
-    context.file.inputStream.readAllBytes().decodeToString().forEach {
+    context.file.data.decodeToString().forEach {
       it.handle()
     }
     endTranslation()

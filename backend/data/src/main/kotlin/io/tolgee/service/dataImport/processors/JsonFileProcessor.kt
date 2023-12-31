@@ -11,7 +11,7 @@ class JsonFileProcessor(
 ) : ImportFileProcessor() {
   override fun process() {
     try {
-      val data = jacksonObjectMapper().readValue<Map<Any?, Any?>>(context.file.inputStream)
+      val data = jacksonObjectMapper().readValue<Map<Any?, Any?>>(context.file.data)
       val parsed = data.parse()
       parsed.entries.forEachIndexed { index, it ->
         context.addTranslation(it.key, languageNameGuesses[0], it.value, index)

@@ -7,6 +7,7 @@ package io.tolgee.initialUserCreation
 import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
@@ -14,6 +15,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -22,13 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
-import java.io.File
 
 @ContextRecreatingTest
 @SpringBootTest(
   classes = [Application::class],
   properties = [
-    "tolgee.file-storage.fs-data-path=./build/create-enabled-test-data/",
     "tolgee.authentication.initial-username=johny",
     "tolgee.internal.disable-initial-user-creation=false",
   ],
@@ -52,7 +52,8 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   @set:Autowired
   lateinit var initialPasswordManager: InitialPasswordManager
 
-  private val passwordFile = File("./build/create-enabled-test-data/initial.pwd")
+  @set:Autowired
+  lateinit var fileStorage: FileStorage
 
   @Autowired
   lateinit var initialUserCreatorCommandLineRunner: InitialUserCreatorCommandLineRunner
@@ -64,14 +65,13 @@ class CreateEnabledTest : AbstractTransactionalTest() {
 
   @Test
   fun storesPassword() {
-    assertThat(passwordFile).exists()
-    assertThat(passwordFile.readText()).isNotBlank
+    assertThat(getPasswordFileContents().toString(Charsets.UTF_8)).isNotBlank
   }
 
   @Test
   fun passwordStoredInDb() {
     val johny = userAccountService.findActive("johny")
-    assertThat(passwordEncoder.matches(passwordFile.readText(), johny!!.password)).isTrue
+    assertThat(passwordEncoder.matches(getPasswordFileContents().toString(Charsets.UTF_8), johny!!.password)).isTrue
   }
 
   @Test
@@ -107,7 +107,7 @@ class CreateEnabledTest : AbstractTransactionalTest() {
 
   @AfterAll
   fun cleanUp() {
-    passwordFile.delete()
+    (fileStorage as InMemoryFileStorage).clear()
     resetInitialPassword()
 
     val initial = userAccountService.findActive("johny")!!
@@ -120,5 +120,13 @@ class CreateEnabledTest : AbstractTransactionalTest() {
       isAccessible = true
       set(initialPasswordManager, null)
     }
+  }
+
+  private fun getPasswordFileContents(): ByteArray {
+    return fileStorage.readFile(FILE_NAME)
+  }
+
+  companion object {
+    const val FILE_NAME = "initial.pwd"
   }
 }

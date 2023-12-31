@@ -64,7 +64,7 @@ class CoreImportFileProcessorUnitTest {
     tolgeePropertiesMock = mock()
 
     importFile = ImportFile("lgn.json", importMock)
-    importFileDto = ImportFileDto("lng.json", "".toByteArray().inputStream())
+    importFileDto = ImportFileDto("lng.json", "".toByteArray())
     existingLanguage = Language().also { it.name = "lng" }
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
     processor = CoreImportFilesProcessor(applicationContextMock, importMock)

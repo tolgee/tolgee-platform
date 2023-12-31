@@ -4,7 +4,7 @@ spring:
       - org.redisson.spring.starter.RedissonAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   jpa:
-#    show-sql: true
+    show-sql: true
     properties:
       hibernate:
         order_by:
@@ -64,6 +64,7 @@ tolgee:
     fake-mt-providers: true
     mock-free-plan: true
     disable-initial-user-creation: true
+    use-in-memory-file-storage: true
   cache:
     caffeine-max-size: 1000
   machine-translation:
@@ -80,6 +81,7 @@ tolgee:
     server: http://localhost:8080
   batch:
     concurrency: 10
+
 logging:
   level:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG

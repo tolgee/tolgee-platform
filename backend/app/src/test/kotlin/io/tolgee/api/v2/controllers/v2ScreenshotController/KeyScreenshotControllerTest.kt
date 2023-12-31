@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.io.File
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
@@ -34,6 +34,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @AfterAll
   fun after() {
     tolgeeProperties.fileStorageUrl = initialScreenshotUrl
+    (fileStorage as InMemoryFileStorage).clear()
   }
 
   @Test
@@ -63,8 +64,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
         node("filename").isEqualTo(screenshots[0].filename)
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
-        assertThat(file).exists()
+        fileStorage.fileExists("screenshots/" + screenshots[0].filename).assert.isTrue()
         val reference = screenshots[0].keyScreenshotReferences[0]
         reference.originalText.assert.isEqualTo(text)
         reference.positions!![0].x.assert.isEqualTo(200)
@@ -116,8 +116,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
     performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
       node("_embedded.screenshots").isArray.hasSize(2)
       node("_embedded.screenshots[0].filename").isString.satisfies {
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + it)
-        assertThat(file.exists()).isTrue()
+        fileStorage.fileExists("screenshots/" + it).assert.isTrue()
       }
     }
 
@@ -151,7 +150,6 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         val key = keyService.create(project, CreateKeyDto("test"))
         screenshotService.store(screenshotFile, key, null)
       }
-    val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
     val result =
       performAuthGet("/screenshots/${screenshot.filename}").andIsOk
         .andExpect(
@@ -159,7 +157,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         )
         .andReturn()
     performAuthGet("/screenshots/${screenshot.thumbnailFilename}").andIsOk
-    assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
+    assertThat(result.response.contentAsByteArray).isEqualTo(fileStorage.readFile("screenshots/" + screenshot.filename))
   }
 
   @Test

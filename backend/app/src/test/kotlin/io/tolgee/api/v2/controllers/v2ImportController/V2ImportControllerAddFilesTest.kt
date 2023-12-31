@@ -14,6 +14,7 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
@@ -67,16 +68,40 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   @AfterEach
   fun resetProps() {
     tolgeeProperties.maxTranslationTextLength = 10000
+    (fileStorage as InMemoryFileStorage).clear()
+    tolgeeProperties.import.storeFilesForDebugging = false
   }
 
   @Test
-  fun `it parses zip file and saves issues`() {
+  fun `it parses zip file stores it for debugging and saves issues`() {
+    tolgeeProperties.import.storeFilesForDebugging = true
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performImport(projectId = base.project.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown))).andAssertThatJson {
+    val fileName = "zipOfUnknown.zip"
+    performImport(projectId = base.project.id, mapOf(Pair(fileName, zipOfUnknown))).andAssertThatJson {
       node("errors[2].code").isEqualTo("cannot_parse_file")
     }
+
+    doesStoredFileExists(fileName, base.project.id).assert.isTrue()
+  }
+
+  @Test
+  fun `doesn't store file for when disabled`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    commitTransaction()
+
+    val fileName = "zipOfUnknown.zip"
+    performImport(projectId = base.project.id, mapOf(Pair(fileName, zipOfUnknown)))
+    doesStoredFileExists(fileName, base.project.id).assert.isFalse()
+  }
+
+  fun doesStoredFileExists(
+    fileName: String,
+    projectId: Long,
+  ): Boolean {
+    val import = importService.find(projectId, userAccount!!.id)
+    return fileStorage.fileExists("importFiles/${import!!.id}/$fileName")
   }
 
   @Test

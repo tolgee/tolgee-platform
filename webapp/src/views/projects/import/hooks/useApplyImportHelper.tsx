@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import { useProject } from 'tg.hooks/useProject';
 
 import { useImportDataHelper } from './useImportDataHelper';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useNdJsonStreamedMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { T } from '@tolgee/react';
+import { OperationStatusType } from '../component/ImportFileInput';
 
 export const useApplyImportHelper = (
   dataHelper: ReturnType<typeof useImportDataHelper>
@@ -13,17 +14,24 @@ export const useApplyImportHelper = (
   const [conflictNotResolvedDialogOpen, setConflictNotResolvedDialogOpen] =
     useState(false);
 
-  const importApplyLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/import/apply',
+  const [status, setStatus] = useState(
+    undefined as OperationStatusType | undefined
+  );
+
+  const importApplyMutation = useNdJsonStreamedMutation({
+    url: '/v2/projects/{projectId}/import/apply-streaming',
     method: 'put',
     fetchOptions: {
       // error is displayed on the page
       disableErrorNotification: true,
     },
+    onData(data) {
+      setStatus(data.status);
+    },
   });
 
   const project = useProject();
-  const error = importApplyLoadable.error;
+  const error = importApplyMutation.error;
 
   const message = useMessage();
 
@@ -33,7 +41,7 @@ export const useApplyImportHelper = (
       0
     );
     if (unResolvedCount === 0) {
-      importApplyLoadable.mutate(
+      importApplyMutation.mutate(
         {
           path: {
             projectId: project.id,
@@ -53,21 +61,26 @@ export const useApplyImportHelper = (
   };
 
   useEffect(() => {
-    const error = importApplyLoadable.error;
+    const error = importApplyMutation.error;
     if (error?.code == 'conflict_is_not_resolved') {
       setConflictNotResolvedDialogOpen(true);
       return;
     }
-  }, [importApplyLoadable.error]);
+  }, [importApplyMutation.error]);
 
   useEffect(() => {
-    if (importApplyLoadable.isSuccess) {
+    if (importApplyMutation.isSuccess) {
       dataHelper.refetchData();
     }
-  }, [importApplyLoadable.isSuccess]);
+  }, [importApplyMutation.isSuccess]);
 
   const onDialogClose = () => {
     setConflictNotResolvedDialogOpen(false);
+  };
+
+  const clear = () => {
+    importApplyMutation.reset();
+    setStatus(undefined);
   };
 
   return {
@@ -75,7 +88,9 @@ export const useApplyImportHelper = (
     onApplyImport,
     conflictNotResolvedDialogOpen,
     error,
-    loading: importApplyLoadable.isLoading,
-    loaded: importApplyLoadable.isSuccess,
+    loading: importApplyMutation.isLoading,
+    loaded: importApplyMutation.isSuccess,
+    status,
+    clear,
   };
 };

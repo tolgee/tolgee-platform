@@ -16,7 +16,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useImportDataHelper } from './hooks/useImportDataHelper';
+import { useImportDataHelper } from '../hooks/useImportDataHelper';
 
 export const ImportAlertError: FunctionComponent<{
   error: components['schemas']['ImportAddFilesResultModel']['errors'][0];

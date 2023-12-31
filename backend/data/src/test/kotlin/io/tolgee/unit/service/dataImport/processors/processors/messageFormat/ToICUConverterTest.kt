@@ -27,7 +27,7 @@ class ToICUConverterTest {
       ImportFileDto(
         "exmample.po",
         File("src/test/resources/import/po/example.po")
-          .inputStream(),
+          .readBytes(),
       )
     context = FileProcessorContext(importFileDto, importFile)
   }

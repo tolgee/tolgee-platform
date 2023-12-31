@@ -3,6 +3,7 @@ package io.tolgee.service
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
@@ -72,7 +73,7 @@ class StartupImportService(
   private fun getImportFileDtos(projectDir: File) =
     projectDir.walk().filter { !it.isDirectory }.map {
       val relativePath = it.path.replace(projectDir.path, "")
-      if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.inputStream())
+      if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.readBytes())
     }.filterNotNull().toList()
 
   private fun setAuthentication(userAccount: UserAccount) {
@@ -104,7 +105,12 @@ class StartupImportService(
     project: Project,
     userAccount: UserAccount,
   ) {
-    importService.addFiles(fileDtos, project, userAccount)
+    importService.addFiles(
+      files = fileDtos,
+      project = project,
+      userAccount = userAccount,
+      params = ImportAddFilesParams(storeFilesToFileStorage = false),
+    )
     entityManager.flush()
     entityManager.clear()
     val imports = importService.getAllByProject(project.id)

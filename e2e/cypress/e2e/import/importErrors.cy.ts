@@ -1,7 +1,6 @@
 import 'cypress-file-upload';
 import { assertMessage, gcy } from '../../common/shared';
 import { visitImport } from '../../common/import';
-import { expectGlobalLoading } from '../../common/loading';
 import { importTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
@@ -67,7 +66,7 @@ describe('Import errors', () => {
     });
 
     it('error shows more and less', { retries: { runMode: 3 } }, () => {
-      expectGlobalLoading();
+      gcy('import-progress-overlay').should('be.visible');
       gcy('import-file-error')
         .findDcy('import-file-error-more-less-button')
         .click();

@@ -82,8 +82,6 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     retryingOnCommonIssues {
       initBaseData()
       try {
-        executeInNewTransaction {
-        }
         performExport()
         performExport()
         waitForNotThrowing(pollTime = 50, timeout = 3000) {

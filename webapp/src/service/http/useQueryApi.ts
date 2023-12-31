@@ -126,6 +126,45 @@ function autoErrorHandling(
   };
 }
 
+function getApiMutationOptions(
+  invalidatePrefix: string | undefined,
+  queryClient: QueryClient
+) {
+  return (options: UseQueryOptions<any, ApiError> | undefined) => ({
+    ...options,
+    onSuccess: (...params) => {
+      // @ts-ignore
+      options?.onSuccess?.(...params);
+      if (invalidatePrefix !== undefined) {
+        invalidateUrlPrefix(queryClient, invalidatePrefix);
+      }
+    },
+  });
+}
+
+const getMutationCallback = <
+  MutationFn extends (variables: any, options: any) => any
+>(
+  mutateFn: MutationFn,
+  customOptions: ReturnType<typeof getApiMutationOptions>,
+  fetchOptions: RequestOptions | undefined,
+  props: any
+) => {
+  return useCallback<typeof mutateFn>(
+    ((variables, options) => {
+      return mutateFn(
+        variables,
+        autoErrorHandling(
+          customOptions(options as any),
+          Boolean(
+            fetchOptions?.disableAutoErrorHandle || props.options?.onError
+          )
+        )
+      );
+    }) as any,
+    [mutateFn]
+  ) as MutationFn;
+};
 export const useApiMutation = <
   Url extends keyof Paths,
   Method extends keyof Paths[Url],
@@ -137,18 +176,7 @@ export const useApiMutation = <
   const { url, method, fetchOptions, options, invalidatePrefix } = props;
 
   // inject custom onSuccess
-  const customOptions = (
-    options: UseQueryOptions<any, ApiError> | undefined
-  ) => ({
-    ...options,
-    onSuccess: (...params) => {
-      // @ts-ignore
-      options?.onSuccess?.(...params);
-      if (invalidatePrefix !== undefined) {
-        invalidateUrlPrefix(queryClient, invalidatePrefix);
-      }
-    },
-  });
+  const customOptions = getApiMutationOptions(invalidatePrefix, queryClient);
 
   const mutation = useMutation<
     ResponseContent<Url, Method, Paths>,
@@ -163,34 +191,18 @@ export const useApiMutation = <
     customOptions(options as any) as any
   );
 
-  const mutate = useCallback<typeof mutation.mutate>(
-    (variables, options) => {
-      return mutation.mutate(
-        variables,
-        autoErrorHandling(
-          customOptions(options as any),
-          Boolean(
-            fetchOptions?.disableAutoErrorHandle || props.options?.onError
-          )
-        )
-      );
-    },
-    [mutation.mutate]
+  const mutate = getMutationCallback(
+    mutation.mutate,
+    customOptions,
+    fetchOptions,
+    props
   );
 
-  const mutateAsync = useCallback<typeof mutation.mutateAsync>(
-    (variables, options) => {
-      return mutation.mutateAsync(
-        variables,
-        autoErrorHandling(
-          customOptions(options as any),
-          Boolean(
-            fetchOptions?.disableAutoErrorHandle || props.options?.onError
-          )
-        )
-      );
-    },
-    [mutation.mutateAsync]
+  const mutateAsync = getMutationCallback(
+    mutation.mutateAsync,
+    customOptions,
+    fetchOptions,
+    props
   );
 
   return { ...mutation, mutate, mutateAsync };
@@ -220,3 +232,81 @@ export const useBillingApiMutation = <
 >(
   props: MutationProps<Url, Method, billingPaths>
 ) => useApiMutation<Url, Method, billingPaths>(props);
+
+export const useNdJsonStreamedMutation = <
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+>(
+  props: MutationProps<Url, Method, Paths> & { onData: (data: any) => void }
+) => {
+  const queryClient = useQueryClient();
+  const { url, method, fetchOptions, options, onData, invalidatePrefix } =
+    props;
+
+  // inject custom onSuccess
+  const customOptions = getApiMutationOptions(invalidatePrefix, queryClient);
+
+  const mutation = useMutation<
+    any[],
+    ApiError,
+    RequestParamsType<Url, Method, Paths>
+  >(async (request) => {
+    const response = await apiHttpService.schemaRequestRaw<Url, Method, Paths>(
+      url,
+      method,
+      {
+        ...fetchOptions,
+      }
+    )(request);
+    const reader = response.body?.getReader();
+    const result: any[] = [];
+    while (reader) {
+      const { done, value } = await reader.read();
+      const text = new TextDecoder().decode(value);
+      if (text) {
+        const parsed = getParsedJsonOrNull(text);
+        if (!parsed) {
+          continue;
+        }
+        if (parsed['error']) {
+          const error = parsed['error'];
+          throw new ApiError('Api error', error);
+        }
+        result.push(parsed);
+        onData(parsed);
+      }
+      if (done) {
+        break;
+      }
+    }
+    return result;
+  }, customOptions(options as any) as any);
+
+  const mutate = getMutationCallback(
+    mutation.mutate,
+    customOptions,
+    fetchOptions,
+    props
+  );
+
+  const mutateAsync = getMutationCallback(
+    mutation.mutateAsync,
+    customOptions,
+    fetchOptions,
+    props
+  );
+  return { ...mutation, mutate, mutateAsync };
+};
+
+function getParsedJsonOrNull(json?: string): any {
+  if (!json) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    return null;
+  }
+}

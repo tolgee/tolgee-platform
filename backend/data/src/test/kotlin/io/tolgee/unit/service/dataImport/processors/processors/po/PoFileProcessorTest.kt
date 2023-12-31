@@ -83,7 +83,7 @@ class PoFileProcessorTest {
     importFileDto =
       ImportFileDto(
         "exmample.po",
-        inputStream,
+        inputStream.readAllBytes(),
       )
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }

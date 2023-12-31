@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tolgee.testing.utils
+package io.tolgee.util
 
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.exceptions.FileStoreException
@@ -40,5 +40,9 @@ class InMemoryFileStorage : FileStorage {
 
   override fun fileExists(storageFilePath: String): Boolean {
     return files.contains(storageFilePath)
+  }
+
+  fun clear() {
+    files.clear()
   }
 }
