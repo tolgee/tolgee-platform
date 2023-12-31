@@ -1,3 +1,10 @@
+## [3.43.2](https://github.com/tolgee/tolgee-platform/compare/v3.43.1...v3.43.2) (2023-12-31)
+
+
+### Bug Fixes
+
+* Import improvements ([#2044](https://github.com/tolgee/tolgee-platform/issues/2044)) ([ce6b70a](https://github.com/tolgee/tolgee-platform/commit/ce6b70ac5c13ceaef4ba3bc96b79c8735ee69b6e))
+
 ## [3.43.1](https://github.com/tolgee/tolgee-platform/compare/v3.43.0...v3.43.1) (2023-12-30)
 
 
