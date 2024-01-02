@@ -122,7 +122,7 @@ export const IntegrateView: FunctionComponent = () => {
             <React.Suspense fallback={<FullPageLoading />}>
               {selectedWeapon && selectedApiKey && (
                 <Box data-cy="integrate-guide">
-                  <MdxProvider
+                  {/* <MdxProvider
                     modifyValue={(code) => {
                       return code
                         ?.replace(
@@ -144,7 +144,7 @@ export const IntegrateView: FunctionComponent = () => {
                     }}
                   >
                     {React.createElement(selectedWeapon.guide)}
-                  </MdxProvider>
+                  </MdxProvider> */}
                 </Box>
               )}
             </React.Suspense>

@@ -3,8 +3,6 @@ import { Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { useHistory } from 'react-router-dom';
-import { container } from 'tsyringe';
-
 
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { BaseFormView } from 'tg.component/layout/BaseFormView';

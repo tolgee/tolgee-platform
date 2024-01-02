@@ -5,7 +5,8 @@ import svgr from 'vite-plugin-svgr';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import mdx from '@mdx-js/rollup';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import path from 'path';
+import { resolve } from 'path';
+
 import { extractDataCy } from './dataCy.plugin';
 
 export default defineConfig({
@@ -21,10 +22,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: path.resolve(
-            __dirname,
-            './node_modules/@tginternal/language-util/flags'
-          ),
+          src: resolve('node_modules/@tginternal/language-util/flags'),
           dest: '',
         },
       ],

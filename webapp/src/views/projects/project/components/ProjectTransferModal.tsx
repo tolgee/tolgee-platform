@@ -96,7 +96,6 @@ export const ProjectTransferModal: FC<{
           </Alert>
           <Autocomplete
             id="transfer-project-owner-select"
-            freeSolo
             options={options}
             getOptionLabel={(option) => option.name || ''}
             filterOptions={(options) => {
