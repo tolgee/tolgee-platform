@@ -206,7 +206,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: webapp
-          path: ./webapp/build
+          path: ./webapp/dist
 
       - name: Download dependencies
         uses: actions/download-artifact@v3
@@ -299,7 +299,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: webapp
-          path: webapp/build
+          path: webapp/dist
 
   frontend-code-check:
     name: Frontend static check 🪲
