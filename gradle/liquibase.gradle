@@ -34,11 +34,13 @@ ext {
                             "revision_sequence_generator," +
                             "billing_sequence," +
                             "activity_sequence," +
-                            "FK9xs5a07fba5yqje5jqm6qrehs,"+
-                            "column:textsearchable_.*"+
+                            "FK9xs5a07fba5yqje5jqm6qrehs," +
+                            "column:textsearchable_.*" +
                             "column:enabled_features"
                 }
             }
         }
+        diff.dependsOn compileKotlin
+        diffChangelog.dependsOn compileKotlin
     }
 }

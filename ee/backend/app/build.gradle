@@ -42,9 +42,6 @@ test {
 apply from: "$rootDir/gradle/liquibase.gradle"
 configureLiquibase("ee", "hibernate:spring:io.tolgee.ee.model", 'src/main/resources/db/changelog/ee-schema.xml')
 
-diff.dependsOn compileKotlin
-diffChangelog.dependsOn compileKotlin
-
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
