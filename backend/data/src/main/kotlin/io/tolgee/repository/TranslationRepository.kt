@@ -214,7 +214,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     """
     from Translation t
     where t.key.id in :keyIds
-    and t.language.id not in :excludeLanguageIds 
+    and t.id not in :excludeTranslationIds 
     and t.language.id <> :baseLanguageId 
     and t.text is not null 
     and t.text <> ''
@@ -229,7 +229,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """
     from Translation t
-    where t.key.project.id = :projectId
+    where t.key.project.id = :projectId and t.id = :translationId
   """,
   )
   fun find(

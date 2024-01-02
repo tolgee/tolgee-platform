@@ -22,7 +22,6 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -36,9 +35,9 @@ class TranslationService(
   private val translationRepository: TranslationRepository,
   private val importService: ImportService,
   private val tolgeeProperties: TolgeeProperties,
-  private val applicationEventPublisher: ApplicationEventPublisher,
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val entityManager: EntityManager,
+  @Lazy
   private val translationCommentService: TranslationCommentService,
   private val translationUpdateHelper: TranslationUpdateHelper,
 ) {

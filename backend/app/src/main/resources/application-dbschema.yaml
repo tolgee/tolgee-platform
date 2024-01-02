@@ -3,7 +3,7 @@ spring:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
   datasource:
-    url: jdbc:postgresql://localhost:55432/postgres
+    url: jdbc:postgresql://localhost:55438/postgres
     username: postgres
     password: postgres
 tolgee:
