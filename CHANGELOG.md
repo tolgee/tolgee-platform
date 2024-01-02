@@ -1,3 +1,10 @@
+## [3.43.3](https://github.com/tolgee/tolgee-platform/compare/v3.43.2...v3.43.3) (2024-01-02)
+
+
+### Bug Fixes
+
+* Remove import unique constraint ([#2056](https://github.com/tolgee/tolgee-platform/issues/2056)) ([01a049a](https://github.com/tolgee/tolgee-platform/commit/01a049a928bdcb36e9da0c84f91a37f135434330))
+
 ## [3.43.2](https://github.com/tolgee/tolgee-platform/compare/v3.43.1...v3.43.2) (2023-12-31)
 
 
