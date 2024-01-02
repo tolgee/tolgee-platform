@@ -3062,19 +3062,4 @@
             limit 1)
         </sql>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1704212881885-1">
-        <addColumn tableName="translation">
-            <column defaultValueBoolean="true" name="active" type="boolean">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1704212881885-2">
-        <addColumn tableName="translation">
-            <column name="author_id" type="bigint"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1704212881885-3">
-        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="translation" constraintName="FKo8nu1hcb6crvc0ftrggybsff1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
-    </changeSet>
 </databaseChangeLog>

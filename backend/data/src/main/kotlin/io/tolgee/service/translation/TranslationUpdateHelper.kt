@@ -1,7 +1,6 @@
 package io.tolgee.service.translation
 
 import io.tolgee.dtos.KeyAndLanguage
-import io.tolgee.model.Language_
 import io.tolgee.model.Project_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation
@@ -26,8 +25,8 @@ class TranslationUpdateHelper(
     val predicates =
       items.map { item ->
         cb.and(
-          cb.equal(key.get(Key_.id), item.key),
-          cb.equal(root.get(Translation_.language).get(Language_.id), item.language),
+          cb.equal(key, item.key),
+          cb.equal(root.get(Translation_.language), item.language),
         )
       }
     val keyPredicates = cb.or(*predicates.toTypedArray())
