@@ -1,6 +1,6 @@
 import { T } from '@tolgee/react';
 import { OperationStatusType } from './ImportFileInput';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebounce } from 'use-debounce';
 import React from 'react';
 
 export const ImportOperationStatus = (props: {

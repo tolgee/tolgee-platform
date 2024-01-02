@@ -15,7 +15,7 @@ export const getFlagPath = (hex: string) => {
   } catch (e) {
     flagName = getSvgNameByEmoji('🏳️');
   }
-  return `/static/flags/${flagName}.svg`;
+  return `/flags/${flagName}.svg`;
 };
 
 export const FlagImage: FC<

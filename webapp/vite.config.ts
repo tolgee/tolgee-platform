@@ -4,6 +4,9 @@ import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import mdx from '@mdx-js/rollup';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+import path from 'path';
+import { extractDataCy } from './dataCy.plugin';
 
 export default defineConfig({
   // depending on your application, base can also be "/"
@@ -14,6 +17,18 @@ export default defineConfig({
     svgr(),
     mdx() as Plugin,
     nodePolyfills(),
+    extractDataCy(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: path.resolve(
+            __dirname,
+            './node_modules/@tginternal/language-util/flags'
+          ),
+          dest: '',
+        },
+      ],
+    }),
   ],
   server: {
     // this ensures that the browser opens upon server start

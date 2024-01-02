@@ -253,13 +253,13 @@ export const useNdJsonStreamedMutation = <
     ApiError,
     RequestParamsType<Url, Method, Paths>
   >(async (request) => {
-    const response = await apiHttpService.schemaRequestRaw<Url, Method, Paths>(
-      url,
-      method,
-      {
-        ...fetchOptions,
-      }
-    )(request);
+    const response = await apiSchemaHttpService.schemaRequestRaw<
+      Url,
+      Method,
+      Paths
+    >(url, method, {
+      ...fetchOptions,
+    })(request);
     const reader = response.body?.getReader();
     const result: any[] = [];
     while (reader) {
