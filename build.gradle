@@ -104,7 +104,7 @@ project(':server-app').afterEvaluate {
 
     task diffChangeLog {
         subprojects.forEach({
-            it.tasks.findByName("diffChangeLog")?.mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
+            it.tasks.findByName("diffChangelog")?.mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
         })
 
         project(':server-app').tasks.findByName("bootRun").mustRunAfter(startDbChangelogContainer)
@@ -114,9 +114,10 @@ project(':server-app').afterEvaluate {
                 startDbChangelogContainer,
                 project(':server-app').tasks.findByName("bootRun"),
                 project(':data').tasks.findByName("diffChangelog"),
+                project(':ee-app').tasks.findByName("diffChangelog"),
         ]
 
-        def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangeLog")
+        def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangelog")
 
         if (billingDiffChangelog != null) {
             finalizedBy.add(billingDiffChangelog)
