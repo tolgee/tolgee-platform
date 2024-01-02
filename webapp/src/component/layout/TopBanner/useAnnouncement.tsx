@@ -9,7 +9,7 @@ type AnnouncementDtoType = components['schemas']['AnnouncementDto']['type'];
 export function useAnnouncement() {
   const { t } = useTranslate();
 
-  return (value: AnnouncementDtoType) => {
+  return function AnnouncementWrapper(value: AnnouncementDtoType) {
     switch (value) {
       case 'FEATURE_BATCH_OPERATIONS':
         return (

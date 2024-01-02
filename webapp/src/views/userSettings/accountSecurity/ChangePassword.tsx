@@ -16,7 +16,6 @@ const PasswordFieldWithValidation = React.lazy(
   () => import('tg.component/security/PasswordFieldWithValidation')
 );
 
-
 export const ChangePassword: FunctionComponent = () => {
   const user = useUser();
 

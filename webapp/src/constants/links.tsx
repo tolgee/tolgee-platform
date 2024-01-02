@@ -54,7 +54,7 @@ export enum PARAMS {
   SERVICE_TYPE = 'serviceType',
   PROJECT_ID = 'projectId',
   LANGUAGE_ID = 'languageId',
-  API_KEY_ID = 'languageId',
+  API_KEY_ID = 'apiKeyId',
   PAT_ID = 'patId',
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',

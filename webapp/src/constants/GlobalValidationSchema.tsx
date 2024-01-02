@@ -14,22 +14,18 @@ Yup.setLocale({
   // use constant translation keys for messages without values
   mixed: {
     default: 'field_invalid',
-    // eslint-disable-next-line react/display-name
     required: () => {
       return <T keyName="Validation - required field" />;
     },
   },
   string: {
-    // eslint-disable-next-line react/display-name
     email: () => <T keyName="validation_email_is_not_valid" />,
-    // eslint-disable-next-line react/display-name
     min: ({ min }) => (
       <T
         keyName="Field should have at least n chars"
         params={{ min: min.toString() }}
       />
     ),
-    // eslint-disable-next-line react/display-name
     max: ({ max }) => (
       <T
         keyName="Field should have maximum of n chars"
