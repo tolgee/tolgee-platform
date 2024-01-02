@@ -80,4 +80,9 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     projectId: Long,
     languageIds: List<Long>,
   ): List<Language>
+
+  fun findByIdAndProjectId(
+    id: Long,
+    projectId: Long,
+  ): Language?
 }

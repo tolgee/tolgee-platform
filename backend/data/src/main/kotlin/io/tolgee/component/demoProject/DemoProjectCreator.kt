@@ -2,6 +2,7 @@ package io.tolgee.component.demoProject
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.dtos.KeyAndLanguage
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
@@ -11,7 +12,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
-import io.tolgee.model.translation.Translation
 import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyService
@@ -54,11 +54,17 @@ class DemoProjectCreator(
   }
 
   private val translations by lazy {
-    DemoProjectData.translations.flatMap { (languageTag, translations) ->
-      translations.map { (key, text) ->
-        setTranslation(key, languageTag, text)
-      }
-    }.associateBy { it.language.tag to it.key.name }
+    val toSave =
+      DemoProjectData.translations.flatMap { (languageTag, translations) ->
+        translations.mapNotNull { (key, text) ->
+          KeyAndLanguage(keys[key] ?: return@mapNotNull null, languages[languageTag] ?: return@mapNotNull null) to text
+        }
+      }.toMap()
+
+    translationService.set(
+      toSave,
+      project.id,
+    ).entries.associate { (it.key.language.tag to it.key.key.name) to it.value }
   }
 
   private fun addBigMeta() {
@@ -76,17 +82,6 @@ class DemoProjectCreator(
   private fun setStates() {
     DemoProjectData.inTranslatedState.forEach { (languageTag, key) ->
       translations[languageTag to key]!!.state = TranslationState.TRANSLATED
-    }
-  }
-
-  private fun setTranslation(
-    keyName: String,
-    languageTag: String,
-    translation: String,
-  ): Translation {
-    val language = languages[languageTag]!!
-    return translationService.setTranslation(getOrCreateKey(keyName), language, translation).also {
-      it.state = TranslationState.REVIEWED
     }
   }
 

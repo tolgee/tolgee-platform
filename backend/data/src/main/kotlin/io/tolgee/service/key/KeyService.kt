@@ -113,7 +113,7 @@ class KeyService(
         if (it.isEmpty()) {
           return@let null
         }
-        translationService.setForKey(key, it)
+        translationService.set(key, it, project.id)
       }
 
     dto.states?.map {
@@ -382,7 +382,7 @@ class KeyService(
     keyId: Long,
     languageIds: List<Long>,
   ): List<Language> {
-    val key = keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException()
+    val key = get(keyId, projectId)
     enableRestOfLanguages(projectId, languageIds, key)
     return disableLanguages(projectId, languageIds, key)
   }
@@ -408,11 +408,18 @@ class KeyService(
   ): List<Language> {
     val languages = languageRepository.findAllByProjectIdAndIdInOrderById(projectId, languageIds)
     languages.map { language ->
-      val translation = translationService.getOrCreate(key, language)
+      val translation = translationService.getOrCreate(key, language, projectId)
       translation.clear()
       translation.state = TranslationState.DISABLED
       translationService.save(translation)
     }
     return languages
+  }
+
+  fun get(
+    keyId: Long,
+    projectId: Long,
+  ): Key {
+    return keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
   }
 }

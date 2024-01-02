@@ -68,7 +68,12 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
 
     val newNow = Date(Date().time + 50000)
     setForcedDate(newNow)
-    translationService.setTranslation(testData.aKey, testData.englishLanguage, "This was changed!")
+    translationService.set(
+      testData.aKey,
+      testData.englishLanguage,
+      "This was changed!",
+      testData.project.id,
+    )
 
     val newLastModified = performWithIsModifiedSince(lastModified).andIsOk.lastModified()
     assertEqualsDate(newLastModified, newNow)

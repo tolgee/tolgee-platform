@@ -46,6 +46,7 @@ import io.tolgee.service.security.PatService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.service.translation.AllTranslationsService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
@@ -87,6 +88,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   protected lateinit var translationService: TranslationService
+
+  @Autowired
+  protected lateinit var allTranslationsService: AllTranslationsService
 
   @Autowired
   protected lateinit var keyService: KeyService

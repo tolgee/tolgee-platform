@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.KeyAndLanguage
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
@@ -60,37 +61,41 @@ class ResolvingKeyImporter(
   private fun tryImport(): List<Key> {
     checkLanguagePermissions(keysToImport)
 
-    return keysToImport.map keys@{ keyToImport ->
-      val key = getOrCreateKey(keyToImport)
+    val translationsToSave = mutableMapOf<KeyAndLanguage, String?>()
+    val existingTranslations = mutableMapOf<KeyAndLanguage, Translation?>()
 
-      keyToImport.mapLanguageAsKey().forEach translations@{ (language, resolvable) ->
-        language ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-        val existingTranslation = getExistingTranslation(key, language)
+    val result =
+      keysToImport.map keys@{ keyToImport ->
+        val key = getOrCreateKey(keyToImport)
 
-        val isEmpty = existingTranslation !== null && existingTranslation.text.isNullOrEmpty()
+        keyToImport.mapLanguageAsKey().forEach translations@{ (language, resolvable) ->
+          language ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+          val existingTranslation = getExistingTranslation(key, language)
 
-        val isNew = existingTranslation == null
+          val isEmpty = existingTranslation !== null && existingTranslation.text.isNullOrEmpty()
 
-        val translationExists = !isEmpty && !isNew
+          val isNew = existingTranslation == null
 
-        if (validate(translationExists, resolvable, key, language)) return@translations
+          val translationExists = !isEmpty && !isNew
 
-        if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
-          translationService.setTranslation(existingTranslation!!, resolvable.text)
-          return@translations
+          if (validate(translationExists, resolvable, key, language)) return@translations
+
+          if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE) || isNew) {
+            translationsToSave[KeyAndLanguage(key, language)] = resolvable.text
+            existingTranslations[KeyAndLanguage(key, language)] = existingTranslation
+            return@translations
+          }
         }
-
-        if (isNew) {
-          val translation =
-            Translation(resolvable.text).apply {
-              this.key = key
-              this.language = language
-            }
-          translationService.save(translation)
-        }
+        key
       }
-      key
-    }
+
+    translationService.set(
+      translationsToSave,
+      existingTranslations,
+      projectEntity.id,
+    )
+
+    return result
   }
 
   private fun importScreenshots(): Map<Long, Screenshot> {
@@ -100,7 +105,7 @@ class ResolvingKeyImporter(
       }
 
     val images = imageUploadService.find(uploadedImagesIds)
-    checkImageUploadermissions(images)
+    checkImageUploadPermissions(images)
 
     val createdScreenshots =
       images.associate {
@@ -151,7 +156,7 @@ class ResolvingKeyImporter(
       }.toMap()
   }
 
-  private fun checkImageUploadermissions(images: List<UploadedImage>) {
+  private fun checkImageUploadPermissions(images: List<UploadedImage>) {
     if (images.isNotEmpty()) {
       securityService.checkScreenshotsUploadPermission(projectEntity.id)
     }

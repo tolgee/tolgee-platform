@@ -209,4 +209,31 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     key: Key,
     languageTags: Collection<String>,
   ): List<Translation>
+
+  @Query(
+    """
+    from Translation t
+    where t.key.id in :keyIds
+    and t.language.id not in :excludeLanguageIds 
+    and t.language.id <> :baseLanguageId 
+    and t.text is not null 
+    and t.text <> ''
+    """,
+  )
+  fun getTranslationsToSetOutDated(
+    keyIds: Collection<Long>,
+    excludeTranslationIds: Collection<Long>,
+    baseLanguageId: Long,
+  ): List<Translation>
+
+  @Query(
+    """
+    from Translation t
+    where t.key.project.id = :projectId
+  """,
+  )
+  fun find(
+    translationId: Long,
+    projectId: Long,
+  ): Translation?
 }

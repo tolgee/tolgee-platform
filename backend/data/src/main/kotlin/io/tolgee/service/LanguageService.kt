@@ -253,4 +253,11 @@ class LanguageService(
   fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView> {
     return languageRepository.getViewsOfProjects(projectIds)
   }
+
+  fun get(
+    id: Long,
+    projectId: Long,
+  ): Language {
+    return languageRepository.findByIdAndProjectId(id, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
 }

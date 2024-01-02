@@ -165,7 +165,7 @@ class AutoTranslationService(
     val translations =
       adjustedConfigs.map {
         if (it.override) {
-          return@map it to translationService.getOrCreate(key, it.language)
+          return@map it to translationService.getOrCreate(key, it.language, key.project.id)
         }
 
         it to getUntranslatedTranslations(key, listOf(it.language)).firstOrNull()

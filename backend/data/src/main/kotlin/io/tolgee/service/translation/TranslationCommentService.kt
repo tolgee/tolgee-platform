@@ -2,11 +2,14 @@ package io.tolgee.service.translation
 
 import io.tolgee.dtos.request.translation.comment.ITranslationCommentDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
+import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
+import io.tolgee.repository.TranslationRepository
 import io.tolgee.repository.translation.TranslationCommentRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
@@ -20,9 +23,44 @@ class TranslationCommentService(
   private val translationCommentRepository: TranslationCommentRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
+  private val translationService: TranslationService,
+  private val translationRepository: TranslationRepository,
 ) {
   @Transactional
   fun create(
+    dto: TranslationCommentWithLangKeyDto,
+    projectId: Long,
+    author: UserAccount,
+  ): TranslationComment {
+    val translation = translationService.getOrCreate(dto.keyId, dto.languageId, projectId)
+
+    if (translation.id == 0L) {
+      translation.state = TranslationState.UNTRANSLATED
+    }
+
+    return create(dto, translation, author)
+  }
+
+  @Transactional
+  fun create(
+    dto: ITranslationCommentDto,
+    translationId: Long,
+    projectId: Long,
+    author: UserAccount,
+  ): TranslationComment {
+    val translation = translationService.get(translationId, projectId)
+
+    return TranslationComment(
+      text = dto.text,
+      state = dto.state,
+      translation = translation,
+    ).let {
+      it.author = author
+      create(it)
+    }
+  }
+
+  private fun create(
     dto: ITranslationCommentDto,
     translation: Translation,
     author: UserAccount,

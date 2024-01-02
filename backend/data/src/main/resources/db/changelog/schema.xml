@@ -3028,4 +3028,23 @@
             create unique index import_author_project_unique on import(author_id, project_id) where deleted_at is null
         </sql>
     </changeSet>
+<!--    <changeSet author="jenik (generated)" id="1701253506665-0">-->
+<!--        <sql>-->
+<!--            CREATE UNIQUE INDEX translations_active ON translation (key_id, language_id) where active is true;-->
+<!--        </sql>-->
+<!--        <sql>-->
+<!--            CREATE UNIQUE INDEX translations_active ON translation (key_id, language_id) where state = 1;-->
+<!--        </sql>-->
+<!--        <sql>-->
+<!--&#45;&#45;         update translation t set-->
+<!--&#45;&#45;             author_id =-->
+<!--&#45;&#45;                 (select ar.author_id-->
+<!--&#45;&#45;                  from activity_revision ar-->
+<!--&#45;&#45;                           join activity_modified_entity ame-->
+<!--&#45;&#45;                                on ar.id = ame.activity_revision_id and ame.entity_id = t.id and-->
+<!--&#45;&#45;                                   ame.entity_class = 'Translation'-->
+<!--&#45;&#45;                  order by ar.id desc-->
+<!--&#45;&#45;             limit 1)-->
+<!--        </sql>-->
+    </changeSet>
 </databaseChangeLog>
