@@ -8,6 +8,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { resolve } from 'path';
 
 import { extractDataCy } from './dataCy.plugin';
+import rehypeHighlight from 'rehype-highlight';
 
 export default defineConfig({
   // depending on your application, base can also be "/"
@@ -16,7 +17,7 @@ export default defineConfig({
     react(),
     viteTsconfigPaths(),
     svgr(),
-    mdx() as Plugin,
+    mdx({ rehypePlugins: [rehypeHighlight] }),
     nodePolyfills(),
     extractDataCy(),
     viteStaticCopy({

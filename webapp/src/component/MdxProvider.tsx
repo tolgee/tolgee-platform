@@ -1,16 +1,6 @@
-import { default as React, FC } from 'react';
+import { FC } from 'react';
 import { Link, Typography, useTheme } from '@mui/material';
-import { MDXProvider } from '@mdx-js/react';
-import Highlight, { defaultProps, Prism } from 'prism-react-renderer';
-import lightTheme from 'prism-react-renderer/themes/github';
-import darkTheme from 'prism-react-renderer/themes/nightOwl';
-import { API_KEY_PLACEHOLDER } from 'tg.views/projects/integrate/IntegrateView';
 import { styled } from '@mui/material';
-
-(typeof global !== 'undefined' ? global : window).Prism = Prism;
-// require('prismjs/components/prism-php');
-// require('prismjs/components/prism-shell-session');
-// require('prism-svelte');
 
 const StyledCode = styled('pre')`
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
@@ -18,6 +8,10 @@ const StyledCode = styled('pre')`
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace;
   overflow: auto;
+  background-color: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[50]
+      : theme.palette.emphasis[50]} !important;
 `;
 
 const StyledInlineCode = styled('span')`
@@ -50,89 +44,64 @@ const StyledH3 = styled(Typography)`
   font-size: 22px;
 `;
 
-export const MdxProvider: FC<{
+type Props = {
   modifyValue?: (code: string) => string;
-}> = (props) => {
-  const modifyValue = (code: string) =>
-    props.modifyValue ? props.modifyValue(code) : code;
+  content: React.FC<any>;
+};
+
+export const MdxProvider: FC<Props> = (props) => {
+  const Content = props.content;
+  const modifyValue = props.modifyValue ?? ((text: string) => text);
 
   const theme = useTheme();
 
   return (
-    <MDXProvider
-      components={{
-        a: function A(props) {
-          return <Link {...props} target="_blank" />;
-        },
-        p: function P(props) {
-          return (
-            <StyledParagraph variant="body1">{props.children}</StyledParagraph>
-          );
-        },
-        h1: function H1(props) {
-          return <StyledH1 variant="h1">{props.children}</StyledH1>;
-        },
-        h2: function H2(props) {
-          return <StyledH2 variant="h2">{props.children}</StyledH2>;
-        },
-        h3: function H3(props) {
-          return <StyledH3 variant="h3">{props.children}</StyledH3>;
-        },
-        inlineCode: function InlineCode(props) {
-          return <StyledInlineCode {...props} className={props.className} />;
-        },
-        code: function Code({ children, className }) {
-          const language = className?.replace(/language-/, '');
-          children = children?.trim();
-          return (
-            <Highlight
-              {...defaultProps}
-              theme={theme.palette.mode === 'dark' ? darkTheme : lightTheme}
-              code={children}
-              language={language}
-            >
-              {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <StyledCode
-                  className={className}
-                  style={{
-                    ...style,
-                    background: theme.palette.emphasis[50],
-                  }}
-                >
-                  {tokens.map((line, i) => (
-                    <div key={i} {...getLineProps({ line, key: i })}>
-                      {line.map((token, key) => {
-                        const tokenProps = getTokenProps({ token, key });
-                        const splitByApiKey = tokenProps.children
-                          .split(API_KEY_PLACEHOLDER)
-                          .map(modifyValue);
-                        tokenProps.children = insertBetweenAll(
-                          splitByApiKey,
-                          <span data-sentry-mask="">
-                            {modifyValue(API_KEY_PLACEHOLDER)}
-                          </span>
-                        ).map((it, idx) => (
-                          <React.Fragment key={idx}>{it}</React.Fragment>
-                        ));
-                        return <span key={key} {...tokenProps} />;
-                      })}
-                    </div>
-                  ))}
-                </StyledCode>
-              )}
-            </Highlight>
-          );
-        },
-      }}
-    >
-      {props.children}
-    </MDXProvider>
+    <>
+      <link
+        rel="stylesheet"
+        href={
+          theme.palette.mode === 'dark'
+            ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css'
+            : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css'
+        }
+      />
+      <Content
+        components={{
+          a: function A(props) {
+            return <Link {...props} target="_blank" />;
+          },
+          p: function P(props) {
+            return (
+              <StyledParagraph variant="body1">
+                {props.children}
+              </StyledParagraph>
+            );
+          },
+          h1: function H1(props) {
+            return <StyledH1 variant="h1">{props.children}</StyledH1>;
+          },
+          h2: function H2(props) {
+            return <StyledH2 variant="h2">{props.children}</StyledH2>;
+          },
+          h3: function H3(props) {
+            return <StyledH3 variant="h3">{props.children}</StyledH3>;
+          },
+          code: function Code(props) {
+            if (
+              typeof props.children === 'string' &&
+              !props.children.includes('\n')
+            ) {
+              return (
+                <StyledInlineCode {...props}>
+                  {modifyValue(props.children)}
+                </StyledInlineCode>
+              );
+            } else {
+              return <StyledCode {...props}></StyledCode>;
+            }
+          },
+        }}
+      />
+    </>
   );
 };
-
-const insertBetweenAll = (arr, thing) =>
-  arr.flatMap((value, index, array) =>
-    array.length - 1 !== index // check for the last item
-      ? [value, thing]
-      : value
-  );

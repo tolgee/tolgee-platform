@@ -142,9 +142,8 @@ export const IntegrateView: FunctionComponent = () => {
                         )
                         .replace(PROJECT_ID, String(project.id));
                     }}
-                  >
-                    {React.createElement(selectedWeapon.guide)}
-                  </MdxProvider>
+                    content={selectedWeapon.guide}
+                  />
                 </Box>
               )}
             </React.Suspense>
