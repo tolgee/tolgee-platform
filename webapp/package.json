@@ -68,7 +68,6 @@
   "scripts": {
     "start": "vite",
     "develop": "start",
-    "startConcurrently": "concurrently \"npm run start\"",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "craco test",

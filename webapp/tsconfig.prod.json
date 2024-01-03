@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src", "tolgee.prod.d.ts"]
+  "include": ["src", "tolgee.prod.d.ts", "vite-env.d.ts"]
 }

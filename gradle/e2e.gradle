@@ -113,10 +113,9 @@ task openBillingE2eDev(type: Exec, group: "e2e") {
 }
 
 task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {
-    commandLine npmCommandName, "run", "startConcurrently"
+    commandLine npmCommandName, "run", "start", "--", "--port", "8081", "--host"
 
     environment "VITE_APP_API_URL", "http://localhost:8201"
-    environment "PORT", "8081"
 
     workingDir WEBAPP_DIR
 }
