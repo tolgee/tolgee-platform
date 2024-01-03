@@ -6,7 +6,7 @@ require('dotenv-flow').config({
 });
 
 const { exec } = require('child_process');
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const apiUrl = process.env.VITE_APP_API_URL || 'http://localhost:8080';
 
 const definitions = {
   public: {
