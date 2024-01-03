@@ -13,6 +13,7 @@ import { QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
+import { SnackbarProvider } from 'notistack';
 import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
 
@@ -32,12 +33,6 @@ import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
 
 const store = configureStore();
-
-const SnackbarProvider = React.lazy(() =>
-  import(/* webpackChunkName: "notistack" */ 'notistack').then((module) => ({
-    default: module.SnackbarProvider,
-  }))
-);
 
 dispatchService.store = store;
 

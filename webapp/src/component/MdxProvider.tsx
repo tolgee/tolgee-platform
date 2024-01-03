@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { Link, Typography, useTheme } from '@mui/material';
 import { styled } from '@mui/material';
 
@@ -49,6 +49,28 @@ type Props = {
   content: React.FC<any>;
 };
 
+function replaceRecursively(
+  children: React.ReactNode,
+  replaceFn: (text: string) => string
+) {
+  if (typeof children === 'string') {
+    return replaceFn(children);
+  }
+  if (Array.isArray(children)) {
+    return children.map((child) => replaceRecursively(child, replaceFn));
+  }
+  if (React.isValidElement(children)) {
+    return {
+      ...children,
+      props: {
+        ...children.props,
+        children: replaceRecursively(children.props.children, replaceFn),
+      },
+    };
+  }
+  return children;
+}
+
 export const MdxProvider: FC<Props> = (props) => {
   const Content = props.content;
   const modifyValue = props.modifyValue ?? ((text: string) => text);
@@ -93,11 +115,15 @@ export const MdxProvider: FC<Props> = (props) => {
             ) {
               return (
                 <StyledInlineCode {...props}>
-                  {modifyValue(props.children)}
+                  {replaceRecursively(props.children, modifyValue)}
                 </StyledInlineCode>
               );
             } else {
-              return <StyledCode {...props}></StyledCode>;
+              return (
+                <StyledCode {...props}>
+                  {replaceRecursively(props.children, modifyValue)}
+                </StyledCode>
+              );
             }
           },
         }}
