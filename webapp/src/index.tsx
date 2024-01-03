@@ -47,13 +47,13 @@ const tolgee = Tolgee()
     apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL,
     apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY,
     staticData: {
-      en: () => import('./i18n/en.json'),
-      es: () => import('./i18n/es.json'),
-      cs: () => import('./i18n/cs.json'),
-      fr: () => import('./i18n/fr.json'),
-      de: () => import('./i18n/de.json'),
-      pt: () => import('./i18n/pt.json'),
-      da: () => import('./i18n/da.json'),
+      en: () => import('./i18n/en.json').then((m) => m.default),
+      es: () => import('./i18n/es.json').then((m) => m.default),
+      cs: () => import('./i18n/cs.json').then((m) => m.default),
+      fr: () => import('./i18n/fr.json').then((m) => m.default),
+      de: () => import('./i18n/de.json').then((m) => m.default),
+      pt: () => import('./i18n/pt.json').then((m) => m.default),
+      da: () => import('./i18n/da.json').then((m) => m.default),
     },
   });
 
