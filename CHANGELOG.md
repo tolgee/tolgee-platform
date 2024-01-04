@@ -1,3 +1,10 @@
+## [3.44.1](https://github.com/tolgee/tolgee-platform/compare/v3.44.0...v3.44.1) (2024-01-04)
+
+
+### Bug Fixes
+
+* Update PostHog SDKs ([#2058](https://github.com/tolgee/tolgee-platform/issues/2058)) ([9058aff](https://github.com/tolgee/tolgee-platform/commit/9058aff02117446449582be557a3ab77895fbe09))
+
 # [3.44.0](https://github.com/tolgee/tolgee-platform/compare/v3.43.3...v3.44.0) (2024-01-04)
 
 
