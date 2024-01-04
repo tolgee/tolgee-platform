@@ -13,6 +13,7 @@ import MachineTranslationSvg from '../svgs/icons/machineTranslation.svg?react';
 import TadaSvg from '../svgs/icons/tada.svg?react';
 import RocketSvg from '../svgs/icons/rocket.svg?react';
 import DropZoneSvg from '../svgs/icons/dropzone.svg?react';
+import QSFinishedSvg from '../svgs/icons/qs-finished.svg?react';
 
 type IconProps = ComponentProps<typeof SvgIcon>;
 
@@ -64,4 +65,8 @@ export const RocketIcon: React.FC<IconProps> = (props) => (
 
 export const DropzoneIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={DropZoneSvg} {...props} />
+);
+
+export const QSFinishedIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={QSFinishedSvg} {...props} />
 );
