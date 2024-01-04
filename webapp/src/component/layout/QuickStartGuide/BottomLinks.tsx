@@ -5,7 +5,7 @@ import { StyledLink } from './StyledComponents';
 
 const StyledContainer = styled(Box)`
   background: ${({ theme }) => theme.palette.quickStart.highlight};
-  padding: 10px 18px;
+  padding: 12px 18px;
 `;
 
 type Props = {

@@ -1,4 +1,4 @@
-import { Box, Button, styled, Typography } from '@mui/material';
+import { Box, IconButton, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useMemo } from 'react';
 import { RocketIcon } from 'tg.component/CustomIcons';
@@ -9,11 +9,13 @@ import {
 import { BottomLinks } from './BottomLinks';
 import { items } from './quickStartConfig';
 import { QuickStartStep } from './QuickStartStep';
+import { KeyboardArrowUp } from '@mui/icons-material';
+import { QuickStartFinishStep } from './QuickStartFinishStep';
 
 const StyledContainer = styled(Box)`
   display: grid;
   gap: 8px;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 0px 1fr auto;
   height: 100%;
   position: relative;
 `;
@@ -22,6 +24,8 @@ const StyledContent = styled(Box)`
   display: grid;
   gap: 8px;
   align-self: start;
+  overflow: auto;
+  max-height: 100%;
 `;
 
 const StyledHeader = styled(Box)`
@@ -32,6 +36,7 @@ const StyledHeader = styled(Box)`
   font-weight: 400;
   padding: 13px 23px;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
 `;
 
@@ -48,10 +53,9 @@ const StyledArrow = styled(Box)`
 `;
 
 export const QuickStartGuide = () => {
-  const { t } = useTranslate();
   const projectId = useGlobalContext((c) => c.quickStartGuide.lastProjectId);
   const completed = useGlobalContext((c) => c.quickStartGuide.completed);
-  const { quickStartFinish } = useGlobalActions();
+  const { setQuickStartOpen } = useGlobalActions();
   const topBarHeight = useGlobalContext((c) => c.topBarHeight);
   const allCompleted = useMemo(
     () => items.every((i) => completed.includes(i.step)),
@@ -62,9 +66,15 @@ export const QuickStartGuide = () => {
     <StyledContainer data-cy="quick-start-dialog">
       <StyledArrow sx={{ opacity: topBarHeight ? 1 : 0 }} />
       <StyledHeader>
-        <RocketIcon fontSize="small" />
-        <T keyName="guide_title" />
+        <Box display="flex" gap="12px" alignItems="center">
+          <RocketIcon fontSize="small" />
+          <T keyName="guide_title" />
+        </Box>
+        <IconButton onClick={() => setQuickStartOpen(false)}>
+          <KeyboardArrowUp />
+        </IconButton>
       </StyledHeader>
+      <Box />
       <StyledContent>
         {items.map((item, i) => (
           <QuickStartStep
@@ -75,19 +85,7 @@ export const QuickStartGuide = () => {
             done={completed.includes(item.step)}
           />
         ))}
-        {allCompleted && (
-          <Box sx={{ display: 'grid', justifyItems: 'center', gap: 2, pt: 1 }}>
-            <Typography>{t('guide_finish_text')}</Typography>
-            <Button
-              data-cy="quick-start-finish"
-              color="primary"
-              variant="contained"
-              onClick={() => quickStartFinish()}
-            >
-              {t('guide_finish_button')}
-            </Button>
-          </Box>
-        )}
+        {allCompleted && <QuickStartFinishStep />}
       </StyledContent>
       <BottomLinks allCompleted={allCompleted} />
     </StyledContainer>
