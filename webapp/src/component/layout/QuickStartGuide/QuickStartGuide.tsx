@@ -1,5 +1,5 @@
 import { Box, IconButton, styled } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { useMemo } from 'react';
 import { RocketIcon } from 'tg.component/CustomIcons';
 import {
