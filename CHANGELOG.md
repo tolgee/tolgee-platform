@@ -1,3 +1,10 @@
+# [3.44.0](https://github.com/tolgee/tolgee-platform/compare/v3.43.3...v3.44.0) (2024-01-04)
+
+
+### Features
+
+* migrate FE to VITE & upgrade dependencies ([#2017](https://github.com/tolgee/tolgee-platform/issues/2017)) ([0984e26](https://github.com/tolgee/tolgee-platform/commit/0984e268624756b8063d5a8818c32feaf38077c1))
+
 ## [3.43.3](https://github.com/tolgee/tolgee-platform/compare/v3.43.2...v3.43.3) (2024-01-02)
 
 
