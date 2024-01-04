@@ -1,13 +1,10 @@
 import { useQuery, UseQueryResult } from 'react-query';
-import { container } from 'tsyringe';
 import { useState } from 'react';
 
 import { paths } from 'tg.service/apiSchema.generated';
 import { ApiError } from 'tg.service/http/ApiError';
-import { ApiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
+import { apiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
 import { QueryProps } from 'tg.service/http/useQueryApi';
-
-const apiHttpService = container.resolve(ApiSchemaHttpService);
 
 const URL =
   '/v2/projects/{projectId}/suggest/machine-translations-streaming' as const;
@@ -62,7 +59,7 @@ export const useMTStreamed = (props: Omit<TypedData, 'url' | 'method'>) => {
   const queryLoadable = useQuery<CombinedMTResponse, ApiError>(
     queryKey,
     async ({ signal }) => {
-      const response = await apiHttpService.schemaRequestRaw<
+      const response = await apiSchemaHttpService.schemaRequestRaw<
         Url,
         Method,
         paths

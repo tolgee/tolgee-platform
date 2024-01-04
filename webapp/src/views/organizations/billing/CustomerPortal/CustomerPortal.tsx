@@ -8,7 +8,7 @@ import {
   StyledBillingSectionTitle,
   StyledBillingSectionHeader,
 } from '../BillingSection';
-import { ReactComponent as StripeLogoSvg } from 'tg.svgs/stripeLogo.svg';
+import StripeLogoSvg from 'tg.svgs/stripeLogo.svg?react';
 
 const StyledContainer = styled('div')`
   display: grid;

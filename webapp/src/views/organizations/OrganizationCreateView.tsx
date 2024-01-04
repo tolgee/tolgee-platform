@@ -1,23 +1,19 @@
 import { FunctionComponent } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { redirectionActions } from 'tg.store/global/RedirectionActions';
+import { messageService } from 'tg.service/MessageService';
 
 import { OrganizationFields } from './components/OrganizationFields';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
-
-const redirectionActions = container.resolve(RedirectionActions);
-const messageService = container.resolve(MessageService);
 
 export const OrganizationCreateView: FunctionComponent = () => {
   const loadable = useApiMutation({

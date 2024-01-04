@@ -1,21 +1,16 @@
 import { FunctionComponent, useEffect } from 'react';
 import { T } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { MessageService } from 'tg.service/MessageService';
-import { SignUpService } from 'tg.service/SignUpService';
+import { messageService } from 'tg.service/MessageService';
+import { signUpService } from 'tg.service/SignUpService';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { redirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
-
-const messageService = container.resolve(MessageService);
-const redirectionActions = container.resolve(RedirectionActions);
-const signUpService = container.resolve(SignUpService);
 
 export const EmailVerificationHandler: FunctionComponent<
   OAuthRedirectionHandlerProps

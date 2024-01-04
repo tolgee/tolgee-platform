@@ -28,7 +28,7 @@ type Props<T> = {
   title?: string;
   addNewTooltip?: string;
   displaySearch?: boolean;
-  popperMinWidth?: string | number;
+  popperMinWidth?: number;
   renderValue?: (value: T | undefined) => React.ReactNode;
   SelectProps?: React.ComponentProps<typeof Select>;
   compareFunction?: (prompt: string, label: string) => boolean;

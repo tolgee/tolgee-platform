@@ -3,11 +3,10 @@ import ReactList from 'react-list';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { createProvider } from 'tg.fixtures/createProvider';
-import { container } from 'tsyringe';
-import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
-import { useTranslationsService } from './services/useTranslationsService';
-import { useEditService } from './services/useEditService';
+import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
   AddTag,
   AddTranslation,
@@ -24,15 +23,14 @@ import {
   UpdateTranslation,
   ViewMode,
 } from './types';
+
+import { useTranslationsService } from './services/useTranslationsService';
+import { useEditService } from './services/useEditService';
 import { useRefsService } from './services/useRefsService';
 import { useTagsService } from './services/useTagsService';
 import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
-import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { useWebsocketService } from './services/useWebsocketService';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-
-const projectPreferences = container.resolve(ProjectPreferencesService);
 
 type Props = {
   projectId: number;
@@ -53,7 +51,7 @@ export const [
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
-    : projectPreferences.getForProject(props.projectId);
+    : projectPreferencesService.getForProject(props.projectId);
 
   const [initialLangs] = useState<string[] | null | undefined>(
     requiredLanguages

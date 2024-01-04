@@ -1,7 +1,6 @@
 import { default as React, FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -9,12 +8,12 @@ import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckB
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { redirect } from 'tg.hooks/redirect';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Scopes } from 'tg.fixtures/permissions';
+import { messageService } from 'tg.service/MessageService';
 
 type EditApiKeyDTO = components['schemas']['V2EditApiKeyDto'];
 
@@ -22,8 +21,6 @@ interface Props {
   loading?: boolean;
   onSaved?: (data: components['schemas']['ApiKeyModel']) => void;
 }
-
-const messageService = container.resolve(MessageService);
 
 export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
   const onDialogClose = () => {

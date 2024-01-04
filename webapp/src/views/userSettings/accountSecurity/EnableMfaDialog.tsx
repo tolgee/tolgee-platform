@@ -9,9 +9,8 @@ import {
   Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
-import { SecurityService } from 'tg.service/SecurityService';
+import { securityService } from 'tg.service/SecurityService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -33,8 +32,6 @@ const WhiteBox = styled(Box)`
   background-color: white;
   border-radius: 8px;
 `;
-
-const securityService = container.resolve(SecurityService);
 
 export const EnableMfaDialog: FunctionComponent = () => {
   const [recoveryCodesPw, setRecoveryCodesPw] = useState<string | null>(null);

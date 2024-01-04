@@ -1,15 +1,12 @@
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
-import { SecurityService } from 'tg.service/SecurityService';
-import { container, singleton } from 'tsyringe';
+import { securityService, SecurityService } from 'tg.service/SecurityService';
+import { tokenService } from 'tg.service/TokenService';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
 import { SecurityDTO } from './types';
-import { TokenService } from 'tg.service/TokenService';
-
-const tokenService = container.resolve(TokenService);
 
 export class GlobalState extends StateWithLoadables<GlobalActions> {
   authLoading = false;
@@ -32,35 +29,36 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
   }[] = [];
 }
 
-@singleton()
 export class GlobalActions extends AbstractLoadableActions<GlobalState> {
-  constructor(private securityService: SecurityService) {
+  constructor() {
     super(new GlobalState());
   }
 
   oAuthSuccessful = this.buildLoginAction(
     'AUTHORIZE_OAUTH',
     (serviceType, code) =>
-      this.securityService.authorizeOAuthLogin(serviceType, code)
+      securityService.authorizeOAuthLogin(serviceType, code)
   );
 
-  logout = this.createAction('LOGOUT', () =>
-    this.securityService.logout()
-  ).build.on((state) => ({
-    ...state,
-    security: <SecurityDTO>{
-      ...state.security,
-      jwtToken: undefined,
-      allowPrivate: false,
-    },
-  }));
-  login = this.buildLoginAction('LOGIN', (v) => this.securityService.login(v));
+  logout = this.createAction('LOGOUT', () => securityService.logout()).build.on(
+    (state) => ({
+      ...state,
+      security: <SecurityDTO>{
+        ...state.security,
+        jwtToken: undefined,
+        allowPrivate: false,
+      },
+    })
+  );
+  login = this.buildLoginAction('LOGIN', (v) => securityService.login(v));
 
   resetPasswordValidate = this.createPromiseAction<
     never,
     ErrorResponseDto,
     Parameters<SecurityService['resetPasswordValidate']>
-  >('RESET_PASSWORD_VALIDATE', this.securityService.resetPasswordValidate)
+  >('RESET_PASSWORD_VALIDATE', (...params) =>
+    securityService.resetPasswordValidate(...params)
+  )
     .build.onPending((state) => {
       return { ...state, passwordResetSetLoading: true };
     })
@@ -83,7 +81,9 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
     void,
     ErrorResponseDto,
     Parameters<SecurityService['resetPasswordSet']>
-  >('RESET_PASSWORD_SET', this.securityService.resetPasswordSet)
+  >('RESET_PASSWORD_SET', (...params) =>
+    securityService.resetPasswordSet(...params)
+  )
     .build.onPending((state) => {
       return <GlobalState>{
         ...state,
@@ -241,7 +241,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
 
   readonly loadableDefinitions = {
     resetPasswordRequest: this.createLoadableDefinition<GlobalState, any>(
-      this.securityService.resetPasswordRequest
+      (email: string) => securityService.resetPasswordRequest(email)
     ),
   };
 
@@ -281,3 +281,5 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
       }));
   }
 }
+
+export const globalActions = new GlobalActions();

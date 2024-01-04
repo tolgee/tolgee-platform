@@ -5,7 +5,7 @@ import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebounce } from 'use-debounce';
 
 const StyledPanel = styled(Box)`
   position: fixed;

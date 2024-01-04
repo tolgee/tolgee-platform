@@ -1,13 +1,11 @@
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { Alert } from 'tg.component/common/Alert';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -18,8 +16,7 @@ import { MfaSettings } from './MfaSettings';
 import { EnableMfaDialog } from './EnableMfaDialog';
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
-
-const globalActions = container.resolve(GlobalActions);
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 export const AccountSecurityView: FunctionComponent = () => {
   const { t } = useTranslate();

@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { container } from 'tsyringe';
 
 import { AppState } from 'tg.store/index';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { components } from 'tg.service/apiSchema.generated';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { useTolgee } from '@tolgee/react';
 import { useOnUpdate } from 'tg.hooks/useOnUpdate';
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
@@ -17,7 +16,6 @@ type QuickStartModel = components['schemas']['QuickStartModel'];
 
 export const useInitialDataService = () => {
   const [organizationLoading, setOrganizationLoading] = useState(false);
-  const actions = container.resolve(GlobalActions);
   const tolgee = useTolgee();
 
   const [organization, setOrganization] = useState<
@@ -52,7 +50,7 @@ export const useInitialDataService = () => {
         tolgee.changeLanguage(data.languageTag);
       }
       const invitationCode = InvitationCodeService.getCode();
-      actions.updateSecurity.dispatch({
+      globalActions.updateSecurity.dispatch({
         allowPrivate:
           !data?.serverConfiguration?.authentication || Boolean(data.userInfo),
         allowRegistration:

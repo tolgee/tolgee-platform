@@ -1,15 +1,12 @@
 import { IconButton, Tooltip } from '@mui/material';
 import { Clear } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { confirmation } from 'tg.hooks/confirmation';
-import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 import { useOrganization } from '../useOrganization';
-
-const messageService = container.resolve(MessageService);
+import { messageService } from 'tg.service/MessageService';
 
 export const RemoveUserButton = (props: {
   userId: number;

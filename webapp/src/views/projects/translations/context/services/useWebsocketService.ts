@@ -6,7 +6,7 @@ import {
   TranslationsModifiedData,
 } from 'tg.websocket-client/WebsocketClient';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useDebouncedCallback } from 'use-debounce/lib';
+import { useDebouncedCallback } from 'use-debounce';
 
 export const useWebsocketService = (
   translationService: ReturnType<typeof useTranslationsService>

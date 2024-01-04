@@ -13,9 +13,9 @@ import { QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
+import { SnackbarProvider } from 'notistack';
 import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
-import { container } from 'tsyringe';
 
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
@@ -27,20 +27,14 @@ import { FullPageLoading } from './component/common/FullPageLoading';
 import { ThemeProvider } from './ThemeProvider';
 
 import reportWebVitals from './reportWebVitals';
-import { DispatchService } from './service/DispatchService';
+import { dispatchService } from './service/DispatchService';
 import configureStore from './store';
 import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
 
 const store = configureStore();
 
-const SnackbarProvider = React.lazy(() =>
-  import(/* webpackChunkName: "notistack" */ 'notistack').then((module) => ({
-    default: module.SnackbarProvider,
-  }))
-);
-
-container.resolve(DispatchService).store = store;
+dispatchService.store = store;
 
 const tolgee = Tolgee()
   .use(DevTools())
@@ -50,16 +44,16 @@ const tolgee = Tolgee()
   .init({
     defaultLanguage: 'en',
     fallbackLanguage: 'en',
-    apiUrl: process.env.REACT_APP_TOLGEE_API_URL,
-    apiKey: process.env.REACT_APP_TOLGEE_API_KEY,
+    apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL,
+    apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY,
     staticData: {
-      en: () => import('./i18n/en.json'),
-      es: () => import('./i18n/es.json'),
-      cs: () => import('./i18n/cs.json'),
-      fr: () => import('./i18n/fr.json'),
-      de: () => import('./i18n/de.json'),
-      pt: () => import('./i18n/pt.json'),
-      da: () => import('./i18n/da.json'),
+      en: () => import('./i18n/en.json').then((m) => m.default),
+      es: () => import('./i18n/es.json').then((m) => m.default),
+      cs: () => import('./i18n/cs.json').then((m) => m.default),
+      fr: () => import('./i18n/fr.json').then((m) => m.default),
+      de: () => import('./i18n/de.json').then((m) => m.default),
+      pt: () => import('./i18n/pt.json').then((m) => m.default),
+      da: () => import('./i18n/da.json').then((m) => m.default),
     },
   });
 

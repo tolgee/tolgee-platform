@@ -10,7 +10,6 @@ import {
   useQueryClient,
   UseQueryOptions,
 } from 'react-query';
-import { container } from 'tsyringe';
 
 import { paths } from '../apiSchema.generated';
 import { paths as billingPaths } from '../billingApiSchema.generated';
@@ -18,12 +17,10 @@ import { ApiError } from './ApiError';
 
 import { RequestOptions } from './ApiHttpService';
 import {
-  ApiSchemaHttpService,
+  apiSchemaHttpService,
   RequestParamsType,
   ResponseContent,
 } from './ApiSchemaHttpService';
-
-const apiHttpService = container.resolve(ApiSchemaHttpService);
 
 export type QueryProps<
   Url extends keyof Paths,
@@ -77,10 +74,14 @@ export const useApiInfiniteQuery = <
   return useInfiniteQuery<ResponseContent<Url, Method, Paths>, ApiError>(
     [url, (request as any)?.path, (request as any)?.query],
     ({ pageParam }) => {
-      return apiHttpService.schemaRequest<Url, Method, Paths>(url, method, {
-        ...fetchOptions,
-        disableAutoErrorHandle: true,
-      })(pageParam || request);
+      return apiSchemaHttpService.schemaRequest<Url, Method, Paths>(
+        url,
+        method,
+        {
+          ...fetchOptions,
+          disableAutoErrorHandle: true,
+        }
+      )(pageParam || request);
     },
     autoErrorHandling(options, Boolean(fetchOptions?.disableAutoErrorHandle))
   );
@@ -98,7 +99,7 @@ export const useApiQuery = <
   return useQuery<ResponseContent<Url, Method, Paths>, ApiError>(
     [url, (request as any)?.path, (request as any)?.query],
     ({ signal }) =>
-      apiHttpService.schemaRequest<Url, Method, Paths>(url, method, {
+      apiSchemaHttpService.schemaRequest<Url, Method, Paths>(url, method, {
         signal,
         ...fetchOptions,
         disableAutoErrorHandle: true,
@@ -184,7 +185,7 @@ export const useApiMutation = <
     RequestParamsType<Url, Method, Paths>
   >(
     (request) =>
-      apiHttpService.schemaRequest<Url, Method, Paths>(url, method, {
+      apiSchemaHttpService.schemaRequest<Url, Method, Paths>(url, method, {
         ...fetchOptions,
         disableAutoErrorHandle: true,
       })(request),
@@ -252,13 +253,13 @@ export const useNdJsonStreamedMutation = <
     ApiError,
     RequestParamsType<Url, Method, Paths>
   >(async (request) => {
-    const response = await apiHttpService.schemaRequestRaw<Url, Method, Paths>(
-      url,
-      method,
-      {
-        ...fetchOptions,
-      }
-    )(request);
+    const response = await apiSchemaHttpService.schemaRequestRaw<
+      Url,
+      Method,
+      Paths
+    >(url, method, {
+      ...fetchOptions,
+    })(request);
     const reader = response.body?.getReader();
     const result: any[] = [];
     while (reader) {

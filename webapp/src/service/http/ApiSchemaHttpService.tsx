@@ -1,22 +1,9 @@
-import { singleton } from 'tsyringe';
-
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-
-import { TokenService } from '../TokenService';
 import { paths } from '../apiSchema.generated';
 
 import { ApiHttpService, RequestOptions } from './ApiHttpService';
 
-@singleton()
 export class ApiSchemaHttpService extends ApiHttpService {
-  constructor(
-    tokenService: TokenService,
-    redirectionActions: RedirectionActions
-  ) {
-    super(tokenService, redirectionActions);
-  }
-
-  apiUrl = process.env.REACT_APP_API_URL as string;
+  apiUrl = import.meta.env.VITE_APP_API_URL as string;
 
   schemaRequest<
     Url extends keyof Paths,
@@ -220,3 +207,5 @@ type OperationSchema<
   Method extends keyof Paths[Url],
   Paths = paths
 > = Paths[Url][Method] extends OperationSchemaType ? Paths[Url][Method] : never;
+
+export const apiSchemaHttpService = new ApiSchemaHttpService();

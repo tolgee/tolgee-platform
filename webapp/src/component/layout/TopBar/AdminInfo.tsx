@@ -1,16 +1,13 @@
 import { Box, Button, styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 const StyledExitDebugButton = styled(Button)`
   color: inherit;
   border-color: rgba(135, 135, 135, 0.38);
 `;
-
-const globalActions = container.resolve(GlobalActions);
 
 export const AdminInfo = (props: {
   adminAccess: boolean | undefined;

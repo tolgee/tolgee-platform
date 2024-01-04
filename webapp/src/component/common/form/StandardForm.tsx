@@ -3,7 +3,7 @@ import { Box, Button, SxProps } from '@mui/material';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { T } from '@tolgee/react';
 import { Form, Formik, FormikProps } from 'formik';
-import { FormikHelpers } from 'formik/dist/types';
+import { FormikHelpers, FormikValues } from 'formik/dist/types';
 import { useHistory } from 'react-router-dom';
 import { ObjectSchema } from 'yup';
 
@@ -34,7 +34,7 @@ interface FormProps<T> {
   showResourceError?: boolean;
 }
 
-export function StandardForm<T>({
+export function StandardForm<T extends FormikValues>({
   initialValues,
   validationSchema,
   disabled,

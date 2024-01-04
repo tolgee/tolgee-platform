@@ -1,9 +1,6 @@
 import React from 'react';
 import { Container, Box, Paper } from '@mui/material';
-
-const GlobalError = React.lazy(
-  () => import(/* webpackChunkName: "global-error" */ './common/GlobalError')
-);
+import GlobalError from './common/GlobalError';
 
 export default class ErrorBoundary extends React.Component<
   {

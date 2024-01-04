@@ -137,14 +137,13 @@ export const IntegrateView: FunctionComponent = () => {
                         )
                         .replace(
                           API_URL_PLACEHOLDER,
-                          process.env.REACT_APP_API_URL ||
+                          import.meta.env.VITE_APP_API_URL ||
                             window.location.origin
                         )
                         .replace(PROJECT_ID, String(project.id));
                     }}
-                  >
-                    {React.createElement(selectedWeapon.guide)}
-                  </MdxProvider>
+                    content={selectedWeapon.guide}
+                  />
                 </Box>
               )}
             </React.Suspense>

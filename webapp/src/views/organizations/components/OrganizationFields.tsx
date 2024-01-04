@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
-import { container } from 'tsyringe';
 import { useDebounce } from 'use-debounce';
 
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { OrganizationService } from 'tg.service/OrganizationService';
-
-const organizationService = container.resolve(OrganizationService);
+import { organizationService } from 'tg.service/OrganizationService';
 
 type Props = {
   disabled?: boolean;

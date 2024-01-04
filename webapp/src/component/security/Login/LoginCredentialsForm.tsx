@@ -4,19 +4,15 @@ import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
-
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
-
-const globalActions = container.resolve(GlobalActions);
 
 type Credentials = { username: string; password: string };
 type LoginViewCredentialsProps = {

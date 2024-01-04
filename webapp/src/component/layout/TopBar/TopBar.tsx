@@ -58,7 +58,7 @@ const StyledTolgeeLink = styled(Link)`
   text-decoration: inherit;
   outline: 0;
 
-  &:focus ${StyledLogoWrapper} {
+  &:focus .logoWrapper {
     filter: brightness(95%);
   }
 `;
@@ -107,7 +107,12 @@ export const TopBar: React.FC<Props> = ({
           <Box>
             <StyledTolgeeLink to={'/'}>
               <Box display="flex" alignItems="center">
-                <StyledLogoWrapper pr={1} display="flex" justifyItems="center">
+                <StyledLogoWrapper
+                  pr={1}
+                  display="flex"
+                  justifyItems="center"
+                  className="logoWrapper"
+                >
                   <TolgeeLogo
                     fontSize="large"
                     sx={{ color: theme.palette.navbar.logo }}

@@ -109,7 +109,9 @@ describe('Language creation in new project', () => {
   });
 
   it('validates language repeat', () => {
+    getInputByName('name').type('Super project');
     addLanguage('English');
+    gcy('global-form-save-button').click();
     cy.contains('Cannot add language more than once').should('be.visible');
   });
 

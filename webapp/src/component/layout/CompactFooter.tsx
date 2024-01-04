@@ -1,11 +1,11 @@
 import { Link, Box, styled } from '@mui/material';
 
-import { ReactComponent as TwitterLogo } from 'tg.svgs/social/twitter.svg';
-import { ReactComponent as FacebookLogo } from 'tg.svgs/social/facebook.svg';
-import { ReactComponent as GitHubLogo } from 'tg.svgs/social/github.svg';
-import { ReactComponent as LinkedInLogo } from 'tg.svgs/social/linkedin.svg';
-import { ReactComponent as SlackLogo } from 'tg.svgs/social/slack.svg';
-import { ReactComponent as DiscussionsLogo } from 'tg.svgs/social/discussions.svg';
+import TwitterLogo from 'tg.svgs/social/twitter.svg?react';
+import FacebookLogo from 'tg.svgs/social/facebook.svg?react';
+import GitHubLogo from 'tg.svgs/social/github.svg?react';
+import LinkedInLogo from 'tg.svgs/social/linkedin.svg?react';
+import SlackLogo from 'tg.svgs/social/slack.svg?react';
+import DiscussionsLogo from 'tg.svgs/social/discussions.svg?react';
 
 const StyledContainer = styled('div')`
   display: grid;

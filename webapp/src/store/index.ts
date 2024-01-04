@@ -2,32 +2,23 @@ import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
 import thunkMiddleware from 'redux-thunk';
-import { container } from 'tsyringe';
 
-import { MessageService } from '../service/MessageService';
-import { SecurityService } from '../service/SecurityService';
-import { ImplicitReducer } from './ImplicitReducer';
-import { ErrorActions } from './global/ErrorActions';
-import { GlobalActions } from './global/GlobalActions';
-import { MessageActions } from './global/MessageActions';
-import { RedirectionActions } from './global/RedirectionActions';
-import { TranslationActions } from './project/TranslationActions';
-
-const implicitReducer = container.resolve(ImplicitReducer);
-const globalActions = container.resolve(GlobalActions);
-const errorActions = container.resolve(ErrorActions);
-const redirectionActions = container.resolve(RedirectionActions);
+import { messageService } from '../service/MessageService';
+import { securityService } from '../service/SecurityService';
+import { implicitReducer } from './ImplicitReducer';
+import { errorActions } from './global/ErrorActions';
+import { globalActions } from './global/GlobalActions';
+import { messageActions } from './global/MessageActions';
+import { redirectionActions } from './global/RedirectionActions';
+import { translationActions } from './project/TranslationActions';
 
 const appReducer = (appState, action) =>
   combineReducers({
-    translations: implicitReducer.create(
-      container.resolve(TranslationActions),
-      appState
-    ),
+    translations: implicitReducer.create(translationActions, appState),
     global: implicitReducer.create(globalActions),
     error: implicitReducer.create(errorActions),
     redirection: implicitReducer.create(redirectionActions),
-    message: implicitReducer.create(container.resolve(MessageActions)),
+    message: implicitReducer.create(messageActions),
   })(appState, action);
 
 const rootReducer = (state, action): ReturnType<typeof appReducer> => {
@@ -37,7 +28,7 @@ const rootReducer = (state, action): ReturnType<typeof appReducer> => {
   if (action.type === globalActions.logout.type) {
     state = undefined;
     //remove after login link to avoid buggy behaviour
-    container.resolve(SecurityService).setLogoutMark();
+    securityService.setLogoutMark();
   }
 
   return appReducer(state, action);
@@ -50,7 +41,7 @@ const successMessageMiddleware = (store) => (next) => (action) => {
     action.type.indexOf('_PENDING') <= -1 &&
     action.type.indexOf('_REJECTED') <= -1
   ) {
-    container.resolve(MessageService).success(action.meta.successMessage);
+    messageService.success(action.meta.successMessage);
   }
 
   next(action);

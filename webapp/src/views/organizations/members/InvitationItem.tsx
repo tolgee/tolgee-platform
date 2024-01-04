@@ -1,15 +1,12 @@
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 import { IconButton, styled, Tooltip } from '@mui/material';
 import { Link, Clear } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrgRoleTranslation } from 'tg.translationTools/useOrgRoleTranslation';
-
-const messaging = container.resolve(MessageService);
+import { messageService } from 'tg.service/MessageService';
 
 type OrganizationInvitationModel =
   components['schemas']['OrganizationInvitationModel'];
@@ -74,7 +71,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
         [PARAMS.INVITATION_CODE]: invitation.code,
       })
     );
-    messaging.success(<T keyName="invite_user_invitation_copy_success" />);
+    messageService.success(<T keyName="invite_user_invitation_copy_success" />);
   };
 
   return (

@@ -3,24 +3,21 @@ import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { globalActions } from 'tg.store/global/GlobalActions';
+import { CompactView } from 'tg.component/layout/CompactView';
 
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
 import { DashboardPage } from '../layout/DashboardPage';
-import { CompactView } from 'tg.component/layout/CompactView';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 interface LoginProps {}
-
-const globalActions = container.resolve(GlobalActions);
 
 type ValueType = {
   email: string;

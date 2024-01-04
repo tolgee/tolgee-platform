@@ -3,22 +3,20 @@ import { Alert, Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { Redirect, useHistory } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
-import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
 import { UserProfileAvatar } from './UserProfileAvatar';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { LINKS } from 'tg.constants/links';
-import { DeleteUserButton } from './DeleteUserButton';
+import { messageService } from 'tg.service/MessageService';
 
-const messagesService = container.resolve(MessageService);
+import { DeleteUserButton } from './DeleteUserButton';
 
 export const UserProfileView: FunctionComponent = () => {
   const { t } = useTranslate();
@@ -41,7 +39,7 @@ export const UserProfileView: FunctionComponent = () => {
       { content: { 'application/json': v } },
       {
         onSuccess() {
-          messagesService.success(
+          messageService.success(
             <T keyName="User data - Successfully updated!" />
           );
           refetchInitialData();
