@@ -23,7 +23,7 @@ pluginManagement {
             if (requested.id.id == 'org.hibernate.orm') {
                 useVersion(hibernateVersion)
             }
-            if(requested.id.id == 'io.sentry.jvm.gradle'){
+            if (requested.id.id == 'io.sentry.jvm.gradle') {
                 useVersion('4.0.0')
             }
         }
@@ -64,7 +64,7 @@ dependencyResolutionManagement {
             library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.7.0")
             library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.23.2")
             library('redissonSpringData', 'org.redisson:redisson-spring-data-27:3.23.2')
-            library('postHog', 'com.posthog.java:posthog:1.1.0')
+            library('postHog', 'com.posthog.java:posthog:1.1.1')
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.9.12")
         }
     }
