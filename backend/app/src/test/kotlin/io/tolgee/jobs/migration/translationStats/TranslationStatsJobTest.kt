@@ -45,7 +45,8 @@ class TranslationStatsJobTest : AbstractSpringTest() {
     val instance = translationsStatsUpdateJobRunner.run()
 
     executeInNewTransaction {
-      val newTranslationId = translationService.setForKey(testData.aKey, mapOf("en" to "Hellooooo!"))["en"]!!.id
+      val newTranslationId =
+        translationService.set(testData.aKey, mapOf("en" to "Hellooooo!"), testData.project.id)["en"]!!.id
       entityManager
         .createNativeQuery(
           "update translation set word_count = null, character_count = null where id = $newTranslationId",

@@ -1,5 +1,6 @@
 package io.tolgee.service.key.utils
 
+import io.tolgee.dtos.KeyAndLanguage
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
@@ -38,6 +39,7 @@ class KeysImporter(
     securityService.checkLanguageTranslatePermissionByTag(project.id, languageTags)
 
     val toTag = mutableMapOf<Key, List<String>>()
+    val translationsToSave = mutableMapOf<KeyAndLanguage, String?>()
 
     keys.forEach { keyDto ->
       val safeNamespace = getSafeNamespace(keyDto.namespace)
@@ -56,11 +58,12 @@ class KeysImporter(
             this.namespace = namespaces[safeNamespace]
           }
         keyService.save(key)
+
         keyDto.translations.entries.forEach { (languageTag, value) ->
-          languages[languageTag]?.let { language ->
-            translationService.setTranslation(key, language, value)
-          }
+          val language = languages[languageTag] ?: return@forEach
+          translationsToSave[KeyAndLanguage(key, language)] = value
         }
+
         existing[safeNamespace to keyDto.name] = key
 
         if (!keyDto.tags.isNullOrEmpty()) {
@@ -71,6 +74,7 @@ class KeysImporter(
       }
     }
 
+    translationService.set(translationsToSave, project.id)
     tagService.tagKeys(toTag)
   }
 }

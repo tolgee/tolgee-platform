@@ -2,7 +2,6 @@ package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -12,38 +11,6 @@ import java.util.*
 @SpringBootTest
 @Transactional
 class TranslationServiceTest : AbstractSpringTest() {
-  @Transactional
-  @Test
-  fun getTranslations() {
-    val id = dbPopulator.populate("App").project.id
-    val data =
-      translationService.getTranslations(
-        languageTags = HashSet(Arrays.asList("en", "de")),
-        namespace = null,
-        projectId = id,
-        structureDelimiter = '.',
-      )
-    assertThat(data["en"]).isInstanceOf(MutableMap::class.java)
-  }
-
-  @Transactional
-  @Test
-  fun `returns correct map when collision`() {
-    val project = dbPopulator.populate("App").project
-    keyService.create(project, CreateKeyDto("folder.folder", null, mapOf("en" to "Ha")))
-    keyService.create(project, CreateKeyDto("folder.folder.translation", null, mapOf("en" to "Ha")))
-
-    val viewData =
-      translationService.getTranslations(
-        languageTags = HashSet(Arrays.asList("en", "de")),
-        namespace = null,
-        projectId = project.id,
-        structureDelimiter = '.',
-      )
-    @Suppress("UNCHECKED_CAST")
-    assertThat(viewData["en"] as Map<String, *>).containsKey("folder.folder.translation")
-  }
-
   @Test
   fun `adds stats on translation save and update`() {
     val testData =
@@ -73,7 +40,7 @@ class TranslationServiceTest : AbstractSpringTest() {
   fun `clears auto translation when set empty`() {
     val testData = TranslationsTestData()
     testDataService.saveTestData(testData.root)
-    translationService.setForKey(testData.aKey, mapOf("de" to ""))
+    translationService.set(testData.aKey, mapOf("de" to ""), testData.project.id)
     val translation = translationService.get(testData.aKeyGermanTranslation.id)
     assertThat(translation.auto).isFalse
     assertThat(translation.mtProvider).isNull()

@@ -10,6 +10,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.translation.AllTranslationsService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
@@ -40,6 +41,7 @@ class ExportController(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
+  private val allTranslationsService: AllTranslationsService,
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
   @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
@@ -65,7 +67,7 @@ class ExportController(
         streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
           val zipOutputStream = ZipOutputStream(out)
           val translations =
-            translationService.getTranslations(
+            allTranslationsService.getAllTranslations(
               allLanguages.map { it.tag }.toSet(),
               null,
               projectHolder.project.id,

@@ -157,10 +157,11 @@ class KeyComplexEditHelper(
         }.toMap()
 
       val translations =
-        translationService.setForKey(
+        translationService.set(
           key,
           oldTranslations = oldTranslations,
           translations = modifiedTranslations,
+          projectId = projectHolder.project.id,
         )
 
       translations.forEach {

@@ -9,6 +9,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.util.TranslationStatsUtil
@@ -37,7 +38,7 @@ import org.hibernate.annotations.ColumnDefault
 )
 @ActivityLoggedEntity
 @EntityListeners(Translation.Companion.UpdateStatsListener::class, Translation.Companion.StateListener::class)
-@ActivityEntityDescribingPaths(paths = ["key", "language"])
+@ActivityEntityDescribingPaths(paths = ["key", "language", "author"])
 class Translation(
   @Column(columnDefinition = "text")
   @ActivityLoggedProp
@@ -80,6 +81,13 @@ class Translation(
   @ActivityLoggedProp
   @field:ColumnDefault("false")
   var outdated: Boolean = false
+
+  @ActivityLoggedProp
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var author: UserAccount? = null
+
+  @ColumnDefault("true")
+  var active: Boolean = true
 
   constructor(text: String? = null, key: Key, language: Language) : this(text) {
     this.key = key
@@ -154,9 +162,9 @@ class Translation(
         if (!translation.text.isNullOrEmpty() && translation.state == TranslationState.UNTRANSLATED) {
           translation.state = TranslationState.TRANSLATED
         }
-        if (translation.text.isNullOrEmpty() &&
-          translation.state != TranslationState.UNTRANSLATED && translation.state != TranslationState.DISABLED
-        ) {
+
+        if (translation.text.isNullOrEmpty() && translation.state != TranslationState.DISABLED) {
+          translation.text = null
           translation.state = TranslationState.UNTRANSLATED
         }
       }

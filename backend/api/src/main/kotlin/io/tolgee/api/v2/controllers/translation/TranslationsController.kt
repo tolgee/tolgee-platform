@@ -47,6 +47,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.AllTranslationsService
 import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -104,6 +105,7 @@ class TranslationsController(
   private val activityHolder: ActivityHolder,
   private val activityService: ActivityService,
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
+  private val allTranslationsService: AllTranslationsService,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -160,7 +162,7 @@ When null, resulting file will be a flat key-value object.
         .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
 
     val response =
-      translationService.getTranslations(
+      allTranslationsService.getAllTranslations(
         languageTags = permittedTags,
         namespace = ns,
         projectId = projectHolder.project.id,
@@ -187,7 +189,8 @@ When null, resulting file will be a flat key-value object.
     val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
     securityService.checkLanguageTranslatePermissionsByTag(dto.translations.keys, projectHolder.project.id)
 
-    val modifiedTranslations = translationService.setForKey(key, dto.translations)
+    val modifiedTranslations =
+      translationService.set(key, dto.translations, projectHolder.project.id)
 
     val translations =
       dto.languagesToReturn
@@ -210,14 +213,14 @@ When null, resulting file will be a flat key-value object.
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
     val key =
-      keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
+      keyService.find(projectHolder.project.id, dto.key, dto.namespace)?.also {
         activityHolder.activity = ActivityType.SET_TRANSLATIONS
       } ?: let {
         checkKeyEditScope()
         activityHolder.activity = ActivityType.CREATE_KEY
         keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
       }
-    val translations = translationService.setForKey(key, dto.translations)
+    val translations = translationService.set(key, dto.translations, projectHolder.project.id)
     return getSetTranslationsResponse(key, translations)
   }
 

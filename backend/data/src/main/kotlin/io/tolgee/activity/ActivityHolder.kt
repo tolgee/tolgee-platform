@@ -53,6 +53,8 @@ open class ActivityHolder(val applicationContext: ApplicationContext) {
     activityRevision.describingRelations.associateBy { it.entityId to it.entityClass }.toMutableMap()
   }
 
+  open val modifiedEntityInstances = mutableListOf<Any>()
+
   fun getDescribingRelationFromCache(
     entityId: Long,
     entityClass: String,

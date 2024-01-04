@@ -20,7 +20,6 @@ import io.tolgee.hateoas.translations.comments.TranslationCommentModelAssembler
 import io.tolgee.hateoas.translations.comments.TranslationWithCommentModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
-import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.security.ProjectHolder
@@ -174,27 +173,12 @@ class TranslationCommentController(
     @RequestBody @Valid
     dto: TranslationCommentWithLangKeyDto,
   ): ResponseEntity<TranslationWithCommentModel> {
-    val translation = translationService.getOrCreate(dto.keyId, dto.languageId)
-    if (translation.key.project.id != projectHolder.project.id) {
-      throw BadRequestException(io.tolgee.constants.Message.KEY_NOT_FROM_PROJECT)
-    }
-
-    if (translation.language.project.id != projectHolder.project.id) {
-      throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_NOT_FROM_PROJECT)
-    }
-
-    // Translation was just created
-    if (translation.id == 0L) {
-      translation.state = TranslationState.UNTRANSLATED
-    }
-
-    translationService.save(translation)
-
-    val comment = translationCommentService.create(dto, translation, authenticationFacade.authenticatedUserEntity)
+    val comment =
+      translationCommentService.create(dto, projectHolder.project.id, authenticationFacade.authenticatedUserEntity)
     return ResponseEntity(
       TranslationWithCommentModel(
         comment = translationCommentModelAssembler.toModel(comment),
-        translation = translationModelAssembler.toModel(translation),
+        translation = translationModelAssembler.toModel(comment.translation),
       ),
       HttpStatus.CREATED,
     )
@@ -211,9 +195,13 @@ class TranslationCommentController(
     @RequestBody @Valid
     dto: TranslationCommentDto,
   ): ResponseEntity<TranslationCommentModel> {
-    val translation = translationService.find(translationId) ?: throw NotFoundException()
-    translation.checkFromProject()
-    val comment = translationCommentService.create(dto, translation, authenticationFacade.authenticatedUserEntity)
+    val comment =
+      translationCommentService.create(
+        dto,
+        translationId,
+        projectHolder.project.id,
+        authenticationFacade.authenticatedUserEntity,
+      )
     return ResponseEntity(translationCommentModelAssembler.toModel(comment), HttpStatus.CREATED)
   }
 
