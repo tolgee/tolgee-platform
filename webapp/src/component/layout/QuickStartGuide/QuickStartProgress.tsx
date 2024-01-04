@@ -1,4 +1,4 @@
-import { Box, styled, useTheme } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
 import { QSFinishedIcon } from 'tg.component/CustomIcons';
 
 const RADIUS = 45;
