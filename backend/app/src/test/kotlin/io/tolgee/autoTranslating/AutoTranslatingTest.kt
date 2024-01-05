@@ -50,7 +50,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     testUsingMtWorks()
     val expectedCost = "Hello".length * 100
     waitForNotThrowing {
-      assertThat(mtCreditBucketService.getCreditBalances(testData.project).creditBalance)
+      assertThat(mtCreditBucketService.getCreditBalances(testData.project.organizationOwner.id).creditBalance)
         .isEqualTo(INITIAL_BUCKET_CREDITS - expectedCost)
     }
   }
@@ -171,7 +171,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
     verify(googleTranslate, times(2)).translate(any<String>(), any(), any(), any())
 
-    val balance = mtCreditBucketService.getCreditBalances(testData.project)
+    val balance = mtCreditBucketService.getCreditBalances(testData.project.organizationOwner.id)
     balance.creditBalance.assert.isEqualTo(0)
   }
 

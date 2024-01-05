@@ -18,12 +18,12 @@ class HttpClient(
     body: Any,
     method: HttpMethod,
     result: Class<T>,
+    headers: HttpHeaders = HttpHeaders(),
   ): T? {
     val bodyJson = jacksonObjectMapper().writeValueAsString(body)
-    val headers =
-      HttpHeaders().apply {
-        contentType = MediaType.APPLICATION_JSON
-      }
+    headers.apply {
+      contentType = MediaType.APPLICATION_JSON
+    }
 
     val response =
       restTemplate.exchange(

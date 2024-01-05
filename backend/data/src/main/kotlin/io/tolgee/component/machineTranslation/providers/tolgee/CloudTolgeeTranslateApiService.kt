@@ -1,4 +1,4 @@
-package io.tolgee.component.machineTranslation.providers
+package io.tolgee.component.machineTranslation.providers.tolgee
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -7,7 +7,6 @@ import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.util.Logging
@@ -24,19 +23,17 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
 import java.time.Duration
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class TolgeeTranslateApiService(
+class CloudTolgeeTranslateApiService(
   private val tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties,
   private val restTemplate: RestTemplate,
   private val tokenBucketManager: TokenBucketManager,
   private val currentDateProvider: CurrentDateProvider,
-) : Logging {
-  @OptIn(ExperimentalTime::class)
-  fun translate(params: TolgeeTranslateParams): MtValueProvider.MtResult {
+) : Logging, TolgeeTranslateApiService {
+  override fun translate(params: TolgeeTranslateParams): MtValueProvider.MtResult {
     val headers = HttpHeaders()
 
     val closeItems =
@@ -112,6 +109,10 @@ class TolgeeTranslateApiService(
     tokenBucketManager.setEmptyUntil(BUCKET_KEY, currentDateProvider.date.time + retryAfter * 1000)
   }
 
+  private fun HttpClientErrorException.TooManyRequests.parse(): TooManyRequestsData {
+    return jacksonObjectMapper().readValue(this.responseBodyAsString)
+  }
+
   /**
    * Data structure for mapping the AzureCognitive JSON response objects.
    */
@@ -130,16 +131,6 @@ class TolgeeTranslateApiService(
       val formality: Formality? = null,
     )
 
-    class TolgeeTranslateParams(
-      val text: String,
-      val keyName: String?,
-      val sourceTag: String,
-      val targetTag: String,
-      val metadata: Metadata?,
-      val formality: Formality?,
-      val isBatch: Boolean,
-    )
-
     class TolgeeTranslateExample(
       var keyName: String,
       var source: String,
@@ -153,8 +144,4 @@ class TolgeeTranslateApiService(
     val error: String? = null,
     val retryAfter: Int? = null,
   )
-}
-
-private fun HttpClientErrorException.TooManyRequests.parse(): TolgeeTranslateApiService.TooManyRequestsData {
-  return jacksonObjectMapper().readValue(this.responseBodyAsString)
 }

@@ -2,6 +2,7 @@ package io.tolgee.ee.model
 
 import io.hypersistence.utils.hibernate.type.array.EnumArrayType
 import io.tolgee.constants.Feature
+import io.tolgee.ee.data.EeSubscriptionDto
 import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.model.AuditModel
 import jakarta.persistence.Column
@@ -46,4 +47,16 @@ class EeSubscription : AuditModel() {
   var status: SubscriptionStatus = SubscriptionStatus.ACTIVE
 
   var lastValidCheck: Date? = null
+
+  fun toDto(): EeSubscriptionDto {
+    return EeSubscriptionDto(
+      licenseKey = licenseKey,
+      name = name,
+      currentPeriodEnd = currentPeriodEnd,
+      cancelAtPeriodEnd = cancelAtPeriodEnd,
+      enabledFeatures = enabledFeatures,
+      status = status,
+      lastValidCheck = lastValidCheck,
+    )
+  }
 }

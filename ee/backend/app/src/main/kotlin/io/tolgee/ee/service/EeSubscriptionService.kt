@@ -3,10 +3,12 @@ package io.tolgee.ee.service
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.HttpClient
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
 import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEeSubscriptionModel
+import io.tolgee.ee.data.EeSubscriptionDto
 import io.tolgee.ee.data.GetMySubscriptionDto
 import io.tolgee.ee.data.PrepareSetLicenseKeyDto
 import io.tolgee.ee.data.ReleaseKeyDto
@@ -20,9 +22,14 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.service.InstanceIdService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.executeInNewTransaction
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpMethod
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
 import java.util.*
@@ -35,6 +42,9 @@ class EeSubscriptionService(
   private val currentDateProvider: CurrentDateProvider,
   private val httpClient: HttpClient,
   private val instanceIdService: InstanceIdService,
+  private val platformTransactionManager: PlatformTransactionManager,
+  @Lazy
+  private val self: EeSubscriptionService,
 ) {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
@@ -45,13 +55,23 @@ class EeSubscriptionService(
     const val REPORT_ERROR_PATH: String = "/v2/public/licensing/report-error"
   }
 
+  @Cacheable(Caches.EE_SUBSCRIPTION, key = "1")
+  fun findSubscriptionDto(): EeSubscriptionDto? {
+    return this.findSubscriptionEntity()?.toDto()
+  }
+
   fun findSubscriptionEntity(): EeSubscription? {
     return eeSubscriptionRepository.findById(1).orElse(null)
   }
 
+  fun isSubscribed(): Boolean {
+    return self.findSubscriptionDto() != null
+  }
+
+  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
   fun setLicenceKey(licenseKey: String): EeSubscription {
     val seats = userAccountService.countAllEnabled()
-    findSubscriptionEntity()?.let {
+    this.findSubscriptionEntity()?.let {
       throw BadRequestException(Message.THIS_INSTANCE_IS_ALREADY_LICENSED)
     }
 
@@ -77,7 +97,7 @@ class EeSubscriptionService(
       entity.name = responseBody.plan.name
       entity.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
       entity.enabledFeatures = responseBody.plan.enabledFeatures
-      return eeSubscriptionRepository.save(entity)
+      return self.save(entity)
     }
 
     throw IllegalStateException("Licence not obtained.")
@@ -129,8 +149,9 @@ class EeSubscriptionService(
     refreshSubscription()
   }
 
+  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
   fun refreshSubscription() {
-    val subscription = findSubscriptionEntity()
+    val subscription = this.findSubscriptionEntity()
     if (subscription != null) {
       val responseBody =
         try {
@@ -152,7 +173,7 @@ class EeSubscriptionService(
 
   private fun setSubscriptionKeyUsedByOtherInstance(subscription: EeSubscription) {
     subscription.status = SubscriptionStatus.KEY_USED_BY_ANOTHER_INSTANCE
-    eeSubscriptionRepository.save(subscription)
+    self.save(subscription)
   }
 
   fun HttpClientErrorException.parseBody(): ErrorResponseBody {
@@ -168,7 +189,7 @@ class EeSubscriptionService(
       subscription.enabledFeatures = responseBody.plan.enabledFeatures
       subscription.status = responseBody.status
       subscription.lastValidCheck = currentDateProvider.date
-      eeSubscriptionRepository.save(subscription)
+      self.save(subscription)
     }
   }
 
@@ -177,7 +198,7 @@ class EeSubscriptionService(
       val isConstantlyFailing = currentDateProvider.date.time - it.time > 1000 * 60 * 60 * 24 * 2
       if (isConstantlyFailing) {
         subscription.status = SubscriptionStatus.ERROR
-        eeSubscriptionRepository.save(subscription)
+        self.save(subscription)
       }
     }
   }
@@ -210,19 +231,34 @@ class EeSubscriptionService(
     val subscription = findSubscriptionEntity()
     if (subscription != null) {
       val seats = userAccountService.countAllEnabled()
-      try {
-        catchingSeatsSpendingLimit {
+      catchingSeatsSpendingLimit {
+        catchingLicenseNotFound {
           reportUsageRemote(subscription, seats)
         }
-      } catch (e: HttpClientErrorException.NotFound) {
-        val licenceKeyNotFound = e.message?.contains(Message.LICENSE_KEY_NOT_FOUND.code) == true
-        if (!licenceKeyNotFound) {
-          throw e
-        }
-        subscription.status = SubscriptionStatus.ERROR
-        eeSubscriptionRepository.save(subscription)
       }
     }
+  }
+
+  fun <T> catchingLicenseNotFound(fn: () -> T): T {
+    try {
+      return fn()
+    } catch (e: HttpClientErrorException.NotFound) {
+      val licenceKeyNotFound = e.message?.contains(Message.LICENSE_KEY_NOT_FOUND.code) == true
+      if (!licenceKeyNotFound) {
+        throw e
+      }
+      executeInNewTransaction(platformTransactionManager) {
+        val entity = findSubscriptionEntity() ?: throw e
+        entity.status = SubscriptionStatus.ERROR
+        self.save(entity)
+      }
+      throw e
+    }
+  }
+
+  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
+  fun save(subscription: EeSubscription): EeSubscription {
+    return eeSubscriptionRepository.save(subscription)
   }
 
   private fun reportUsageRemote(

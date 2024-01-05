@@ -176,7 +176,7 @@ class MtResultStreamer(
   private lateinit var servicesToUse: Set<MtServiceInfo>
 
   private val balanceBefore by lazy {
-    mtCreditBucketService.getCreditBalances(project)
+    mtCreditBucketService.getCreditBalances(project.organizationOwner.id)
   }
 
   private lateinit var project: Project

@@ -42,7 +42,7 @@ class MachineTranslationSuggestionFacade(
       listOf(targetLanguage.id),
     )
 
-    val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
+    val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.project.organizationOwnerId)
 
     return catchingOutOfCredits(balanceBefore) {
       val resultData = getTranslationResults(dto, targetLanguage)

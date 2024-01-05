@@ -243,13 +243,13 @@ class MtService(
     actualPrice: Int,
   ) {
     applicationEventPublisher.publishEvent(
-      OnAfterMachineTranslationEvent(this, project, actualPrice),
+      OnAfterMachineTranslationEvent(this, project.organizationOwner.id, actualPrice),
     )
   }
 
   private fun publishBeforeEvent(project: Project) {
     applicationEventPublisher.publishEvent(
-      OnBeforeMachineTranslationEvent(this, project),
+      OnBeforeMachineTranslationEvent(this, project.organizationOwner.id),
     )
   }
 

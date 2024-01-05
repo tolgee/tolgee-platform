@@ -3,12 +3,14 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
-import io.tolgee.component.machineTranslation.providers.TolgeeTranslateApiService
+import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
+import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -35,6 +37,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -80,7 +83,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
-  lateinit var tolgeeTranslateApiService: TolgeeTranslateApiService
+  lateinit var eeTolgeeTranslateApiService: EeTolgeeTranslateApiService
+
+  @Autowired
+  @MockBean
+  lateinit var eeSubscriptionInfoProvider: EeSubscriptionInfoProvider
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
@@ -89,15 +96,16 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   lateinit var cacheMock: Cache
 
-  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateApiService.Companion.TolgeeTranslateParams>
+  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
 
   @BeforeEach
   fun setup() {
-    Mockito.clearInvocations(amazonTranslate, deeplApiService, tolgeeTranslateApiService)
+    Mockito.clearInvocations(amazonTranslate, deeplApiService, eeTolgeeTranslateApiService)
     setForcedDate(Date())
     initTestData()
     initMachineTranslationProperties(1000)
     initMachineTranslationMocks()
+    doAnswer { true }.whenever(eeSubscriptionInfoProvider).isSubscribed()
     mockDefaultMtBucketSize(1000)
     cacheMock = mock()
     val rateLimitsCacheMock = mock<Cache>()
@@ -165,13 +173,13 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     tolgeeTranslateParamsCaptor = argumentCaptor()
 
     whenever(
-      tolgeeTranslateApiService.translate(
+      eeTolgeeTranslateApiService.translate(
         tolgeeTranslateParamsCaptor.capture(),
       ),
     ).thenAnswer {
       MtValueProvider.MtResult(
         "Translated with Tolgee Translator",
-        ((it.arguments[0] as? TolgeeTranslateApiService.Companion.TolgeeTranslateParams)?.text?.length ?: 0) * 100,
+        ((it.arguments[0] as? TolgeeTranslateParams)?.text?.length ?: 0) * 100,
       )
     }
   }
@@ -247,7 +255,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
         .assert.isEqualTo((1000 - "Beautiful".length * 100).toLong())
     }
   }
@@ -300,7 +308,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
 
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance.assert.isEqualTo(600)
+      mtCreditBucketService.getCreditBalances(
+        testData.projectBuilder.self.organizationOwner.id,
+      ).creditBalance.assert.isEqualTo(
+        600,
+      )
     }
   }
 
@@ -451,7 +463,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
         .assert.isEqualTo(5100)
     }
 
@@ -506,9 +518,9 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     extraCreditBalance: Long = 0,
   ) {
     performMtRequest().andIsOk
-    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
       .assert.isEqualTo(creditBalance * 100)
-    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).extraCreditBalance
+    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).extraCreditBalance
       .assert.isEqualTo(extraCreditBalance * 100)
   }
 

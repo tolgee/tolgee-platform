@@ -8,7 +8,6 @@ import io.tolgee.events.OnConsumePayAsYouGoMtCredits
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
-import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
@@ -35,13 +34,13 @@ class MtCreditBucketService(
   private val transactionManager: PlatformTransactionManager,
 ) : Logging {
   fun consumeCredits(
-    project: Project,
+    organizationId: Long,
     amount: Int,
   ): MtCreditBucket {
-    return lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
+    return lockingProvider.withLocking(getMtCreditBucketLockName(organizationId)) {
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
-          val bucket = findOrCreateBucket(project)
+          val bucket = findOrCreateBucketByOrganizationId(organizationId)
           consumeCredits(bucket, amount)
           bucket
         }
@@ -49,7 +48,7 @@ class MtCreditBucketService(
     }
   }
 
-  private fun getMtCreditBucketLockName(project: Project) = "mt-credit-lock-${project.organizationOwner.id}"
+  private fun getMtCreditBucketLockName(organizationId: Long) = "mt-credit-lock-$organizationId"
 
   private fun consumeCredits(
     bucket: MtCreditBucket,
@@ -70,13 +69,13 @@ class MtCreditBucketService(
 
   @Transactional(noRollbackFor = [OutOfCreditsException::class])
   @ExperimentalTime
-  fun checkPositiveBalance(project: Project) {
-    lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
+  fun checkPositiveBalance(organizationId: Long) {
+    lockingProvider.withLocking(getMtCreditBucketLockName(organizationId)) {
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
           val time =
             measureTime {
-              val bucket = findOrCreateBucket(project)
+              val bucket = findOrCreateBucketByOrganizationId(organizationId)
               checkPositiveBalance(bucket)
             }
           logger.debug("Checked for positive credits in $time")
@@ -161,8 +160,8 @@ class MtCreditBucketService(
     machineTranslationCreditBucketRepository.saveAll(buckets)
   }
 
-  fun getCreditBalances(project: Project): MtCreditBalanceDto {
-    return getCreditBalances(findOrCreateBucket(project))
+  fun getCreditBalances(organizationId: Long): MtCreditBalanceDto {
+    return getCreditBalances(findOrCreateBucketByOrganizationId(organizationId))
   }
 
   fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
@@ -230,9 +229,5 @@ class MtCreditBucketService(
   fun findOrCreateBucketByOrganizationId(organizationId: Long): MtCreditBucket {
     val organization = organizationService.get(organizationId)
     return findOrCreateBucket(organization)
-  }
-
-  private fun findOrCreateBucket(project: Project): MtCreditBucket {
-    return findOrCreateBucket(project.organizationOwner)
   }
 }

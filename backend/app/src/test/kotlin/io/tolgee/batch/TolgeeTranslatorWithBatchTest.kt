@@ -4,7 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.component.machineTranslation.providers.TolgeeTranslateApiService
+import io.tolgee.component.machineTranslation.providers.tolgee.CloudTolgeeTranslateApiService
+import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -37,7 +38,7 @@ class TolgeeTranslatorWithBatchTest {
   lateinit var restTemplate: RestTemplate
 
   @Autowired
-  lateinit var tolgeeTranslateApiService: TolgeeTranslateApiService
+  lateinit var cloudTolgeeTranslateApiService: CloudTolgeeTranslateApiService
 
   @SpyBean
   lateinit var tokenBucketManager: TokenBucketManager
@@ -67,8 +68,8 @@ class TolgeeTranslatorWithBatchTest {
     )
 
     assertThrows<TranslationApiRateLimitException> {
-      tolgeeTranslateApiService.translate(
-        TolgeeTranslateApiService.Companion.TolgeeTranslateParams(
+      cloudTolgeeTranslateApiService.translate(
+        TolgeeTranslateParams(
           "Helo",
           null,
           "en",
@@ -83,13 +84,13 @@ class TolgeeTranslatorWithBatchTest {
     val captor = ArgumentCaptor.forClass(Long::class.java)
 
     verify(tokenBucketManager, times(1))
-      .setEmptyUntil(eq(TolgeeTranslateApiService.Companion.BUCKET_KEY), captor.capture())
+      .setEmptyUntil(eq(CloudTolgeeTranslateApiService.Companion.BUCKET_KEY), captor.capture())
 
     captor.firstValue.assert.isEqualTo(currentDateProvider.date.time + 100 * 1000)
 
     assertThrows<TranslationApiRateLimitException> {
-      tolgeeTranslateApiService.translate(
-        TolgeeTranslateApiService.Companion.TolgeeTranslateParams(
+      cloudTolgeeTranslateApiService.translate(
+        TolgeeTranslateParams(
           "Helo",
           null,
           "en",
