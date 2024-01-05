@@ -89,6 +89,9 @@ export type QuickStart = {
   topBorder: string;
   progressBackground: string;
   itemBorder: string;
+  finishIcon: string;
+  finishBackground: string;
+  finishCircle: string;
 };
 
 export const colors = {
@@ -158,6 +161,9 @@ export const colors = {
       topBorder: '#e9ecef',
       progressBackground: '#bcbcbc70',
       itemBorder: '#EDF0F7',
+      finishIcon: '#fff',
+      finishBackground: '#EC407A19',
+      finishCircle: '#EC407A',
     } as QuickStart,
     import: {
       progressDone: '#00B962',
@@ -245,6 +251,9 @@ export const colors = {
       circleSuccess: '#3bac21',
       topBorder: '#2a384c',
       progressBackground: '#2c3c52',
+      finishIcon: '#fff',
+      finishBackground: '#EC407A19',
+      finishCircle: '#EC407A',
     } as QuickStart,
     import: {
       progressDone: '#00B962',

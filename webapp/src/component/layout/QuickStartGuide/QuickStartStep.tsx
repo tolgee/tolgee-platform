@@ -29,8 +29,8 @@ const StyledContainer = styled(Box)`
 
 const StyledIndex = styled(Box)`
   display: flex;
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   margin: 0px 3px;
   align-items: center;
   justify-content: center;

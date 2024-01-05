@@ -1,4 +1,5 @@
-import { styled } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
+import { QSFinishedIcon } from 'tg.component/CustomIcons';
 
 const RADIUS = 45;
 const CIRCUIT = RADIUS * Math.PI * 2;
@@ -25,11 +26,21 @@ type Props = {
 };
 
 export const QuickStartProgress = ({ percent, size = 28 }: Props) => {
+  const theme = useTheme();
   const normalized = percent > 1 ? 1 : percent < 0 ? 0 : percent;
 
   const fullLength = percent > 1 ? percent : 1;
   const progressLength = CIRCUIT - (normalized / fullLength) * CIRCUIT;
   const rotation = 0;
+
+  if (percent === 1) {
+    return (
+      <QSFinishedIcon
+        fillOpacity={0}
+        sx={{ color: theme.palette.quickStart.circleSuccess }}
+      />
+    );
+  }
 
   return (
     <svg viewBox="0 0 114 114" style={{ width: size, height: size }}>

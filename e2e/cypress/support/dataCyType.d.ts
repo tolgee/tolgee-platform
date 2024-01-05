@@ -394,7 +394,8 @@ declare namespace DataCy {
         "project-transfer-dialog" |
         "quick-start-action" |
         "quick-start-dialog" |
-        "quick-start-finish" |
+        "quick-start-finish-action" |
+        "quick-start-finish-step" |
         "quick-start-highlight" |
         "quick-start-highlight-ok" |
         "quick-start-step" |

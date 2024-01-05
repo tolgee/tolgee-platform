@@ -62,7 +62,7 @@ export const CdList = () => {
     <QuickStartHighlight
       itemKey="content_delivery_page"
       message={t('content_delivery_page_hint')}
-      offset={6}
+      offset={10}
       borderRadius="6px"
     >
       <Box mt={4}>

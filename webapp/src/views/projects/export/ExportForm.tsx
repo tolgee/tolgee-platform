@@ -219,6 +219,7 @@ export const ExportForm = () => {
         <QuickStartHighlight
           itemKey="export_form"
           offset={10}
+          borderRadius="6px"
           message={t('quick_start_item_export_form_hint')}
         >
           <StyledForm onSubmit={handleSubmit}>

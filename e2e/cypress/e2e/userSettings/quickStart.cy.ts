@@ -83,7 +83,7 @@ describe('Quick start guide', () => {
     getHighlightOkButton('export_form').click();
 
     // close guide
-    gcy('quick-start-finish').click();
+    gcy('quick-start-finish-action').click();
     gcy('quick-start-dialog').should('not.exist');
     cy.reload();
     gcy('quick-start-dialog').should('not.exist');
