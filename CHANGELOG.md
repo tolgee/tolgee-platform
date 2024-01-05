@@ -1,3 +1,11 @@
+## [3.44.4](https://github.com/tolgee/tolgee-platform/compare/v3.44.3...v3.44.4) (2024-01-05)
+
+
+### Bug Fixes
+
+* fixes in labels and hints ([#2064](https://github.com/tolgee/tolgee-platform/issues/2064)) ([76b29c4](https://github.com/tolgee/tolgee-platform/commit/76b29c421066dea991f5219110a3f568d0ae9481))
+* Import ConstraintViolationException ([#2065](https://github.com/tolgee/tolgee-platform/issues/2065)) ([1592cc7](https://github.com/tolgee/tolgee-platform/commit/1592cc7499dc8c0b0fe2d0fb58eb309ea2493909))
+
 ## [3.44.3](https://github.com/tolgee/tolgee-platform/compare/v3.44.2...v3.44.3) (2024-01-05)
 
 
