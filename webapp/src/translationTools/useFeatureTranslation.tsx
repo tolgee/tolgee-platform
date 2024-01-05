@@ -1,4 +1,5 @@
 import { useTranslate } from '@tolgee/react';
+import { FeatureLink } from 'tg.component/billing/FeatureLink';
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -8,10 +9,17 @@ type Feature =
 export function useFeatureTranslation() {
   const { t } = useTranslate();
 
-  return (value: Feature) => {
+  return function Feature(value: Feature) {
     switch (value) {
       case 'GRANULAR_PERMISSIONS':
-        return t('billing_subscriptions_granular_permissions_feature');
+        return (
+          <FeatureLink
+            newTab
+            href="https://tolgee.io/platform/projects_and_organizations/members#granular-permissions"
+          >
+            {t('billing_subscriptions_granular_permissions_feature')}
+          </FeatureLink>
+        );
       case 'PREMIUM_SUPPORT':
         return t('billing_subscriptions_premium_support_feature');
       case 'BACKUP_CONFIGURATION':

@@ -32,6 +32,7 @@ import {
 import { FormalityType, RowData, ServiceType } from './types';
 import { ServiceLabel } from './ServiceLabel';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';
+import { SuggestionsLabel } from './SuggestionsLabel';
 
 const StyledSubtitle = styled('div')`
   font-size: 14px;
@@ -209,7 +210,7 @@ export const LanguageSettingsDialog = ({
               >
                 <div className={TABLE_TOP_ROW} />
                 <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
-                  {t('project_mt_dialog_service_enabled')}
+                  <SuggestionsLabel />
                 </div>
                 <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
                   <PrimaryServiceLabel />

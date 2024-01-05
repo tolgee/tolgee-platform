@@ -17,6 +17,7 @@ import { EstimatedCosts } from '../common/usage/EstimatedCosts';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../../useOrganization';
 import { getProgressData } from 'tg.component/billing/utils';
+import { StringsHint } from 'tg.component/billing/StringsHint';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
@@ -92,9 +93,14 @@ export const CurrentUsage: FC<Props> = ({
       <StyledMetrics>
         <PlanMetric
           name={
-            usesSlots
-              ? t('billing_actual_used_translations')
-              : t('billing_actual_used_strings')
+            usesSlots ? (
+              t('billing_actual_used_translations')
+            ) : (
+              <T
+                keyName="billing_actual_used_strings_with_hint"
+                params={{ hint: <StringsHint /> }}
+              />
+            )
           }
           currentQuantity={translationsUsed}
           totalQuantity={translationsMax}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
-import { styled } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
 import clsx from 'clsx';
 import { useLoadingRegister } from './GlobalLoading';
 
@@ -31,6 +31,7 @@ export const SmoothProgress: React.FC<Props> = ({
   className,
   global,
 }) => {
+  const theme = useTheme();
   const [stateLoading, setStateLoading] = useState(false);
   const [smoothedLoading] = useDebounce(stateLoading, 100);
   const [progress, setProgress] = useState(0);
@@ -63,7 +64,12 @@ export const SmoothProgress: React.FC<Props> = ({
   return loading || smoothedLoading || progress ? (
     <StyledProgress
       data-cy="global-loading"
-      style={{ width: `${progress === 1 ? 100 : progress * 95}%` }}
+      style={{
+        width: `${progress === 1 ? 100 : progress * 95}%`,
+        background: global
+          ? theme.palette.globalLoading.main
+          : theme.palette.primary.main,
+      }}
       className={clsx(
         {
           loading: progress > 0 && progress < 1,
