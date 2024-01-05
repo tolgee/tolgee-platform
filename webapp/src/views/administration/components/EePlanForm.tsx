@@ -146,6 +146,16 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                 type="number"
                 fullWidth
               />
+              <TextField
+                name="prices.perThousandMtCredits"
+                size="small"
+                data-cy="administration-ee-plan-field-price-per-thousand-mt-credits"
+                label={t(
+                  'administration_ee_plan_field_price_per_thousand_mt_credits'
+                )}
+                type="number"
+                fullWidth
+              />
             </Box>
 
             <Typography sx={{ mt: 2 }}>
@@ -159,6 +169,16 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                 fullWidth
                 data-cy="administration-ee-plan-field-included-seats"
                 label={t('administration_ee_plan_field_included_seats')}
+              />
+            </Box>
+            <Box display="flex" gap={2} sx={{ mt: 1 }}>
+              <TextField
+                name="includedUsage.mtCredits"
+                size="small"
+                type="number"
+                fullWidth
+                data-cy="administration-ee-plan-field-included-mt-credits"
+                label={t('administration_ee_plan_field_included_mt_credits')}
               />
             </Box>
             <Box>

@@ -29,10 +29,12 @@ declare namespace DataCy {
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-field-feature" |
+        "administration-ee-plan-field-included-mt-credits" |
         "administration-ee-plan-field-included-seats" |
         "administration-ee-plan-field-name" |
         "administration-ee-plan-field-price-monthly" |
         "administration-ee-plan-field-price-per-seat" |
+        "administration-ee-plan-field-price-per-thousand-mt-credits" |
         "administration-ee-plan-field-price-yearly" |
         "administration-ee-plan-field-public" |
         "administration-ee-plan-field-stripe-product" |
