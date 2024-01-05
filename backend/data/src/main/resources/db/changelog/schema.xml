@@ -3028,4 +3028,7 @@
             create unique index import_author_project_unique on import(author_id, project_id) where deleted_at is null
         </sql>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1704461236234-1">
+        <dropUniqueConstraint constraintName="uc_import_translationconflict_id_col" tableName="import_translation"/>
+    </changeSet>
 </databaseChangeLog>

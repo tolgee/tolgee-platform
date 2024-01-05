@@ -5,7 +5,6 @@ import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.codec.digest.MurmurHash3
 import java.nio.ByteBuffer
@@ -21,7 +20,7 @@ class ImportTranslation(
   @ManyToOne(optional = false)
   lateinit var key: ImportKey
 
-  @OneToOne
+  @ManyToOne
   var conflict: Translation? = null
 
   /**
