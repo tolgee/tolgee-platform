@@ -348,6 +348,8 @@ declare namespace DataCy {
         "project-dashboard-progress" |
         "project-dashboard-project-totals" |
         "project-dashboard-reviewed-percentage" |
+        "project-dashboard-strings" |
+        "project-dashboard-strings-count" |
         "project-dashboard-tags" |
         "project-dashboard-text" |
         "project-dashboard-translated-percentage" |

@@ -24,7 +24,7 @@ describe('Former user', () => {
 
   it('shows the former user in activity', () => {
     cy.visit(`${HOST}/projects/${projectId}`);
-    cy.contains('Project').should('be.visible');
+    cy.gcy('project-dashboard-activity-list').should('be.visible');
     cy.gcy('former-user-name').should('be.visible');
   });
 
