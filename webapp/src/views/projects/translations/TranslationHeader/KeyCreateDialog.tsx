@@ -9,6 +9,7 @@ import {
   useTranslationsActions,
 } from '../context/TranslationsContext';
 import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
@@ -38,7 +39,10 @@ export const KeyCreateDialog: React.FC<Props> = ({
 }) => {
   const { insertTranslation } = useTranslationsActions();
 
-  const languages = useTranslationsSelector((c) => c.languages);
+  const { satisfiesLanguageAccess } = useProjectPermissions();
+  const languages = useTranslationsSelector((c) => c.languages)?.filter((l) =>
+    satisfiesLanguageAccess('translations.edit', l.id)
+  );
   const selectedLanguagesDefault = useTranslationsSelector(
     (c) => c.selectedLanguages
   );
@@ -100,7 +104,7 @@ export const KeyCreateDialog: React.FC<Props> = ({
           <T keyName="translation_single_create_title" />
           <LanguagesSelect
             languages={languages || []}
-            value={selectedLanguages}
+            value={selectedLanguagesMapped.map((l) => l.tag)}
             onChange={handleLanguageChange}
             context="translations-dialog"
           />

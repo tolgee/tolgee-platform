@@ -16,6 +16,7 @@ import {
 } from '../context/TranslationsContext';
 import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
 import { KeyEditForm } from './KeyEditForm';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export type LanguageType = {
   tag: string;
@@ -45,10 +46,13 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const history = useHistory();
 
   const translations = useTranslationsSelector((c) => c.translations);
+  const { satisfiesLanguageAccess } = useProjectPermissions();
   const selectedLanguages = useTranslationsSelector(
     (c) => c.selectedLanguages
   )!;
-  const languages = useTranslationsSelector((c) => c.languages)!;
+  const languages = useTranslationsSelector((c) => c.languages)?.filter((l) =>
+    satisfiesLanguageAccess('translations.edit', l.id)
+  );
 
   const translation = translations?.[0];
 
@@ -90,7 +94,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
           <LanguagesSelect
             languages={languages}
             onChange={selectLanguages}
-            value={selectedLanguages}
+            value={selectedLanguagesMapped.map((l) => l.tag)}
             context="languages"
           />
         </StyledLanguagesMenu>
