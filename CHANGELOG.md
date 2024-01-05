@@ -1,3 +1,10 @@
+## [3.44.3](https://github.com/tolgee/tolgee-platform/compare/v3.44.2...v3.44.3) (2024-01-05)
+
+
+### Bug Fixes
+
+* improve quick start ([#2061](https://github.com/tolgee/tolgee-platform/issues/2061)) ([793a007](https://github.com/tolgee/tolgee-platform/commit/793a007b0b290ec07838e0fd1d641e377a036bb2))
+
 ## [3.44.2](https://github.com/tolgee/tolgee-platform/compare/v3.44.1...v3.44.2) (2024-01-05)
 
 
