@@ -1,9 +1,9 @@
 import { default as React, FunctionComponent, useState } from 'react';
-import { IconButton, styled } from '@mui/material';
+import { Box, IconButton, styled } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { CircledLanguageIcon } from './languages/CircledLanguageIcon';
-import { locales } from '../locales';
+import { CircledLanguageIcon } from '../../languages/CircledLanguageIcon';
+import { locales } from '../../../locales';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { useTolgee } from '@tolgee/react';
 
@@ -21,9 +21,7 @@ const StyledIconButton = styled(IconButton)`
   }
 `;
 
-export const LocaleMenu: FunctionComponent<{ className?: string }> = (
-  props
-) => {
+export const LanguageMenu: FunctionComponent<{ className?: string }> = () => {
   const tolgee = useTolgee();
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
@@ -79,7 +77,14 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
                 tolgee.changeLanguage(abbr);
               }}
             >
-              {lang.name}
+              <Box display="flex" gap={0.7} alignItems="center">
+                <CircledLanguageIcon
+                  flag={lang.flag}
+                  size={18}
+                  draggable="false"
+                />
+                {lang.name}
+              </Box>
             </MenuItem>
           ))}
         </StyledMenu>

@@ -21,6 +21,8 @@ import { MenuHeader } from './MenuHeader';
 import { OrganizationSwitch } from './OrganizationSwitch';
 import { BillingItem } from './BillingItem';
 import { useLogout } from 'tg.hooks/useLogout';
+import { ThemeItem } from './ThemeItem';
+import { LanguageItem } from './LanguageItem';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -33,7 +35,6 @@ const StyledPopover = styled(Popover)`
   & .paper {
     margin-top: 5px;
     padding: 2px 0px;
-    max-width: 300px;
   }
 `;
 
@@ -151,6 +152,7 @@ export const UserMenu: React.FC = () => {
             {item.label}
           </MenuItem>
         ))}
+
         {preferredOrganization && (
           <>
             <StyledDivider />
@@ -187,6 +189,9 @@ export const UserMenu: React.FC = () => {
             />
           </>
         )}
+        <StyledDivider />
+        <LanguageItem />
+        <ThemeItem />
         <StyledDivider />
 
         {user.globalServerRole == 'ADMIN' && (
