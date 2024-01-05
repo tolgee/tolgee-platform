@@ -1,3 +1,10 @@
+## [3.44.2](https://github.com/tolgee/tolgee-platform/compare/v3.44.1...v3.44.2) (2024-01-05)
+
+
+### Bug Fixes
+
+* hide languages that are not editable when creating new key ([#2059](https://github.com/tolgee/tolgee-platform/issues/2059)) ([cae1932](https://github.com/tolgee/tolgee-platform/commit/cae1932c7dd353f603ec5f29f102b011ee41b950))
+
 ## [3.44.1](https://github.com/tolgee/tolgee-platform/compare/v3.44.0...v3.44.1) (2024-01-04)
 
 
