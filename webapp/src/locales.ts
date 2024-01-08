@@ -13,7 +13,7 @@ export const locales = {
     dateFnsLocale: enDateLocale,
   },
   cs: {
-    name: 'Česky',
+    name: 'Čeština',
     flag: '🇨🇿',
     dateFnsLocale: csDateLocale,
   },

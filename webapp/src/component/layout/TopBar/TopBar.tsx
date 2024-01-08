@@ -1,19 +1,19 @@
 import { Link } from 'react-router-dom';
-import { Box, IconButton, styled, useTheme } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { DarkMode, LightMode } from '@mui/icons-material';
 
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useConfig } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 
-import { LocaleMenu } from '../../LocaleMenu';
 import { UserMenu } from '../../security/UserMenu/UserMenu';
-import { useThemeContext } from '../../../ThemeProvider';
 import { AdminInfo } from './AdminInfo';
 import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
+import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
+import { AppState } from 'tg.store/index';
+import { useSelector } from 'react-redux';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -63,11 +63,6 @@ const StyledTolgeeLink = styled(Link)`
   }
 `;
 
-const StyledIconButton = styled(IconButton)`
-  width: 40px;
-  height: 40px;
-`;
-
 type Props = {
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
@@ -81,17 +76,11 @@ export const TopBar: React.FC<Props> = ({
 
   const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
   const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
+  const userLogged = useSelector(
+    (state: AppState) => state.global.security.allowPrivate
+  );
 
-  const { mode, setMode } = useThemeContext();
   const theme = useTheme();
-
-  const toggleTheme = () => {
-    if (mode === 'dark') {
-      setMode('light');
-    } else {
-      setMode('dark');
-    }
-  };
 
   return (
     <StyledAppBar
@@ -135,11 +124,8 @@ export const TopBar: React.FC<Props> = ({
           />
         </Box>
         <QuickStartTopBarButton />
-        <StyledIconButton onClick={toggleTheme} color="inherit">
-          {mode === 'dark' ? <LightMode /> : <DarkMode />}
-        </StyledIconButton>
-        <LocaleMenu />
         <UserMenu />
+        {!userLogged && <LanguageMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );
