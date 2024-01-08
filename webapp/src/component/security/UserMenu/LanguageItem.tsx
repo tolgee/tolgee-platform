@@ -1,8 +1,21 @@
-import { Box, MenuItem, Select, Typography } from '@mui/material';
+import {
+  Box,
+  MenuItem,
+  Select,
+  Typography,
+  selectClasses,
+  styled,
+} from '@mui/material';
 import { useTolgee, useTranslate } from '@tolgee/react';
 import { locales } from '../../../locales';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
+
+const StyledSelect = styled(Select)`
+  & .${selectClasses.select} {
+    padding: 6px 14px;
+  }
+`;
 
 export const LanguageItem = () => {
   const tolgee = useTolgee();
@@ -12,11 +25,11 @@ export const LanguageItem = () => {
   return (
     <Box sx={{ padding: '10px 16px 6px 16px' }} display="grid">
       <Typography variant="caption">{t('language_menu_label')}</Typography>
-      <Select
+      <StyledSelect
         size="small"
         value={language}
         onChange={(e) => {
-          tolgee.changeLanguage(e.target.value);
+          tolgee.changeLanguage(e.target.value as any);
         }}
       >
         {Object.entries(locales).map(([abbr, lang]) => (
@@ -31,7 +44,7 @@ export const LanguageItem = () => {
             </Box>
           </MenuItem>
         ))}
-      </Select>
+      </StyledSelect>
     </Box>
   );
 };
