@@ -362,7 +362,6 @@ declare namespace DataCy {
         "project-member-item" |
         "project-member-revoke-button" |
         "project-menu-item" |
-        "project-menu-item-api-keys" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
