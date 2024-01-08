@@ -275,36 +275,36 @@ class ProjectsE2eDataController(
           name = "Microsoft 4",
           organizationOwner = "microsoft",
           permittedUsers =
-          mutableListOf(
-            PermittedUserData(
-              "vaclav.novak@fake.com",
-              ProjectPermissionType.VIEW,
+            mutableListOf(
+              PermittedUserData(
+                "vaclav.novak@fake.com",
+                ProjectPermissionType.VIEW,
+              ),
             ),
-          ),
           keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!")))),
         ),
         ProjectDataItem(
           name = "Microsoft 5",
           organizationOwner = "microsoft",
           permittedUsers =
-          mutableListOf(
-            PermittedUserData(
-              "vaclav.novak@fake.com",
-              ProjectPermissionType.VIEW,
+            mutableListOf(
+              PermittedUserData(
+                "vaclav.novak@fake.com",
+                ProjectPermissionType.VIEW,
+              ),
             ),
-          ),
           keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!")))),
         ),
         ProjectDataItem(
           name = "Microsoft 6",
           organizationOwner = "microsoft",
           permittedUsers =
-          mutableListOf(
-            PermittedUserData(
-              "vaclav.novak@fake.com",
-              ProjectPermissionType.VIEW,
+            mutableListOf(
+              PermittedUserData(
+                "vaclav.novak@fake.com",
+                ProjectPermissionType.VIEW,
+              ),
             ),
-          ),
           keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!")))),
         ),
         ProjectDataItem(
