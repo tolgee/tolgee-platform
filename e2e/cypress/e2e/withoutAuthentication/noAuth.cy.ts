@@ -18,44 +18,30 @@ describe('Test no authentication mode', () => {
     cy.visit(`${HOST}`);
   });
 
-  it(
-    'Has API keys item in project menu',
-    {
-      retries: {
-        runMode: 3,
-      },
-    },
-    () => {
-      disableAuthentication();
-      createTestProject();
-      cy.reload();
-      gcy('project-list-more-button').click();
-      gcy('project-settings-button').click();
-      gcy('project-menu-items')
-        .get(`[aria-label="API keys"]`)
-        .should('be.visible');
-    }
-  );
-
-  it('Has no user menu', () => {
-    cy.reload();
-    const globalUserMenuDataCy = 'global-user-menu-button';
-    gcy(globalUserMenuDataCy).should('be.visible');
+  it('Has limited user menu', () => {
     disableAuthentication();
+    createTestProject();
     cy.reload();
-    cy.contains('Projects').should('be.visible');
-    gcy(globalUserMenuDataCy).should('not.exist');
-  });
+    gcy('global-user-menu-button').click();
 
-  it('Has no link to User profile', () => {
-    cy.visit(HOST + '/account/apiKeys');
-    cy.contains('Project API keys');
+    // needs have access to tokens
+    gcy('user-menu-user-settings')
+      .contains('Project API keys')
+      .should('be.visible');
+    gcy('user-menu-user-settings')
+      .contains('Personal Access Tokens')
+      .should('be.visible');
 
-    cy.gcy('settings-menu-item').contains('User profile').should('be.visible');
-    disableAuthentication();
-    cy.reload();
-    cy.contains('Project API keys').should('be.visible');
-    cy.gcy('settings-menu-item').contains('User profile').should('not.exist');
+    // needs access to language and theme switching
+    gcy('user-menu-language-switch').should('be.visible');
+    gcy('user-menu-theme-switch').should('be.visible');
+
+    // no access to profile and organization
+    gcy('user-menu-user-settings')
+      .contains('Account settings')
+      .should('not.exist');
+    gcy('user-menu-organization-settings').should('not.exist');
+    gcy('user-menu-logout').should('not.exist');
   });
 
   it('should not allow accessing user profile settings', () => {

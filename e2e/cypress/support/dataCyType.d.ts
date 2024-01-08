@@ -165,6 +165,7 @@ declare namespace DataCy {
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
+        "global-language-menu" |
         "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
@@ -498,10 +499,12 @@ declare namespace DataCy {
         "translations-view-table" |
         "translations-view-table-button" |
         "user-delete-organization-message-item" |
+        "user-menu-language-switch" |
         "user-menu-logout" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |
         "user-menu-server-administration" |
+        "user-menu-theme-switch" |
         "user-menu-user-settings" |
         "user-profile" |
         "webhook-form-cancel" |

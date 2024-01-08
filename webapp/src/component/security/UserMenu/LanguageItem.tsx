@@ -23,7 +23,11 @@ export const LanguageItem = () => {
 
   const { t } = useTranslate();
   return (
-    <Box sx={{ padding: '10px 16px 6px 16px' }} display="grid">
+    <Box
+      sx={{ padding: '10px 16px 6px 16px' }}
+      display="grid"
+      data-cy="user-menu-language-switch"
+    >
       <Typography variant="caption">{t('language_menu_label')}</Typography>
       <StyledSelect
         size="small"

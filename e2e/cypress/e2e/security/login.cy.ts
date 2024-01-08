@@ -26,6 +26,10 @@ context('Login', () => {
     cy.visit(HOST);
   });
 
+  it('can change language', () => {
+    cy.gcy('global-language-menu').should('be.visible');
+  });
+
   it('login', () => {
     checkAnonymousIdSet();
 
