@@ -23,6 +23,11 @@ describe('Projects Basics', () => {
       .contains('Microsoft Word');
   });
 
+  it('Search is hidden for less than 5 projects', () => {
+    switchToOrganization('Facebook');
+    gcy('global-list-search').should('not.exist');
+  });
+
   it('Creates with organization owner', () => {
     createProject('I am a great project', 'Facebook');
   });
