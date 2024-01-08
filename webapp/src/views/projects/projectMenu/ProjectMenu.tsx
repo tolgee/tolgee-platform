@@ -1,4 +1,4 @@
-import { Devices, PersonOutline, VpnKey, Code } from '@mui/icons-material';
+import { Devices, PersonOutline, Code } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import LanguageIcon from '@mui/icons-material/Language';
 import {
@@ -157,14 +157,6 @@ export const ProjectMenu = ({ id }) => {
           text={t('project_menu_integrate')}
           data-cy="project-menu-item-integrate"
           quickStart={{ itemKey: 'menu_integrate' }}
-        />
-      )}
-      {!config.authentication && (
-        <SideMenuItem
-          linkTo={LINKS.USER_API_KEYS.build()}
-          icon={<VpnKey />}
-          text={t('project_menu_api_keys')}
-          data-cy="project-menu-item-api-keys"
         />
       )}
     </SideMenu>

@@ -22,7 +22,11 @@ export const ThemeItem = () => {
 
   const { t } = useTranslate();
   return (
-    <Box sx={{ padding: '6px 16px 12px 16px' }} display="grid">
+    <Box
+      sx={{ padding: '6px 16px 12px 16px' }}
+      display="grid"
+      data-cy="user-menu-theme-switch"
+    >
       <Typography variant="caption">{t('theme_mode')}</Typography>
       <StyledButtonGroup size="small">
         <Tooltip

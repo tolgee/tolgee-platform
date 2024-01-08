@@ -43,6 +43,7 @@ export const LanguageMenu: FunctionComponent<{ className?: string }> = () => {
           color="inherit"
           aria-controls="language-menu"
           aria-haspopup="true"
+          data-cy="global-language-menu"
           onClick={handleOpen}
           size="large"
         >

@@ -124,8 +124,8 @@ export const TopBar: React.FC<Props> = ({
           />
         </Box>
         <QuickStartTopBarButton />
-        <UserMenu />
         {!userLogged && <LanguageMenu />}
+        {userLogged && <UserMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );
