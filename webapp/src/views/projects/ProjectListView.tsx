@@ -58,12 +58,16 @@ export const ProjectListView = () => {
 
   const addAllowed = isOrganizationOwner || isAdminAccess;
 
+  const showSearch =
+    search || (listPermitted.data?.page?.totalElements ?? 0) > 5;
+
   return (
     <StyledWrapper>
       <DashboardPage isAdminAccess={isAdminAccess}>
         <BaseView
           windowTitle={t('projects_title')}
-          onSearch={setSearch}
+          onSearch={showSearch ? setSearch : undefined}
+          searchPlaceholder={t('projects_search_placeholder')}
           maxWidth={1000}
           allCentered
           addComponent={
