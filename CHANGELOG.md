@@ -1,3 +1,15 @@
+# [3.45.0](https://github.com/tolgee/tolgee-platform/compare/v3.44.4...v3.45.0) (2024-01-08)
+
+
+### Bug Fixes
+
+* no auth mode ([#2068](https://github.com/tolgee/tolgee-platform/issues/2068)) ([ea1ff42](https://github.com/tolgee/tolgee-platform/commit/ea1ff423da85baaf3f0e629b1c49e6a3e297be51))
+
+
+### Features
+
+* move top bar switches to user menu ([#2066](https://github.com/tolgee/tolgee-platform/issues/2066)) ([3926266](https://github.com/tolgee/tolgee-platform/commit/392626609b69ee26ff64dcf14ad9d50446547087))
+
 ## [3.44.4](https://github.com/tolgee/tolgee-platform/compare/v3.44.3...v3.44.4) (2024-01-05)
 
 
