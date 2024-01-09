@@ -15,6 +15,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslation
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
+import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
@@ -234,9 +235,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var currentDateProvider: CurrentDateProvider
 
   fun clearCaches() {
-    cacheManager.cacheNames.stream().forEach { cacheName: String ->
-      @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-      cacheManager.getCache(cacheName).clear()
+    Caches.caches.forEach { cacheName ->
+      cacheManager.getCache(cacheName)?.clear()
     }
   }
 

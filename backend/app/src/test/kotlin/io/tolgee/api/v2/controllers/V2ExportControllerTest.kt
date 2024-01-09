@@ -46,7 +46,8 @@ import kotlin.system.measureTimeMillis
   ],
 )
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-  lateinit var testData: TranslationsTestData
+  var testData: TranslationsTestData? = null
+  var namespacesTestData: NamespacesTestData? = null
 
   @MockBean
   @Autowired
@@ -98,7 +99,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         }
       } finally {
         Mockito.reset(postHog)
-        testDataService.cleanTestData(testData.root)
+        testDataService.cleanTestData(testData!!.root)
       }
     }
   }
@@ -149,9 +150,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `it filters by keyId in`() {
     retryingOnCommonIssues {
       testData = TranslationsTestData()
-      testData.generateLotOfData(1000)
-      testDataService.saveTestData(testData.root)
-      prepareUserAndProject(testData)
+      testData!!.generateLotOfData(1000)
+      testDataService.saveTestData(testData!!.root)
+      prepareUserAndProject(testData!!)
       commitTransaction()
 
       val time =
@@ -179,9 +180,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `the structureDelimiter works`() {
     retryingOnCommonIssues {
       testData = TranslationsTestData()
-      testData.generateScopedData()
-      testDataService.saveTestData(testData.root)
-      prepareUserAndProject(testData)
+      testData!!.generateScopedData()
+      testDataService.saveTestData(testData!!.root)
+      prepareUserAndProject(testData!!)
       commitTransaction()
 
       performExport("structureDelimiter=").let { parsed ->
@@ -235,10 +236,10 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it exports to json with namespaces`() {
     retryingOnCommonIssues {
-      val namespacesTestData = NamespacesTestData()
-      testDataService.saveTestData(namespacesTestData.root)
-      projectSupplier = { namespacesTestData.projectBuilder.self }
-      userAccount = namespacesTestData.user
+      namespacesTestData = NamespacesTestData()
+      testDataService.saveTestData(namespacesTestData!!.root)
+      projectSupplier = { namespacesTestData!!.projectBuilder.self }
+      userAccount = namespacesTestData!!.user
 
       val parsed = performExport()
 
@@ -313,8 +314,8 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun initBaseData() {
     testData = TranslationsTestData()
-    testDataService.saveTestData(testData.root)
-    prepareUserAndProject(testData)
+    testDataService.saveTestData(testData!!.root)
+    prepareUserAndProject(testData!!)
   }
 
   private fun prepareUserAndProject(testData: TranslationsTestData) {
@@ -326,19 +327,29 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     retry(
       retries = 10,
       exceptionMatcher = matcher@{
-        if (it is ConcurrentModificationException || it is DataIntegrityViolationException) {
+        if (it is ConcurrentModificationException ||
+          it is DataIntegrityViolationException ||
+          it is NullPointerException
+        ) {
           return@matcher true
         }
 
-        if (it is IllegalStateException && it.message?.contains("End size") == true)
-          {
-            return@matcher true
-          }
+        if (it is IllegalStateException && it.message?.contains("End size") == true) {
+          return@matcher true
+        }
 
         false
       },
     ) {
-      fn()
+      try {
+        fn()
+      } catch (e: Throwable) {
+        executeInNewTransaction {
+          testData?.let { testDataService.cleanTestData(it.root) }
+          namespacesTestData?.let { testDataService.cleanTestData(it.root) }
+        }
+        throw e
+      }
     }
   }
 }
