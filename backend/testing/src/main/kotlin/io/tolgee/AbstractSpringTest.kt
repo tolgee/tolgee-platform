@@ -63,22 +63,7 @@ import java.time.Duration
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(
-//  exclude = [
-//    CompositeMeterRegistryAutoConfiguration::class,
-//    DataSourcePoolMetricsAutoConfiguration::class,
-//    DiskSpaceHealthContributorAutoConfiguration::class,
-//    InfoContributorAutoConfiguration::class,
-//    JmxAutoConfiguration::class,
-//    JvmMetricsAutoConfiguration::class,
-//    JmxEndpointAutoConfiguration::class,
-//    LdapAutoConfiguration::class,
-//    LiquibaseEndpointAutoConfiguration::class,
-//    MetricsEndpointAutoConfiguration::class,
-//    StartupTimeMetricsListenerAutoConfiguration::class,
-//    TomcatMetricsAutoConfiguration::class,
-//  ]
-)
+@SpringBootTest
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal

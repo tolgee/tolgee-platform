@@ -28,7 +28,7 @@ class EmailVerificationSender(
           <a href="$url">$url</a><br/><br/>
           
           Regards,<br/>
-          Tolgee<br/><br/>
+          Tolgee
           """.trimIndent(),
       )
     tolgeeEmailSender.sendEmail(params)

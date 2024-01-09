@@ -111,6 +111,8 @@ export function useErrorTranslation() {
         return t('unexpected_error_while_executing_webhook');
       case 'resource_not_found':
         return t('resource_not_found');
+      case 'subscription_already_canceled':
+        return t('subscription_already_canceled');
       default:
         return code;
     }

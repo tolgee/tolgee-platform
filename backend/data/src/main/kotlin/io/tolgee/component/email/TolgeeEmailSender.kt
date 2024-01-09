@@ -22,7 +22,7 @@ class TolgeeEmailSender(
       """
       <html>
       <body style="font-size: 15px">
-      ${params.text}
+      ${params.text}<br/><br/>
       <img style="max-width: 100%; width:120px" src="cid:logo.png" />
       </body>
       </html>
