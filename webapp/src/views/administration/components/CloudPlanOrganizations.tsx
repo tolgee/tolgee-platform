@@ -62,7 +62,7 @@ export function CloudPlanOrganizations({
   );
 
   return (
-    <Box sx={{ minHeight: 690 }}>
+    <Box>
       <Box display="flex" justifyContent="space-between">
         <Typography sx={{ mt: 2, mb: 1 }}>
           {t('administration_cloud_plan_form_organizations_title')} (

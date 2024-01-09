@@ -264,6 +264,9 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
+  "/v2/public/translator/translate": {
+    post: operations["translate"];
+  };
   "/v2/public/telemetry/report": {
     post: operations["report"];
   };
@@ -356,7 +359,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm": {
     /** Pre-translate provided keys to provided languages by TM. */
-    post: operations["translate"];
+    post: operations["translate_1"];
   };
   "/v2/projects/{projectId}/start-batch-job/machine-translate": {
     /** Translate provided keys to provided languages through primary MT provider. */
@@ -734,14 +737,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -751,6 +746,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -1517,15 +1520,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1663,15 +1666,15 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
+      description: string;
+      username?: string;
+      scopes: string[];
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      scopes: string[];
-      /** Format: int64 */
       lastUsedAt?: number;
-      username?: string;
-      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1682,6 +1685,30 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    ExampleItem: {
+      source: string;
+      target: string;
+      key: string;
+    };
+    Metadata: {
+      examples: components["schemas"]["ExampleItem"][];
+      closeItems: components["schemas"]["ExampleItem"][];
+    };
+    TolgeeTranslateParams: {
+      text: string;
+      keyName?: string;
+      sourceTag: string;
+      targetTag: string;
+      metadata?: components["schemas"]["Metadata"];
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+    };
+    MtResult: {
+      translated?: string;
+      /** Format: int32 */
+      price: number;
+      contextDescription?: string;
     };
     TelemetryReportRequest: {
       instanceId: string;
@@ -2115,7 +2142,11 @@ export interface components {
         | "UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK"
         | "CONTENT_STORAGE_IS_IN_USE"
         | "CANNOT_SET_STATE_FOR_MISSING_TRANSLATION"
-        | "NO_PROJECT_ID_PROVIDED";
+        | "NO_PROJECT_ID_PROVIDED"
+        | "LICENSE_KEY_NOT_PROVIDED"
+        | "SUBSCRIPTION_ALREADY_CANCELED"
+        | "USER_IS_SUBSCRIBED_TO_PAID_PLAN"
+        | "CANNOT_CREATE_FREE_PLAN_WITHOUT_FIXED_TYPE";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2538,11 +2569,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3162,15 +3193,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3290,15 +3321,15 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
+      description: string;
+      username?: string;
+      scopes: string[];
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      scopes: string[];
-      /** Format: int64 */
       lastUsedAt?: number;
-      username?: string;
-      description: string;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -6216,6 +6247,33 @@ export interface operations {
       };
     };
   };
+  translate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["MtResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TolgeeTranslateParams"];
+      };
+    };
+  };
   report: {
     responses: {
       /** OK */
@@ -7147,7 +7205,7 @@ export interface operations {
     };
   };
   /** Pre-translate provided keys to provided languages by TM. */
-  translate: {
+  translate_1: {
     parameters: {
       path: {
         projectId: number;

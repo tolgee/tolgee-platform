@@ -7,7 +7,9 @@ declare namespace DataCy {
         "activity-detail" |
         "add-box" |
         "administration-access-message" |
+        "administration-cloud-plan-field-auto-assign-to-selected" |
         "administration-cloud-plan-field-feature" |
+        "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-mt-credits" |
         "administration-cloud-plan-field-included-translations" |
         "administration-cloud-plan-field-name" |

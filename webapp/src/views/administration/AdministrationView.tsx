@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Switch } from 'react-router-dom';
 
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
@@ -12,18 +11,25 @@ import { AdministrationCloudPlanCreateView } from './AdministrationCloudPlanCrea
 import { AdministrationEePlansView } from './AdministrationEePlansView';
 import { AdministrationEePlanEditView } from './AdministrationEePlanEditView';
 import { AdministrationEePlanCreateView } from './AdministrationEePlanCreateView';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 export const AdministrationView = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useUrlSearchState('search');
 
   return (
     <>
       <Switch>
         <PrivateRoute exact path={LINKS.ADMINISTRATION_ORGANIZATIONS.template}>
-          <AdministrationOrganizations search={search} setSearch={setSearch} />
+          <AdministrationOrganizations
+            search={search as string}
+            setSearch={setSearch}
+          />
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ADMINISTRATION_USERS.template}>
-          <AdministrationUsers search={search} setSearch={setSearch} />
+          <AdministrationUsers
+            search={search as string}
+            setSearch={setSearch}
+          />
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
           <AdministrationEeLicenseView />
