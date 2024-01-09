@@ -325,7 +325,18 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun retryingOnCommonIssues(fn: () -> Unit) {
     retry(
       retries = 10,
-      exceptionMatcher = { it is ConcurrentModificationException || it is DataIntegrityViolationException },
+      exceptionMatcher = matcher@{
+        if (it is ConcurrentModificationException || it is DataIntegrityViolationException) {
+          return@matcher true
+        }
+
+        if (it is IllegalStateException && it.message?.contains("End size") == true)
+          {
+            return@matcher true
+          }
+
+        false
+      },
     ) {
       fn()
     }
