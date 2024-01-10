@@ -14,7 +14,6 @@ export const BaseViewAddButton = (props: {
     to={props.addLinkTo}
     startIcon={<Add />}
     color="primary"
-    size="small"
     variant="contained"
     aria-label="add"
     onClick={props.onClick}

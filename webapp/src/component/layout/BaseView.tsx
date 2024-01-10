@@ -37,6 +37,7 @@ export interface BaseViewProps {
   addComponent?: React.ReactNode;
   children: (() => ReactNode) | ReactNode;
   onSearch?: (string) => void;
+  searchPlaceholder?: string;
   navigation?: React.ComponentProps<typeof Navigation>['path'];
   customNavigation?: ReactNode;
   customHeader?: ReactNode;
@@ -65,6 +66,7 @@ export const BaseView = (props: BaseViewProps) => {
     props.customHeader ||
     props.onSearch ||
     props.onAdd ||
+    props.addComponent ||
     props.addLinkTo;
 
   const maxWidth = getBaseViewWidth(props.maxWidth);
@@ -112,6 +114,7 @@ export const BaseView = (props: BaseViewProps) => {
                         <SecondaryBarSearchField
                           onSearch={props.onSearch}
                           initial={props.initialSearch}
+                          placeholder={props.searchPlaceholder}
                         />
                       </Box>
                     )}
