@@ -9,6 +9,7 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andPrettyPrint
@@ -61,6 +62,24 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         node("id").isValidId
         node("name").isEqualTo("super_key")
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates key with description`() {
+    performProjectAuthPost("keys", CreateKeyDto(name = "super_key", description = "description"))
+      .andIsCreated.andPrettyPrint.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo("super_key")
+        node("description").isEqualTo("description")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `validates description`() {
+    performProjectAuthPost("keys", CreateKeyDto(name = "super_key", description = "a".repeat(2001)))
+      .andIsBadRequest
   }
 
   @ProjectJWTAuthTestMethod

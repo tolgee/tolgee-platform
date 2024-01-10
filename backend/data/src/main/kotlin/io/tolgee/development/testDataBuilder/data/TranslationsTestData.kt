@@ -60,6 +60,7 @@ class TranslationsTestData {
           name = "A key"
           aKey = this
         }.build {
+          setDescription("A key description")
           addTranslation {
             language = germanLanguage
             text = "Z translation"

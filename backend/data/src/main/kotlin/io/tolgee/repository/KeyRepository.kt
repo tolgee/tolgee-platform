@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeySearchResultView
@@ -37,10 +38,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-      from Key k left join fetch k.namespace where k.project.id = :projectId order by k.id
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description)
+     from Key k
+     left join k.keyMeta km
+     left join k.namespace ns
+     where k.project.id = :projectId order by k.id
     """,
   )
-  fun getAllByProjectIdSortedById(projectId: Long): List<Key>
+  fun getAllByProjectIdSortedById(projectId: Long): List<KeyView>
 
   @Query("select k from Key k left join fetch k.keyMeta km where k.project.id = :projectId")
   fun getByProjectIdWithFetchedMetas(projectId: Long?): List<Key>
@@ -65,10 +70,12 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-    select k.id as id, ns.name as namespace, k.name as name, bt.text as baseTranslation, t.text as translation from 
-       key k
+    select k.id as id, ns.name as namespace, km.description as description, 
+        k.name as name, bt.text as baseTranslation, t.text as translation 
+        from key k
        join project p on p.id = k.project_id and p.id = :projectId
        left join namespace ns on k.namespace_id = ns.id
+       left join key_meta km on k.id = km.key_id
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
        left join translation t on t.key_id = k.id and (t.language_id = l.id),
@@ -116,8 +123,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-      select k from Key k 
-      left join fetch k.namespace where k.project.id = :projectId
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description)
+     from Key k
+     left join k.keyMeta km
+     left join k.namespace ns
+     where k.project.id = :projectId
     """,
     countQuery = """
       select count(k) from Key k 
@@ -127,7 +137,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
   fun getAllByProjectId(
     projectId: Long,
     pageable: Pageable,
-  ): Page<Key>
+  ): Page<KeyView>
 
   @Query(
     """
@@ -184,4 +194,15 @@ interface KeyRepository : JpaRepository<Key, Long> {
     projectId: Long,
     keyId: Long,
   ): Key?
+
+  @Query(
+    """
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description)
+     from Key k
+     left join k.keyMeta km
+     left join k.namespace ns
+      where k.id in :ids
+  """,
+  )
+  fun getViewsByKeyIds(ids: List<Long>): List<KeyView>
 }

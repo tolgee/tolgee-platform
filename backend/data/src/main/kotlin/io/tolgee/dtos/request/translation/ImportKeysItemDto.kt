@@ -16,6 +16,11 @@ class ImportKeysItemDto(
   @field:Length(max = 100)
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
   val namespace: String? = null,
+  @Schema(
+    description = "Description of key",
+    example = "This key is used on homepage. It's a label of sign up button.",
+  )
+  val description: String?,
   /**
    * Map of language tag -> text
    */

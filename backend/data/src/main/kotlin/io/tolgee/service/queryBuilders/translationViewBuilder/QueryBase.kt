@@ -8,6 +8,7 @@ import io.tolgee.model.Screenshot_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
@@ -60,6 +61,7 @@ class QueryBase<T>(
 
   private fun addLeftJoinedColumns() {
     addNamespace()
+    addDescription()
     addScreenshotCounts()
     addContextCounts()
     addLanguageSpecificFields()
@@ -178,6 +180,14 @@ class QueryBase<T>(
     this.fullTextFields.add(namespaceName)
     groupByExpressions.add(namespaceId)
     groupByExpressions.add(namespaceName)
+  }
+
+  private fun addDescription() {
+    val keyMeta = this.root.join(Key_.keyMeta, JoinType.LEFT)
+    val description = keyMeta.get(KeyMeta_.description)
+    this.querySelection[KeyWithTranslationsView::keyDescription.name] = description
+    this.fullTextFields.add(description)
+    groupByExpressions.add(description)
   }
 
   private fun addContextCounts() {

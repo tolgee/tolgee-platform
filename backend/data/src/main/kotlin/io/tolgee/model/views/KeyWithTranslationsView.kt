@@ -11,6 +11,7 @@ data class KeyWithTranslationsView(
   val keyName: String,
   val keyNamespaceId: Long?,
   val keyNamespace: String?,
+  val keyDescription: String?,
   val screenshotCount: Long,
   val contextPresent: Boolean,
   val translations: MutableMap<String, TranslationView> = mutableMapOf(),
@@ -30,6 +31,7 @@ data class KeyWithTranslationsView(
           keyName = data.removeFirst() as String,
           keyNamespaceId = data.removeFirst() as Long?,
           keyNamespace = data.removeFirst() as String?,
+          keyDescription = data.removeFirst() as String?,
           screenshotCount = data.removeFirst() as Long,
           contextPresent = data.removeFirst() as Boolean,
         )

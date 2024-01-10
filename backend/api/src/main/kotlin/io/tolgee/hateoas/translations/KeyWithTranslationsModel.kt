@@ -17,6 +17,8 @@ open class KeyWithTranslationsModel(
   val keyNamespaceId: Long?,
   @Schema(description = "The namespace of the key", example = "homepage")
   val keyNamespace: String?,
+  @Schema(description = "The namespace of the key", example = "homepage")
+  val keyDescription: String?,
   @Schema(description = "Tags of key")
   val keyTags: List<TagModel>,
   @Schema(description = "Count of screenshots provided for the key", example = "1")

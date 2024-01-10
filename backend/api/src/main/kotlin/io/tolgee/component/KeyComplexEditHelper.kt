@@ -15,6 +15,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
@@ -44,6 +45,7 @@ class KeyComplexEditHelper(
   private val transactionManager: PlatformTransactionManager =
     applicationContext.getBean(PlatformTransactionManager::class.java)
   private val bigMetaService = applicationContext.getBean(BigMetaService::class.java)
+  private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
 
   private lateinit var key: Key
   private var modifiedTranslations: Map<Long, String?>? = null
@@ -105,6 +107,9 @@ class KeyComplexEditHelper(
 
     if (isKeyModified) {
       key.project.checkKeysEditPermission()
+      keyMetaService.getOrCreateForKey(key).apply {
+        description = dto.description
+      }
       edited = keyService.edit(key, dto.name, dto.namespace)
     }
 

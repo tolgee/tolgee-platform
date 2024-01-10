@@ -18,6 +18,11 @@ open class KeyWithDataModel(
   @Schema(description = "Namespace of key", example = "homepage")
   val namespace: String?,
   @Schema(
+    description = "Description of key",
+    example = "This key is used on homepage. It's a label of sign up button.",
+  )
+  val description: String?,
+  @Schema(
     description = "Translations object containing values updated in this request",
     example = "{\"en\": {\"id\": 100000003, \"text\": \"This is super translation!\" }}",
   )

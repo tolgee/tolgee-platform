@@ -54,7 +54,8 @@ class ResolvingKeyImporter(
     importedKeys = tryImport()
     checkErrors()
     val screenshots = importScreenshots()
-    return KeyImportResolvableResult(importedKeys, screenshots)
+    val keyViews = keyService.getViewsByKeyIds(importedKeys.map { it.id })
+    return KeyImportResolvableResult(keyViews, screenshots)
   }
 
   private fun tryImport(): List<Key> {

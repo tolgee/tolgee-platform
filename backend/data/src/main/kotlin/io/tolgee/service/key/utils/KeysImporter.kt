@@ -3,8 +3,10 @@ package io.tolgee.service.key.utils
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.service.LanguageService
+import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.TagService
@@ -24,6 +26,7 @@ class KeysImporter(
   private val languageService: LanguageService = applicationContext.getBean(LanguageService::class.java)
   private val tagService: TagService = applicationContext.getBean(TagService::class.java)
   private val securityService: SecurityService = applicationContext.getBean(SecurityService::class.java)
+  private val keyMetaService: KeyMetaService = applicationContext.getBean(KeyMetaService::class.java)
 
   fun import() {
     val existing =
@@ -38,6 +41,7 @@ class KeysImporter(
     securityService.checkLanguageTranslatePermissionByTag(project.id, languageTags)
 
     val toTag = mutableMapOf<Key, List<String>>()
+    val keyMetasToSave = mutableListOf<KeyMeta>()
 
     keys.forEach { keyDto ->
       val safeNamespace = getSafeNamespace(keyDto.namespace)
@@ -68,9 +72,16 @@ class KeysImporter(
             toTag[key] = keyDto.tags
           }
         }
+        if (keyDto.description != key.keyMeta?.description) {
+          val keyMeta = key.keyMeta ?: KeyMeta(key = key)
+          key.keyMeta = keyMeta
+          keyMeta.description = keyDto.description
+          keyMetasToSave.add(keyMeta)
+        }
       }
     }
 
     tagService.tagKeys(toTag)
+    keyMetaService.saveAll(keyMetasToSave)
   }
 }

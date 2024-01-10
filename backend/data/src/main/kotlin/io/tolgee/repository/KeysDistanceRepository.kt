@@ -26,7 +26,7 @@ interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
   @Query(
     """
     select 
-      k.id as id, k.name as name, n.name as namespace, t.text as baseTranslation
+      k.id as id, k.name as name, k.keyMeta.description as description, n.name as namespace, t.text as baseTranslation
     from Key k
     left join k.namespace n
     left join k.translations t on t.language in (select p.baseLanguage from Project p where p.id = :projectId)

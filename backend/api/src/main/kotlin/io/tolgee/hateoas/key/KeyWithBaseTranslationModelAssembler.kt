@@ -10,7 +10,13 @@ class KeyWithBaseTranslationModelAssembler :
     KeyWithBaseTranslationView::class.java,
     KeyWithBaseTranslationModel::class.java,
   ) {
-  override fun toModel(entity: KeyWithBaseTranslationView): KeyWithBaseTranslationModel {
-    return KeyWithBaseTranslationModel(entity.id, entity.name, entity.namespace, entity.baseTranslation)
+  override fun toModel(view: KeyWithBaseTranslationView): KeyWithBaseTranslationModel {
+    return KeyWithBaseTranslationModel(
+      id = view.id,
+      name = view.name,
+      namespace = view.namespace,
+      description = view.description,
+      baseTranslation = view.baseTranslation,
+    )
   }
 }

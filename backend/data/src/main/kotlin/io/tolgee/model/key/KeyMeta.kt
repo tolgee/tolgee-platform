@@ -7,6 +7,7 @@ import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportKey
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.ManyToMany
@@ -15,6 +16,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.OrderBy
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
+import jakarta.validation.constraints.Size
 
 @Entity
 @EntityListeners(KeyMeta.Companion.KeyMetaListener::class)
@@ -38,6 +40,11 @@ class KeyMeta(
   @OrderBy("id")
   @ActivityLoggedProp(TagsPropChangesProvider::class)
   var tags: MutableSet<Tag> = mutableSetOf()
+
+  @ActivityLoggedProp
+  @Column(columnDefinition = "text")
+  @Size(max = 2000)
+  var description: String? = null
 
   fun addComment(
     author: UserAccount? = null,

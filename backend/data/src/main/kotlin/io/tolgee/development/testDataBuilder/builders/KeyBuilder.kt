@@ -86,6 +86,11 @@ class KeyBuilder(
     }
   }
 
+  fun setDescription(description: String) {
+    val meta = this.data.meta ?: addMeta { }
+    meta.self.description = description
+  }
+
   fun addTag(name: String): Tag {
     val meta = this.data.meta ?: addMeta { }
 

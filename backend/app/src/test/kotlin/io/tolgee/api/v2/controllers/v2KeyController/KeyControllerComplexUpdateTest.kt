@@ -210,12 +210,14 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
         name = keyName,
         translations = mapOf("en" to "EN", "de" to "DE"),
         tags = listOf("tag", "tag2"),
+        description = "What a cool key!",
         screenshotUploadedImageIds = screenshotImageIds,
         screenshotIdsToDelete = listOf(testData.screenshot.id),
       ),
     ).andIsOk.andAssertThatJson {
       node("id").isValidId
       node("name").isEqualTo(keyName)
+      node("description").isEqualTo("What a cool key!")
       node("tags") {
         isArray.hasSize(2)
         node("[0]") {

@@ -14,6 +14,11 @@ open class KeyWithBaseTranslationModel(
   val name: String,
   @Schema(description = "Namespace of key", example = "homepage")
   val namespace: String?,
+  @Schema(
+    description = "Description of key",
+    example = "This key is used on homepage. It's a label of sign up button.",
+  )
+  val description: String?,
   @Schema(description = "Base translation", example = "This is translation")
   val baseTranslation: String?,
 ) : RepresentationModel<KeyWithBaseTranslationModel>(), Serializable

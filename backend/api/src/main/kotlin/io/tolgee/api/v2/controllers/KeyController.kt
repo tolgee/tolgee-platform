@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.KeyComplexEditHelper
+import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.dtos.request.SetDisabledLanguagesRequest
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
@@ -80,7 +81,7 @@ class KeyController(
   private val securityService: SecurityService,
   private val applicationContext: ApplicationContext,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>,
+  private val keyPagedResourcesAssembler: PagedResourcesAssembler<KeyView>,
   private val keySearchResultModelAssembler: KeySearchResultModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
@@ -98,41 +99,13 @@ class KeyController(
     @RequestBody @Valid
     dto: CreateKeyDto,
   ): ResponseEntity<KeyWithDataModel> {
-    checkScrenshotUploadPermissions(dto)
+    checkScreenshotUploadPermissions(dto)
     checkTranslatePermission(dto)
     checkCanStoreBigMeta(dto)
     checkStateChangePermission(dto)
 
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
-  }
-
-  private fun checkCanStoreBigMeta(dto: CreateKeyDto) {
-    if (!dto.relatedKeysInOrder.isNullOrEmpty()) {
-      securityService.checkBigMetaUploadPermission(projectHolder.project.id)
-    }
-  }
-
-  private fun checkTranslatePermission(dto: CreateKeyDto) {
-    dto.translations?.filterValues { !it.isNullOrEmpty() }?.keys?.let { languageTags ->
-      if (languageTags.isNotEmpty()) {
-        securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
-      }
-    }
-  }
-
-  private fun checkStateChangePermission(dto: CreateKeyDto) {
-    dto.states?.filterValues { it != AssignableTranslationState.TRANSLATED }?.keys?.let { languageTags ->
-      if (languageTags.isNotEmpty()) {
-        securityService.checkLanguageStateChangePermissionsByTag(projectHolder.project.id, languageTags)
-      }
-    }
-  }
-
-  private fun checkScrenshotUploadPermissions(dto: CreateKeyDto) {
-    if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
-      projectHolder.projectEntity.checkScreenshotsUploadPermission()
-    }
   }
 
   @PutMapping(value = ["/{id}/complex-update"])
@@ -161,7 +134,9 @@ class KeyController(
   ): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
-    return keyService.edit(id, dto).model
+    keyService.edit(id, dto)
+    val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description)
+    return keyModelAssembler.toModel(view)
   }
 
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
@@ -326,10 +301,35 @@ class KeyController(
     keyService.checkInProject(this, projectHolder.project.id)
   }
 
-  private val Key.model: KeyModel
-    get() = keyModelAssembler.toModel(this)
-
   private fun Project.checkScreenshotsUploadPermission() {
     securityService.checkScreenshotsUploadPermission(this.id)
+  }
+
+  private fun checkCanStoreBigMeta(dto: CreateKeyDto) {
+    if (!dto.relatedKeysInOrder.isNullOrEmpty()) {
+      securityService.checkBigMetaUploadPermission(projectHolder.project.id)
+    }
+  }
+
+  private fun checkTranslatePermission(dto: CreateKeyDto) {
+    dto.translations?.filterValues { !it.isNullOrEmpty() }?.keys?.let { languageTags ->
+      if (languageTags.isNotEmpty()) {
+        securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
+      }
+    }
+  }
+
+  private fun checkStateChangePermission(dto: CreateKeyDto) {
+    dto.states?.filterValues { it != AssignableTranslationState.TRANSLATED }?.keys?.let { languageTags ->
+      if (languageTags.isNotEmpty()) {
+        securityService.checkLanguageStateChangePermissionsByTag(projectHolder.project.id, languageTags)
+      }
+    }
+  }
+
+  private fun checkScreenshotUploadPermissions(dto: CreateKeyDto) {
+    if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
+      projectHolder.projectEntity.checkScreenshotsUploadPermission()
+    }
   }
 }

@@ -3,6 +3,7 @@ package io.tolgee.service.key
 import io.tolgee.constants.Message
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
@@ -52,7 +53,7 @@ class KeyService(
     return keyRepository.getAllByProjectId(projectId)
   }
 
-  fun getAllSortedById(projectId: Long): List<Key> {
+  fun getAllSortedById(projectId: Long): List<KeyView> {
     return keyRepository.getAllByProjectIdSortedById(projectId)
   }
 
@@ -123,6 +124,10 @@ class KeyService(
       translation to it.value.translationState
     }?.toMap()?.let { translationService.setStateBatch(it) }
 
+    keyMetaService.getOrCreateForKey(key).apply {
+      description = dto.description
+    }
+
     dto.tags?.forEach {
       tagService.tagKey(key, it)
     }
@@ -186,6 +191,9 @@ class KeyService(
     dto: EditKeyDto,
   ): Key {
     val key = findOptional(keyId).orElseThrow { NotFoundException() }
+    keyMetaService.getOrCreateForKey(key).apply {
+      description = dto.description
+    }
     return edit(key, dto.name, dto.namespace)
   }
 
@@ -358,7 +366,7 @@ class KeyService(
   fun getPaged(
     projectId: Long,
     pageable: Pageable,
-  ): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
+  ): Page<KeyView> = keyRepository.getAllByProjectId(projectId, pageable)
 
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
 
@@ -414,5 +422,9 @@ class KeyService(
       translationService.save(translation)
     }
     return languages
+  }
+
+  fun getViewsByKeyIds(ids: List<Long>): List<KeyView> {
+    return keyRepository.getViewsByKeyIds(ids)
   }
 }
