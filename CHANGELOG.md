@@ -1,3 +1,10 @@
+## [3.45.1](https://github.com/tolgee/tolgee-platform/compare/v3.45.0...v3.45.1) (2024-01-10)
+
+
+### Bug Fixes
+
+* make project search field less confusing ([#2069](https://github.com/tolgee/tolgee-platform/issues/2069)) ([73cc4d8](https://github.com/tolgee/tolgee-platform/commit/73cc4d86102da2427d9834d2fa999b6984e97f43))
+
 # [3.45.0](https://github.com/tolgee/tolgee-platform/compare/v3.44.4...v3.45.0) (2024-01-08)
 
 
