@@ -27,7 +27,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
       l.originalName,
       l.flagEmoji,
       l.aiTranslatorPromptDescription,
-      (l.id = l.project.baseLanguage.id)
+      coalesce((l.id = l.project.baseLanguage.id), false)
     )
     from Language l
     where l.project.id = :projectId
@@ -71,7 +71,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
       l.originalName,
       l.flagEmoji,
       l.aiTranslatorPromptDescription,
-      (l.id = l.project.baseLanguage.id)
+      coalesce((l.id = l.project.baseLanguage.id), false)
     )
     from Language l where l.project.id = :projectId
   """,
