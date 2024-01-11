@@ -6,7 +6,7 @@ import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
 
 @Suppress("unused")
-@Relation(collectionRelation = "prompt-customizations", itemRelation = "prompt-customizations")
+@Relation(collectionRelation = "promptCustomizations", itemRelation = "promptCustomization")
 open class ProjectAiPromptCustomizationModel(
   @Schema(
     description =

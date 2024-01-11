@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.KeyComplexEditHelper
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.dtos.request.SetDisabledLanguagesRequest
@@ -32,7 +33,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
-import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -276,7 +276,7 @@ class KeyController(
     @PathVariable id: Long,
   ): CollectionModel<LanguageModel> {
     val languages = keyService.getDisabledLanguages(projectHolder.project.id, id)
-    return languageModelAssembler.toCollectionModel(languages.toViews())
+    return languageModelAssembler.toCollectionModel(languages.toDtos())
   }
 
   @PutMapping("/{id}/disabled-languages")
@@ -289,12 +289,12 @@ class KeyController(
     dto: SetDisabledLanguagesRequest,
   ): CollectionModel<LanguageModel> {
     val languages = keyService.setDisabledLanguages(projectHolder.project.id, id, dto.languageIds)
-    return languageModelAssembler.toCollectionModel(languages.toViews())
+    return languageModelAssembler.toCollectionModel(languages.toDtos())
   }
 
-  private fun List<Language>.toViews(): List<LanguageViewImpl> {
+  private fun List<Language>.toDtos(): List<LanguageDto> {
     val baseLanguage = projectHolder.projectEntity.baseLanguage
-    return this.map { LanguageViewImpl(it, it.id == baseLanguage?.id) }
+    return this.map { LanguageDto.fromEntity(it, baseLanguage?.id ?: 0) }
   }
 
   private fun Key.checkInProject() {

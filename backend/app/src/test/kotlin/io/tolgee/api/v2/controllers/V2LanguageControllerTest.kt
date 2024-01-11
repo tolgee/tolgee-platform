@@ -77,7 +77,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
     performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
     executeInNewTransaction {
-      Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+      Assertions.assertThat(languageService.findEntity(deutsch.id)).isNull()
     }
   }
 
@@ -92,7 +92,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthDelete("languages/${deutsch.id}", null)
       .andExpect(MockMvcResultMatchers.status().isOk)
     executeInNewTransaction {
-      Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+      Assertions.assertThat(languageService.findEntity(deutsch.id)).isNull()
     }
   }
 

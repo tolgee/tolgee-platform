@@ -36,7 +36,7 @@ class ImportServiceTest : AbstractSpringTest() {
     }
     executeInNewTransaction {
       val importFrench = importService.findLanguage(importTestData.importFrench.id)!!
-      val french = languageService.get(importTestData.french.id)
+      val french = languageService.getEntity(importTestData.french.id)
       importService.selectExistingLanguage(importFrench, french)
       assertThat(importFrench.existingLanguage).isEqualTo(french)
       val translations = importService.findTranslations(importTestData.importFrench.id)

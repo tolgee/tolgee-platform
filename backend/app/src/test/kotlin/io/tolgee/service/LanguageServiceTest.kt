@@ -38,7 +38,7 @@ class LanguageServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     languageService.deleteLanguage(testData.germanLanguage.id)
-    languageService.find(testData.germanLanguage.id).assert.isNull()
+    languageService.findEntity(testData.germanLanguage.id).assert.isNull()
   }
 
   @Test
@@ -48,6 +48,6 @@ class LanguageServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     languageService.deleteLanguage(testData.englishLanguage.id)
-    languageService.find(testData.englishLanguage.id).assert.isNull()
+    languageService.findEntity(testData.englishLanguage.id).assert.isNull()
   }
 }

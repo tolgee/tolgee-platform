@@ -29,7 +29,7 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
     entityManager.flush()
 
     languageService.deleteLanguage(testData.englishLanguage.id)
-    languageService.find(testData.englishLanguage.id).assert.isNull()
+    languageService.findEntity(testData.englishLanguage.id).assert.isNull()
   }
 
   @Test

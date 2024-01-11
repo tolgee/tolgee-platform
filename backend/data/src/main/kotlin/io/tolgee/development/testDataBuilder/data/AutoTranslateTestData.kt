@@ -10,7 +10,6 @@ class AutoTranslateTestData : BaseTestData() {
   lateinit var spanishLanguage: Language
   lateinit var baseTranslationNotExistKey: Key
   lateinit var baseTranslationUntranslated: Key
-  val project get() = projectBuilder.self
 
   init {
     root.apply {

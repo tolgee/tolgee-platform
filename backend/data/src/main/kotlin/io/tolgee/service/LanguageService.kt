@@ -9,7 +9,6 @@ import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.views.LanguageView
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -58,12 +57,25 @@ class LanguageService(
   }
 
   @Transactional
-  fun deleteLanguage(id: Long) {
-    val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
+  fun deleteLanguage(
+    languageId: Long,
+    projectId: Long,
+  ) {
+    val language = getEntity(languageId, projectId)
+    deleteLanguage(language)
+  }
+
+  @Transactional
+  fun deleteLanguage(language: Language) {
     permissionService.removeLanguageFromPermissions(language)
     languageRepository.delete(language)
     entityManager.flush()
     clearCache(language)
+  }
+
+  @Transactional
+  fun deleteLanguage(id: Long) {
+    deleteLanguage(getEntity(id))
   }
 
   @Transactional
@@ -103,23 +115,33 @@ class LanguageService(
     return self.getProjectLanguages(projectId).toSet()
   }
 
-  fun get(id: Long): Language {
-    return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  fun get(
+    languageId: Long,
+    projectId: Long,
+  ): LanguageDto {
+    return find(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
-  fun getEntity(id: Long): Language? {
-    return findEntity(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  fun find(
+    languageId: Long,
+    projectId: Long,
+  ): LanguageDto? {
+    return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
   }
 
   fun findEntity(id: Long): Language? {
     return languageRepository.findById(id).orElse(null)
   }
 
-  fun get(
+  fun getEntity(id: Long): Language {
+    return this.findEntity(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  fun getEntity(
     languageId: Long,
     projectId: Long,
   ): Language {
-    return find(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    return findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
   fun findEntity(
@@ -127,32 +149,6 @@ class LanguageService(
     projectId: Long,
   ): Language? {
     return languageRepository.find(languageId, projectId)
-  }
-
-  fun find(
-    languageId: Long,
-    projectId: Long,
-  ): Language? {
-    return languageRepository.find(languageId, projectId)
-  }
-
-  fun find(id: Long): Language? {
-    return languageRepository.findById(id).orElse(null)
-  }
-
-  @Transactional
-  fun getView(id: Long): LanguageView {
-    return findView(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-  }
-
-  @Transactional
-  fun findView(id: Long): LanguageView? {
-    return languageRepository.findView(id)
-  }
-
-  @Deprecated("use find method", replaceWith = ReplaceWith("find"))
-  fun findById(id: Long): Optional<Language> {
-    return languageRepository.findById(id)
   }
 
   fun findByTag(
@@ -299,7 +295,7 @@ class LanguageService(
   fun getPaged(
     projectId: Long,
     pageable: Pageable,
-  ): Page<LanguageView> {
+  ): Page<LanguageDto> {
     return this.languageRepository.findAllByProjectId(projectId, pageable)
   }
 
@@ -315,8 +311,8 @@ class LanguageService(
   }
 
   @Transactional
-  fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView> {
-    return languageRepository.getViewsOfProjects(projectIds)
+  fun getDtosOfProjects(projectIds: List<Long>): Map<Long, List<LanguageDto>> {
+    return projectIds.associateWith { self.getProjectLanguages(it) }
   }
 
   @Cacheable(Caches.LANGUAGES, key = "#projectId")

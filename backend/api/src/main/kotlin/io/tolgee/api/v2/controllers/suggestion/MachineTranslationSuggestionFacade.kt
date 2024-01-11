@@ -124,7 +124,7 @@ class MachineTranslationSuggestionFacade(
       }
 
   val SuggestRequestDto.targetLanguage
-    get() = languageService.get(this.targetLanguageId)
+    get() = languageService.getEntity(this.targetLanguageId)
 
   private fun Key.checkInProject() {
     keyService.checkInProject(this, projectHolder.project.id)

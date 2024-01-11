@@ -58,7 +58,7 @@ class MtResultStreamer(
    */
   private fun init() {
     key = with(machineTranslationSuggestionFacade) { dto.key }
-    val targetLanguage = applicationContext.getBean(LanguageService::class.java).get(dto.targetLanguageId)
+    val targetLanguage = applicationContext.getBean(LanguageService::class.java).getEntity(dto.targetLanguageId)
     servicesToUse = mtService.getServicesToUse(targetLanguage, dto.services)
     project = projectHolder.projectEntity
   }

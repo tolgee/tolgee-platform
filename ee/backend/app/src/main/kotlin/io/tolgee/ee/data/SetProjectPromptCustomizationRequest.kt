@@ -3,7 +3,7 @@ package io.tolgee.ee.data
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
 
-class SetProjectPromptCustomizationRequest {
+class SetProjectPromptCustomizationRequest(
   @Schema(
     description =
       "The project description used in the  prompt that " +
@@ -13,5 +13,5 @@ class SetProjectPromptCustomizationRequest {
         "This is an project of translations for out paper selling app.",
   )
   @Size(max = 5000)
-  var description: String? = null
-}
+  var description: String? = null,
+)

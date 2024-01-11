@@ -3,7 +3,7 @@ package io.tolgee.ee.data
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
 
-class SetLanguagePromptCustomizationRequest {
+class SetLanguagePromptCustomizationRequest(
   @Schema(
     description =
       "The language description used in the  prompt that " +
@@ -14,5 +14,5 @@ class SetLanguagePromptCustomizationRequest {
         "Office -> مكتب\n",
   )
   @Size(max = 5000)
-  var description: String? = null
-}
+  var description: String? = null,
+)

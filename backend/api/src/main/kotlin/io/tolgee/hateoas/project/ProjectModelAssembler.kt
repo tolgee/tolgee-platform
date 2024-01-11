@@ -3,12 +3,12 @@ package io.tolgee.hateoas.project
 import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.dtos.ComputedPermissionDto
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
 import io.tolgee.model.UserAccount
-import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -49,7 +49,7 @@ class ProjectModelAssembler(
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationRole = view.organizationRole,
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
-      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageViewImpl(baseLanguage, true)) },
+      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
     ).add(link).also { model ->

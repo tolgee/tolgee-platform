@@ -11,24 +11,23 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.LanguageValidator
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.views.LanguageView
-import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -58,9 +57,8 @@ class V2LanguagesController(
   private val languageService: LanguageService,
   private val projectService: ProjectService,
   private val languageValidator: LanguageValidator,
-  private val securityService: SecurityService,
   private val languageModelAssembler: LanguageModelAssembler,
-  private val pagedAssembler: PagedResourcesAssembler<LanguageView>,
+  private val pagedAssembler: PagedResourcesAssembler<LanguageDto>,
   private val projectHolder: ProjectHolder,
 ) : IController {
   @PostMapping(value = [""])
@@ -76,7 +74,7 @@ class V2LanguagesController(
     val project = projectService.get(projectId)
     languageValidator.validateCreate(dto, project)
     val language = languageService.createLanguage(dto, project)
-    return languageModelAssembler.toModel(LanguageViewImpl(language, false))
+    return languageModelAssembler.toModel(LanguageDto.fromEntity(language, project.baseLanguage?.id))
   }
 
   @Operation(summary = "Edits language")
@@ -90,10 +88,8 @@ class V2LanguagesController(
     @PathVariable("languageId") languageId: Long,
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
-    val view = languageService.getView(languageId)
-    languageService.editLanguage(view.language, dto)
-    val languageView = languageService.getView(languageId)
-    return languageModelAssembler.toModel(languageView)
+    languageService.editLanguage(languageService.getEntity(languageId, projectHolder.project.id), dto)
+    return languageModelAssembler.toModel(languageService.get(languageId, projectHolder.project.id))
   }
 
   @GetMapping(value = [""])
@@ -102,7 +98,7 @@ class V2LanguagesController(
   @AllowApiAccess
   fun getAll(
     @PathVariable("projectId") pathProjectId: Long?,
-    @ParameterObject pageable: Pageable,
+    @ParameterObject @SortDefault("tag") pageable: Pageable,
   ): PagedModel<LanguageModel> {
     val data = languageService.getPaged(projectHolder.project.id, pageable)
     return pagedAssembler.toModel(data, languageModelAssembler)
@@ -115,7 +111,7 @@ class V2LanguagesController(
   fun get(
     @PathVariable("languageId") id: Long,
   ): LanguageModel {
-    val languageView = languageService.getView(id)
+    val languageView = languageService.get(id, projectHolder.project.id)
     return languageModelAssembler.toModel(languageView)
   }
 
@@ -127,14 +123,12 @@ class V2LanguagesController(
   fun deleteLanguage(
     @PathVariable languageId: Long,
   ) {
-    val language = languageService.get(languageId)
-    securityService.checkProjectPermission(language.project.id, Scope.LANGUAGES_EDIT)
-
-    // if base language is missing, select first language
-    val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
-    if (baseLanguage!!.id == languageId) {
+    val isBaseLanguage =
+      languageService.getProjectLanguages(projectHolder.project.id).any { it.base && it.id == languageId }
+    if (isBaseLanguage) {
       throw BadRequestException(Message.CANNOT_DELETE_BASE_LANGUAGE)
     }
-    languageService.deleteLanguage(languageId)
+
+    languageService.deleteLanguage(languageId, projectHolder.project.id)
   }
 }

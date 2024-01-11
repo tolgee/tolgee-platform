@@ -10,4 +10,21 @@ data class LanguageDto(
   override var flagEmoji: String? = null,
   override var aiTranslatorPromptDescription: String? = null,
   var base: Boolean = false,
-) : ILanguage
+) : ILanguage {
+  companion object {
+    fun fromEntity(
+      language: ILanguage,
+      baseLanguageId: Long?,
+    ): LanguageDto {
+      return LanguageDto(
+        id = language.id,
+        name = language.name,
+        tag = language.tag,
+        originalName = language.originalName,
+        flagEmoji = language.flagEmoji,
+        aiTranslatorPromptDescription = language.aiTranslatorPromptDescription,
+        base = baseLanguageId == language.id,
+      )
+    }
+  }
+}
