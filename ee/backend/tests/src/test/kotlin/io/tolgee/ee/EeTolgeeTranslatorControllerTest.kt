@@ -1,12 +1,12 @@
 package io.tolgee.ee
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.ee.component.contentDelivery.EeTolgeeTranslateApiServiceImpl
-import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.fixtures.andAssertThatJson

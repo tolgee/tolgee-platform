@@ -23,8 +23,15 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
     val result =
       translationViewDataProvider.getData(
         projectId = testData.project.id,
-        languages = setOf(testData.englishLanguage, testData.germanLanguage),
-        PageRequest.of(0, 10),
+        languages =
+          languageService.dtosFromEntities(
+            listOf(testData.englishLanguage, testData.germanLanguage),
+            testData.project.id,
+          ).toSet(),
+        PageRequest.of(
+          0,
+          10,
+        ),
       )
     assertThat(result.content).hasSize(10)
     assertThat(result.totalElements).isGreaterThan(90)
@@ -36,7 +43,11 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
     val result =
       translationViewDataProvider.getData(
         projectId = testData.project.id,
-        languages = setOf(testData.englishLanguage),
+        languages =
+          languageService.dtosFromEntities(
+            listOf(testData.englishLanguage),
+            testData.project.id,
+          ).toSet(),
         PageRequest.of(
           0,
           10,
@@ -51,7 +62,11 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
     val result =
       translationViewDataProvider.getData(
         projectId = testData.project.id,
-        languages = setOf(testData.englishLanguage),
+        languages =
+          languageService.dtosFromEntities(
+            listOf(testData.englishLanguage),
+            testData.project.id,
+          ).toSet(),
         PageRequest.of(0, 10),
         params =
           GetTranslationsParams().apply {
@@ -69,7 +84,11 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
     val result =
       translationViewDataProvider.getData(
         projectId = testData.project.id,
-        languages = setOf(testData.germanLanguage),
+        languages =
+          languageService.dtosFromEntities(
+            listOf(testData.englishLanguage, testData.germanLanguage),
+            testData.project.id,
+          ).toSet(),
         PageRequest.of(0, 10),
         params = GetTranslationsParams(),
       )

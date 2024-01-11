@@ -36,7 +36,7 @@ class KeysImporter(
     val namespaces = mutableMapOf<String, Namespace>()
     namespaceService.getAllInProject(project.id).associateByTo(namespaces) { it.name }
     val languageTags = keys.flatMap { it.translations.keys }.toSet()
-    val languages = languageService.findByTags(languageTags, project.id).map { it.tag to it }.toMap()
+    val languages = languageService.findEntitiesByTags(languageTags, project.id).associateBy { it.tag }
 
     securityService.checkLanguageTranslatePermissionByTag(project.id, languageTags)
 

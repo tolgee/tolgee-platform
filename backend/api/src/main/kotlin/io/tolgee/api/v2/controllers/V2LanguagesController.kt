@@ -11,7 +11,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.LanguageValidator
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
@@ -71,7 +71,7 @@ class V2LanguagesController(
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
     @RequestBody @Valid
-    dto: LanguageDto,
+    dto: LanguageRequest,
   ): LanguageModel {
     val project = projectService.get(projectId)
     languageValidator.validateCreate(dto, project)
@@ -86,7 +86,7 @@ class V2LanguagesController(
   @AllowApiAccess
   fun editLanguage(
     @RequestBody @Valid
-    dto: LanguageDto,
+    dto: LanguageRequest,
     @PathVariable("languageId") languageId: Long,
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)

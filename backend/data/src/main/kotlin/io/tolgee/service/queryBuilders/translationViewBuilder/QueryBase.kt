@@ -1,7 +1,8 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
-import io.tolgee.model.Language
+import io.tolgee.model.Language_
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
 import io.tolgee.model.Screenshot_
@@ -33,7 +34,7 @@ class QueryBase<T>(
   private val cb: CriteriaBuilder,
   private val projectId: Long,
   private val query: CriteriaQuery<T>,
-  private val languages: Set<Language>,
+  private val languages: Set<LanguageDto>,
   params: TranslationFilters,
   private var isKeyIdsQuery: Boolean = false,
 ) {
@@ -91,7 +92,7 @@ class QueryBase<T>(
 
   private fun addTranslationOutdatedField(
     translation: ListJoin<Key, Translation>,
-    language: Language,
+    language: LanguageDto,
   ): Path<Boolean> {
     val translationOutdated = translation.get(Translation_.outdated)
     this.querySelection[language to TranslationView::outdated] = translationOutdated
@@ -100,7 +101,7 @@ class QueryBase<T>(
 
   private fun addComments(
     translation: ListJoin<Key, Translation>,
-    language: Language,
+    language: LanguageDto,
   ) {
     val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
     val commentsExpression = cb.countDistinct(commentsJoin)
@@ -117,7 +118,7 @@ class QueryBase<T>(
 
   private fun addTranslationStateField(
     translation: ListJoin<Key, Translation>,
-    language: Language,
+    language: LanguageDto,
   ): Path<TranslationState> {
     val translationStateField = translation.get(Translation_.state)
     this.querySelection[language to TranslationView::state] = translationStateField
@@ -126,16 +127,16 @@ class QueryBase<T>(
 
   private fun addTranslationText(
     translation: ListJoin<Key, Translation>,
-    language: Language,
+    language: LanguageDto,
   ): Path<String> {
     val translationTextField = translation.get(Translation_.text)
     this.querySelection[language to TranslationView::text] = translationTextField
     return translationTextField
   }
 
-  private fun addTranslationId(language: Language): ListJoin<Key, Translation> {
+  private fun addTranslationId(language: LanguageDto): ListJoin<Key, Translation> {
     val translation = this.root.join(Key_.translations, JoinType.LEFT)
-    translation.on(cb.equal(translation.get(Translation_.language), language))
+    translation.on(cb.equal(translation.get(Translation_.language).get(Language_.id), language.id))
     val translationId = translation.get(Translation_.id)
     this.querySelection[language to TranslationView::id] = translationId
     groupByExpressions.add(translationId)
@@ -161,7 +162,7 @@ class QueryBase<T>(
   }
 
   private fun addNotFilteringTranslationFields(
-    language: Language,
+    language: LanguageDto,
     translation: ListJoin<Key, Translation>,
   ) {
     if (!isKeyIdsQuery) {

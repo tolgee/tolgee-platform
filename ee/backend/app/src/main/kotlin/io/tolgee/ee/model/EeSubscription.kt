@@ -1,9 +1,10 @@
 package io.tolgee.ee.model
 
 import io.hypersistence.utils.hibernate.type.array.EnumArrayType
+import io.tolgee.api.EeSubscriptionDto
+import io.tolgee.api.IEeSubscription
+import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
-import io.tolgee.ee.data.EeSubscriptionDto
-import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.model.AuditModel
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -20,9 +21,9 @@ import java.util.*
 
 @Entity
 @Table(schema = "ee")
-class EeSubscription : AuditModel() {
+class EeSubscription : AuditModel(), IEeSubscription {
   @field:Id
-  val id: Int = 1
+  override val id: Int = 1
 
   @field:NotBlank
   lateinit var licenseKey: String
@@ -31,22 +32,22 @@ class EeSubscription : AuditModel() {
   lateinit var name: String
 
   @field:NotNull
-  var currentPeriodEnd: Date? = null
+  override var currentPeriodEnd: Date? = null
 
-  var cancelAtPeriodEnd: Boolean = false
+  override var cancelAtPeriodEnd: Boolean = false
 
   @Type(EnumArrayType::class, parameters = [Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "varchar")])
   @Column(name = "enabled_features", columnDefinition = "varchar[]")
-  var enabledFeatures: Array<Feature> = arrayOf()
+  override var enabledFeatures: Array<Feature> = arrayOf()
     get() {
       return if (status != SubscriptionStatus.ERROR && status != SubscriptionStatus.CANCELED) field else arrayOf()
     }
 
   @Enumerated(EnumType.STRING)
   @ColumnDefault("ACTIVE")
-  var status: SubscriptionStatus = SubscriptionStatus.ACTIVE
+  override var status: SubscriptionStatus = SubscriptionStatus.ACTIVE
 
-  var lastValidCheck: Date? = null
+  override var lastValidCheck: Date? = null
 
   fun toDto(): EeSubscriptionDto {
     return EeSubscriptionDto(

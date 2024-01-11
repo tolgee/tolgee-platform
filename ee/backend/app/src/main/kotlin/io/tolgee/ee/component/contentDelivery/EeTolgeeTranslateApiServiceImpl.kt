@@ -6,7 +6,7 @@ import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslate
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.ee.service.EeSubscriptionService
+import io.tolgee.ee.service.EeSubscriptionServiceImpl
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 class EeTolgeeTranslateApiServiceImpl(
   private val tolgeeProperties: TolgeeProperties,
   private val httpClient: HttpClient,
-  private val subscriptionService: EeSubscriptionService,
+  private val subscriptionService: EeSubscriptionServiceImpl,
 ) : TolgeeTranslateApiService, EeTolgeeTranslateApiService {
   companion object {
     const val API_PATH = "v2/public/translator/translate"

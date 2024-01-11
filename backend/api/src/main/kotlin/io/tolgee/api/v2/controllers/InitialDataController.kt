@@ -2,10 +2,10 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.component.PreferredOrganizationFacade
-import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
-import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.hateoas.InitialDataModel
+import io.tolgee.hateoas.ee.IEeSubscriptionModelAssembler
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -27,8 +27,8 @@ class InitialDataController(
   private val userController: V2UserController,
   private val userPreferencesService: UserPreferencesService,
   private val preferredOrganizationFacade: PreferredOrganizationFacade,
-  private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler,
-  private val eeSubscriptionService: EeSubscriptionService,
+  private val eeSubscriptionModelAssembler: IEeSubscriptionModelAssembler,
+  private val eeSubscriptionProvider: EeSubscriptionProvider,
   private val announcementController: AnnouncementController,
 ) : IController {
   @GetMapping(value = [""])
@@ -38,7 +38,7 @@ class InitialDataController(
       InitialDataModel(
         serverConfiguration = configurationController.getPublicConfiguration(),
         eeSubscription =
-          eeSubscriptionService.findSubscriptionEntity()?.let {
+          eeSubscriptionProvider.findSubscriptionDto()?.let {
             eeSubscriptionModelAssembler.toModel(
               it,
             )

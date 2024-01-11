@@ -39,12 +39,12 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     "from Translation t " +
       "join fetch Key k on t.key = k " +
-      "where k = :key and k.project = :project and t.language in :languages",
+      "where k = :key and k.project = :project and t.language.id in :languageIds",
   )
   fun getTranslations(
     key: Key,
     project: Project,
-    languages: Collection<Language>,
+    languageIds: Collection<Long>,
   ): Set<Translation>
 
   fun findOneByKeyAndLanguage(

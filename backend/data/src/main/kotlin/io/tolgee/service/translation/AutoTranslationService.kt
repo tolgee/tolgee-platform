@@ -5,6 +5,7 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.AutoTranslationRequest
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
@@ -165,7 +166,11 @@ class AutoTranslationService(
     val translations =
       adjustedConfigs.map {
         if (it.override) {
-          return@map it to translationService.getOrCreate(key, it.language)
+          return@map it to
+            translationService.getOrCreate(
+              key = key,
+              language = entityManager.getReference(Language::class.java, it.language.id),
+            )
         }
 
         it to getUntranslatedTranslations(key, listOf(it.language)).firstOrNull()
@@ -219,12 +224,16 @@ class AutoTranslationService(
     val languages = languageService.findAll(project.id)
     return languages.map {
       val config = (perLangConfig[it.id] ?: perLangConfig[null] ?: AutoTranslationConfig())
-      LanguageConfig(it, config.usingTm, config.usingPrimaryMtService)
+      LanguageConfig(
+        language = it,
+        usingTm = config.usingTm,
+        usingPrimaryMtService = config.usingPrimaryMtService,
+      )
     }
   }
 
   data class LanguageConfig(
-    val language: Language,
+    val language: LanguageDto,
     var usingTm: Boolean,
     var usingPrimaryMtService: Boolean,
     var override: Boolean = false,
@@ -281,17 +290,22 @@ class AutoTranslationService(
 
   private fun getUntranslatedTranslations(
     key: Key,
-    languages: List<Language>?,
+    languages: List<LanguageDto>?,
   ): List<Translation> {
-    return getUntranslatedExistingTranslations(key, languages) + createNonExistingTranslations(key, languages)
+    val languageIds = languages?.map { it.id }
+    return getUntranslatedExistingTranslations(key, languageIds) + createNonExistingTranslations(key, languages)
   }
 
   private fun createNonExistingTranslations(
     key: Key,
-    languages: List<Language>?,
+    languages: List<LanguageDto>?,
   ): List<Translation> {
     return getLanguagesWithNoTranslation(key, languages).map { language ->
-      val translation = Translation(key = key, language = language)
+      val translation =
+        Translation(
+          key = key,
+          language = entityManager.getReference(Language::class.java, language.id),
+        )
       key.translations.add(translation)
       translation
     }
@@ -366,9 +380,9 @@ class AutoTranslationService(
 
   private fun getLanguagesWithNoTranslation(
     key: Key,
-    languages: List<Language>?,
-  ): List<Language> {
-    return (languages ?: key.project.languages)
+    languages: List<LanguageDto>?,
+  ): List<LanguageDto> {
+    return (languages ?: languageService.getProjectLanguages(key.project.id))
       .filter { projectLanguage ->
         key.translations.find { it.language.id == projectLanguage.id } == null
       }
@@ -379,9 +393,9 @@ class AutoTranslationService(
    */
   private fun getUntranslatedExistingTranslations(
     key: Key,
-    languages: List<Language>?,
+    languageIds: List<Long>?,
   ) = key.translations
-    .filter { languages?.contains(it.language) != false && it.text.isNullOrEmpty() }
+    .filter { languageIds?.contains(it.language.id) != false && it.text.isNullOrEmpty() }
 
   fun saveConfig(
     projectEntity: Project,
@@ -397,7 +411,8 @@ class AutoTranslationService(
         config.usingPrimaryMtService = dto.usingMachineTranslation
         config.enableForImport = dto.enableForImport
         config.project = projectEntity
-        config.targetLanguage = languages.find { it.id == dto.languageId }
+        config.targetLanguage =
+          entityManager.getReference(Language::class.java, languages.find { it.id == dto.languageId })
         config
       }
 

@@ -9,6 +9,7 @@ data class ProjectDto(
   val slug: String?,
   val id: Long,
   val organizationOwnerId: Long,
+  var aiTranslatorPromptDescription: String?,
 ) : Serializable {
   companion object {
     fun fromEntity(entity: Project) =
@@ -18,6 +19,7 @@ data class ProjectDto(
         slug = entity.slug,
         id = entity.id,
         organizationOwnerId = entity.organizationOwner.id,
+        aiTranslatorPromptDescription = entity.aiTranslatorPromptDescription,
       )
   }
 }

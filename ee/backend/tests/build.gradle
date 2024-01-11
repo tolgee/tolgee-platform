@@ -47,6 +47,7 @@ dependencies {
     testImplementation(project(":testing"))
     testImplementation(project(":ee-app"))
     testImplementation(project(":server-app"))
+    testImplementation(project(":api"))
     testImplementation(project(":data"))
     testImplementation(project(":misc"))
     testImplementation libs.jsonUnitAssert

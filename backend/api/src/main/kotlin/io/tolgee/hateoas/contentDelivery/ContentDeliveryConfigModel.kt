@@ -2,7 +2,7 @@ package io.tolgee.hateoas.contentDelivery
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
-import io.tolgee.ee.api.v2.hateoas.contentStorage.ContentStorageModel
+import io.tolgee.hateoas.ee.contentStorage.ContentStorageModel
 import io.tolgee.model.enums.TranslationState
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation

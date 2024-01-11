@@ -1,9 +1,9 @@
 package io.tolgee.unit
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
@@ -44,7 +44,7 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var importFile: ImportFile
   private lateinit var importFileDto: ImportFileDto
   private lateinit var translationServiceMock: TranslationService
-  private lateinit var existingLanguage: Language
+  private lateinit var existingLanguage: LanguageDto
   private lateinit var existingTranslation: Translation
   private lateinit var authenticationFacadeMock: AuthenticationFacade
   private lateinit var keyMetaServiceMock: KeyMetaService
@@ -65,7 +65,7 @@ class CoreImportFileProcessorUnitTest {
 
     importFile = ImportFile("lgn.json", importMock)
     importFileDto = ImportFileDto("lng.json", "".toByteArray())
-    existingLanguage = Language().also { it.name = "lng" }
+    existingLanguage = LanguageDto(name = "lng")
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
     processor = CoreImportFilesProcessor(applicationContextMock, importMock)
 
@@ -85,7 +85,7 @@ class CoreImportFileProcessorUnitTest {
     whenever(importMock.project).thenReturn(Project(1, "test repo"))
     whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
     whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
-      .thenReturn(Optional.of(existingLanguage))
+      .thenReturn(existingLanguage)
     val userAccount = UserAccount()
     whenever(authenticationFacadeMock.authenticatedUser).thenReturn(UserAccountDto.fromEntity(userAccount))
     whenever(authenticationFacadeMock.authenticatedUserEntity).thenReturn(userAccount)

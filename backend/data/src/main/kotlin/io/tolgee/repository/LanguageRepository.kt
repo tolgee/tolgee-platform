@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Language
 import io.tolgee.model.views.LanguageView
 import org.springframework.data.domain.Page
@@ -43,8 +44,8 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   ): Page<LanguageView>
 
   fun findAllByTagInAndProjectId(
-    abbreviation: Collection<String?>?,
-    projectId: Long?,
+    tag: Collection<String>,
+    projectId: Long,
   ): List<Language>
 
   fun deleteAllByProjectId(projectId: Long?)
@@ -80,4 +81,32 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     projectId: Long,
     languageIds: List<Long>,
   ): List<Language>
+
+  @Query(
+    """
+    select l
+    from Language l
+    where l.project.id = :projectId and l.id in :languageId
+  """,
+  )
+  fun find(
+    languageId: Long,
+    projectId: Long,
+  ): Language?
+
+  @Query(
+    """
+    select new io.tolgee.dtos.cacheable.LanguageDto(
+      l.id,
+      l.name,
+      l.tag,
+      l.originalName,
+      l.flagEmoji,
+      l.aiTranslatorPromptDescription,
+      (l.id = l.project.baseLanguage.id)
+    )
+    from Language l where l.project.id = :projectId
+  """,
+  )
+  fun findAllDtosByProjectId(projectId: Long): List<LanguageDto>
 }

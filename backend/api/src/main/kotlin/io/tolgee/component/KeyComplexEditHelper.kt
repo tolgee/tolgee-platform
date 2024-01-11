@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyWithDataModel
 import io.tolgee.hateoas.key.KeyWithDataModelAssembler
+import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
@@ -68,7 +69,7 @@ class KeyComplexEditHelper(
     if (all.isEmpty()) {
       return@lazy setOf()
     }
-    languageService.findByTags(all, projectHolder.project.id)
+    languageService.findEntitiesByTags(all, projectHolder.project.id)
   }
 
   private val existingTranslations: MutableMap<String, Translation> by lazy {
@@ -273,11 +274,11 @@ class KeyComplexEditHelper(
         ?.map { languageByTag(it.key).id to it.value.translationState }?.toMap()
   }
 
-  private fun languageByTag(tag: String): io.tolgee.model.Language {
+  private fun languageByTag(tag: String): Language {
     return languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
-  private fun languageById(id: Long): io.tolgee.model.Language {
+  private fun languageById(id: Long): Language {
     return languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 

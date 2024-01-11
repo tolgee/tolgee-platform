@@ -1,5 +1,6 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
@@ -12,7 +13,7 @@ import java.util.*
 class TranslationsViewQueryBuilder(
   private val cb: CriteriaBuilder,
   private val projectId: Long,
-  private val languages: Set<Language>,
+  private val languages: Set<LanguageDto>,
   private val params: TranslationFilters,
   private val sort: Sort,
   private val cursor: Map<String, CursorValue>? = null,

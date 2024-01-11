@@ -5,8 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.WebhookConfigRequest
-import io.tolgee.ee.api.v2.hateoas.webhooks.WebhookConfigModel
-import io.tolgee.ee.api.v2.hateoas.webhooks.WebhookConfigModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.WebhookConfigModelAssembler
 import io.tolgee.ee.data.WebhookTestResponse
 import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.model.enums.Scope
@@ -53,7 +52,7 @@ class WebhookConfigController(
   fun create(
     @Valid @RequestBody
     dto: WebhookConfigRequest,
-  ): WebhookConfigModel {
+  ): io.tolgee.hateoas.ee.webhooks.WebhookConfigModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
       Feature.WEBHOOKS,
@@ -71,7 +70,7 @@ class WebhookConfigController(
     id: Long,
     @Valid @RequestBody
     dto: WebhookConfigRequest,
-  ): WebhookConfigModel {
+  ): io.tolgee.hateoas.ee.webhooks.WebhookConfigModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
       Feature.WEBHOOKS,
@@ -86,7 +85,7 @@ class WebhookConfigController(
   @AllowApiAccess
   fun list(
     @ParameterObject pageable: Pageable,
-  ): PagedModel<WebhookConfigModel> {
+  ): PagedModel<io.tolgee.hateoas.ee.webhooks.WebhookConfigModel> {
     val page = webhookConfigService.findAllInProject(projectHolder.project.id, pageable)
     return pageModelAssembler.toModel(page, webhookConfigModelAssembler)
   }
@@ -107,7 +106,7 @@ class WebhookConfigController(
   @AllowApiAccess
   fun get(
     @PathVariable id: Long,
-  ): WebhookConfigModel {
+  ): io.tolgee.hateoas.ee.webhooks.WebhookConfigModel {
     return webhookConfigModelAssembler.toModel(webhookConfigService.get(projectHolder.project.id, id))
   }
 

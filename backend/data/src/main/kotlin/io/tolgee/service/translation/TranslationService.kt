@@ -2,12 +2,14 @@ package io.tolgee.service.translation
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.helpers.TextHelper
+import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationState
@@ -83,12 +85,12 @@ class TranslationService(
   }
 
   fun getKeyTranslations(
-    languages: Set<Language>,
+    languages: Set<ILanguage>,
     project: Project,
     key: Key?,
   ): Set<Translation> {
     return if (key != null) {
-      translationRepository.getTranslations(key, project, languages)
+      translationRepository.getTranslations(key, project, languages.map { it.id })
     } else {
       LinkedHashSet()
     }
@@ -137,7 +139,7 @@ class TranslationService(
     projectId: Long,
     pageable: Pageable,
     params: GetTranslationsParams,
-    languages: Set<Language>,
+    languages: Set<LanguageDto>,
   ): Page<KeyWithTranslationsView> {
     return translationViewDataProvider.getData(projectId, languages, pageable, params, params.cursor)
   }
@@ -145,7 +147,7 @@ class TranslationService(
   fun getSelectAllKeys(
     projectId: Long,
     params: TranslationFilters,
-    languages: Set<Language>,
+    languages: Set<LanguageDto>,
   ): List<Long> {
     return translationViewDataProvider.getSelectAllKeys(projectId, languages, params)
   }
@@ -156,9 +158,8 @@ class TranslationService(
     text: String?,
   ): Translation? {
     val language =
-      languageService.findByTag(languageTag!!, key.project)
-        .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    return setTranslation(key, language, text)
+      languageService.getByTag(languageTag!!, key.project)
+    return setTranslation(key, entityManager.getReference(Language::class.java, language.id), text)
   }
 
   fun setTranslation(
@@ -203,7 +204,7 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
-    val languages = languageService.findByTags(translations.keys, key.project.id)
+    val languages = languageService.findEntitiesByTags(translations.keys, key.project.id)
     val oldTranslations =
       getKeyTranslations(languages, key.project, key).associate {
         languageByIdFromLanguages(
@@ -234,7 +235,7 @@ class TranslationService(
 
   private fun languageByIdFromLanguages(
     id: Long,
-    languages: Collection<Language>,
+    languages: Set<Language>,
   ) = languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
   @Transactional
@@ -433,7 +434,7 @@ class TranslationService(
     translationRepository.setOutdated(keyIds)
   }
 
-  fun get(keyLanguagesMap: Map<Key, List<Language>>): List<Translation> {
+  fun get(keyLanguagesMap: Map<Key, List<LanguageDto>>): List<Translation> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createQuery(Translation::class.java)
     val root = query.from(Translation::class.java)

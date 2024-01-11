@@ -1,7 +1,7 @@
 package io.tolgee.model.views
 
 import io.tolgee.constants.MtServiceType
-import io.tolgee.model.Language
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Tag
@@ -22,7 +22,7 @@ data class KeyWithTranslationsView(
   companion object {
     fun of(
       queryData: Array<Any?>,
-      languages: List<Language>,
+      languages: List<LanguageDto>,
     ): KeyWithTranslationsView {
       val data = mutableListOf(*queryData)
       val result =

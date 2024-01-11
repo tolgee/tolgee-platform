@@ -3036,7 +3036,17 @@
             <column name="description" type="text"/>
         </addColumn>
         <sql>
-            CREATE INDEX key_description_gin_trgm_index ON key USING GIN (lower (f_unaccent(description)) gin_trgm_ops);
+            CREATE INDEX key_description_gin_trgm_index ON key_meta USING GIN (lower (f_unaccent(description)) gin_trgm_ops);
         </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1704970433633-1">
+        <addColumn tableName="language">
+            <column name="ai_translator_prompt_description" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1704970433633-2">
+        <addColumn tableName="project">
+            <column name="ai_translator_prompt_description" type="varchar(255)"/>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

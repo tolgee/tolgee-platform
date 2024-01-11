@@ -44,6 +44,9 @@ class Project(
   @field:Size(min = 3, max = 2000)
   @ActivityLoggedProp
   var description: String? = null,
+  @field:Size(max = 5000)
+  @ActivityLoggedProp
+  var aiTranslatorPromptDescription: String? = null,
   @Column(name = "address_part")
   @ActivityLoggedProp
   @field:Size(min = 3, max = 60)

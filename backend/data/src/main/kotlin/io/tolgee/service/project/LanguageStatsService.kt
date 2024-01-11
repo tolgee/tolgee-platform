@@ -2,6 +2,7 @@ package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
 import io.tolgee.model.LanguageStats
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
@@ -55,7 +56,7 @@ class LanguageStatsService(
               val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@tx
               val stats =
                 languageStats.computeIfAbsent(language.id) {
-                  LanguageStats(language)
+                  LanguageStats(entityManager.getReference(Language::class.java, language.id))
                 }
               stats.apply {
                 translatedKeys = rawLanguageStats.translatedKeys
