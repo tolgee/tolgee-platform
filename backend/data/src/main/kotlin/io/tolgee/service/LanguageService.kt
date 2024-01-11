@@ -52,7 +52,7 @@ class LanguageService(
     language.project = project
     projectService.refresh(project).languages.add(language)
     languageRepository.save(language)
-    clearCache(language)
+    evictCache(language)
     return language
   }
 
@@ -70,7 +70,7 @@ class LanguageService(
     permissionService.removeLanguageFromPermissions(language)
     languageRepository.delete(language)
     entityManager.flush()
-    clearCache(language)
+    evictCache(language)
   }
 
   @Transactional
@@ -85,7 +85,7 @@ class LanguageService(
   ): Language {
     language.updateByDTO(dto)
     entityManager.persist(language)
-    clearCache(language)
+    evictCache(language)
     return language
   }
 
@@ -269,16 +269,16 @@ class LanguageService(
   }
 
   fun save(language: Language): Language {
-    clearCache(language)
+    evictCache(language)
     return this.languageRepository.save(language)
   }
 
   fun saveAll(languages: Iterable<Language>): MutableList<Language>? {
-    clearCache(languages)
+    evictCache(languages)
     return this.languageRepository.saveAll(languages)
   }
 
-  private fun clearCache(languages: Iterable<Language>) {
+  private fun evictCache(languages: Iterable<Language>) {
     languages.map { it.project.id }.toSet().forEach {
       clearCacheForProject(it)
     }
@@ -288,7 +288,7 @@ class LanguageService(
     cacheManager.getCache(Caches.LANGUAGES)?.evict(it)
   }
 
-  private fun clearCache(language: Language) {
+  private fun evictCache(language: Language) {
     cacheManager.getCache(Caches.LANGUAGES)?.evict(language.project.id)
   }
 

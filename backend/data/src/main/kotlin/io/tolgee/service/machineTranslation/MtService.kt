@@ -16,8 +16,6 @@ import io.tolgee.helpers.TextHelper
 import io.tolgee.model.key.Key
 import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
-import io.tolgee.service.key.KeyService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.PageRequest
@@ -29,11 +27,9 @@ class MtService(
   private val translationService: TranslationService,
   private val machineTranslationManager: MtServiceManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val projectService: ProjectService,
   private val mtServiceConfigService: MtServiceConfigService,
   private val tolgeeProperties: TolgeeProperties,
   private val bigMetaService: BigMetaService,
-  private val keyService: KeyService,
   private val languageService: LanguageService,
 ) {
   @Transactional

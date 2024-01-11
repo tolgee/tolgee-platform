@@ -229,7 +229,7 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
-  fun addAiDescriptions()  {
+  fun addAiDescriptions() {
     beautifulKeyBuilder.addMeta { description = "This key is Beautiful" }
     germanLanguage.aiTranslatorPromptDescription = "This is a description for AI translator"
     project.aiTranslatorPromptDescription = "This is a description for AI translator"

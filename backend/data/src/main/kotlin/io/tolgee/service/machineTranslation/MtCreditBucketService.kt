@@ -9,12 +9,12 @@ import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
-import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMonths
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
@@ -28,10 +28,10 @@ class MtCreditBucketService(
   private val machineTranslationCreditBucketRepository: MachineTranslationCreditBucketRepository,
   private val currentDateProvider: CurrentDateProvider,
   private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
-  private val organizationService: OrganizationService,
   private val eventPublisher: ApplicationEventPublisher,
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
+  private val entityManager: EntityManager,
 ) : Logging {
   fun consumeCredits(
     organizationId: Long,
@@ -227,7 +227,7 @@ class MtCreditBucketService(
   }
 
   fun findOrCreateBucketByOrganizationId(organizationId: Long): MtCreditBucket {
-    val organization = organizationService.get(organizationId)
+    val organization = entityManager.getReference(Organization::class.java, organizationId)
     return findOrCreateBucket(organization)
   }
 }

@@ -1,6 +1,8 @@
 package io.tolgee.service.organization
 
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.OrganizationRoleDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -17,6 +19,9 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,21 +37,10 @@ class OrganizationRoleService(
   private val organizationRepository: OrganizationRepository,
   @Lazy
   private val userPreferencesService: UserPreferencesService,
+  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  private val self: OrganizationRoleService,
+  private val cacheManager: CacheManager,
 ) {
-  fun checkUserCanViewStrict(organizationId: Long) {
-    checkUserCanViewStrict(
-      authenticationFacade.authenticatedUser.id,
-      organizationId,
-    )
-  }
-
-  private fun checkUserCanViewStrict(
-    userId: Long,
-    organizationId: Long,
-  ) {
-    if (!canUserViewStrict(userId, organizationId)) throw PermissionException()
-  }
-
   fun canUserViewStrict(
     userId: Long,
     organizationId: Long,
@@ -102,6 +96,7 @@ class OrganizationRoleService(
     return when (role) {
       OrganizationRoleType.MEMBER ->
         isUserMemberOrOwner(userId, organizationId)
+
       OrganizationRoleType.OWNER ->
         isUserOwner(userId, organizationId)
     }
@@ -130,10 +125,6 @@ class OrganizationRoleService(
     throw PermissionException()
   }
 
-  fun checkUserIsMemberOrOwner(organizationId: Long) {
-    this.checkUserIsMemberOrOwner(this.authenticationFacade.authenticatedUser.id, organizationId)
-  }
-
   fun isUserMemberOrOwner(
     userId: Long,
     organizationId: Long,
@@ -158,28 +149,38 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ): OrganizationRoleType {
-    organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
-      ?.let { return it.type!! }
-    throw PermissionException()
+    return self.findType(userId, organizationId) ?: throw PermissionException()
   }
 
   fun getType(organizationId: Long): OrganizationRoleType {
-    return getType(authenticationFacade.authenticatedUser.id, organizationId)
+    return self.getType(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   fun findType(organizationId: Long): OrganizationRoleType? {
-    return findType(authenticationFacade.authenticatedUser.id, organizationId)
+    return self.findType(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   fun findType(
     userId: Long,
     organizationId: Long,
   ): OrganizationRoleType? {
-    organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+    self.findDto(organizationId, userId)
       ?.let { return it.type }
     return null
   }
 
+  @Cacheable(Caches.ORGANIZATION_ROLES, key = "{#organizationId, #userId}")
+  fun findDto(
+    organizationId: Long,
+    userId: Long,
+  ): OrganizationRoleDto? {
+    val entity =
+      organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+        ?: return null
+    return OrganizationRoleDto.fromEntity(entity)
+  }
+
+  @CacheEvict(Caches.ORGANIZATION_ROLES, key = "{#organization.id, #user.id}")
   fun grantRoleToUser(
     user: UserAccount,
     organization: Organization,
@@ -195,6 +196,7 @@ class OrganizationRoleService(
 
   fun leave(organizationId: Long) {
     this.removeUser(organizationId, authenticationFacade.authenticatedUser.id)
+    evictCache(organizationId, authenticationFacade.authenticatedUser.id)
   }
 
   fun removeUser(
@@ -213,28 +215,25 @@ class OrganizationRoleService(
     }
 
     userPreferencesService.refreshPreferredOrganization(userId)
+    evictCache(organizationId, userId)
   }
 
-  fun deleteAllInOrganization(organization: Organization) {
+  fun onOrganizationDelete(organization: Organization) {
     organizationRoleRepository.deleteByOrganization(organization)
-  }
-
-  fun delete(id: Long) {
-    organizationRoleRepository.deleteById(id)
   }
 
   fun grantMemberRoleToUser(
     user: UserAccount,
     organization: Organization,
   ) {
-    this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
+    self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
   }
 
   fun grantOwnerRoleToUser(
     user: UserAccount,
     organization: Organization,
   ) {
-    this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.OWNER)
+    self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.OWNER)
   }
 
   fun setMemberRole(
@@ -243,6 +242,7 @@ class OrganizationRoleService(
     dto: SetOrganizationRoleDto,
   ) {
     val user = userAccountService.findActive(userId) ?: throw NotFoundException()
+    evictCache(organizationId, userId)
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
       organizationRoleRepository.save(it)
@@ -283,5 +283,13 @@ class OrganizationRoleService(
 
   fun saveAll(organizationRoles: List<OrganizationRole>) {
     organizationRoleRepository.saveAll(organizationRoles)
+  }
+
+  fun evictCache(
+    organizationId: Long,
+    userId: Long,
+  ) {
+    val cache = cacheManager.getCache(Caches.ORGANIZATION_ROLES)
+    cache?.evict(listOf(organizationId, userId))
   }
 }
