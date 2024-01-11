@@ -122,9 +122,9 @@ class TranslationService(
 
   fun find(
     key: Key,
-    language: Language,
+    language: ILanguage,
   ): Optional<Translation> {
-    return translationRepository.findOneByKeyAndLanguage(key, language)
+    return translationRepository.findOneByKeyAndLanguageId(key, language.id)
   }
 
   fun get(id: Long): Translation {
@@ -353,7 +353,7 @@ class TranslationService(
 
   fun getTranslationMemorySuggestions(
     key: Key,
-    targetLanguage: Language,
+    targetLanguage: LanguageDto,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     val baseTranslation = findBaseTranslation(key) ?: return Page.empty()
@@ -364,34 +364,18 @@ class TranslationService(
   }
 
   fun getTranslationMemorySuggestions(
-    baseTranslationText: String,
-    key: Key?,
-    targetLanguage: Language,
-    pageable: Pageable,
-  ): Page<TranslationMemoryItemView> {
-    val baseLanguage =
-      projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
-        ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
-
-    return getTranslationMemorySuggestions(baseTranslationText, key, baseLanguage, targetLanguage, pageable)
-  }
-
-  fun getTranslationMemorySuggestions(
     sourceTranslationText: String,
     key: Key?,
-    sourceLanguage: Language,
-    targetLanguage: Language,
+    targetLanguage: LanguageDto,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     if ((sourceTranslationText.length) < 3) {
       return Page.empty(pageable)
     }
-
     return translationRepository.getTranslateMemorySuggestions(
       baseTranslationText = sourceTranslationText,
       key = key,
-      baseLanguage = sourceLanguage,
-      targetLanguage = targetLanguage,
+      targetLanguageId = targetLanguage.id,
       pageable = pageable,
     )
   }

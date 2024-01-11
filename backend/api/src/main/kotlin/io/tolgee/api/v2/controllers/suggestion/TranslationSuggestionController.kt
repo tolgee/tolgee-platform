@@ -90,7 +90,7 @@ class TranslationSuggestionController(
     dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationMemoryItemModel> {
-    val targetLanguage = languageService.getEntity(dto.targetLanguageId)
+    val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
 
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 

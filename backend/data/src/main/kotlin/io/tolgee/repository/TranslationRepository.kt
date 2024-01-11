@@ -47,9 +47,9 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languageIds: Collection<Long>,
   ): Set<Translation>
 
-  fun findOneByKeyAndLanguage(
+  fun findOneByKeyAndLanguageId(
     key: Key,
-    language: Language,
+    languageId: Long,
   ): Optional<Translation>
 
   fun findOneByKeyIdAndLanguageId(
@@ -91,12 +91,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
       similarity(baseTranslation.text, :baseTranslationText) as similarity
       from Translation baseTranslation
       join baseTranslation.key key
+      join key.project p
       join Translation target on 
             target.key = key and 
-            target.language = :targetLanguage and
+            target.language.id = :targetLanguageId and
             target.text <> '' and
             target.text is not null
-      where baseTranslation.language = :baseLanguage and
+      where baseTranslation.language.id = p.baseLanguage.id and
         cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
         (:key is null or key <> :key)
       order by similarity desc
@@ -105,8 +106,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getTranslateMemorySuggestions(
     baseTranslationText: String,
     key: Key? = null,
-    baseLanguage: Language,
-    targetLanguage: Language,
+    targetLanguageId: Long,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView>
 

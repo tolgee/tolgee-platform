@@ -3,13 +3,13 @@ package io.tolgee.api.v2.controllers.suggestion
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.MtCreditBalanceDto
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
-import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
@@ -68,13 +68,13 @@ class MachineTranslationSuggestionFacade(
    */
   private fun getTranslationResults(
     dto: SuggestRequestDto,
-    targetLanguage: Language,
+    targetLanguage: LanguageDto,
   ): Map<MtServiceType, TranslationItemModel>? {
     val key = dto.key
 
     val resultMap =
       mtService.getMachineTranslations(
-        projectHolder.projectEntity,
+        projectHolder.project,
         key,
         dto.baseText,
         targetLanguage,
@@ -124,7 +124,7 @@ class MachineTranslationSuggestionFacade(
       }
 
   val SuggestRequestDto.targetLanguage
-    get() = languageService.getEntity(this.targetLanguageId)
+    get() = languageService.get(this.targetLanguageId, projectHolder.project.id)
 
   private fun Key.checkInProject() {
     keyService.checkInProject(this, projectHolder.project.id)

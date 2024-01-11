@@ -457,6 +457,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `it uses Tolgee correctly`() {
     mockDefaultMtBucketSize(6000)
     testData.enableTolgee()
+    testData.addAiDescriptions()
     saveTestData()
 
     performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
@@ -471,6 +472,9 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     val metadata = tolgeeTranslateParamsCaptor.firstValue.metadata
     metadata!!.examples.assert.hasSize(2)
     metadata.closeItems.assert.hasSize(4)
+    metadata.keyDescription.assert.isEqualTo(testData.beautifulKey.keyMeta!!.description)
+    metadata.projectDescription.assert.isEqualTo(testData.project.aiTranslatorPromptDescription)
+    metadata.languageDescription.assert.isEqualTo(testData.germanLanguage.aiTranslatorPromptDescription)
   }
 
   @Test

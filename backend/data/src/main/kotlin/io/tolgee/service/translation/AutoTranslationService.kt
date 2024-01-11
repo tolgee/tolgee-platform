@@ -17,6 +17,7 @@ import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
@@ -36,6 +37,7 @@ class AutoTranslationService(
   private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
+  private val projectService: ProjectService,
 ) {
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -129,9 +131,12 @@ class AutoTranslationService(
       }
     }
 
+    val projectDto = projectService.getDto(config.project.id)
+    val targetLanguage = languageService.get(translation.language.id, config.project.id)
+
     if (config.usingPrimaryMtService) {
       val result =
-        mtService.getPrimaryMachineTranslations(translation.key, listOf(translation.language), true)
+        mtService.getPrimaryMachineTranslations(projectDto, translation.key, listOf(targetLanguage), true)
           .singleOrNull()
 
       return result?.let { it.translatedText to it.usedService }
@@ -244,9 +249,13 @@ class AutoTranslationService(
     key: Key,
     isBatch: Boolean,
   ) {
-    val languages = translations.map { it.language }
+    val languages =
+      languageService.getProjectLanguages(key.project.id)
+        .filter { l -> translations.any { t -> t.language.id == l.id } }
 
-    mtService.getPrimaryMachineTranslations(key, languages, isBatch)
+    val projectDto = projectService.getDto(key.project.id)
+
+    mtService.getPrimaryMachineTranslations(projectDto, key, languages, isBatch)
       .zip(translations)
       .asSequence()
       .forEach { (translateResult, translation) ->

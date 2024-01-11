@@ -38,15 +38,15 @@ class MtServiceConfigService(
    *
    * @return enabled translation services for project
    */
-  fun getEnabledServiceInfos(language: Language): List<MtServiceInfo> {
+  fun getEnabledServiceInfos(language: LanguageDto): List<MtServiceInfo> {
     return getEnabledServiceInfosByStoredConfig(language) ?: getEnabledServicesByDefaultServerConfig(language)
   }
 
   fun getPrimaryServices(
     languagesIds: List<Long>,
-    project: Project,
+    projectId: Long,
   ): Map<Long, MtServiceInfo?> {
-    val configs = getStoredConfigs(languagesIds, project)
+    val configs = getStoredConfigs(languagesIds, projectId)
     return languagesIds.associateWith { languageId ->
       configs[languageId]?.primaryServiceInfo
         ?: getDefaultPrimaryServiceInfo()
@@ -58,7 +58,7 @@ class MtServiceConfigService(
     return MtServiceInfo(defaultPrimaryService, null)
   }
 
-  private fun getEnabledServicesByDefaultServerConfig(language: Language): MutableList<MtServiceInfo> {
+  private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> {
     return services.asSequence()
       .sortedBy { it.key.order }
       .sortedByDescending { it.value.first.defaultPrimary }
@@ -72,7 +72,7 @@ class MtServiceConfigService(
     return services.filter { it.value.first.defaultPrimary }.keys.firstOrNull()
   }
 
-  private fun getEnabledServiceInfosByStoredConfig(language: Language): List<MtServiceInfo>? {
+  private fun getEnabledServiceInfosByStoredConfig(language: LanguageDto): List<MtServiceInfo>? {
     getStoredConfig(language.id)?.let { storedConfig ->
       return storedConfig.enabledServicesInfo.toList()
         // return just enabled services
@@ -85,7 +85,7 @@ class MtServiceConfigService(
     return null
   }
 
-  private fun Language.isSupportedBy(serviceType: MtServiceType): Boolean {
+  private fun LanguageDto.isSupportedBy(serviceType: MtServiceType): Boolean {
     return services[serviceType]?.second?.isLanguageSupported(this.tag) ?: return false
   }
 
@@ -310,10 +310,6 @@ class MtServiceConfigService(
     this.mtServiceConfigRepository.deleteAllByProjectId(projectId)
   }
 
-  fun deleteAllByTargetLanguageId(projectId: Long) {
-    this.mtServiceConfigRepository.deleteAllByTargetLanguageId(projectId)
-  }
-
   private fun getStoredConfig(languageId: Long): MtServiceConfig? {
     val entities = mtServiceConfigRepository.findAllByTargetLanguageId(languageId)
     return entities.find { it.targetLanguage != null } ?: entities.find { it.targetLanguage == null }
@@ -321,9 +317,9 @@ class MtServiceConfigService(
 
   private fun getStoredConfigs(
     languageIds: List<Long>,
-    project: Project,
+    projectId: Long,
   ): Map<Long, MtServiceConfig?> {
-    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, project)
+    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, projectId)
     return languageIds.associateWith { languageId ->
       entities.find { it.targetLanguage?.id == languageId } ?: entities.find { it.targetLanguage == null }
     }

@@ -3,7 +3,9 @@ package io.tolgee.api.v2.controllers.suggestion
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.machineTranslation.TranslateResult
+import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ExceptionWithMessage
@@ -11,14 +13,12 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.machineTranslation.StreamedSuggestionInfo
 import io.tolgee.hateoas.machineTranslation.StreamedSuggestionItem
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
-import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceInfo
-import io.tolgee.service.project.ProjectService
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.logger
@@ -58,9 +58,8 @@ class MtResultStreamer(
    */
   private fun init() {
     key = with(machineTranslationSuggestionFacade) { dto.key }
-    val targetLanguage = applicationContext.getBean(LanguageService::class.java).getEntity(dto.targetLanguageId)
+    val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
     servicesToUse = mtService.getServicesToUse(targetLanguage, dto.services)
-    project = projectHolder.projectEntity
   }
 
   private fun writeInfo() {
@@ -81,7 +80,7 @@ class MtResultStreamer(
     try {
       with(machineTranslationSuggestionFacade) {
         catchingOutOfCredits(balanceBefore) {
-          val translated = getTranslatedValue(project, key, dto, service)
+          val translated = getTranslatedValue(projectHolder.project, key, dto, service)
           writeTranslatedValue(writer, service, translated)
         }
       }
@@ -112,7 +111,7 @@ class MtResultStreamer(
   }
 
   private fun getTranslatedValue(
-    project: Project,
+    project: ProjectDto,
     key: Key?,
     dto: SuggestRequestDto,
     service: MtServiceType,
@@ -167,8 +166,8 @@ class MtResultStreamer(
     applicationContext.getBean(ProjectHolder::class.java)
   }
 
-  private val projectService by lazy {
-    applicationContext.getBean(ProjectService::class.java)
+  private val languageService by lazy {
+    applicationContext.getBean(LanguageService::class.java)
   }
 
   var key: Key? = null
@@ -176,11 +175,14 @@ class MtResultStreamer(
   private lateinit var servicesToUse: Set<MtServiceInfo>
 
   private val balanceBefore by lazy {
-    mtCreditBucketService.getCreditBalances(project.organizationOwner.id)
+    mtCreditBucketService.getCreditBalances(projectHolder.project.organizationOwnerId)
   }
 
-  private lateinit var project: Project
-  private var baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(projectHolder.project.id)
+  private var baseLanguage =
+    languageService.getProjectBaseLanguage(projectHolder.project.id)
+      ?: throw BadRequestException(
+        Message.BASE_LANGUAGE_NOT_FOUND,
+      )
 
   private val baseBlank by lazy {
     mtService.getBaseTranslation(

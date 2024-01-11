@@ -321,6 +321,10 @@ class LanguageService(
     return languageRepository.findAllDtosByProjectId(projectId)
   }
 
+  fun getProjectBaseLanguage(projectId: Long): LanguageDto? {
+    return self.getProjectLanguages(projectId).singleOrNull { it.base }
+  }
+
   @Transactional
   fun dtosFromEntities(
     entities: List<Language>,
