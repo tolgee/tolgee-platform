@@ -17,6 +17,7 @@ import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -265,7 +266,7 @@ class LanguageService(
     entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
       .setParameter("projectId", projectId)
       .executeUpdate()
-    clearCacheForProject(projectId)
+    evictCacheForProject(projectId)
   }
 
   fun save(language: Language): Language {
@@ -280,12 +281,12 @@ class LanguageService(
 
   private fun evictCache(languages: Iterable<Language>) {
     languages.map { it.project.id }.toSet().forEach {
-      clearCacheForProject(it)
+      evictCacheForProject(it)
     }
   }
 
-  private fun clearCacheForProject(it: Long) {
-    cacheManager.getCache(Caches.LANGUAGES)?.evict(it)
+  fun evictCacheForProject(projectId: Long) {
+    cacheManager.getCache(Caches.LANGUAGES)?.evict(projectId)
   }
 
   private fun evictCache(language: Language) {
@@ -318,11 +319,67 @@ class LanguageService(
   @Cacheable(Caches.LANGUAGES, key = "#projectId")
   @Transactional
   fun getProjectLanguages(projectId: Long): List<LanguageDto> {
-    return languageRepository.findAllDtosByProjectId(projectId)
+    val cache = cacheManager.getCache(Caches.LANGUAGES)
+    val list =
+      (
+        (cache?.get(projectId) as? List<LanguageDto>)
+          ?: languageRepository.findAllDtosByProjectId(projectId)
+      ).toMutableList()
+
+    handleMissingBaseLanguage(list, projectId)
+    sortLanguages(list)
+    cache?.put(projectId, list)
+    return list
   }
 
-  fun getProjectBaseLanguage(projectId: Long): LanguageDto? {
-    return self.getProjectLanguages(projectId).singleOrNull { it.base }
+  private fun sortLanguages(list: MutableList<LanguageDto>): MutableList<LanguageDto> {
+    list.sortBy { it.tag }
+    list.sortBy { !it.base }
+    return list
+  }
+
+  private fun handleMissingBaseLanguage(
+    all: MutableList<LanguageDto>,
+    projectId: Long,
+  ) {
+    if (all.none { it.base }) {
+      val newBase = setNewProjectBaseLanguage(all, projectId)
+      all.find { it.id == newBase.id }?.also { it.base = true } ?: let {
+        all.add(newBase)
+      }
+    }
+    sortLanguages(all)
+  }
+
+  @Transactional
+  fun getProjectBaseLanguage(projectId: Long): LanguageDto {
+    val projectLanguages = self.getProjectLanguages(projectId)
+    return projectLanguages.singleOrNull { it.base } ?: let {
+      setNewProjectBaseLanguage(projectLanguages, projectId)
+    }
+  }
+
+  fun setNewProjectBaseLanguage(project: Project) {
+    val projectLanguages = self.getProjectLanguages(project.id)
+    val newBase = projectLanguages.firstOrNull() ?: self.createDefaultLanguage(project.id)
+    project.baseLanguage = entityManager.getReference(Language::class.java, newBase.id)
+    projectService.save(project)
+    evictCacheForProject(project.id)
+  }
+
+  private fun setNewProjectBaseLanguage(
+    projectLanguages: List<LanguageDto>,
+    projectId: Long,
+  ): LanguageDto {
+    val newBase =
+      projectLanguages.find { it.tag == "en" }
+        ?: projectLanguages.firstOrNull()
+        ?: self.createDefaultLanguage(projectId)
+    val project = projectService.get(projectId)
+    project.baseLanguage = entityManager.getReference(Language::class.java, newBase.id)
+    projectService.save(project)
+    evictCacheForProject(projectId)
+    return LanguageDto.fromEntity(newBase, newBase.id)
   }
 
   @Transactional
@@ -334,5 +391,16 @@ class LanguageService(
     return entities.map { entity ->
       all.find { it.id == entity.id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
     }
+  }
+
+  @CacheEvict(Caches.LANGUAGES, key = "#projectId")
+  fun createDefaultLanguage(projectId: Long): Language {
+    val language = Language()
+    language.name = "English"
+    language.originalName = "English"
+    language.flagEmoji = "🇬🇧"
+    language.tag = "en"
+    language.project = entityManager.getReference(Project::class.java, projectId)
+    return languageRepository.save(language)
   }
 }

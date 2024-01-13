@@ -3,7 +3,7 @@ package io.tolgee.service.export.exporters
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.helpers.TextHelper
-import io.tolgee.model.Language
+import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import org.dom4j.Document
 import org.dom4j.DocumentException
@@ -19,7 +19,7 @@ class XliffFileExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
-  val baseLanguage: Language,
+  val baseLanguage: ILanguage,
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.XLIFF.extension
 

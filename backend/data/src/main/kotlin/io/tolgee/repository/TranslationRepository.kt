@@ -1,7 +1,6 @@
 package io.tolgee.repository
 
 import io.tolgee.jobs.migration.translationStats.StatsMigrationTranslationView
-import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -116,12 +115,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
       1 as similarity
       from Translation baseTranslation
       join baseTranslation.key key
+      join key.project p
       join Translation target on 
             target.key = key and 
-            target.language = :targetLanguage and
+            target.language.id = :targetLanguageId and
             target.text <> '' and
             target.text is not null
-      where baseTranslation.language = :baseLanguage and
+      where baseTranslation.language = p.baseLanguage and
         baseTranslation.text = :baseTranslationText and
         key <> :key
       """,
@@ -129,8 +129,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getTranslationMemoryValue(
     baseTranslationText: String,
     key: Key,
-    baseLanguage: Language,
-    targetLanguage: Language,
+    targetLanguageId: Long,
     pageable: Pageable = PageRequest.of(0, 1),
   ): List<TranslationMemoryItemView>
 

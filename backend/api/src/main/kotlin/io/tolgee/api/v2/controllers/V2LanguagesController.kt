@@ -125,6 +125,7 @@ class V2LanguagesController(
   ) {
     val isBaseLanguage =
       languageService.getProjectLanguages(projectHolder.project.id).any { it.base && it.id == languageId }
+
     if (isBaseLanguage) {
       throw BadRequestException(Message.CANNOT_DELETE_BASE_LANGUAGE)
     }

@@ -36,7 +36,7 @@ class ProjectModelAssembler(
     val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage =
       view.baseLanguage ?: let {
-        projectService.getOrCreateBaseLanguage(view.id)
+        projectService.getOrAssignBaseLanguage(view.id)
       }
 
     val computedPermissions = getComputedPermissions(view)

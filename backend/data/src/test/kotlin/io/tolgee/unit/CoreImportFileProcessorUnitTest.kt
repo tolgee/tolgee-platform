@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
@@ -33,6 +34,7 @@ import org.springframework.context.ApplicationContext
 import java.util.*
 
 class CoreImportFileProcessorUnitTest {
+  private lateinit var existingLanguageEntity: Language
   private lateinit var applicationContextMock: ApplicationContext
   private lateinit var importMock: Import
   private lateinit var processorFactoryMock: ProcessorFactory
@@ -66,6 +68,7 @@ class CoreImportFileProcessorUnitTest {
     importFile = ImportFile("lgn.json", importMock)
     importFileDto = ImportFileDto("lng.json", "".toByteArray())
     existingLanguage = LanguageDto(name = "lng")
+    existingLanguageEntity = Language().apply { name = existingLanguage.name }
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
     processor = CoreImportFilesProcessor(applicationContextMock, importMock)
 
@@ -86,6 +89,8 @@ class CoreImportFileProcessorUnitTest {
     whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
     whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
       .thenReturn(existingLanguage)
+    whenever(languageServiceMock.getEntity(any<Long>()))
+      .thenReturn(existingLanguageEntity)
     val userAccount = UserAccount()
     whenever(authenticationFacadeMock.authenticatedUser).thenReturn(UserAccountDto.fromEntity(userAccount))
     whenever(authenticationFacadeMock.authenticatedUserEntity).thenReturn(userAccount)

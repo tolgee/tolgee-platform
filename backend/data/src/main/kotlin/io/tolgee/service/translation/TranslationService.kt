@@ -328,7 +328,7 @@ class TranslationService(
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.getOrCreateBaseLanguage(key.project.id)?.let {
+    projectService.getOrAssignBaseLanguage(key.project.id)?.let {
       return find(key, it).orElse(null)
     }
     return null
@@ -336,19 +336,14 @@ class TranslationService(
 
   fun getTranslationMemoryValue(
     key: Key,
-    targetLanguage: Language,
+    targetLanguage: ILanguage,
   ): TranslationMemoryItemView? {
-    val baseLanguage =
-      projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
-        ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
-
     val baseTranslationText = findBaseTranslation(key)?.text ?: return null
 
     return translationRepository.getTranslationMemoryValue(
       baseTranslationText,
       key,
-      baseLanguage,
-      targetLanguage,
+      targetLanguage.id,
     ).firstOrNull()
   }
 

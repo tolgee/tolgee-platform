@@ -126,14 +126,23 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `automatically sets base language`() {
     val base = dbPopulator.createBase(generateUniqueString())
-    executeInNewTransaction {
-      val project = projectService.get(base.project.id)
-      val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
-      project.baseLanguage = null
-      projectService.save(project)
-      performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
-        node("code").isEqualTo("cannot_delete_base_language")
+
+    val project =
+      executeInNewTransaction {
+        val project = projectService.get(base.project.id)
+        project.baseLanguage = null
+        projectService.save(project)
       }
+
+    val en =
+      executeInNewTransaction {
+        // base language is set on load, so this should set new language
+        val projectLocal = projectService.get(base.project.id)
+        projectLocal.findLanguageOptional("en").orElseThrow { NotFoundException() }
+      }
+
+    performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("cannot_delete_base_language")
     }
   }
 

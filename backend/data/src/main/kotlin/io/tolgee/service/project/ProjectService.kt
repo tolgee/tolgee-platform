@@ -5,6 +5,7 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
@@ -155,7 +156,7 @@ class ProjectService(
     save(project)
 
     val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
-    project.baseLanguage = getOrCreateBaseLanguage(dto, createdLanguages)
+    project.baseLanguage = getOrAssignBaseLanguage(dto, createdLanguages)
 
     return project
   }
@@ -177,6 +178,7 @@ class ProjectService(
         project.languages.find { it.id == dto.baseLanguageId }
           ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
       project.baseLanguage = language
+      languageService.evictCacheForProject(project.id)
     }
 
     val newSlug = dto.slug
@@ -237,6 +239,7 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
+    languageService.evictCacheForProject(project.id)
     project.deletedAt = currentDateProvider.date
     save(project)
   }
@@ -295,22 +298,8 @@ class ProjectService(
    * It saves updated project and returns project's new baseLanguage
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  fun getOrCreateBaseLanguage(projectId: Long): Language? {
-    val project = this.get(projectId)
-    return project.baseLanguage ?: project.languages.toList().firstOrNull()?.let {
-      project.baseLanguage = it
-      projectRepository.save(project)
-      it
-    }
-  }
-
-  /**
-   * If base language is missing on project it selects language with lowest id
-   * It saves updated project and returns project's new baseLanguage
-   */
-  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  fun getOrCreateBaseLanguageOrThrow(projectId: Long): Language {
-    return getOrCreateBaseLanguage(projectId) ?: throw IllegalStateException("Project has no languages")
+  fun getOrAssignBaseLanguage(projectId: Long): LanguageDto {
+    return languageService.getProjectBaseLanguage(projectId)
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
@@ -401,7 +390,7 @@ class ProjectService(
     return this.projectRepository.findById(project.id).orElseThrow { NotFoundException() }
   }
 
-  private fun getOrCreateBaseLanguage(
+  private fun getOrAssignBaseLanguage(
     dto: CreateProjectDTO,
     createdLanguages: List<Language>,
   ): Language {

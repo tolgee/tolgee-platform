@@ -41,11 +41,11 @@ class ProjectStatsController(
   @AllowApiAccess
   fun getProjectStats(): ProjectStatsModel {
     val projectStats = projectStatsService.getProjectStats(projectHolder.project.id)
-    val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
+    val baseLanguage = projectService.getOrAssignBaseLanguage(projectHolder.project.id)
     val languageStats =
       languageStatsService.getLanguageStats(projectHolder.project.id)
         .sortedBy { it.language.name }
-        .sortedBy { it.language.id != baseLanguage?.id }
+        .sortedBy { it.language.id != baseLanguage.id }
 
     val totals = projectStatsService.computeProjectTotals(baseLanguage, languageStats)
 
