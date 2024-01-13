@@ -6,7 +6,6 @@ import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
@@ -83,9 +82,9 @@ class MachineTranslationSuggestionFacade(
       }
 
     val resultData =
-      result.map { resultItem ->
+      result.associate { resultItem ->
         resultItem.service to TranslationItemModel(resultItem.translatedText.orEmpty(), resultItem.contextDescription)
-      }.toMap()
+      }
 
     if (result.all { it.baseBlank }) {
       return null
@@ -112,16 +111,6 @@ class MachineTranslationSuggestionFacade(
       )
     }
   }
-
-  val SuggestRequestDto.key
-    get() =
-      if (this.baseText != null) {
-        null
-      } else {
-        keyService.findOptional(this.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }?.also {
-          it.checkInProject()
-        }
-      }
 
   val SuggestRequestDto.targetLanguage
     get() = languageService.get(this.targetLanguageId, projectHolder.project.id)

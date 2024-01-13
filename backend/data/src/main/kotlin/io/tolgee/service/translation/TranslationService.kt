@@ -11,6 +11,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
+import io.tolgee.model.Language_
 import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -427,7 +428,7 @@ class TranslationService(
       keyLanguagesMap.map { (key, languages) ->
         cb.and(
           cb.equal(root.get(Translation_.key), key),
-          root.get(Translation_.language).`in`(languages),
+          root.get(Translation_.language).get(Language_.id).`in`(languages.map { it.id }),
         )
       }.toTypedArray()
 

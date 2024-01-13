@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.TranslationMemoryItemModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuggestRequestDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.hateoas.translationMemory.TranslationMemoryItemModel
@@ -97,7 +98,8 @@ class TranslationSuggestionController(
     val data =
       dto.baseText?.let { baseText -> translationMemoryService.suggest(baseText, targetLanguage, pageable) }
         ?: let {
-          val key = keyService.findOptional(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
+          val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
+          val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
           key.checkInProject()
           translationMemoryService.suggest(key, targetLanguage, pageable)
         }
