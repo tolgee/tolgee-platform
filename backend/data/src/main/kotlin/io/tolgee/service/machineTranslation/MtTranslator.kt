@@ -9,6 +9,12 @@ import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.context.ApplicationContext
 
+/**
+ * This class is universal tool for translating using machine translation services.
+ * It's designed to effectively target any amount of keys to any amount of languages using any services.
+ * It uses the context for caching, so it's fetching only the required data only once, and it caches it for the whole
+ * class life.
+ */
 class MtTranslator(
   projectId: Long,
   private val applicationContext: ApplicationContext,
@@ -46,6 +52,10 @@ class MtTranslator(
     return context.getServicesToUseByDesiredServices(targetLanguageId, desiredServices)
   }
 
+  /**
+   * We can get request to translate to multiple languages or using multiple services,
+   * This method expands such params to MtBatchItemParams, which hold only one language and one service per item
+   */
   private fun expandParams(paramsList: List<MachineTranslationParams>): List<MtBatchItemParams> {
     val batchItems = mutableListOf<MtBatchItemParams>()
 
