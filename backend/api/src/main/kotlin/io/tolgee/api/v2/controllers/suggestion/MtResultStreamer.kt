@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.suggestion
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ExceptionWithMessage
@@ -12,7 +13,6 @@ import io.tolgee.hateoas.machineTranslation.StreamedSuggestionItem
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.machineTranslation.MachineTranslationParams
-import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtTranslatorResult
 import io.tolgee.util.Logging
@@ -33,9 +33,12 @@ class MtResultStreamer(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : Logging {
   private lateinit var outputStream: OutputStream
+  private lateinit var project: ProjectDto
 
   fun stream(): StreamingResponseBody {
+    project = projectHolder.project
     val info = getInfo()
+
     return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
       this.outputStream = outputStream
       try {
@@ -72,7 +75,7 @@ class MtResultStreamer(
   private fun writeServiceResult(service: MtServiceType) {
     try {
       with(machineTranslationSuggestionFacade) {
-        catchingOutOfCredits(balanceBefore) {
+        catchingOutOfCredits(project.organizationOwnerId) {
           val translated = getTranslatedValue(dto, service)
           writeTranslatedValue(writer, service, translated)
         }
@@ -152,19 +155,11 @@ class MtResultStreamer(
     applicationContext.getBean(MtService::class.java)
   }
 
-  private val mtCreditBucketService by lazy {
-    applicationContext.getBean(MtCreditBucketService::class.java)
-  }
-
   private val projectHolder by lazy {
     applicationContext.getBean(ProjectHolder::class.java)
   }
 
   private val writer by lazy { OutputStreamWriter(outputStream) }
-
-  private val balanceBefore by lazy {
-    mtCreditBucketService.getCreditBalances(projectHolder.project.organizationOwnerId)
-  }
 
   private val mtTranslator by lazy {
     mtService.getMtTranslator(projectHolder.project.id, false)

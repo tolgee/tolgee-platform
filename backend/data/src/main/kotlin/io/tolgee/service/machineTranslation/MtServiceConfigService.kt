@@ -109,10 +109,9 @@ class MtServiceConfigService(
         storedConfigs.find { it.targetLanguage?.id == languageSetting.targetLanguageId }
           ?: MtServiceConfig().apply {
             this.project = project
-            val targetLanguageDto =
-              languageSetting.targetLanguageId
-                ?.let { allLanguages.getLanguageOrThrow(it) }
-            this.targetLanguage = entityManager.getReference(Language::class.java, targetLanguageDto?.id)
+            languageSetting.targetLanguageId ?.let {
+              this.targetLanguage = entityManager.getReference(Language::class.java, it)
+            }
           }
 
       setPrimaryService(entity, languageSetting)

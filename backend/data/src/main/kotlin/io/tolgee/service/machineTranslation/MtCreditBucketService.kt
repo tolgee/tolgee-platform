@@ -160,6 +160,7 @@ class MtCreditBucketService(
     machineTranslationCreditBucketRepository.saveAll(buckets)
   }
 
+  @Transactional
   fun getCreditBalances(organizationId: Long): MtCreditBalanceDto {
     return getCreditBalances(findOrCreateBucketByOrganizationId(organizationId))
   }
