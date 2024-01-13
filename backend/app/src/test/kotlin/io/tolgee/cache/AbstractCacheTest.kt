@@ -2,6 +2,7 @@ package io.tolgee.cache
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.component.machineTranslation.MtValueProvider
+import io.tolgee.component.machineTranslation.TranslationParams
 import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
 import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
 import io.tolgee.constants.Caches
@@ -70,7 +71,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       }
 
   private final val paramsEnGoogle by lazy {
-    mtServiceManager.getParams(
+    TranslationParams(
       text = "Hello",
       textRaw = "raw-text",
       keyName = "key-name",
@@ -78,6 +79,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       targetLanguageTag = "de",
       serviceInfo = MtServiceInfo(MtServiceType.GOOGLE, null),
       isBatch = false,
+      metadata = null,
     )
   }
 

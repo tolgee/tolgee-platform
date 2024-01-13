@@ -131,15 +131,17 @@ class AutoTranslationService(
       }
     }
 
-    val projectDto = projectService.getDto(config.project.id)
     val targetLanguage = languageService.get(translation.language.id, config.project.id)
 
     if (config.usingPrimaryMtService) {
       val result =
-        mtService.getPrimaryMachineTranslations(projectDto, translation.key, listOf(targetLanguage), true)
-          .singleOrNull()
+        mtService.getMachineTranslations(config.project.id, true) {
+          keyId = translation.key.id
+          targetLanguageId = targetLanguage.id
+          usePrimaryService = true
+        }.singleOrNull()
 
-      return result?.let { it.translatedText to it.usedService }
+      return result?.let { it.translatedText to it.service }
     }
 
     return null
@@ -249,22 +251,21 @@ class AutoTranslationService(
     key: Key,
     isBatch: Boolean,
   ) {
-    val languages =
-      languageService.getProjectLanguages(key.project.id)
-        .filter { l -> translations.any { t -> t.language.id == l.id } }
+    val languages = translations.map { it.language.id }
 
-    val projectDto = projectService.getDto(key.project.id)
+    val result =
+      mtService.getMachineTranslations(key.project.id, isBatch) {
+        targetLanguageIds = languages
+        keyId = key.id
+      }.associateBy { it.targetLanguageId }
 
-    mtService.getPrimaryMachineTranslations(projectDto, key, languages, isBatch)
-      .zip(translations)
-      .asSequence()
-      .forEach { (translateResult, translation) ->
-        translateResult?.let {
-          it.translatedText?.let { text ->
-            translation.setValueAndState(text, it.usedService)
-          }
+    translations.forEach { translation ->
+      result[translation.language.id]?.let {
+        it.translatedText?.let { text ->
+          translation.setValueAndState(text, it.service)
         }
       }
+    }
   }
 
   /**
@@ -415,13 +416,14 @@ class AutoTranslationService(
     val languages = languageService.findAll(projectEntity.id)
     val result =
       dtos.map { dto ->
+        val targetLanguageReference =
+          dto.languageId?.let { entityManager.getReference(Language::class.java, dto.languageId) }
         val config = (configs[dto.languageId] ?: AutoTranslationConfig())
         config.usingTm = dto.usingTranslationMemory
         config.usingPrimaryMtService = dto.usingMachineTranslation
         config.enableForImport = dto.enableForImport
         config.project = projectEntity
-        config.targetLanguage =
-          entityManager.getReference(Language::class.java, languages.find { it.id == dto.languageId })
+        config.targetLanguage = targetLanguageReference
         config
       }
 

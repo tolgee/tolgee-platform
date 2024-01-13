@@ -39,7 +39,8 @@ class MtServiceConfigService(
    * @return enabled translation services for project
    */
   fun getEnabledServiceInfos(language: LanguageDto): List<MtServiceInfo> {
-    return getEnabledServiceInfosByStoredConfig(language) ?: getEnabledServicesByDefaultServerConfig(language)
+    return getEnabledServiceInfosByStoredConfig(language)
+      ?: getEnabledServicesByDefaultServerConfig(language)
   }
 
   fun getPrimaryServices(

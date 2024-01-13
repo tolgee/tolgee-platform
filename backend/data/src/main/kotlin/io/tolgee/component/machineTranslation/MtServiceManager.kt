@@ -1,7 +1,6 @@
 package io.tolgee.component.machineTranslation
 
 import io.sentry.Sentry
-import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
@@ -9,11 +8,6 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.model.mtServiceConfig.Formality
-import io.tolgee.service.machineTranslation.MtServiceInfo
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.cache.CacheManager
@@ -34,38 +28,6 @@ class MtServiceManager(
   private val cacheManager: CacheManager,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
-
-  /**
-   * Translates a text using All services
-   */
-  fun translate(
-    text: String,
-    textRaw: String,
-    keyName: String?,
-    sourceLanguageTag: String,
-    targetLanguageTag: String,
-    serviceInfos: Collection<MtServiceInfo>,
-    metadata: Metadata?,
-    isBatch: Boolean,
-  ): Map<MtServiceInfo, TranslateResult> {
-    return runBlocking(Dispatchers.IO) {
-      serviceInfos.map { service ->
-        async {
-          service to
-            translate(
-              text = text,
-              textRaw = textRaw,
-              keyName = keyName,
-              sourceLanguageTag = sourceLanguageTag,
-              targetLanguageTag = targetLanguageTag,
-              serviceInfo = service,
-              metadata = metadata,
-              isBatch = isBatch,
-            )
-        }
-      }.awaitAll().toMap()
-    }
-  }
 
   private fun findInCache(params: TranslationParams): TranslateResult? {
     return params.findInCacheByParams()?.let {
@@ -180,26 +142,6 @@ class MtServiceManager(
     }
   }
 
-  fun getParams(
-    text: String,
-    textRaw: String,
-    keyName: String?,
-    sourceLanguageTag: String,
-    targetLanguageTag: String,
-    serviceInfo: MtServiceInfo,
-    metadata: Metadata? = null,
-    isBatch: Boolean,
-  ) = TranslationParams(
-    text = text,
-    textRaw = textRaw,
-    sourceLanguageTag = sourceLanguageTag,
-    targetLanguageTag = targetLanguageTag,
-    serviceInfo = serviceInfo,
-    metadata = metadata,
-    keyName = keyName,
-    isBatch = isBatch,
-  )
-
   private fun getFaked(params: TranslationParams): TranslateResult {
     var fakedText =
       "${params.text} translated with ${params.serviceInfo.serviceType.name} " +
@@ -229,74 +171,6 @@ class MtServiceManager(
   }
 
   private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
-
-  fun translate(
-    text: String,
-    textRaw: String,
-    keyName: String?,
-    sourceLanguageTag: String,
-    targetLanguageTag: String,
-    serviceInfo: MtServiceInfo,
-    metadata: Metadata? = null,
-    isBatch: Boolean = false,
-  ): TranslateResult {
-    val params = getParams(text, textRaw, keyName, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata, isBatch)
-
-    return translate(params)
-  }
-
-  /**
-   * Translates a text using single service
-   */
-  fun translate(
-    text: String,
-    textRaw: String,
-    keyName: String?,
-    sourceLanguageTag: String,
-    targetLanguageTags: List<String>,
-    service: MtServiceInfo,
-    metadata: Map<String, Metadata>? = null,
-    isBatch: Boolean,
-  ): List<TranslateResult> {
-    return translateToMultipleTargets(
-      serviceInfo = service,
-      textRaw = textRaw,
-      keyName = keyName,
-      text = text,
-      sourceLanguageTag = sourceLanguageTag,
-      targetLanguageTags = targetLanguageTags,
-      metadata = metadata,
-      isBatch = isBatch,
-    )
-  }
-
-  private fun translateToMultipleTargets(
-    serviceInfo: MtServiceInfo,
-    text: String,
-    textRaw: String,
-    keyName: String?,
-    sourceLanguageTag: String,
-    targetLanguageTags: List<String>,
-    metadata: Map<String, Metadata>? = null,
-    isBatch: Boolean,
-  ): List<TranslateResult> {
-    return runBlocking(Dispatchers.IO) {
-      targetLanguageTags.map { targetLanguageTag ->
-        async {
-          translate(
-            text,
-            textRaw,
-            keyName,
-            sourceLanguageTag,
-            targetLanguageTag,
-            serviceInfo,
-            metadata?.get(targetLanguageTag),
-            isBatch,
-          )
-        }
-      }.awaitAll()
-    }
-  }
 
   fun MtServiceType.getProvider(): MtValueProvider {
     return applicationContext.getBean(this.providerClass)

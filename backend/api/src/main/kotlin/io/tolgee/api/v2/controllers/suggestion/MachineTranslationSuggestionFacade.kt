@@ -70,24 +70,24 @@ class MachineTranslationSuggestionFacade(
     dto: SuggestRequestDto,
     targetLanguage: LanguageDto,
   ): Map<MtServiceType, TranslationItemModel>? {
-    val key = dto.key
-
-    val resultMap =
+    val result =
       mtService.getMachineTranslations(
-        projectHolder.project,
-        key,
-        dto.baseText,
-        targetLanguage,
-        dto.services,
-      )
+        projectHolder.project.id,
+        false,
+      ) {
+        baseTranslationText = dto.baseText
+        keyId = dto.keyId
+        desiredServices = dto.services
+        useAllEnabledServices = dto.services.isNullOrEmpty()
+        targetLanguageId = targetLanguage.id
+      }
 
     val resultData =
-      resultMap
-        .map { (key, value) ->
-          key to TranslationItemModel(value.translatedText.orEmpty(), value.contextDescription)
-        }.toMap()
+      result.map { resultItem ->
+        resultItem.service to TranslationItemModel(resultItem.translatedText.orEmpty(), resultItem.contextDescription)
+      }.toMap()
 
-    if (resultMap.values.all { it.baseBlank }) {
+    if (result.all { it.baseBlank }) {
       return null
     }
 
