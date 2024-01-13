@@ -15,7 +15,6 @@ class KeyWithBaseTranslationModelAssembler :
       id = view.id,
       name = view.name,
       namespace = view.namespace,
-      description = view.description,
       baseTranslation = view.baseTranslation,
     )
   }

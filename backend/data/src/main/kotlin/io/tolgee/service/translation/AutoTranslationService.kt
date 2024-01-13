@@ -257,6 +257,7 @@ class AutoTranslationService(
       mtService.getMachineTranslations(key.project.id, isBatch) {
         targetLanguageIds = languages
         keyId = key.id
+        usePrimaryService = true
       }.associateBy { it.targetLanguageId }
 
     translations.forEach { translation ->
