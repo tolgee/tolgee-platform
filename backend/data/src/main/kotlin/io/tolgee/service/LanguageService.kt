@@ -81,9 +81,11 @@ class LanguageService(
 
   @Transactional
   fun editLanguage(
-    language: Language,
+    languageId: Long,
+    projectId: Long,
     dto: LanguageRequest,
   ): Language {
+    val language = getEntity(languageId, projectId)
     language.updateByDTO(dto)
     entityManager.persist(language)
     evictCache(language)
@@ -322,7 +324,7 @@ class LanguageService(
     val cache = cacheManager.getCache(Caches.LANGUAGES)
     val list =
       (
-        (cache?.get(projectId) as? List<LanguageDto>)
+        (cache?.get(projectId)?.get() as? List<LanguageDto>)
           ?: languageRepository.findAllDtosByProjectId(projectId)
       ).toMutableList()
 

@@ -50,6 +50,7 @@ import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -219,6 +220,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
 
+  @BeforeEach
   fun clearCaches() {
     Caches.caches.forEach { cacheName ->
       cacheManager.getCache(cacheName)?.clear()

@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
-class LanguageServiceTest : AbstractSpringTest() {
+class LanguageCachingTest : AbstractSpringTest() {
   @Test
   @Transactional
   fun `remove of language removes existing language reference from import language`() {

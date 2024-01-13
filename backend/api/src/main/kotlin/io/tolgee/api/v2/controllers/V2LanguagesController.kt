@@ -88,7 +88,7 @@ class V2LanguagesController(
     @PathVariable("languageId") languageId: Long,
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
-    languageService.editLanguage(languageService.getEntity(languageId, projectHolder.project.id), dto)
+    languageService.editLanguage(languageId, projectHolder.project.id, dto)
     return languageModelAssembler.toModel(languageService.get(languageId, projectHolder.project.id))
   }
 
