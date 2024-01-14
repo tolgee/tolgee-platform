@@ -164,8 +164,7 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ): OrganizationRoleType? {
-    self.getDto(organizationId, userId).type
-    return null
+    return self.getDto(organizationId, userId).type
   }
 
   @Cacheable(Caches.ORGANIZATION_ROLES, key = "{#organizationId, #userId}")
