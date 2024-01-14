@@ -17,7 +17,6 @@ import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
@@ -37,7 +36,6 @@ class AutoTranslationService(
   private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
-  private val projectService: ProjectService,
 ) {
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
