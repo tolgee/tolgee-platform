@@ -125,7 +125,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   protected lateinit var organizationRoleService: OrganizationRoleService
 
   @Autowired
-  lateinit var organizationRoleRepository: OrganizationRoleRepository
+  open lateinit var organizationRoleRepository: OrganizationRoleRepository
 
   @Autowired
   open lateinit var projectRepository: ProjectRepository
