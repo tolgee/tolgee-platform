@@ -100,7 +100,7 @@ class MtServiceManager(
         actualPrice = 0,
         usedService = params.serviceInfo.serviceType,
         baseBlank = params.textRaw.isBlank(),
-        exception = e
+        exception = e,
       )
     }
   }
