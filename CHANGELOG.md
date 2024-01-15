@@ -1,3 +1,10 @@
+## [3.45.2](https://github.com/tolgee/tolgee-platform/compare/v3.45.1...v3.45.2) (2024-01-15)
+
+
+### Bug Fixes
+
+* Publish to Content Delivery Storage debouncing ([#2077](https://github.com/tolgee/tolgee-platform/issues/2077)) ([ce24018](https://github.com/tolgee/tolgee-platform/commit/ce24018a496946b7e247ac5da4ca707218ccbb23))
+
 ## [3.45.1](https://github.com/tolgee/tolgee-platform/compare/v3.45.0...v3.45.1) (2024-01-10)
 
 
