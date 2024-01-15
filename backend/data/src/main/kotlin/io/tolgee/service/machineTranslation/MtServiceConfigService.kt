@@ -339,9 +339,9 @@ class MtServiceConfigService(
     }
   }
 
-  val services by lazy {
-    MtServiceType.entries.associateWith {
-      (applicationContext.getBean(it.propertyClass) to applicationContext.getBean(it.providerClass))
-    }
-  }
+  val services
+    get() =
+      MtServiceType.entries.associateWith {
+        (applicationContext.getBean(it.propertyClass) to applicationContext.getBean(it.providerClass))
+      }
 }
