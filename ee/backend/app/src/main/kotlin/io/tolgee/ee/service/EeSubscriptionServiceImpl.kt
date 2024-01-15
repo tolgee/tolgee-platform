@@ -280,6 +280,7 @@ class EeSubscriptionServiceImpl(
   }
 
   @Transactional
+  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
   fun releaseSubscription() {
     val subscription = findSubscriptionEntity()
     if (subscription != null) {
@@ -291,6 +292,7 @@ class EeSubscriptionServiceImpl(
           throw e
         }
       }
+
       eeSubscriptionRepository.deleteAll()
     }
   }

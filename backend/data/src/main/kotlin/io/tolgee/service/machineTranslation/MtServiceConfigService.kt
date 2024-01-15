@@ -70,7 +70,7 @@ class MtServiceConfigService(
   }
 
   private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
-    return services.filter { it.value.first.defaultPrimary }.keys.minByOrNull { it.order }
+    return services.filter { it.value.first.defaultPrimary && it.value.second.isEnabled }.keys.minByOrNull { it.order }
   }
 
   private fun getEnabledServiceInfosByStoredConfig(language: LanguageDto): List<MtServiceInfo>? {
@@ -290,7 +290,7 @@ class MtServiceConfigService(
         services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
           .keys.toMutableSet()
       this.project = project
-      primaryService = services.entries.find { it.value.first.defaultPrimary }?.key
+      primaryService = getPrimaryServiceByDefaultConfig()
     }
   }
 
@@ -339,9 +339,9 @@ class MtServiceConfigService(
     }
   }
 
-  val services
-    get() =
-      MtServiceType.entries.associateWith {
-        (applicationContext.getBean(it.propertyClass) to applicationContext.getBean(it.providerClass))
-      }
+  val services by lazy {
+    MtServiceType.entries.associateWith {
+      (applicationContext.getBean(it.propertyClass) to applicationContext.getBean(it.providerClass))
+    }
+  }
 }

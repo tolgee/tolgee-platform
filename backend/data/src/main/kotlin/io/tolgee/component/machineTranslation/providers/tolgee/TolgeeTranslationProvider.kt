@@ -21,9 +21,7 @@ class TolgeeTranslationProvider(
   private val eeSubscriptionInfoProvider: EeSubscriptionInfoProvider,
   private val publicBillingConfProvider: PublicBillingConfProvider,
 ) : AbstractMtValueProvider() {
-  override val isEnabled: Boolean by lazy {
-    apiService != null
-  }
+  override val isEnabled: Boolean get() = apiService != null
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val apiServiceNotNull =
