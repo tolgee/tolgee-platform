@@ -8,6 +8,7 @@ import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslatePa
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.OutOfCreditsException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -19,6 +20,7 @@ class EeTolgeeTranslateApiServiceImpl(
   private val tolgeeProperties: TolgeeProperties,
   private val httpClient: HttpClient,
   private val subscriptionService: EeSubscriptionServiceImpl,
+  private val eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
 ) : TolgeeTranslateApiService, EeTolgeeTranslateApiService {
   companion object {
     const val API_PATH = "v2/public/translator/translate"
@@ -37,14 +39,18 @@ class EeTolgeeTranslateApiServiceImpl(
           method = HttpMethod.POST,
           result = MtValueProvider.MtResult::class.java,
           headers =
-            HttpHeaders().apply {
-              this.add("License-Key", licenseKey)
-            },
+          HttpHeaders().apply {
+            this.add("License-Key", licenseKey)
+          },
         ) ?: throw EmptyBodyException()
       }
     } catch (e: BadRequest) {
       if (e.message?.contains(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code) == true) {
         throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED)
+      }
+      if (e.message?.contains(Message.SUBSCRIPTION_NOT_ACTIVE.code) == true) {
+        eeSubscriptionServiceImpl.checkSubscription()
+        throw BadRequestException(Message.SUBSCRIPTION_NOT_ACTIVE)
       }
       throw e
     }

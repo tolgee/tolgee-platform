@@ -1,7 +1,7 @@
-import { useTranslate } from '@tolgee/react';
+import {useTranslate} from '@tolgee/react';
 
 export function useErrorTranslation() {
-  const { t } = useTranslate();
+  const {t} = useTranslate();
 
   return (code: string) => {
     switch (code.toLocaleLowerCase()) {
@@ -115,6 +115,8 @@ export function useErrorTranslation() {
         return t('subscription_already_canceled');
       case 'credit_spending_limit_exceeded':
         return t('credit_spending_limit_exceeded');
+      case 'subscription_not_active':
+        return t('subscription_not_active');
       default:
         return code;
     }
