@@ -1,3 +1,10 @@
+## [3.45.3](https://github.com/tolgee/tolgee-platform/compare/v3.45.2...v3.45.3) (2024-01-15)
+
+
+### Bug Fixes
+
+* ReCaptcha availability in China ([#2078](https://github.com/tolgee/tolgee-platform/issues/2078)) ([3307eca](https://github.com/tolgee/tolgee-platform/commit/3307eca9cf0484428db74fb23212a689e9204a03))
+
 ## [3.45.2](https://github.com/tolgee/tolgee-platform/compare/v3.45.1...v3.45.2) (2024-01-15)
 
 
