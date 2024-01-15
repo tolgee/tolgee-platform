@@ -1,3 +1,10 @@
+## [3.45.4](https://github.com/tolgee/tolgee-platform/compare/v3.45.3...v3.45.4) (2024-01-15)
+
+
+### Bug Fixes
+
+* Allow API access for MT settings controller ([#2079](https://github.com/tolgee/tolgee-platform/issues/2079)) ([71d8452](https://github.com/tolgee/tolgee-platform/commit/71d84520a1b04f8b72a9aff621d48adf980e1c15))
+
 ## [3.45.3](https://github.com/tolgee/tolgee-platform/compare/v3.45.2...v3.45.3) (2024-01-15)
 
 
