@@ -2,6 +2,7 @@ package io.tolgee.component.automations
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.BatchJobService
+import io.tolgee.batch.BatchOperationParams
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.AutomationBjRequest
 import io.tolgee.dtos.cacheable.automations.AutomationActionDto
@@ -54,7 +55,12 @@ class AutomationsBatchJobCreator(
 
     automationTriggersMap.forEach { (trigger, automation) ->
       automation.actions.forEach { action ->
-        startAutomationBatchJob(trigger, action, projectId, activityRevisionId)
+        val debouncingKeyProvider: ((BatchOperationParams) -> Any)? =
+          action.type.debouncingKeyProvider?.let {
+              actionProvider ->
+            { batchOperationParams -> actionProvider(batchOperationParams, action, trigger) }
+          }
+        startAutomationBatchJob(trigger, action, projectId, activityRevisionId, debouncingKeyProvider)
       }
     }
   }
@@ -67,6 +73,7 @@ class AutomationsBatchJobCreator(
     action: AutomationActionDto,
     projectId: Long,
     activityRevisionId: Long,
+    debouncingKeyProvider: ((BatchOperationParams) -> Any)? = null,
   ) {
     batchJobService.startJob(
       AutomationBjRequest(trigger.id, action.id, activityRevisionId),
@@ -75,6 +82,7 @@ class AutomationsBatchJobCreator(
       type = BatchJobType.AUTOMATION,
       isHidden = true,
       debounceDuration = trigger.debounceDurationInMs?.let { Duration.ofMillis(it) },
+      debouncingKeyProvider = debouncingKeyProvider,
     )
   }
 }

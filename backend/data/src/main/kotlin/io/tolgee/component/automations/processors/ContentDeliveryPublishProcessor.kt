@@ -35,6 +35,9 @@ class ContentDeliveryPublishProcessor(
         else -> throw RequeueWithDelayException(
           Message.UNEXPECTED_ERROR_WHILE_PUBLISHING_TO_CONTENT_STORAGE,
           cause = e,
+          delayInMs = 60000,
+          increaseFactor = 10,
+          maxRetries = 2,
         )
       }
     }
