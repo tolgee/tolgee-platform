@@ -47,7 +47,10 @@ const RecaptchaProvider: FC = (props) => {
   }
 
   return (
-    <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
+    <GoogleReCaptchaProvider
+      reCaptchaKey={config.recaptchaSiteKey}
+      useRecaptchaNet={true}
+    >
       {props.children}
     </GoogleReCaptchaProvider>
   );
