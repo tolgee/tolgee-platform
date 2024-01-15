@@ -9,4 +9,5 @@ data class MtTranslatorResult(
   val service: MtServiceType,
   val targetLanguageId: Long,
   val baseBlank: Boolean,
+  val exception: Exception?,
 )

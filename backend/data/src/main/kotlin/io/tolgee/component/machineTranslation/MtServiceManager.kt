@@ -95,11 +95,12 @@ class MtServiceManager(
     } catch (e: Exception) {
       handleSilentFail(params, e)
       TranslateResult(
-        null,
-        null,
-        0,
-        params.serviceInfo.serviceType,
-        params.textRaw.isBlank(),
+        translatedText = null,
+        contextDescription = null,
+        actualPrice = 0,
+        usedService = params.serviceInfo.serviceType,
+        baseBlank = params.textRaw.isBlank(),
+        exception = e
       )
     }
   }

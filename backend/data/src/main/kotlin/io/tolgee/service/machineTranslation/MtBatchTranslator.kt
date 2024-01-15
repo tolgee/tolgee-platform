@@ -39,6 +39,7 @@ class MtBatchTranslator(
       service = item.service,
       targetLanguageId = item.targetLanguageId,
       baseBlank = managerResult.baseBlank,
+      exception = managerResult.exception
     )
   }
 
@@ -50,6 +51,7 @@ class MtBatchTranslator(
       service = item.service,
       targetLanguageId = item.targetLanguageId,
       baseBlank = true,
+      exception = null
     )
 
   private fun getTranslationParams(
@@ -63,8 +65,8 @@ class MtBatchTranslator(
       keyName = context.keys[item.keyId]?.name,
       sourceLanguageTag = context.getBaseLanguage().tag,
       targetLanguageTag =
-        context.languages[item.targetLanguageId]?.tag
-          ?: throw IllegalStateException("Language ${item.targetLanguageId} not found"),
+      context.languages[item.targetLanguageId]?.tag
+        ?: throw IllegalStateException("Language ${item.targetLanguageId} not found"),
       serviceInfo = context.getServiceInfo(item.targetLanguageId, item.service),
       metadata = context.getMetadata(item),
       isBatch = context.isBatch,

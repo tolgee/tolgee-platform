@@ -77,6 +77,7 @@ class MtResultStreamer(
       with(machineTranslationSuggestionFacade) {
         catchingOutOfCredits(project.organizationOwnerId) {
           val translated = getTranslatedValue(dto, service)
+          translated?.exception?.let { throw it }
           writeTranslatedValue(writer, service, translated)
         }
       }
