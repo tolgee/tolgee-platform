@@ -113,6 +113,8 @@ export function useErrorTranslation() {
         return t('resource_not_found');
       case 'subscription_already_canceled':
         return t('subscription_already_canceled');
+      case 'credit_spending_limit_exceeded':
+        return t('credit_spending_limit_exceeded');
       default:
         return code;
     }

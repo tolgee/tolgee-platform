@@ -6,6 +6,7 @@ import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslate
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.ee.service.EeSubscriptionServiceImpl
 import io.tolgee.exceptions.OutOfCreditsException
 import org.springframework.http.HttpHeaders
@@ -42,7 +43,7 @@ class EeTolgeeTranslateApiServiceImpl(
         ) ?: throw EmptyBodyException()
       }
     } catch (e: BadRequest) {
-      if (e.message?.contains("credit_spending_limit_exceeded") == true) {
+      if (e.message?.contains(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code) == true) {
         throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED)
       }
       throw e
