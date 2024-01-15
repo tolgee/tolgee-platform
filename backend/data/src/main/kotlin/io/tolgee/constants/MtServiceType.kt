@@ -21,10 +21,35 @@ enum class MtServiceType(
   val usesMetadata: Boolean = false,
   val order: Int = 0,
 ) {
-  GOOGLE(GoogleMachineTranslationProperties::class.java, GoogleTranslationProvider::class.java),
-  AWS(AwsMachineTranslationProperties::class.java, AwsMtValueProvider::class.java),
-  DEEPL(DeeplMachineTranslationProperties::class.java, DeeplTranslationProvider::class.java),
-  AZURE(AzureCognitiveTranslationProperties::class.java, AzureCognitiveTranslationProvider::class.java),
-  BAIDU(BaiduMachineTranslationProperties::class.java, BaiduTranslationProvider::class.java),
-  TOLGEE(TolgeeMachineTranslationProperties::class.java, TolgeeTranslationProvider::class.java, true, order = -1),
+  GOOGLE(
+    propertyClass = GoogleMachineTranslationProperties::class.java,
+    providerClass = GoogleTranslationProvider::class.java,
+    order = 1,
+  ),
+  AWS(
+    propertyClass = AwsMachineTranslationProperties::class.java,
+    providerClass = AwsMtValueProvider::class.java,
+    order = 2,
+  ),
+  DEEPL(
+    propertyClass = DeeplMachineTranslationProperties::class.java,
+    providerClass = DeeplTranslationProvider::class.java,
+    order = 3,
+  ),
+  AZURE(
+    propertyClass = AzureCognitiveTranslationProperties::class.java,
+    providerClass = AzureCognitiveTranslationProvider::class.java,
+    order = 4,
+  ),
+  BAIDU(
+    propertyClass = BaiduMachineTranslationProperties::class.java,
+    providerClass = BaiduTranslationProvider::class.java,
+    order = 5,
+  ),
+  TOLGEE(
+    propertyClass = TolgeeMachineTranslationProperties::class.java,
+    providerClass = TolgeeTranslationProvider::class.java,
+    usesMetadata = true,
+    order = -1,
+  ),
 }

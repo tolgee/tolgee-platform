@@ -70,7 +70,7 @@ class MtServiceConfigService(
   }
 
   private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
-    return services.filter { it.value.first.defaultPrimary }.keys.firstOrNull()
+    return services.filter { it.value.first.defaultPrimary }.keys.minByOrNull { it.order }
   }
 
   private fun getEnabledServiceInfosByStoredConfig(language: LanguageDto): List<MtServiceInfo>? {
@@ -109,7 +109,7 @@ class MtServiceConfigService(
         storedConfigs.find { it.targetLanguage?.id == languageSetting.targetLanguageId }
           ?: MtServiceConfig().apply {
             this.project = project
-            languageSetting.targetLanguageId ?.let {
+            languageSetting.targetLanguageId?.let {
               this.targetLanguage = entityManager.getReference(Language::class.java, it)
             }
           }
