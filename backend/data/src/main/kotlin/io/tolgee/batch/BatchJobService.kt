@@ -1,7 +1,6 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.AllIncompleteJobsResult
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
@@ -73,11 +72,21 @@ class BatchJobService(
     type: BatchJobType,
     isHidden: Boolean = false,
     debounceDuration: Duration? = null,
+    debouncingKeyProvider: ((BatchOperationParams) -> Any)? = null,
   ): BatchJob {
     val processor = getProcessor(type)
     val target = processor.getTarget(request)
 
-    val debouncingKey = debounceDuration?.let { getDebouncingKey(type, project, target, request) }
+    val params =
+      BatchOperationParams(
+        projectId = project.id,
+        type = type,
+        request = request,
+        target = target,
+      )
+
+    val debouncingKey =
+      debounceDuration?.let { getDebouncingKeySha(debouncingKeyProvider?.invoke(params) ?: params) }
     if (debouncingKey != null) {
       val debouncedJob = tryDebounceJob(debouncingKey, debounceDuration)
       if (debouncedJob != null) {
@@ -176,13 +185,9 @@ class BatchJobService(
     return job
   }
 
-  private fun getDebouncingKey(
-    type: BatchJobType,
-    project: Project,
-    target: List<Any>,
-    request: Any,
-  ): String? {
-    val debouncingKeyJson = jacksonObjectMapper().writeValueAsString(listOf(type, project.id, target, request))
+  private fun getDebouncingKeySha(key: Any): String {
+    val debouncingKeyJson =
+      objectMapper.writeValueAsString(key)
     return sha256Hex(debouncingKeyJson)
   }
 
