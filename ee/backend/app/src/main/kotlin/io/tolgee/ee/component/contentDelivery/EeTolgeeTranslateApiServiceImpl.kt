@@ -7,9 +7,11 @@ import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateAp
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.exceptions.OutOfCreditsException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException.BadRequest
 
 @Component
 class EeTolgeeTranslateApiServiceImpl(
@@ -26,17 +28,24 @@ class EeTolgeeTranslateApiServiceImpl(
     val licenseKey =
       subscriptionService.findSubscriptionDto()?.licenseKey ?: throw IllegalStateException("Not Subscribed")
 
-    return subscriptionService.catchingLicenseNotFound {
-      httpClient.requestForJson(
-        url = url,
-        body = params,
-        method = HttpMethod.POST,
-        result = MtValueProvider.MtResult::class.java,
-        headers =
-          HttpHeaders().apply {
-            this.add("License-Key", licenseKey)
-          },
-      ) ?: throw EmptyBodyException()
+    try {
+      return subscriptionService.catchingLicenseNotFound {
+        httpClient.requestForJson(
+          url = url,
+          body = params,
+          method = HttpMethod.POST,
+          result = MtValueProvider.MtResult::class.java,
+          headers =
+            HttpHeaders().apply {
+              this.add("License-Key", licenseKey)
+            },
+        ) ?: throw EmptyBodyException()
+      }
+    } catch (e: BadRequest) {
+      if (e.message?.contains("credit_spending_limit_exceeded") == true) {
+        throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED)
+      }
+      throw e
     }
   }
 

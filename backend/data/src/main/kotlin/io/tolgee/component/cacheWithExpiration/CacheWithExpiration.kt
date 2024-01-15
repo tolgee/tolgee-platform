@@ -8,10 +8,7 @@ class CacheWithExpiration(
   private val cache: Cache,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-  fun <T : Any?> get(
-    key: Any,
-    type: Class<T>?,
-  ): T? {
+  fun <T : Any?> get(key: Any): T? {
     this.cache.get(key, CachedWithExpiration::class.java)?.let {
       if (it.expiresAt > currentDateProvider.date.time) {
         try {
@@ -33,5 +30,13 @@ class CacheWithExpiration(
     expiration: Duration,
   ) {
     this.cache.put(key, CachedWithExpiration(currentDateProvider.date.time + expiration.toMillis(), value))
+  }
+
+  fun evict(key: Any) {
+    this.cache.evict(key)
+  }
+
+  fun clear() {
+    this.cache.clear()
   }
 }

@@ -1,7 +1,9 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.clear
 import io.tolgee.activity.ActivityService
+import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtServiceManager
@@ -15,7 +17,6 @@ import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslation
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
-import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
@@ -220,9 +221,12 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
 
+  @Autowired
+  lateinit var allCachesProvider: AllCachesProvider
+
   @BeforeEach
   fun clearCaches() {
-    Caches.caches.forEach { cacheName ->
+    allCachesProvider.getAllCaches().forEach { cacheName ->
       cacheManager.getCache(cacheName)?.clear()
     }
   }
