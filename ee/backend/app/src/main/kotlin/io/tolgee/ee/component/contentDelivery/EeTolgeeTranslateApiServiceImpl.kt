@@ -20,7 +20,7 @@ class EeTolgeeTranslateApiServiceImpl(
   private val tolgeeProperties: TolgeeProperties,
   private val httpClient: HttpClient,
   private val subscriptionService: EeSubscriptionServiceImpl,
-  private val eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
+  private val eeSubscriptionServiceImpl: EeSubscriptionServiceImpl,
 ) : TolgeeTranslateApiService, EeTolgeeTranslateApiService {
   companion object {
     const val API_PATH = "v2/public/translator/translate"
@@ -39,9 +39,9 @@ class EeTolgeeTranslateApiServiceImpl(
           method = HttpMethod.POST,
           result = MtValueProvider.MtResult::class.java,
           headers =
-          HttpHeaders().apply {
-            this.add("License-Key", licenseKey)
-          },
+            HttpHeaders().apply {
+              this.add("License-Key", licenseKey)
+            },
         ) ?: throw EmptyBodyException()
       }
     } catch (e: BadRequest) {
