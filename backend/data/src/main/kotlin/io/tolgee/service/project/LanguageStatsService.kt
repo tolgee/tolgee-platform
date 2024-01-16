@@ -15,7 +15,6 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
@@ -31,7 +30,7 @@ class LanguageStatsService(
 ) : Logging {
   fun refreshLanguageStats(projectId: Long) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId") {
-      executeInNewRepeatableTransaction(platformTransactionManager, TransactionDefinition.ISOLATION_READ_COMMITTED) tx@{
+      executeInNewRepeatableTransaction(platformTransactionManager) tx@{
         val languages = languageService.findAll(projectId)
         val allRawLanguageStats = getLanguageStatsRaw(projectId)
         try {
