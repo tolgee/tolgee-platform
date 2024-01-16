@@ -133,6 +133,7 @@ class V2ProjectsController(
   @Operation(summary = "Returns project all users, who have permission to access project")
   @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
   @RequiresSuperAuthentication
+  @AllowApiAccess
   fun getAllUsers(
     @PathVariable("projectId") projectId: Long,
     @ParameterObject pageable: Pageable,
@@ -147,6 +148,7 @@ class V2ProjectsController(
   @Operation(summary = "Uploads organizations avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @AllowApiAccess
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
     @PathVariable projectId: Long,
@@ -160,6 +162,7 @@ class V2ProjectsController(
   @Operation(summary = "Deletes organization avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @AllowApiAccess
   fun removeAvatar(
     @PathVariable projectId: Long,
   ): ProjectModel {
@@ -232,6 +235,7 @@ class V2ProjectsController(
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @RequiresSuperAuthentication
+  @AllowApiAccess
   fun editProject(
     @RequestBody @Valid
     dto: EditProjectDTO,
@@ -244,6 +248,7 @@ class V2ProjectsController(
   @Operation(summary = "Deletes project by id")
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @RequiresSuperAuthentication
+  @AllowApiAccess
   fun deleteProject(
     @PathVariable projectId: Long,
   ) {
@@ -300,6 +305,7 @@ class V2ProjectsController(
   @Operation(summary = "Returns all invitations to project")
   @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
   @RequiresSuperAuthentication
+  @AllowApiAccess
   fun getProjectInvitations(
     @PathVariable("projectId") id: Long,
   ): CollectionModel<ProjectInvitationModel> {
