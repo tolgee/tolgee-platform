@@ -99,33 +99,35 @@ export const SignUpView: FunctionComponent = () => {
   }
 
   return (
-    <DashboardPage>
-      <CompactView
-        maxWidth={isSmall ? 430 : 964}
-        windowTitle={t('sign_up_title')}
-        title={t('sign_up_title')}
-        backLink={LINKS.LOGIN.build()}
-        content={
-          signUpMutation.isSuccess && config.needsEmailVerification ? (
-            <Alert severity="success">
-              <T keyName="sign_up_success_needs_verification_message" />
-            </Alert>
-          ) : (
-            <SplitContent
-              left={
-                <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
-              }
-              right={
-                <StyledRightPart>
-                  <SignUpProviders />
-                </StyledRightPart>
-              }
-            />
-          )
-        }
-      />
+    <>
+      <DashboardPage>
+        <CompactView
+          maxWidth={isSmall ? 430 : 964}
+          windowTitle={t('sign_up_title')}
+          title={t('sign_up_title')}
+          backLink={LINKS.LOGIN.build()}
+          content={
+            signUpMutation.isSuccess && config.needsEmailVerification ? (
+              <Alert severity="success">
+                <T keyName="sign_up_success_needs_verification_message" />
+              </Alert>
+            ) : (
+              <SplitContent
+                left={
+                  <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
+                }
+                right={
+                  <StyledRightPart>
+                    <SignUpProviders />
+                  </StyledRightPart>
+                }
+              />
+            )
+          }
+        />
+      </DashboardPage>
       {config.capterraTracker && <img src={config.capterraTracker} />}
-    </DashboardPage>
+    </>
   );
 };
 
