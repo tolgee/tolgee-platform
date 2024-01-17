@@ -40,16 +40,17 @@ class ProjectWithStatsFacade(
       projects.content.map { projectWithLanguagesView ->
         val projectTotals = totals[projectWithLanguagesView.id]
         val baseLanguage = projectWithLanguagesView.baseLanguage
-        val projectLanguageStats = languageStats[projectWithLanguagesView.id]
+        val projectLanguageStats =
+          languageStats[projectWithLanguagesView.id]
+            ?.sortedBy { it.language.name }
+            ?.sortedBy { it.language.id != baseLanguage?.id }
 
         var stateTotals: ProjectStatsService.ProjectStateTotals? = null
         if (baseLanguage != null && projectLanguageStats != null) {
           stateTotals =
             projectStatsService.computeProjectTotals(
               baseLanguage,
-              projectLanguageStats
-                .sortedBy { it.language.name }
-                .sortedBy { it.language.id != baseLanguage.id },
+              projectLanguageStats,
             )
         }
 
