@@ -1,3 +1,10 @@
+## [3.45.7](https://github.com/tolgee/tolgee-platform/compare/v3.45.6...v3.45.7) (2024-01-17)
+
+
+### Bug Fixes
+
+* Content delivery -> All namespaces exporting new namespaces ([#2087](https://github.com/tolgee/tolgee-platform/issues/2087)) ([8cb0151](https://github.com/tolgee/tolgee-platform/commit/8cb015106333e67fdd27c7a3a3bd21f223f84bf9))
+
 ## [3.45.6](https://github.com/tolgee/tolgee-platform/compare/v3.45.5...v3.45.6) (2024-01-17)
 
 
