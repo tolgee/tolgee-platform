@@ -1,3 +1,10 @@
+## [3.45.8](https://github.com/tolgee/tolgee-platform/compare/v3.45.7...v3.45.8) (2024-01-17)
+
+
+### Bug Fixes
+
+* API Key regeneration ([#2085](https://github.com/tolgee/tolgee-platform/issues/2085)) ([808af0c](https://github.com/tolgee/tolgee-platform/commit/808af0cedcd2e9bca175df9737c24f6e6d1c07d3))
+
 ## [3.45.7](https://github.com/tolgee/tolgee-platform/compare/v3.45.6...v3.45.7) (2024-01-17)
 
 
