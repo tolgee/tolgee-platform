@@ -28,8 +28,8 @@ class ApiKey(
   @Column(updatable = false, insertable = false, nullable = true)
   var key: String? = null,
   /**
-   * Scope should be never nullable, butthere were entries with null scopes in the production DB, which caused NPEs,
-   * so to be sure, lets meke it nullable
+   * Scope should be never nullable, but here were entries with null scopes in the production DB, which caused NPEs,
+   * so to be sure, lets make it nullable
    */
   @NotNull
   @NotEmpty

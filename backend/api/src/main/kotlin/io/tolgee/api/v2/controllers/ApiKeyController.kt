@@ -220,7 +220,8 @@ class ApiKeyController(
     @PathVariable apiKeyId: Long,
   ): RevealedApiKeyModel {
     checkOwner(apiKeyId)
-    return revealedApiKeyModelAssembler.toModel(apiKeyService.regenerate(apiKeyId, dto.expiresAt))
+    val regenerated = apiKeyService.regenerate(apiKeyId, dto.expiresAt)
+    return revealedApiKeyModelAssembler.toModel(regenerated)
   }
 
   @DeleteMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])

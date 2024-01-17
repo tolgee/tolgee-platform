@@ -29,6 +29,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
@@ -41,6 +42,7 @@ class ApiKeyService(
   private val permissionService: PermissionService,
   private val entityManager: EntityManager,
   private val cacheManager: CacheManager,
+  private val transactionManager: PlatformTransactionManager,
 ) : Logging {
   private val cache: Cache? by lazy {
     cacheManager.getCache(Caches.PROJECT_API_KEYS)
