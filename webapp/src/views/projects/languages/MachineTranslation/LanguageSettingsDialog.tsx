@@ -210,10 +210,10 @@ export const LanguageSettingsDialog = ({
               >
                 <div className={TABLE_TOP_ROW} />
                 <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
-                  <SuggestionsLabel />
+                  <PrimaryServiceLabel />
                 </div>
                 <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
-                  <PrimaryServiceLabel />
+                  <SuggestionsLabel />
                 </div>
                 <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
                   {t('project_mt_dialog_service_formality')}
@@ -233,6 +233,16 @@ export const LanguageSettingsDialog = ({
                         />
                       </Box>
                       <div className={TABLE_CENTERED}>
+                        <Radio
+                          data-cy="mt-language-dialog-primary-radio"
+                          data-cy-service={service}
+                          size="small"
+                          checked={values.primaryService === service}
+                          onClick={() => setPrimary(service)}
+                          disabled={!languageSupported}
+                        />
+                      </div>
+                      <div className={TABLE_CENTERED}>
                         {languageSupported && (
                           <Checkbox
                             data-cy="mt-language-dialog-enabled-checkbox"
@@ -245,16 +255,6 @@ export const LanguageSettingsDialog = ({
                             onClick={() => toggleService(service)}
                           />
                         )}
-                      </div>
-                      <div className={TABLE_CENTERED}>
-                        <Radio
-                          data-cy="mt-language-dialog-primary-radio"
-                          data-cy-service={service}
-                          size="small"
-                          checked={values.primaryService === service}
-                          onClick={() => setPrimary(service)}
-                          disabled={!languageSupported}
-                        />
                       </div>
                       <div className={TABLE_CENTERED}>
                         {formalitySupported && (

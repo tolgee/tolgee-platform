@@ -68,9 +68,9 @@ export const UserPresentMenu: React.FC = () => {
 
   const logout = useLogout();
 
-  const handleSelectOrganization = (organization: OrganizationModel) => {
-    updatePreferredOrganization(organization.id);
+  const handleSelectOrganization = async (organization: OrganizationModel) => {
     setAnchorEl(null);
+    await updatePreferredOrganization(organization.id);
     history.push(LINKS.PROJECTS.build());
   };
 

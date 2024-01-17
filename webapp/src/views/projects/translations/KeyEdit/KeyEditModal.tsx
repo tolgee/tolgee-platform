@@ -57,6 +57,7 @@ type Props = {
   keyId: number;
   name: string;
   namespace: string | undefined;
+  description: string | undefined;
   tags: string[];
   onClose: () => void;
   initialTab: TabsType;
@@ -67,6 +68,7 @@ export const KeyEditModal: React.FC<Props> = ({
   keyId,
   name,
   namespace = '',
+  description,
   tags,
   onClose,
   initialTab,
@@ -97,7 +99,7 @@ export const KeyEditModal: React.FC<Props> = ({
   const disabledLangs =
     disabledLangsLoadable.data?._embedded?.languages?.map((l) => l.id) || [];
 
-  const initialValues = { name, namespace, tags, disabledLangs };
+  const initialValues = { name, namespace, description, tags, disabledLangs };
 
   return (
     <Formik
@@ -113,6 +115,7 @@ export const KeyEditModal: React.FC<Props> = ({
                   name: values.name,
                   namespace: values.namespace,
                   tags: values.tags,
+                  description: values.description,
                 },
               },
             },
@@ -140,6 +143,7 @@ export const KeyEditModal: React.FC<Props> = ({
             value: {
               keyName: data.name,
               keyNamespace: data.namespace,
+              keyDescription: data.description,
               keyTags: data.tags,
             },
           });
@@ -151,7 +155,7 @@ export const KeyEditModal: React.FC<Props> = ({
     >
       {({ submitForm }) => {
         return (
-          <Dialog open={true} onClose={onClose} fullWidth>
+          <Dialog open={true} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>{t('translations_key_edit_title')}</DialogTitle>
             <StyledTabsWrapper>
               <StyledTabs value={tab} onChange={(_, val) => setTab(val)}>

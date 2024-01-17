@@ -89,6 +89,7 @@ export const KeyCreateDialog: React.FC<Props> = ({
     insertTranslation({
       keyId: data.id,
       keyNamespace: data.namespace,
+      keyDescription: data.description,
       keyName: data.name,
       keyTags: data.tags,
       screenshotCount: 0,

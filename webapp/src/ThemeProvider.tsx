@@ -151,6 +151,8 @@ const getTheme = (mode: PaletteMode) => {
       topBanner: c.topBanner,
       quickStart: c.quickStart,
       import: c.import,
+      exampleBanner: c.exampleBanner,
+      tipsBanner: c.tipsBanner,
     },
     mixins: {
       toolbar: {

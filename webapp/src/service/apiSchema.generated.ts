@@ -185,6 +185,9 @@ export interface paths {
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
+  "/v2/projects/{projectId}/languages/{languageId}/ai-prompt-customization": {
+    put: operations["setLanguagePromptCustomization"];
+  };
   "/v2/projects/{projectId}/keys/{keyId}/auto-translate": {
     /**
      * Uses enabled auto-translation methods.
@@ -197,6 +200,10 @@ export interface paths {
   "/v2/projects/{projectId}/avatar": {
     put: operations["uploadAvatar_1"];
     delete: operations["removeAvatar_1"];
+  };
+  "/v2/projects/{projectId}/ai-prompt-customization": {
+    get: operations["getPromptProjectCustomization"];
+    put: operations["setPromptProjectCustomization"];
   };
   "/v2/pats/{id}": {
     get: operations["get_13"];
@@ -562,6 +569,9 @@ export interface paths {
   "/v2/projects/{projectId}/stats": {
     get: operations["getProjectStats"];
   };
+  "/v2/projects/{projectId}/language-ai-prompt-customizations": {
+    get: operations["getLanguagePromptCustomizations"];
+  };
   "/v2/projects/{projectId}/invitations": {
     get: operations["getProjectInvitations"];
   };
@@ -737,16 +747,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
        * @deprecated
        * @description Deprecated (use translateLanguageIds).
        *
@@ -755,10 +755,20 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1077,6 +1087,8 @@ export interface components {
       screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
       /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
       relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
+      /** @description Description of the key. It's also used as a context for Tolgee AI translator */
+      description?: string;
     };
     KeyInScreenshotPositionDto: {
       /** Format: int32 */
@@ -1136,6 +1148,11 @@ export interface components {
        * @example homepage
        */
       namespace?: string;
+      /**
+       * @description Description of key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
       /**
        * @description Translations object containing values updated in this request
        * @example [object Object]
@@ -1205,6 +1222,11 @@ export interface components {
     EditKeyDto: {
       name: string;
       namespace?: string;
+      /**
+       * @description Description of the key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
     };
     KeyModel: {
       /**
@@ -1222,6 +1244,11 @@ export interface components {
        * @example homepage
        */
       namespace?: string;
+      /**
+       * @description Description of key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
     };
     ProjectInviteUserDto: {
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
@@ -1469,7 +1496,7 @@ export interface components {
         [key: string]: components["schemas"]["TranslationModel"];
       };
     };
-    LanguageDto: {
+    LanguageRequest: {
       /**
        * @description Language name in english
        * @example Czech
@@ -1490,6 +1517,39 @@ export interface components {
        * @example 🇨🇿
        */
       flagEmoji?: string;
+    };
+    SetLanguagePromptCustomizationRequest: {
+      /**
+       * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
+       * @example For arabic language, we are super formal. Always use these translations:
+       * Paper -> ورقة
+       * Office -> مكتب
+       */
+      description?: string;
+    };
+    LanguageAiPromptCustomizationModel: {
+      /**
+       * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
+       * @example For arabic language, we are super formal. Always use these translations:
+       * Paper -> ورقة
+       * Office -> مكتب
+       */
+      description?: string;
+      language: components["schemas"]["LanguageModel"];
+    };
+    SetProjectPromptCustomizationRequest: {
+      /**
+       * @description The project description used in the  prompt that helps AI translator to understand the context of your project.
+       * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
+       */
+      description?: string;
+    };
+    ProjectAiPromptCustomizationModel: {
+      /**
+       * @description The project description used in the  prompt that helps AI translator to understand the context of your project.
+       * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
+       */
+      description?: string;
     };
     UpdatePatDto: {
       /** @description New description of the PAT */
@@ -1520,7 +1580,6 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -1529,6 +1588,7 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1596,6 +1656,7 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -1664,17 +1725,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
-      description: string;
+      userFullName?: string;
       username?: string;
-      scopes: string[];
-      /** Format: int64 */
-      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      description: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1694,6 +1755,9 @@ export interface components {
     Metadata: {
       examples: components["schemas"]["ExampleItem"][];
       closeItems: components["schemas"]["ExampleItem"][];
+      keyDescription?: string;
+      projectDescription?: string;
+      languageDescription?: string;
     };
     TolgeeTranslateParams: {
       text: string;
@@ -1763,6 +1827,7 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -1854,7 +1919,7 @@ export interface components {
     };
     CreateProjectDTO: {
       name: string;
-      languages: components["schemas"]["LanguageDto"][];
+      languages: components["schemas"]["LanguageRequest"][];
       /** @description Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
       slug?: string;
       /**
@@ -1935,6 +2000,11 @@ export interface components {
       /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       /**
+       * @description Description of key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
+      /**
        * @description Object mapping language tag to translation
        * @example [object Object]
        */
@@ -1958,6 +2028,11 @@ export interface components {
       screenshots?: components["schemas"]["KeyScreenshotDto"][];
       /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
       relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
+      /**
+       * @description Description of the key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
     };
     StorageTestResult: {
       success: boolean;
@@ -2146,7 +2221,9 @@ export interface components {
         | "LICENSE_KEY_NOT_PROVIDED"
         | "SUBSCRIPTION_ALREADY_CANCELED"
         | "USER_IS_SUBSCRIBED_TO_PAID_PLAN"
-        | "CANNOT_CREATE_FREE_PLAN_WITHOUT_FIXED_TYPE";
+        | "CANNOT_CREATE_FREE_PLAN_WITHOUT_FIXED_TYPE"
+        | "CANNOT_MODIFY_PLAN_FREE_STATUS"
+        | "KEY_ID_NOT_PROVIDED";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2342,7 +2419,7 @@ export interface components {
        * Format: int64
        * @description Key Id to get results for. Use when key is stored already.
        */
-      keyId: number;
+      keyId?: number;
       /** Format: int64 */
       targetLanguageId: number;
       /** @description Text value of base translation. Useful, when base translation is not stored yet. */
@@ -2556,19 +2633,20 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       /** @example btforg */
@@ -2682,18 +2760,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       translation?: string;
+      baseTranslation?: string;
       namespace?: string;
+      description?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       translation?: string;
+      baseTranslation?: string;
       namespace?: string;
+      description?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2986,6 +3066,11 @@ export interface components {
        * @example homepage
        */
       keyNamespace?: string;
+      /**
+       * @description The namespace of the key
+       * @example homepage
+       */
+      keyDescription?: string;
       /** @description Tags of key */
       keyTags: components["schemas"]["TagModel"][];
       /**
@@ -3130,6 +3215,11 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    CollectionModelLanguageAiPromptCustomizationModel: {
+      _embedded?: {
+        promptCustomizations?: components["schemas"]["LanguageAiPromptCustomizationModel"][];
+      };
+    };
     CollectionModelProjectInvitationModel: {
       _embedded?: {
         invitations?: components["schemas"]["ProjectInvitationModel"][];
@@ -3193,7 +3283,6 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -3202,6 +3291,7 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3319,17 +3409,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
-      description: string;
+      userFullName?: string;
       username?: string;
-      scopes: string[];
-      /** Format: int64 */
-      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      description: string;
+      scopes: string[];
     };
     ApiKeyPermissionsModel: {
       /**
@@ -5414,7 +5504,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LanguageDto"];
+        "application/json": components["schemas"]["LanguageRequest"];
       };
     };
   };
@@ -5439,6 +5529,39 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  setLanguagePromptCustomization: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLanguagePromptCustomizationRequest"];
       };
     };
   };
@@ -5540,6 +5663,65 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  getPromptProjectCustomization: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ProjectAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setPromptProjectCustomization: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ProjectAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetProjectPromptCustomizationRequest"];
       };
     };
   };
@@ -7828,7 +8010,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LanguageDto"];
+        "application/json": components["schemas"]["LanguageRequest"];
       };
     };
   };
@@ -9386,6 +9568,33 @@ export interface operations {
       200: {
         content: {
           "application/hal+json": components["schemas"]["ProjectStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getLanguagePromptCustomizations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelLanguageAiPromptCustomizationModel"];
         };
       };
       /** Bad Request */

@@ -48,12 +48,15 @@ class CloudTolgeeTranslateApiServiceImpl(
       TolgeeTranslateRequest(
         params.text,
         params.keyName,
+        params.metadata?.keyDescription,
         params.sourceTag,
         params.targetTag,
         examples,
         closeItems,
         priority = if (params.isBatch) "low" else "high",
         params.formality,
+        params.metadata?.projectDescription,
+        params.metadata?.languageDescription,
       )
     val request = HttpEntity(requestBody, headers)
 
@@ -120,12 +123,15 @@ class CloudTolgeeTranslateApiServiceImpl(
     class TolgeeTranslateRequest(
       val input: String,
       val keyName: String?,
+      val contextDescription: String?,
       val source: String,
       val target: String?,
       val examples: List<TolgeeTranslateExample>?,
       val closeItems: List<TolgeeTranslateExample>?,
       val priority: String = "low",
       val formality: Formality? = null,
+      val projectDescription: String? = null,
+      val languageNote: String? = null,
     )
 
     class TolgeeTranslateExample(

@@ -1,16 +1,26 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
+import { useQueryClient } from 'react-query';
 
 import { SettingsIconButton } from 'tg.component/common/buttons/SettingsIconButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
-import { MachineTranslation } from './MachineTranslation/MachineTranslation';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
+
 import { LanguageItem } from './LanguageItem';
-import { useConfig } from 'tg.globalContext/helpers';
 import {
   StyledLanguageTable,
   TABLE_CENTERED,
@@ -18,16 +28,13 @@ import {
   TABLE_LAST_CELL,
   TABLE_TOP_ROW,
 } from './tableStyles';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
-import { useQueryClient } from 'react-query';
+import { Add } from '@mui/icons-material';
 
-export const ProjectSettingsLanguages = () => {
+export const ProjectLanguages = () => {
   const queryClient = useQueryClient();
   const project = useProject();
   const { t } = useTranslate();
-  const config = useConfig();
+  const [addLanguageOpen, setAddLanguageOpen] = useState(false);
   const { satisfiesPermission } = useProjectPermissions();
 
   const canEditLanguages = satisfiesPermission('languages.edit');
@@ -41,10 +48,6 @@ export const ProjectSettingsLanguages = () => {
     },
   });
 
-  const mtEnabled = Object.values(
-    config?.machineTranslationServices.services
-  ).some(({ enabled }) => enabled);
-
   return (
     <Box mb={6}>
       <QuickStartHighlight
@@ -54,24 +57,28 @@ export const ProjectSettingsLanguages = () => {
         offset={10}
       >
         <Box>
-          {canEditLanguages && (
-            <>
-              <Box mt={4}>
-                <Typography variant="h5">
-                  <T keyName="create_language_title" />
-                </Typography>
-              </Box>
-              <Box mb={2}>
-                <CreateSingleLanguage
-                  autoFocus={false}
-                  onCancel={() => {}}
-                  onCreated={() => {
-                    invalidateUrlPrefix(queryClient, '/v2/project');
-                  }}
-                />
-              </Box>
-            </>
-          )}
+          <Box
+            mt={4}
+            mb={3}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h5">
+              <T keyName="project_languages_title" />
+            </Typography>
+            {canEditLanguages && (
+              <Button
+                color="primary"
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setAddLanguageOpen(true)}
+              >
+                {t('project_languages_add_button')}
+              </Button>
+            )}
+          </Box>
+
           <StyledLanguageTable
             style={{ gridTemplateColumns: '1fr auto auto' }}
             data-cy="project-settings-languages"
@@ -118,23 +125,21 @@ export const ProjectSettingsLanguages = () => {
           </StyledLanguageTable>
         </Box>
       </QuickStartHighlight>
-
-      {mtEnabled && (
-        <QuickStartHighlight
-          itemKey="machine_translation"
-          message={t('quick_start_item_machine_translation_hint')}
-          borderRadius="5px"
-          offset={10}
-        >
-          <Box>
-            <Box mt={4} mb={2}>
-              <Typography variant="h5">
-                <T keyName="machine_translation_title" />
-              </Typography>
-            </Box>
-            <MachineTranslation />
-          </Box>
-        </QuickStartHighlight>
+      {addLanguageOpen && (
+        <Dialog open fullWidth onClose={() => setAddLanguageOpen(false)}>
+          <DialogTitle>{t('create_language_title')}</DialogTitle>
+          <DialogContent
+            sx={{ minHeight: 75, display: 'grid', alignContent: 'center' }}
+          >
+            <CreateSingleLanguage
+              autoFocus={false}
+              onCancel={() => {}}
+              onCreated={() => {
+                invalidateUrlPrefix(queryClient, '/v2/project');
+              }}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </Box>
   );

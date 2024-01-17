@@ -17,6 +17,9 @@ import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
 import { useTranslationTools } from '../TranslationTools/useTranslationTools';
+import { RequiredField } from 'tg.component/common/form/RequiredField';
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
+import { LabelHint } from 'tg.component/common/LabelHint';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -28,7 +31,7 @@ const StyledContainer = styled('div')`
 
 const StyledKeyNsContainer = styled('div')`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 300px;
   gap: 0px 16px;
   @media (max-width: 800px) {
     grid-template-columns: 1fr;
@@ -120,7 +123,9 @@ export const FormBody: React.FC<Props> = ({
               return (
                 <div>
                   <FieldLabel>
-                    <T keyName="translation_single_label_key" />
+                    <RequiredField>
+                      <T keyName="translation_single_label_key" />
+                    </RequiredField>
                   </FieldLabel>
                   <EditorWrapper>
                     <StyledEdtorWrapper data-cy="translation-create-key-input">
@@ -150,7 +155,9 @@ export const FormBody: React.FC<Props> = ({
               return (
                 <div>
                   <FieldLabel>
-                    <T keyName="translation_single_label_namespace" />
+                    <LabelHint title={t('translation_single_namespace_hint')}>
+                      <T keyName="translation_single_label_namespace" />
+                    </LabelHint>
                   </FieldLabel>
                   <StyledEdtorWrapper data-cy="translation-create-namespace-input">
                     <NamespaceSelector
@@ -165,6 +172,34 @@ export const FormBody: React.FC<Props> = ({
             }}
           </FastField>
         </StyledKeyNsContainer>
+
+        <FastField name={`description`}>
+          {({ field, form }) => (
+            <div>
+              <FieldLabel>
+                <LabelHint title={t('translation_single_description_hint')}>
+                  <T keyName="translation_single_label_description" />
+                </LabelHint>
+              </FieldLabel>
+              <EditorWrapper>
+                <StyledEdtorWrapper data-cy="translation-create-description-input">
+                  <Editor
+                    plaintext
+                    value={field.value}
+                    onChange={(val) => {
+                      form.setFieldValue(field.name, val);
+                    }}
+                    onSave={() => form.handleSubmit()}
+                    onBlur={() => form.setFieldTouched(field.name, true)}
+                    minHeight={50}
+                    scrollMargins={{ bottom: 150 }}
+                    autoScrollIntoView
+                  />
+                </StyledEdtorWrapper>
+              </EditorWrapper>
+            </div>
+          )}
+        </FastField>
 
         <FieldArray
           name="tags"
@@ -200,11 +235,19 @@ export const FormBody: React.FC<Props> = ({
             </FastField>
           )}
         />
+
+        <Box pt={2} />
+
         {languages.map((lang, i) => (
           <FastField key={lang.tag} name={`translations.${lang.tag}`}>
             {({ field, form, meta }) => (
               <div key={lang.tag}>
-                <FieldLabel>{lang.name}</FieldLabel>
+                <FieldLabel>
+                  <Box display="flex" gap={0.5}>
+                    <CircledLanguageIcon flag={lang.flagEmoji} size={16} />
+                    {lang.name}
+                  </Box>
+                </FieldLabel>
                 <EditorWrapper>
                   <StyledEdtorWrapper data-cy="translation-create-translation-input">
                     <Editor

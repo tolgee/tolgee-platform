@@ -14,7 +14,8 @@ export const LanguageModifyFields: FC<{
   preferredEmojis?: string[];
 }> = (props) => {
   const [tagValid, setTagValid] = useState(true);
-  const { values } = useFormikContext<components['schemas']['LanguageDto']>();
+  const { values } =
+    useFormikContext<components['schemas']['LanguageRequest']>();
 
   const validateTag = () => {
     const tagValue = (values as any)['tag'];

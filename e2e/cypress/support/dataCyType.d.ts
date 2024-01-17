@@ -248,6 +248,9 @@ declare namespace DataCy {
         "languages-create-customize-button" |
         "languages-create-submit-button" |
         "languages-flag-selector-open-button" |
+        "languages-menu-ai-prompt-customization" |
+        "languages-menu-machine-translation" |
+        "languages-menu-project-languages" |
         "languages-modify-apply-button" |
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
@@ -255,7 +258,6 @@ declare namespace DataCy {
         "machine-translations-settings-language-enabled-service" |
         "machine-translations-settings-language-options" |
         "machine-translations-settings-language-primary-service" |
-        "machine-translations-settings-toggle" |
         "mfa-disable-button" |
         "mfa-disable-dialog" |
         "mfa-disable-dialog-content" |
@@ -445,6 +447,7 @@ declare namespace DataCy {
         "top-banner-content" |
         "top-banner-dismiss-button" |
         "transfer-project-apply-button" |
+        "translation-create-description-input" |
         "translation-create-key-input" |
         "translation-create-namespace-input" |
         "translation-create-translation-input" |
