@@ -293,8 +293,9 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `regenerate works`() {
-    val oldKey = testData.expiredKey.key
+  fun `regenerate works on expired key`() {
+    val oldKeyHash = testData.expiredKey.keyHash
+
     val expiresAt = Date().time + 10000
     performAuthPut(
       "/v2/api-keys/${testData.expiredKey.id}/regenerate",
@@ -306,6 +307,28 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       node("expiresAt").isEqualTo(expiresAt)
     }
 
-    apiKeyService.get(testData.expiredKey.id).key.assert.isNotEqualTo(oldKey)
+    val key = apiKeyService.get(testData.expiredKey.id)
+    key.key.assert.isNull()
+    key.keyHash.assert.isNotEqualTo(oldKeyHash)
+  }
+
+  @Test
+  fun `regenerate works (never expiring key)`() {
+    val oldKeyHash = testData.usersKey.keyHash
+
+    testData.usersKey.expiresAt.assert.isNull()
+
+    performAuthPut(
+      "/v2/api-keys/${testData.usersKey.id}/regenerate",
+      mapOf(
+        "expiresAt" to null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("key").isString.startsWith("tgpak_").hasSizeGreaterThan(20)
+    }
+
+    val key = apiKeyService.get(testData.usersKey.id)
+    key.key.assert.isNull()
+    key.keyHash.assert.isNotEqualTo(oldKeyHash)
   }
 }

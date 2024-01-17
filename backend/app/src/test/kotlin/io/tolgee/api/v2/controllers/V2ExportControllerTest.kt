@@ -19,6 +19,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addDays
+import io.tolgee.util.addSeconds
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -80,14 +81,17 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it reports business event once in a day`() {
     retryingOnCommonIssues {
+      clearCaches()
       initBaseData()
+      Mockito.reset(postHog)
       try {
+        currentDateProvider.forcedDate = currentDateProvider.date
         performExport()
         performExport()
         waitForNotThrowing(pollTime = 50, timeout = 3000) {
           verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
         }
-        setForcedDate(currentDateProvider.date.addDays(1))
+        setForcedDate(currentDateProvider.date.addDays(1).addSeconds(1))
         performExport()
         waitForNotThrowing(pollTime = 50, timeout = 3000) {
           verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())

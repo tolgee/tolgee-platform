@@ -1,13 +1,13 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { assertTooltip, gcy } from '../../common/shared';
-import { projectListdData } from '../../common/apiCalls/testData/testData';
+import { projectListData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
 describe('Projects Dashboard', () => {
   beforeEach(() => {
-    projectListdData.clean();
-    projectListdData.generate();
+    projectListData.clean();
+    projectListData.generate();
     login('projectListDashboardUser', 'admin');
     cy.visit(`${HOST}`);
   });
@@ -46,7 +46,7 @@ describe('Projects Dashboard', () => {
   });
 
   afterEach(() => {
-    projectListdData.clean();
+    projectListData.clean();
   });
 });
 

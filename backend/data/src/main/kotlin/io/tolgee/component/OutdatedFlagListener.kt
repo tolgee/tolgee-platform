@@ -1,15 +1,12 @@
 package io.tolgee.component
 
-import io.tolgee.configuration.TransactionScopeConfig
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.service.translation.TranslationService
-import org.springframework.context.annotation.Scope
 import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
 @Component
-@Scope(TransactionScopeConfig.SCOPE_TRANSACTION)
 class OutdatedFlagListener(
   private val translationService: TranslationService,
 ) {

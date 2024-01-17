@@ -205,6 +205,7 @@ When null, resulting file will be a flat key-value object.
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
+  @Transactional
   fun createOrUpdateTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,

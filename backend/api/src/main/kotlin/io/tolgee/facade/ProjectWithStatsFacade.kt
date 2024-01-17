@@ -40,16 +40,15 @@ class ProjectWithStatsFacade(
       projects.content.map { projectWithLanguagesView ->
         val projectTotals = totals[projectWithLanguagesView.id]
         val baseLanguage = projectWithLanguagesView.baseLanguage
-        val projectLanguageStats = languageStats[projectWithLanguagesView.id]
+        val projectLanguageStats =
+          languageStats[projectWithLanguagesView.id]
 
         var stateTotals: ProjectStatsService.ProjectStateTotals? = null
         if (baseLanguage != null && projectLanguageStats != null) {
           stateTotals =
             projectStatsService.computeProjectTotals(
               baseLanguage,
-              projectLanguageStats
-                .sortedBy { it.language.name }
-                .sortedBy { it.language.id != baseLanguage.id },
+              projectLanguageStats,
             )
         }
 
@@ -73,10 +72,16 @@ class ProjectWithStatsFacade(
                 TranslationState.UNTRANSLATED to untranslatedPercent,
               ),
           )
+
+        val projectLanguages =
+          languages[projectWithLanguagesView.id]
+            ?.sortedBy { it.language.name }
+            ?.sortedBy { it.language.id != baseLanguage?.id } ?: listOf()
+
         ProjectWithStatsView(
           view = projectWithLanguagesView,
           stats = projectStatistics,
-          languages = languages[projectWithLanguagesView.id] ?: listOf(),
+          languages = projectLanguages,
         )
       }
     val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
