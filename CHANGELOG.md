@@ -1,3 +1,10 @@
+## [3.45.6](https://github.com/tolgee/tolgee-platform/compare/v3.45.5...v3.45.6) (2024-01-17)
+
+
+### Bug Fixes
+
+* signup view broken layout ([#2081](https://github.com/tolgee/tolgee-platform/issues/2081)) ([9fb05a6](https://github.com/tolgee/tolgee-platform/commit/9fb05a6b6ebd62f26d3419f261e72478f001a7bb))
+
 ## [3.45.5](https://github.com/tolgee/tolgee-platform/compare/v3.45.4...v3.45.5) (2024-01-16)
 
 
