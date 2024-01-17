@@ -1,6 +1,6 @@
 package io.tolgee.model
 
-import io.tolgee.model.enums.Announcement
+import io.tolgee.model.enums.announcement.Announcement
 import java.io.Serializable
 
 data class DismissedAnnouncementId(
