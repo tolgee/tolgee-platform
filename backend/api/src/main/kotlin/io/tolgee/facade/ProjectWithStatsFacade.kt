@@ -72,8 +72,8 @@ class ProjectWithStatsFacade(
 
         val projectLanguages =
           languages[projectWithLanguagesView.id]
-            ?.sortedBy { it.language.name }
-            ?.sortedBy { it.language.id != baseLanguage?.id } ?: listOf()
+            ?.sortedBy { it.name }
+            ?.sortedBy { it.id != baseLanguage?.id } ?: listOf()
 
         ProjectWithStatsView(
           view = projectWithLanguagesView,

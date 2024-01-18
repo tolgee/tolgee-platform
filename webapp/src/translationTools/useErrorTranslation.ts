@@ -1,7 +1,7 @@
-import {useTranslate} from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 
 export function useErrorTranslation() {
-  const {t} = useTranslate();
+  const { t } = useTranslate();
 
   return (code: string) => {
     switch (code.toLocaleLowerCase()) {
