@@ -1,3 +1,10 @@
+## [3.45.9](https://github.com/tolgee/tolgee-platform/compare/v3.45.8...v3.45.9) (2024-01-18)
+
+
+### Bug Fixes
+
+* New pricing announcement ([#2091](https://github.com/tolgee/tolgee-platform/issues/2091)) ([d7fe539](https://github.com/tolgee/tolgee-platform/commit/d7fe5398bb181b08da5db895615242543717fd9d))
+
 ## [3.45.8](https://github.com/tolgee/tolgee-platform/compare/v3.45.7...v3.45.8) (2024-01-17)
 
 
