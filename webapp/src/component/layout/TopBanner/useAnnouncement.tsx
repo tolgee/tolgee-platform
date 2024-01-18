@@ -47,7 +47,7 @@ export function useAnnouncement() {
         return (
           <Announcement
             content={<T keyName="announcement_new_pricing" />}
-            link="https://tolgee.io/blog/new-pricing"
+            link="https://tolgee.io/blog/new-pricing-2024-01"
           />
         );
 
