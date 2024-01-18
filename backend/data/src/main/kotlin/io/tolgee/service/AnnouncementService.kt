@@ -3,7 +3,7 @@ package io.tolgee.service
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.model.DismissedAnnouncement
-import io.tolgee.model.enums.Announcement
+import io.tolgee.model.enums.announcement.Announcement
 import io.tolgee.repository.AnnouncementRepository
 import io.tolgee.service.security.UserAccountService
 import org.springframework.cache.annotation.CacheEvict

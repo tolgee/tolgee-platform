@@ -1,6 +1,6 @@
 package io.tolgee.dtos.response
 
-import io.tolgee.model.enums.Announcement
+import io.tolgee.model.enums.announcement.Announcement
 
 class AnnouncementDto(
   val type: Announcement,

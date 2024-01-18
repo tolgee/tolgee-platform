@@ -43,6 +43,14 @@ export function useAnnouncement() {
             }
           />
         );
+      case 'NEW_PRICING':
+        return (
+          <Announcement
+            content={<T keyName="announcement_new_pricing" />}
+            link="https://tolgee.io/blog/new-pricing-2024-01"
+          />
+        );
+
       default:
         assertUnreachable(value);
     }
