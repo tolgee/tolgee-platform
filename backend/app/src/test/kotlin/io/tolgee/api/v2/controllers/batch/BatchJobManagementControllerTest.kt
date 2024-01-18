@@ -113,50 +113,52 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @Test
   @ProjectJWTAuthTestMethod
   fun `cancels a job`() {
-    val keys = testData.addTranslationOperationData(100)
-    saveAndPrepare()
+    finallyDump {
+      val keys = testData.addTranslationOperationData(100)
+      saveAndPrepare()
 
-    val keyIds = keys.map { it.id }.toList()
+      val keyIds = keys.map { it.id }.toList()
 
-    val count = AtomicInteger(0)
+      val count = AtomicInteger(0)
 
-    doAnswer {
-      if (count.incrementAndGet() > 5) {
-        while (true) {
-          val context = it.arguments[2] as CoroutineContext
-          context.ensureActive()
-          Thread.sleep(10)
+      doAnswer {
+        if (count.incrementAndGet() > 5) {
+          while (true) {
+            val context = it.arguments[2] as CoroutineContext
+            context.ensureActive()
+            Thread.sleep(10)
+          }
         }
-      }
-      it.callRealMethod()
-    }.whenever(machineTranslationChunkProcessor).process(any(), any(), any(), any())
+        it.callRealMethod()
+      }.whenever(machineTranslationChunkProcessor).process(any(), any(), any(), any())
 
-    performProjectAuthPost(
-      "start-batch-job/machine-translate",
-      mapOf(
-        "keyIds" to keyIds,
-        "targetLanguageIds" to
-          listOf(
-            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
-          ),
-      ),
-    ).andIsOk
+      performProjectAuthPost(
+        "start-batch-job/machine-translate",
+        mapOf(
+          "keyIds" to keyIds,
+          "targetLanguageIds" to
+            listOf(
+              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+            ),
+        ),
+      ).andIsOk
 
-    Thread.sleep(500)
+      Thread.sleep(500)
 
-    val job = getSingleJob()
-    performProjectAuthPut("batch-jobs/${job.id}/cancel")
-      .andIsOk
+      val job = getSingleJob()
+      performProjectAuthPut("batch-jobs/${job.id}/cancel")
+        .andIsOk
 
-    waitForNotThrowing(pollTime = 1000) {
-      executeInNewTransaction {
-        getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-        verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
+      waitForNotThrowing(pollTime = 1000) {
+        executeInNewTransaction {
+          getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+          verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
 
-        // assert activity stored
-        entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-          .setParameter("id", job.id).resultList
-          .assert.hasSize(1)
+          // assert activity stored
+          entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+            .setParameter("id", job.id).resultList
+            .assert.hasSize(1)
+        }
       }
     }
   }

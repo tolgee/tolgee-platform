@@ -245,7 +245,9 @@ class KeyComplexEditHelper(
     areTranslationsModified = !modifiedTranslations.isNullOrEmpty()
     areStatesModified = !modifiedStates.isNullOrEmpty()
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
-    isKeyModified = key.name != dto.name || getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace)
+    isKeyModified = key.name != dto.name ||
+      getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace) ||
+      key.keyMeta?.description != dto.description
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
     isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()

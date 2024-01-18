@@ -35,7 +35,7 @@ data class ComplexEditKeyDto(
   val screenshotUploadedImageIds: List<Long>? = null,
   val screenshotsToAdd: List<KeyScreenshotDto>? = null,
   override var relatedKeysInOrder: MutableList<RelatedKeyDto>? = null,
-  @Size(max = 2000)
+  @field:Size(max = 2000)
   @Schema(description = "Description of the key. It's also used as a context for Tolgee AI translator")
   val description: String? = null,
 ) : WithRelatedKeysInOrder {

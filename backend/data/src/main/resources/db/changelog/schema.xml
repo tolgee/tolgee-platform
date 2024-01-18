@@ -3041,12 +3041,12 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1704970433633-1">
         <addColumn tableName="language">
-            <column name="ai_translator_prompt_description" type="varchar(255)"/>
+            <column name="ai_translator_prompt_description" type="text"/>
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1704970433633-2">
         <addColumn tableName="project">
-            <column name="ai_translator_prompt_description" type="varchar(255)"/>
+            <column name="ai_translator_prompt_description" type="text"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

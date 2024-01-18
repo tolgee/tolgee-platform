@@ -12,6 +12,6 @@ class SetProjectPromptCustomizationRequest(
       "We are Dunder Mifflin, a paper company. We sell paper. " +
         "This is an project of translations for out paper selling app.",
   )
-  @Size(max = 5000)
+  @Size(max = 2000)
   var description: String? = null,
 )

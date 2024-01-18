@@ -73,6 +73,12 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         node("name").isEqualTo("super_key")
         node("description").isEqualTo("description")
       }
+
+    executeInNewTransaction {
+      keyService.find(project.id, "super_key", null)!!
+        .keyMeta!!
+        .description.assert.isEqualTo("description")
+    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -80,6 +86,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `validates description`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", description = "a".repeat(2001)))
       .andIsBadRequest
+    performProjectAuthPost("keys", CreateKeyDto(name = "super_key", description = "a".repeat(1999)))
+      .andIsCreated
   }
 
   @ProjectJWTAuthTestMethod

@@ -93,8 +93,9 @@ class Language : StandardAuditModel(), ILanguage {
   @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
   var stats: LanguageStats? = null
 
-  @field:Size(max = 5000)
+  @field:Size(max = 2000)
   @ActivityLoggedProp
+  @Column(columnDefinition = "text")
   override var aiTranslatorPromptDescription: String? = null
 
   fun updateByDTO(dto: LanguageRequest) {

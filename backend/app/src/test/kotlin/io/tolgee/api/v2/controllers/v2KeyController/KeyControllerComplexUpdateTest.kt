@@ -8,6 +8,7 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -19,6 +20,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.generateImage
@@ -394,5 +396,35 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
         assertThat(position.height).isEqualTo(212)
       }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `complex edit updates description only`() {
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.keyWithReferences.name,
+        description = "Changed!",
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      keyService.get(testData.keyWithReferences.id).let {
+        assertThat(it.keyMeta!!.description).isEqualTo("Changed!")
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `validates description length`() {
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.keyWithReferences.name,
+        description = "a".repeat(2001),
+      ),
+    ).andIsBadRequest
   }
 }
