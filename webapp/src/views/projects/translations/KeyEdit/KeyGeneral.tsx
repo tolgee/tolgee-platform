@@ -1,4 +1,4 @@
-import { styled, useTheme } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 
@@ -49,7 +49,7 @@ export const KeyGeneral = () => {
           <FieldLabel>
             <RequiredField>{t('translations_key_edit_label')}</RequiredField>
           </FieldLabel>
-          <EditorWrapper>
+          <EditorWrapper data-cy="translations-key-edit-key-field">
             <Editor
               autofocus
               value={values.name}
@@ -86,7 +86,7 @@ export const KeyGeneral = () => {
             {t('translations_key_edit_label_description')}
           </LabelHint>
         </FieldLabel>
-        <EditorWrapper>
+        <EditorWrapper data-cy="translations-key-edit-description-field">
           <Editor
             value={values.description || ''}
             onChange={(val) => setFieldValue('description', val)}
