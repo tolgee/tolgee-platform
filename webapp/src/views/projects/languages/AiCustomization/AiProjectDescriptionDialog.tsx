@@ -62,7 +62,7 @@ export const AiProjectDescriptionDialog = ({
     );
   }
 
-  const isTooLong = inputValue?.length > 5000;
+  const isTooLong = inputValue?.length > 2000;
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
