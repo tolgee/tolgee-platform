@@ -95,6 +95,7 @@ export const KeyGeneral = () => {
             minHeight={50}
           />
         </EditorWrapper>
+        <FieldError error={errors.description} />
       </StyledSection>
 
       <StyledSection>
