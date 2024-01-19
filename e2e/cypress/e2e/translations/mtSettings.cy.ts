@@ -25,7 +25,7 @@ describe('Machine translation settings', () => {
   });
 
   it('will update default settings', { retries: 5 }, () => {
-    cy.gcy('machine-translations-settings-language-options').click();
+    cy.gcy('machine-translations-settings-language-options').first().click();
     getEnableCheckbox('GOOGLE').click();
     getPrimaryRadio('AWS').click();
     cy.gcy('mt-language-dialog-auto-for-import').click();
@@ -56,7 +56,6 @@ describe('Machine translation settings', () => {
   });
 
   it('will update language specific settings', { retries: 5 }, () => {
-    cy.gcy('machine-translations-settings-toggle').click();
     gcyAdvanced({
       value: 'machine-translations-settings-language-options',
       language: 'es',
@@ -107,7 +106,7 @@ describe('Machine translation settings', () => {
   });
 
   const visit = () => {
-    cy.visit(`${HOST}/projects/${project.id}/languages`);
+    cy.visit(`${HOST}/projects/${project.id}/languages/mt`);
   };
 
   const openEditor = (text: string) => {

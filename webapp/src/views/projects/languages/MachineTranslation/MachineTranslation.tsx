@@ -28,18 +28,18 @@ export const MachineTranslation = () => {
   }
 
   return (
-    <QuickStartHighlight
-      itemKey="machine_translation"
-      message={t('quick_start_item_machine_translation_hint')}
-      borderRadius="5px"
-      offset={10}
-    >
-      <Box>
-        <Box mt={4} mb={3}>
-          <Typography variant="h5">
-            <T keyName="machine_translation_title" />
-          </Typography>
-        </Box>
+    <Box>
+      <Box mt={4} mb={3}>
+        <Typography variant="h5">
+          <T keyName="machine_translation_title" />
+        </Typography>
+      </Box>
+      <QuickStartHighlight
+        itemKey="machine_translation"
+        message={t('quick_start_item_machine_translation_hint')}
+        borderRadius="5px"
+        offset={10}
+      >
         <StyledContainer>
           <StyledLanguageTable style={{ gridTemplateColumns }}>
             <SettingsTable settings={settings || []} onUpdate={applyUpdate} />
@@ -48,7 +48,7 @@ export const MachineTranslation = () => {
             </StyledLoadingWrapper>
           </StyledLanguageTable>
         </StyledContainer>
-      </Box>
-    </QuickStartHighlight>
+      </QuickStartHighlight>
+    </Box>
   );
 };

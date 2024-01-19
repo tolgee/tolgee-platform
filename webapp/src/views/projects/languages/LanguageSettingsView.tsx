@@ -9,9 +9,14 @@ import { BaseProjectView } from '../BaseProjectView';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageEditDialog } from './LanguageEdit/LanguageEditDialog';
 import { AiCustomization } from './AiCustomization/AiCustomization';
+import { QuickStartHighlightInPortal } from 'tg.component/layout/QuickStartGuide/QuickStartHighlightInPortal';
 
 const StyledTabs = styled(Tabs)`
   margin-bottom: -1px;
+  overflow: visible;
+  & * {
+    overflow: visible;
+  }
 `;
 
 const StyledTabWrapper = styled(Box)`
@@ -66,6 +71,7 @@ export const LanguageSettingsView = () => {
             data-cy="languages-menu-project-languages"
           />
           <Tab
+            id="machine-translation-tab"
             value="mt"
             component={Link}
             to={LINKS.PROJECT_LANGUAGES_MT.build({
@@ -73,6 +79,7 @@ export const LanguageSettingsView = () => {
             })}
             label={t('languages_menu_machine_translation')}
             data-cy="languages-menu-machine-translation"
+            sx={{ overflow: 'visible' }}
           />
           <Tab
             value="ai"
@@ -95,6 +102,12 @@ export const LanguageSettingsView = () => {
       ) : null}
 
       {pageEditLanguage?.isExact && <LanguageEditDialog />}
+      {
+        <QuickStartHighlightInPortal
+          elId="machine-translation-tab"
+          itemKey="machine_translation_tab"
+        />
+      }
     </BaseProjectView>
   );
 };

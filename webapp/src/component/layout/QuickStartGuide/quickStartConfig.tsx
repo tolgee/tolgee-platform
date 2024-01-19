@@ -29,6 +29,7 @@ export const items: ItemType[] = [
         highlightItems: [
           'menu_languages',
           'add_language',
+          'machine_translation_tab',
           'machine_translation',
         ],
       },
