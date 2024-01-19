@@ -92,11 +92,13 @@ describe('Language creation', () => {
 });
 
 const addCustomLanguage = () => {
+  gcy('project-settings-languages-add').click();
   typeToAutocomplete('cs');
   selectInAutocomplete('New custom language');
 };
 
 const prepareCzechLanguage = () => {
+  gcy('project-settings-languages-add').click();
   typeToAutocomplete('cs');
   selectInAutocomplete('čeština');
 };

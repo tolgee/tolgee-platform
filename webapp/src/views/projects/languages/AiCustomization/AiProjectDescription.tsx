@@ -41,12 +41,18 @@ export const AiProjectDescription = ({ description }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
-    <StyledWrapper className={clsx({ empty: !description })}>
+    <StyledWrapper
+      className={clsx({ empty: !description })}
+      data-cy="ai-customization-project-description"
+    >
       {description ? (
         <>
           <Box py="8px">{description}</Box>
           <Box>
-            <IconButton onClick={() => setDialogOpen(true)}>
+            <IconButton
+              onClick={() => setDialogOpen(true)}
+              data-cy="ai-customization-project-description-edit"
+            >
               <Edit />
             </IconButton>
           </Box>
@@ -68,6 +74,7 @@ export const AiProjectDescription = ({ description }: Props) => {
               variant="contained"
               startIcon={<Add />}
               onClick={() => setDialogOpen(true)}
+              data-cy="ai-customization-project-description-add"
             >
               {t('project_ai_prompt_add')}
             </Button>

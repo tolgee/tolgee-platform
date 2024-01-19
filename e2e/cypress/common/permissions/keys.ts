@@ -61,7 +61,7 @@ export function testKeys(info: ProjectInfo) {
   }
 
   if (scopes.includes('keys.create')) {
-    createTranslation('new_test_key');
+    createTranslation({ key: 'new_test_key' });
   }
 
   if (scopes.includes('keys.delete')) {

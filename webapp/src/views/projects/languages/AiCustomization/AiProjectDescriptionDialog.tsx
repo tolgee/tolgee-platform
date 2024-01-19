@@ -79,6 +79,7 @@ export const AiProjectDescriptionDialog = ({
           helperText={
             isTooLong && t('project_ai_prompt_dialog_description_too_long')
           }
+          data-cy="project-ai-prompt-dialog-description-input"
         />
         <AiTips
           tips={[
@@ -95,6 +96,7 @@ export const AiProjectDescriptionDialog = ({
           color="primary"
           variant="contained"
           disabled={isTooLong}
+          data-cy="project-ai-prompt-dialog-save"
         >
           {t('global_form_save')}
         </LoadingButton>

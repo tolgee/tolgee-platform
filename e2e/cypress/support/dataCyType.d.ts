@@ -56,6 +56,11 @@ declare namespace DataCy {
         "administration-user-menu" |
         "administration-user-role-select" |
         "administration-users-list-item" |
+        "ai-customization-project-description" |
+        "ai-customization-project-description-add" |
+        "ai-customization-project-description-edit" |
+        "ai-languages-description" |
+        "ai-languages-description-edit" |
         "api-key-expiry-info" |
         "api-key-list-item" |
         "api-key-list-item-delete-button" |
@@ -240,6 +245,8 @@ declare namespace DataCy {
         "key-edit-tab-advanced" |
         "key-edit-tab-context" |
         "key-edit-tab-general" |
+        "language-ai-prompt-dialog-description-input" |
+        "language-ai-prompt-dialog-save" |
         "language-delete-button" |
         "language-modify-form" |
         "languages-create-autocomplete-field" |
@@ -336,6 +343,8 @@ declare namespace DataCy {
         "permissions-menu-inherited-message" |
         "permissions-menu-reset-to-organization" |
         "permissions-menu-save" |
+        "project-ai-prompt-dialog-description-input" |
+        "project-ai-prompt-dialog-save" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |
         "project-dashboard-base-word-count" |
@@ -387,6 +396,7 @@ declare namespace DataCy {
         "project-settings-delete-button" |
         "project-settings-description" |
         "project-settings-languages" |
+        "project-settings-languages-add" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
         "project-settings-name" |
@@ -479,6 +489,7 @@ declare namespace DataCy {
         "translations-filter-select" |
         "translations-filters-subheader" |
         "translations-history-load-more-button" |
+        "translations-key-cell-description" |
         "translations-key-count" |
         "translations-key-edit-description-field" |
         "translations-key-edit-key-field" |

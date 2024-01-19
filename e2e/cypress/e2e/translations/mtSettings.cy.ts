@@ -49,7 +49,7 @@ describe('Machine translation settings', () => {
       1
     );
     cy.gcy('global-editor').type('{esc}');
-    createTranslation('aaa_key', 'test translation');
+    createTranslation({ key: 'aaa_key', translation: 'test translation' });
     cy.contains('test translation translated with AWS from en to cs').should(
       'be.visible'
     );
@@ -98,7 +98,7 @@ describe('Machine translation settings', () => {
     );
     cy.gcy('global-editor').type('{esc}');
 
-    createTranslation('aaa_key', 'test translation');
+    createTranslation({ key: 'aaa_key', translation: 'test translation' });
     cy.contains(
       'test translation translated with AWS from en to es FORMAL'
     ).should('be.visible');

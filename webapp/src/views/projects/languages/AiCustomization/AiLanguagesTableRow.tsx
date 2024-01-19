@@ -33,9 +33,19 @@ export const AiLanguagesTableRow = ({ language, description }: Props) => {
         <LanguageItem language={language} />
       </div>
 
-      <StyledNote>{description}</StyledNote>
+      <StyledNote
+        data-cy="ai-languages-description"
+        data-cy-language={language.tag}
+      >
+        {description}
+      </StyledNote>
       <StyledAction>
-        <IconButton size="small" onClick={() => setDialogOpen(true)}>
+        <IconButton
+          size="small"
+          onClick={() => setDialogOpen(true)}
+          data-cy="ai-languages-description-edit"
+          data-cy-language={language.tag}
+        >
           {description ? <Edit fontSize="small" /> : <Add fontSize="small" />}
         </IconButton>
       </StyledAction>

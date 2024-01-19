@@ -194,7 +194,7 @@ export const CellKey: React.FC<Props> = ({
             </LimitedHeightText>
           </StyledKey>
           {data.keyDescription && (
-            <StyledDescription role={editEnabled ? 'button' : undefined}>
+            <StyledDescription data-cy="translations-key-cell-description">
               <LimitedHeightText maxLines={5}>
                 {data.keyDescription}
               </LimitedHeightText>

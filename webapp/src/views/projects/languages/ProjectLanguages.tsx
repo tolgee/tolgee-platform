@@ -73,6 +73,7 @@ export const ProjectLanguages = () => {
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => setAddLanguageOpen(true)}
+                data-cy="project-settings-languages-add"
               >
                 {t('project_languages_add_button')}
               </Button>

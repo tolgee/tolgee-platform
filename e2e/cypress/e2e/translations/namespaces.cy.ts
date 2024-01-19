@@ -35,7 +35,7 @@ describe('namespaces in translations', () => {
   });
 
   it('displays <none>', () => {
-    createTranslation('new-key', undefined, undefined, 'new-ns');
+    createTranslation({ key: 'new-key', namespace: 'new-ns' });
     gcy('translations-namespace-banner')
       .contains('new-ns')
       .should('be.visible');

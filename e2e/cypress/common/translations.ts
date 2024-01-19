@@ -27,17 +27,29 @@ export const getCell = (value: string) => {
   return cy.gcy('translations-table-cell').contains(value);
 };
 
-export function createTranslation(
-  testKey: string,
-  translation?: string,
-  tag?: string,
-  namespace?: string
-) {
+type Props = {
+  key: string;
+  translation?: string;
+  tag?: string;
+  namespace?: string;
+  description?: string;
+};
+
+export function createTranslation({
+  key,
+  translation,
+  tag,
+  namespace,
+  description,
+}: Props) {
   waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
-  cy.gcy('translation-create-key-input').type(testKey);
+  cy.gcy('translation-create-key-input').type(key);
   if (namespace) {
     selectNamespace(namespace);
+  }
+  if (description) {
+    cy.gcy('translation-create-description-input').type(description);
   }
   if (tag) {
     cy.gcy('translations-tag-input').type(tag);
