@@ -31,7 +31,10 @@ export const LanguageModifyForm: FC<{
   return (
     <Wrapper>
       <Formik
-        initialValues={props.values}
+        initialValues={{
+          ...props.values,
+          flagEmoji: props.values.flagEmoji || '🏳️',
+        }}
         validationSchema={Validation.LANGUAGE(t)}
         onSubmit={(values) => {
           props.onModified(values);

@@ -5,7 +5,9 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  IconButton,
   Typography,
+  styled,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
@@ -28,14 +30,24 @@ import {
   TABLE_LAST_CELL,
   TABLE_TOP_ROW,
 } from './tableStyles';
-import { Add } from '@mui/icons-material';
+import { Add, Close } from '@mui/icons-material';
+
+const StyledButton = styled(IconButton)`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+`;
 
 export const ProjectLanguages = () => {
   const queryClient = useQueryClient();
   const project = useProject();
   const { t } = useTranslate();
-  const [addLanguageOpen, setAddLanguageOpen] = useState(false);
   const { satisfiesPermission } = useProjectPermissions();
+  const [addLanguageOpen, setAddLanguageOpen] = useState(false);
+
+  function handleClose() {
+    setAddLanguageOpen(false);
+  }
 
   const canEditLanguages = satisfiesPermission('languages.edit');
 
@@ -127,8 +139,11 @@ export const ProjectLanguages = () => {
         </Box>
       </QuickStartHighlight>
       {addLanguageOpen && (
-        <Dialog open fullWidth onClose={() => setAddLanguageOpen(false)}>
+        <Dialog open fullWidth onClose={handleClose}>
           <DialogTitle>{t('create_language_title')}</DialogTitle>
+          <StyledButton onClick={handleClose}>
+            <Close />
+          </StyledButton>
           <DialogContent
             sx={{ minHeight: 75, display: 'grid', alignContent: 'center' }}
           >
@@ -136,6 +151,7 @@ export const ProjectLanguages = () => {
               autoFocus={false}
               onCancel={() => {}}
               onCreated={() => {
+                handleClose();
                 invalidateUrlPrefix(queryClient, '/v2/project');
               }}
             />
