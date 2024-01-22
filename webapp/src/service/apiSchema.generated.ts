@@ -747,6 +747,16 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
        * @deprecated
        * @description Deprecated (use translateLanguageIds).
        *
@@ -755,20 +765,10 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1580,15 +1580,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1728,14 +1728,14 @@ export interface components {
       projectName: string;
       userFullName?: string;
       username?: string;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       projectId: number;
-      description: string;
-      scopes: string[];
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2577,7 +2577,8 @@ export interface components {
         | "FEATURE_BATCH_OPERATIONS"
         | "FEATURE_MT_FORMALITY"
         | "FEATURE_CONTENT_DELIVERY_AND_WEBHOOKS"
-        | "NEW_PRICING";
+        | "NEW_PRICING"
+        | "FEATURE_AI_CUSTOMIZATION";
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -2649,9 +2650,9 @@ export interface components {
       currentUserRole?: "MEMBER" | "OWNER";
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2760,20 +2761,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
       namespace?: string;
       description?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
       namespace?: string;
       description?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3283,15 +3284,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3412,14 +3413,14 @@ export interface components {
       projectName: string;
       userFullName?: string;
       username?: string;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       projectId: number;
-      description: string;
-      scopes: string[];
     };
     ApiKeyPermissionsModel: {
       /**

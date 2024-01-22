@@ -51,6 +51,14 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_AI_CUSTOMIZATION':
+        return (
+          <Announcement
+            content={<T keyName="announcement_feature_ai_customization" />}
+            link="https://tolgee.io/blog/releasing-ai-customizations"
+          />
+        );
+
       default:
         assertUnreachable(value);
     }
