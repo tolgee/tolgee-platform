@@ -1,3 +1,10 @@
+## [3.46.1](https://github.com/tolgee/tolgee-platform/compare/v3.46.0...v3.46.1) (2024-01-22)
+
+
+### Bug Fixes
+
+* Cannot convert Namespace to String ([#2101](https://github.com/tolgee/tolgee-platform/issues/2101)) ([f130bfd](https://github.com/tolgee/tolgee-platform/commit/f130bfd004d1eb82cf2a3fc20b78484ce08da2e4))
+
 # [3.46.0](https://github.com/tolgee/tolgee-platform/compare/v3.45.9...v3.46.0) (2024-01-22)
 
 
