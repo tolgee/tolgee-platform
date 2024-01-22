@@ -5,6 +5,7 @@ import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationService
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.PageRequest
 
@@ -44,32 +45,31 @@ class MetadataProvider(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,
     closeKeyIds: List<Long>,
-    keyId: Long?,
+    excludeKeyId: Long?,
   ): List<ExampleItem> {
-    val translations =
-      this.translationService.findAllByKeyIdsAndLanguageIds(
-        closeKeyIds,
-        languageIds = listOf(sourceLanguage.id, targetLanguage.id),
-      )
-
-    val sourceTranslations = translations.filter { it.language.id == sourceLanguage.id }
-
-    val targetTranslations = translations.filter { it.language.id == targetLanguage.id }
-
-    return sourceTranslations
-      .filter { !it.text.isNullOrEmpty() }
-      .map {
-        ExampleItem(
-          key = it.key.name,
-          source = it.text ?: "",
-          target =
-            if (it.key.id != keyId) {
-              targetTranslations.find { target -> target.key.id == it.key.id }?.text ?: ""
-            } else {
-              ""
-            },
-        )
-      }
+    return entityManager.createQuery(
+      """
+      select new 
+         io.tolgee.component.machineTranslation.metadata.ExampleItem(source.text, target.text, key.name, ns.name) 
+      from Translation source
+      join source.key key on key.id <> :excludeKeyId
+      left join key.namespace ns
+      join key.translations target on target.language.id = :targetLanguageId
+      where source.language.id = :sourceLanguageId 
+          and key.id in :closeKeyIds 
+          and key.id <> :excludeKeyId 
+          and source.text is not null 
+          and source.text <> '' 
+          and target.text is not null 
+          and target.text <> ''
+    """,
+      ExampleItem::class.java,
+    )
+      .setParameter("excludeKeyId", excludeKeyId)
+      .setParameter("targetLanguageId", targetLanguage.id)
+      .setParameter("sourceLanguageId", sourceLanguage.id)
+      .setParameter("closeKeyIds", closeKeyIds)
+      .resultList
   }
 
   private fun getExamples(
@@ -85,7 +85,12 @@ class MetadataProvider(
     ).content
       .filter { it.keyId != keyId }
       .map {
-        ExampleItem(key = it.keyName, source = it.baseTranslationText, target = it.targetTranslationText)
+        ExampleItem(
+          key = it.keyName,
+          keyNamespace = it.keyNamespace,
+          source = it.baseTranslationText,
+          target = it.targetTranslationText,
+        )
       }
   }
 
@@ -95,5 +100,9 @@ class MetadataProvider(
 
   private val translationService: TranslationService by lazy {
     applicationContext.getBean(TranslationService::class.java)
+  }
+
+  private val entityManager: EntityManager by lazy {
+    applicationContext.getBean(EntityManager::class.java)
   }
 }
