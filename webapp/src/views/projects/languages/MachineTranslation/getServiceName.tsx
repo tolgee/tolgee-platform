@@ -12,6 +12,8 @@ export const getServiceName = (service: ServiceType) => {
       return 'Baidu';
     case 'TOLGEE':
       return 'Tolgee';
+    case 'AWS':
+      return 'Amazon Translate';
     default:
       return service;
   }

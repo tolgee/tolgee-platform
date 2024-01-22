@@ -14,6 +14,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.satisfies
+import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -21,8 +22,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.io.File
-import java.util.stream.Collectors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
@@ -36,6 +35,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @AfterAll
   fun after() {
     tolgeeProperties.fileStorageUrl = initialScreenshotUrl
+    (fileStorage as InMemoryFileStorage).clear()
   }
 
   @Test
@@ -47,21 +47,25 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
     performStoreScreenshot(
       project,
       key,
-      info = mapOf(
-        "positions" to listOf(
-          mapOf(
-            "x" to 200, "y" to 100, "width" to 40, "height" to 40
-          )
+      info =
+        mapOf(
+          "positions" to
+            listOf(
+              mapOf(
+                "x" to 200,
+                "y" to 100,
+                "width" to 40,
+                "height" to 40,
+              ),
+            ),
+          "text" to text,
         ),
-        "text" to text
-      )
     ).andPrettyPrint.andIsCreated.andAssertThatJson {
       executeInNewTransaction {
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
         node("filename").isEqualTo(screenshots[0].filename)
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
-        assertThat(file).exists()
+        fileStorage.fileExists("screenshots/" + screenshots[0].filename).assert.isTrue()
         val reference = screenshots[0].keyScreenshotReferences[0]
         reference.originalText.assert.isEqualTo(text)
         reference.positions!![0].x.assert.isEqualTo(200)
@@ -77,11 +81,10 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun `uploads without metadata`() {
     val key = keyService.create(project, CreateKeyDto("test"))
 
-    val text = "I am key"
     performStoreScreenshot(
       project,
       key,
-      info = null
+      info = null,
     ).andIsCreated
   }
 
@@ -99,22 +102,22 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun findAll() {
-    val (key, key2) = executeInNewTransaction {
-      val key = keyService.create(project, CreateKeyDto("test"))
-      val key2 = keyService.create(project, CreateKeyDto("test_2"))
+    val (key, key2) =
+      executeInNewTransaction {
+        val key = keyService.create(project, CreateKeyDto("test"))
+        val key2 = keyService.create(project, CreateKeyDto("test_2"))
 
-      screenshotService.store(screenshotFile, key, null)
-      screenshotService.store(screenshotFile, key, null)
-      screenshotService.store(screenshotFile, key2, null)
+        screenshotService.store(screenshotFile, key, null)
+        screenshotService.store(screenshotFile, key, null)
+        screenshotService.store(screenshotFile, key2, null)
 
-      key to key2
-    }
+        key to key2
+      }
 
     performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
       node("_embedded.screenshots").isArray.hasSize(2)
       node("_embedded.screenshots[0].filename").isString.satisfies {
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + it)
-        assertThat(file.exists()).isTrue()
+        fileStorage.fileExists("screenshots/" + it).assert.isTrue()
       }
     }
 
@@ -128,11 +131,12 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun `returns correct fileUrl when absolute url is set`() {
     tolgeeProperties.fileStorageUrl = "http://hello.com"
 
-    val key = executeInNewTransaction {
-      val key = keyService.create(project, CreateKeyDto("test"))
-      screenshotService.store(screenshotFile, key, null)
-      key
-    }
+    val key =
+      executeInNewTransaction {
+        val key = keyService.create(project, CreateKeyDto("test"))
+        screenshotService.store(screenshotFile, key, null)
+        key
+      }
 
     performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
       node("_embedded.screenshots[0].fileUrl").isString.startsWith("http://hello.com/screenshots")
@@ -142,52 +146,62 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun getScreenshotFile() {
-    val screenshot = executeInNewTransaction {
-      val key = keyService.create(project, CreateKeyDto("test"))
-      screenshotService.store(screenshotFile, key, null)
-    }
-    val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
-    val result = performAuthGet("/screenshots/${screenshot.filename}").andIsOk
-      .andExpect(
-        header().string("Cache-Control", "max-age=365, must-revalidate, no-transform")
-      )
-      .andReturn()
+    val screenshot =
+      executeInNewTransaction {
+        val key = keyService.create(project, CreateKeyDto("test"))
+        screenshotService.store(screenshotFile, key, null)
+      }
+    val result =
+      performAuthGet("/screenshots/${screenshot.filename}").andIsOk
+        .andExpect(
+          header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"),
+        )
+        .andReturn()
     performAuthGet("/screenshots/${screenshot.thumbnailFilename}").andIsOk
-    assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
+    assertThat(result.response.contentAsByteArray).isEqualTo(fileStorage.readFile("screenshots/" + screenshot.filename))
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun delete() {
-    val (key, list) = executeInNewTransaction {
-      val key = keyService.create(project, CreateKeyDto("test"))
+    val (key, list) =
+      executeInNewTransaction {
+        val key = keyService.create(project, CreateKeyDto("test"))
 
-      val list = (1..20).map {
-        screenshotService.store(screenshotFile, key, null)
-      }.toCollection(mutableListOf())
-      key to list
-    }
-    val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
+        val list =
+          (1..20).map {
+            screenshotService.store(screenshotFile, key, null)
+          }.toCollection(mutableListOf())
+        key to list
+      }
+    val chunked = list.chunked(10)
+    val toDelete = chunked[0]
+    val notToDelete = chunked[1]
+
+    val idsToDelete = toDelete.map { it.id.toString() }.joinToString(",")
 
     performProjectAuthDelete("/keys/${key.id}/screenshots/$idsToDelete", null).andExpect(status().isOk)
 
     val rest = screenshotService.findAll(key)
-    assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
+    assertThat(rest).hasSize(10).containsExactlyInAnyOrder(*notToDelete.toTypedArray())
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun uploadValidationNoImage() {
     val key = keyService.create(project, CreateKeyDto("test"))
-    val response = performProjectAuthMultipart(
-      "keys/${key.id}/screenshots",
-      listOf(
-        MockMultipartFile(
-          "screenshot", "originalShot.png", "not_valid",
-          "test".toByteArray()
-        )
-      ),
-    ).andIsBadRequest.andReturn()
+    val response =
+      performProjectAuthMultipart(
+        "keys/${key.id}/screenshots",
+        listOf(
+          MockMultipartFile(
+            "screenshot",
+            "originalShot.png",
+            "not_valid",
+            "test".toByteArray(),
+          ),
+        ),
+      ).andIsBadRequest.andReturn()
     assertThat(response).error().isCustomValidation.hasMessage("file_not_image")
   }
 }

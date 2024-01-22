@@ -3,10 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { LINKS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
-
-const globalActions = container.resolve(GlobalActions);
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 export const DebugCustomerAccountButton = (props: { userId: number }) => {
   const debugAccount = useApiMutation({

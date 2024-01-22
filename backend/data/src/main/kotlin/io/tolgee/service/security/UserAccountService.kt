@@ -7,7 +7,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
-import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
@@ -27,9 +26,12 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationEventPublisher
@@ -41,7 +43,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class UserAccountService(
@@ -56,7 +57,8 @@ class UserAccountService(
   private val currentDateProvider: CurrentDateProvider,
   @Lazy private val userNotificationService: UserNotificationService,
   @Lazy private val notificationPreferencesService: NotificationPreferencesService,
-) {
+  private val cacheManager: CacheManager,
+) : Logging {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
 
@@ -93,7 +95,7 @@ class UserAccountService(
     }
   }
 
-  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  @Transactional
   fun createUser(userAccount: UserAccount): UserAccount {
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
@@ -102,34 +104,15 @@ class UserAccountService(
   }
 
   @Transactional
-  fun createUser(request: SignUpDto, role: UserAccount.Role = UserAccount.Role.USER): UserAccount {
-    dtoToEntity(request).let {
-      it.role = role
-      this.createUser(it)
-      return it
-    }
-  }
-
-  @Transactional
-  fun createInitialUser(request: SignUpDto): UserAccount {
-    // Check if the account already exists.
-    // This can only be the case on Tolgee 3.x series and should be removed on Tolgee 4.
-    val candidate = findActive(request.email)
-    if (candidate != null) {
-      candidate.isInitialUser = true
-      return save(candidate)
-    }
-
-    dtoToEntity(request).let {
-      it.role = UserAccount.Role.ADMIN
-      it.isInitialUser = true
-      it.passwordChanged = false
-      this.createUser(it)
-
-      // TODO: remove this on Tolgee 4 release
-      transferLegacyNoAuthUser()
-      return it
-    }
+  fun createUser(
+    userAccount: UserAccount,
+    rawPassword: String,
+  ): UserAccount {
+    userAccountRepository.saveAndFlush(userAccount)
+    userAccount.password = passwordEncoder.encode(rawPassword)
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    return userAccount
   }
 
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#id")
@@ -143,71 +126,99 @@ class UserAccountService(
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
   @Transactional
   fun delete(userAccount: UserAccount) {
-    userAccount.emailVerification?.let {
+    traceLogMeasureTime("deleteUser") {
+      val toDelete =
+        userAccountRepository.findWithFetchedEmailVerificationAndPermissions(userAccount.id)
+          ?: throw NotFoundException()
+      deleteWithFetchedData(toDelete)
+    }
+  }
+
+  private fun deleteWithFetchedData(toDelete: UserAccount) {
+    toDelete.emailVerification?.let {
       entityManager.remove(it)
     }
-    userAccount.apiKeys?.forEach {
+    toDelete.apiKeys?.forEach {
       entityManager.remove(it)
     }
-    userAccount.pats?.forEach {
+    toDelete.pats?.forEach {
       entityManager.remove(it)
     }
-    userAccount.permissions.forEach {
+    toDelete.permissions.forEach {
       entityManager.remove(it)
     }
-    userAccount.preferences?.let {
+    toDelete.preferences?.let {
       entityManager.remove(it)
     }
-    organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+    organizationService.getAllSingleOwnedByUser(toDelete).forEach {
       it.preferredBy.removeIf { preferences ->
-        preferences.userAccount.id == userAccount.id
+        preferences.userAccount.id == toDelete.id
       }
       organizationService.delete(it)
     }
-    userAccount.organizationRoles.forEach {
+    toDelete.organizationRoles.forEach {
       entityManager.remove(it)
     }
 
     userNotificationService.deleteAllByUserId(userAccount.id)
     notificationPreferencesService.deleteAllByUserId(userAccount.id)
 
-    userAccountRepository.softDeleteUser(userAccount)
+    userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
-  fun dtoToEntity(request: SignUpDto): UserAccount {
-    val encodedPassword = passwordEncoder.encode(request.password!!)
-    return UserAccount(name = request.name, username = request.email, password = encodedPassword)
+  @Transactional
+  fun deleteByUserNames(usernames: List<String>) {
+    val data = userAccountRepository.findActiveWithFetchedDataByUserNames(usernames)
+    data.forEach {
+      deleteWithFetchedData(it)
+      cacheManager.getCache(Caches.USER_ACCOUNTS)?.evict(it.id)
+    }
   }
 
-  fun findByThirdParty(type: String, id: String): Optional<UserAccount> {
+  fun findByThirdParty(
+    type: String,
+    id: String,
+  ): Optional<UserAccount> {
     return userAccountRepository.findThirdByThirdParty(id, type)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun setAccountType(userAccount: UserAccount, accountType: UserAccount.AccountType): UserAccount {
+  fun setAccountType(
+    userAccount: UserAccount,
+    accountType: UserAccount.AccountType,
+  ): UserAccount {
     userAccount.accountType = accountType
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun setResetPasswordCode(userAccount: UserAccount, code: String?): UserAccount {
+  fun setResetPasswordCode(
+    userAccount: UserAccount,
+    code: String?,
+  ): UserAccount {
     userAccount.resetPasswordCode = passwordEncoder.encode(code)
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun setUserPassword(userAccount: UserAccount, password: String?): UserAccount {
+  fun setUserPassword(
+    userAccount: UserAccount,
+    password: String?,
+  ): UserAccount {
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
-  fun isResetCodeValid(userAccount: UserAccount, code: String?): Boolean {
+  fun isResetCodeValid(
+    userAccount: UserAccount,
+    code: String?,
+  ): Boolean {
     return passwordEncoder.matches(code, userAccount.resetPasswordCode)
   }
 
@@ -220,7 +231,10 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun enableMfaTotp(userAccount: UserAccount, key: ByteArray): UserAccount {
+  fun enableMfaTotp(
+    userAccount: UserAccount,
+    key: ByteArray,
+  ): UserAccount {
     userAccount.totpKey = key
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     return userAccountRepository.save(userAccount)
@@ -238,7 +252,10 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun consumeMfaRecoveryCode(userAccount: UserAccount, token: String): UserAccount {
+  fun consumeMfaRecoveryCode(
+    userAccount: UserAccount,
+    token: String,
+  ): UserAccount {
     if (!userAccount.mfaRecoveryCodes.contains(token)) {
       throw AuthenticationException(Message.INVALID_OTP_CODE)
     }
@@ -249,7 +266,10 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun setMfaRecoveryCodes(userAccount: UserAccount, codes: List<String>): UserAccount {
+  fun setMfaRecoveryCodes(
+    userAccount: UserAccount,
+    codes: List<String>,
+  ): UserAccount {
     userAccount.mfaRecoveryCodes = codes
     return userAccountRepository.save(userAccount)
   }
@@ -262,14 +282,17 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
-  fun setAvatar(userAccount: UserAccount, avatar: InputStream) {
+  fun setAvatar(
+    userAccount: UserAccount,
+    avatar: InputStream,
+  ) {
     avatarService.setAvatar(userAccount, avatar)
   }
 
   fun getAllInOrganization(
     organizationId: Long,
     pageable: Pageable,
-    search: String?
+    search: String?,
   ): Page<UserAccountWithOrganizationRoleView> {
     return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
   }
@@ -278,7 +301,7 @@ class UserAccountService(
     projectId: Long,
     pageable: Pageable,
     search: String?,
-    exceptUserId: Long? = null
+    exceptUserId: Long? = null,
   ): Page<UserAccountInProjectView> {
     return userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId)
   }
@@ -287,15 +310,16 @@ class UserAccountService(
     projectId: Long,
     pageable: Pageable,
     search: String?,
-    exceptUserId: Long? = null
+    exceptUserId: Long? = null,
   ): Page<ExtendedUserAccountInProject> {
     val users = getAllInProject(projectId, pageable, search, exceptUserId)
     val organizationBasePermission = organizationService.getProjectOwner(projectId = projectId).basePermission
 
-    val permittedLanguageMap = permissionService.getPermittedTranslateLanguagesForUserIds(
-      users.content.map { it.id },
-      projectId
-    )
+    val permittedLanguageMap =
+      permissionService.getPermittedTranslateLanguagesForUserIds(
+        users.content.map { it.id },
+        projectId,
+      )
     return users.map {
       ExtendedUserAccountInProject(
         id = it.id,
@@ -305,7 +329,7 @@ class UserAccountService(
         directPermission = it.directPermission,
         organizationBasePermission = organizationBasePermission,
         permittedLanguageIds = permittedLanguageMap[it.id],
-        avatarHash = it.avatarHash
+        avatarHash = it.avatarHash,
       )
     }
   }
@@ -317,7 +341,10 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
+  fun update(
+    userAccount: UserAccount,
+    dto: UserUpdateRequestDto,
+  ): UserAccount {
     // Current password required to change email or password
     if (dto.email != userAccount.username) {
       if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
@@ -338,13 +365,16 @@ class UserAccountService(
   }
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun updatePassword(userAccount: UserAccount, dto: UserUpdatePasswordRequestDto): UserAccount {
+  fun updatePassword(
+    userAccount: UserAccount,
+    dto: UserUpdatePasswordRequestDto,
+  ): UserAccount {
     if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
-    if (!matches) throw PermissionException()
+    if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(dto.password)
@@ -354,7 +384,7 @@ class UserAccountService(
 
   private fun updateUserEmail(
     userAccount: UserAccount,
-    dto: UserUpdateRequestDto
+    dto: UserUpdateRequestDto,
   ) {
     if (userAccount.username != dto.email) {
       if (!emailValidator.isValid(dto.email, null)) {
@@ -373,7 +403,7 @@ class UserAccountService(
 
   private fun publishUserInfoUpdatedEvent(
     old: UserAccountDto,
-    userAccount: UserAccount
+    userAccount: UserAccount,
   ) {
     val event = OnUserUpdated(this, old, UserAccountDto.fromEntity(userAccount))
     applicationEventPublisher.publishEvent(event)
@@ -396,7 +426,10 @@ class UserAccountService(
     return userAccountRepository.getAllByIdsIncludingDeleted(ids)
   }
 
-  fun findAllWithDisabledPaged(pageable: Pageable, search: String?): Page<UserAccount> {
+  fun findAllWithDisabledPaged(
+    pageable: Pageable,
+    search: String?,
+  ): Page<UserAccount> {
     return userAccountRepository.findAllWithDisabledPaged(search, pageable)
   }
 
@@ -427,8 +460,9 @@ class UserAccountService(
   }
 
   private fun transferLegacyNoAuthUser() {
-    val legacyImplicitUser = findActive("___implicit_user")
-      ?: return
+    val legacyImplicitUser =
+      findActive("___implicit_user")
+        ?: return
 
     // We need to migrate what's owned by `___implicit_user` to the initial user
     val initialUser = findInitialUser() ?: throw IllegalStateException("Initial user does not exist?")

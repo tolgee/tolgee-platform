@@ -17,7 +17,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectTranslationLastModifiedManager
-import io.tolgee.dtos.query_results.TranslationHistoryView
+import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -45,10 +45,11 @@ import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
-import io.tolgee.service.query_builders.CursorUtil
+import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
-import org.springdoc.api.annotations.ParameterObject
+import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -58,6 +59,7 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -72,7 +74,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
 import java.util.concurrent.TimeUnit
-import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -80,13 +81,13 @@ import javax.validation.Valid
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/translations",
-    "/v2/projects/translations"
-  ]
+    "/v2/projects/translations",
+  ],
 )
 @Tags(
   value = [
     Tag(name = "Translations", description = "Operations related to translations in project"),
-  ]
+  ],
 )
 class TranslationsController(
   private val projectHolder: ProjectHolder,
@@ -102,7 +103,7 @@ class TranslationsController(
   private val screenshotService: ScreenshotService,
   private val activityHolder: ActivityHolder,
   private val activityService: ActivityService,
-  private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager
+  private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -112,24 +113,28 @@ class TranslationsController(
         responseCode = "200",
         content = [
           Content(
-            schema = Schema(
-              example = """{"en": {"what a key": "Translated value", "another key": "Another key translated"},""" +
-                """"cs": {"what a key": "Překlad", "another key": "Další překlad"}}"""
-            )
-          )
-        ]
-      )
-    ]
+            schema =
+              Schema(
+                example =
+                  """{"en": {"what a key": "Translated value", "another key": "Another key translated"},""" +
+                    """"cs": {"what a key": "Překlad", "another key": "Další překlad"}}""",
+              ),
+          ),
+        ],
+      ),
+    ],
   )
   @UseDefaultPermissions // Security: check performed in the handler
   @AllowApiAccess
   fun getAllTranslations(
     @Parameter(
-      description = "Comma-separated language tags to return translations in. " +
-        "Languages you are not permitted to see will be silently dropped and not returned.",
-      example = "en,de,fr"
+      description =
+        "Comma-separated language tags to return translations in. " +
+          "Languages you are not permitted to see will be silently dropped and not returned.",
+      example = "en,de,fr",
     )
-    @PathVariable("languages") languages: Set<String>,
+    @PathVariable("languages")
+    languages: Set<String>,
     @Parameter(description = "Namespace to return")
     ns: String? = "",
     @Parameter(
@@ -142,7 +147,7 @@ When null, resulting file will be a flat key-value object.
     )
     @RequestParam(value = "structureDelimiter", defaultValue = ".", required = false)
     structureDelimiter: Char?,
-    request: WebRequest
+    request: WebRequest,
   ): ResponseEntity<Map<String, Any>>? {
     val lastModified: Long = projectTranslationLastModifiedManager.getLastModified(projectHolder.project.id)
 
@@ -150,42 +155,47 @@ When null, resulting file will be a flat key-value object.
       return null
     }
 
-    val permittedTags = securityService
-      .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
+    val permittedTags =
+      securityService
+        .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
 
-    val response = translationService.getTranslations(
-      languageTags = permittedTags,
-      namespace = ns,
-      projectId = projectHolder.project.id,
-      structureDelimiter = request.getStructureDelimiter()
-    )
+    val response =
+      translationService.getTranslations(
+        languageTags = permittedTags,
+        namespace = ns,
+        projectId = projectHolder.project.id,
+        structureDelimiter = request.getStructureDelimiter(),
+      )
 
     return ResponseEntity.ok()
       .lastModified(lastModified)
       .cacheControl(CacheControl.maxAge(0, TimeUnit.SECONDS))
       .body(
-        response
+        response,
       )
   }
 
   @PutMapping("")
   @Operation(summary = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
-  fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
+  fun setTranslations(
+    @RequestBody @Valid
+    dto: SetTranslationsWithKeyDto,
+  ): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
     securityService.checkLanguageTranslatePermissionsByTag(dto.translations.keys, projectHolder.project.id)
 
     val modifiedTranslations = translationService.setForKey(key, dto.translations)
 
-    val translations = dto.languagesToReturn
-      ?.let { languagesToReturn ->
-        key.translations
-          .filter { languagesToReturn.contains(it.language.tag) }
-          .associateBy { it.language.tag }
-      }
-      ?: modifiedTranslations
+    val translations =
+      dto.languagesToReturn
+        ?.let { languagesToReturn ->
+          translationService.findForKeyByLanguages(key, languagesToReturn)
+            .associateBy { it.language.tag }
+        }
+        ?: modifiedTranslations
 
     return getSetTranslationsResponse(key, translations)
   }
@@ -193,16 +203,21 @@ When null, resulting file will be a flat key-value object.
   @PostMapping("")
   @Operation(summary = "Sets translations for existing or not existing key.")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
-  fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
-      activityHolder.activity = ActivityType.SET_TRANSLATIONS
-    } ?: let {
-      checkKeyEditScope()
-      activityHolder.activity = ActivityType.CREATE_KEY
-      keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
-    }
+  @Transactional
+  fun createOrUpdateTranslations(
+    @RequestBody @Valid
+    dto: SetTranslationsWithKeyDto,
+  ): SetTranslationsResponseModel {
+    val key =
+      keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
+        activityHolder.activity = ActivityType.SET_TRANSLATIONS
+      } ?: let {
+        checkKeyEditScope()
+        activityHolder.activity = ActivityType.CREATE_KEY
+        keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
+      }
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
   }
@@ -210,11 +225,11 @@ When null, resulting file will be a flat key-value object.
   @PutMapping("/{translationId}/set-state/{state}")
   @Operation(summary = "Sets translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun setTranslationState(
     @PathVariable translationId: Long,
-    @PathVariable state: AssignableTranslationState
+    @PathVariable state: AssignableTranslationState,
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
@@ -227,7 +242,7 @@ When null, resulting file will be a flat key-value object.
     binder.registerCustomEditor(
       List::class.java,
       TranslationFilters::filterKeyName.name,
-      CustomCollectionEditor(List::class.java)
+      CustomCollectionEditor(List::class.java),
     )
   }
 
@@ -235,20 +250,27 @@ When null, resulting file will be a flat key-value object.
   @Operation(summary = "Returns translations in project")
   @UseDefaultPermissions // Security: check done internally
   @AllowApiAccess
+  @Transactional
   fun getTranslations(
-    @ParameterObject @ModelAttribute("translationFilters") params: GetTranslationsParams,
-    @ParameterObject pageable: Pageable
+    @ParameterObject
+    @ModelAttribute("translationFilters")
+    params: GetTranslationsParams,
+    @ParameterObject pageable: Pageable,
   ): KeysWithTranslationsPageModel {
-    val languages: Set<Language> = languageService.getLanguagesForTranslationsView(
-      params.languages,
-      projectHolder.project.id,
-      authenticationFacade.authenticatedUser.id
-    )
+    val baseLanguage = projectHolder.projectEntity.baseLanguage
+
+    val languages: Set<Language> =
+      languageService.getLanguagesForTranslationsView(
+        params.languages,
+        projectHolder.project.id,
+        authenticationFacade.authenticatedUser.id,
+      )
 
     val pageableWithSort = getSafeSortPageable(pageable)
 
-    val data = translationService
-      .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
+    val data =
+      translationService
+        .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
     val keysWithScreenshots = getScreenshots(data.map { it.keyId }.toList())
 
@@ -257,38 +279,41 @@ When null, resulting file will be a flat key-value object.
     }
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
-    return pagedAssembler.toTranslationModel(data, languages, cursor)
+    return pagedAssembler.toTranslationModel(data, languages, cursor, baseLanguage)
   }
 
   @GetMapping(value = ["select-all"])
   @Operation(summary = "Get select all keys")
-  @RequiresProjectPermissions([ Scope.KEYS_VIEW ])
+  @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
   fun getSelectAllKeyIds(
-    @ParameterObject @ModelAttribute("translationFilters") params: TranslationFilters,
+    @ParameterObject
+    @ModelAttribute("translationFilters")
+    params: TranslationFilters,
   ): SelectAllResponse {
-    val languages: Set<Language> = languageService.getLanguagesForTranslationsView(
-      params.languages,
-      projectHolder.project.id,
-      authenticationFacade.authenticatedUser.id
-    )
+    val languages: Set<Language> =
+      languageService.getLanguagesForTranslationsView(
+        params.languages,
+        projectHolder.project.id,
+        authenticationFacade.authenticatedUser.id,
+      )
 
     return SelectAllResponse(
       translationService.getSelectAllKeys(
         projectId = projectHolder.project.id,
         params = params,
-        languages = languages
-      )
+        languages = languages,
+      ),
     )
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
   @Operation(summary = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun dismissAutoTranslatedState(
-    @PathVariable translationId: Long
+    @PathVariable translationId: Long,
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
@@ -300,11 +325,11 @@ When null, resulting file will be a flat key-value object.
   @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
   @Operation(summary = """Set's "outdated" indication""")
   @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun setOutdated(
     @PathVariable translationId: Long,
-    @PathVariable state: Boolean
+    @PathVariable state: Boolean,
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
@@ -316,13 +341,15 @@ When null, resulting file will be a flat key-value object.
   @Operation(
     summary = """Returns history of specific translation. 
 
-Sorting is not supported for supported. It is automatically sorted from newest to oldest."""
+Sorting is not supported for supported. It is automatically sorted from newest to oldest.""",
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getTranslationHistory(
     @PathVariable translationId: Long,
-    @ParameterObject @SortDefault(sort = ["timestamp"], direction = Sort.Direction.DESC) pageable: Pageable
+    @ParameterObject
+    @SortDefault(sort = ["timestamp"], direction = Sort.Direction.DESC)
+    pageable: Pageable,
   ): PagedModel<TranslationHistoryModel> {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
@@ -341,22 +368,25 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     return null
   }
 
-  private fun getSetTranslationsResponse(key: Key, translations: Map<String, Translation>):
-    SetTranslationsResponseModel {
+  private fun getSetTranslationsResponse(
+    key: Key,
+    translations: Map<String, Translation>,
+  ): SetTranslationsResponseModel {
     return SetTranslationsResponseModel(
       keyId = key.id,
       keyName = key.name,
       keyNamespace = key.namespace?.name,
-      translations = translations.entries.associate { (languageTag, translation) ->
-        languageTag to translationModelAssembler.toModel(translation)
-      }
+      translations =
+        translations.entries.associate { (languageTag, translation) ->
+          languageTag to translationModelAssembler.toModel(translation)
+        },
     )
   }
 
   private fun checkKeyEditScope() {
     securityService.checkProjectPermission(
       projectHolder.project.id,
-      Scope.KEYS_EDIT
+      Scope.KEYS_EDIT,
     )
   }
 

@@ -10,7 +10,7 @@ import io.tolgee.service.dataImport.processors.po.data.PoParserResult
 import java.util.*
 
 class PoParser(
-  private val context: FileProcessorContext
+  private val context: FileProcessorContext,
 ) {
   private var expectMsgId = false
   private var expectMsgStr = false
@@ -44,7 +44,7 @@ class PoParser(
 
     return PoParserResult(
       meta = processHeader(),
-      translations
+      translations,
     )
   }
 
@@ -93,7 +93,7 @@ class PoParser(
   }
 
   private fun processInputStream() {
-    context.file.inputStream.readAllBytes().decodeToString().forEach {
+    context.file.data.decodeToString().forEach {
       it.handle()
     }
     endTranslation()
@@ -232,7 +232,7 @@ class PoParser(
       isKeyword("msgctxt") -> {
         context.fileEntity.addIssue(
           FileIssueType.PO_MSGCTXT_NOT_SUPPORTED,
-          mapOf(FileIssueParamType.LINE to currentLine.toString())
+          mapOf(FileIssueParamType.LINE to currentLine.toString()),
         )
       }
       current.matches("^msgstr\\[\\d+]$".toRegex()) -> {

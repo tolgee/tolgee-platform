@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { InfiniteData } from 'react-query';
-import { container } from 'tsyringe';
 import { useDebouncedCallback } from 'use-debounce';
 import { T } from '@tolgee/react';
 
@@ -10,14 +9,15 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
+import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
+
 import {
   ChangeScreenshotNum,
   KeyUpdateData,
   UpdateTranslation,
 } from '../types';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 const MAX_LANGUAGES = 10;
 const PAGE_SIZE = 60;
@@ -40,8 +40,6 @@ type FiltersType = Pick<
   | 'filterUntranslatedInLang'
   | 'filterNamespace'
 >;
-
-const projectPreferences = container.resolve(ProjectPreferencesService);
 
 type Props = {
   projectId: number;
@@ -153,7 +151,10 @@ export const useTranslationsService = (props: Props) => {
           // update language selection to the fetched one
           // if there are some languages which are not permitted or were deleted
           _setLanguages(selectedLanguages);
-          projectPreferences.setForProject(props.projectId, selectedLanguages);
+          projectPreferencesService.setForProject(
+            props.projectId,
+            selectedLanguages
+          );
         }
 
         if (data?.pages.length === 1) {
@@ -232,7 +233,7 @@ export const useTranslationsService = (props: Props) => {
       return;
     }
     if (props.updateLocalStorageLanguages) {
-      projectPreferences.setForProject(props.projectId, value);
+      projectPreferencesService.setForProject(props.projectId, value);
     }
     // override url languages
     setUrlLanguages(undefined);

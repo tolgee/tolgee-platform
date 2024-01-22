@@ -9,26 +9,26 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.webhook.WebhookConfig
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.OrderBy
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import java.util.*
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.OrderBy
-import javax.persistence.PrePersist
-import javax.persistence.PreUpdate
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
@@ -37,23 +37,19 @@ class Project(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
-
   @field:NotBlank
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp
   var name: String = "",
-
   @field:Size(min = 3, max = 2000)
   @ActivityLoggedProp
   var description: String? = null,
-
   @Column(name = "address_part")
   @ActivityLoggedProp
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
-) : AuditModel(), ModelWithAvatar, EntityWithId {
-
+) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()
@@ -105,10 +101,12 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
+  override var deletedAt: Date? = null
+
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
-      this.organizationOwner = organizationOwner
-    }
+    this.organizationOwner = organizationOwner
+  }
 
   fun findLanguageOptional(tag: String): Optional<Language> {
     return languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()

@@ -1,28 +1,26 @@
 package io.tolgee.model.dataImport
 
-import com.sun.istack.NotNull
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.translation.Translation
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToOne
+import jakarta.validation.constraints.NotNull
 import org.apache.commons.codec.digest.MurmurHash3
 import java.nio.ByteBuffer
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
 
 @Entity
 class ImportTranslation(
   @Column(columnDefinition = "text")
   var text: String?,
-
   @ManyToOne
   var language: ImportLanguage,
 ) : StandardAuditModel() {
   @ManyToOne(optional = false)
   lateinit var key: ImportKey
 
-  @OneToOne
+  @ManyToOne
   var conflict: Translation? = null
 
   /**
@@ -52,11 +50,12 @@ class ImportTranslation(
     if (this == null) {
       return "__null_value"
     }
-    val hash = MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
-      val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
-      buffer.putLong(it)
-      buffer.array().asSequence()
-    }.toList().toByteArray()
+    val hash =
+      MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
+        val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
+        buffer.putLong(it)
+        buffer.array().asSequence()
+      }.toList().toByteArray()
     return Base64.getEncoder().encodeToString(hash)
   }
 }

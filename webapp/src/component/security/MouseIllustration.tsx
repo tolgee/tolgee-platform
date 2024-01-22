@@ -1,5 +1,5 @@
 import { Box, styled } from '@mui/material';
-import { ReactComponent as ComeIn } from 'tg.svgs/signup/comeIn.svg';
+import ComeIn from 'tg.svgs/signup/comeIn.svg?react';
 
 const StyledIllustration = styled(Box)`
   display: grid;

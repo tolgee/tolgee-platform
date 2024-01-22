@@ -26,7 +26,6 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureMockMvc
 class ApiKeyControllerTest : AuthorizedControllerTest() {
-
   lateinit var testData: ApiKeysTestData
 
   @BeforeEach
@@ -42,8 +41,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       "/v2/api-keys",
       mapOf(
         "projectId" to testData.projectBuilder.self.id,
-        "scopes" to setOf(Scope.TRANSLATIONS_VIEW.value, Scope.SCREENSHOTS_UPLOAD.value)
-      )
+        "scopes" to setOf(Scope.TRANSLATIONS_VIEW.value, Scope.SCREENSHOTS_UPLOAD.value),
+      ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
       node("username").isEqualTo("test_username")
@@ -61,8 +60,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       "/v2/api-keys",
       mapOf(
         "projectId" to testData.projectBuilder.self.id,
-        "scopes" to setOf(Scope.TRANSLATIONS_VIEW.value, Scope.SCREENSHOTS_UPLOAD.value)
-      )
+        "scopes" to setOf(Scope.TRANSLATIONS_VIEW.value, Scope.SCREENSHOTS_UPLOAD.value),
+      ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
       node("username").isEqualTo("test_username")
@@ -82,7 +81,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       CreateApiKeyDto().apply {
         projectId = testData.projectBuilder.self.id
         scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_UPLOAD)
-      }
+      },
     ).andIsForbidden
   }
 
@@ -94,7 +93,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       CreateApiKeyDto().apply {
         projectId = testData.projectBuilder.self.id
         scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_UPLOAD, Scope.KEYS_EDIT)
-      }
+      },
     ).andIsForbidden
   }
 
@@ -105,20 +104,20 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       CreateApiKeyDto().apply {
         projectId = testData.frantasProject.id
         scopes = setOf()
-      }
+      },
     ).andIsBadRequest
     performAuthPost(
       "/v2/api-keys",
       mapOf(
-        "projectId" to testData.frantasProject.id
-      )
+        "projectId" to testData.frantasProject.id,
+      ),
     ).andIsBadRequest
     performAuthPost(
       "/v2/api-keys",
       mapOf(
         "projectId" to null,
-        "scopes" to listOf("translations.edit")
-      )
+        "scopes" to listOf("translations.edit"),
+      ),
     ).andIsBadRequest
   }
 
@@ -294,19 +293,42 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `regenerate works`() {
-    val oldKey = testData.expiredKey.key
+  fun `regenerate works on expired key`() {
+    val oldKeyHash = testData.expiredKey.keyHash
+
     val expiresAt = Date().time + 10000
     performAuthPut(
       "/v2/api-keys/${testData.expiredKey.id}/regenerate",
       mapOf(
-        "expiresAt" to expiresAt
-      )
+        "expiresAt" to expiresAt,
+      ),
     ).andIsOk.andAssertThatJson {
       node("key").isString.startsWith("tgpak_").hasSizeGreaterThan(20)
       node("expiresAt").isEqualTo(expiresAt)
     }
 
-    apiKeyService.get(testData.expiredKey.id).key.assert.isNotEqualTo(oldKey)
+    val key = apiKeyService.get(testData.expiredKey.id)
+    key.key.assert.isNull()
+    key.keyHash.assert.isNotEqualTo(oldKeyHash)
+  }
+
+  @Test
+  fun `regenerate works (never expiring key)`() {
+    val oldKeyHash = testData.usersKey.keyHash
+
+    testData.usersKey.expiresAt.assert.isNull()
+
+    performAuthPut(
+      "/v2/api-keys/${testData.usersKey.id}/regenerate",
+      mapOf(
+        "expiresAt" to null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("key").isString.startsWith("tgpak_").hasSizeGreaterThan(20)
+    }
+
+    val key = apiKeyService.get(testData.usersKey.id)
+    key.key.assert.isNull()
+    key.keyHash.assert.isNotEqualTo(oldKeyHash)
   }
 }

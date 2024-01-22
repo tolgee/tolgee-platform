@@ -23,7 +23,6 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 class EeLicenseControllerTest : AuthorizedControllerTest() {
-
   @Autowired
   @MockBean
   lateinit var restTemplate: RestTemplate
@@ -67,7 +66,9 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
           .andIsOk.andPrettyPrint.andAssertThatJson {
           }
         val body = captor.allValues.single().body as String
-        @Suppress("UNCHECKED_CAST") val req: Map<String, Any> =
+
+        @Suppress("UNCHECKED_CAST")
+        val req: Map<String, Any> =
           jacksonObjectMapper().readValue(body, Map::class.java) as Map<String, Any>
 
         req["licenseKey"].assert.isEqualTo("mock-mock")
@@ -110,7 +111,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
       verify {
         performAuthPost(
           "/v2/ee-license/prepare-set-license-key",
-          mapOf("licenseKey" to "mock-mock")
+          mapOf("licenseKey" to "mock-mock"),
         ).andIsOk.andPrettyPrint.andAssertThatJson {
           node("plan") {
             node("id").isNumber
@@ -138,7 +139,8 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
       verify {
         performAuthPut(
-          "/v2/ee-license/refresh", null
+          "/v2/ee-license/refresh",
+          null,
         ).andIsOk
 
         eeSubscriptionRepository.findAll().single().status.assert.isEqualTo(SubscriptionStatus.ACTIVE)
@@ -151,7 +153,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   fun `returns info`() {
     prepareSubscription()
     performAuthGet(
-      "/v2/ee-license/info"
+      "/v2/ee-license/info",
     ).andIsOk
   }
 
@@ -170,7 +172,8 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
       verify {
         performAuthPut(
-          "/v2/ee-license/release-license-key", null
+          "/v2/ee-license/release-license-key",
+          null,
         ).andIsOk
 
         eeSubscriptionRepository.findAll().assert.isEmpty()
@@ -191,7 +194,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
-      }
+      },
     )
   }
 

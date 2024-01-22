@@ -47,7 +47,7 @@ export const OrganizationInvoicesView: FunctionComponent = () => {
         ],
       ]}
       windowTitle={t({ key: 'organization_invoices_title', noWrap: true })}
-      containerMaxWidth="md"
+      maxWidth="normal"
     >
       <StyledWrapper>
         <CustomerPortal />

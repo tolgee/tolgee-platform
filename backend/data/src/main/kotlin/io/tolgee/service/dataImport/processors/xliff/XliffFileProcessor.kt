@@ -24,7 +24,7 @@ class XliffFileProcessor(override val context: FileProcessorContext) : ImportFil
 
   private val xmlEventReader: XMLEventReader by lazy {
     val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
-    inputFactory.createXMLEventReader(context.file.inputStream)
+    inputFactory.createXMLEventReader(context.file.data.inputStream())
   }
 
   private val version: String by lazy {

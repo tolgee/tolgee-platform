@@ -10,8 +10,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.batch.params.AutoTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.translation.AutoTranslationService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 @Component
@@ -19,13 +19,13 @@ class AutoTranslateChunkProcessor(
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
   private val mtServiceConfigService: MtServiceConfigService,
   private val entityManager: EntityManager,
-  private val autoTranslationService: AutoTranslationService
+  private val autoTranslationService: AutoTranslationService,
 ) : ChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     genericAutoTranslationChunkProcessor.iterateCatching(chunk, coroutineContext) { item ->
       val (keyId, languageId) = item
@@ -49,7 +49,10 @@ class AutoTranslateChunkProcessor(
     return JobCharacter.SLOW
   }
 
-  override fun getChunkSize(request: AutoTranslationRequest, projectId: Long): Int {
+  override fun getChunkSize(
+    request: AutoTranslationRequest,
+    projectId: Long,
+  ): Int {
     val languageIds = request.target.map { it.languageId }.distinct()
     val project = entityManager.getReference(Project::class.java, projectId)
     val services = mtServiceConfigService.getPrimaryServices(languageIds, project).values.toSet()

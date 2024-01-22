@@ -10,9 +10,10 @@ import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.EntityUtil
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
-import javax.persistence.EntityManager
-import javax.persistence.criteria.Predicate
 
 class ActivityViewByRevisionsProvider(
   private val applicationContext: ApplicationContext,
@@ -52,7 +53,7 @@ class ActivityViewByRevisionsProvider(
         meta = revision.meta,
         modifications = modifiedEntities[revision.id],
         counts = counts[revision.id],
-        params = params[revision.id]
+        params = params[revision.id],
       )
     }
   }
@@ -100,7 +101,7 @@ class ActivityViewByRevisionsProvider(
     val counts: MutableMap<Long, MutableMap<String, Long>> = mutableMapOf()
     activityRevisionRepository.getModifiedEntityTypeCounts(
       revisionIds = revisionIds,
-      allowedTypes
+      allowedTypes,
     ).forEach { (revisionId, entityClass, count) ->
       counts
         .computeIfAbsent(revisionId as Long) { mutableMapOf() }
@@ -111,7 +112,7 @@ class ActivityViewByRevisionsProvider(
 
   private fun getAuthors(revisions: Collection<ActivityRevision>) =
     userAccountService.getAllByIdsIncludingDeleted(
-      revisions.mapNotNull { it.authorId }.toSet()
+      revisions.mapNotNull { it.authorId }.toSet(),
     ).associateBy { it.id }
 
   private fun getModifiedEntitiesRaw(): List<ActivityModifiedEntity> {
@@ -129,8 +130,8 @@ class ActivityViewByRevisionsProvider(
         whereConditions.add(
           cb.or(
             cb.notEqual(revision.get(ActivityRevision_.type), it),
-            root.get(ActivityModifiedEntity_.entityClass).`in`(restrictedEntityNames)
-          )
+            root.get(ActivityModifiedEntity_.entityClass).`in`(restrictedEntityNames),
+          ),
         )
       }
     }

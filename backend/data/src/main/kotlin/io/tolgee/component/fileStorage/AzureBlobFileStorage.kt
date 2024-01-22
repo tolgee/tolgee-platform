@@ -6,9 +6,11 @@ package io.tolgee.component.fileStorage
 
 import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobClient
+import com.azure.storage.blob.BlobContainerAsyncClient
 import com.azure.storage.blob.BlobContainerClient
 import io.tolgee.exceptions.FileStoreException
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
+import java.lang.reflect.Field
 
 open class AzureBlobFileStorage(
   private val client: BlobContainerClient,
@@ -30,7 +32,10 @@ open class AzureBlobFileStorage(
     }
   }
 
-  override fun storeFile(storageFilePath: String, bytes: ByteArray) {
+  override fun storeFile(
+    storageFilePath: String,
+    bytes: ByteArray,
+  ) {
     try {
       val client = getBlobClient(storageFilePath)
       client.upload(BinaryData.fromBytes(bytes), true)
@@ -49,6 +54,21 @@ open class AzureBlobFileStorage(
     }
   }
 
-  private fun getBlobClient(storageFilePath: String): BlobClient =
-    client.getBlobClient(storageFilePath)
+  private fun getBlobClient(storageFilePath: String): BlobClient {
+    val clientValue = extractClientFromBlobContainerClient()
+    return TolgeeBlobClient(clientValue.getBlobAsyncClient(storageFilePath))
+  }
+
+  /**
+   * The Azure blob client uses deprecated method:
+   * reactor.core.publisher.Mono reactor.core.publisher.Mono.subscriberContext
+   * It was removed in mono 3.5 (minor version ugh!)
+   *
+   * This is a workaround for this issue.
+   */
+  private fun extractClientFromBlobContainerClient(): BlobContainerAsyncClient {
+    val clientField: Field? = BlobContainerClient::class.java.getDeclaredField("client")
+    clientField?.isAccessible = true
+    return clientField?.get(client) as BlobContainerAsyncClient
+  }
 }

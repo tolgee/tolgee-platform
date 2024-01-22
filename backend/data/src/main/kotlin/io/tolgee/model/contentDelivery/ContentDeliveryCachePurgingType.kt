@@ -5,5 +5,5 @@ import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurg
 import kotlin.reflect.KClass
 
 enum class ContentDeliveryCachePurgingType(val factory: KClass<out ContentDeliveryCachePurgingFactory>) {
-  AZURE_FRONT_DOOR(AzureContentDeliveryCachePurgingFactory::class)
+  AZURE_FRONT_DOOR(AzureContentDeliveryCachePurgingFactory::class),
 }

@@ -17,6 +17,7 @@ const StyledContainer = styled('div')`
   align-items: space-between;
   justify-items: stretch;
   grid-template-rows: 1fr auto;
+  padding: 0 32px 0 32px;
 `;
 
 const StyledInner = styled('div')`

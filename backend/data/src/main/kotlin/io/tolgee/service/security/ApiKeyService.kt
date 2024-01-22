@@ -19,6 +19,7 @@ import io.tolgee.security.PROJECT_API_KEY_PREFIX
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
+import jakarta.persistence.EntityManager
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
@@ -28,9 +29,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class ApiKeyService(
@@ -41,6 +42,7 @@ class ApiKeyService(
   private val permissionService: PermissionService,
   private val entityManager: EntityManager,
   private val cacheManager: CacheManager,
+  private val transactionManager: PlatformTransactionManager,
 ) : Logging {
   private val cache: Cache? by lazy {
     cacheManager.getCache(Caches.PROJECT_API_KEYS)
@@ -51,17 +53,18 @@ class ApiKeyService(
     scopes: Set<Scope>,
     project: Project,
     expiresAt: Long? = null,
-    description: String? = null
+    description: String? = null,
   ): ApiKey {
-    val apiKey = ApiKey(
-      key = generateKey(),
-      project = project,
-      userAccount = userAccount,
-      scopesEnum = scopes
-    ).apply {
-      this.description = description ?: ""
-      this.expiresAt = expiresAt?.let { Date(expiresAt) }
-    }
+    val apiKey =
+      ApiKey(
+        key = generateKey(),
+        project = project,
+        userAccount = userAccount,
+        scopesEnum = scopes,
+      ).apply {
+        this.description = description ?: ""
+        this.expiresAt = expiresAt?.let { Date(expiresAt) }
+      }
     return save(apiKey)
   }
 
@@ -71,7 +74,11 @@ class ApiKeyService(
     return apiKeyRepository.getAllByUserAccountIdOrderById(userAccountId)
   }
 
-  fun getAllByUser(userAccountId: Long, filterProjectId: Long?, pageable: Pageable): Page<ApiKey> {
+  fun getAllByUser(
+    userAccountId: Long,
+    filterProjectId: Long?,
+    pageable: Pageable,
+  ): Page<ApiKey> {
     return apiKeyRepository.getAllByUserAccount(userAccountId, filterProjectId, pageable)
   }
 
@@ -79,7 +86,10 @@ class ApiKeyService(
     return apiKeyRepository.getAllByProjectId(projectId)
   }
 
-  fun getAllByProject(projectId: Long, pageable: Pageable): Page<ApiKey> {
+  fun getAllByProject(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ApiKey> {
     return apiKeyRepository.getAllByProjectId(projectId, pageable)
   }
 
@@ -113,14 +123,21 @@ class ApiKeyService(
     apiKeyRepository.delete(apiKey)
   }
 
-  fun getAvailableScopes(userAccountId: Long, project: Project): Array<Scope> {
-    val permittedScopes = permissionService.getProjectPermissionScopes(project.id, userAccountId)
-      ?: throw NotFoundException()
+  fun getAvailableScopes(
+    userAccountId: Long,
+    project: Project,
+  ): Array<Scope> {
+    val permittedScopes =
+      permissionService.getProjectPermissionScopes(project.id, userAccountId)
+        ?: throw NotFoundException()
     return Scope.expand(permittedScopes)
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#apiKey.keyHash")
-  fun editApiKey(apiKey: ApiKey, dto: V2EditApiKeyDto): ApiKey {
+  fun editApiKey(
+    apiKey: ApiKey,
+    dto: V2EditApiKeyDto,
+  ): ApiKey {
     apiKey.scopesEnum = dto.scopes.toMutableSet()
     dto.description?.let {
       apiKey.description = it
@@ -129,12 +146,13 @@ class ApiKeyService(
   }
 
   fun deleteAllByProject(projectId: Long) {
+    val apiKeys = getAllByProject(projectId)
     cache?.let {
       // Manual bulk cache eviction
-      getAllByProject(projectId).forEach { p -> it.evict(p.keyHash) }
+      apiKeys.forEach { p -> it.evict(p.keyHash) }
     }
 
-    apiKeyRepository.deleteAllByProjectId(projectId)
+    apiKeyRepository.deleteAll(apiKeys)
   }
 
   fun hashKey(key: String) = keyGenerator.hash(key)
@@ -152,7 +170,10 @@ class ApiKeyService(
     return this.apiKeyRepository.save(entity)
   }
 
-  fun encodeKey(key: String, projectId: Long): String {
+  fun encodeKey(
+    key: String,
+    projectId: Long,
+  ): String {
     val stringToEncode = "${projectId}_$key"
     return BaseEncoding.base32().omitPadding().lowerCase().encode(stringToEncode.toByteArray())
   }
@@ -187,7 +208,10 @@ class ApiKeyService(
     apiKeyRepository.updateLastUsedById(apiKeyId, currentDateProvider.date)
   }
 
-  fun regenerate(id: Long, expiresAt: Long?): ApiKey {
+  fun regenerate(
+    id: Long,
+    expiresAt: Long?,
+  ): ApiKey {
     val apiKey = get(id)
     // Manual cache eviction
     cache?.evict(apiKey.keyHash)
@@ -220,14 +244,15 @@ class ApiKeyService(
 
   private fun logTransactionIsolation() {
     if (logger.isDebugEnabled) {
-      val isolationLevel = entityManager.createNativeQuery("show transaction_isolation")
-        .singleResult as String
+      val isolationLevel =
+        entityManager.createNativeQuery("show transaction_isolation")
+          .singleResult as String
       logger.debug("Transaction isolation level: $isolationLevel")
     }
   }
 
   class DecodedApiKey(
     val projectId: Long,
-    val apiKey: String
+    val apiKey: String,
   )
 }

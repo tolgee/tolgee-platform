@@ -6,6 +6,7 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.redisson.api.RMap
 import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
@@ -15,7 +16,6 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobStateProvider(
@@ -24,7 +24,7 @@ class BatchJobStateProvider(
   val redissonClient: RedissonClient,
   val entityManager: EntityManager,
   val lockingProvider: LockingProvider,
-  val platformTransactionManager: PlatformTransactionManager
+  val platformTransactionManager: PlatformTransactionManager,
 ) : Logging {
   companion object {
     private val localJobStatesMap by lazy {
@@ -32,7 +32,10 @@ class BatchJobStateProvider(
     }
   }
 
-  fun <T> updateState(jobId: Long, block: (MutableMap<Long, ExecutionState>) -> T): T {
+  fun <T> updateState(
+    jobId: Long,
+    block: (MutableMap<Long, ExecutionState>) -> T,
+  ): T {
     return lockingProvider.withLocking("batch_job_state_lock_$jobId") {
       val map = get(jobId)
       val result = block(map)
@@ -47,7 +50,7 @@ class BatchJobStateProvider(
       status = execution.status,
       chunkNumber = execution.chunkNumber,
       retry = execution.retry,
-      transactionCommitted = false
+      transactionCommitted = false,
     )
   }
 
@@ -87,28 +90,30 @@ class BatchJobStateProvider(
   fun getInitialState(jobId: Long): MutableMap<Long, ExecutionState> {
     logger.debug("Initializing batch job state for job $jobId")
     // we want to get state which is not affected by current transaction
-    val executions = executeInNewTransaction(
-      platformTransactionManager,
-      isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED
-    ) {
-      entityManager.createQuery(
-        """
+    val executions =
+      executeInNewTransaction(
+        platformTransactionManager,
+        isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED,
+      ) {
+        entityManager.createQuery(
+          """
       from BatchJobChunkExecution bjce
       where bjce.batchJob.id = :jobId
       """,
-        BatchJobChunkExecution::class.java
-      )
-        .setParameter("jobId", jobId).resultList
-    }
+          BatchJobChunkExecution::class.java,
+        )
+          .setParameter("jobId", jobId).resultList
+      }
 
     return executions.associate {
-      it.id to ExecutionState(
-        it.successTargets,
-        it.status,
-        it.chunkNumber,
-        it.retry,
-        true
-      )
+      it.id to
+        ExecutionState(
+          it.successTargets,
+          it.status,
+          it.chunkNumber,
+          it.retry,
+          true,
+        )
     }.toMutableMap()
   }
 
@@ -125,6 +130,9 @@ class BatchJobStateProvider(
   }
 
   fun getCachedJobIds(): MutableSet<Long> {
-    return getStatesMap().keys
+    val keys = getStatesMap().keys
+    // redisson defers the access to the key set, so it was throwing NoSuchElementException when iterating over keys
+    // so let's rather copy the set
+    return keys.toMutableSet()
   }
 }

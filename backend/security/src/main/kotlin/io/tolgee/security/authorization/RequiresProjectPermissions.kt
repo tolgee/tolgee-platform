@@ -24,5 +24,5 @@ import io.tolgee.model.enums.Scope
  */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class RequiresProjectPermissions(
-  val scopes: Array<Scope>
+  val scopes: Array<Scope>,
 )

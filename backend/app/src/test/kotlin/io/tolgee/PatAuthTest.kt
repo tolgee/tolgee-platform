@@ -23,7 +23,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsOk.andAssertThatJson {
       node("username").isEqualTo("franta")
     }
@@ -41,7 +41,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/projects/translations/en",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsBadRequest.andHasErrorMessage(Message.PROJECT_NOT_SELECTED)
   }
 
@@ -53,7 +53,7 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsOk
   }
 
@@ -63,29 +63,31 @@ class PatAuthTest : AbstractControllerTest() {
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_nopat")
-      }
+      },
     ).andIsUnauthorized
   }
 
   @Test
   fun `user doesnt authorize with expired PAT`() {
-    val pat = createUserWithPat(Date(Date().time - 10000))
+    val pat = createUserWithPat(expiresAt = Date(Date().time - 10000))
     performGet(
       "/v2/user",
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
-      }
+      },
     ).andIsUnauthorized
   }
 
   @Test
   fun `pat doesnt work on restricted endpoint`() {
-    val pat = createUserWithPat(Date(Date().time - 10000))
+    val pat = createUserWithPat(expiresAt = Date(Date().time + 100000))
     performDelete(
       "/v2/pats/${pat.id}",
-      HttpHeaders().apply {
-        add("X-API-Key", "tgpat_${pat.token}")
-      }
+      content = null,
+      httpHeaders =
+        HttpHeaders().apply {
+          add("X-API-Key", "tgpat_${pat.token}")
+        },
     ).andIsForbidden
   }
 

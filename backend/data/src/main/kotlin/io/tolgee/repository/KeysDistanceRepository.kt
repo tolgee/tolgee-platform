@@ -10,18 +10,18 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
-  @Query("""from KeysDistance kd where kd.key1Id in :data or kd.key2Id in :data""")
-  fun findForKeyIds(data: Collection<Long>): List<KeysDistance>
-
   @Query(
     """
     select (case when kd.key1Id = :keyId then kd.key2Id else kd.key1Id end) from KeysDistance kd 
     where kd.key1Id = :keyId or 
           kd.key2Id = :keyId 
     order by kd.score desc
-        """
+        """,
   )
-  fun getCloseKeys(keyId: Long, pageable: Pageable = PageRequest.of(0, 10)): List<Long>
+  fun getCloseKeys(
+    keyId: Long,
+    pageable: Pageable = PageRequest.of(0, 10),
+  ): List<Long>
 
   @Query(
     """
@@ -36,12 +36,13 @@ interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
             kd.key2Id = :keyId
       order by kd.score desc
     ) and k.project.id = :projectId
-    """
+    """,
   )
   fun getCloseKeysWithBaseTranslation(
     keyId: Long,
     projectId: Long,
-    pageable: Pageable = PageRequest.of(0, 10)
+    pageable: Pageable = PageRequest.of(0, 10),
   ): List<KeyWithBaseTranslationView>
+
   fun deleteAllByProjectId(id: Long)
 }

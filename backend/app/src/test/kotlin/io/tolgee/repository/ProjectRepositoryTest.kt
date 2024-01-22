@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @Transactional
 class ProjectRepositoryTest {
-
   @Autowired
   lateinit var projectRepository: ProjectRepository
 

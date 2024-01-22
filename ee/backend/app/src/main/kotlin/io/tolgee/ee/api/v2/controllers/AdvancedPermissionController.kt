@@ -15,7 +15,7 @@ import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.organization.OrganizationRoleService
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -30,7 +30,7 @@ class AdvancedPermissionController(
   private val eePermissionService: EePermissionService,
   private val projectHolder: ProjectHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  private val organizationRoleService: OrganizationRoleService
+  private val organizationRoleService: OrganizationRoleService,
 ) {
   @Suppress("MVCPathVariableInspection")
   @PutMapping("projects/{projectId}/users/{userId}/set-permissions")
@@ -43,12 +43,13 @@ class AdvancedPermissionController(
       description = "Granted scopes",
       example = """["translations.view", "translations.edit"]""",
     )
-    @RequestParam scopes: List<String>?,
-    @ParameterObject params: SetPermissionLanguageParams
+    @RequestParam
+    scopes: List<String>?,
+    @ParameterObject params: SetPermissionLanguageParams,
   ) {
     enabledFeaturesProvider.checkFeatureEnabled(
       projectHolder.project.organizationOwnerId!!,
-      Feature.GRANULAR_PERMISSIONS
+      Feature.GRANULAR_PERMISSIONS,
     )
     val parsedScopes = Scope.parse(scopes)
     projectPermissionFacade.checkNotCurrentUser(userId)
@@ -56,7 +57,7 @@ class AdvancedPermissionController(
       projectId = projectHolder.project.id,
       userId = userId,
       languages = projectPermissionFacade.getLanguages(params, projectHolder.project.id),
-      scopes = parsedScopes
+      scopes = parsedScopes,
     )
   }
 
@@ -67,9 +68,10 @@ class AdvancedPermissionController(
     @PathVariable organizationId: Long,
     @Parameter(
       description = "Granted scopes to all projects for all organization users without direct project permissions set",
-      example = """["translations.view", "translations.edit"]"""
+      example = """["translations.view", "translations.edit"]""",
     )
-    @RequestParam scopes: List<String>
+    @RequestParam
+    scopes: List<String>,
   ) {
     enabledFeaturesProvider.checkFeatureEnabled(organizationId, Feature.GRANULAR_PERMISSIONS)
     val parsedScopes = Scope.parse(scopes)

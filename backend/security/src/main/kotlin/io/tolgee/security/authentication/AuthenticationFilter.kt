@@ -25,24 +25,32 @@ import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class AuthenticationFilter(
   private val authenticationProperties: AuthenticationProperties,
+  @Lazy
   private val currentDateProvider: CurrentDateProvider,
+  @Lazy
   private val rateLimitService: RateLimitService,
+  @Lazy
   private val jwtService: JwtService,
   private val userAccountService: UserAccountService,
   private val apiKeyService: ApiKeyService,
   private val patService: PatService,
 ) : OncePerRequestFilter() {
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     val policy = rateLimitService.getIpAuthRateLimitPolicy(request)
 
     if (policy == null) {
@@ -87,45 +95,52 @@ class AuthenticationFilter(
   }
 
   private fun pakAuth(key: String) {
-    val parsed = apiKeyService.parseApiKey(key)
-      ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
+    val parsed =
+      apiKeyService.parseApiKey(key)
+        ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
 
     val hash = apiKeyService.hashKey(parsed)
-    val pak = apiKeyService.findDto(hash)
-      ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
+    val pak =
+      apiKeyService.findDto(hash)
+        ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
 
     if (pak.expiresAt?.before(currentDateProvider.date) == true) {
       throw AuthenticationException(Message.PROJECT_API_KEY_EXPIRED)
     }
 
-    val userAccount = userAccountService.findDto(pak.userAccountId)
-      ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+    val userAccount =
+      userAccountService.findDto(pak.userAccountId)
+        ?: throw AuthenticationException(Message.USER_NOT_FOUND)
 
     apiKeyService.updateLastUsedAsync(pak.id)
-    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-      pak,
-      userAccount,
-      TolgeeAuthenticationDetails(false)
-    )
+    SecurityContextHolder.getContext().authentication =
+      TolgeeAuthentication(
+        pak,
+        userAccount,
+        TolgeeAuthenticationDetails(false),
+      )
   }
 
   private fun patAuth(key: String) {
     val hash = patService.hashToken(key.substring(PAT_PREFIX.length))
-    val pat = patService.findDto(hash)
-      ?: throw AuthenticationException(Message.INVALID_PAT)
+    val pat =
+      patService.findDto(hash)
+        ?: throw AuthenticationException(Message.INVALID_PAT)
 
     if (pat.expiresAt?.before(currentDateProvider.date) == true) {
       throw AuthenticationException(Message.PAT_EXPIRED)
     }
 
-    val userAccount = userAccountService.findDto(pat.userAccountId)
-      ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+    val userAccount =
+      userAccountService.findDto(pat.userAccountId)
+        ?: throw AuthenticationException(Message.USER_NOT_FOUND)
 
     patService.updateLastUsedAsync(pat.id)
-    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-      pat,
-      userAccount,
-      TolgeeAuthenticationDetails(false)
-    )
+    SecurityContextHolder.getContext().authentication =
+      TolgeeAuthentication(
+        pat,
+        userAccount,
+        TolgeeAuthenticationDetails(false),
+      )
   }
 }

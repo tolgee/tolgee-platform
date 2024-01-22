@@ -32,7 +32,6 @@ import java.math.BigDecimal
 import java.util.function.Consumer
 
 class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private lateinit var testData: ContentDeliveryConfigTestData
 
   @Autowired
@@ -99,14 +98,15 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "content-storages/${storage.id}",
       mapOf(
         "name" to "S3",
-        "s3ContentStorageConfig" to mapOf(
-          "bucketName" to "bucketName",
-          "accessKey" to "accessKey",
-          "secretKey" to "secretKey",
-          "endpoint" to "endpoint",
-          "signingRegion" to "signingRegion",
-        )
-      )
+        "s3ContentStorageConfig" to
+          mapOf(
+            "bucketName" to "bucketName",
+            "accessKey" to "accessKey",
+            "secretKey" to "secretKey",
+            "endpoint" to "endpoint",
+            "signingRegion" to "signingRegion",
+          ),
+      ),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("S3")
     }
@@ -126,11 +126,12 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "content-storages/${storage.id}",
       mapOf(
         "name" to "Azure",
-        "azureContentStorageConfig" to mapOf(
-          "connectionString" to "fakeConnectionString",
-          "containerName" to "fakeContainerName"
-        )
-      )
+        "azureContentStorageConfig" to
+          mapOf(
+            "connectionString" to "fakeConnectionString",
+            "containerName" to "fakeContainerName",
+          ),
+      ),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("Azure")
     }
@@ -142,11 +143,12 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
     performProjectAuthPost(
       "content-storages",
       mapOf(
-        "azureContentStorageConfig" to mapOf(
-          "connectionString" to "fakeConnectionString",
-          "containerName" to "fakeContainerName"
-        )
-      )
+        "azureContentStorageConfig" to
+          mapOf(
+            "connectionString" to "fakeConnectionString",
+            "containerName" to "fakeContainerName",
+          ),
+      ),
     ).andIsBadRequest
   }
 
@@ -155,7 +157,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   fun `deletes an storage`() {
     val (storage) = performCreate()
     performProjectAuthDelete(
-      "content-storages/${storage.id}"
+      "content-storages/${storage.id}",
     ).andIsOk
   }
 
@@ -163,7 +165,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   @ProjectJWTAuthTestMethod
   fun `deletes not delete when in use`() {
     performProjectAuthDelete(
-      "content-storages/${testData.azureContentStorage.self.id}"
+      "content-storages/${testData.azureContentStorage.self.id}",
     ).andIsBadRequest.andHasErrorMessage(Message.CONTENT_STORAGE_IS_IN_USE)
   }
 
@@ -174,11 +176,12 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "content-storages/test",
       mapOf(
         "name" to "azure",
-        "azureContentStorageConfig" to mapOf(
-          "connectionString" to "fakeConnectionString",
-          "containerName" to "fakeContainerName"
-        )
-      )
+        "azureContentStorageConfig" to
+          mapOf(
+            "connectionString" to "fakeConnectionString",
+            "containerName" to "fakeContainerName",
+          ),
+      ),
     ).andAssertThatJson {
       node("success").isBoolean.isFalse
     }.andIsOk
@@ -192,10 +195,11 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "content-storages/${storage.id}/test",
       mapOf(
         "name" to "azure",
-        "azureContentStorageConfig" to mapOf(
-          "containerName" to "fakeContainerName"
-        )
-      )
+        "azureContentStorageConfig" to
+          mapOf(
+            "containerName" to "fakeContainerName",
+          ),
+      ),
     ).andAssertThatJson {
       node("success").isBoolean.isTrue
     }.andIsOk
@@ -208,14 +212,15 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       "content-storages/test",
       mapOf(
         "name" to "s3",
-        "s3ContentStorageConfig" to mapOf(
-          "bucketName" to "bucketName",
-          "accessKey" to "accessKey",
-          "secretKey" to "secretKey",
-          "endpoint" to "endpoint",
-          "signingRegion" to "signingRegion",
-        )
-      )
+        "s3ContentStorageConfig" to
+          mapOf(
+            "bucketName" to "bucketName",
+            "accessKey" to "accessKey",
+            "secretKey" to "secretKey",
+            "endpoint" to "endpoint",
+            "signingRegion" to "signingRegion",
+          ),
+      ),
     ).andIsOk
   }
 
@@ -226,18 +231,20 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
     var id: Long? = null
 
-    val result = performProjectAuthPost(
-      "content-storages",
-      mapOf(
-        "name" to "Azure",
-        "azureContentStorageConfig" to mapOf(
-          "connectionString" to "fakeConnectionString",
-          "containerName" to "fakeContainerName"
-        )
-      )
-    ).andIsOk.andAssertThatJson {
-      node("id").isValidId.satisfies(Consumer { it: BigDecimal -> id = it.toLong() })
-    }
+    val result =
+      performProjectAuthPost(
+        "content-storages",
+        mapOf(
+          "name" to "Azure",
+          "azureContentStorageConfig" to
+            mapOf(
+              "connectionString" to "fakeConnectionString",
+              "containerName" to "fakeContainerName",
+            ),
+        ),
+      ).andIsOk.andAssertThatJson {
+        node("id").isValidId.satisfies(Consumer { it: BigDecimal -> id = it.toLong() })
+      }
 
     val storage = contentStorageService.get(id!!)
     return storage to result

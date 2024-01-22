@@ -1,24 +1,19 @@
 package io.tolgee.postgresRunners
 
+import io.tolgee.PostgresRunner
 import io.tolgee.configuration.tolgee.FileStorageProperties
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
 import io.tolgee.fixtures.waitFor
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.InputStream
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.annotation.PreDestroy
 import kotlin.concurrent.thread
 
-@Component
-@Scope(SCOPE_SINGLETON)
 class PostgresEmbeddedRunner(
   private val postgresAutostartProperties: PostgresAutostartProperties,
-  private val storageProperties: FileStorageProperties
+  private val storageProperties: FileStorageProperties,
 ) : PostgresRunner {
   private val logger = LoggerFactory.getLogger(javaClass)
   private lateinit var proc: Process
@@ -32,6 +27,14 @@ class PostgresEmbeddedRunner(
     }
   }
 
+  override fun stop() {
+    proc.destroy()
+    proc.waitFor()
+    running.set(false)
+  }
+
+  override val shouldRunMigrations: Boolean = true
+
   private fun startPostgresProcess() {
     val processBuilder = buildProcess()
     logger.info("Starting embedded Postgres DB...")
@@ -40,8 +43,9 @@ class PostgresEmbeddedRunner(
   }
 
   private fun buildProcess(): ProcessBuilder {
-    val processBuilder = ProcessBuilder()
-      .command("bash", "-c", "postgres-entrypoint.sh postgres")
+    val processBuilder =
+      ProcessBuilder()
+        .command("bash", "-c", "postgres-entrypoint.sh postgres")
 
     initProcessEnv(processBuilder)
     return processBuilder
@@ -55,8 +59,8 @@ class PostgresEmbeddedRunner(
         "POSTGRES_PASSWORD" to postgresAutostartProperties.password,
         "POSTGRES_USER" to postgresAutostartProperties.user,
         "POSTGRES_DB" to postgresAutostartProperties.databaseName,
-        "PGDATA" to storageProperties.fsDataPath + "/postgres"
-      )
+        "PGDATA" to storageProperties.fsDataPath + "/postgres",
+      ),
     )
   }
 
@@ -65,8 +69,8 @@ class PostgresEmbeddedRunner(
       logOutput(
         mapOf(
           proc.inputStream to logger::info,
-          proc.errorStream to logger::error
-        )
+          proc.errorStream to logger::error,
+        ),
       )
       if (proc.exitValue() != 0) {
         throw Exception("Postgres failed to start...")
@@ -93,29 +97,25 @@ class PostgresEmbeddedRunner(
     } catch (e: java.lang.Exception) {
       false
     } finally {
-      if (s != null) try {
-        s.close()
-      } catch (e: java.lang.Exception) {
-        e.printStackTrace()
+      if (s != null) {
+        try {
+          s.close()
+        } catch (e: java.lang.Exception) {
+          e.printStackTrace()
+        }
       }
     }
-  }
-
-  @PreDestroy
-  fun preDestroy() {
-    proc.destroy()
-    proc.waitFor()
-    running.set(false)
   }
 
   private fun logOutput(loggerMap: Map<InputStream, (message: String) -> Unit>) {
     while (running.get()) {
       try {
-        val allNull = loggerMap.entries.map { (inputStream, logger) ->
-          val line = inputStream.bufferedReader().readLine()
-          logLine(line, logger)
-          line == null
-        }.all { it }
+        val allNull =
+          loggerMap.entries.map { (inputStream, logger) ->
+            val line = inputStream.bufferedReader().readLine()
+            logLine(line, logger)
+            line == null
+          }.all { it }
         if (allNull) {
           break
         }
@@ -125,7 +125,10 @@ class PostgresEmbeddedRunner(
     }
   }
 
-  private fun logLine(line: String?, logger: (message: String) -> Unit) {
+  private fun logLine(
+    line: String?,
+    logger: (message: String) -> Unit,
+  ) {
     if (line != null) {
       logger("Postgres: $line")
     }

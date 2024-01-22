@@ -1,61 +1,18 @@
 package io.tolgee.dialects.postgres
 
-import com.vladmihalcea.hibernate.type.array.StringArrayType
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import org.hibernate.NullPrecedence
-import org.hibernate.dialect.PostgreSQL10Dialect
-import org.hibernate.dialect.function.SQLFunction
-import org.hibernate.dialect.function.StandardSQLFunction
-import org.hibernate.engine.spi.Mapping
-import org.hibernate.engine.spi.SessionFactoryImplementor
-import org.hibernate.type.FloatType
+import org.hibernate.boot.model.FunctionContributions
+import org.hibernate.dialect.DatabaseVersion
+import org.hibernate.dialect.PostgreSQLDialect
 import org.hibernate.type.StandardBasicTypes
-import org.hibernate.type.Type
-import java.sql.Types
 
 @Suppress("unused")
-class CustomPostgreSQLDialect : PostgreSQL10Dialect() {
-  init {
-    registerHibernateType(Types.ARRAY, StringArrayType::class.java.name)
-    registerFunction("array_to_string", StandardSQLFunction("array_to_string", StandardBasicTypes.STRING))
-  }
-
-  override fun renderOrderByElement(
-    expression: String?,
-    collation: String?,
-    order: String?,
-    nulls: NullPrecedence?
-  ): String {
-    if (nulls == NullPrecedence.NONE) {
-      if (order == "asc") {
-        return super.renderOrderByElement(expression, collation, order, NullPrecedence.FIRST)
-      }
-      if (order == "desc") {
-        return super.renderOrderByElement(expression, collation, order, NullPrecedence.LAST)
-      }
-    }
-    return super.renderOrderByElement(expression, collation, order, nulls)
-  }
-
-  init {
-    registerFunction(
+class CustomPostgreSQLDialect : PostgreSQLDialect(DatabaseVersion.make(13)) {
+  override fun contributeFunctions(functionContributions: FunctionContributions) {
+    super.contributeFunctions(functionContributions)
+    functionContributions.functionRegistry.registerPattern(
       "similarity",
-      object : SQLFunction {
-        override fun hasArguments(): Boolean = true
-
-        override fun hasParenthesesIfNoArguments() = false
-
-        override fun getReturnType(firstArgumentType: Type?, mapping: Mapping?) = FloatType()
-
-        override fun render(
-          firstArgumentType: Type,
-          arguments: MutableList<Any?>,
-          factory: SessionFactoryImplementor
-        ): String {
-          return "similarity(${arguments[0]}, ${arguments[1]})"
-        }
-      }
+      "similarity(?1, ?2)",
+      functionContributions.typeConfiguration.basicTypeRegistry.resolve(StandardBasicTypes.FLOAT),
     )
-    registerHibernateType(Types.OTHER, JsonBinaryType::class.java.name)
   }
 }

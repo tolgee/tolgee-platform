@@ -1,27 +1,32 @@
 import React, { FunctionComponent } from 'react';
 import { Box, Typography } from '@mui/material';
-import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
+import { T, useTranslate } from '@tolgee/react';
 
-import { MessageService } from 'tg.service/MessageService';
-import { SecurityService } from 'tg.service/SecurityService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdatePasswordDTO } from 'tg.service/request.types';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
+import { NewPasswordLabel } from 'tg.component/security/SetPasswordField';
 import { useUser } from 'tg.globalContext/helpers';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { messageService } from 'tg.service/MessageService';
+import { securityService } from 'tg.service/SecurityService';
 
-const messagesService = container.resolve(MessageService);
-const securityService = container.resolve(SecurityService);
+const PasswordFieldWithValidation = React.lazy(
+  () => import('tg.component/security/PasswordFieldWithValidation')
+);
 
 export const ChangePassword: FunctionComponent = () => {
   const user = useUser();
 
+  const { t } = useTranslate();
+
   const updatePassword = useApiMutation({
     url: '/v2/user/password',
     method: 'put',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+    },
   });
 
   const handleSubmit = (v: UserUpdatePasswordDTO) => {
@@ -30,7 +35,7 @@ export const ChangePassword: FunctionComponent = () => {
       {
         onSuccess(r) {
           securityService.setToken(r.accessToken!);
-          messagesService.success(<T keyName="password-updated" />);
+          messageService.success(<T keyName="password-updated" />);
         },
       }
     );
@@ -49,10 +54,9 @@ export const ChangePassword: FunctionComponent = () => {
           {
             currentPassword: '',
             password: '',
-            passwordRepeat: '',
           } as UserUpdatePasswordDTO
         }
-        validationSchema={Validation.USER_PASSWORD_CHANGE}
+        validationSchema={Validation.USER_PASSWORD_CHANGE(t)}
         onSubmit={handleSubmit}
       >
         <TextField
@@ -61,7 +65,7 @@ export const ChangePassword: FunctionComponent = () => {
           label={<T keyName="current-password" />}
           variant="standard"
         />
-        <SetPasswordFields />
+        <PasswordFieldWithValidation label={<NewPasswordLabel />} />
       </StandardForm>
     </Box>
   );

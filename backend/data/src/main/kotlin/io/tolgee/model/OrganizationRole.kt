@@ -1,37 +1,35 @@
 package io.tolgee.model
 
 import io.tolgee.model.enums.OrganizationRoleType
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
-import javax.validation.constraints.NotNull
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import jakarta.validation.constraints.NotNull
 
 @Entity
 @Table(
   uniqueConstraints = [
     UniqueConstraint(
       columnNames = ["user_id", "organization_id"],
-      name = "organization_member_role_user_organization_unique"
-    )
-  ]
+      name = "organization_member_role_user_organization_unique",
+    ),
+  ],
 )
 class OrganizationRole(
   @OneToOne
   var invitation: Invitation? = null,
-
   @Enumerated(EnumType.ORDINAL)
-  var type: OrganizationRoleType? = null
+  var type: OrganizationRoleType? = null,
 ) : StandardAuditModel() {
-
   constructor(
     user: UserAccount? = null,
     invitation: Invitation? = null,
     organization: Organization?,
-    type: OrganizationRoleType?
+    type: OrganizationRoleType?,
   ) : this(invitation, type) {
     this.organization = organization
     this.user = user

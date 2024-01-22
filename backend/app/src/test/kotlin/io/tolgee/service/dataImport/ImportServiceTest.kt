@@ -4,6 +4,9 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.testing.assert
@@ -37,19 +40,22 @@ class ImportServiceTest : AbstractSpringTest() {
       importService.selectExistingLanguage(importFrench, french)
       assertThat(importFrench.existingLanguage).isEqualTo(french)
       val translations = importService.findTranslations(importTestData.importFrench.id)
-      assertThat(translations[0].conflict).isNotNull
-      assertThat(translations[1].conflict).isNull()
+      assertThat(translations.getByKey("what a key").conflict).isNotNull
+      assertThat(translations.getByKey("what a beautiful key").conflict).isNull()
     }
   }
 
+  fun Collection<ImportTranslation>.getByKey(key: String) = this.find { it.key.name == key } ?: error("Key not found")
+
   @Test
   fun `deletes import language`() {
-    val testData = executeInNewTransaction {
-      val testData = ImportTestData()
-      testDataService.saveTestData(testData.root)
-      assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
-      testData
-    }
+    val testData =
+      executeInNewTransaction {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
+        testData
+      }
     executeInNewTransaction {
       importService.findLanguage(testData.importEnglish.id)?.let {
         importService.deleteLanguage(it)
@@ -63,7 +69,30 @@ class ImportServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `deletes import`() {
+  fun `hard deletes import`() {
+    val testData = ImportTestData()
+    executeInNewTransaction {
+      testData.addFileIssues()
+      testData.addKeyMetadata()
+      testDataService.saveTestData(testData.root)
+    }
+
+    executeInNewTransaction {
+      val import = importService.get(testData.import.id)
+      importService.hardDeleteImport(import)
+    }
+  }
+
+  private fun checkImportHardDeleted(id: Long) {
+    executeInNewTransaction {
+      entityManager.createQuery("from Import i where i.id = :id", Import::class.java)
+        .setParameter("id", id)
+        .resultList.firstOrNull().assert.isNull()
+    }
+  }
+
+  @Test
+  fun `soft deletes import`() {
     val testData = ImportTestData()
     executeInNewTransaction {
       testData.addFileIssues()
@@ -79,20 +108,26 @@ class ImportServiceTest : AbstractSpringTest() {
     executeInNewTransaction {
       assertThat(importService.find(testData.import.project.id, testData.import.author.id)).isNull()
     }
+
+    waitForNotThrowing(pollTime = 200, timeout = 10000) {
+      checkImportHardDeleted(testData.import.id)
+    }
   }
 
   @Test
   fun `imports namespaces and merges same keys from multiple files`() {
-    val testData = executeInNewTransaction {
-      val testData = ImportNamespacesTestData()
-      testDataService.saveTestData(testData.root)
-      SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-        null,
-        UserAccountDto.fromEntity(testData.userAccount),
-        TolgeeAuthenticationDetails(false)
-      )
-      testData
-    }
+    val testData =
+      executeInNewTransaction {
+        val testData = ImportNamespacesTestData()
+        testDataService.saveTestData(testData.root)
+        SecurityContextHolder.getContext().authentication =
+          TolgeeAuthentication(
+            null,
+            UserAccountDto.fromEntity(testData.userAccount),
+            TolgeeAuthenticationDetails(false),
+          )
+        testData
+      }
     executeInNewTransaction {
       permissionService.find(testData.project.id, testData.userAccount.id)
       val import = importService.get(testData.import.id)

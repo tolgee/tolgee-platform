@@ -1,60 +1,53 @@
 package io.tolgee.model.activity
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
-import org.hibernate.annotations.NotFound
-import org.hibernate.annotations.NotFoundAction
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Index
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.PrePersist
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
+import jakarta.persistence.Temporal
+import jakarta.persistence.TemporalType
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.Index
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.PrePersist
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
 
 @Entity
 @Table(
   indexes = [
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
-    Index(columnList = "type")
-  ]
+    Index(columnList = "type"),
+  ],
 )
 @EntityListeners(ActivityRevision.Companion.ActivityRevisionListener::class)
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
-)
 class ActivityRevision : java.io.Serializable {
   @Id
   @SequenceGenerator(
     name = "activitySequenceGenerator",
     sequenceName = "activity_sequence",
     initialValue = 0,
-    allocationSize = 10
+    allocationSize = 10,
   )
   @GeneratedValue(
     strategy = GenerationType.SEQUENCE,
-    generator = "activitySequenceGenerator"
+    generator = "activitySequenceGenerator",
   )
   val id: Long = 0
 
@@ -67,7 +60,8 @@ class ActivityRevision : java.io.Serializable {
    */
   var authorId: Long? = null
 
-  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
   var meta: MutableMap<String, Any?>? = null
 
   @Enumerated(EnumType.STRING)
@@ -79,7 +73,6 @@ class ActivityRevision : java.io.Serializable {
   var projectId: Long? = null
 
   @OneToMany(mappedBy = "activityRevision")
-  @NotFound(action = NotFoundAction.IGNORE)
   var describingRelations: MutableList<ActivityDescribingEntity> = mutableListOf()
 
   @OneToMany(mappedBy = "activityRevision")

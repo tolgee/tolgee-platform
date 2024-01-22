@@ -2,6 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, Tooltip } from '@mui/material';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledItem = styled('li')`
   display: flex;
@@ -43,6 +44,10 @@ type Props = {
   matchAsPrefix?: boolean | string;
   hidden?: boolean;
   'data-cy': string;
+  quickStart?: Omit<
+    React.ComponentProps<typeof QuickStartHighlight>,
+    'children'
+  >;
 };
 
 export function SideMenuItem({
@@ -52,6 +57,7 @@ export function SideMenuItem({
   selected,
   matchAsPrefix,
   hidden,
+  quickStart,
   ...props
 }: Props) {
   const match = useLocation();
@@ -64,19 +70,37 @@ export function SideMenuItem({
       )
     : match.pathname === linkTo;
 
+  function wrapWithQuickStart(children: React.ReactNode) {
+    if (quickStart) {
+      return (
+        <QuickStartHighlight {...quickStart} offset={-1} fullfiled={isSelected}>
+          {children}
+        </QuickStartHighlight>
+      );
+    } else {
+      return children;
+    }
+  }
+
   return (
     <StyledItem data-cy="project-menu-item">
-      <Tooltip title={text} placement="right" classes={{ tooltip: 'tooltip' }}>
-        <Link
-          data-cy={props['data-cy']}
-          aria-label={text}
-          to={linkTo as string}
-          tabIndex={hidden ? -1 : undefined}
-          className={clsx('link', { selected: isSelected })}
+      {wrapWithQuickStart(
+        <Tooltip
+          title={text}
+          placement="right"
+          classes={{ tooltip: 'tooltip' }}
         >
-          {icon}
-        </Link>
-      </Tooltip>
+          <Link
+            data-cy={props['data-cy']}
+            aria-label={text}
+            to={linkTo as string}
+            tabIndex={hidden ? -1 : undefined}
+            className={clsx('link', { selected: isSelected })}
+          >
+            {icon}
+          </Link>
+        </Tooltip>
+      )}
     </StyledItem>
   );
 }

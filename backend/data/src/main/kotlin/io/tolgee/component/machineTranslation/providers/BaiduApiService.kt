@@ -19,8 +19,11 @@ class BaiduApiService(
   private val baiduMachineTranslationProperties: BaiduMachineTranslationProperties,
   private val restTemplate: RestTemplate,
 ) {
-
-  fun translate(text: String, sourceTag: String, targetTag: String): String? {
+  fun translate(
+    text: String,
+    sourceTag: String,
+    targetTag: String,
+  ): String? {
     val headers = HttpHeaders()
     headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
 
@@ -40,10 +43,11 @@ class BaiduApiService(
     requestBody.add("action", action)
     requestBody.add("sign", signature.lowercase())
 
-    val response = restTemplate.postForEntity<BaiduResponse>(
-      "https://fanyi-api.baidu.com/api/trans/vip/translate",
-      requestBody
-    )
+    val response =
+      restTemplate.postForEntity<BaiduResponse>(
+        "https://fanyi-api.baidu.com/api/trans/vip/translate",
+        requestBody,
+      )
 
     return response.body?.transResult?.first()?.dst
       ?: throw RuntimeException(response.toString())

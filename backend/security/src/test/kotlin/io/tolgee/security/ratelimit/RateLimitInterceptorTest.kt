@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerMapping
-import java.util.Date
+import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.reflect.jvm.javaMethod
@@ -51,24 +51,27 @@ class RateLimitInterceptorTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
-  private val rateLimitService = Mockito.spy(
-    RateLimitService(
-      ConcurrentMapCacheManager(),
-      TestLockingProvider(),
-      currentDateProvider,
-      rateLimitProperties,
+  private val rateLimitService =
+    Mockito.spy(
+      RateLimitService(
+        ConcurrentMapCacheManager(),
+        TestLockingProvider(),
+        currentDateProvider,
+        rateLimitProperties,
+      ),
     )
-  )
 
-  private val rateLimitInterceptor = RateLimitInterceptor(
-    authenticationFacade,
-    rateLimitProperties,
-    rateLimitService,
-  )
+  private val rateLimitInterceptor =
+    RateLimitInterceptor(
+      authenticationFacade,
+      rateLimitProperties,
+      rateLimitService,
+    )
 
-  private val mockMvc = MockMvcBuilders.standaloneSetup(TestController::class.java)
-    .addInterceptors(rateLimitInterceptor)
-    .build()
+  private val mockMvc =
+    MockMvcBuilders.standaloneSetup(TestController::class.java)
+      .addInterceptors(rateLimitInterceptor)
+      .build()
 
   @BeforeEach
   fun setupMocks() {
@@ -243,9 +246,13 @@ class RateLimitInterceptorTest {
   // Accessing the one from API package is a pain here.
   class TestLockingProvider : LockingProvider {
     private val lock = ReentrantLock()
+
     override fun getLock(name: String): Lock = lock
 
-    override fun <T> withLocking(name: String, fn: () -> T): T {
+    override fun <T> withLocking(
+      name: String,
+      fn: () -> T,
+    ): T {
       lock.lock()
       try {
         return fn()

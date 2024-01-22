@@ -7,5 +7,5 @@ class ExportTranslationView(
   val text: String?,
   val state: TranslationState,
   val key: ExportKeyView,
-  val languageTag: String
+  val languageTag: String,
 )

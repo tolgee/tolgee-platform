@@ -5,7 +5,10 @@ import java.util.regex.Pattern
 
 object TextHelper {
   @JvmStatic
-  fun splitOnNonEscapedDelimiter(string: String, delimiter: Char?): List<String> {
+  fun splitOnNonEscapedDelimiter(
+    string: String,
+    delimiter: Char?,
+  ): List<String> {
     if (delimiter == null) {
       return listOf(string)
     }
@@ -25,7 +28,10 @@ object TextHelper {
     return result
   }
 
-  private fun isCharEscaped(position: Int, fullString: String): Boolean {
+  private fun isCharEscaped(
+    position: Int,
+    fullString: String,
+  ): Boolean {
     if (position == 0) {
       return false
     }
@@ -111,6 +117,6 @@ object TextHelper {
   data class ReplaceIcuResult(
     val text: String,
     val isComplex: Boolean,
-    val params: Map<String, String>
+    val params: Map<String, String>,
   )
 }

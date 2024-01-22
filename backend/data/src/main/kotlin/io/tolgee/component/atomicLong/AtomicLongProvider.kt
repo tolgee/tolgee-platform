@@ -12,9 +12,12 @@ import java.util.concurrent.TimeUnit
 @Component
 class AtomicLongProvider(
   val isUsingRedisProvider: UsingRedisProvider,
-  val applicationContext: ApplicationContext
+  val applicationContext: ApplicationContext,
 ) : Logging {
-  fun get(name: String, defaultProvider: () -> Long): TolgeeAtomicLong {
+  fun get(
+    name: String,
+    defaultProvider: () -> Long,
+  ): TolgeeAtomicLong {
     return if (isUsingRedisProvider.areWeUsingRedis) {
       // we need to lock it, because we don't want to set the default multiple times
       val lock = redissonClient.getLock("lock_$name")

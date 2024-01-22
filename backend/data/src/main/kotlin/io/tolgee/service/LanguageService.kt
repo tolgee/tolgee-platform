@@ -7,11 +7,14 @@ import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.LanguageView
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationService
+import jakarta.persistence.EntityManager
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -20,7 +23,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class LanguageService(
@@ -30,13 +32,18 @@ class LanguageService(
   private val permissionService: PermissionService,
   @Lazy
   private val securityService: SecurityService,
+  @Lazy
+  private val autoTranslationService: AutoTranslationService,
 ) {
   @set:Autowired
   @set:Lazy
   lateinit var translationService: TranslationService
 
   @Transactional
-  fun createLanguage(dto: LanguageDto?, project: Project): Language {
+  fun createLanguage(
+    dto: LanguageDto?,
+    project: Project,
+  ): Language {
     val language = fromRequestDTO(dto!!)
     language.project = project
     projectService.refresh(project).languages.add(language)
@@ -53,29 +60,41 @@ class LanguageService(
   }
 
   @Transactional
-  fun editLanguage(id: Long, dto: LanguageDto): Language {
+  fun editLanguage(
+    id: Long,
+    dto: LanguageDto,
+  ): Language {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
     return editLanguage(language, dto)
   }
 
   @Transactional
-  fun editLanguage(language: Language, dto: LanguageDto): Language {
+  fun editLanguage(
+    language: Language,
+    dto: LanguageDto,
+  ): Language {
     language.updateByDTO(dto)
     entityManager.persist(language)
     return language
   }
 
-  fun getImplicitLanguages(projectId: Long, userId: Long): Set<Language> {
+  fun getImplicitLanguages(
+    projectId: Long,
+    userId: Long,
+  ): Set<Language> {
     val all = languageRepository.findAllByProjectId(projectId)
-    val viewLanguageIds = permissionService.getProjectPermissionData(
-      projectId,
-      userId
-    ).computedPermissions.viewLanguageIds
+    val viewLanguageIds =
+      permissionService.getProjectPermissionData(
+        projectId,
+        userId,
+      ).computedPermissions.viewLanguageIds
 
-    val permitted = if (viewLanguageIds.isNullOrEmpty())
-      all
-    else
-      all.filter { viewLanguageIds.contains(it.id) }
+    val permitted =
+      if (viewLanguageIds.isNullOrEmpty()) {
+        all
+      } else {
+        all.filter { viewLanguageIds.contains(it.id) }
+      }
 
     return permitted.sortedBy { it.id }.take(2).toSet()
   }
@@ -89,6 +108,16 @@ class LanguageService(
     return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
+  @Transactional
+  fun getView(id: Long): LanguageView {
+    return findView(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  @Transactional
+  fun findView(id: Long): LanguageView? {
+    return languageRepository.findView(id)
+  }
+
   fun find(id: Long): Language? {
     return languageRepository.findById(id).orElse(null)
   }
@@ -98,24 +127,38 @@ class LanguageService(
     return languageRepository.findById(id)
   }
 
-  fun findByTag(tag: String, project: Project): Optional<Language> {
+  fun findByTag(
+    tag: String,
+    project: Project,
+  ): Optional<Language> {
     return languageRepository.findByTagAndProject(tag, project)
   }
 
-  fun findByTag(tag: String?, projectId: Long): Optional<Language> {
+  fun findByTag(
+    tag: String?,
+    projectId: Long,
+  ): Optional<Language> {
     return languageRepository.findByTagAndProjectId(tag, projectId)
   }
 
-  fun findByTags(tags: Collection<String>, projectId: Long): Set<Language> {
+  fun findByTags(
+    tags: Collection<String>,
+    projectId: Long,
+  ): Set<Language> {
     val languages = languageRepository.findAllByTagInAndProjectId(tags, projectId)
-    val sortedByTagsParam = languages.sortedBy { language ->
-      tags.indexOfFirst { tag -> language.tag == tag }
-    }
+    val sortedByTagsParam =
+      languages.sortedBy { language ->
+        tags.indexOfFirst { tag -> language.tag == tag }
+      }
     return sortedByTagsParam.toSet()
   }
 
   @Transactional
-  fun getLanguagesForExport(languages: Set<String>?, projectId: Long, userId: Long): Set<Language> {
+  fun getLanguagesForExport(
+    languages: Set<String>?,
+    projectId: Long,
+    userId: Long,
+  ): Set<Language> {
     if (languages == null) {
       return permissionService.getPermittedViewLanguages(projectId, userId).toSet()
     } else {
@@ -125,7 +168,11 @@ class LanguageService(
   }
 
   @Transactional
-  fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long, userId: Long): Set<Language> {
+  fun getLanguagesForTranslationsView(
+    languages: Set<String>?,
+    projectId: Long,
+    userId: Long,
+  ): Set<Language> {
     val canViewTranslations =
       permissionService.getProjectPermissionScopes(projectId, userId)?.contains(Scope.TRANSLATIONS_VIEW) == true
 
@@ -142,12 +189,13 @@ class LanguageService(
   private fun findByTagsAndFilterPermitted(
     projectId: Long,
     userId: Long,
-    languages: Set<String>
+    languages: Set<String>,
   ): Set<Language> {
-    val viewLanguageIds = permissionService.getProjectPermissionData(
-      projectId,
-      userId
-    ).computedPermissions.viewLanguageIds
+    val viewLanguageIds =
+      permissionService.getProjectPermissionData(
+        projectId,
+        userId,
+      ).computedPermissions.viewLanguageIds
     return if (viewLanguageIds.isNullOrEmpty()) {
       findByTags(languages, projectId)
     } else {
@@ -155,7 +203,10 @@ class LanguageService(
     }
   }
 
-  fun findByName(name: String?, project: Project): Optional<Language> {
+  fun findByName(
+    name: String?,
+    project: Project,
+  ): Optional<Language> {
     return languageRepository.findByNameAndProject(name, project)
   }
 
@@ -170,9 +221,17 @@ class LanguageService(
 
   @Transactional
   fun deleteAllByProject(projectId: Long) {
-    findAll(projectId).forEach {
-      deleteLanguage(it.id)
-    }
+    translationService.deleteAllByProject(projectId)
+    autoTranslationService.deleteConfigsByProject(projectId)
+    entityManager.createNativeQuery(
+      "delete from language_stats " +
+        "where language_id in (select id from language where project_id = :projectId)",
+    )
+      .setParameter("projectId", projectId)
+      .executeUpdate()
+    entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   fun save(language: Language): Language {
@@ -183,7 +242,10 @@ class LanguageService(
     return this.languageRepository.saveAll(languages)
   }
 
-  fun getPaged(projectId: Long, pageable: Pageable): Page<Language> {
+  fun getPaged(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<LanguageView> {
     return this.languageRepository.findAllByProjectId(projectId, pageable)
   }
 
@@ -191,8 +253,16 @@ class LanguageService(
     return languageRepository.findAllById(ids)
   }
 
-  fun getLanguageIdsByTags(projectId: Long, languageTags: Collection<String>): Map<String, Language> {
+  fun getLanguageIdsByTags(
+    projectId: Long,
+    languageTags: Collection<String>,
+  ): Map<String, Language> {
     return languageRepository.findAllByTagInAndProjectId(languageTags, projectId).associateBy { it.tag }
+  }
+
+  @Transactional
+  fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView> {
+    return languageRepository.getViewsOfProjects(projectIds)
   }
 
   fun getBaseLanguageForProject(project: Project): Long? {

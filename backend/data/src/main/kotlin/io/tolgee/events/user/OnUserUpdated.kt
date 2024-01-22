@@ -6,5 +6,5 @@ import org.springframework.context.ApplicationEvent
 class OnUserUpdated(
   source: Any,
   val oldUserAccount: UserAccountDto,
-  val newUserAccount: UserAccountDto
+  val newUserAccount: UserAccountDto,
 ) : ApplicationEvent(source)

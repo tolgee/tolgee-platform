@@ -30,156 +30,171 @@ class ImportTestData {
   var userAccount: UserAccount
   val projectBuilder get() = root.data.projects[0]
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    userAccount = addUserAccount {
-      username = "franta"
-      name = "Frantisek Dobrota"
-    }.self
-    project = addProject { name = "test" }.build project@{
-      addPermission {
-        project = this@project.self
-        user = this@ImportTestData.userAccount
-        type = ProjectPermissionType.MANAGE
-      }
-
-      val key = addKey {
-        name = "what a key"
-      }.self
-      addKey {
-        name = "what a nice key"
-      }.self
-      addKey {
-        name = "what a beautiful key"
-      }.self
-      addKey {
-        name = "another nice key"
-      }.self
-      addKey {
-        name = "extraordinary key"
-      }.self
-      addKey {
-        name = "this is another key"
-      }.self
-      english = addLanguage {
-        name = "English"
-        tag = "en"
-      }.self
-      german = addLanguage {
-        name = "German"
-        tag = "de"
-      }.self
-      czech = addLanguage {
-        name = "Czech"
-        tag = "cs"
-      }.self
-      french = addLanguage {
-        name = "French"
-        tag = "fr"
-      }.self
-      conflict = addTranslation {
-        this.language = english
-        this.key = key
-      }.self
-      addTranslation {
-        this.language = english
-        this.key = this@project.data.keys[1].self
-      }.self
-      addTranslation {
-        this.language = english
-        this.key = this@project.data.keys[2].self
-      }.self
-      addTranslation {
-        this.language = english
-        this.key = this@project.data.keys[3].self
-      }.self
-      addTranslation {
-        this.auto = true
-        this.mtProvider = MtServiceType.GOOGLE
-        this.language = french
-        this.key = this@project.data.keys[0].self
-        this.text = "What a french text"
-      }.self
-      addTranslation {
-        this.auto = true
-        this.mtProvider = MtServiceType.GOOGLE
-        this.language = french
-        this.key = this@project.data.keys[1].self
-        this.text = "What a french text 2"
-      }.self
-      importBuilder = addImport {
-        author = userAccount
-      }.build {
-        addImportFile {
-          name = "multilang.json"
-        }.build {
-          importEnglish = addImportLanguage {
-            name = "en"
-            existingLanguage = english
-          }.self
-          importFrench = addImportLanguage {
-            name = "fr"
-          }.self
-          addImportLanguage {
-            name = "de"
-            existingLanguage = german
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      userAccount =
+        addUserAccount {
+          username = "franta"
+          name = "Frantisek Dobrota"
+        }.self
+      project =
+        addProject { name = "test" }.build project@{
+          addPermission {
+            project = this@project.self
+            user = this@ImportTestData.userAccount
+            type = ProjectPermissionType.MANAGE
           }
 
-          val addedKey = addImportKey {
-            name = "what a key"
-          }
-          addImportKey {
+          val key =
+            addKey {
+              name = "what a key"
+            }.self
+          addKey {
             name = "what a nice key"
-          }
-          addImportKey {
-            name = "what a beautiful key"
-          }
-          addImportKey {
-            name = (1..2000).joinToString("") { "a" }
-            newLongKey = this
-          }
-          addImportKey {
-            name = "extraordinary key"
-          }
-          addImportKey {
-            name = "this is another key"
-          }
-
-          translationWithConflict = addImportTranslation {
-            this.language = importEnglish
-            this.key = addedKey.self
-            this.conflict = this@ImportTestData.conflict
-            this.text = "Overridden"
           }.self
-          addImportTranslation {
-            this.language = importEnglish
-            this.key = data.importKeys[1].self
-            this.conflict = projectBuilder.data.translations[1].self
-            this.text = "Imported text"
-          }
-          addImportTranslation {
-            this.language = importEnglish
-            this.key = data.importKeys[2].self
-            this.conflict = projectBuilder.data.translations[2].self
-          }
-          addImportTranslation {
-            this.language = importEnglish
-            this.key = data.importKeys[4].self
-          }
-          addImportTranslation {
-            this.language = importEnglish
-            this.key = data.importKeys[5].self
-          }
-        }
-      }
-      import = importBuilder.self
-    }.self
-  }
+          addKey {
+            name = "what a beautiful key"
+          }.self
+          addKey {
+            name = "another nice key"
+          }.self
+          addKey {
+            name = "extraordinary key"
+          }.self
+          addKey {
+            name = "this is another key"
+          }.self
+          english =
+            addLanguage {
+              name = "English"
+              tag = "en"
+            }.self
+          german =
+            addLanguage {
+              name = "German"
+              tag = "de"
+            }.self
+          czech =
+            addLanguage {
+              name = "Czech"
+              tag = "cs"
+            }.self
+          french =
+            addLanguage {
+              name = "French"
+              tag = "fr"
+            }.self
+          conflict =
+            addTranslation {
+              this.language = english
+              this.key = key
+            }.self
+          addTranslation {
+            this.language = english
+            this.key = this@project.data.keys[1].self
+          }.self
+          addTranslation {
+            this.language = english
+            this.key = this@project.data.keys[2].self
+          }.self
+          addTranslation {
+            this.language = english
+            this.key = this@project.data.keys[3].self
+          }.self
+          addTranslation {
+            this.auto = true
+            this.mtProvider = MtServiceType.GOOGLE
+            this.language = french
+            this.key = this@project.data.keys[0].self
+            this.text = "What a french text"
+          }.self
+          addTranslation {
+            this.auto = true
+            this.mtProvider = MtServiceType.GOOGLE
+            this.language = french
+            this.key = this@project.data.keys[1].self
+            this.text = "What a french text 2"
+          }.self
+          importBuilder =
+            addImport {
+              author = userAccount
+            }.build {
+              addImportFile {
+                name = "multilang.json"
+              }.build {
+                importEnglish =
+                  addImportLanguage {
+                    name = "en"
+                    existingLanguage = english
+                  }.self
+                importFrench =
+                  addImportLanguage {
+                    name = "fr"
+                  }.self
+                addImportLanguage {
+                  name = "de"
+                  existingLanguage = german
+                }
+
+                val addedKey =
+                  addImportKey {
+                    name = "what a key"
+                  }
+                addImportKey {
+                  name = "what a nice key"
+                }
+                addImportKey {
+                  name = "what a beautiful key"
+                }
+                addImportKey {
+                  name = (1..2000).joinToString("") { "a" }
+                  newLongKey = this
+                }
+                addImportKey {
+                  name = "extraordinary key"
+                }
+                addImportKey {
+                  name = "this is another key"
+                }
+
+                translationWithConflict =
+                  addImportTranslation {
+                    this.language = importEnglish
+                    this.key = addedKey.self
+                    this.conflict = this@ImportTestData.conflict
+                    this.text = "Overridden"
+                  }.self
+                addImportTranslation {
+                  this.language = importEnglish
+                  this.key = data.importKeys[1].self
+                  this.conflict = projectBuilder.data.translations[1].self
+                  this.text = "Imported text"
+                }
+                addImportTranslation {
+                  this.language = importEnglish
+                  this.key = data.importKeys[2].self
+                  this.conflict = projectBuilder.data.translations[2].self
+                }
+                addImportTranslation {
+                  this.language = importEnglish
+                  this.key = data.importKeys[4].self
+                }
+                addImportTranslation {
+                  this.language = importEnglish
+                  this.key = data.importKeys[5].self
+                }
+              }
+            }
+          import = importBuilder.self
+        }.self
+    }
 
   fun useTranslateOnlyUser(): UserAccount {
-    val user = this.root.addUserAccount {
-      name = "En only user"
-      username = "en_only_user"
-    }
+    val user =
+      this.root.addUserAccount {
+        name = "En only user"
+        username = "en_only_user"
+      }
     this.import.author = user.self
     this.projectBuilder.addPermission {
       this.user = user.self
@@ -192,10 +207,11 @@ class ImportTestData {
   }
 
   fun useViewEnOnlyUser(): UserAccount {
-    val user = this.root.addUserAccount {
-      name = "En only user"
-      username = "en_only_user"
-    }
+    val user =
+      this.root.addUserAccount {
+        name = "En only user"
+        username = "en_only_user"
+      }
     this.import.author = user.self
     this.projectBuilder.addPermission {
       this.user = user.self
@@ -283,10 +299,11 @@ class ImportTestData {
     import.addImportFile {
       name = "another.json"
     }.build {
-      val fr = addImportLanguage {
-        name = "fr"
-        existingLanguage = french
-      }.self
+      val fr =
+        addImportLanguage {
+          name = "fr"
+          existingLanguage = french
+        }.self
       (1..300).forEach { num ->
         projectBuilder.addKey {
           name = "this_is_key_$num"
@@ -390,6 +407,6 @@ class ImportTestData {
   }
 
   data class AddFilesWithNamespacesResult(
-    val importFrenchInNs: ImportLanguage
+    val importFrenchInNs: ImportLanguage,
   )
 }

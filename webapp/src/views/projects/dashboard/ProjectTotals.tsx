@@ -7,39 +7,40 @@ import { useHistory } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useConfig } from 'tg.globalContext/helpers';
+import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { StringsHint } from 'tg.component/billing/StringsHint';
 
 const StyledTiles = styled(Box)`
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  grid-template-areas: 'languages text text progress progress users users tags';
+  grid-template-areas: 'languages text text strings progress progress users tags';
   gap: 10px;
 
-  @media (max-width: 1200px) {
+  @container (max-width: 1200px) {
     grid-template-columns: repeat(4, 1fr);
     grid-template-areas:
-      'languages text     text   tags'
-      'progress  progress users  users';
+      'languages text     text     tags'
+      'strings   progress progress users';
   }
 
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     grid-template-columns: repeat(2, 1fr);
     grid-template-areas:
       'languages tags'
       'text      text'
       'progress  progress'
-      'users     users';
+      'strings   users';
   }
 `;
 
 const StyledTile = styled(Box)`
-  background-color: ${({ theme }) => theme.palette.emphasis[50]};
+  background-color: ${({ theme }) => theme.palette.tile.background};
   border-radius: 20px;
   height: 120px;
   display: grid;
@@ -57,16 +58,16 @@ const StyledTile = styled(Box)`
     cursor: pointer;
 
     &:hover {
-      background-color: ${({ theme }) => theme.palette.emphasis[100]};
+      background-color: ${({ theme }) => theme.palette.tile.backgroundHover};
       transition: background-color 0.2s ease-in;
     }
   }
 
-  @media (max-width: 1200px) {
+  @container (max-width: 1200px) {
     height: 100px;
   }
 
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     height: 80px;
   }
 `;
@@ -88,7 +89,7 @@ const StyledTileValue = styled(Box)`
   font-size: 28px;
   display: flex;
   justify-content: center;
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     font-size: 24px;
   }
 `;
@@ -97,33 +98,8 @@ const StyledTileDescription = styled('div')`
   grid-area: label;
   padding: 0px 8px;
   font-size: 18px;
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     font-size: 14px;
-  }
-`;
-
-const StyledTileDescriptionSmall = styled(StyledTileDescription)`
-  padding: 0px 8px;
-  font-size: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  @media (max-width: 800px) {
-    font-size: 12px;
-  }
-`;
-
-const StyledTileSubDescription = styled('div')`
-  grid-area: sublabel;
-  padding: 0px 8px;
-  font-size: 11px;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: ${({ theme }) => theme.palette.text.secondary};
-  @media (max-width: 800px) {
-    font-size: 11px;
   }
 `;
 
@@ -149,6 +125,15 @@ export const ProjectTotals: React.FC<{
     query: { size: 1000 },
   });
   const locale = useCurrentLanguage();
+
+  const billingEnabled = useGlobalContext(
+    (c) => c.serverConfiguration.billing.enabled
+  );
+  const isOrganizationOwner = useGlobalContext(
+    (c) => c.preferredOrganization?.currentUserRole === 'OWNER'
+  );
+  const { preferredOrganization } = usePreferredOrganization();
+  const canGoToBilling = billingEnabled && isOrganizationOwner;
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const anchorWidth = useRef();
@@ -186,6 +171,14 @@ export const ProjectTotals: React.FC<{
     );
   };
 
+  const redirectToBilling = () => {
+    history.push(
+      LINKS.ORGANIZATION_BILLING.build({
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.id,
+      })
+    );
+  };
+
   const { satisfiesPermission } = useProjectPermissions();
 
   const canViewMembers = satisfiesPermission('members.view');
@@ -198,6 +191,10 @@ export const ProjectTotals: React.FC<{
 
   const membersAccessible = config.authentication && canViewMembers;
   const membersEditable = membersAccessible && canEditMembers;
+
+  const stringsCount = stats.languageStats
+    .map((i) => i.reviewedKeyCount + i.translatedKeyCount)
+    .reduce((prev, curr) => prev + curr, 0);
 
   return (
     <>
@@ -278,22 +275,27 @@ export const ProjectTotals: React.FC<{
         </StyledTile>
 
         <StyledTile
+          gridArea="strings"
+          data-cy="project-dashboard-strings"
+          onClick={canGoToBilling ? redirectToBilling : undefined}
+          className={clsx({ clickable: canGoToBilling })}
+        >
+          <StyledTileDataItem data-cy="project-dashboard-strings-count">
+            <StyledTileValue>
+              {Number(stringsCount).toLocaleString(locale)}
+            </StyledTileValue>
+            <StyledTileDescription>
+              <StringsHint>{t('project_dashboard_strings_count')}</StringsHint>
+            </StyledTileDescription>
+          </StyledTileDataItem>
+        </StyledTile>
+
+        <StyledTile
           gridArea="users"
           data-cy="project-dashboard-members"
           onClick={membersAccessible ? redirectToPermissions : undefined}
           className={clsx({ clickable: membersAccessible })}
         >
-          <StyledTileDataItem>
-            <StyledTileValue>
-              <OwnerAvatar organizationOwner={project.organizationOwner} />
-            </StyledTileValue>
-            <StyledTileDescriptionSmall>
-              {project.organizationOwner?.name}
-            </StyledTileDescriptionSmall>
-            <StyledTileSubDescription>
-              {t('project_dashboard_project_owner', 'Project Owner')}
-            </StyledTileSubDescription>
-          </StyledTileDataItem>
           <StyledTileDataItem data-cy="project-dashboard-members-count">
             <StyledTileValue>
               {Number(stats.membersCount).toLocaleString(locale)}
@@ -349,23 +351,5 @@ export const ProjectTotals: React.FC<{
         </Menu>
       </StyledTiles>
     </>
-  );
-};
-
-type OwnerAvatarProps = {
-  organizationOwner?: components['schemas']['SimpleOrganizationModel'];
-};
-
-const OwnerAvatar = (props: OwnerAvatarProps) => {
-  return (
-    <AvatarImg
-      size={32}
-      owner={{
-        avatar: props.organizationOwner?.avatar,
-        id: props.organizationOwner!.id,
-        name: props.organizationOwner?.name,
-        type: 'ORG',
-      }}
-    />
   );
 };

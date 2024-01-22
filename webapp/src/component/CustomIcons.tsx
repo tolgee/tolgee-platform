@@ -1,16 +1,19 @@
 import React, { ComponentProps } from 'react';
 import { SvgIcon } from '@mui/material';
 
-import { ReactComponent as ExportSvg } from '../svgs/icons/export.svg';
-import { ReactComponent as ImportSvg } from '../svgs/icons/import.svg';
-import { ReactComponent as ProjectsSvg } from '../svgs/icons/projects.svg';
-import { ReactComponent as SettingsSvg } from '../svgs/icons/settings.svg';
-import { ReactComponent as TranslationSvg } from '../svgs/icons/translation.svg';
-import { ReactComponent as UserAddSvg } from '../svgs/icons/user-add.svg';
-import { ReactComponent as UserSettingSvg } from '../svgs/icons/user-setting.svg';
-import { ReactComponent as TranslationMemorySvg } from '../svgs/icons/translationMemory.svg';
-import { ReactComponent as MachineTranslationSvg } from '../svgs/icons/machineTranslation.svg';
-import { ReactComponent as TadaSvg } from '../svgs/icons/tada.svg';
+import ExportSvg from '../svgs/icons/export.svg?react';
+import ImportSvg from '../svgs/icons/import.svg?react';
+import ProjectsSvg from '../svgs/icons/projects.svg?react';
+import SettingsSvg from '../svgs/icons/settings.svg?react';
+import TranslationSvg from '../svgs/icons/translation.svg?react';
+import UserAddSvg from '../svgs/icons/user-add.svg?react';
+import UserSettingSvg from '../svgs/icons/user-setting.svg?react';
+import TranslationMemorySvg from '../svgs/icons/translationMemory.svg?react';
+import MachineTranslationSvg from '../svgs/icons/machineTranslation.svg?react';
+import TadaSvg from '../svgs/icons/tada.svg?react';
+import RocketSvg from '../svgs/icons/rocket.svg?react';
+import DropZoneSvg from '../svgs/icons/dropzone.svg?react';
+import QSFinishedSvg from '../svgs/icons/qs-finished.svg?react';
 
 type IconProps = ComponentProps<typeof SvgIcon>;
 
@@ -55,4 +58,15 @@ export const MachineTranslationIcon: React.FC<IconProps> = (props) => (
 );
 export const TadaIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={TadaSvg} {...props} />
+);
+export const RocketIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={RocketSvg} {...props} />
+);
+
+export const DropzoneIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={DropZoneSvg} {...props} />
+);
+
+export const QSFinishedIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={QSFinishedSvg} {...props} />
 );

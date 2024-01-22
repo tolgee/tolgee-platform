@@ -4,18 +4,17 @@
 
 package io.tolgee.model
 
-import javax.persistence.Entity
-import javax.persistence.OneToOne
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
+import jakarta.persistence.Entity
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["language_id"], name = "language_stats_language_id_key")])
 class LanguageStats(
   @OneToOne
-  val language: Language
+  val language: Language,
 ) : StandardAuditModel() {
-
   var untranslatedWords: Long = 0
 
   var translatedWords: Long = 0

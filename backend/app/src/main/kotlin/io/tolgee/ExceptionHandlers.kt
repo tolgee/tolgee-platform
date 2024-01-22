@@ -13,6 +13,8 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
+import jakarta.persistence.EntityNotFoundException
+import jakarta.servlet.http.HttpServletRequest
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
@@ -36,8 +38,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
-import javax.persistence.EntityNotFoundException
-import javax.servlet.http.HttpServletRequest
 
 @RestControllerAdvice
 class ExceptionHandlers {
@@ -45,7 +45,7 @@ class ExceptionHandlers {
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
-    ex: MethodArgumentNotValidException
+    ex: MethodArgumentNotValidException,
   ): ResponseEntity<Map<String, Map<String, String>>> {
     val errors: MutableMap<String, String> = HashMap()
     ex.bindingResult.allErrors.forEach(
@@ -53,27 +53,25 @@ class ExceptionHandlers {
         val fieldName = (error as FieldError).field
         val errorMessage = error.getDefaultMessage()
         errors[fieldName] = errorMessage ?: ""
-      }
+      },
     )
     return ResponseEntity(
       Collections.singletonMap<String, Map<String, String>>(ValidationErrorType.STANDARD_VALIDATION.name, errors),
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     )
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-  fun handleValidationExceptions(
-    ex: MethodArgumentTypeMismatchException
-  ): ResponseEntity<ErrorResponseBody> {
+  fun handleValidationExceptions(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
       ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOf(ex.parameter.parameterName) as List<Serializable>?),
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     )
   }
 
   @ExceptionHandler(ValidationException::class)
   fun handleCustomValidationExceptions(
-    ex: ValidationException
+    ex: ValidationException,
   ): ResponseEntity<Map<String, Map<String, List<String>>>> {
     val errors: MutableMap<String, List<String>> = HashMap()
     for (validationError in ex.validationErrors) {
@@ -81,14 +79,12 @@ class ExceptionHandlers {
     }
     return ResponseEntity(
       Collections.singletonMap<String, Map<String, List<String>>>(ValidationErrorType.CUSTOM_VALIDATION.name, errors),
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     )
   }
 
   @ExceptionHandler(BindException::class)
-  fun handleBindExceptions(
-    ex: BindException
-  ): ResponseEntity<MutableMap<String, Map<String, String>>> {
+  fun handleBindExceptions(ex: BindException): ResponseEntity<MutableMap<String, Map<String, String>>> {
     val errors: MutableMap<String, String> = HashMap()
 
     ex.bindingResult.allErrors.forEach { error: ObjectError ->
@@ -99,27 +95,29 @@ class ExceptionHandlers {
 
     return ResponseEntity(
       Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors),
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     )
   }
 
   @ExceptionHandler(MissingServletRequestParameterException::class)
   fun handleMissingServletRequestParameterException(
-    ex: MissingServletRequestParameterException
+    ex: MissingServletRequestParameterException,
   ): ResponseEntity<Map<String, Map<String, String?>>> {
     val errors = Collections.singletonMap(ex.parameterName, ex.message)
     return ResponseEntity(
-      Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST
+      Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors),
+      HttpStatus.BAD_REQUEST,
     )
   }
 
   @ExceptionHandler(MissingServletRequestPartException::class)
   fun handleMissingServletRequestPartException(
-    ex: MissingServletRequestPartException
+    ex: MissingServletRequestPartException,
   ): ResponseEntity<Map<String, Map<String, String?>>> {
     val errors = Collections.singletonMap(ex.requestPartName, ex.message)
     return ResponseEntity(
-      Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST
+      Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors),
+      HttpStatus.BAD_REQUEST,
     )
   }
 
@@ -127,11 +125,12 @@ class ExceptionHandlers {
     responseCode = "400",
     content = [
       Content(
-        schema = Schema(
-          example = """{"code": "you_did_something_wrong", "params": ["something", "wrong"]}"""
-        )
-      )
-    ]
+        schema =
+          Schema(
+            example = """{"code": "you_did_something_wrong", "params": ["something", "wrong"]}""",
+          ),
+      ),
+    ],
   )
   @ExceptionHandler(ErrorException::class)
   fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
@@ -147,11 +146,12 @@ class ExceptionHandlers {
     responseCode = "404",
     content = [
       Content(
-        schema = Schema(
-          example = """{"code": "resource_not_found", "params": null}"""
-        )
-      )
-    ]
+        schema =
+          Schema(
+            example = """{"code": "resource_not_found", "params": null}""",
+          ),
+      ),
+    ],
   )
   @ExceptionHandler(NotFoundException::class)
   fun handleNotFound(ex: NotFoundException): ResponseEntity<ErrorResponseBody> {
@@ -162,7 +162,7 @@ class ExceptionHandlers {
   fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
       ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     )
   }
 
@@ -171,7 +171,7 @@ class ExceptionHandlers {
     val params = ex.rootCause?.message?.let { listOf(it) }
     return ResponseEntity(
       ErrorResponseBody(Message.REQUEST_PARSE_ERROR.code, params),
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     )
   }
 
@@ -187,7 +187,7 @@ class ExceptionHandlers {
     if (contains) {
       return ResponseEntity(
         ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       )
     }
     throw ex
@@ -205,7 +205,7 @@ class ExceptionHandlers {
   fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
     return ResponseEntity(
       RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
-      HttpStatus.TOO_MANY_REQUESTS
+      HttpStatus.TOO_MANY_REQUESTS,
     )
   }
 
@@ -216,9 +216,9 @@ class ExceptionHandlers {
     return ResponseEntity(
       ErrorResponseBody(
         "unexpected_error_occurred",
-        listOf(ex::class.java.name)
+        listOf(ex::class.java.name),
       ),
-      HttpStatus.INTERNAL_SERVER_ERROR
+      HttpStatus.INTERNAL_SERVER_ERROR,
     )
   }
 
@@ -235,7 +235,10 @@ class ExceptionHandlers {
   }
 
   @ExceptionHandler(ClientAbortException::class)
-  fun handleClientAbortException(exception: ClientAbortException?, request: HttpServletRequest) {
+  fun handleClientAbortException(
+    exception: ClientAbortException?,
+    request: HttpServletRequest,
+  ) {
     val message = "ClientAbortException generated by request {} {} from remote address {} with X-FORWARDED-FOR {}"
     val headerXFF = request.getHeader("X-FORWARDED-FOR")
     logger.warn(message, request.method, request.requestURL, request.remoteAddr, headerXFF)

@@ -5,21 +5,21 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.UntagKeysRequest
 import io.tolgee.model.batch.params.UntagKeysParams
 import io.tolgee.service.key.TagService
+import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class UntagKeysChunkProcessor(
   private val entityManager: EntityManager,
-  private val tagService: TagService
+  private val tagService: TagService,
 ) : ChunkProcessor<UntagKeysRequest, UntagKeysParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     @Suppress("UNCHECKED_CAST")
     val subChunked = chunk.chunked(100) as List<List<Long>>

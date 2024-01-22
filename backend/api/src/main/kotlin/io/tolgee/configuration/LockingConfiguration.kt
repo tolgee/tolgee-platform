@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class LockingConfiguration(
   val usingRedisProvider: UsingRedisProvider,
-  val applicationContext: ApplicationContext
+  val applicationContext: ApplicationContext,
 ) {
   @Bean
   fun redisLockingProvider(): LockingProvider {

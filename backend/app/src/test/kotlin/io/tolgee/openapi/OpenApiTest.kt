@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class OpenApiTest : AbstractControllerTest() {
-
   @Test
   fun `accessible with api key is generated`() {
     performGet("/v3/api-docs/Accessible with API key").andIsOk.andAssertThatJson {

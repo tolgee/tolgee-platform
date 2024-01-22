@@ -27,6 +27,7 @@ import io.tolgee.util.addMinutes
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import io.tolgee.websocket.WebsocketTestHelper
+import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.any
@@ -41,21 +42,19 @@ import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.Duration
 import java.util.*
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 class BatchJobTestUtil(
   private val applicationContext: ApplicationContext,
-  private val testData: BatchJobsTestData
+  private val testData: BatchJobsTestData,
 ) : Logging {
-
   lateinit var websocketHelper: WebsocketTestHelper
 
   fun assertPreTranslationProcessExecutedTimes(times: Int) {
     waitForNotThrowing(pollTime = 1000) {
       verify(
         preTranslationByTmChunkProcessor,
-        times(times)
+        times(times),
       ).process(any(), any(), any(), any())
     }
   }
@@ -112,7 +111,10 @@ class BatchJobTestUtil(
     }
   }
 
-  fun assertJobFailedWithMessage(job: BatchJob, message: Message) {
+  fun assertJobFailedWithMessage(
+    job: BatchJob,
+    message: Message,
+  ) {
     waitForNotThrowing {
       executeInNewTransaction(transactionManager) {
         batchJobService.getView(job.id).errorMessage.assert.isEqualTo(message)
@@ -127,7 +129,7 @@ class BatchJobTestUtil(
         any(),
         argThat { this.containsAll((1L..10).toList()) },
         any(),
-        any()
+        any(),
       )
   }
 
@@ -137,7 +139,10 @@ class BatchJobTestUtil(
       .process(any(), any(), any(), any())
   }
 
-  fun verifyConstantRepeats(repeats: Int, timeout: Long = 2000) {
+  fun verifyConstantRepeats(
+    repeats: Int,
+    timeout: Long = 2000,
+  ) {
     repeat(repeats) {
       waitForNotThrowing {
         batchJobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + timeout }.assert.isNotNull
@@ -147,14 +152,15 @@ class BatchJobTestUtil(
   }
 
   fun makeDeleteKeysProcessorThrowDifferentGenericExceptions() {
-    val exceptions = (0..100).flatMap {
-      listOf(
-        IllegalStateException("a"),
-        NotFoundException(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE),
-        RuntimeException("c"),
-        RuntimeException(IllegalStateException("d")),
-      )
-    }
+    val exceptions =
+      (0..100).flatMap {
+        listOf(
+          IllegalStateException("a"),
+          NotFoundException(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE),
+          RuntimeException("c"),
+          RuntimeException(IllegalStateException("d")),
+        )
+      }
 
     doThrow(*exceptions.toTypedArray())
       .whenever(deleteKeysChunkProcessor).process(any(), any(), any(), any())
@@ -179,7 +185,10 @@ class BatchJobTestUtil(
     }
   }
 
-  fun assertTotalExecutionsCount(job: BatchJob, count: Int) {
+  fun assertTotalExecutionsCount(
+    job: BatchJob,
+    count: Int,
+  ) {
     waitForNotThrowing(pollTime = 100, timeout = 2000) {
       entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
         .setParameter("id", job.id).resultList.assert.hasSize(count)
@@ -201,7 +210,7 @@ class BatchJobTestUtil(
       any(),
       any(),
       any(),
-      any()
+      any(),
     )
   }
 
@@ -237,22 +246,23 @@ class BatchJobTestUtil(
         cause = OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS),
         delayInMs = 100,
         increaseFactor = 10,
-        maxRetries = 3
-      )
+        maxRetries = 3,
+      ),
     ).whenever(preTranslationByTmChunkProcessor).process(
       any(),
       argThat { this.containsAll(throwingChunk) },
       any(),
-      any()
+      any(),
     )
   }
 
   fun initWebsocketHelper() {
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtService.emitToken(testData.user.id),
-      testData.projectBuilder.self.id
-    )
+    websocketHelper =
+      WebsocketTestHelper(
+        port,
+        jwtService.emitToken(testData.user.id),
+        testData.projectBuilder.self.id,
+      )
     websocketHelper.listenForBatchJobProgress()
   }
 
@@ -265,13 +275,14 @@ class BatchJobTestUtil(
   }
 
   fun makePreTranslateProcessorThrowOutOfCreditsTimes(times: Int) {
-    val exceptions = (1..times).map { _ ->
-      FailedDontRequeueException(
-        Message.OUT_OF_CREDITS,
-        cause = OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS),
-        successfulTargets = listOf()
-      )
-    }
+    val exceptions =
+      (1..times).map { _ ->
+        FailedDontRequeueException(
+          Message.OUT_OF_CREDITS,
+          cause = OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS),
+          successfulTargets = listOf(),
+        )
+      }
 
     doThrow(*exceptions.toTypedArray()).doAnswer { }
       .whenever(preTranslationByTmChunkProcessor)
@@ -295,21 +306,20 @@ class BatchJobTestUtil(
     batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(0L)
   }
 
-  fun getExecutions(
-    jobIds: List<Long>,
-  ): Map<Long, List<BatchJobChunkExecution>> =
+  fun getExecutions(jobIds: List<Long>): Map<Long, List<BatchJobChunkExecution>> =
     entityManager.createQuery(
       """from BatchJobChunkExecution b left join fetch b.batchJob where b.batchJob.id in :ids""",
-      BatchJobChunkExecution::class.java
+      BatchJobChunkExecution::class.java,
     )
       .setParameter("ids", jobIds).resultList.groupBy { it.batchJob.id }
 
   fun runChunkedJob(keyCount: Int): BatchJob {
     return executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
-        request = PreTranslationByTmRequest().apply {
-          keyIds = (1L..keyCount).map { it }
-        },
+        request =
+          PreTranslationByTmRequest().apply {
+            keyIds = (1L..keyCount).map { it }
+          },
         project = testData.projectBuilder.self,
         author = testData.user,
         type = BatchJobType.PRE_TRANSLATE_BT_TM,
@@ -320,9 +330,10 @@ class BatchJobTestUtil(
   fun runSingleChunkJob(keyCount: Int): BatchJob {
     return executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
-        request = DeleteKeysRequest().apply {
-          keyIds = (1L..keyCount).map { it }
-        },
+        request =
+          DeleteKeysRequest().apply {
+            keyIds = (1L..keyCount).map { it }
+          },
         project = testData.projectBuilder.self,
         author = testData.user,
         type = BatchJobType.DELETE_KEYS,
@@ -331,13 +342,21 @@ class BatchJobTestUtil(
   }
 
   fun runDebouncedJob(): BatchJob {
+    return runAutomationJob(Duration.ofSeconds(10))
+  }
+
+  fun runNonExclusiveJob(): BatchJob {
+    return runAutomationJob(null)
+  }
+
+  private fun runAutomationJob(duration: Duration?): BatchJob {
     return executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
         request = AutomationBjRequest(1, 1, 1),
         project = testData.projectBuilder.self,
         author = testData.user,
         type = BatchJobType.AUTOMATION,
-        debounceDuration = Duration.ofSeconds(10)
+        debounceDuration = duration,
       )
     }
   }
@@ -346,6 +365,13 @@ class BatchJobTestUtil(
     waitForNotThrowing(pollTime = 50, timeout = 2000) {
       batchJobChunkExecutionQueue.size.assert.isEqualTo(size)
     }
+  }
+
+  fun waitAndClearQueue(waitForQueueSize: Int) {
+    this.waitForQueueSize(waitForQueueSize)
+    batchJobChunkExecutionQueue.clear()
+    this.waitForQueueSize(0)
+    batchJobConcurrentLauncher.pause = false
   }
 
   fun waitForExecutionSuccess(execution: BatchJobChunkExecution) {
@@ -361,7 +387,7 @@ class BatchJobTestUtil(
   fun verifiedTriedToLockJob(jobId: Long) {
     waitForNotThrowing {
       verify(batchJobProjectLockingManager, atLeast(1))
-        .canRunBatchJobOfExecution(ArgumentMatchers.eq(jobId))
+        .canLockJobForProject(ArgumentMatchers.eq(jobId))
     }
   }
 
@@ -374,7 +400,7 @@ class BatchJobTestUtil(
       // the project was unlocked before job2 acquired the job
       verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(
         ArgumentMatchers.eq(job.project.id),
-        ArgumentMatchers.eq(job.id)
+        ArgumentMatchers.eq(job.id),
       )
     }
   }
@@ -423,4 +449,7 @@ class BatchJobTestUtil(
 
   private val batchJobService: BatchJobService
     get() = applicationContext.getBean(BatchJobService::class.java)
+
+  private val batchJobConcurrentLauncher: BatchJobConcurrentLauncher
+    get() = applicationContext.getBean(BatchJobConcurrentLauncher::class.java)
 }

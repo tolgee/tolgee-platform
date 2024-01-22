@@ -4,5 +4,5 @@ import io.tolgee.model.UserAccount
 
 class OnUserCreated(
   source: Any,
-  userAccount: UserAccount
+  userAccount: UserAccount,
 ) : UserAccountEvent(source, userAccount)

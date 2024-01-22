@@ -33,16 +33,18 @@ class ProjectsTestData : BaseTestData() {
           type = ProjectPermissionType.MANAGE
         }
 
-        project2English = addLanguage {
-          name = "English"
-          tag = "en"
-          this@buildProject.self.baseLanguage = this
-        }.self
+        project2English =
+          addLanguage {
+            name = "English"
+            tag = "en"
+            this@buildProject.self.baseLanguage = this
+          }.self
 
-        project2Deutsch = addLanguage {
-          name = "Deutsch"
-          tag = "de"
-        }.self
+        project2Deutsch =
+          addLanguage {
+            name = "Deutsch"
+            tag = "de"
+          }.self
 
         addPermission {
           user = userWithTranslatePermission

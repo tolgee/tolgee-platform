@@ -19,12 +19,12 @@ describe('Former user', () => {
   });
 
   afterEach(() => {
-    // formerUserTestData.clean();
+    formerUserTestData.clean();
   });
 
   it('shows the former user in activity', () => {
     cy.visit(`${HOST}/projects/${projectId}`);
-    cy.contains('Project').should('be.visible');
+    cy.gcy('project-dashboard-activity-list').should('be.visible');
     cy.gcy('former-user-name').should('be.visible');
   });
 
@@ -32,6 +32,7 @@ describe('Former user', () => {
     visitTranslations(projectId);
     cy.gcy('translations-cell-comments-button').click();
     cy.gcy('translations-cell-tab-history').click();
+    cy.waitForDom();
     cy.gcy('translation-history-item')
       .findDcy('auto-avatar-img')
       .trigger('mouseover');
@@ -41,6 +42,7 @@ describe('Former user', () => {
   it('shows the former user in translation comments', () => {
     visitTranslations(projectId);
     cy.gcy('translations-cell-comments-button').click();
+    cy.waitForDom();
     cy.gcy('comment').findDcy('auto-avatar-img').trigger('mouseover');
     cy.gcy('former-user-name').should('be.visible');
   });

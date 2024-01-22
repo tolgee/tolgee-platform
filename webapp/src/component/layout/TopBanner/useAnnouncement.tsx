@@ -9,7 +9,7 @@ type AnnouncementDtoType = components['schemas']['AnnouncementDto']['type'];
 export function useAnnouncement() {
   const { t } = useTranslate();
 
-  return (value: AnnouncementDtoType) => {
+  return function AnnouncementWrapper(value: AnnouncementDtoType) {
     switch (value) {
       case 'FEATURE_BATCH_OPERATIONS':
         return (
@@ -43,6 +43,14 @@ export function useAnnouncement() {
             }
           />
         );
+      case 'NEW_PRICING':
+        return (
+          <Announcement
+            content={<T keyName="announcement_new_pricing" />}
+            link="https://tolgee.io/blog/new-pricing-2024-01"
+          />
+        );
+
       default:
         assertUnreachable(value);
     }

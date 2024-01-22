@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.ResultActions
 
 class InvitationTestUtil(
   private val test: ProjectAuthControllerTest,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
   fun perform(fn: ProjectInviteUserDto.(getLang: LangByTag) -> Unit): ResultActions {
     val testData = prepareTestData()
@@ -23,12 +23,12 @@ class InvitationTestUtil(
       "/invite",
       ProjectInviteUserDto().apply {
         fn(
-          this
+          this,
         ) { tag ->
           testData.projectBuilder.data.languages.find { it.self.tag == tag }?.self?.id
             ?: throw NullPointerException("Language $tag not found")
         }
-      }
+      },
     )
   }
 

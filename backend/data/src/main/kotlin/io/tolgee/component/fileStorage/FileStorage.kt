@@ -4,9 +4,16 @@ import io.tolgee.exceptions.FileStoreException
 
 interface FileStorage {
   fun readFile(storageFilePath: String): ByteArray
+
   fun deleteFile(storageFilePath: String)
-  fun storeFile(storageFilePath: String, bytes: ByteArray)
+
+  fun storeFile(
+    storageFilePath: String,
+    bytes: ByteArray,
+  )
+
   fun fileExists(storageFilePath: String): Boolean
+
   fun test() {
     try {
       this.storeFile("test", "test".toByteArray())

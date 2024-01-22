@@ -9,6 +9,8 @@ import {
   Emphasis,
   Marker,
   Navbar,
+  QuickStart,
+  Tile,
   TopBanner,
 } from './colors';
 
@@ -16,11 +18,15 @@ declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
+import { colors } from './colors';
+
+const all = { ...colors.light, ...colors.dark };
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
     primaryText: string;
     divider1: string;
+    tile: Tile;
     cell: Cell;
     default: PaletteColor;
     navbar: Navbar;
@@ -32,11 +38,14 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
+    quickStart: QuickStart;
+    import: typeof all.import;
   }
 
   interface PaletteOptions {
     primaryText: string;
     divider1: string;
+    tile: Tile;
     cell: Cell;
     default: PaletteColor;
     navbar: Navbar;
@@ -48,6 +57,8 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
+    quickStart: QuickStart;
+    import: typeof all.import;
   }
 }
 

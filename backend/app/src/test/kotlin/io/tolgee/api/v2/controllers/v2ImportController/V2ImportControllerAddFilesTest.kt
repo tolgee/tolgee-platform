@@ -14,6 +14,7 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
@@ -67,16 +68,40 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   @AfterEach
   fun resetProps() {
     tolgeeProperties.maxTranslationTextLength = 10000
+    (fileStorage as InMemoryFileStorage).clear()
+    tolgeeProperties.import.storeFilesForDebugging = false
   }
 
   @Test
-  fun `it parses zip file and saves issues`() {
+  fun `it parses zip file stores it for debugging and saves issues`() {
+    tolgeeProperties.import.storeFilesForDebugging = true
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performImport(projectId = base.project.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown))).andAssertThatJson {
+    val fileName = "zipOfUnknown.zip"
+    performImport(projectId = base.project.id, mapOf(Pair(fileName, zipOfUnknown))).andAssertThatJson {
       node("errors[2].code").isEqualTo("cannot_parse_file")
     }
+
+    doesStoredFileExists(fileName, base.project.id).assert.isTrue()
+  }
+
+  @Test
+  fun `doesn't store file for when disabled`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    commitTransaction()
+
+    val fileName = "zipOfUnknown.zip"
+    performImport(projectId = base.project.id, mapOf(Pair(fileName, zipOfUnknown)))
+    doesStoredFileExists(fileName, base.project.id).assert.isFalse()
+  }
+
+  fun doesStoredFileExists(
+    fileName: String,
+    projectId: Long,
+  ): Boolean {
+    val import = importService.find(projectId, userAccount!!.id)
+    return fileStorage.fileExists("importFiles/${import!!.id}/$fileName")
   }
 
   @Test
@@ -179,7 +204,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("tooLongTranslation.json", tooLongTranslation))
+        mapOf(Pair("tooLongTranslation.json", tooLongTranslation)),
       ).andIsOk
     }
 
@@ -201,10 +226,10 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        null
+        null,
       ).andIsBadRequest.andAssertThatJson {
         node("STANDARD_VALIDATION") {
-          node("files").isEqualTo("Required request part 'files' is not present")
+          node("files").isEqualTo("Required part 'files' is not present.")
         }
       }
     }
@@ -219,7 +244,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("namespaces.zip", namespacesZip))
+        mapOf(Pair("namespaces.zip", namespacesZip)),
       ).andIsOk
     }
 
@@ -243,7 +268,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("namespaces.zip", namespacesMacZip))
+        mapOf(Pair("namespaces.zip", namespacesMacZip)),
       ).andIsOk
     }
 
@@ -262,7 +287,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue))
+        mapOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue)),
       ).andIsOk
     }
 
@@ -272,7 +297,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
         assertThat(it.files[0].issues[0].params[2].value).isEqualTo(
           "[Lorem ipsum dolor sit amet," +
             " consectetur adipiscing elit. Suspendisse" +
-            " ac ultricies tortor. Integer ac..."
+            " ac ultricies tortor. Integer ac...",
         )
       }
     }
@@ -287,7 +312,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = testData.project.id,
-        mapOf(Pair("importWithConflicts.zip", importWithConflicts))
+        mapOf(Pair("importWithConflicts.zip", importWithConflicts)),
       ).andIsOk.andAssertThatJson {
         node("result.page.totalElements").isEqualTo(2)
         node("result._embedded.languages[0].conflictCount").isEqualTo(1)
@@ -296,7 +321,10 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     }
   }
 
-  private fun validateSavedJsonImportData(project: Project, userAccount: UserAccount) {
+  private fun validateSavedJsonImportData(
+    project: Project,
+    userAccount: UserAccount,
+  ) {
     importService.find(project.id, userAccount.id)!!.let { importEntity ->
       entityManager.refresh(importEntity)
       assertThat(importEntity.files.size).isEqualTo(3)
@@ -318,17 +346,20 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   private fun performImport(
     projectId: Long,
     files: Map<String?, Resource>?,
-    params: Map<String, Any?> = mapOf()
+    params: Map<String, Any?> = mapOf(),
   ): ResultActions {
-    val builder = MockMvcRequestBuilders
-      .multipart("/v2/projects/$projectId/import?${mapToQueryString(params)}")
+    val builder =
+      MockMvcRequestBuilders
+        .multipart("/v2/projects/$projectId/import?${mapToQueryString(params)}")
 
     files?.forEach {
       builder.file(
         MockMultipartFile(
-          "files", it.key, "application/zip",
-          it.value.file.readBytes()
-        )
+          "files",
+          it.key,
+          "application/zip",
+          it.value.file.readBytes(),
+        ),
       )
     }
 

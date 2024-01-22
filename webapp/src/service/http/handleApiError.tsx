@@ -1,20 +1,14 @@
-import { container } from 'tsyringe';
-import { MessageService } from 'tg.service/MessageService';
-import { TokenService } from 'tg.service/TokenService';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { messageService } from 'tg.service/MessageService';
+import { tokenService } from 'tg.service/TokenService';
+import { redirectionActions } from 'tg.store/global/RedirectionActions';
 import { T } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
 import { GlobalError } from 'tg.error/GlobalError';
-import { ErrorActions } from 'tg.store/global/ErrorActions';
+import { errorActions } from 'tg.store/global/ErrorActions';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import * as Sentry from '@sentry/browser';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { RequestOptions } from './ApiHttpService';
-
-const tokenService = container.resolve(TokenService);
-const messageService = container.resolve(MessageService);
-const redirectionActions = container.resolve(RedirectionActions);
-const errorActions = container.resolve(ErrorActions);
 
 export const handleApiError = (
   r: Response,

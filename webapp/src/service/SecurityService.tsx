@@ -1,17 +1,16 @@
 import { T } from '@tolgee/react';
-import { singleton } from 'tsyringe';
 
 import { API_LINKS } from '../constants/apiLinks';
 import { LINKS, PARAMS } from '../constants/links';
 import { InvitationCodeService } from './InvitationCodeService';
-import { MessageService } from './MessageService';
-import { TokenService } from './TokenService';
-import { ApiSchemaHttpService } from './http/ApiSchemaHttpService';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { messageService } from './MessageService';
+import { tokenService } from './TokenService';
+import { apiSchemaHttpService } from './http/ApiSchemaHttpService';
+import { apiV1HttpService } from './http/ApiV1HttpService';
 import { ErrorResponseDto, TokenDTO } from './response.types';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
-const API_URL = process.env.REACT_APP_API_URL + '/api/';
+const API_URL = import.meta.env.VITE_APP_API_URL + '/api/';
 
 interface ResetPasswordPostRequest {
   email: string;
@@ -19,15 +18,7 @@ interface ResetPasswordPostRequest {
   password: string;
 }
 
-@singleton()
 export class SecurityService {
-  constructor(
-    private http: ApiV1HttpService,
-    private tokenService: TokenService,
-    private messageService: MessageService,
-    private apiSchemaService: ApiSchemaHttpService
-  ) {}
-
   public authorizeOAuthLogin = async (
     type: string,
     code: string
@@ -48,8 +39,8 @@ export class SecurityService {
 
   logout() {
     this.removeAfterLoginLink();
-    this.tokenService.disposeToken();
-    this.tokenService.disposeAdminToken();
+    tokenService.disposeToken();
+    tokenService.disposeAdminToken();
   }
 
   async login(v: { username: string; password: string }): Promise<TokenDTO> {
@@ -65,12 +56,12 @@ export class SecurityService {
   }
 
   setToken(token: string) {
-    this.tokenService.setToken(token);
+    tokenService.setToken(token);
   }
 
   public resetPasswordRequest = (email: string) => {
     const url = `${API_LINKS.RESET_PASSWORD_REQUEST}`;
-    return this.http.post<never>(url, {
+    return apiV1HttpService.post<never>(url, {
       email: email,
       callbackUrl: LINKS.RESET_PASSWORD.buildWithOrigin(),
     });
@@ -80,7 +71,7 @@ export class SecurityService {
     const url = `${API_LINKS.RESET_PASSWORD_VALIDATE}/${encodeURIComponent(
       email
     )}/${encodeURIComponent(code)}`;
-    return this.http.get<never>(url);
+    return apiV1HttpService.get<never>(url);
   };
 
   public resetPasswordSet = async (
@@ -89,12 +80,12 @@ export class SecurityService {
     password: string
   ): Promise<void> => {
     const url = `${API_LINKS.RESET_PASSWORD_SET}`;
-    const res = await this.http.post<never>(url, {
+    const res = await apiV1HttpService.post<never>(url, {
       email,
       code,
       password,
     } as ResetPasswordPostRequest);
-    this.messageService.success(<T keyName="password_reset_message" />);
+    messageService.success(<T keyName="password_reset_message" />);
     return res;
   };
 
@@ -136,18 +127,18 @@ export class SecurityService {
 
     const tokenDTO: TokenDTO = await response.json();
 
-    this.tokenService.setToken(tokenDTO.accessToken);
+    tokenService.setToken(tokenDTO.accessToken);
 
     const code = InvitationCodeService.getCode();
     if (code) {
       try {
-        await this.apiSchemaService.schemaRequest(
+        await apiSchemaHttpService.schemaRequest(
           '/v2/invitations/{code}/accept',
           'get'
         )({ path: { code } });
       } catch (e: any) {
         if (e.code === 'invitation_code_does_not_exist_or_expired') {
-          this.messageService.error(<TranslatedError code={e.code} />);
+          messageService.error(<TranslatedError code={e.code} />);
         } else {
           throw e;
         }
@@ -157,3 +148,5 @@ export class SecurityService {
     return tokenDTO;
   }
 }
+
+export const securityService = new SecurityService();

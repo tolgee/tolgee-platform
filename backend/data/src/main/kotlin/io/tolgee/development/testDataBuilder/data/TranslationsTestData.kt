@@ -26,69 +26,74 @@ class TranslationsTestData {
   lateinit var aKeyGermanTranslation: Translation
   lateinit var keysOnlyUser: UserAccount
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    val userAccountBuilder = addUserAccount {
-      username = "franta"
-      user = this
-    }
-    addProject {
-      name = "Franta's project"
-      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-      project = this
-    }.build project@{
-      addPermission {
-        user = this@TranslationsTestData.user
-        type = ProjectPermissionType.MANAGE
-      }
-      englishLanguage = addLanguage {
-        name = "English"
-        tag = "en"
-        originalName = "English"
-        this@project.self.baseLanguage = this
-      }.self
-      germanLanguage = addLanguage {
-        name = "German"
-        tag = "de"
-        originalName = "Deutsch"
-      }.self
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      val userAccountBuilder =
+        addUserAccount {
+          username = "franta"
+          user = this
+        }
+      addProject {
+        name = "Franta's project"
+        organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        project = this
+      }.build project@{
+        addPermission {
+          user = this@TranslationsTestData.user
+          type = ProjectPermissionType.MANAGE
+        }
+        englishLanguage =
+          addLanguage {
+            name = "English"
+            tag = "en"
+            originalName = "English"
+            this@project.self.baseLanguage = this
+          }.self
+        germanLanguage =
+          addLanguage {
+            name = "German"
+            tag = "de"
+            originalName = "Deutsch"
+          }.self
 
-      addKey {
-        name = "A key"
-        aKey = this
-      }.build {
-        addTranslation {
-          language = germanLanguage
-          text = "Z translation"
-          state = TranslationState.REVIEWED
-          auto = true
-          outdated = true
-          mtProvider = MtServiceType.GOOGLE
-          aKeyGermanTranslation = this
+        addKey {
+          name = "A key"
+          aKey = this
         }.build {
-          addComment {
-            author = user
-            text = "Comment"
+          addTranslation {
+            language = germanLanguage
+            text = "Z translation"
+            state = TranslationState.REVIEWED
+            auto = true
+            outdated = true
+            mtProvider = MtServiceType.GOOGLE
+            aKeyGermanTranslation = this
+          }.build {
+            addComment {
+              author = user
+              text = "Comment"
+            }
+          }
+          addTag("Cool tag")
+        }
+
+        val zKeyBuilder =
+          addKey {
+            name = "Z key"
+          }
+        zKeyBuilder.build {
+          addTranslation {
+            key = zKeyBuilder.self
+            language = englishLanguage
+            text = "A translation"
+            auto = true
+          }.build {
+            addTag("Lame tag")
           }
         }
-        addTag("Cool tag")
-      }
-
-      val zKeyBuilder = addKey {
-        name = "Z key"
-      }
-      zKeyBuilder.build {
-        addTranslation {
-          key = zKeyBuilder.self
-          language = englishLanguage
-          text = "A translation"
-          auto = true
-        }.build {
-          addTag("Lame tag")
-        }
-      }
-      projectBuilder = this
-    }.self
-  }
+        projectBuilder = this
+      }.self
+    }
 
   fun addKeysViewOnlyUser() {
     root.apply {

@@ -14,7 +14,7 @@ const StyledRoot = styled(Box)`
   display: grid;
   gap: 0.5rem;
 
-  ${(props) => props.theme.breakpoints.up('md')} {
+  @container (min-width: 899px) {
     // prettier-ignore
     grid-template-columns: minmax(200px, 1fr) minmax(0, 1fr) auto auto;
   }

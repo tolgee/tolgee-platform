@@ -1,14 +1,13 @@
 package io.tolgee.controllers.internal
 
 import io.swagger.v3.oas.annotations.Hidden
-import org.hibernate.Session
+import jakarta.persistence.EntityManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.persistence.EntityManager
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -16,20 +15,21 @@ import javax.persistence.EntityManager
 @RequestMapping(value = ["internal/sql"])
 @Transactional
 class SqlController(
-  val entityManager: EntityManager
+  val entityManager: EntityManager,
 ) {
-
   @PostMapping(value = ["/list"])
   @Transactional
-  fun getList(@RequestBody query: String): MutableList<Any?>? {
-    val session = entityManager.unwrap(Session::class.java)
-    return session.createNativeQuery(query).list()
+  fun getList(
+    @RequestBody query: String,
+  ): MutableList<Any?>? {
+    return entityManager.createNativeQuery(query).resultList
   }
 
   @PostMapping(value = ["/execute"])
   @Transactional
-  fun execute(@RequestBody query: String) {
-    val session = entityManager.unwrap(Session::class.java)
-    session.createNativeQuery(query).executeUpdate()
+  fun execute(
+    @RequestBody query: String,
+  ) {
+    entityManager.createNativeQuery(query).executeUpdate()
   }
 }

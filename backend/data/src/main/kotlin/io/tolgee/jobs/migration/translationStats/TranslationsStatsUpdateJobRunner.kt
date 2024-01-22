@@ -22,9 +22,8 @@ class TranslationsStatsUpdateJobRunner(
   val translationStatsJob: Job,
   val jobLauncher: JobLauncher,
   val translationRepository: TranslationRepository,
-  val jobRepository: JobRepository
+  val jobRepository: JobRepository,
 ) : MigrationJobRunner {
-
   val log = LoggerFactory.getLogger(this::class.java)
 
   override fun run(): JobExecution? {
@@ -43,6 +42,6 @@ class TranslationsStatsUpdateJobRunner(
       return null
     }
     val hash = DigestUtils.sha256Hex(ids.flatMap { it.toBigInteger().toByteArray().toList() }.toByteArray())
-    return JobParameters(mapOf("idsHash" to JobParameter(hash)))
+    return JobParameters(mapOf("idsHash" to JobParameter(hash, String::class.java)))
   }
 }

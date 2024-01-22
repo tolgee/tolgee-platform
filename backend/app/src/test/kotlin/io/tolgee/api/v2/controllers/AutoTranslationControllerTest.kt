@@ -39,7 +39,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
         "useMachineTranslation=true" +
         "&languages=de" +
         "&languages=es",
-      null
+      null,
     ).andIsOk
     assertThat(testData.thisIsBeautifulKey.getLangTranslation(testData.spanishLanguage).text)
       .isEqualTo("Translated with Google")
@@ -55,7 +55,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
       "keys/${testData.thisIsBeautifulKey.id}/auto-translate?" +
         "languages=${testData.spanishLanguage.tag}&" +
         "useMachineTranslation=true",
-      null
+      null,
     ).andIsOk
     assertThat(testData.thisIsBeautifulKey.getLangTranslation(testData.spanishLanguage).text)
       .isEqualTo("Translated with Google")
@@ -72,7 +72,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
       "keys/${another.id}/auto-translate?" +
         "languages=${testData.germanLanguage.tag}&" +
         "useTranslationMemory=true",
-      null
+      null,
     ).andIsOk
     val translation = another.getLangTranslation(testData.germanLanguage)
     assertThat(translation.mtProvider).isEqualTo(null)
@@ -88,7 +88,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
         "useMachineTranslation=true" +
         "&languages=de" +
         "&languages=es",
-      null
+      null,
     ).andIsOk
     assertThat(testData.thisIsBeautifulKey.getLangTranslation(testData.spanishLanguage).text)
       .isEqualTo("Translated with Google")
@@ -105,7 +105,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
         "useMachineTranslation=true" +
         "&languages=de" +
         "&languages=es",
-      null
+      null,
     ).andIsForbidden
   }
 
@@ -118,7 +118,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
       "keys/${another.id}/auto-translate?" +
         "languages=en&" +
         "useTranslationMemory=true",
-      null
+      null,
     ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_TRANSLATE_BASE_LANGUAGE)
   }
 

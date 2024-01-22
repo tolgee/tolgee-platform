@@ -20,13 +20,14 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/v2/preferred-organization"])
 @Tag(name = "Organizations")
 class PreferredOrganizationController(
-  private val preferredOrganizationFacade: PreferredOrganizationFacade
+  private val preferredOrganizationFacade: PreferredOrganizationFacade,
 ) {
   @GetMapping("")
   @Operation(
-    summary = "Returns preferred organization. " +
-      "If server allows users to create organization, preferred organization is automatically created " +
-      "if user doesn't have access to any organization."
+    summary =
+      "Returns preferred organization. " +
+        "If server allows users to create organization, preferred organization is automatically created " +
+        "if user doesn't have access to any organization.",
   )
   fun getPreferred(): PrivateOrganizationModel {
     return preferredOrganizationFacade.getPreferred() ?: throw PermissionException(Message.CANNOT_CREATE_ORGANIZATION)

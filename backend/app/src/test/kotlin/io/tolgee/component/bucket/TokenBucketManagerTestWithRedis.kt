@@ -14,7 +14,7 @@ import org.springframework.test.context.ContextConfiguration
     "tolgee.websocket.use-redis=true",
     "spring.redis.port=56379",
   ],
-  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ContextConfiguration(initializers = [TokenBucketManagerTestWithRedis.Companion.Initializer::class])
 class TokenBucketManagerTestWithRedis : AbstractTokenBucketManagerTest() {

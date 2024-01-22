@@ -68,7 +68,7 @@ export const OrganizationSubscriptionsView: FunctionComponent = () => {
         ],
       ]}
       windowTitle={t({ key: 'organization_subscriptions_title', noWrap: true })}
-      containerMaxWidth="xl"
+      maxWidth="wide"
     >
       <Box mb={2}>
         <ButtonGroup>

@@ -13,6 +13,7 @@ import { T } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const ImportConflictsDataHeader: FunctionComponent<{
   language: components['schemas']['ImportLanguageModel'];
@@ -20,7 +21,10 @@ export const ImportConflictsDataHeader: FunctionComponent<{
   const project = useProject();
 
   const theme = useTheme();
-  const isSmOrLower = useMediaQuery(theme.breakpoints.down('md'));
+  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const isSmOrLower = useMediaQuery(
+    `@media(max-width: ${899 + rightPanelWidth}px)`
+  );
 
   const setOverrideMutation = useApiMutation({
     url: '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override',

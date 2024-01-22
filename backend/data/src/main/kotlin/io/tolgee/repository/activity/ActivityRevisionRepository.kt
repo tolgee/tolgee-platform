@@ -15,9 +15,13 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """
     from ActivityRevision ar
     where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
-  """
+  """,
   )
-  fun getForProject(projectId: Long, pageable: Pageable, types: List<ActivityType>): Page<ActivityRevision>
+  fun getForProject(
+    projectId: Long,
+    pageable: Pageable,
+    types: List<ActivityType>,
+  ): Page<ActivityRevision>
 
   @Query(
     """
@@ -26,11 +30,11 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       join ar.describingRelations dr
       where ar.id in :revisionIds
       and ar.type in :allowedTypes
-    """
+    """,
   )
   fun getRelationsForRevisions(
     revisionIds: List<Long>,
-    allowedTypes: Collection<ActivityType>
+    allowedTypes: Collection<ActivityType>,
   ): List<ActivityDescribingEntity>
 
   @Query(
@@ -41,9 +45,12 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       where ar.id in :revisionIds
       and ar.type in :allowedTypes
       group by ar.id, me.entityClass
-    """
+    """,
   )
-  fun getModifiedEntityTypeCounts(revisionIds: List<Long>, allowedTypes: Collection<ActivityType>): List<Array<Any>>
+  fun getModifiedEntityTypeCounts(
+    revisionIds: List<Long>,
+    allowedTypes: Collection<ActivityType>,
+  ): List<Array<Any>>
 
   @Query(
     """
@@ -52,7 +59,7 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       where ar.projectId = :projectId
       group by date
       order by date
-    """
+    """,
   )
   fun getProjectDailyActivity(projectId: Long): List<Array<Any>>
 }

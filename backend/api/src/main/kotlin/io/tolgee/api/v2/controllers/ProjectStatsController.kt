@@ -33,7 +33,7 @@ class ProjectStatsController(
   private val projectHolder: ProjectHolder,
   private val projectService: ProjectService,
   private val languageStatsService: LanguageStatsService,
-  private val languageStatsModelAssembler: LanguageStatsModelAssembler
+  private val languageStatsModelAssembler: LanguageStatsModelAssembler,
 ) {
   @Operation(summary = "Returns project stats")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -42,9 +42,10 @@ class ProjectStatsController(
   fun getProjectStats(): ProjectStatsModel {
     val projectStats = projectStatsService.getProjectStats(projectHolder.project.id)
     val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
-    val languageStats = languageStatsService.getLanguageStats(projectHolder.project.id)
-      .sortedBy { it.language.name }
-      .sortedBy { it.language.id != baseLanguage?.id }
+    val languageStats =
+      languageStatsService.getLanguageStats(projectHolder.project.id)
+        .sortedBy { it.language.name }
+        .sortedBy { it.language.id != baseLanguage?.id }
 
     val totals = projectStatsService.computeProjectTotals(baseLanguage, languageStats)
 
@@ -57,7 +58,7 @@ class ProjectStatsController(
       reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = languageStats.map { languageStatsModelAssembler.toModel(it) }
+      languageStats = languageStats.map { languageStatsModelAssembler.toModel(it) },
     )
   }
 

@@ -7,7 +7,8 @@ import org.assertj.core.api.StringAssert
 
 class StandardValidationMessageAssert(val data: Map<String, String>) :
   AbstractAssert<StandardValidationMessageAssert?, Map<String, String>>(
-    data, StandardValidationMessageAssert::class.java
+    data,
+    StandardValidationMessageAssert::class.java,
   ) {
   fun onField(field: String?): StringAssert {
     if (!actual!!.containsKey(field)) {
@@ -18,8 +19,9 @@ class StandardValidationMessageAssert(val data: Map<String, String>) :
                     |
                     |$it
                     |
-                    |Error is not on field %s.""".trimMargin(),
-          field
+                    |Error is not on field %s.
+          """.trimMargin(),
+          field,
         )
       }
     }

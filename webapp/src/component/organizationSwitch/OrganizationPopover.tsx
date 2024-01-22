@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebounce } from 'use-debounce';
 
 import { OrganizationItem } from './OrganizationItem';
 import { components } from 'tg.service/apiSchema.generated';

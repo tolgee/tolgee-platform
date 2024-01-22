@@ -17,13 +17,13 @@ export const SecondaryBarSearchField: FC<ComponentProps<typeof SearchField>> = (
 
   return (
     <StyledSearchField
-      {...props}
       data-cy="global-list-search"
       placeholder={t('standard_search_label')}
       label={null}
       hiddenLabel={true}
       variant={'outlined'}
       size="small"
+      {...props}
     />
   );
 };

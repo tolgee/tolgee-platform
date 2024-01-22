@@ -109,7 +109,8 @@ export function useErrorTranslation() {
         return t('webhook_responded_with_non_200_status');
       case 'unexpected_error_while_executing_webhook':
         return t('unexpected_error_while_executing_webhook');
-
+      case 'resource_not_found':
+        return t('resource_not_found');
       default:
         return code;
     }

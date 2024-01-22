@@ -144,7 +144,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
         keyService
           .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
-          .find { it.language == testData.spanishLanguage }
+          .find { it.language == testData.spanishLanguage },
       )
         .isNull()
     }
@@ -161,14 +161,15 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
     performCreateKey(
       keyName = "jaj",
-      translations = mapOf(
-        "en" to "Hello2",
-        "de" to "Hallo2"
-      )
+      translations =
+        mapOf(
+          "en" to "Hello2",
+          "de" to "Hallo2",
+        ),
     )
     waitForSpanishTranslationSet("jaj")
 
-    verify(googleTranslate, times(2)).translate(any<String>(), any())
+    verify(googleTranslate, times(2)).translate(any<String>(), any(), any(), any())
 
     val balance = mtCreditBucketService.getCreditBalances(testData.project)
     balance.creditBalance.assert.isEqualTo(0)
@@ -177,13 +178,15 @@ class AutoTranslatingTest : MachineTranslationTest() {
   private fun waitForSpanishTranslationSet(keyName: String) {
     waitForNotThrowing(pollTime = 200) {
       transactionTemplate.execute {
-        val translations = keyService
-          .get(testData.project.id, keyName, null)
-          .translations
-        val spanishTranslation = translations
-          .find {
-            it.language == testData.spanishLanguage
-          }
+        val translations =
+          keyService
+            .get(testData.project.id, keyName, null)
+            .translations
+        val spanishTranslation =
+          translations
+            .find {
+              it.language == testData.spanishLanguage
+            }
         spanishTranslation?.text.isNullOrBlank().assert.isFalse()
       }
     }
@@ -218,19 +221,19 @@ class AutoTranslatingTest : MachineTranslationTest() {
         mapOf(
           "languageId" to null,
           "usingTranslationMemory" to false,
-          "usingMachineTranslation" to false
+          "usingMachineTranslation" to false,
         ),
         mapOf(
           "languageId" to testData.germanLanguage.id,
           "usingTranslationMemory" to false,
-          "usingMachineTranslation" to false
+          "usingMachineTranslation" to false,
         ),
         mapOf(
           "languageId" to testData.spanishLanguage.id,
           "usingTranslationMemory" to false,
-          "usingMachineTranslation" to false
-        )
-      )
+          "usingMachineTranslation" to false,
+        ),
+      ),
     ).andIsOk.andAssertThatJson {
       node("_embedded.configs").isArray.hasSize(3)
     }
@@ -256,24 +259,27 @@ class AutoTranslatingTest : MachineTranslationTest() {
     performCreateHalloKeyWithEnAndDeTranslations()
     Thread.sleep(2000)
     transactionTemplate.execute {
-      val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
-        .translations
-        .find { it.language == testData.spanishLanguage }
+      val esTranslation =
+        keyService.get(testData.project.id, CREATE_KEY_NAME, null)
+          .translations
+          .find { it.language == testData.spanishLanguage }
 
       assertThat(esTranslation).isNull()
     }
   }
 
-  private fun getCreatedEsTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
-    .getLangTranslation(testData.spanishLanguage).text
+  private fun getCreatedEsTranslation() =
+    keyService.get(testData.project.id, CREATE_KEY_NAME, null)
+      .getLangTranslation(testData.spanishLanguage).text
 
   private fun performCreateHalloKeyWithEnAndDeTranslations(keyName: String = CREATE_KEY_NAME) {
     performCreateKey(
       keyName = keyName,
-      translations = mapOf(
-        "en" to "Hello",
-        "de" to "Hallo"
-      )
+      translations =
+        mapOf(
+          "en" to "Hello",
+          "de" to "Hallo",
+        ),
     )
   }
 
@@ -294,10 +300,16 @@ class AutoTranslatingTest : MachineTranslationTest() {
     }
   }
 
-  private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
-    .getLangTranslation(testData.germanLanguage).text
+  private fun getCreatedDeTranslation() =
+    keyService.get(testData.project.id, CREATE_KEY_NAME, null)
+      .getLangTranslation(testData.germanLanguage).text
 
-  private fun performSetConfig(usingTm: Boolean, usingMt: Boolean, enableForImport: Boolean, languageId: Long? = null) {
+  private fun performSetConfig(
+    usingTm: Boolean,
+    usingMt: Boolean,
+    enableForImport: Boolean,
+    languageId: Long? = null,
+  ) {
     performProjectAuthPut(
       "per-language-auto-translation-settings",
       listOf(
@@ -305,9 +317,9 @@ class AutoTranslatingTest : MachineTranslationTest() {
           "languageId" to languageId,
           "usingTranslationMemory" to usingTm,
           "usingMachineTranslation" to usingMt,
-          "enableForImport" to enableForImport
-        )
-      )
+          "enableForImport" to enableForImport,
+        ),
+      ),
     ).andIsOk
   }
 
@@ -316,8 +328,8 @@ class AutoTranslatingTest : MachineTranslationTest() {
       "translations",
       SetTranslationsWithKeyDto(
         key = key,
-        translations = mapOf("en" to "Hello")
-      )
+        translations = mapOf("en" to "Hello"),
+      ),
     )
   }
 

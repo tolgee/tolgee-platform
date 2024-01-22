@@ -10,7 +10,7 @@ import org.springframework.transaction.event.TransactionalEventListener
 @Component
 class SignUpListener(
   private val businessEventPublisher: BusinessEventPublisher,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
 ) {
   @TransactionalEventListener(OnUserCreated::class)
   fun listen(onUserCreated: OnUserCreated) {
@@ -25,8 +25,8 @@ class SignUpListener(
         organizationId = organization?.id,
         organizationName = organization?.name,
         userAccountId = user.id,
-        userAccountDto = UserAccountDto.fromEntity(user)
-      )
+        userAccountDto = UserAccountDto.fromEntity(user),
+      ),
     )
   }
 }

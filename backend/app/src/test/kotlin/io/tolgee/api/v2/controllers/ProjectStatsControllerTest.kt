@@ -16,7 +16,6 @@ import java.math.BigDecimal
 import java.text.SimpleDateFormat
 
 class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private lateinit var testData: TranslationsTestData
 
   private var activityCounter = 0
@@ -108,7 +107,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         "2022-04-05" : 5,
         "2022-04-20" : 2
       }
-      """
+      """,
       )
     }
   }
@@ -121,7 +120,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     repeat(times) {
       performProjectAuthPut(
         "translations",
-        mapOf("key" to "A key", "translations" to mapOf(testData.englishLanguage.tag to "A key ${activityCounter++}"))
+        mapOf("key" to "A key", "translations" to mapOf(testData.englishLanguage.tag to "A key ${activityCounter++}")),
       ).andIsOk
     }
   }

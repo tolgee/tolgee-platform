@@ -2,17 +2,16 @@ import { FunctionComponent, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { DangerZone } from 'tg.component/DangerZone/DangerZone';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { redirectionActions } from 'tg.store/global/RedirectionActions';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 
@@ -23,9 +22,6 @@ import { useLeaveOrganization } from './useLeaveOrganization';
 import { useIsAdmin } from 'tg.globalContext/helpers';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
-
-const redirectionActions = container.resolve(RedirectionActions);
-const messageService = container.resolve(MessageService);
 
 export const OrganizationProfileView: FunctionComponent = () => {
   const { t } = useTranslate();
@@ -45,11 +41,13 @@ export const OrganizationProfileView: FunctionComponent = () => {
   const editOrganization = useApiMutation({
     url: '/v2/organizations/{id}',
     method: 'put',
+    invalidatePrefix: '/v2/organizations',
   });
 
   const deleteOrganization = useApiMutation({
     url: '/v2/organizations/{id}',
     method: 'delete',
+    invalidatePrefix: '/v2/organizations',
   });
 
   const isAdmin = useIsAdmin();
@@ -132,7 +130,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
       ]}
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}
-      containerMaxWidth="md"
+      maxWidth="normal"
     >
       <Box data-cy="organization-profile">
         <StandardForm

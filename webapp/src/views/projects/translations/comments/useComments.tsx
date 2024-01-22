@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { container } from 'tsyringe';
 import { useQueryClient } from 'react-query';
 import { T } from '@tolgee/react';
 
@@ -9,16 +8,15 @@ import {
   useApiInfiniteQuery,
   useApiMutation,
 } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
+
 import { useTranslationsActions } from '../context/TranslationsContext';
+import { messageService } from 'tg.service/MessageService';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 type PagedModelTranslationCommentModel =
   components['schemas']['PagedModelTranslationCommentModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
-
-const messaging = container.resolve(MessageService);
 
 type Props = {
   keyId: number;
@@ -135,7 +133,7 @@ export const useComments = ({
       return;
     }
     if (!inputValue) {
-      messaging.error(<T keyName="global_empty_value" />);
+      messageService.error(<T keyName="global_empty_value" />);
       return;
     }
     addComment

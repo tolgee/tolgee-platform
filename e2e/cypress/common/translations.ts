@@ -7,7 +7,7 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
-import { assertMessage } from './shared';
+import { assertMessage, dismissMenu } from './shared';
 import Chainable = Cypress.Chainable;
 import { selectNamespace } from './namespace';
 
@@ -120,7 +120,7 @@ export const toggleLang = (lang) => {
     .contains(lang)
     .should('be.visible')
     .click();
-  cy.get('body').click();
+  dismissMenu();
   // wait for loading to disappear
   waitForGlobalLoading();
 };
@@ -166,6 +166,8 @@ export const forEachView = (
 };
 
 export function createProjectWithThreeLanguages() {
+  let project: ProjectDTO;
+
   return login()
     .then(() =>
       createProject({
@@ -190,7 +192,7 @@ export function createProjectWithThreeLanguages() {
       })
     )
     .then((r) => {
-      const project = r.body as ProjectDTO;
+      project = r.body as ProjectDTO;
       selectLangsInLocalstorage(project.id, ['en']);
       const promises = [];
       for (let i = 1; i < 5; i++) {
@@ -204,7 +206,9 @@ export function createProjectWithThreeLanguages() {
       }
 
       selectLangsInLocalstorage(project.id, ['en', 'cs', 'es']);
-
-      return Cypress.Promise.all(promises).then(() => project);
+      return Cypress.Promise.all(promises);
+    })
+    .then(() => {
+      return project;
     });
 }

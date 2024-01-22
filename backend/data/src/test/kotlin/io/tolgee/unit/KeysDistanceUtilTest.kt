@@ -1,10 +1,10 @@
 package io.tolgee.unit
 
 import io.tolgee.dtos.RelatedKeyDto
-import io.tolgee.dtos.query_results.KeyIdFindResult
+import io.tolgee.dtos.queryResults.KeyIdFindResult
 import io.tolgee.model.Project
-import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.service.bigMeta.KeysDistanceUtil
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ class KeysDistanceUtilTest {
     mutableListOf(
       RelatedKeyDto(keyName = "key1", namespace = "a"),
       RelatedKeyDto(keyName = "key2", namespace = null),
-      RelatedKeyDto(keyName = "key3", namespace = "a")
+      RelatedKeyDto(keyName = "key3", namespace = "a"),
     )
 
   private val project: Project = mock()
@@ -28,47 +28,48 @@ class KeysDistanceUtilTest {
 
     whenever(bigMetaService.findExistingKeyDistances(any(), any()))
       .thenReturn(
-        listOf(
-          KeysDistance(1, 3).also { keysDistance ->
+        setOf(
+          KeysDistanceDto(1, 3, projectId = 0).also { keysDistance ->
             keysDistance.score = 10000
             keysDistance.hits = 10
           },
-          KeysDistance(3, 4).also { keysDistance ->
+          KeysDistanceDto(3, 4, projectId = 0).also { keysDistance ->
             keysDistance.score = 10000
             keysDistance.hits = 1
-          }
-        )
+          },
+        ),
       )
     whenever(bigMetaService.getKeyIdsForItems(any(), any())).thenReturn(
       mutableListOf(
         KeyIdFindResult(
           id = 1,
           name = "key1",
-          namespace = "a"
+          namespace = "a",
         ),
         KeyIdFindResult(
           id = 2,
           name = "key2",
-          namespace = null
+          namespace = null,
         ),
         KeyIdFindResult(
           id = 3,
           name = "key3",
-          namespace = "a"
+          namespace = "a",
         ),
         KeyIdFindResult(
           id = 4,
           name = "key4",
-          namespace = "a"
+          namespace = "a",
         ),
-      )
+      ),
     )
   }
 
   @Test
   fun `it works`() {
-    val result = KeysDistanceUtil(relatedKeysRequest, project, bigMetaService)
-      .newDistances
+    val result =
+      KeysDistanceUtil(relatedKeysRequest, project, bigMetaService)
+        .newDistances
 
     result.assert.hasSize(4)
     result.singleOrNull { it.key1Id == 1L && it.key2Id == 2L }!!.score.assert.isEqualTo(10000)

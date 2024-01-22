@@ -10,11 +10,11 @@ import io.tolgee.model.key.WithKeyMetaReference
 import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
-import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
+import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class KeyMetaService(
@@ -22,20 +22,22 @@ class KeyMetaService(
   private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
   private val keyCommentRepository: KeyCommentRepository,
   private val entityManager: EntityManager,
-) {
+) : Logging {
   @set:Autowired
   @set:Lazy
   lateinit var tagService: TagService
 
   fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)
 
-  fun saveAllComments(entities: Iterable<KeyComment>): MutableList<KeyComment> =
-    keyCommentRepository.saveAll(entities)
+  fun saveAllComments(entities: Iterable<KeyComment>): MutableList<KeyComment> = keyCommentRepository.saveAll(entities)
 
   fun saveAllCodeReferences(entities: Iterable<KeyCodeReference>): MutableList<KeyCodeReference> =
     keyCodeReferenceRepository.saveAll(entities)
 
-  fun import(target: KeyMeta, source: KeyMeta) {
+  fun import(
+    target: KeyMeta,
+    source: KeyMeta,
+  ) {
     target.comments.import(target, source.comments.toList()) { a, b ->
       a.text == b.text && a.fromImport == b.fromImport
     }
@@ -47,7 +49,7 @@ class KeyMetaService(
   private inline fun <T : WithKeyMetaReference> List<T>.import(
     target: KeyMeta,
     source: Collection<T>,
-    equalsFn: (a: T, b: T) -> Boolean
+    equalsFn: (a: T, b: T) -> Boolean,
   ) {
     source.forEach { otherItem ->
       if (!this.any { equalsFn(it, otherItem) }) {
@@ -58,57 +60,57 @@ class KeyMetaService(
 
   @Suppress("UNCHECKED_CAST")
   fun getWithFetchedData(import: Import): List<KeyMeta> {
-    var result: List<KeyMeta> = entityManager.createQuery(
-      """
+    var result: List<KeyMeta> =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.importKey ik
             left join fetch ikm.comments ikc
             join ik.file if
             where if.import = :import 
-            """
-    )
-      .setParameter("import", import)
-      .setHint(PASS_DISTINCT_THROUGH, false)
-      .resultList as List<KeyMeta>
+            """,
+      )
+        .setParameter("import", import)
+        .resultList as List<KeyMeta>
 
-    result = entityManager.createQuery(
-      """
+    result =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join ikm.importKey ik
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ikm in :metas 
-        """
-    ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
-      .resultList as List<KeyMeta>
+        """,
+      ).setParameter("metas", result)
+        .resultList as List<KeyMeta>
 
     return result
   }
 
   fun getWithFetchedData(project: Project): List<KeyMeta> {
-    var result: List<KeyMeta> = entityManager.createQuery(
-      """
+    var result: List<KeyMeta> =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.key k
             left join fetch ikm.comments ikc
             where k.project = :project 
-            """
-    )
-      .setParameter("project", project)
-      .setHint(PASS_DISTINCT_THROUGH, false)
-      .resultList as List<KeyMeta>
+            """,
+      )
+        .setParameter("project", project)
+        .resultList as List<KeyMeta>
 
-    result = entityManager.createQuery(
-      """
+    result =
+      entityManager.createQuery(
+        """
             select distinct ikm from KeyMeta ikm
             join ikm.key k
             left join fetch ikm.codeReferences ikc
             where ikm in :metas 
-        """
-    ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
-      .resultList as List<KeyMeta>
+        """,
+      ).setParameter("metas", result)
+        .resultList as List<KeyMeta>
 
     return result
   }
@@ -125,13 +127,6 @@ class KeyMetaService(
 
   fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)
 
-  fun deleteAllByImportKeyIdIn(importKeyIds: List<Long>) {
-    tagService.deleteAllByImportKeyIdIn(importKeyIds)
-    keyCommentRepository.deleteAllByImportKeyIds(importKeyIds)
-    keyCodeReferenceRepository.deleteAllByImportKeyIds(importKeyIds)
-    this.keyMetaRepository.deleteAllByImportKeyIdIn(importKeyIds)
-  }
-
   fun deleteAllByKeyIdIn(ids: Collection<Long>) {
     tagService.deleteAllByKeyIdIn(ids)
     keyCommentRepository.deleteAllByKeyIds(ids)
@@ -140,9 +135,40 @@ class KeyMetaService(
   }
 
   fun deleteAllByKeyId(id: Long) {
-    tagService.deleteAllByKeyIdIn(listOf(id))
-    keyCommentRepository.deleteAllByKeyId(id)
-    keyCodeReferenceRepository.deleteAllByKeyId(id)
-    this.keyMetaRepository.deleteAllByKeyId(id)
+    deleteAllByKeyIdIn(listOf(id))
+  }
+
+  fun deleteAllByProject(projectId: Long) {
+    tagService.deleteAllByProject(projectId)
+    entityManager.createNativeQuery(
+      """
+      delete from key_comment where key_meta_id in (
+        select id from key_meta where key_id in (
+          select id from key where project_id = :projectId
+        )
+      )
+    """,
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      delete from key_code_reference where key_meta_id in (
+        select id from key_meta where key_id in (
+          select id from key where project_id = :projectId
+        )
+      )
+    """,
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      delete from key_meta where key_id in (
+        select id from key where project_id = :projectId
+      )
+      """,
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 }

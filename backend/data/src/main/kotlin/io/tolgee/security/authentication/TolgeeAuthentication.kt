@@ -17,7 +17,9 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.model.*
+import io.tolgee.model.ApiKey
+import io.tolgee.model.Pat
+import io.tolgee.model.UserAccount
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -38,10 +40,11 @@ class TolgeeAuthentication(
   override fun getAuthorities(): Collection<GrantedAuthority> {
     return when (userAccount.role) {
       UserAccount.Role.USER -> listOf(SimpleGrantedAuthority(ROLE_USER))
-      UserAccount.Role.ADMIN -> listOf(
-        SimpleGrantedAuthority(ROLE_USER),
-        SimpleGrantedAuthority(ROLE_ADMIN)
-      )
+      UserAccount.Role.ADMIN ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_ADMIN),
+        )
       null -> emptyList()
     }
   }

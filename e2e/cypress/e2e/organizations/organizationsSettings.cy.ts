@@ -11,16 +11,19 @@ import { login } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 
 describe('Organization Settings', () => {
+  let organizationData: Record<string, { slug: string }>;
+
   beforeEach(() => {
     login();
     organizationTestData.clean();
-    organizationTestData.generate();
-    visitProfile();
+    organizationTestData.generate().then((res) => {
+      organizationData = res.body as any;
+      visit('Tolgee');
+    });
   });
 
   const newValues = {
     name: 'What a nice organization',
-    addressPart: 'what-a-nice-organization',
     description: 'This is an nice updated value!',
   };
 
@@ -28,15 +31,22 @@ describe('Organization Settings', () => {
     gcy('organization-name-field').within(() =>
       cy.get('input').clear().type(newValues.name)
     );
-    gcy('organization-address-part-field').within(() =>
-      cy.get('input').should('have.value', newValues.addressPart)
-    );
+    gcy('organization-address-part-field').within(() => {
+      cy.get('input').should('contain.value', 'what-a-nice-organization');
+    });
     gcy('organization-description-field').within(() =>
       cy.get('input').clear().type(newValues.description)
     );
     clickGlobalSave();
     cy.contains('Organization settings updated').should('be.visible');
-    cy.visit(`${HOST}/organizations/what-a-nice-organization/profile`);
+
+    cy.reload();
+
+    cy.gcy('global-user-menu-button').click();
+    cy.gcy('user-menu-organization-settings')
+      .contains('Organization settings')
+      .click();
+
     gcy('organization-name-field').within(() =>
       cy.get('input').should('have.value', newValues.name)
     );
@@ -47,7 +57,7 @@ describe('Organization Settings', () => {
 
   it('Gates cannot change Tolgee settings', () => {
     login('gates@microsoft.com');
-    visitProfile();
+    visit('Tolgee');
     switchToOrganization('Tolgee');
     cy.gcy('global-user-menu-button').click();
     cy.gcy('user-menu-organization-settings')
@@ -77,7 +87,13 @@ describe('Organization Settings', () => {
     organizationTestData.clean();
   });
 
-  const visitProfile = () => {
-    cy.visit(`${HOST}/organizations/tolgee/profile`);
+  function visitSlug(slug: string) {
+    cy.visit(`${HOST}/organizations/${slug}/profile`);
+  }
+
+  const visit = (name: string) => {
+    cy.log(`Visiting ${name}`);
+    const slug = organizationData[name].slug;
+    visitSlug(slug);
   };
 });

@@ -1,29 +1,25 @@
 package io.tolgee.model.contentDelivery
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.enums.TranslationState
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 
-@Entity()
+@Entity
 @Table(
-  uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "slug"])]
-)
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
+  uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "slug"])],
 )
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
@@ -41,26 +37,32 @@ class ContentDeliveryConfig(
 
   var lastPublished: Date? = null
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var languages: Set<String>? = null
 
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var filterKeyId: List<Long>? = null
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var filterKeyIdNot: List<Long>? = null
   override var filterTag: String? = null
   override var filterKeyPrefix: String? = null
 
-  @Type(type = "jsonb")
-  override var filterState: List<TranslationState>? = listOf(
-    TranslationState.TRANSLATED,
-    TranslationState.REVIEWED,
-  )
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  override var filterState: List<TranslationState>? =
+    listOf(
+      TranslationState.TRANSLATED,
+      TranslationState.REVIEWED,
+    )
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   override var filterNamespace: List<String?>? = null
 }

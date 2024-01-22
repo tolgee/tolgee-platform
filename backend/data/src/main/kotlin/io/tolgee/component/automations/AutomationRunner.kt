@@ -7,9 +7,12 @@ import org.springframework.stereotype.Component
 @Component
 class AutomationRunner(
   private val automationService: AutomationService,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
-  fun run(actionId: Long, activityRevisionId: Long?) {
+  fun run(
+    actionId: Long,
+    activityRevisionId: Long?,
+  ) {
     val action = automationService.getAction(actionId)
     applicationContext.getBean(action.type.processor.java).process(action, activityRevisionId)
   }

@@ -2,7 +2,7 @@ package io.tolgee.hateoas.project
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.Avatar
-import io.tolgee.dtos.query_results.ProjectStatistics
+import io.tolgee.dtos.queryResults.ProjectStatistics
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.permission.ComputedPermissionModel
@@ -26,9 +26,9 @@ open class ProjectWithStatsModel(
   val directPermission: PermissionModel?,
   @Schema(
     description = "Actual current user's permissions on this project. You can not sort data by this column!",
-    example = "EDIT"
+    example = "EDIT",
   )
   val computedPermission: ComputedPermissionModel,
   val stats: ProjectStatistics,
-  val languages: List<LanguageModel>
+  val languages: List<LanguageModel>,
 ) : RepresentationModel<ProjectWithStatsModel>()

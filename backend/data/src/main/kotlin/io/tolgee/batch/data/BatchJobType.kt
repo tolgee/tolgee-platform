@@ -23,6 +23,7 @@ enum class BatchJobType(
   val maxRetries: Int,
   val processor: KClass<out ChunkProcessor<*, *, *>>,
   val defaultRetryWaitTimeInMs: Int = 2000,
+  val exclusive: Boolean = true,
 ) {
   PRE_TRANSLATE_BT_TM(
     activityType = ActivityType.BATCH_PRE_TRANSLATE_BY_TM,
@@ -78,6 +79,6 @@ enum class BatchJobType(
     activityType = ActivityType.AUTOMATION,
     maxRetries = 3,
     processor = AutomationChunkProcessor::class,
-  )
-  ;
+    exclusive = false,
+  ),
 }

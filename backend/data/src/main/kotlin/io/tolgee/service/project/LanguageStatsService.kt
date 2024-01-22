@@ -6,14 +6,16 @@ import io.tolgee.model.LanguageStats
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.service.LanguageService
-import io.tolgee.service.query_builders.LanguageStatsProvider
+import io.tolgee.service.queryBuilders.LanguageStatsProvider
 import io.tolgee.util.Logging
+import io.tolgee.util.debug
 import io.tolgee.util.executeInNewRepeatableTransaction
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Transactional
 @Service
@@ -24,22 +26,23 @@ class LanguageStatsService(
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
   private val lockingProvider: LockingProvider,
-  private val platformTransactionManager: PlatformTransactionManager
+  private val platformTransactionManager: PlatformTransactionManager,
 ) : Logging {
   fun refreshLanguageStats(projectId: Long) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId") {
-      executeInNewRepeatableTransaction(platformTransactionManager) tx@{
+      executeInNewRepeatableTransaction(platformTransactionManager, TransactionDefinition.ISOLATION_READ_COMMITTED) tx@{
         val languages = languageService.findAll(projectId)
         val allRawLanguageStats = getLanguageStatsRaw(projectId)
         try {
-
           val baseLanguage = projectService.getOrCreateBaseLanguage(projectId)
-          val rawBaseLanguageStats = allRawLanguageStats.find { it.languageId == baseLanguage?.id }
-            ?: return@tx
+          val rawBaseLanguageStats =
+            allRawLanguageStats.find { it.languageId == baseLanguage?.id }
+              ?: return@tx
           val projectStats = projectStatsService.getProjectStats(projectId)
-          val languageStats = languageStatsRepository.getAllByProjectId(projectId)
-            .associateBy { it.language.id }
-            .toMutableMap()
+          val languageStats =
+            languageStatsRepository.getAllByProjectId(projectId)
+              .associateBy { it.language.id }
+              .toMutableMap()
 
           allRawLanguageStats
             .sortedBy { it.languageName }
@@ -50,9 +53,10 @@ class LanguageStatsService(
               val translatedOrReviewedWords = rawLanguageStats.translatedWords + rawLanguageStats.reviewedWords
               val untranslatedWords = baseWords - translatedOrReviewedWords
               val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@tx
-              val stats = languageStats.computeIfAbsent(language.id) {
-                LanguageStats(language)
-              }
+              val stats =
+                languageStats.computeIfAbsent(language.id) {
+                  LanguageStats(language)
+                }
               stats.apply {
                 translatedKeys = rawLanguageStats.translatedKeys
                 translatedWords = rawLanguageStats.translatedWords
@@ -69,6 +73,13 @@ class LanguageStatsService(
           languageStats.values.forEach {
             it.language.stats = it
             languageStatsRepository.save(it)
+          }
+          logger.debug {
+            "Language stats refreshed for project $projectId: ${
+              languageStats.values.joinToString("\n") {
+                "${it.language.id} reviewed words: ${it.reviewedWords} translated words:${it.translatedWords}"
+              }
+            }"
           }
         } catch (e: NotFoundException) {
           logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?", e)
@@ -104,10 +115,6 @@ class LanguageStatsService(
     }
     refreshLanguageStats(projectId)
     return languageStatsRepository.getAllByProjectId(projectId)
-  }
-
-  fun deleteAllByLanguage(languageId: Long) {
-    languageStatsRepository.deleteAllByLanguage(languageId)
   }
 
   private fun getLanguageStatsRaw(projectId: Long): List<ProjectLanguageStatsResultView> {

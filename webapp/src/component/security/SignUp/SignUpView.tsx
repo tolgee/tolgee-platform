@@ -15,25 +15,20 @@ import { SignUpForm } from './SignUpForm';
 import { SignUpProviders } from './SignUpProviders';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { TokenService } from 'tg.service/TokenService';
-import { container } from 'tsyringe';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useRecaptcha } from './useRecaptcha';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
+import { tokenService } from 'tg.service/TokenService';
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 export type SignUpType = {
   name: string;
   email: string;
   password: string;
-  passwordRepeat?: string;
   organizationName: string;
   invitationCode?: string;
 };
-
-const tokenService = container.resolve(TokenService);
-const globalActions = container.resolve(GlobalActions);
 
 const StyledRightPart = styled('div')`
   display: grid;
@@ -72,8 +67,6 @@ export const SignUpView: FunctionComponent = () => {
       recaptchaToken: await getRecaptchaToken(),
     } as SignUpType;
 
-    delete request.passwordRepeat;
-
     signUpMutation.mutate(
       { content: { 'application/json': request } },
       {
@@ -106,33 +99,35 @@ export const SignUpView: FunctionComponent = () => {
   }
 
   return (
-    <DashboardPage>
-      <CompactView
-        maxWidth={isSmall ? 430 : 964}
-        windowTitle={t('sign_up_title')}
-        title={t('sign_up_title')}
-        backLink={LINKS.LOGIN.build()}
-        content={
-          signUpMutation.isSuccess && config.needsEmailVerification ? (
-            <Alert severity="success">
-              <T keyName="sign_up_success_needs_verification_message" />
-            </Alert>
-          ) : (
-            <SplitContent
-              left={
-                <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
-              }
-              right={
-                <StyledRightPart>
-                  <SignUpProviders />
-                </StyledRightPart>
-              }
-            />
-          )
-        }
-      />
+    <>
+      <DashboardPage>
+        <CompactView
+          maxWidth={isSmall ? 430 : 964}
+          windowTitle={t('sign_up_title')}
+          title={t('sign_up_title')}
+          backLink={LINKS.LOGIN.build()}
+          content={
+            signUpMutation.isSuccess && config.needsEmailVerification ? (
+              <Alert severity="success">
+                <T keyName="sign_up_success_needs_verification_message" />
+              </Alert>
+            ) : (
+              <SplitContent
+                left={
+                  <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
+                }
+                right={
+                  <StyledRightPart>
+                    <SignUpProviders />
+                  </StyledRightPart>
+                }
+              />
+            )
+          }
+        />
+      </DashboardPage>
       {config.capterraTracker && <img src={config.capterraTracker} />}
-    </DashboardPage>
+    </>
   );
 };
 

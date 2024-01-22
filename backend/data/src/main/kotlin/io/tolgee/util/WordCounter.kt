@@ -7,7 +7,10 @@ object WordCounter {
   private val NON_WORD = """[\p{P} \t\n\r~!@#$%^&*()_+{}\[\]:;,.<>/?-]""".toRegex()
   private val LANGUAGE_PART = "^([A-Za-z]+).*".toRegex()
 
-  fun countWords(text: String, languageTag: String): Int {
+  fun countWords(
+    text: String,
+    languageTag: String,
+  ): Int {
     val uLocale = getLocaleFromTag(languageTag)
     val iterator: BreakIterator = BreakIterator.getWordInstance(uLocale)
     iterator.setText(text)

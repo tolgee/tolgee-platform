@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class StartupImportCommandLineRunner(
   val tolgeeProperties: TolgeeProperties,
-  val startupImportService: StartupImportService
+  val startupImportService: StartupImportService,
 ) :
   CommandLineRunner, ApplicationListener<ContextClosedEvent>, Ordered {
   override fun run(vararg args: String) {

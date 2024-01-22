@@ -1,61 +1,55 @@
 package io.tolgee.model
 
-import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.hypersistence.utils.hibernate.type.array.EnumArrayType
 import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.JoinTable
-import javax.persistence.ManyToMany
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
-import javax.persistence.PrePersist
-import javax.persistence.PreUpdate
 
 @Suppress("LeakingThis")
 @Entity
-@TypeDef(
-  name = "enum-array",
-  typeClass = EnumArrayType::class,
-  parameters = [
-    Parameter(
-      name = EnumArrayType.SQL_ARRAY_TYPE,
-      value = "varchar"
-    )
-  ]
-)
 @EntityListeners(Permission.Companion.PermissionListeners::class)
 class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
-
   @ManyToOne(fetch = FetchType.LAZY)
   var user: UserAccount? = null,
-
   /**
    * When base permission for organization
    */
   @OneToOne(fetch = FetchType.LAZY)
   var organization: Organization? = null,
-
   @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
 ) : AuditModel(), IPermission {
-  @Type(type = "enum-array")
+  @Type(
+    EnumArrayType::class,
+    parameters = [
+      Parameter(
+        name = EnumArrayType.SQL_ARRAY_TYPE,
+        value = "varchar",
+      ),
+    ],
+  )
   @Column(name = "scopes", columnDefinition = "varchar[]")
   private var _scopes: Array<Scope>? = null
     set(value) {
@@ -111,12 +105,12 @@ class Permission(
     organization: Organization? = null,
     type: ProjectPermissionType? = ProjectPermissionType.VIEW,
     languagePermissions: LanguagePermissions? = null,
-    scopes: Array<Scope>? = null
+    scopes: Array<Scope>? = null,
   ) : this(
     id = id,
     user = user,
     organization = null,
-    invitation = invitation
+    invitation = invitation,
   ) {
     this._scopes = scopes
     this.project = project
@@ -148,7 +142,6 @@ class Permission(
     get() = this.stateChangeLanguages.map { it.id }.toSet()
 
   companion object {
-
     class PermissionListeners {
       @PrePersist
       @PreUpdate
@@ -160,9 +153,9 @@ class Permission(
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
         if (permission.organization != null && (
-          permission.viewLanguages.isNotEmpty() ||
-            permission.translateLanguages.isNotEmpty() ||
-            permission.stateChangeLanguages.isNotEmpty()
+            permission.viewLanguages.isNotEmpty() ||
+              permission.translateLanguages.isNotEmpty() ||
+              permission.stateChangeLanguages.isNotEmpty()
           )
         ) {
           throw IllegalStateException("Organization base permission cannot have language permissions")

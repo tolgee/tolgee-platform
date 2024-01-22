@@ -16,7 +16,8 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.NamespaceService
-import org.springdoc.api.annotations.ParameterObject
+import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -37,8 +37,8 @@ import javax.validation.Valid
 @RequestMapping(
   value = [
     "/v2/projects/{projectId}/",
-    "/v2/projects/"
-  ]
+    "/v2/projects/",
+  ],
 )
 @Tag(name = "Namespaces", description = "Manipulates key namespaces")
 class NamespaceController(
@@ -47,15 +47,16 @@ class NamespaceController(
   private val namespaceModelAssembler: NamespaceModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<Namespace>,
-  private val usedNamespaceModelAssembler: UsedNamespaceModelAssembler
+  private val usedNamespaceModelAssembler: UsedNamespaceModelAssembler,
 ) : IController {
-
   @GetMapping(value = ["namespaces"])
   @Operation(summary = "Returns all project namespaces")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAllNamespaces(
-    @ParameterObject @SortDefault("id") pageable: Pageable
+    @ParameterObject
+    @SortDefault("id")
+    pageable: Pageable,
   ): PagedModel<NamespaceModel> {
     val namespaces = namespaceService.getAllInProject(projectHolder.project.id, pageable)
     return pagedResourcesAssembler.toModel(namespaces, namespaceModelAssembler)
@@ -66,8 +67,9 @@ class NamespaceController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
-    val namespaces = namespaceService.getAllInProject(projectHolder.project.id)
-      .map { it.id as Long? to it.name as String? }.toMutableList()
+    val namespaces =
+      namespaceService.getAllInProject(projectHolder.project.id)
+        .map { it.id as Long? to it.name as String? }.toMutableList()
     val isDefaultUsed = namespaceService.isDefaultUsed(projectHolder.project.id)
     if (isDefaultUsed) {
       namespaces.add(0, null to null)
@@ -82,7 +84,8 @@ class NamespaceController(
   @AllowApiAccess
   fun update(
     @PathVariable id: Long,
-    @RequestBody @Valid dto: UpdateNamespaceDto
+    @RequestBody @Valid
+    dto: UpdateNamespaceDto,
   ): NamespaceModel {
     val namespace = namespaceService.get(projectHolder.project.id, id)
     namespaceService.update(namespace, dto)

@@ -7,12 +7,12 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import jakarta.persistence.Entity
+import jakarta.persistence.Index
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.apache.commons.codec.digest.DigestUtils
 import org.hibernate.annotations.ColumnDefault
-import javax.persistence.Entity
-import javax.persistence.Index
-import javax.persistence.OneToMany
-import javax.persistence.Table
 
 @Entity
 @ActivityLoggedEntity
@@ -70,9 +70,7 @@ class Screenshot : StandardAuditModel() {
 
     other as Screenshot
 
-    if (id != other.id) return false
-
-    return true
+    return id == other.id
   }
 
   override fun hashCode(): Int {

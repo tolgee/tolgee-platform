@@ -6,20 +6,19 @@ import io.tolgee.model.Project
 import io.tolgee.model.Project_
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.repository.activity.ActivityRevisionRepository
-import io.tolgee.service.query_builders.ProjectStatsProvider
+import io.tolgee.service.queryBuilders.ProjectStatsProvider
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.JoinType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import javax.persistence.EntityManager
-import javax.persistence.criteria.JoinType
 
 @Transactional
 @Service
 class ProjectStatsService(
   private val entityManager: EntityManager,
-  private val activityRevisionRepository: ActivityRevisionRepository
+  private val activityRevisionRepository: ActivityRevisionRepository,
 ) {
-
   fun getProjectStats(projectId: Long): ProjectStatsView {
     return ProjectStatsProvider(entityManager, projectId).getResult()
   }
@@ -53,10 +52,11 @@ class ProjectStatsService(
 
   fun computeProjectTotals(
     baseLanguage: Language?,
-    languageStats: List<LanguageStats>
+    languageStats: List<LanguageStats>,
   ): ProjectStateTotals {
-    val baseStats = languageStats.find { it.language.id == baseLanguage?.id }
-      ?: return ProjectStateTotals(0, 0.0, 0.0)
+    val baseStats =
+      languageStats.find { it.language.id == baseLanguage?.id }
+        ?: return ProjectStateTotals(0, 0.0, 0.0)
 
     val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
     val nonBaseLanguages = languageStats.filterNot { it.language.id == baseLanguage?.id }
@@ -71,18 +71,18 @@ class ProjectStatsService(
     return ProjectStateTotals(
       baseWordsCount = baseWordsCount,
       translatedPercent = translatedPercent,
-      reviewedPercent = reviewedPercent
+      reviewedPercent = reviewedPercent,
     )
   }
 
   data class ProjectStateTotals(
     val baseWordsCount: Long,
     val translatedPercent: Double,
-    val reviewedPercent: Double
+    val reviewedPercent: Double,
   )
 
   data class ProjectTotals(
     val languageCount: Long,
-    val keyCount: Long
+    val keyCount: Long,
   )
 }

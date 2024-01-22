@@ -4,24 +4,22 @@
 
 package io.tolgee.model
 
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.ColumnDefault
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["filename"], name = "uploaded_image_filename")])
 class UploadedImage(
   var filename: String,
-
   @ManyToOne(fetch = FetchType.LAZY)
-  var userAccount: UserAccount
+  var userAccount: UserAccount,
 ) : StandardAuditModel() {
-
-  @ColumnDefault("jpg")
   // legacy is jpg, new is png
+  @ColumnDefault("jpg")
   var extension: String? = null
     get() = field ?: "jpg"
 

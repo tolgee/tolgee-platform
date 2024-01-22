@@ -24,16 +24,17 @@ class ApiKeysTestData : BaseTestData() {
 
   init {
     this.root.apply {
-      val userAccountBuilder = addUserAccount {
-        name = "Franta Dobrota"
-        username = "franta"
-        frantisekDobrota = this
-      }.build {
-        addPat {
-          description = "cool pat"
-          frantasPat = this
+      val userAccountBuilder =
+        addUserAccount {
+          name = "Franta Dobrota"
+          username = "franta"
+          frantisekDobrota = this
+        }.build {
+          addPat {
+            description = "cool pat"
+            frantasPat = this
+          }
         }
-      }
 
       addProject {
         organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self

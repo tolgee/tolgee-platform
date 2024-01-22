@@ -9,8 +9,8 @@ import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
-import io.tolgee.hateoas.user_account.PrivateUserAccountModel
-import io.tolgee.hateoas.user_account.PrivateUserAccountModelAssembler
+import io.tolgee.hateoas.userAccount.PrivateUserAccountModel
+import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
@@ -20,6 +20,7 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.UserAccountService
+import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -35,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import javax.validation.Valid
 
 @RestController
 @RequestMapping("/v2/user")
@@ -68,21 +68,30 @@ class V2UserController(
 
   @PostMapping("")
   @Operation(summary = "Updates current user's data.", deprecated = true)
-  fun updateUserOld(@RequestBody @Valid dto: UserUpdateRequestDto?): PrivateUserAccountModel = updateUser(dto)
+  fun updateUserOld(
+    @RequestBody @Valid
+    dto: UserUpdateRequestDto?,
+  ): PrivateUserAccountModel = updateUser(dto)
 
   @PutMapping("")
   @Operation(summary = "Updates current user's data.")
-  fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDto?): PrivateUserAccountModel {
+  fun updateUser(
+    @RequestBody @Valid
+    dto: UserUpdateRequestDto?,
+  ): PrivateUserAccountModel {
     val userAccount = userAccountService.update(authenticationFacade.authenticatedUserEntity, dto!!)
     return privateUserAccountModelAssembler.toModel(userAccount)
   }
 
   @PutMapping("/password")
   @Operation(summary = "Updates current user's password. Invalidates all previous sessions upon success.")
-  fun updateUserPassword(@RequestBody @Valid dto: UserUpdatePasswordRequestDto?): JwtAuthenticationResponse {
+  fun updateUserPassword(
+    @RequestBody @Valid
+    dto: UserUpdatePasswordRequestDto?,
+  ): JwtAuthenticationResponse {
     userAccountService.updatePassword(authenticationFacade.authenticatedUserEntity, dto!!)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
     )
   }
 
@@ -117,7 +126,10 @@ class V2UserController(
 
   @PostMapping("/generate-super-token")
   @Operation(summary = "Generates new JWT token permitted to sensitive operations")
-  fun getSuperToken(@RequestBody @Valid req: SuperTokenRequest): ResponseEntity<JwtAuthenticationResponse> {
+  fun getSuperToken(
+    @RequestBody @Valid
+    req: SuperTokenRequest,
+  ): ResponseEntity<JwtAuthenticationResponse> {
     val entity = authenticationFacade.authenticatedUserEntity
     if (entity.isMfaEnabled) {
       mfaService.checkMfa(entity, req.otp)

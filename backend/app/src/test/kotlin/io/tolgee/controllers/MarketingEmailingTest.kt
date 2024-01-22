@@ -34,7 +34,6 @@ import sibModel.UpdateContact
 @SpringBootTest
 @AutoConfigureMockMvc
 class MarketingEmailingTest : AuthorizedControllerTest() {
-
   @Autowired
   lateinit var sendInBlueProperties: SendInBlueProperties
 
@@ -61,11 +60,12 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   @BeforeAll
   fun initDto() {
-    updateRequestDto = UserUpdateRequestDto(
-      name = "New Name",
-      email = "newemail@test.com",
-      currentPassword = initialPassword
-    )
+    updateRequestDto =
+      UserUpdateRequestDto(
+        name = "New Name",
+        email = "newemail@test.com",
+        currentPassword = initialPassword,
+      )
   }
 
   @BeforeEach
@@ -126,11 +126,12 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   fun `updates contact email when verified`() {
     tolgeeProperties.authentication.needsEmailVerification = true
     val user = dbPopulator.createUserIfNotExists(username = testMail, name = testName)
-    val updatedUser = executeInNewTransaction {
-      val updatedUser = userAccountService.get(user.id)
-      userAccountService.update(userAccountService.get(user.id), updateRequestDto)
-      updatedUser
-    }
+    val updatedUser =
+      executeInNewTransaction {
+        val updatedUser = userAccountService.get(user.id)
+        userAccountService.update(userAccountService.get(user.id), updateRequestDto)
+        updatedUser
+      }
     Thread.sleep(100)
     verify(contactsApi).updateContact(eq(testMail), any())
     Mockito.clearInvocations(contactsApi)
@@ -161,7 +162,10 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     Mockito.clearInvocations(contactsApi)
   }
 
-  private fun verifyCreateContactCalled(email: String = testMail, name: String = testName) {
+  private fun verifyCreateContactCalled(
+    email: String = testMail,
+    name: String = testName,
+  ) {
     Thread.sleep(100)
     verify(contactsApi).createContact(createContactArgumentCaptor.capture())
     assertThat(createContactArgumentCaptor.value.email).isEqualTo(email)

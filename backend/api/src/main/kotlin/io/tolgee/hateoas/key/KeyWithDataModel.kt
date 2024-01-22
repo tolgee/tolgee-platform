@@ -15,19 +15,15 @@ open class KeyWithDataModel(
   val id: Long,
   @Schema(description = "Name of key", example = "this_is_super_key")
   val name: String,
-
   @Schema(description = "Namespace of key", example = "homepage")
   val namespace: String?,
-
   @Schema(
     description = "Translations object containing values updated in this request",
-    example = "{\"en\": {\"id\": 100000003, \"text\": \"This is super translation!\" }}"
+    example = "{\"en\": {\"id\": 100000003, \"text\": \"This is super translation!\" }}",
   )
   val translations: Map<String, TranslationModel>,
-
   @Schema(description = "Tags of key")
   val tags: Set<TagModel>,
-
   @Schema(description = "Screenshots of the key")
-  val screenshots: List<ScreenshotModel>
+  val screenshots: List<ScreenshotModel>,
 ) : RepresentationModel<KeyWithDataModel>(), Serializable

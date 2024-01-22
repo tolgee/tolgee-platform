@@ -7,23 +7,23 @@ import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.constants.Message
 import io.tolgee.model.batch.params.SetKeysNamespaceParams
 import io.tolgee.service.key.KeyService
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceException
 import kotlinx.coroutines.ensureActive
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceException
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class SetKeysNamespaceChunkProcessor(
   private val entityManager: EntityManager,
-  private val keyService: KeyService
+  private val keyService: KeyService,
 ) : ChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit
+    onProgress: (Int) -> Unit,
   ) {
     val subChunked = chunk.chunked(100)
     var progress = 0

@@ -16,24 +16,77 @@
 
 package io.tolgee.util
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.sentry.Sentry
+import io.tolgee.exceptions.ErrorException
+import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.exceptions.ExpectedException
+import io.tolgee.exceptions.NotFoundException
+import jakarta.persistence.EntityManager
 import org.hibernate.Session
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.OutputStream
-import javax.persistence.EntityManager
+import java.io.OutputStreamWriter
 
 @Component
 class StreamingResponseBodyProvider(
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val objectMapper: ObjectMapper,
 ) {
   fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody {
     return StreamingResponseBody {
       val session = entityManager.unwrap(Session::class.java)
-      fn(it)
+
+      session.doWork { connection ->
+        fn(it)
+        // Manually dispose the connection because spring has a hard time doing so by itself
+        connection.close()
+      }
 
       // Manually dispose the connection because spring has a hard time doing so by itself
-      session.disconnect()
       session.close()
     }
   }
+
+  fun streamNdJson(stream: (write: (message: Any?) -> Unit) -> Unit): ResponseEntity<StreamingResponseBody> {
+    return ResponseEntity.ok().disableAccelBuffering().body(
+      this.createStreamingResponseBody { outputStream ->
+        OutputStreamWriter(outputStream).use { writer ->
+          val write =
+            { message: Any? -> writer.writeJson(message) }
+          try {
+            stream(write)
+          } catch (e: Throwable) {
+            val message = getErrorMessage(e)
+            writer.writeJson(StreamedErrorMessage(message))
+            if (e !is ExpectedException) {
+              Sentry.captureException(e)
+            }
+          }
+        }
+      },
+    )
+  }
+
+  fun OutputStreamWriter.writeJson(message: Any?) {
+    this.write(
+      (objectMapper.writeValueAsString(message) + "\n"),
+    )
+    this.flush()
+  }
+
+  private fun getErrorMessage(e: Throwable) =
+    when (e) {
+      is NotFoundException -> ErrorResponseBody(e.msg.code, null)
+      is ErrorException -> e.errorResponseBody
+      else ->
+        ErrorResponseBody(
+          "unexpected_error_occurred",
+          listOf(e::class.java.name),
+        )
+    }
+
+  data class StreamedErrorMessage(val error: ErrorResponseBody)
 }

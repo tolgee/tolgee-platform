@@ -12,18 +12,14 @@ import org.springframework.hateoas.server.core.Relation
 class ApiKeyPermissionsModel(
   @Schema(description = """The API key's project id or the one provided as query param""")
   val projectId: Long,
-
   override var viewLanguageIds: Set<Long>?,
-
   override val translateLanguageIds: Set<Long>?,
-
   override var stateChangeLanguageIds: Set<Long>?,
-
   override var scopes: Array<Scope> = arrayOf(),
-
   @get:Schema(
-    description = "The user's permission type. This field is null if user has assigned " +
-      "granular permissions or if returning API key's permissions",
+    description =
+      "The user's permission type. This field is null if user has assigned " +
+        "granular permissions or if returning API key's permissions",
   )
-  override val type: ProjectPermissionType?
+  override val type: ProjectPermissionType?,
 ) : RepresentationModel<ApiKeyPermissionsModel>(), IPermissionModel

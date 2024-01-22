@@ -13,8 +13,9 @@ class OrganizationModelAssembler(
   private val avatarService: AvatarService,
   private val permissionModelAssembler: PermissionModelAssembler,
 ) : RepresentationModelAssemblerSupport<OrganizationView, OrganizationModel>(
-  OrganizationController::class.java, OrganizationModel::class.java
-) {
+    OrganizationController::class.java,
+    OrganizationModel::class.java,
+  ) {
   override fun toModel(view: OrganizationView): OrganizationModel {
     val link = linkTo<OrganizationController> { get(view.organization.slug) }.withSelfRel()
     val basePermission = view.organization.basePermission

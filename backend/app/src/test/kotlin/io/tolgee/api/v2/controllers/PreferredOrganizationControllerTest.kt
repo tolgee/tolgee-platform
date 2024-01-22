@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
-
   lateinit var testData: OrganizationTestData
 
   @BeforeEach

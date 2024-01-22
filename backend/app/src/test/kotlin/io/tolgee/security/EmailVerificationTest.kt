@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
 
 class EmailVerificationTest : AbstractControllerTest() {
-
   @Autowired
   private lateinit var emailTestUtil: EmailTestUtil
 
@@ -108,7 +107,7 @@ class EmailVerificationTest : AbstractControllerTest() {
       post("/api/public/sign_up")
         .content(mapper.writeValueAsString(signUpDto))
         .accept(MediaType.ALL)
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON),
     )
       .andReturn()
   }

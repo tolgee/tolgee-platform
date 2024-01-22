@@ -17,64 +17,68 @@ class TranslationNsAndTagsData {
   lateinit var translation: Translation
   lateinit var userAccountBuilder: UserAccountBuilder
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    val userAccountBuilder = addUserAccount {
-      username = "olin"
-      user = this
-    }
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      val userAccountBuilder =
+        addUserAccount {
+          username = "olin"
+          user = this
+        }
 
-    addProject {
-      name = "Test project"
-      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-    }.build {
+      addProject {
+        name = "Test project"
+        organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+      }.build {
 
-      val newProject = this.self
-      englishLanguage = addLanguage {
-        name = "English"
-        tag = "en"
-        originalName = "English"
-      }.self
+        val newProject = this.self
+        englishLanguage =
+          addLanguage {
+            name = "English"
+            tag = "en"
+            originalName = "English"
+          }.self
 
-      czechLanguage = addLanguage {
-        name = "Czech"
-        tag = "cs"
-        originalName = "Čeština"
-      }.self
+        czechLanguage =
+          addLanguage {
+            name = "Czech"
+            tag = "cs"
+            originalName = "Čeština"
+          }.self
 
-      self.baseLanguage = englishLanguage
+        self.baseLanguage = englishLanguage
 
-      for (i in 1..20) {
-        val paddedNum = i.toString().padStart(2, '0')
-        addKey {
-          name = "Key $paddedNum"
-        }.build {
-          addTranslation {
-            language = englishLanguage
-            text = "Translation $paddedNum"
-            state = TranslationState.REVIEWED
-          }
+        for (i in 1..20) {
+          val paddedNum = i.toString().padStart(2, '0')
+          addKey {
+            name = "Key $paddedNum"
+          }.build {
+            addTranslation {
+              language = englishLanguage
+              text = "Translation $paddedNum"
+              state = TranslationState.REVIEWED
+            }
 
-          addTranslation {
-            language = czechLanguage
-            text = "Překlad $paddedNum"
-            state = TranslationState.REVIEWED
-          }
+            addTranslation {
+              language = czechLanguage
+              text = "Překlad $paddedNum"
+              state = TranslationState.REVIEWED
+            }
 
-          setNamespace("Namespace $paddedNum")
-          addMeta {
-            self {
-              tags.add(
-                Tag().apply {
-                  project = newProject
-                  name = "Tag $paddedNum"
-                }
-              )
+            setNamespace("Namespace $paddedNum")
+            addMeta {
+              self {
+                tags.add(
+                  Tag().apply {
+                    project = newProject
+                    name = "Tag $paddedNum"
+                  },
+                )
+              }
             }
           }
         }
-      }
 
-      projectBuilder = this
-    }.self
-  }
+        projectBuilder = this
+      }.self
+    }
 }

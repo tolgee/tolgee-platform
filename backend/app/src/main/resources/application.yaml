@@ -9,9 +9,10 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   jpa:
-#    open-in-view: false
     properties:
       hibernate:
+        order_by:
+          default_null_ordering: first
         jdbc:
           batch_size: 50
           batch_versioned_data: true
@@ -21,6 +22,9 @@ spring:
         types:
           print:
             banner: false
+        enhancer:
+          enableLazyInitialization: true
+          enableDirtyTracking: true
   batch:
     job:
       enabled: false
@@ -28,8 +32,6 @@ spring:
       initialize-schema: always
   datasource:
     auto-commit: false
-#  main:
-#    lazy-initialization: true
 tolgee:
   authentication:
     enabled: false

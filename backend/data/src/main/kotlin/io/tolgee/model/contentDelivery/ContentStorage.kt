@@ -2,21 +2,19 @@ package io.tolgee.model.contentDelivery
 
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
-import javax.validation.constraints.NotBlank
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.validation.constraints.NotBlank
 
 @Entity()
 class ContentStorage(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
-
   @NotBlank
-  var name: String
+  var name: String,
 ) : StandardAuditModel() {
-
   var publicUrlPrefix: String? = null
 
   @OneToOne(mappedBy = "contentStorage", optional = true, orphanRemoval = true)

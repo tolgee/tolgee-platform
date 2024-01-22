@@ -15,15 +15,15 @@ When used with multiple languages, it is applied with logical AND.
       ExampleObject("en,TRANSLATED"),
       ExampleObject("en-US,UNTRANSLATED"),
       ExampleObject("fr,REVIEWED"),
-    ]
+    ],
   )
-  open val filterState: List<String>? = null
+  open val filterState: List<String>? = null,
 ) {
   @field:Parameter(
     description = """Languages to be contained in response.
                 
 To add multiple languages, repeat this param (eg. ?languages=en&languages=de)""",
-    example = "en"
+    example = "en",
   )
   var languages: Set<String>? = null
 
@@ -44,13 +44,13 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
 
   @field:Parameter(
     description = "Selects only keys, where translation is missing in specified language",
-    example = "en-US"
+    example = "en-US",
   )
   var filterUntranslatedInLang: String? = null
 
   @field:Parameter(
     description = "Selects only keys, where translation is provided in specified language",
-    example = "en-US"
+    example = "en-US",
   )
   var filterTranslatedInLang: String? = null
 
@@ -64,7 +64,7 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
     description = """Filter namespaces. 
 
 To filter default namespace, set to empty string.
-  """
+  """,
   )
   var filterNamespace: List<String>? = null
 
@@ -73,13 +73,13 @@ To filter default namespace, set to empty string.
 
   @field:Parameter(
     description = "Selects only keys, where translation in provided langs is in outdated state",
-    example = "en-US"
+    example = "en-US",
   )
   var filterOutdatedLanguage: List<String>? = null
 
   @field:Parameter(
     description = "Selects only keys, where translation in provided langs is not in outdated state",
-    example = "en-US"
+    example = "en-US",
   )
   var filterNotOutdatedLanguage: List<String>? = null
 }

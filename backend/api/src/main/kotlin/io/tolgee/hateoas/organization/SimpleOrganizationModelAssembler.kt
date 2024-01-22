@@ -11,10 +11,11 @@ import org.springframework.stereotype.Component
 @Component
 class SimpleOrganizationModelAssembler(
   private val avatarService: AvatarService,
-  private val permissionModelAssembler: PermissionModelAssembler
+  private val permissionModelAssembler: PermissionModelAssembler,
 ) : RepresentationModelAssemblerSupport<Organization, SimpleOrganizationModel>(
-  OrganizationController::class.java, SimpleOrganizationModel::class.java
-) {
+    OrganizationController::class.java,
+    SimpleOrganizationModel::class.java,
+  ) {
   override fun toModel(entity: Organization): SimpleOrganizationModel {
     val link = linkTo<OrganizationController> { get(entity.slug ?: "") }.withSelfRel()
     return SimpleOrganizationModel(
@@ -23,7 +24,7 @@ class SimpleOrganizationModelAssembler(
       entity.slug,
       entity.description,
       permissionModelAssembler.toModel(entity.basePermission),
-      avatarService.getAvatarLinks(entity.avatarHash)
+      avatarService.getAvatarLinks(entity.avatarHash),
     ).add(link)
   }
 }

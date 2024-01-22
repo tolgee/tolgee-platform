@@ -27,7 +27,7 @@ class ImageUploadService(
   val uploadedImageRepository: UploadedImageRepository,
   val fileStorage: FileStorage,
   val dateProvider: CurrentDateProvider,
-  val maxUploadedFilesByUserProvider: MaxUploadedFilesByUserProvider
+  val maxUploadedFilesByUserProvider: MaxUploadedFilesByUserProvider,
 ) {
   val logger = LoggerFactory.getLogger(ImageUploadService::class.java)
 
@@ -36,7 +36,11 @@ class ImageUploadService(
   }
 
   @Transactional
-  fun store(image: InputStreamSource, userAccount: UserAccount, info: ImageUploadInfoDto?): UploadedImage {
+  fun store(
+    image: InputStreamSource,
+    userAccount: UserAccount,
+    info: ImageUploadInfoDto?,
+  ): UploadedImage {
     if (uploadedImageRepository.countAllByUserAccount(userAccount) > maxUploadedFilesByUserProvider()) {
       throw BadRequestException(Message.TOO_MANY_UPLOADED_IMAGES)
     }
@@ -44,15 +48,16 @@ class ImageUploadService(
     val imageConverter = ImageConverter(image.inputStream)
     val dimension = imageConverter.originalDimension
 
-    val uploadedImageEntity = UploadedImage(generateFilename(), userAccount)
-      .apply {
-        extension = "png"
-        originalWidth = dimension.width
-        originalHeight = dimension.height
-        width = imageConverter.targetDimension.width
-        height = imageConverter.targetDimension.height
-        location = info?.location
-      }
+    val uploadedImageEntity =
+      UploadedImage(generateFilename(), userAccount)
+        .apply {
+          extension = "png"
+          originalWidth = dimension.width
+          originalHeight = dimension.height
+          width = imageConverter.targetDimension.width
+          height = imageConverter.targetDimension.height
+          location = info?.location
+        }
 
     save(uploadedImageEntity)
     val processedImage = imageConverter.getImage()

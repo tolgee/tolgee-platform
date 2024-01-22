@@ -11,8 +11,10 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.satisfies
+import org.assertj.core.data.Offset
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -22,12 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
-import java.io.File
 import java.util.stream.Collectors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
-
   lateinit var initialFileStorageUrl: String
 
   @BeforeAll
@@ -51,11 +51,9 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
       node("fileUrl").isString.startsWith("http://").endsWith(".png")
       node("requestFilename").isString.satisfies {
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it)
-        assertThat(file).exists()
-        assertThat(file.readBytes().size)
-          .isGreaterThan(7200)
-          .isLessThan(7500)
+        val file = fileStorage.fileExists("uploadedImages/" + it).assert.isTrue()
+        fileStorage.readFile("uploadedImages/" + it)
+          .size.assert.isCloseTo(5538, Offset.offset(500))
       }
     }
   }
@@ -81,29 +79,30 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   @Test
   fun `returns file`() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
-
-    val file = File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${image.filenameWithExtension}""")
-    val result = performAuthGet("/uploaded-images/${image.filenameWithExtension}").andIsOk
-      .andExpect(
-        header().string("Cache-Control", "max-age=365, must-revalidate, no-transform")
+    val result =
+      performAuthGet("/uploaded-images/${image.filenameWithExtension}").andIsOk
+        .andExpect(
+          header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"),
+        )
+        .andReturn()
+    assertThat(result.response.contentAsByteArray)
+      .isEqualTo(
+        fileStorage.readFile("uploadedImages/${image.filenameWithExtension}"),
       )
-      .andReturn()
-    assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
   }
 
   @Test
   fun delete() {
     whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 30L }
-    val list = (1..20).map {
-      imageUploadService.store(screenshotFile, userAccount!!, null)
-    }.toCollection(mutableListOf())
+    val list =
+      (1..20).map {
+        imageUploadService.store(screenshotFile, userAccount!!, null)
+      }.toCollection(mutableListOf())
 
     val idsToDelete = list.take(10).map { it.id }.joinToString(",")
 
     list.asSequence().take(10).forEach {
-      assertThat(
-        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}""")
-      ).exists()
+      fileStorage.fileExists("uploadedImages/${it.filenameWithExtension}").assert.isTrue()
     }
 
     performAuthDelete("/v2/image-upload/$idsToDelete", null).andIsOk
@@ -111,9 +110,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
     assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
 
     list.asSequence().take(10).forEach {
-      assertThat(
-        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}""")
-      ).doesNotExist()
+      fileStorage.fileExists("uploadedImages/${it.filenameWithExtension}").assert.isFalse()
     }
   }
 
@@ -125,15 +122,18 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
   @Test
   fun uploadValidationNoImage() {
-    val response = performAuthMultipart(
-      "/v2/image-upload",
-      listOf(
-        MockMultipartFile(
-          "image", "originalShot.png", "not_valid",
-          "test".toByteArray()
-        )
-      ),
-    ).andIsBadRequest.andReturn()
+    val response =
+      performAuthMultipart(
+        "/v2/image-upload",
+        listOf(
+          MockMultipartFile(
+            "image",
+            "originalShot.png",
+            "not_valid",
+            "test".toByteArray(),
+          ),
+        ),
+      ).andIsBadRequest.andReturn()
     assertThat(response).error().isCustomValidation.hasMessage("file_not_image")
   }
 }

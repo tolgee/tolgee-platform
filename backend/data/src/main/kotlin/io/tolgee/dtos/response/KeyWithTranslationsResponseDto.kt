@@ -1,11 +1,11 @@
 package io.tolgee.dtos.response
 
-import io.tolgee.dtos.query_results.KeyWithTranslationsDto
+import io.tolgee.dtos.queryResults.KeyWithTranslationsDto
 
 data class KeyWithTranslationsResponseDto(
   var id: Long? = null,
   var name: String? = null,
-  var translations: Map<String, String?> = LinkedHashMap()
+  var translations: Map<String, String?> = LinkedHashMap(),
 ) {
   companion object {
     @JvmStatic
@@ -13,7 +13,7 @@ data class KeyWithTranslationsResponseDto(
       return KeyWithTranslationsResponseDto(
         keyWithTranslationsDTO.id,
         keyWithTranslationsDTO.path.fullPathString,
-        keyWithTranslationsDTO.getTranslations()
+        keyWithTranslationsDTO.getTranslations(),
       )
     }
   }

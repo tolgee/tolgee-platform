@@ -20,7 +20,6 @@ import java.math.BigDecimal
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TranslationsTestData
 
   @BeforeEach

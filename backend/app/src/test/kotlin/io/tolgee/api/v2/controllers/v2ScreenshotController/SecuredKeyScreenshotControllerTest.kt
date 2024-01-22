@@ -23,15 +23,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
-import java.io.File
 import java.time.Duration
 
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.authentication.secured-image-retrieval=true",
-    "tolgee.authentication.secured-image-timestamp-max-age=10000"
-  ]
+    "tolgee.authentication.secured-image-timestamp-max-age=10000",
+  ],
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
@@ -60,15 +59,16 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      val token = jwtService.emitTicket(
-        userAccount!!.id,
-        JwtService.TicketType.IMG_ACCESS,
-        5000,
-        mapOf(
-          "fileName" to screenshot.filename,
-          "projectId" to project.id.toString(),
+      val token =
+        jwtService.emitTicket(
+          userAccount!!.id,
+          JwtService.TicketType.IMG_ACCESS,
+          5000,
+          mapOf(
+            "fileName" to screenshot.filename,
+            "projectId" to project.id.toString(),
+          ),
         )
-      )
 
       moveCurrentDate(Duration.ofSeconds(10))
       performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
@@ -83,15 +83,16 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      val token = jwtService.emitTicket(
-        userAccount!!.id,
-        JwtService.TicketType.IMG_ACCESS,
-        5000,
-        mapOf(
-          "fileName" to screenshot.filename,
-          "projectId" to project.id.toString(),
+      val token =
+        jwtService.emitTicket(
+          userAccount!!.id,
+          JwtService.TicketType.IMG_ACCESS,
+          5000,
+          mapOf(
+            "fileName" to screenshot.filename,
+            "projectId" to project.id.toString(),
+          ),
         )
-      )
 
       performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
     }
@@ -100,15 +101,14 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   @Test
   @ProjectJWTAuthTestMethod
   fun uploadScreenshot() {
-    executeInNewTransaction {
-      val key = keyService.create(project, CreateKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
 
-      performStoreScreenshot(project, key).andIsCreated.andAssertThatJson {
+    performStoreScreenshot(project, key).andIsCreated.andAssertThatJson {
+      executeInNewTransaction {
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
-        assertThat(file).exists()
-        assertThat(file.readBytes().size).isCloseTo(1524, Offset.offset(200))
+        val bytes = fileStorage.readFile("screenshots/" + screenshots[0].filename)
+        assertThat(bytes.size).isCloseTo(1070, Offset.offset(500))
         node("filename").isString.startsWith(screenshots[0].filename).satisfies {
           val parts = it.split("?token=")
           val auth = jwtService.validateTicket(parts[1], JwtService.TicketType.IMG_ACCESS)
@@ -141,27 +141,29 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       val newUser = dbPopulator.createUserIfNotExists("screenshot-test-user-1")
       val newUserRandom = dbPopulator.createUserIfNotExists("screenshot-test-user-2")
 
-      val userPermission = permissionService.create(
-        Permission(
-          type = null,
-          user = newUser,
-          project = project,
-          scopes = Scope.expand(Scope.SCREENSHOTS_UPLOAD)
+      val userPermission =
+        permissionService.create(
+          Permission(
+            type = null,
+            user = newUser,
+            project = project,
+            scopes = Scope.expand(Scope.SCREENSHOTS_UPLOAD),
+          ),
         )
-      )
 
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      val token = jwtService.emitTicket(
-        newUser.id,
-        JwtService.TicketType.IMG_ACCESS,
-        5000,
-        mapOf(
-          "fileName" to screenshot.filename,
-          "projectId" to project.id.toString(),
+      val token =
+        jwtService.emitTicket(
+          newUser.id,
+          JwtService.TicketType.IMG_ACCESS,
+          5000,
+          mapOf(
+            "fileName" to screenshot.filename,
+            "projectId" to project.id.toString(),
+          ),
         )
-      )
 
       // Login as someone who has 0 access to the project and see if it works
       loginAsUser(newUserRandom)

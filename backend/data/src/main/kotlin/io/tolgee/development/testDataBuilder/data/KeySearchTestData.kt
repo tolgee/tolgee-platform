@@ -2,10 +2,9 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import net.datafaker.Faker
-import java.util.UUID
+import java.util.*
 
 class KeySearchTestData : BaseTestData() {
-
   init {
     projectBuilder.addGerman()
 
@@ -24,7 +23,11 @@ class KeySearchTestData : BaseTestData() {
     }
   }
 
-  fun ProjectBuilder.addKeyWithTranslations(keyName: String, translation: String?, baseTranslation: String) {
+  fun ProjectBuilder.addKeyWithTranslations(
+    keyName: String,
+    translation: String?,
+    baseTranslation: String,
+  ) {
     addKey {
       name = keyName
       addTranslation {
@@ -44,7 +47,7 @@ class KeySearchTestData : BaseTestData() {
     this.projectBuilder.addKeyWithTranslations(
       getRandomWords(),
       getRandomWords(),
-      getRandomWords()
+      getRandomWords(),
     )
   }
 

@@ -13,8 +13,10 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.util.Logging
+import io.tolgee.util.debug
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import io.tolgee.util.trace
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -27,9 +29,8 @@ class ProgressManager(
   private val batchJobStateProvider: BatchJobStateProvider,
   private val cachingBatchJobService: CachingBatchJobService,
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
-  private val queue: BatchJobChunkExecutionQueue
+  private val queue: BatchJobChunkExecutionQueue,
 ) : Logging {
-
   /**
    * This method tries to set execution running in the state
    * @param canRunFn function that returns true if execution can be run
@@ -37,7 +38,7 @@ class ProgressManager(
   fun trySetExecutionRunning(
     executionId: Long,
     batchJobId: Long,
-    canRunFn: (Map<Long, ExecutionState>) -> Boolean
+    canRunFn: (Map<Long, ExecutionState>) -> Boolean,
   ): Boolean {
     return batchJobStateProvider.updateState(batchJobId) {
       if (canRunFn(it)) {
@@ -50,7 +51,7 @@ class ProgressManager(
             status = BatchJobChunkExecutionStatus.RUNNING,
             chunkNumber = null,
             retry = null,
-            transactionCommitted = false
+            transactionCommitted = false,
           )
         return@updateState true
       }
@@ -73,13 +74,17 @@ class ProgressManager(
     }
   }
 
-  fun handleProgress(execution: BatchJobChunkExecution, failOnly: Boolean = false) {
+  fun handleProgress(
+    execution: BatchJobChunkExecution,
+    failOnly: Boolean = false,
+  ) {
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
-    val info = batchJobStateProvider.updateState(job.id) {
-      it[execution.id] = batchJobStateProvider.getStateForExecution(execution)
-      it.getInfoForJobResult()
-    }
+    val info =
+      batchJobStateProvider.updateState(job.id) {
+        it[execution.id] = batchJobStateProvider.getStateForExecution(execution)
+        it.getInfoForJobResult()
+      }
 
     if (execution.successTargets.isNotEmpty()) {
       eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
@@ -91,33 +96,49 @@ class ProgressManager(
       isAnyCancelled = info.isAnyCancelled,
       completedChunks = info.completedChunks,
       errorMessage = execution.errorMessage,
-      failOnly = failOnly
+      failOnly = failOnly,
     )
   }
 
-  fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution) {
-    val state = batchJobStateProvider.updateState(execution.batchJob.id) {
-      logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
-      it.compute(execution.id) { _, v ->
-        val state = batchJobStateProvider.getStateForExecution(execution)
-        state.transactionCommitted = true
-        state
+  fun handleChunkCompletedCommitted(
+    execution: BatchJobChunkExecution,
+    triggerJobCompleted: Boolean = true,
+  ) {
+    val state =
+      batchJobStateProvider.updateState(execution.batchJob.id) {
+        logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
+        it.compute(execution.id) { _, v ->
+          val state = batchJobStateProvider.getStateForExecution(execution)
+          state.transactionCommitted = true
+          state
+        }
+        it
       }
-      it
-    }
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
-    logger.debug("Is job ${execution.batchJob.id} completed: $isJobCompleted (execution: ${execution.id})")
-    if (isJobCompleted) {
-      onJobCompletedCommitted(execution)
+    logger.debug {
+      val incompleteExecutions =
+        state.filter { !(it.value.transactionCommitted && it.value.status.completed) }
+          .map { it.key }
+          .joinToString(", ")
+      "Is job ${execution.batchJob.id} " +
+        "completed: $isJobCompleted " +
+        "(current execution: ${execution.id}), " +
+        "incomplete executions: $incompleteExecutions"
+    }
+    if (isJobCompleted && triggerJobCompleted) {
+      onJobCompletedCommitted(execution.batchJob.id)
     }
   }
 
-  private fun onJobCompletedCommitted(execution: BatchJobChunkExecution) {
-    batchJobStateProvider.removeJobState(execution.batchJob.id)
-    val jobDto = batchJobService.getJobDto(execution.batchJob.id)
-    cachingBatchJobService.evictJobCache(execution.batchJob.id)
-    batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId, jobDto.id)
-    batchJobStateProvider.removeJobState(execution.batchJob.id)
+  fun onJobCompletedCommitted(jobId: Long) {
+    val jobDto = batchJobService.getJobDto(jobId)
+    onJobCompletedCommitted(jobDto)
+  }
+
+  fun onJobCompletedCommitted(batchJob: BatchJobDto) {
+    cachingBatchJobService.evictJobCache(batchJob.id)
+    batchJobProjectLockingManager.unlockJobForProject(batchJob.projectId, batchJob.id)
+    batchJobStateProvider.removeJobState(batchJob.id)
   }
 
   fun handleJobStatus(
@@ -126,10 +147,10 @@ class ProgressManager(
     completedChunks: Long,
     isAnyCancelled: Boolean,
     errorMessage: Message? = null,
-    failOnly: Boolean = false
+    failOnly: Boolean = false,
   ) {
-    logger.debug("Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}")
-    logger.debug("Job ${job.id} progress: $progress of ${job.totalItems}")
+    logger.debug { "Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}" }
+    logger.debug { "Job ${job.id} progress: $progress of ${job.totalItems}" }
 
     if (job.totalChunks.toLong() != completedChunks) {
       return
@@ -154,7 +175,7 @@ class ProgressManager(
     }
 
     jobEntity.status = BatchJobStatus.SUCCESS
-    logger.debug("Publishing success event for job ${job.id}")
+    logger.debug { "Publishing success event for job ${job.id}" }
     eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
     cachingBatchJobService.saveJob(jobEntity)
   }
@@ -174,17 +195,20 @@ class ProgressManager(
     return batchJobStateProvider.getCached(jobId)?.getInfoForJobResult()?.progress
   }
 
-  fun publishSingleChunkProgress(jobId: Long, progress: Int) {
+  fun publishSingleChunkProgress(
+    jobId: Long,
+    progress: Int,
+  ) {
     val job = batchJobService.getJobDto(jobId)
     eventPublisher.publishEvent(OnBatchJobProgress(job, progress.toLong(), job.totalItems.toLong()))
   }
 
   fun handleJobRunning(id: Long) {
     executeInNewTransaction(transactionManager) {
-      logger.trace("""Fetching job $id""")
+      logger.trace { """Fetching job $id""" }
       val job = batchJobService.getJobDto(id)
       if (job.status == BatchJobStatus.PENDING) {
-        logger.debug("""Updating job state to running ${job.id}""")
+        logger.debug { """Updating job state to running ${job.id}""" }
         cachingBatchJobService.setRunningState(job.id)
         eventPublisher.publishEvent(OnBatchJobStarted(job))
       }

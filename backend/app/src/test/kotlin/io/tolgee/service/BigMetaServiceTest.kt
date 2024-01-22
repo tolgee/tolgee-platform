@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class BigMetaServiceTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: BigMetaTestData
 
   @Autowired
@@ -36,26 +35,27 @@ class BigMetaServiceTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "big-meta",
       mapOf(
-        "relatedKeysInOrder" to listOf(
-          mapOf(
-            "keyName" to "key"
+        "relatedKeysInOrder" to
+          listOf(
+            mapOf(
+              "keyName" to "key",
+            ),
+            mapOf(
+              "namespace" to "yep",
+              "keyName" to "key",
+            ),
           ),
-          mapOf(
-            "namespace" to "yep",
-            "keyName" to "key"
-          ),
-        )
-      )
+      ),
     ).andIsOk
 
-    bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
+    bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
 
     executeInNewTransaction {
       keyService.delete(testData.yepKey.id)
     }
 
     waitForNotThrowing(pollTime = 1000) {
-      bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(0)
+      bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(0)
     }
   }
 }

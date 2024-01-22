@@ -7,7 +7,7 @@ abstract class BaseEntityDataBuilder<Entity, Builder> : EntityDataBuilder<Entity
   protected inline fun <reified AddedEntity, reified Builder : EntityDataBuilder<AddedEntity, *>> addOperation(
     collection: MutableCollection<Builder>,
     instance: Builder,
-    ft: AddedEntity.() -> Unit
+    ft: AddedEntity.() -> Unit,
   ): Builder {
     ft(instance.self)
     collection.add(instance)
@@ -16,7 +16,7 @@ abstract class BaseEntityDataBuilder<Entity, Builder> : EntityDataBuilder<Entity
 
   protected inline fun <reified AddedEntity, reified Builder : EntityDataBuilder<AddedEntity, *>> addOperation(
     collection: MutableCollection<Builder>,
-    ft: AddedEntity.() -> Unit
+    ft: AddedEntity.() -> Unit,
   ): Builder {
     val instance = Builder::class.constructors.find { it.parameters[0].type == this::class.createType() }!!.call(this)
     addOperation(collection, instance, ft)

@@ -33,39 +33,42 @@ class WebSocketConfig(
   }
 
   override fun configureClientInboundChannel(registration: ChannelRegistration) {
-    registration.interceptors(object : ChannelInterceptor {
-      override fun preSend(message: Message<*>, channel: MessageChannel): Message<*> {
-        val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)
+    registration.interceptors(
+      object : ChannelInterceptor {
+        override fun preSend(
+          message: Message<*>,
+          channel: MessageChannel,
+        ): Message<*> {
+          val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)
 
-        if (accessor?.command == StompCommand.CONNECT) {
-          val tokenString = accessor.getNativeHeader("jwtToken")?.firstOrNull()
-          accessor.user = if (tokenString == null) null else jwtService.validateToken(tokenString)
-        }
-
-        if (accessor?.command == StompCommand.SUBSCRIBE) {
-          val projectId = accessor.destination?.let {
-            "/projects/([0-9]+)".toRegex().find(it)?.groupValues
-              ?.getOrNull(1)?.toLong()
+          if (accessor?.command == StompCommand.CONNECT) {
+            val tokenString = accessor.getNativeHeader("jwtToken")?.firstOrNull()
+            accessor.user = if (tokenString == null) null else jwtService.validateToken(tokenString)
           }
 
-          if (projectId != null) {
-            val user = (accessor.user as? TolgeeAuthentication)?.principal
-              ?: throw MessagingException("Unauthenticated")
+          if (accessor?.command == StompCommand.SUBSCRIBE) {
+            val projectId =
+              accessor.destination?.let {
+                "/projects/([0-9]+)".toRegex().find(it)?.groupValues
+                  ?.getOrNull(1)?.toLong()
+              }
 
-            try {
-              securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
-            } catch (e: Exception) {
-              throw MessagingException("Forbidden")
+            if (projectId != null) {
+              val user =
+                (accessor.user as? TolgeeAuthentication)?.principal
+                  ?: throw MessagingException("Unauthenticated")
+
+              try {
+                securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
+              } catch (e: Exception) {
+                throw MessagingException("Forbidden")
+              }
             }
           }
+
+          return message
         }
-
-        return message
-      }
-
-      override fun postReceive(message: Message<*>, channel: MessageChannel): Message<*>? {
-        return super.postReceive(message, channel)
-      }
-    })
+      },
+    )
   }
 }

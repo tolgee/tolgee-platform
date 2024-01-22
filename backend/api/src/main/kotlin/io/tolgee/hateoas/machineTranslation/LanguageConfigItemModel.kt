@@ -12,28 +12,22 @@ import java.io.Serializable
 class LanguageConfigItemModel(
   @Schema(description = "When null, its a default configuration applied to not configured languages")
   val targetLanguageId: Long?,
-
   @Schema(description = "When null, its a default configuration applied to not configured languages")
   val targetLanguageTag: String?,
-
   @Schema(description = "When null, its a default configuration applied to not configured languages")
   val targetLanguageName: String?,
-
   @Schema(
     description = "Service used for automated translating (deprecated: use primaryServiceInfo)",
-    deprecated = true
+    deprecated = true,
   )
   val primaryService: MtServiceType?,
-
   @Schema(description = "Service info used for automated translating")
   val primaryServiceInfo: MtServiceInfo?,
-
   @Schema(
     description = "Services to be used for suggesting (deprecated: use enabledServicesInfo)",
-    deprecated = true
+    deprecated = true,
   )
   val enabledServices: Set<MtServiceType>,
-
   @Schema(description = "Info about enabled services")
-  var enabledServicesInfo: Set<MtServiceInfo>
+  var enabledServicesInfo: Set<MtServiceInfo>,
 ) : RepresentationModel<LanguageConfigItemModel>(), Serializable

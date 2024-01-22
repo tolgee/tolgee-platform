@@ -90,7 +90,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
                   "TRANSLATED": 0,
                   "REVIEWED": 0
                 }
-              """
+              """,
             )
           node("[1].stats.translationStatePercentages")
             .isEqualTo(
@@ -100,7 +100,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
                   "TRANSLATED": 75.0,
                   "REVIEWED": 0
                 }
-              """
+              """,
             )
         }
       }
@@ -119,8 +119,8 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
         it.node("[0].computedPermission.permittedLanguageIds").isArray.hasSize(2).containsAll(
           mutableListOf(
             testData.project2English.id,
-            testData.project2Deutsch.id
-          )
+            testData.project2Deutsch.id,
+          ),
         )
       }
   }
@@ -134,7 +134,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
         project = base.project,
         user = userAccount,
         type = ProjectPermissionType.TRANSLATE,
-      ).apply { translateLanguages = mutableSetOf(base.project.languages.first()) }
+      ).apply { translateLanguages = mutableSetOf(base.project.languages.first()) },
     )
 
     performAuthGet("/v2/projects/${base.project.id}").andPrettyPrint.andAssertThatJson.let {
@@ -166,7 +166,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
         project = directPermissionProject
         type = ProjectPermissionType.TRANSLATE
         translateLanguages = project!!.languages.toMutableSet()
-      }
+      },
     )
 
     loginAsUser(usersAndOrganizations[1].name)
@@ -217,10 +217,11 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   fun setUsersPermissionsOwn() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[1]
-      .organizationRoles[0]
-      .organization!!
-      .projects[0]
+    val repo =
+      usersAndOrganizations[1]
+        .organizationRoles[0]
+        .organization!!
+        .projects[0]
 
     loginAsUser(usersAndOrganizations[1].name)
 

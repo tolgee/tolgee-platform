@@ -9,9 +9,8 @@ import sibApi.ContactsApi
 
 @Configuration
 class SendInBlueConfiguration(
-  private val sendInBlueProperties: SendInBlueProperties
+  private val sendInBlueProperties: SendInBlueProperties,
 ) {
-
   @Bean
   fun sendInBlueContactsApi(): ContactsApi? {
     if (sendInBlueProperties.apiKey != null) {

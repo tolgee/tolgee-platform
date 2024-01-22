@@ -12,7 +12,7 @@ import org.springframework.test.annotation.DirtiesContext
   properties = [
     "tolgee.cache.enabled=true",
     "tolgee.internal.fake-mt-providers=false",
-  ]
+  ],
 )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class CacheWithoutRedisTest : AbstractCacheTest() {

@@ -11,7 +11,7 @@ open class ApiKeyWithLanguagesModel(
   apiKeyModel: ApiKeyModel,
   @Schema(
     description = """Languages for which user has translate permission.""",
-    deprecated = true
+    deprecated = true,
   )
   val permittedLanguageIds: Set<Long>?,
 ) : RepresentationModel<ApiKeyWithLanguagesModel>(), IApiKeyModel by apiKeyModel

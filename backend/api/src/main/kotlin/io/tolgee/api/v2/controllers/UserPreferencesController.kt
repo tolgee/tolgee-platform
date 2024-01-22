@@ -26,7 +26,7 @@ class UserPreferencesController(
   private val userPreferencesService: UserPreferencesService,
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
 ) {
   @GetMapping("")
   @Operation(summary = "Get user's preferences")
@@ -39,7 +39,7 @@ class UserPreferencesController(
   @PutMapping("/set-language/{languageTag}")
   @Operation(summary = "Set user's UI language")
   fun setLanguage(
-    @PathVariable languageTag: String
+    @PathVariable languageTag: String,
   ) {
     userPreferencesService.setLanguage(languageTag, authenticationFacade.authenticatedUserEntity)
   }
@@ -47,7 +47,7 @@ class UserPreferencesController(
   @PutMapping("/set-preferred-organization/{organizationId}")
   @Operation(summary = "Set user preferred organization")
   fun setPreferredOrganization(
-    @PathVariable organizationId: Long
+    @PathVariable organizationId: Long,
   ) {
     val organization = organizationService.get(organizationId)
     organizationRoleService.checkUserCanView(organization.id)

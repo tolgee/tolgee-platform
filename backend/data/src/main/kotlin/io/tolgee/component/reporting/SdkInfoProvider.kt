@@ -1,9 +1,9 @@
 package io.tolgee.component.reporting
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import javax.servlet.http.HttpServletRequest
 
 @Component
 class SdkInfoProvider() {
@@ -11,7 +11,7 @@ class SdkInfoProvider() {
     val safeRequest = request ?: getRequest() ?: return null
     return mapOf(
       "sdkType" to safeRequest.getHeader("X-Tolgee-SDK-Type"),
-      "sdkVersion" to safeRequest.getHeader("X-Tolgee-SDK-Version")
+      "sdkVersion" to safeRequest.getHeader("X-Tolgee-SDK-Version"),
     )
   }
 

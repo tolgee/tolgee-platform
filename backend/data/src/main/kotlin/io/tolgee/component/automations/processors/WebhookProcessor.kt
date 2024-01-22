@@ -9,8 +9,8 @@ import io.tolgee.constants.Message
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.security.ProjectHolder
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class WebhookProcessor(
@@ -19,19 +19,23 @@ class WebhookProcessor(
   val activityService: ActivityService,
   val currentDateProvider: CurrentDateProvider,
   val webhookExecutor: WebhookExecutor,
-  val entityManager: EntityManager
+  val entityManager: EntityManager,
 ) : AutomationProcessor {
-  override fun process(action: AutomationAction, activityRevisionId: Long?) {
+  override fun process(
+    action: AutomationAction,
+    activityRevisionId: Long?,
+  ) {
     activityRevisionId ?: return
     val view = activityService.getProjectActivity(activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
     val config = action.webhookConfig ?: return
 
-    val data = WebhookRequest(
-      webhookConfigId = config.id,
-      eventType = WebhookEventType.PROJECT_ACTIVITY,
-      activityData = activityModel
-    )
+    val data =
+      WebhookRequest(
+        webhookConfigId = config.id,
+        eventType = WebhookEventType.PROJECT_ACTIVITY,
+        activityData = activityModel,
+      )
 
     try {
       webhookExecutor.signAndExecute(config, data)
@@ -54,7 +58,10 @@ class WebhookProcessor(
     }
   }
 
-  fun updateEntity(webhookConfig: WebhookConfig, failing: Boolean) {
+  fun updateEntity(
+    webhookConfig: WebhookConfig,
+    failing: Boolean,
+  ) {
     webhookConfig.firstFailed = if (failing) currentDateProvider.date else null
     webhookConfig.lastExecuted = currentDateProvider.date
     entityManager.persist(webhookConfig)

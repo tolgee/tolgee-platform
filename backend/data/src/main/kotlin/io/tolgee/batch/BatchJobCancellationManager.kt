@@ -10,6 +10,8 @@ import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
+import jakarta.persistence.LockModeType
 import org.hibernate.LockOptions
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
@@ -17,8 +19,6 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
-import javax.persistence.LockModeType
 
 @Component
 class BatchJobCancellationManager(
@@ -29,7 +29,7 @@ class BatchJobCancellationManager(
   private val transactionManager: PlatformTransactionManager,
   private val batchJobActionService: BatchJobActionService,
   private val progressManager: ProgressManager,
-  private val activityHolder: ActivityHolder
+  private val activityHolder: ActivityHolder,
 ) : Logging {
   @Transactional
   fun cancel(id: Long) {
@@ -47,7 +47,7 @@ class BatchJobCancellationManager(
     if (usingRedisProvider.areWeUsingRedis) {
       redisTemplate.convertAndSend(
         RedisPubSubReceiverConfiguration.JOB_CANCEL_TOPIC,
-        jacksonObjectMapper().writeValueAsString(id)
+        jacksonObjectMapper().writeValueAsString(id),
       )
       return
     }
@@ -60,40 +60,44 @@ class BatchJobCancellationManager(
   }
 
   fun cancelJob(jobId: Long) {
-    val executions = executeInNewTransaction(transactionManager) {
-      entityManager.createNativeQuery("""SET enable_seqscan=off""")
-      val executions = entityManager.createQuery(
-        """
+    val executions =
+      executeInNewTransaction(transactionManager) {
+        entityManager.createNativeQuery("""SET enable_seqscan=off""")
+        val executions =
+          entityManager.createQuery(
+            """
         from BatchJobChunkExecution bjce  
         where bjce.batchJob.id = :id
         and status = :status
       """,
-        BatchJobChunkExecution::class.java
-      )
-        .setLockMode(LockModeType.PESSIMISTIC_WRITE)
-        .setHint(
-          "javax.persistence.lock.timeout",
-          LockOptions.SKIP_LOCKED
+            BatchJobChunkExecution::class.java,
+          )
+            .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+            .setHint(
+              "jakarta.persistence.lock.timeout",
+              LockOptions.SKIP_LOCKED,
+            )
+            .setParameter("id", jobId)
+            .setParameter("status", BatchJobChunkExecutionStatus.PENDING)
+            .resultList
+
+        executions.forEach { execution ->
+          cancelExecution(execution)
+        }
+
+        logger.debug(
+          "Cancelling job $jobId, cancelling locked execution ids: ${
+            executions.map { it.id }.joinToString(", ")
+          }",
         )
-        .setParameter("id", jobId)
-        .setParameter("status", BatchJobChunkExecutionStatus.PENDING)
-        .resultList
-
-      executions.forEach { execution ->
-        cancelExecution(execution)
+        executions
       }
-
-      logger.debug(
-        "Cancelling job $jobId, cancelling locked execution ids: ${
-        executions.map { it.id }.joinToString(", ")
-        }"
-      )
-      executions
-    }
     logger.debug("""Job $jobId cancellation committed. setting transaction committed for the executions.""")
     executions.forEach {
-      progressManager.handleChunkCompletedCommitted(it)
+      progressManager.handleChunkCompletedCommitted(it, false)
     }
+
+    progressManager.onJobCompletedCommitted(jobId)
   }
 
   fun cancelExecution(execution: BatchJobChunkExecution) {

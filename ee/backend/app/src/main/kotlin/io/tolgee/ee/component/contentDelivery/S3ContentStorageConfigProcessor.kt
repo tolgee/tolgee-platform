@@ -7,8 +7,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.ContentStorageType
 import io.tolgee.model.contentDelivery.S3ContentStorageConfig
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentStorageConfig> {
@@ -16,7 +16,10 @@ class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentS
     return dto.s3ContentStorageConfig
   }
 
-  override fun clearParentEntity(storageEntity: ContentStorage, em: EntityManager) {
+  override fun clearParentEntity(
+    storageEntity: ContentStorage,
+    em: EntityManager,
+  ) {
     storageEntity.s3ContentStorageConfig?.let { em.remove(it) }
     storageEntity.s3ContentStorageConfig = null
   }
@@ -27,7 +30,7 @@ class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentS
   override fun configDtoToEntity(
     dto: ContentStorageRequest,
     storageEntity: ContentStorage,
-    em: EntityManager
+    em: EntityManager,
   ): S3ContentStorageConfig {
     val s3dto = dto.s3ContentStorageConfig ?: throw BadRequestException(Message.S3_CONFIG_REQUIRED)
     val entity = S3ContentStorageConfig(storageEntity)
@@ -41,7 +44,10 @@ class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentS
     return entity
   }
 
-  override fun fillDtoSecrets(storageEntity: ContentStorage, dto: ContentStorageRequest) {
+  override fun fillDtoSecrets(
+    storageEntity: ContentStorage,
+    dto: ContentStorageRequest,
+  ) {
     val s3dto = dto.s3ContentStorageConfig ?: return
     val entity = storageEntity.s3ContentStorageConfig ?: return
     s3dto.accessKey = entity.accessKey

@@ -3,5 +3,5 @@ package io.tolgee.events
 import org.springframework.context.ApplicationEvent
 
 class OnUserCountChanged(
-  source: Any
+  source: Any,
 ) : ApplicationEvent(source)

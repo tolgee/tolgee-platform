@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class ImportLanguageModelAssembler : RepresentationModelAssemblerSupport<ImportLanguageView, ImportLanguageModel>(
-  V2ImportController::class.java, ImportLanguageModel::class.java
+  V2ImportController::class.java,
+  ImportLanguageModel::class.java,
 ) {
   override fun toModel(view: ImportLanguageView): ImportLanguageModel {
     return ImportLanguageModel(
@@ -23,7 +24,7 @@ class ImportLanguageModelAssembler : RepresentationModelAssemblerSupport<ImportL
       namespace = view.namespace,
       totalCount = view.totalCount,
       conflictCount = view.conflictCount,
-      resolvedCount = view.resolvedCount
+      resolvedCount = view.resolvedCount,
     )
   }
 }

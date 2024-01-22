@@ -2,7 +2,11 @@ package io.tolgee.fixtures
 
 import kotlin.reflect.KClass
 
-fun waitFor(timeout: Long = 10000, pollTime: Long = 10, fn: () -> Boolean) {
+fun waitFor(
+  timeout: Long = 10000,
+  pollTime: Long = 10,
+  fn: () -> Boolean,
+) {
   val time = System.currentTimeMillis()
   var done = false
   while (!done && System.currentTimeMillis() - time < timeout) {
@@ -18,13 +22,14 @@ fun waitFor(timeout: Long = 10000, pollTime: Long = 10, fn: () -> Boolean) {
 }
 
 class WaitNotSatisfiedException : RuntimeException()
+
 class WaitNotSatisfiedStillThrowingException(throwable: Throwable) : RuntimeException(throwable)
 
 fun waitForNotThrowing(
   throwableClass: KClass<out Throwable> = Throwable::class,
   timeout: Long = 10000,
   pollTime: Long = 10,
-  fn: () -> Unit
+  fn: () -> Unit,
 ) {
   lateinit var throwable: Throwable
   try {

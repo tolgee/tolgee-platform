@@ -55,7 +55,6 @@ export const AdministrationUsers = ({
             [t('administration_users'), LINKS.ADMINISTRATION_USERS.build()],
           ]}
           initialSearch={search}
-          containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={listPermitted.isFetching}

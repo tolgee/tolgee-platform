@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.ResultActions
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: LanguagePermissionsTestData
 
   @BeforeEach
@@ -74,8 +73,8 @@ class KeyControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/proje
       "keys/$keyId/complex-update",
       mapOf(
         "name" to key.name,
-        "translations" to mapOf(langTag to langTag)
-      )
+        "translations" to mapOf(langTag to langTag),
+      ),
     )
   }
 }

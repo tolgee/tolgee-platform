@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.Metrics
+import io.tolgee.batch.data.BatchJobChunkExecutionDto
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -11,16 +12,16 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.hibernate.LockOptions
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobChunkExecutionQueue(
@@ -28,7 +29,7 @@ class BatchJobChunkExecutionQueue(
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
   private val redisTemplate: StringRedisTemplate,
-  private val metrics: Metrics
+  private val metrics: Metrics,
 ) : Logging, InitializingBean {
   companion object {
     /**
@@ -37,7 +38,7 @@ class BatchJobChunkExecutionQueue(
     private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
   }
 
-  @EventListener(JobQueueItemsEvent::class)
+  @EventListener
   fun onJobItemEvent(event: JobQueueItemsEvent) {
     when (event.type) {
       QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
@@ -45,35 +46,47 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  @Scheduled(fixedRate = 60000)
-  fun populateQueue() {
-    logger.debug("Running scheduled populate queue")
-    val data = entityManager.createQuery(
-      """
-          from BatchJobChunkExecution bjce
-          join fetch bjce.batchJob bk
-          where bjce.status = :executionStatus
-          order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
-      """.trimIndent(),
-      BatchJobChunkExecution::class.java
-    ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
-      .setHint(
-        "javax.persistence.lock.timeout",
-        LockOptions.SKIP_LOCKED
-      ).resultList
-    if (data.size > 0) {
-      logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
-    }
-    addExecutionsToLocalQueue(data)
+  @EventListener
+  fun onApplicationReady(event: ApplicationReadyEvent) {
+    populateQueue()
   }
 
-  fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecution>) {
+  @Scheduled(fixedDelay = 60000)
+  fun populateQueue() {
+    logger.debug("Running scheduled populate queue")
+    val data =
+      entityManager.createQuery(
+        """
+        select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
+        from BatchJobChunkExecution bjce
+        join bjce.batchJob bk
+        where bjce.status = :executionStatus
+        order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
+        """.trimIndent(),
+        BatchJobChunkExecutionDto::class.java,
+      ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
+        .setHint(
+          "jakarta.persistence.lock.timeout",
+          LockOptions.SKIP_LOCKED,
+        ).resultList
+
+    if (data.size > 0) {
+      logger.debug("Attempt to add ${data.size} items to queue ${System.identityHashCode(this)}")
+      addExecutionsToLocalQueue(data)
+    }
+  }
+
+  fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
     val ids = queue.map { it.chunkExecutionId }.toSet()
+    var count = 0
     data.forEach {
       if (!ids.contains(it.id)) {
         queue.add(it.toItem())
+        count++
       }
     }
+
+    logger.debug("Added $count new items to queue ${System.identityHashCode(this)}")
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
@@ -84,7 +97,10 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  fun addToQueue(execution: BatchJobChunkExecution, jobCharacter: JobCharacter) {
+  fun addToQueue(
+    execution: BatchJobChunkExecution,
+    jobCharacter: JobCharacter,
+  ) {
     val item = execution.toItem(jobCharacter)
     addItemsToQueue(listOf(item))
   }
@@ -99,7 +115,7 @@ class BatchJobChunkExecutionQueue(
       val event = JobQueueItemsEvent(items, QueueEventType.ADD)
       redisTemplate.convertAndSend(
         RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
-        jacksonObjectMapper().writeValueAsString(event)
+        jacksonObjectMapper().writeValueAsString(event),
       )
       return
     }
@@ -117,14 +133,19 @@ class BatchJobChunkExecutionQueue(
     // Yes. jobCharacter is part of the batchJob entity.
     // However, we don't want to fetch it here, because it would be a waste of resources.
     // So we can provide the jobCharacter here.
-    jobCharacter: JobCharacter? = null
+    jobCharacter: JobCharacter? = null,
   ) =
     ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
 
+  private fun BatchJobChunkExecutionDto.toItem(providedJobCharacter: JobCharacter? = null) =
+    ExecutionQueueItem(id, batchJobId, executeAfter?.time, providedJobCharacter ?: jobCharacter)
+
   val size get() = queue.size
 
-  fun joinToString(separator: String = ", ", transform: (item: ExecutionQueueItem) -> String) =
-    queue.joinToString(separator, transform = transform)
+  fun joinToString(
+    separator: String = ", ",
+    transform: (item: ExecutionQueueItem) -> String,
+  ) = queue.joinToString(separator, transform = transform)
 
   fun poll(): ExecutionQueueItem? {
     return queue.poll()
@@ -139,14 +160,20 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun peek(): ExecutionQueueItem = queue.peek()
+
   fun contains(item: ExecutionQueueItem?): Boolean = queue.contains(item)
 
   fun isEmpty(): Boolean = queue.isEmpty()
+
   fun getJobCharacterCounts(): Map<JobCharacter, Int> {
     return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
   }
 
   override fun afterPropertiesSet() {
     metrics.registerJobQueue(queue)
+  }
+
+  fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> {
+    return queue.filter { it.jobId == jobId }
   }
 }

@@ -13,9 +13,8 @@ import io.tolgee.service.dataImport.processors.po.data.PoParsedTranslation
 import io.tolgee.service.dataImport.processors.po.data.PoParserResult
 
 class PoFileProcessor(
-  override val context: FileProcessorContext
+  override val context: FileProcessorContext,
 ) : ImportFileProcessor() {
-
   lateinit var languageId: String
   lateinit var parsed: PoParserResult
   var poParser: PoParser = PoParser(context)
@@ -34,8 +33,9 @@ class PoFileProcessor(
           return@forEachIndexed
         }
         if (poTranslation.msgid.isNotBlank()) {
-          val icuMessage = getToIcuConverter(poTranslation)
-            .convert(poTranslation.msgstr.toString())
+          val icuMessage =
+            getToIcuConverter(poTranslation)
+              .convert(poTranslation.msgstr.toString())
           context.addTranslation(keyName, languageId, icuMessage, idx)
 
           poTranslation.meta.references.forEach { reference ->
@@ -62,11 +62,15 @@ class PoFileProcessor(
     }
   }
 
-  private fun addPlural(poTranslation: PoParsedTranslation, idx: Int) {
+  private fun addPlural(
+    poTranslation: PoParsedTranslation,
+    idx: Int,
+  ) {
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
-      val icuMessage = ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
-        .convertPoPlural(plurals)
+      val icuMessage =
+        ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
+          .convertPoPlural(plurals)
       context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage, idx)
     }
   }
@@ -75,9 +79,7 @@ class PoFileProcessor(
     return ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
   }
 
-  private fun getMessageFormat(
-    poParsedTranslation: PoParsedTranslation,
-  ): SupportedFormat {
+  private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): SupportedFormat {
     poParsedTranslation.meta.flags.forEach {
       SupportedFormat.findByFlag(it)
         ?.let { found -> return found }
@@ -86,14 +88,16 @@ class PoFileProcessor(
   }
 
   private val detectedFormat by lazy {
-    val messages = parsed.translations.flatMap { poParsed ->
-      if (poParsed.msgidPlural.isNotBlank() && !poParsed.msgstrPlurals.isNullOrEmpty())
-        poParsed.msgstrPlurals!!.values.asSequence().map { it.toString() }
-      else
-        sequence {
-          yield(poParsed.msgstr.toString())
+    val messages =
+      parsed.translations.flatMap { poParsed ->
+        if (poParsed.msgidPlural.isNotBlank() && !poParsed.msgstrPlurals.isNullOrEmpty()) {
+          poParsed.msgstrPlurals!!.values.asSequence().map { it.toString() }
+        } else {
+          sequence {
+            yield(poParsed.msgstr.toString())
+          }
         }
-    }
+      }
 
     FormatDetector(messages.toList())()
   }

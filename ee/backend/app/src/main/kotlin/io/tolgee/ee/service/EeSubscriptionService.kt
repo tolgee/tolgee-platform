@@ -34,15 +34,15 @@ class EeSubscriptionService(
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val httpClient: HttpClient,
-  private val instanceIdService: InstanceIdService
+  private val instanceIdService: InstanceIdService,
 ) {
   companion object {
-    const val setPath: String = "/v2/public/licensing/set-key"
-    const val prepareSetKeyPath: String = "/v2/public/licensing/prepare-set-key"
-    const val subscriptionInfoPath: String = "/v2/public/licensing/subscription"
-    const val reportUsagePath: String = "/v2/public/licensing/report-usage"
-    const val releaseKeyPath: String = "/v2/public/licensing/release-key"
-    const val reportErrorPath: String = "/v2/public/licensing/report-error"
+    const val SET_PATH: String = "/v2/public/licensing/set-key"
+    const val PREPARE_SET_KEY_PATH: String = "/v2/public/licensing/prepare-set-key"
+    const val SUBSCRIPTION_INFO_PATH: String = "/v2/public/licensing/subscription"
+    const val REPORT_USAGE_PATH: String = "/v2/public/licensing/report-usage"
+    const val RELEASE_KEY_PATH: String = "/v2/public/licensing/release-key"
+    const val REPORT_ERROR_PATH: String = "/v2/public/licensing/report-error"
   }
 
   fun findSubscriptionEntity(): EeSubscription? {
@@ -55,21 +55,23 @@ class EeSubscriptionService(
       throw BadRequestException(Message.THIS_INSTANCE_IS_ALREADY_LICENSED)
     }
 
-    val entity = EeSubscription().apply {
-      this.licenseKey = licenseKey
-      this.lastValidCheck = currentDateProvider.date
-    }
-
-    val responseBody = catchingSeatsSpendingLimit {
-      try {
-        postRequest<SelfHostedEeSubscriptionModel>(
-          setPath,
-          SetLicenseKeyLicensingDto(licenseKey, seats, instanceIdService.getInstanceId())
-        )
-      } catch (e: HttpClientErrorException.NotFound) {
-        throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+    val entity =
+      EeSubscription().apply {
+        this.licenseKey = licenseKey
+        this.lastValidCheck = currentDateProvider.date
       }
-    }
+
+    val responseBody =
+      catchingSeatsSpendingLimit {
+        try {
+          postRequest<SelfHostedEeSubscriptionModel>(
+            SET_PATH,
+            SetLicenseKeyLicensingDto(licenseKey, seats, instanceIdService.getInstanceId()),
+          )
+        } catch (e: HttpClientErrorException.NotFound) {
+          throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+        }
+      }
 
     if (responseBody != null) {
       entity.name = responseBody.plan.name
@@ -83,16 +85,17 @@ class EeSubscriptionService(
 
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
     val seats = userAccountService.countAllEnabled()
-    val responseBody = catchingSeatsSpendingLimit {
-      try {
-        postRequest<PrepareSetEeLicenceKeyModel>(
-          prepareSetKeyPath,
-          PrepareSetLicenseKeyDto(licenseKey, seats),
-        )
-      } catch (e: HttpClientErrorException.NotFound) {
-        throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+    val responseBody =
+      catchingSeatsSpendingLimit {
+        try {
+          postRequest<PrepareSetEeLicenceKeyModel>(
+            PREPARE_SET_KEY_PATH,
+            PrepareSetLicenseKeyDto(licenseKey, seats),
+          )
+        } catch (e: HttpClientErrorException.NotFound) {
+          throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+        }
       }
-    }
 
     if (responseBody != null) {
       return responseBody
@@ -113,7 +116,10 @@ class EeSubscriptionService(
     }
   }
 
-  private inline fun <reified T> postRequest(url: String, body: Any): T? {
+  private inline fun <reified T> postRequest(
+    url: String,
+    body: Any,
+  ): T? {
     return httpClient.requestForJson("${eeProperties.licenseServer}$url", body, HttpMethod.POST, T::class.java)
   }
 
@@ -126,18 +132,19 @@ class EeSubscriptionService(
   fun refreshSubscription() {
     val subscription = findSubscriptionEntity()
     if (subscription != null) {
-      val responseBody = try {
-        getRemoteSubscriptionInfo(subscription)
-      } catch (e: HttpClientErrorException.BadRequest) {
-        val error = e.parseBody()
-        if (error.code == Message.LICENSE_KEY_USED_BY_ANOTHER_INSTANCE.code) {
-          setSubscriptionKeyUsedByOtherInstance(subscription)
+      val responseBody =
+        try {
+          getRemoteSubscriptionInfo(subscription)
+        } catch (e: HttpClientErrorException.BadRequest) {
+          val error = e.parseBody()
+          if (error.code == Message.LICENSE_KEY_USED_BY_ANOTHER_INSTANCE.code) {
+            setSubscriptionKeyUsedByOtherInstance(subscription)
+          }
+          null
+        } catch (e: Exception) {
+          reportError(e.stackTraceToString())
+          null
         }
-        null
-      } catch (e: Exception) {
-        reportError(e.stackTraceToString())
-        null
-      }
       updateLocalSubscription(responseBody, subscription)
       handleConstantlyFailingRemoteCheck(subscription)
     }
@@ -154,7 +161,7 @@ class EeSubscriptionService(
 
   private fun updateLocalSubscription(
     responseBody: SelfHostedEeSubscriptionModel?,
-    subscription: EeSubscription
+    subscription: EeSubscription,
   ) {
     if (responseBody != null) {
       subscription.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
@@ -176,22 +183,23 @@ class EeSubscriptionService(
   }
 
   private fun getRemoteSubscriptionInfo(subscription: EeSubscription): SelfHostedEeSubscriptionModel? {
-    val responseBody = try {
-      postRequest<SelfHostedEeSubscriptionModel>(
-        subscriptionInfoPath,
-        GetMySubscriptionDto(subscription.licenseKey, instanceIdService.getInstanceId())
-      )
-    } catch (e: HttpClientErrorException.NotFound) {
-      subscription.status = SubscriptionStatus.CANCELED
-      null
-    }
+    val responseBody =
+      try {
+        postRequest<SelfHostedEeSubscriptionModel>(
+          SUBSCRIPTION_INFO_PATH,
+          GetMySubscriptionDto(subscription.licenseKey, instanceIdService.getInstanceId()),
+        )
+      } catch (e: HttpClientErrorException.NotFound) {
+        subscription.status = SubscriptionStatus.CANCELED
+        null
+      }
     return responseBody
   }
 
   fun reportError(error: String) {
     try {
       findSubscriptionEntity()?.let {
-        postRequest<Any>(reportErrorPath, ReportErrorDto(error, it.licenseKey))
+        postRequest<Any>(REPORT_ERROR_PATH, ReportErrorDto(error, it.licenseKey))
       }
     } catch (e: Exception) {
       e.printStackTrace()
@@ -217,17 +225,20 @@ class EeSubscriptionService(
     }
   }
 
-  private fun reportUsageRemote(subscription: EeSubscription, seats: Long) {
+  private fun reportUsageRemote(
+    subscription: EeSubscription,
+    seats: Long,
+  ) {
     postRequest<Any>(
-      reportUsagePath,
-      ReportUsageDto(subscription.licenseKey, seats)
+      REPORT_USAGE_PATH,
+      ReportUsageDto(subscription.licenseKey, seats),
     )
   }
 
   private fun releaseKeyRemote(subscription: EeSubscription) {
     postRequest<Any>(
-      releaseKeyPath,
-      ReleaseKeyDto(subscription.licenseKey)
+      RELEASE_KEY_PATH,
+      ReleaseKeyDto(subscription.licenseKey),
     )
   }
 

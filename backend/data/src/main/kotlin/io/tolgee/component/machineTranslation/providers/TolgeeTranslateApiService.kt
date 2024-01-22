@@ -33,9 +33,8 @@ class TolgeeTranslateApiService(
   private val tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties,
   private val restTemplate: RestTemplate,
   private val tokenBucketManager: TokenBucketManager,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
-
   @OptIn(ExperimentalTime::class)
   fun translate(params: TolgeeTranslateParams): MtValueProvider.MtResult {
     val headers = HttpHeaders()
@@ -44,40 +43,44 @@ class TolgeeTranslateApiService(
       params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
     val examples = params.metadata?.examples?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
 
-    val requestBody = TolgeeTranslateRequest(
-      params.text,
-      params.keyName,
-      params.sourceTag,
-      params.targetTag,
-      examples,
-      closeItems,
-      priority = if (params.isBatch) "low" else "high",
-      params.formality
-    )
+    val requestBody =
+      TolgeeTranslateRequest(
+        params.text,
+        params.keyName,
+        params.sourceTag,
+        params.targetTag,
+        examples,
+        closeItems,
+        priority = if (params.isBatch) "low" else "high",
+        params.formality,
+      )
     val request = HttpEntity(requestBody, headers)
 
     checkPositiveRateLimitTokens(params)
 
-    val response: ResponseEntity<TolgeeTranslateResponse> = try {
-      val (value, time) = measureTimedValue {
-        restTemplate.exchange<TolgeeTranslateResponse>(
-          "${tolgeeMachineTranslationProperties.url}/api/openai/translate",
-          HttpMethod.POST,
-          request
-        )
+    val response: ResponseEntity<TolgeeTranslateResponse> =
+      try {
+        val (value, time) =
+          measureTimedValue {
+            restTemplate.exchange<TolgeeTranslateResponse>(
+              "${tolgeeMachineTranslationProperties.url}/api/openai/translate",
+              HttpMethod.POST,
+              request,
+            )
+          }
+        logger.debug("Translator request took ${time.inWholeMilliseconds} ms")
+        value
+      } catch (e: HttpClientErrorException.TooManyRequests) {
+        val data = e.parse()
+        emptyBucket(data)
+        val waitTime = data.retryAfter ?: 0
+        logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
+        throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
       }
-      logger.debug("Translator request took ${time.inWholeMilliseconds} ms")
-      value
-    } catch (e: HttpClientErrorException.TooManyRequests) {
-      val data = e.parse()
-      emptyBucket(data)
-      val waitTime = data.retryAfter ?: 0
-      logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
-      throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
-    }
 
-    val costString = response.headers.get("Mt-Credits-Cost")?.singleOrNull()
-      ?: throw IllegalStateException("No valid Credits-Cost header in response")
+    val costString =
+      response.headers.get("Mt-Credits-Cost")?.singleOrNull()
+        ?: throw IllegalStateException("No valid Credits-Cost header in response")
     val cost = costString.toInt()
 
     return MtValueProvider.MtResult(
@@ -124,7 +127,7 @@ class TolgeeTranslateApiService(
       val examples: List<TolgeeTranslateExample>?,
       val closeItems: List<TolgeeTranslateExample>?,
       val priority: String = "low",
-      val formality: Formality? = null
+      val formality: Formality? = null,
     )
 
     class TolgeeTranslateParams(
@@ -134,13 +137,13 @@ class TolgeeTranslateApiService(
       val targetTag: String,
       val metadata: Metadata?,
       val formality: Formality?,
-      val isBatch: Boolean
+      val isBatch: Boolean,
     )
 
     class TolgeeTranslateExample(
       var keyName: String,
       var source: String,
-      var target: String
+      var target: String,
     )
 
     class TolgeeTranslateResponse(val output: String, val contextDescription: String?)

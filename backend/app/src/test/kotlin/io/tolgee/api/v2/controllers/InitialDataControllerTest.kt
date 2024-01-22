@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class InitialDataControllerTest : AuthorizedControllerTest() {
-
   @Test
   fun `returns initial data when authenticated`() {
     performAuthGet("/v2/public/initial-data").andPrettyPrint.andIsOk.andAssertThatJson {

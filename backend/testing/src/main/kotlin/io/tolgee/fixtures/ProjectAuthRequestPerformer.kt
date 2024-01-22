@@ -9,9 +9,8 @@ import org.springframework.test.web.servlet.ResultActions
 
 abstract class ProjectAuthRequestPerformer(
   userAccountProvider: () -> UserAccount,
-  val projectUrlPrefix: String = "/api/project/"
+  val projectUrlPrefix: String = "/api/project/",
 ) : AuthorizedRequestPerformer() {
-
   @field:Autowired
   lateinit var dbPopulator: DbPopulatorReal
 
@@ -24,13 +23,26 @@ abstract class ProjectAuthRequestPerformer(
 
   var projectSupplier: (() -> Project)? = null
 
-  abstract fun performProjectAuthPut(url: String, content: Any?): ResultActions
-  abstract fun performProjectAuthPost(url: String, content: Any?): ResultActions
+  abstract fun performProjectAuthPut(
+    url: String,
+    content: Any?,
+  ): ResultActions
+
+  abstract fun performProjectAuthPost(
+    url: String,
+    content: Any?,
+  ): ResultActions
+
   abstract fun performProjectAuthGet(url: String): ResultActions
-  abstract fun performProjectAuthDelete(url: String, content: Any?): ResultActions
+
+  abstract fun performProjectAuthDelete(
+    url: String,
+    content: Any?,
+  ): ResultActions
+
   abstract fun performProjectAuthMultipart(
     url: String,
     files: List<MockMultipartFile>,
-    params: Map<String, Array<String>>
+    params: Map<String, Array<String>>,
   ): ResultActions
 }

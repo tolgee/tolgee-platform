@@ -12,9 +12,17 @@ interface AutomationRepository : JpaRepository<Automation?, Long?> {
     from Automation a
       join fetch a.actions
       where a.id = :id
-  """
+  """,
   )
   fun find(id: Long): Automation?
-  fun deleteByIdAndProjectId(automationId: Long, projectId: Long): Long
-  fun findByIdAndProjectId(automationId: Long, projectId: Long): Automation?
+
+  fun deleteByIdAndProjectId(
+    automationId: Long,
+    projectId: Long,
+  ): Long
+
+  fun findByIdAndProjectId(
+    automationId: Long,
+    projectId: Long,
+  ): Automation?
 }

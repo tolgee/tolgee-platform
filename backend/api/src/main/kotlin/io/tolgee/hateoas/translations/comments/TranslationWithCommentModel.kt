@@ -4,5 +4,5 @@ import io.tolgee.hateoas.translations.TranslationModel
 
 data class TranslationWithCommentModel(
   val translation: TranslationModel,
-  val comment: TranslationCommentModel
+  val comment: TranslationCommentModel,
 )

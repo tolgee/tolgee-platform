@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { IconButton, styled, Tooltip, useTheme } from '@mui/material';
+import { IconButton, Portal, styled, Tooltip, useTheme } from '@mui/material';
 import { KeyboardArrowUp } from '@mui/icons-material';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -45,6 +45,7 @@ const StyledCounterContainer = styled('div')`
     opacity: 0;
     pointer-events: none;
     width: 0px;
+    overflow: hidden;
     margin-right: ${({ theme }) => theme.spacing(1)};
   }
 `;
@@ -133,40 +134,42 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const counterContent = `${index} / ${totalCount}`;
 
   return width ? (
-    <StyledContainer
-      style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-    >
-      <StyledShortcutsContainer>
-        <BatchOperations
-          open={selectionOpen}
-          onClose={() => setIsMouseOver(false)}
-        />
-        {!selectionOpen && <TranslationsShortcuts />}
-      </StyledShortcutsContainer>
-      <StyledCounterContainer
-        className={clsx({
-          hidden: !toolbarVisible,
-        })}
+    <Portal>
+      <StyledContainer
+        style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
       >
-        <StyledIndex>
-          <span data-cy="translations-toolbar-counter">{counterContent}</span>
-          {/* stretch content by monospace font, so it's not jumping */}
-          <StyledStretcher>{counterContent}</StyledStretcher>
-        </StyledIndex>
-        <StyledDivider />
-        <Tooltip title={t('translations_toolbar_to_top')}>
-          <StyledIconButton
-            data-cy="translations-toolbar-to-top"
-            onClick={handleScrollUp}
-            size="small"
-            aria-label={t('translations_toolbar_to_top')}
-          >
-            <KeyboardArrowUp />
-          </StyledIconButton>
-        </Tooltip>
-      </StyledCounterContainer>
-    </StyledContainer>
+        <StyledShortcutsContainer>
+          <BatchOperations
+            open={selectionOpen}
+            onClose={() => setIsMouseOver(false)}
+          />
+          {!selectionOpen && <TranslationsShortcuts />}
+        </StyledShortcutsContainer>
+        <StyledCounterContainer
+          className={clsx({
+            hidden: !toolbarVisible,
+          })}
+        >
+          <StyledIndex>
+            <span data-cy="translations-toolbar-counter">{counterContent}</span>
+            {/* stretch content by monospace font, so it's not jumping */}
+            <StyledStretcher>{counterContent}</StyledStretcher>
+          </StyledIndex>
+          <StyledDivider />
+          <Tooltip title={t('translations_toolbar_to_top')}>
+            <StyledIconButton
+              data-cy="translations-toolbar-to-top"
+              onClick={handleScrollUp}
+              size="small"
+              aria-label={t('translations_toolbar_to_top')}
+            >
+              <KeyboardArrowUp />
+            </StyledIconButton>
+          </Tooltip>
+        </StyledCounterContainer>
+      </StyledContainer>
+    </Portal>
   ) : null;
 };

@@ -1,10 +1,9 @@
 import { DefaultParamType, T, TFnType, TranslationKey } from '@tolgee/react';
-import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { OrganizationService } from '../service/OrganizationService';
-import { SignUpService } from '../service/SignUpService';
+import { organizationService } from '../service/OrganizationService';
+import { signUpService } from '../service/SignUpService';
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -15,22 +14,18 @@ Yup.setLocale({
   // use constant translation keys for messages without values
   mixed: {
     default: 'field_invalid',
-    // eslint-disable-next-line react/display-name
     required: () => {
       return <T keyName="Validation - required field" />;
     },
   },
   string: {
-    // eslint-disable-next-line react/display-name
     email: () => <T keyName="validation_email_is_not_valid" />,
-    // eslint-disable-next-line react/display-name
     min: ({ min }) => (
       <T
         keyName="Field should have at least n chars"
         params={{ min: min.toString() }}
       />
     ),
-    // eslint-disable-next-line react/display-name
     max: ({ max }) => (
       <T
         keyName="Field should have maximum of n chars"
@@ -41,18 +36,8 @@ Yup.setLocale({
 });
 
 export class Validation {
-  static readonly USER_PASSWORD = Yup.string().min(8).max(50).required();
-
-  static readonly USER_PASSWORD_WITH_REPEAT_NAKED = {
-    password: Validation.USER_PASSWORD,
-    passwordRepeat: Yup.string()
-      .oneOf([Yup.ref('password'), null], 'Passwords must match')
-      .required(),
-  };
-
-  static readonly USER_PASSWORD_WITH_REPEAT = Yup.object().shape(
-    Validation.USER_PASSWORD_WITH_REPEAT_NAKED
-  );
+  static readonly USER_PASSWORD = (t: TFunType) =>
+    Yup.string().min(8).max(50).required();
 
   static readonly RESET_PASSWORD_REQUEST = Yup.object().shape({
     email: Yup.string().email().required(),
@@ -68,11 +53,11 @@ export class Validation {
       } catch (e) {
         return false;
       }
-    }, container.resolve(SignUpService).validateEmail);
+    }, signUpService.validateEmail);
 
   static readonly SIGN_UP = (t: TFunType, orgRequired: boolean) =>
     Yup.object().shape({
-      ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
+      password: Validation.USER_PASSWORD(t),
       name: Yup.string().required(),
       email: Yup.string().email().required().test(
         'checkEmailUnique',
@@ -103,13 +88,16 @@ export class Validation {
           : Yup.string().email().required(),
     });
 
-  static readonly USER_PASSWORD_CHANGE = Yup.object().shape({
-    currentPassword: Yup.string().max(50).required(),
-    password: Validation.USER_PASSWORD,
-    passwordRepeat: Yup.string()
-      .notRequired()
-      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
-  });
+  static readonly USER_PASSWORD_CHANGE = (t: TFunType) =>
+    Yup.object().shape({
+      currentPassword: Yup.string().max(50).required(),
+      password: Validation.USER_PASSWORD(t),
+    });
+
+  static readonly PASSWORD_RESET = (t: TFunType) =>
+    Yup.object().shape({
+      password: Validation.USER_PASSWORD(t),
+    });
 
   static readonly USER_MFA_ENABLE = Yup.object().shape({
     password: Yup.string().max(50).required(),
@@ -245,7 +233,7 @@ export class Validation {
             return false;
           }
         },
-        (v) => container.resolve(OrganizationService).validateSlug(v)
+        (v) => organizationService.validateSlug(v)
       )(v);
     };
     return Yup.object().shape({

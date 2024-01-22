@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/public/configuration-properties",
-  ]
+  ],
 )
 class ConfigurationPropsController : IController {
   val docs get() = ConfigurationDocumentationProvider().docs

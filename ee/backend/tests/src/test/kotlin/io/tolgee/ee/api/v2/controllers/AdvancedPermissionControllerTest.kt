@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 
 class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
-
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }
 
   @Autowired
@@ -53,7 +52,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   fun `fails to set user's permission when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = setOf()
     permissionTestUtil.performSetPermissions(
-      ""
+      "",
     ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
@@ -62,7 +61,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   @Test
   fun `validates permissions (view languages and scopes)`() {
     permissionTestUtil.performSetPermissions(
-      ""
+      "",
     ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.CANNOT_SET_VIEW_LANGUAGES_WITHOUT_TRANSLATIONS_VIEW_SCOPE)
@@ -71,7 +70,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   @Test
   fun `validates permissions (translate languages and scopes)`() {
     permissionTestUtil.performSetPermissions(
-      ""
+      "",
     ) { getLang -> "scopes=translations.view&translateLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.CANNOT_SET_TRANSLATE_LANGUAGES_WITHOUT_TRANSLATIONS_EDIT_SCOPE)
@@ -80,7 +79,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   @Test
   fun `validates permissions (state change languages and scopes)`() {
     permissionTestUtil.performSetPermissions(
-      ""
+      "",
     ) { getLang -> "scopes=translations.view&stateChangeLanguages=${getLang("en")}" }
       .andIsBadRequest
       .andHasErrorMessage(Message.CANNOT_SET_STATE_CHANGE_LANGUAGES_WITHOUT_TRANSLATIONS_STATE_EDIT_SCOPE)
@@ -89,7 +88,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   @Test
   fun `validates permissions (empty scopes)`() {
     permissionTestUtil.performSetPermissions(
-      ""
+      "",
     ) { "" }
       .andIsBadRequest
       .andHasErrorMessage(Message.SCOPES_HAS_TO_BE_SET)
@@ -123,7 +122,8 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
       performSetScopesBaseOrganization(org).andIsOk
 
       organizationService.get(org.id).basePermission.scopes.assert.containsExactlyInAnyOrder(
-        Scope.TRANSLATIONS_EDIT, Scope.TRANSLATIONS_STATE_EDIT
+        Scope.TRANSLATIONS_EDIT,
+        Scope.TRANSLATIONS_STATE_EDIT,
       )
     }
   }
@@ -134,7 +134,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
     permissionTestUtil.withPermissionsTestData { project, user ->
       val org = project.organizationOwner
       performSetScopesBaseOrganization(org).andIsBadRequest.andHasErrorMessage(
-        Message.FEATURE_NOT_ENABLED
+        Message.FEATURE_NOT_ENABLED,
       )
     }
   }
@@ -147,7 +147,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
 
       performAuthPut(
         "/v2/organizations/${org.id}/set-base-permissions/TRANSLATE",
-        null
+        null,
       ).andIsOk
 
       performSetScopesBaseOrganization(org).andIsOk
@@ -168,7 +168,7 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   private fun performSetScopesBaseOrganization(org: Organization): ResultActions {
     return performAuthPut(
       "/v2/organizations/${org.id}/set-base-permissions?scopes=translations.edit&scopes=translations.state-edit",
-      null
+      null,
     )
   }
 }

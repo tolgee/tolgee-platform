@@ -59,7 +59,6 @@ export const AdministrationEePlanEditView = () => {
             }),
           ],
         ]}
-        containerMaxWidth="lg"
         allCentered
         hideChildrenOnLoading={false}
       >

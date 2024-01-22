@@ -3,6 +3,7 @@ package io.tolgee.service
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
@@ -20,13 +21,13 @@ import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class StartupImportService(
@@ -36,9 +37,8 @@ class StartupImportService(
   private val properties: TolgeeProperties,
   private val apiKeyService: ApiKeyService,
   private val applicationContext: ApplicationContext,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) : Logging {
-
   @Transactional
   fun importFiles() {
     getDirsToImport()?.forEach { projectDir ->
@@ -50,7 +50,7 @@ class StartupImportService(
 
   private fun importAsInitialUserProject(
     projectName: String,
-    fileDtos: List<ImportFileDto>
+    fileDtos: List<ImportFileDto>,
   ) {
     val userAccount = getInitialUserAccount() ?: return
     val organization = getInitialUserOrganization(userAccount)
@@ -73,19 +73,22 @@ class StartupImportService(
   private fun getImportFileDtos(projectDir: File) =
     projectDir.walk().filter { !it.isDirectory }.map {
       val relativePath = it.path.replace(projectDir.path, "")
-      if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.inputStream())
+      if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.readBytes())
     }.filterNotNull().toList()
 
   private fun setAuthentication(userAccount: UserAccount) {
-    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-      credentials = null,
-      userAccount = UserAccountDto.fromEntity(userAccount),
-      details = TolgeeAuthenticationDetails(false)
-    )
+    SecurityContextHolder.getContext().authentication =
+      TolgeeAuthentication(
+        credentials = null,
+        userAccount = UserAccountDto.fromEntity(userAccount),
+        details = TolgeeAuthenticationDetails(false),
+      )
   }
 
-  private fun isProjectExisting(projectName: String, organization: Organization) =
-    projectService.findAllByNameAndOrganizationOwner(projectName, organization).isNotEmpty()
+  private fun isProjectExisting(
+    projectName: String,
+    organization: Organization,
+  ) = projectService.findAllByNameAndOrganizationOwner(projectName, organization).isNotEmpty()
 
   private fun getDirsToImport(): List<File>? {
     properties.import.dir?.let { dir ->
@@ -100,9 +103,14 @@ class StartupImportService(
   private fun importData(
     fileDtos: List<ImportFileDto>,
     project: Project,
-    userAccount: UserAccount
+    userAccount: UserAccount,
   ) {
-    importService.addFiles(fileDtos, project, userAccount)
+    importService.addFiles(
+      files = fileDtos,
+      project = project,
+      userAccount = userAccount,
+      params = ImportAddFilesParams(storeFilesToFileStorage = false),
+    )
     entityManager.flush()
     entityManager.clear()
     val imports = importService.getAllByProject(project.id)
@@ -114,28 +122,30 @@ class StartupImportService(
   private fun assignProjectHolder(project: Project) {
     applicationContext.getBean(
       "transactionProjectHolder",
-      ProjectHolder::class.java
+      ProjectHolder::class.java,
     ).project = ProjectDto.fromEntity(project)
   }
 
   private fun createProject(
     projectName: String,
     fileDtos: List<ImportFileDto>,
-    organization: Organization
+    organization: Organization,
   ): Project {
-    val languages = fileDtos.map { file ->
-      // remove extension
-      val name = getLanguageName(file)
-      LanguageDto(name, name, name)
-    }.toSet().toList()
+    val languages =
+      fileDtos.map { file ->
+        // remove extension
+        val name = getLanguageName(file)
+        LanguageDto(name, name, name)
+      }.toSet().toList()
 
-    val project = projectService.createProject(
-      CreateProjectDTO(
-        name = projectName,
-        languages = languages,
-        organizationId = organization.id
-      ),
-    )
+    val project =
+      projectService.createProject(
+        CreateProjectDTO(
+          name = projectName,
+          languages = languages,
+          organizationId = organization.id,
+        ),
+      )
 
     setBaseLanguage(project)
 
@@ -161,23 +171,25 @@ class StartupImportService(
 
   private fun createImplicitApiKey(
     userAccount: UserAccount,
-    project: Project
+    project: Project,
   ) {
     if (properties.import.createImplicitApiKey) {
-      val apiKey = ApiKey(
-        key = "${project.name.lowercase(Locale.getDefault())}-${userAccount.name}-imported-project-implicit",
-        scopesEnum = Scope.values().toMutableSet(),
-        userAccount = userAccount,
-        project = project
-      )
+      val apiKey =
+        ApiKey(
+          key = "${project.name.lowercase(Locale.getDefault())}-${userAccount.name}-imported-project-implicit",
+          scopesEnum = Scope.values().toMutableSet(),
+          userAccount = userAccount,
+          project = project,
+        )
       apiKeyService.save(apiKey)
       project.apiKeys.add(apiKey)
     }
   }
 
   private fun getInitialUserAccount(): UserAccount? {
-    val userAccount = userAccountService
-      .findActive(properties.authentication.initialUsername)
+    val userAccount =
+      userAccountService
+        .findActive(properties.authentication.initialUsername)
     return userAccount
   }
 }

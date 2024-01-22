@@ -5,16 +5,15 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatExceptionOfType
+import jakarta.validation.ConstraintViolationException
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
-import javax.validation.ConstraintViolationException
 
 @Transactional
 @SpringBootTest
 class ImportFileRepositoryTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var importFileRepository: ImportFileRepository
 
@@ -37,12 +36,13 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
   fun `validates ImportFile entity`() {
     val import = createBaseImport()
 
-    val longName = StringBuilder().let { builder ->
-      repeat((1..2010).count()) {
-        builder.append("a")
+    val longName =
+      StringBuilder().let { builder ->
+        repeat((1..2010).count()) {
+          builder.append("a")
+        }
+        builder.toString()
       }
-      builder.toString()
-    }
 
     ImportFile(import = import, name = longName).let {
       assertThatExceptionOfType(ConstraintViolationException::class.java)

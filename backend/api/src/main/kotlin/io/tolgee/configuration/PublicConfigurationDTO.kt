@@ -38,7 +38,7 @@ class PublicConfigurationDTO(
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
     val google: OAuthPublicConfigDTO,
-    val oauth2: OAuthPublicExtendsConfigDTO
+    val oauth2: OAuthPublicExtendsConfigDTO,
   )
 
   data class OAuthPublicConfigDTO(val clientId: String?) {
@@ -48,34 +48,35 @@ class PublicConfigurationDTO(
   data class OAuthPublicExtendsConfigDTO(
     val clientId: String?,
     val authorizationUrl: String?,
-    val scopes: List<String>?
+    val scopes: List<String>?,
   ) {
     val enabled: Boolean = !clientId.isNullOrEmpty()
   }
 
   data class MtServicesDTO(
     val defaultPrimaryService: MtServiceType?,
-    val services: Map<MtServiceType, MtServiceDTO>
+    val services: Map<MtServiceType, MtServiceDTO>,
   )
 
   data class MtServiceDTO(
     val enabled: Boolean,
-    val defaultEnabledForProject: Boolean
+    val defaultEnabledForProject: Boolean,
   )
 
   init {
     if (authentication) {
-      authMethods = AuthMethodsDTO(
-        OAuthPublicConfigDTO(
-          properties.authentication.github.clientId
-        ),
-        OAuthPublicConfigDTO(properties.authentication.google.clientId),
-        OAuthPublicExtendsConfigDTO(
-          properties.authentication.oauth2.clientId,
-          properties.authentication.oauth2.authorizationUrl,
-          properties.authentication.oauth2.scopes
+      authMethods =
+        AuthMethodsDTO(
+          OAuthPublicConfigDTO(
+            properties.authentication.github.clientId,
+          ),
+          OAuthPublicConfigDTO(properties.authentication.google.clientId),
+          OAuthPublicExtendsConfigDTO(
+            properties.authentication.oauth2.clientId,
+            properties.authentication.oauth2.authorizationUrl,
+            properties.authentication.oauth2.scopes,
+          ),
         )
-      )
     }
     passwordResettable = properties.authentication.nativeEnabled
     allowRegistrations = properties.authentication.registrationsAllowed

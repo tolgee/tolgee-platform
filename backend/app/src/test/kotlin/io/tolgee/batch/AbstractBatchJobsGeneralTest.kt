@@ -22,7 +22,6 @@ import kotlin.math.ceil
 
 @WebsocketTest
 abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
-
   private lateinit var testData: BatchJobsTestData
 
   @Autowired
@@ -202,10 +201,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val thirdExecution = executions[job1.id]!![1]
     val fourthExecution = executions[job2.id]!![1]
 
-    util.waitForQueueSize(4)
-    batchJobChunkExecutionQueue.clear()
-    util.waitForQueueSize(0)
-    batchJobConcurrentLauncher.pause = false
+    util.waitAndClearQueue(4)
 
     batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
     util.waitForExecutionSuccess(firstExecution)
@@ -232,6 +228,29 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     util.assertJobStateCacheCleared(job1)
     util.assertJobStateCacheCleared(job2)
     util.assertJobUnlocked()
+  }
+
+  @Test
+  fun `doesn't lock non-exclusive job`() {
+    clearForcedDate()
+    batchJobConcurrentLauncher.pause = true
+
+    val job1 = util.runChunkedJob(20)
+    val job2 = util.runNonExclusiveJob()
+
+    val executions = util.getExecutions(listOf(job1.id, job2.id))
+
+    val firstExecution = executions[job1.id]!!.first()
+    val secondExecution = executions[job2.id]!!.first()
+
+    util.waitAndClearQueue(3)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
+    util.waitForExecutionSuccess(firstExecution)
+    util.verifyJobLocked(job1)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(secondExecution))
+    util.waitForExecutionSuccess(secondExecution)
   }
 
   /**
@@ -266,13 +285,18 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Test
   fun `debounces job`() {
     currentDateProvider.forcedDate = currentDateProvider.date
+    val startTie = currentDateProvider.date
+
     util.makeAutomationChunkProcessorPass()
     val firstJobId = util.runDebouncedJob().id
 
     repeat(2) {
+      Thread.sleep(500)
       util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
     }
     currentDateProvider.move(Duration.ofSeconds(5))
+
+    Thread.sleep(500)
     repeat(2) {
       util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
     }
@@ -284,7 +308,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     // test it debounces for max time (10 sec * 4 = 40)
     repeat(7) {
-      currentDateProvider.move(Duration.ofSeconds(5))
+      currentDateProvider.move(Duration.ofSeconds(2))
+      Thread.sleep(20)
+      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+      currentDateProvider.move(Duration.ofSeconds(3))
+      Thread.sleep(20)
       util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
     }
 

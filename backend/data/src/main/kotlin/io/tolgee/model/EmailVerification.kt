@@ -1,13 +1,13 @@
 package io.tolgee.model
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToOne
-import javax.persistence.Table
-import javax.validation.constraints.Email
-import javax.validation.constraints.NotBlank
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
 
 @Entity
 @Table(uniqueConstraints = [])
@@ -15,12 +15,10 @@ data class EmailVerification(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null,
-
   @NotBlank
   var code: String? = null,
-
   @Email
-  var newEmail: String? = null
+  var newEmail: String? = null,
 ) : AuditModel() {
   @OneToOne(optional = false)
   lateinit var userAccount: UserAccount
@@ -29,9 +27,9 @@ data class EmailVerification(
     id: Long? = null,
     @NotBlank code: String,
     userAccount: UserAccount,
-    newEmail: String? = null
+    newEmail: String? = null,
   ) :
     this(id = id, code = code, newEmail = newEmail) {
-      this.userAccount = userAccount
-    }
+    this.userAccount = userAccount
+  }
 }

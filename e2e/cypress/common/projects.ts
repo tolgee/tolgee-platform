@@ -51,7 +51,7 @@ export const createProject = (name: string, owner: string) => {
   gcy('global-form-save-button').click();
   assertMessage('Project created');
   gcy('organization-switch').contains(owner).should('be.visible');
-  gcy('global-paginated-list').contains(name);
+  gcy('navigation-item').contains(name);
 };
 
 export const visitList = () => {

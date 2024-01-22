@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { styled, keyframes, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { useDebouncedCallback } from 'use-debounce/lib';
+import { useDebouncedCallback } from 'use-debounce';
 import { Close, Help } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
@@ -98,7 +98,7 @@ const StyledContent = styled('div')`
     opacity: 1;
   }
 
-  &:hover ${StyledItems} {
+  &:hover .items {
     opacity: 1;
   }
 
@@ -276,7 +276,7 @@ export const TranslationsShortcuts = () => {
           contentEmpty: !collapsed && !items.length,
         })}
       >
-        <StyledItems>
+        <StyledItems className="items">
           {!collapsed &&
             items.map((item, i) => {
               return (

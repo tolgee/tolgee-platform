@@ -10,7 +10,6 @@ import java.io.Serializable
 open class NamespaceModel(
   @Schema(description = "The id of namespace", example = "10000048")
   val id: Long,
-
   @Schema(description = "", example = "homepage")
   val name: String,
 ) : RepresentationModel<NamespaceModel>(), Serializable

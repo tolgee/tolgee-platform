@@ -6,7 +6,6 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory } from 'react-router-dom';
@@ -18,6 +17,8 @@ import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { ProjectLanguages } from './ProjectLanguages';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -25,9 +26,8 @@ const StyledContainer = styled('div')`
   grid-template-areas: 'image title keyCount stats languages controls';
   padding: ${({ theme }) => theme.spacing(3, 2.5)};
   cursor: pointer;
-  overflow: hidden;
   background-color: ${({ theme }) => theme.palette.background.default};
-  .translationIconButton {
+  & .translationIconButton {
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
   }
@@ -38,14 +38,14 @@ const StyledContainer = styled('div')`
       opacity: 1;
     }
   }
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     grid-template-columns: auto 1fr 1fr 70px;
     grid-template-areas:
       'image title keyCount  controls'
       'image title languages controls'
       'image stats stats     stats';
   }
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  @container (max-width: 599px) {
     grid-gap: ${({ theme }) => theme.spacing(1, 2)};
     grid-template-columns: auto 1fr 70px;
     grid-template-areas:
@@ -60,7 +60,7 @@ const StyledImage = styled('div')`
   grid-area: image;
   overflow: hidden;
   margin-right: ${({ theme }) => theme.spacing(2)};
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  @container (max-width: 599px) {
     margin-right: 0px;
   }
 `;
@@ -71,7 +71,7 @@ const StyledTitle = styled('div')`
   flex-direction: column;
   overflow: hidden;
   margin-right: ${({ theme }) => theme.spacing(2)};
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  @container (max-width: 599px) {
     margin-right: 0px;
   }
 `;
@@ -80,7 +80,7 @@ const StyledKeyCount = styled('div')`
   grid-area: keyCount;
   display: flex;
   justify-content: flex-end;
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     justify-content: flex-start;
   }
 `;
@@ -90,14 +90,14 @@ const StyledStats = styled('div')`
   display: flex;
   padding-top: ${({ theme }) => theme.spacing(1)};
   margin: ${({ theme }) => theme.spacing(0, 6)};
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     margin: 0px;
   }
 `;
 
 const StyledLanguages = styled('div')`
   grid-area: languages;
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     justify-content: flex-start;
   }
 `;
@@ -122,73 +122,82 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
     [PARAMS.PROJECT_ID]: p.id,
   });
   const history = useHistory();
-  const theme = useTheme();
-  const isCompact = useMediaQuery(theme.breakpoints.down('md'));
+  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const isCompact = useMediaQuery(
+    `@media(max-width: ${rightPanelWidth + 800}px)`
+  );
 
   return (
-    <StyledContainer
-      data-cy="dashboard-projects-list-item"
-      onClick={() =>
-        history.push(
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: p.id,
-          })
-        )
-      }
+    <QuickStartHighlight
+      itemKey="demo_project"
+      disabled={p.name !== 'Demo project'}
+      borderRadius="4px"
+      offset={1}
     >
-      <StyledImage>
-        <AvatarImg
-          owner={{
-            name: p.name,
-            avatar: p.avatar,
-            type: 'PROJECT',
-            id: p.id,
-          }}
-          size={50}
-        />
-      </StyledImage>
-      <StyledTitle>
-        <StyledProjectName variant="h3">{p.name}</StyledProjectName>
-      </StyledTitle>
-      <StyledKeyCount>
-        <Typography variant="body1">
-          <T
-            keyName="project_list_keys_count"
-            params={{ keysCount: p.stats.keyCount.toString() }}
+      <StyledContainer
+        data-cy="dashboard-projects-list-item"
+        onClick={() =>
+          history.push(
+            LINKS.PROJECT_DASHBOARD.build({
+              [PARAMS.PROJECT_ID]: p.id,
+            })
+          )
+        }
+      >
+        <StyledImage>
+          <AvatarImg
+            owner={{
+              name: p.name,
+              avatar: p.avatar,
+              type: 'PROJECT',
+              id: p.id,
+            }}
+            size={50}
           />
-        </Typography>
-      </StyledKeyCount>
-      <StyledStats>
-        <TranslationStatesBar stats={p.stats as any} labels={!isCompact} />
-      </StyledStats>
-      <StyledLanguages data-cy="project-list-languages">
-        <Grid container>
-          <ProjectLanguages p={p} />
-        </Grid>
-      </StyledLanguages>
-      <StyledControls>
-        <Box width="100%" display="flex" justifyContent="flex-end">
-          <Tooltip title={t('project_list_translations_button')}>
-            <IconButton
-              data-cy="project-list-translations-button"
-              onClick={stopBubble()}
-              aria-label={t('project_list_translations_button')}
-              component={Link}
-              to={translationsLink}
-              size="small"
-              className="translationIconButton"
-            >
-              <TranslationIcon />
-            </IconButton>
-          </Tooltip>
-          <ProjectListItemMenu
-            projectId={p.id}
-            computedPermission={p.computedPermission}
-            projectName={p.name}
-          />
-        </Box>
-      </StyledControls>
-    </StyledContainer>
+        </StyledImage>
+        <StyledTitle>
+          <StyledProjectName variant="h3">{p.name}</StyledProjectName>
+        </StyledTitle>
+        <StyledKeyCount>
+          <Typography variant="body1">
+            <T
+              keyName="project_list_keys_count"
+              params={{ keysCount: p.stats.keyCount.toString() }}
+            />
+          </Typography>
+        </StyledKeyCount>
+        <StyledStats>
+          <TranslationStatesBar stats={p.stats as any} labels={!isCompact} />
+        </StyledStats>
+        <StyledLanguages data-cy="project-list-languages">
+          <Grid container>
+            <ProjectLanguages p={p} />
+          </Grid>
+        </StyledLanguages>
+        <StyledControls>
+          <Box width="100%" display="flex" justifyContent="flex-end">
+            <Tooltip title={t('project_list_translations_button')}>
+              <IconButton
+                data-cy="project-list-translations-button"
+                onClick={stopBubble()}
+                aria-label={t('project_list_translations_button')}
+                component={Link}
+                to={translationsLink}
+                size="small"
+                className="translationIconButton"
+              >
+                <TranslationIcon />
+              </IconButton>
+            </Tooltip>
+            <ProjectListItemMenu
+              projectId={p.id}
+              computedPermission={p.computedPermission}
+              projectName={p.name}
+            />
+          </Box>
+        </StyledControls>
+      </StyledContainer>
+    </QuickStartHighlight>
   );
 };
 

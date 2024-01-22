@@ -1,18 +1,14 @@
-import { container, singleton } from 'tsyringe';
-
 import { LINKS } from 'tg.constants/links';
 import { GlobalError } from 'tg.error/GlobalError';
-import { ErrorActions } from 'tg.store/global/ErrorActions';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { errorActions } from 'tg.store/global/ErrorActions';
+import { redirectionActions } from 'tg.store/global/RedirectionActions';
 
-import { TokenService } from '../TokenService';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { tokenService } from '../TokenService';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import { getUtmCookie } from 'tg.fixtures/utmCookie';
 import { handleApiError } from './handleApiError';
 import { ApiError } from './ApiError';
 import { errorAction } from './errorAction';
-
-const errorActions = container.resolve(ErrorActions);
 
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
@@ -34,14 +30,8 @@ export class RequestOptions {
   disable404Redirect? = false;
 }
 
-@singleton()
 export class ApiHttpService {
-  constructor(
-    private tokenService: TokenService,
-    private redirectionActions: RedirectionActions
-  ) {}
-
-  apiUrl = process.env.REACT_APP_API_URL + '/api/';
+  apiUrl = import.meta.env.VITE_APP_API_URL + '/api/';
 
   fetch(
     input: RequestInfo,
@@ -50,13 +40,13 @@ export class ApiHttpService {
   ): Promise<Response> {
     if (detectLoop(input)) {
       //if we get into loop, maybe something went wrong in login requests etc, rather start over
-      this.tokenService.disposeToken();
-      this.redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
+      tokenService.disposeToken();
+      redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
       location.reload();
     }
     return new Promise((resolve, reject) => {
       const fetchIt = () => {
-        const jwtToken = this.tokenService.getToken();
+        const jwtToken = tokenService.getToken();
         if (jwtToken) {
           init = init || {};
           init.headers = init.headers || {};
@@ -83,7 +73,7 @@ export class ApiHttpService {
                 r.status == 403 &&
                 responseData.code === 'expired_super_jwt_token'
               ) {
-                container.resolve(GlobalActions).requestSuperJwt.dispatch({
+                globalActions.requestSuperJwt.dispatch({
                   onSuccess: () => {
                     fetchIt();
                   },
@@ -241,3 +231,5 @@ function addUtmHeader(headers: HeadersInit) {
     headers['X-Tolgee-Utm'] = cookie;
   }
 }
+
+export const apiHttpService = new ApiHttpService();

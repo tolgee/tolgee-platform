@@ -2,13 +2,13 @@ package io.tolgee.model.dataImport
 
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.key.KeyMeta
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.Size
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 @Entity
 class ImportKey(
@@ -16,11 +16,9 @@ class ImportKey(
   @field:Size(max = 2000)
   @Column(length = 2000)
   var name: String,
-
   @ManyToOne
-  var file: ImportFile
+  var file: ImportFile,
 ) : StandardAuditModel(), WithKeyMeta {
-
   @OneToMany(mappedBy = "key", orphanRemoval = true)
   var translations: MutableList<ImportTranslation> = mutableListOf()
 

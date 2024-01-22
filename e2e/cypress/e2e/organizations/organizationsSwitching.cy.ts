@@ -9,11 +9,17 @@ import {
 } from '../../common/shared';
 
 describe('Organization switching', () => {
+  let organizationData: Record<string, { slug: string }>;
+
   beforeEach(() => {
     login();
-    organizationTestData.clean();
-    organizationTestData.generate();
-    visit();
+    organizationTestData.clean({
+      timeout: 120000,
+    });
+    organizationTestData.generate().then((res) => {
+      organizationData = res.body as any;
+      visit();
+    });
   });
 
   afterEach(() => {
@@ -30,8 +36,13 @@ describe('Organization switching', () => {
     assertOrganizationIsPreferred('Facebook');
   });
 
+  function visitMembers() {
+    const slug = organizationData['Tolgee'].slug;
+    cy.visit(`${HOST}/organizations/${slug}/members`);
+  }
+
   it('switches correctly when going directly to organization', () => {
-    cy.visit(`${HOST}/organizations/tolgee/members`);
+    visitMembers();
     switchToOrganizationWithSearch('admin');
     gcy('organization-switch').contains('admin').should('be.visible');
     cy.go('back');
@@ -39,7 +50,7 @@ describe('Organization switching', () => {
   });
 
   it('switches correctly when in organization settings', () => {
-    cy.visit(`${HOST}/organizations/tolgee/members`);
+    visitMembers();
     switchToOrganization('Microsoft');
     cy.waitForDom();
     gcy('settings-menu-item')

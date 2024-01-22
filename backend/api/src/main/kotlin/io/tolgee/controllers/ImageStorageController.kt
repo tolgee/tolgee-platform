@@ -14,13 +14,13 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.service.key.ScreenshotService.Companion.SCREENSHOTS_STORAGE_FOLDER_NAME
 import io.tolgee.service.security.SecurityService
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -35,14 +35,14 @@ class ImageStorageController(
   fun getScreenshot(
     request: HttpServletRequest,
     @RequestParam("token") token: String?,
-    response: HttpServletResponse
+    response: HttpServletResponse,
   ): ByteArray {
     return getFile(
       urlPathPrefix = FileStoragePath.SCREENSHOTS,
       storageFolderName = SCREENSHOTS_STORAGE_FOLDER_NAME,
       token,
       request,
-      response
+      response,
     )
   }
 
@@ -50,28 +50,28 @@ class ImageStorageController(
   fun getUploadedImage(
     request: HttpServletRequest,
     @RequestParam("token") token: String?,
-    response: HttpServletResponse
+    response: HttpServletResponse,
   ): ByteArray {
     return getFile(
       urlPathPrefix = FileStoragePath.UPLOADED_IMAGES,
       storageFolderName = UPLOADED_IMAGES_STORAGE_FOLDER_NAME,
       token,
       request,
-      response
+      response,
     )
   }
 
   @GetMapping(value = ["/${FileStoragePath.AVATARS}/*"])
   fun getAvatar(
     request: HttpServletRequest,
-    response: HttpServletResponse
+    response: HttpServletResponse,
   ): ByteArray {
     val fileName = getFileName(request, urlPathPrefix = "avatars")
 
     return getFile(
       fileName = fileName,
       storageFolderName = FileStoragePath.AVATARS,
-      response
+      response,
     )
   }
 
@@ -80,7 +80,7 @@ class ImageStorageController(
     storageFolderName: String,
     token: String?,
     request: HttpServletRequest,
-    response: HttpServletResponse
+    response: HttpServletResponse,
   ): ByteArray {
     val fileName = getFileName(request, urlPathPrefix)
 
@@ -115,7 +115,7 @@ class ImageStorageController(
     return getFile(
       fileName = fileName,
       response = response,
-      storageFolderName = storageFolderName
+      storageFolderName = storageFolderName,
     )
   }
 
@@ -128,7 +128,10 @@ class ImageStorageController(
     return fileStorage.readFile("$storageFolderName/$fileName")
   }
 
-  private fun getFileName(request: HttpServletRequest, urlPathPrefix: String): String {
+  private fun getFileName(
+    request: HttpServletRequest,
+    urlPathPrefix: String,
+  ): String {
     return request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
   }
 }

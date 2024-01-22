@@ -115,19 +115,11 @@ describe('Import Adding files', () => {
       cy.get('[data-cy=dropzone]').trigger('dragenter', {
         dataTransfer: dt,
       });
-      cy.get('[data-cy=dropzone-inner]').should(
-        'have.css',
-        'background-color',
-        'rgb(232, 245, 233)'
-      );
+      cy.get('[data-cy=dropzone-inner]').should('have.css', 'opacity', '1');
       cy.get('[data-cy=dropzone]').trigger('dragleave', {
         dataTransfer: dt,
       });
-      cy.get('[data-cy=dropzone-inner]').should(
-        'have.css',
-        'background-color',
-        'rgba(0, 0, 0, 0)'
-      );
+      cy.get('[data-cy=dropzone-inner]').should('have.css', 'opacity', '0');
     });
   });
 
@@ -144,19 +136,11 @@ describe('Import Adding files', () => {
       cy.get('[data-cy=dropzone]').trigger('dragenter', {
         dataTransfer: dt,
       });
-      cy.get('[data-cy=dropzone-inner]').should(
-        'have.css',
-        'background-color',
-        'rgb(255, 235, 238)'
-      );
+      cy.get('[data-cy=dropzone-inner]').should('have.css', 'opacity', '1');
       cy.get('[data-cy=dropzone]').trigger('dragleave', {
         dataTransfer: dt,
       });
-      cy.get('[data-cy=dropzone-inner]').should(
-        'have.css',
-        'background-color',
-        'rgba(0, 0, 0, 0)'
-      );
+      cy.get('[data-cy=dropzone-inner]').should('have.css', 'opacity', '0');
     });
   });
 

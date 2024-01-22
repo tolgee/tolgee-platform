@@ -13,12 +13,12 @@ import io.tolgee.repository.contentDelivery.ContentDeliveryConfigRepository
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
-import javax.transaction.Transactional
 import kotlin.random.Random
 
 @Service
@@ -31,10 +31,13 @@ class ContentDeliveryConfigService(
   private val automationService: AutomationService,
   @Lazy
   private val contentDeliveryUploader: ContentDeliveryUploader,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @Transactional
-  fun create(projectId: Long, dto: ContentDeliveryConfigRequest): ContentDeliveryConfig {
+  fun create(
+    projectId: Long,
+    dto: ContentDeliveryConfigRequest,
+  ): ContentDeliveryConfig {
     val project = entityManager.getReference(Project::class.java, projectId)
     checkMultipleConfigsFeature(project)
     val contentDeliveryConfig = ContentDeliveryConfig(project)
@@ -50,11 +53,14 @@ class ContentDeliveryConfigService(
     return contentDeliveryConfig
   }
 
-  private fun checkMultipleConfigsFeature(project: Project, maxCurrentAllowed: Int = 0) {
+  private fun checkMultipleConfigsFeature(
+    project: Project,
+    maxCurrentAllowed: Int = 0,
+  ) {
     if (contentDeliveryConfigRepository.countByProject(project) > maxCurrentAllowed) {
       enabledFeaturesProvider.checkFeatureEnabled(
         project.organizationOwner.id,
-        Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS
+        Feature.MULTIPLE_CONTENT_DELIVERY_CONFIGS,
       )
     }
   }
@@ -71,7 +77,10 @@ class ContentDeliveryConfigService(
     return (1..32).joinToString("") { Random.nextInt(0, 16).toString(16) }
   }
 
-  private fun getStorage(projectId: Long, contentStorageId: Long?): ContentStorage? {
+  private fun getStorage(
+    projectId: Long,
+    contentStorageId: Long?,
+  ): ContentStorage? {
     contentStorageId ?: return null
     return contentStorageProvider.getStorage(projectId, contentStorageId)
   }
@@ -81,7 +90,11 @@ class ContentDeliveryConfigService(
   fun find(id: Long) = contentDeliveryConfigRepository.findById(id).orElse(null)
 
   @Transactional
-  fun update(projectId: Long, id: Long, dto: ContentDeliveryConfigRequest): ContentDeliveryConfig {
+  fun update(
+    projectId: Long,
+    id: Long,
+    dto: ContentDeliveryConfigRequest,
+  ): ContentDeliveryConfig {
     checkMultipleConfigsFeature(projectService.get(projectId), maxCurrentAllowed = 1)
     val config = get(projectId, id)
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
@@ -91,7 +104,10 @@ class ContentDeliveryConfigService(
     return save(config)
   }
 
-  private fun handleUpdateAutoPublish(dto: ContentDeliveryConfigRequest, exporter: ContentDeliveryConfig) {
+  private fun handleUpdateAutoPublish(
+    dto: ContentDeliveryConfigRequest,
+    exporter: ContentDeliveryConfig,
+  ) {
     if (dto.autoPublish && exporter.automationActions.isEmpty()) {
       automationService.createForContentDelivery(exporter)
     }
@@ -100,7 +116,10 @@ class ContentDeliveryConfigService(
     }
   }
 
-  fun delete(projectId: Long, id: Long) {
+  fun delete(
+    projectId: Long,
+    id: Long,
+  ) {
     val config = get(projectId, id)
     config.automationActions.map { it.automation }.forEach {
       automationService.delete(it)
@@ -108,11 +127,17 @@ class ContentDeliveryConfigService(
     contentDeliveryConfigRepository.deleteById(config.id)
   }
 
-  fun getAllInProject(projectId: Long, pageable: Pageable): Page<ContentDeliveryConfig> {
+  fun getAllInProject(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ContentDeliveryConfig> {
     return contentDeliveryConfigRepository.findAllByProjectId(projectId, pageable)
   }
 
-  fun get(projectId: Long, contentDeliveryConfigId: Long): ContentDeliveryConfig {
+  fun get(
+    projectId: Long,
+    contentDeliveryConfigId: Long,
+  ): ContentDeliveryConfig {
     return contentDeliveryConfigRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
   }
 

@@ -11,9 +11,8 @@ import org.springframework.transaction.annotation.Transactional
 class RemoveExpiredImportService(
   @Lazy
   private val importService: ImportService,
-  private val currentDateProvider: io.tolgee.component.CurrentDateProvider
+  private val currentDateProvider: io.tolgee.component.CurrentDateProvider,
 ) {
-
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun removeIfExpired(import: Import?): Import? {
     if (import == null) {

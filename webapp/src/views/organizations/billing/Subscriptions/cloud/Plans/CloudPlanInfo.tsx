@@ -6,6 +6,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { MtHint } from 'tg.component/billing/MtHint';
 import { PlanInfo } from '../../common/PlanInfo';
 import React from 'react';
+import { StringsHint } from 'tg.component/billing/StringsHint';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
 
@@ -48,11 +49,17 @@ export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
         </StyledNumber>
         <StyledName>
           {plan.type === 'PAY_AS_YOU_GO' ? (
-            <T keyName="billing_plan_strings_included" />
+            <T
+              keyName="billing_plan_strings_included_with_hint"
+              params={{ hint: <StringsHint /> }}
+            />
           ) : plan.type === 'SLOTS_FIXED' ? (
             <T keyName="billing_plan_translation_limit" />
           ) : (
-            <T keyName="billing_plan_strings_limit" />
+            <T
+              keyName="billing_plan_strings_limit_with_hint"
+              params={{ hint: <StringsHint /> }}
+            />
           )}
         </StyledName>
       </StyledItem>

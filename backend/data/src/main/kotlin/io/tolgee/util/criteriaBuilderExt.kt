@@ -1,16 +1,16 @@
 package io.tolgee.util
 
-import javax.persistence.EntityManager
-import javax.persistence.TypedQuery
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Root
+import jakarta.persistence.EntityManager
+import jakarta.persistence.TypedQuery
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 
 fun CriteriaBuilder.greaterThanNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return expression.isNotNull
@@ -20,7 +20,7 @@ fun CriteriaBuilder.greaterThanNullable(
 
 fun CriteriaBuilder.lessThanNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return this.isTrue(this.literal(false))
@@ -30,7 +30,7 @@ fun CriteriaBuilder.lessThanNullable(
 
 fun CriteriaBuilder.greaterThanOrEqualToNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return this.isTrue(this.literal(true))
@@ -40,7 +40,7 @@ fun CriteriaBuilder.greaterThanOrEqualToNullable(
 
 fun CriteriaBuilder.lessThanOrEqualToNullable(
   expression: Expression<String>,
-  value: String?
+  value: String?,
 ): Predicate {
   if (value == null) {
     return this.isNull(expression)
@@ -50,7 +50,7 @@ fun CriteriaBuilder.lessThanOrEqualToNullable(
 
 fun CriteriaBuilder.equalNullable(
   expression: Expression<String>,
-  value: Any?
+  value: Any?,
 ): Predicate {
   if (value == null) {
     return this.isNull(expression)
@@ -59,7 +59,7 @@ fun CriteriaBuilder.equalNullable(
 }
 
 inline fun <reified RootT, reified Result> EntityManager.query(
-  fn: CriteriaQuery<Result>.(cb: CriteriaBuilder, root: Root<RootT>) -> Unit
+  fn: CriteriaQuery<Result>.(cb: CriteriaBuilder, root: Root<RootT>) -> Unit,
 ): TypedQuery<Result> {
   val cb = this.criteriaBuilder
   val cq = cb.createQuery(Result::class.java)

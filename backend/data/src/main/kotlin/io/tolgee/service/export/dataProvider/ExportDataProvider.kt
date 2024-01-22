@@ -16,21 +16,21 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.key.Tag_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
-import javax.persistence.EntityManager
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.ListJoin
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Root
-import javax.persistence.criteria.SetJoin
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.ListJoin
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
+import jakarta.persistence.criteria.SetJoin
 
 class ExportDataProvider(
   private val entityManager: EntityManager,
   private val exportParams: IExportParams,
   private val projectId: Long,
-  private val overrideLanguageTag: List<String>? = null
+  private val overrideLanguageTag: List<String>? = null,
 ) {
   private val cb: CriteriaBuilder = entityManager.criteriaBuilder
   val query: CriteriaQuery<ExportDataView> = cb.createQuery(ExportDataView::class.java)
@@ -147,14 +147,11 @@ class ExportDataProvider(
 
   private fun joinTranslation(
     key: Root<Key>,
-    language: SetJoin<Project, Language>
+    language: SetJoin<Project, Language>,
   ): ListJoin<Key, Translation> {
     val translation = key.join(Key_.translations, JoinType.LEFT)
     translation.on(
-      cb.and(
-        cb.equal(key, translation.get(Translation_.key)),
-        cb.equal(language, translation.get(Translation_.language))
-      )
+      cb.equal(language, translation.get(Translation_.language)),
     )
     return translation
   }
@@ -178,17 +175,19 @@ class ExportDataProvider(
   private fun transformResult(resultList: MutableList<ExportDataView>): HashMap<Long, ExportKeyView> {
     val keyMap = LinkedHashMap<Long, ExportKeyView>()
     resultList.forEach { dataView ->
-      val keyView = keyMap.computeIfAbsent(dataView.keyId) {
-        ExportKeyView(dataView.keyId, dataView.keyName, dataView.namespace)
-      }
+      val keyView =
+        keyMap.computeIfAbsent(dataView.keyId) {
+          ExportKeyView(dataView.keyId, dataView.keyName, dataView.namespace)
+        }
 
-      keyView.translations[dataView.languageTag] = ExportTranslationView(
-        id = dataView.translationId,
-        text = dataView.translationText,
-        state = dataView.translationState ?: TranslationState.UNTRANSLATED,
-        key = keyView,
-        languageTag = dataView.languageTag
-      )
+      keyView.translations[dataView.languageTag] =
+        ExportTranslationView(
+          id = dataView.translationId,
+          text = dataView.translationText,
+          state = dataView.translationState ?: TranslationState.UNTRANSLATED,
+          key = keyView,
+          languageTag = dataView.languageTag,
+        )
     }
     return keyMap
   }

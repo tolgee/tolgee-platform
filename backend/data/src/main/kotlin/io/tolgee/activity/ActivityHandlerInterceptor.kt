@@ -3,6 +3,8 @@ package io.tolgee.activity
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.reporting.SdkInfoProvider
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.core.annotation.AnnotationUtils
@@ -12,17 +14,19 @@ import org.springframework.web.servlet.HandlerInterceptor
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.*
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class ActivityHandlerInterceptor(
   private val activityHolder: ActivityHolder,
-  private val sdkInfoProvider: SdkInfoProvider
+  private val sdkInfoProvider: SdkInfoProvider,
 ) : HandlerInterceptor {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+  override fun preHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+  ): Boolean {
     if (handler !is HandlerMethod) {
       return super.preHandle(request, response, handler)
     }

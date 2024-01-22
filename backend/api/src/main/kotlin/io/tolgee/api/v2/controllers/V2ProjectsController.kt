@@ -24,8 +24,8 @@ import io.tolgee.hateoas.project.ProjectModel
 import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectTransferOptionModel
 import io.tolgee.hateoas.project.ProjectWithStatsModel
-import io.tolgee.hateoas.user_account.UserAccountInProjectModel
-import io.tolgee.hateoas.user_account.UserAccountInProjectModelAssembler
+import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
+import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -46,7 +46,8 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.translation.AutoTranslationService
-import org.springdoc.api.annotations.ParameterObject
+import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -67,7 +68,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import javax.validation.Valid
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
 @RestController
@@ -92,7 +92,7 @@ class V2ProjectsController(
   private val autoTranslateService: AutoTranslationService,
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val projectWithStatsFacade: ProjectWithStatsFacade,
-  private val autoTranslationSettingsModelAssembler: AutoTranslationSettingsModelAssembler
+  private val autoTranslationSettingsModelAssembler: AutoTranslationSettingsModelAssembler,
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -100,7 +100,7 @@ class V2ProjectsController(
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   fun getAll(
     @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
+    @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {
     val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
@@ -111,7 +111,7 @@ class V2ProjectsController(
   @IsGlobalRoute
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
+    @RequestParam("search") search: String?,
   ): PagedModel<ProjectWithStatsModel> {
     val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
     return projectWithStatsFacade.getPagedModelWithStats(projects)
@@ -121,7 +121,9 @@ class V2ProjectsController(
   @Operation(summary = "Returns project by id")
   @UseDefaultPermissions
   @AllowApiAccess
-  fun get(@PathVariable("projectId") projectId: Long): ProjectModel {
+  fun get(
+    @PathVariable("projectId") projectId: Long,
+  ): ProjectModel {
     return projectService.getView(projectId).let {
       projectModelAssembler.toModel(it)
     }
@@ -131,10 +133,11 @@ class V2ProjectsController(
   @Operation(summary = "Returns project all users, who have permission to access project")
   @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
   @RequiresSuperAuthentication
+  @AllowApiAccess
   fun getAllUsers(
     @PathVariable("projectId") projectId: Long,
     @ParameterObject pageable: Pageable,
-    @RequestParam("search", required = false) search: String?
+    @RequestParam("search", required = false) search: String?,
   ): PagedModel<UserAccountInProjectModel> {
     return userAccountService.getAllInProjectWithPermittedLanguages(projectId, pageable, search).let { users ->
       userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
@@ -145,9 +148,10 @@ class V2ProjectsController(
   @Operation(summary = "Uploads organizations avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @AllowApiAccess
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
-    @PathVariable projectId: Long
+    @PathVariable projectId: Long,
   ): ProjectModel {
     imageUploadService.validateIsImage(avatar)
     projectService.setAvatar(projectHolder.projectEntity, avatar.inputStream)
@@ -158,8 +162,9 @@ class V2ProjectsController(
   @Operation(summary = "Deletes organization avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @AllowApiAccess
   fun removeAvatar(
-    @PathVariable projectId: Long
+    @PathVariable projectId: Long,
   ): ProjectModel {
     projectService.removeAvatar(projectHolder.projectEntity)
     return projectModelAssembler.toModel(projectService.getView(projectId))
@@ -172,14 +177,14 @@ class V2ProjectsController(
   fun setUsersPermissions(
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
-    @ParameterObject params: SetPermissionLanguageParams
+    @ParameterObject params: SetPermissionLanguageParams,
   ) {
     projectPermissionFacade.checkNotCurrentUser(userId)
     permissionService.setUserDirectPermission(
       projectId = projectHolder.project.id,
       userId = userId,
       newPermissionType = permissionType,
-      languages = projectPermissionFacade.getLanguages(params, projectHolder.project.id)
+      languages = projectPermissionFacade.getLanguages(params, projectHolder.project.id),
     )
   }
 
@@ -203,7 +208,7 @@ class V2ProjectsController(
   @RequiresSuperAuthentication
   fun revokePermission(
     @PathVariable("projectId") projectId: Long,
-    @PathVariable("userId") userId: Long
+    @PathVariable("userId") userId: Long,
   ) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CAN_NOT_REVOKE_OWN_PERMISSIONS)
@@ -216,7 +221,10 @@ class V2ProjectsController(
   @RequestActivity(ActivityType.CREATE_PROJECT)
   @IsGlobalRoute
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
-  fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
+  fun createProject(
+    @RequestBody @Valid
+    dto: CreateProjectDTO,
+  ): ProjectModel {
     organizationRoleService.checkUserIsOwner(dto.organizationId)
     val project = projectService.createProject(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
@@ -227,7 +235,11 @@ class V2ProjectsController(
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @RequiresSuperAuthentication
-  fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
+  @AllowApiAccess
+  fun editProject(
+    @RequestBody @Valid
+    dto: EditProjectDTO,
+  ): ProjectModel {
     val project = projectService.editProject(projectHolder.project.id, dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
@@ -236,7 +248,10 @@ class V2ProjectsController(
   @Operation(summary = "Deletes project by id")
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @RequiresSuperAuthentication
-  fun deleteProject(@PathVariable projectId: Long) {
+  @AllowApiAccess
+  fun deleteProject(
+    @PathVariable projectId: Long,
+  ) {
     projectService.deleteProject(projectId)
   }
 
@@ -244,7 +259,10 @@ class V2ProjectsController(
   @Operation(summary = "Transfers project's ownership to organization")
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @RequiresSuperAuthentication
-  fun transferProjectToOrganization(@PathVariable projectId: Long, @PathVariable organizationId: Long) {
+  fun transferProjectToOrganization(
+    @PathVariable projectId: Long,
+    @PathVariable organizationId: Long,
+  ) {
     organizationRoleService.checkUserIsOwner(organizationId)
     projectService.transferToOrganization(projectId, organizationId)
   }
@@ -260,21 +278,25 @@ class V2ProjectsController(
   @GetMapping(value = ["/{projectId:[0-9]+}/transfer-options"])
   @Operation(summary = "Returns transfer option")
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
-  fun getTransferOptions(@RequestParam search: String? = ""): CollectionModel<ProjectTransferOptionModel> {
+  fun getTransferOptions(
+    @RequestParam search: String? = "",
+  ): CollectionModel<ProjectTransferOptionModel> {
     val project = projectHolder.project
-    val organizations = organizationService.findPermittedPaged(
-      PageRequest.of(0, 10),
-      true,
-      search,
-      project.organizationOwnerId
-    )
-    val options = organizations.content.map {
-      ProjectTransferOptionModel(
-        name = it.organization.name,
-        slug = it.organization.slug,
-        id = it.organization.id,
+    val organizations =
+      organizationService.findPermittedPaged(
+        PageRequest.of(0, 10),
+        true,
+        search,
+        project.organizationOwnerId,
       )
-    }.toMutableList()
+    val options =
+      organizations.content.map {
+        ProjectTransferOptionModel(
+          name = it.organization.name,
+          slug = it.organization.slug,
+          id = it.organization.id,
+        )
+      }.toMutableList()
     options.sortBy { it.name }
     return CollectionModel.of(options)
   }
@@ -283,7 +305,10 @@ class V2ProjectsController(
   @Operation(summary = "Returns all invitations to project")
   @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
   @RequiresSuperAuthentication
-  fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
+  @AllowApiAccess
+  fun getProjectInvitations(
+    @PathVariable("projectId") id: Long,
+  ): CollectionModel<ProjectInvitationModel> {
     val project = projectService.get(id)
     val invitations = invitationService.getForProject(project)
     return projectInvitationModelAssembler.toCollectionModel(invitations)
@@ -294,7 +319,7 @@ class V2ProjectsController(
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   @AllowApiAccess
   fun setPerLanguageAutoTranslationSettings(
-    @RequestBody dto: List<AutoTranslationSettingsDto>
+    @RequestBody dto: List<AutoTranslationSettingsDto>,
   ): CollectionModel<AutoTranslationConfigModel> {
     val config = autoTranslateService.saveConfig(projectHolder.projectEntity, dto)
     return autoTranslationSettingsModelAssembler.toCollectionModel(config)
@@ -311,14 +336,15 @@ class V2ProjectsController(
 
   @PutMapping("/{projectId}/auto-translation-settings")
   @Operation(
-    summary = "Sets default auto translation settings for project " +
-      "(deprecated: use per language config with null language id)",
-    deprecated = true
+    summary =
+      "Sets default auto translation settings for project " +
+        "(deprecated: use per language config with null language id)",
+    deprecated = true,
   )
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   @AllowApiAccess
   fun setAutoTranslationSettings(
-    @RequestBody dto: AutoTranslationSettingsDto
+    @RequestBody dto: AutoTranslationSettingsDto,
   ): AutoTranslationConfigModel {
     val config = autoTranslateService.saveDefaultConfig(projectHolder.projectEntity, dto)
     return autoTranslationSettingsModelAssembler.toModel(config)
@@ -326,9 +352,10 @@ class V2ProjectsController(
 
   @GetMapping("/{projectId}/auto-translation-settings")
   @Operation(
-    summary = "Returns default auto translation settings for project " +
-      "(deprecated: use per language config with null language id)",
-    deprecated = true
+    summary =
+      "Returns default auto translation settings for project " +
+        "(deprecated: use per language config with null language id)",
+    deprecated = true,
   )
   @UseDefaultPermissions
   @AllowApiAccess

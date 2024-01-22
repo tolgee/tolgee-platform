@@ -14,7 +14,7 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.MediaTypes
@@ -33,14 +33,14 @@ class ProjectActivityController(
   private val activityService: ActivityService,
   private val projectHolder: ProjectHolder,
   private val pagedResourcesAssembler: PagedResourcesAssembler<ProjectActivityView>,
-  private val projectActivityModelAssembler: ProjectActivityModelAssembler
+  private val projectActivityModelAssembler: ProjectActivityModelAssembler,
 ) {
   @Operation(summary = "Returns project history")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
   @AllowApiAccess
   fun getActivity(
-    @ParameterObject pageable: Pageable
+    @ParameterObject pageable: Pageable,
   ): PagedModel<ProjectActivityModel> {
     val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
     return pagedResourcesAssembler.toModel(views, projectActivityModelAssembler)

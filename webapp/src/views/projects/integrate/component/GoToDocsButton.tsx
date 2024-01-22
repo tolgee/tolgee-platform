@@ -1,4 +1,4 @@
-import { Button, ButtonProps, Link, styled } from '@mui/material';
+import { Button, ButtonProps, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 const StyledButton = styled(Button)`
@@ -13,7 +13,6 @@ export const GoToDocsButton = (props: ButtonProps & { href: string }) => {
     <>
       <StyledButton
         // @ts-ignore
-        component={Link}
         target="_blank"
         size="large"
         color="primary"

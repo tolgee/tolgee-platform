@@ -14,7 +14,7 @@ import org.springframework.context.ApplicationContext
 class LanguageDeletedPermissionUpdater(
   private val applicationContext: ApplicationContext,
   private val permission: Permission,
-  private val language: Language
+  private val language: Language,
 ) {
   operator fun invoke() {
     if (permission.scopes.isNotEmpty()) {
@@ -37,7 +37,7 @@ class LanguageDeletedPermissionUpdater(
     arrayOf(
       permission.translateLanguages,
       permission.viewLanguages,
-      permission.stateChangeLanguages
+      permission.stateChangeLanguages,
     ).forEach { languages ->
       languages.removeIf { it.id == language.id }
     }
@@ -87,25 +87,33 @@ class LanguageDeletedPermissionUpdater(
     }
   }
 
-  private fun shouldLowerPermissions(languages: MutableSet<Language>, type: ProjectPermissionType): Boolean {
+  private fun shouldLowerPermissions(
+    languages: MutableSet<Language>,
+    type: ProjectPermissionType,
+  ): Boolean {
     return hasOnlyAccessToDeletedLanguage(languages) && hasPermissionType(type)
   }
 
-  private fun shouldLowerPermissions(languages: MutableSet<Language>, scope: Scope): Boolean {
+  private fun shouldLowerPermissions(
+    languages: MutableSet<Language>,
+    scope: Scope,
+  ): Boolean {
     return hasOnlyAccessToDeletedLanguage(languages) && hasScope(scope)
   }
 
-  private fun scopesWithout(scope: Scope) = Scope.expand(permission.scopes)
-    .toMutableList()
-    .also { it.remove(scope) }
-    .toTypedArray()
+  private fun scopesWithout(scope: Scope) =
+    Scope.expand(permission.scopes)
+      .toMutableList()
+      .also { it.remove(scope) }
+      .toTypedArray()
 
   private fun hasScope(scope: Scope) = permission.granular && permission.scopes.contains(scope)
 
   private fun hasPermissionType(type: ProjectPermissionType) = permission.type == type
 
-  private fun hasOnlyAccessToDeletedLanguage(languages: MutableSet<Language>) = languages.size == 1 &&
-    languages.first().id == language.id
+  private fun hasOnlyAccessToDeletedLanguage(languages: MutableSet<Language>) =
+    languages.size == 1 &&
+      languages.first().id == language.id
 
   val permissionService: PermissionService
     get() = applicationContext.getBean(PermissionService::class.java)

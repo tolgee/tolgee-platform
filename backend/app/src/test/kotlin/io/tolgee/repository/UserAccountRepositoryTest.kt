@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @Transactional
 class UserAccountRepositoryTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var userAccountRepository: UserAccountRepository
 

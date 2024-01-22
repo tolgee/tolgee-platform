@@ -124,9 +124,11 @@ export const MachineTranslation: React.FC<Props> = ({
               />
               {result?.output ? (
                 <>
-                  <StyledValue dir={getLanguageDirection(languageTag)}>
-                    <div>{result.output}</div>
-                    {result.contextDescription && (
+                  <StyledValue>
+                    <div dir={getLanguageDirection(languageTag)}>
+                      {result?.output}
+                    </div>
+                    {result?.contextDescription && (
                       <StyledDescription>
                         {result.contextDescription}
                       </StyledDescription>

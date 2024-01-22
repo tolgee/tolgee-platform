@@ -1,9 +1,8 @@
 package io.tolgee.service.bigMeta
 
-import com.google.common.primitives.Longs
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.model.Project
-import io.tolgee.model.keyBigMeta.KeysDistance
+import io.tolgee.util.Logging
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -11,13 +10,12 @@ import kotlin.math.min
 class KeysDistanceUtil(
   private val relatedKeysInOrder: MutableList<RelatedKeyDto>,
   private val project: Project,
-  private val bigMetaService: BigMetaService
-) {
-
+  private val bigMetaService: BigMetaService,
+) : Logging {
   val newDistances by lazy {
     increaseRelevant()
     decreaseOthers()
-    distances.values
+    distances.values.toList()
   }
 
   private fun increaseRelevant() {
@@ -28,8 +26,10 @@ class KeysDistanceUtil(
           return@forEach2
         }
         val key2Id = keyIdMap[item2.namespace to item2.keyName] ?: return@forEach2
-        val distance = distances[min(key1Id, key2Id) to max(key1Id, key2Id)]
-          ?: createDistance(key1Id, key2Id)
+
+        val distance =
+          distances[min(key1Id, key2Id) to max(key1Id, key2Id)]
+            ?: createDistance(key1Id, key2Id)
         relevant[distance.key1Id to distance.key2Id] = distance
         distance.score = computeDistanceScore(distance.score, distance.hits, relatedKeysSize, index1, index2)
         distance.hits++
@@ -50,7 +50,7 @@ class KeysDistanceUtil(
     bigMetaService.getKeyIdsForItems(relatedKeysInOrder, project.id)
   }
 
-  private val relevant = mutableMapOf<Pair<Long, Long>, KeysDistance>()
+  private val relevant = mutableMapOf<Pair<Long, Long>, KeysDistanceDto>()
 
   private val keyIdMap by lazy {
     keys.associate { (it.namespace to it.name) to it.id }
@@ -68,15 +68,17 @@ class KeysDistanceUtil(
 
   private val relatedKeysSize = relatedKeysInOrder.size
 
-  private fun createDistance(key1Id: Long, key2Id: Long): KeysDistance {
-    return KeysDistance()
-      .apply {
-        this.key1Id = Longs.min(key1Id, key2Id)
-        this.key2Id = max(key1Id, key2Id)
-        this.project = this@KeysDistanceUtil.project
-        this.new = true
-        distances[this.key1Id to this.key2Id] = this
-      }
+  private fun createDistance(
+    key1Id: Long,
+    key2Id: Long,
+  ): KeysDistanceDto {
+    return KeysDistanceDto(
+      key1Id = min(a = key1Id, b = key2Id),
+      key2Id = max(key1Id, key2Id),
+      projectId = project.id,
+    ).apply {
+      distances[this.key1Id to this.key2Id] = this
+    }
   }
 
   private fun computeDistanceScore(
@@ -84,12 +86,13 @@ class KeysDistanceUtil(
     hits: Long,
     relatedKeysSize: Int,
     index1: Int,
-    index2: Int
+    index2: Int,
   ): Long {
     val maxDistance = (relatedKeysSize - 2)
 
-    val points = (
-      (maxDistance - (abs(index1 - index2) - 1)) / maxDistance.toDouble()
+    val points =
+      (
+        (maxDistance - (abs(index1 - index2) - 1)) / maxDistance.toDouble()
       ) * BigMetaService.MAX_POINTS
 
     val baseDistance = BigMetaService.MAX_DISTANCE_SCORE - BigMetaService.MAX_POINTS

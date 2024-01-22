@@ -1,4 +1,3 @@
-import { container } from 'tsyringe';
 import { useSelector } from 'react-redux';
 import {
   Box,
@@ -9,10 +8,10 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { useUser } from 'tg.globalContext/helpers';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import { StandardForm } from './common/form/StandardForm';
 import { TextField } from './common/form/fields/TextField';
 import { useLoadingRegister } from './GlobalLoading';
@@ -20,7 +19,6 @@ import { useLoadingRegister } from './GlobalLoading';
 type Value = { otp?: string; password?: string };
 
 export const SensitiveOperationAuthDialog = () => {
-  const globalActions = container.resolve(GlobalActions);
   const afterActions = useSelector(
     (s: AppState) => s.global.requestSuperJwtAfterActions
   );

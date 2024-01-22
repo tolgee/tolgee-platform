@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
   properties = [
     "tolgee.websocket.use-redis=false",
   ],
-  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class WebsocketWithoutRedisTest : AbstractWebsocketTest()

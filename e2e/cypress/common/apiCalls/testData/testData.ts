@@ -37,7 +37,7 @@ export const importTestData = {
 export const importNamespacesTestData =
   generateTestDataObject('import-namespaces');
 
-export const projectListdData = generateTestDataObject(
+export const projectListData = generateTestDataObject(
   'projects-list-dashboard'
 );
 

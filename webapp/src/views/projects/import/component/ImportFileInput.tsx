@@ -1,21 +1,42 @@
-import React, { FunctionComponent, ReactNode } from 'react';
-import { Box, styled, Typography } from '@mui/material';
-import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
+import React, { FunctionComponent, ReactNode, useState } from 'react';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { Box, Button, styled, Typography } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
 
 import { useConfig } from 'tg.globalContext/helpers';
-import { MessageActions } from 'tg.store/global/MessageActions';
+import { messageActions } from 'tg.store/global/MessageActions';
 import { Message } from 'tg.store/global/types';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { ImportFileDropzone } from './ImportFileDropzone';
-import { useState } from 'react';
+import { ImportProgressOverlay } from './ImportProgressOverlay';
+import {
+  ImportInputAreaLayout,
+  ImportInputAreaLayoutBottom,
+  ImportInputAreaLayoutCenter,
+  ImportInputAreaLayoutTitle,
+  ImportInputAreaLayoutTop,
+} from './ImportInputAreaLayout';
 
 export const MAX_FILE_COUNT = 20;
+
+export type OperationType = 'addFiles' | 'apply';
+
+export type OperationStatusType =
+  | 'PREPARING_AND_VALIDATING'
+  | 'STORING_KEYS'
+  | 'STORING_TRANSLATIONS'
+  | 'FINALIZING';
 
 type ImportFileInputProps = {
   onNewFiles: (files: File[]) => void;
   loading: boolean;
+  operation?: OperationType;
+  operationStatus?: OperationStatusType;
+  importDone: boolean;
+  onImportMore: () => void;
+  filesUploaded?: boolean;
+  onProgressOverlayActiveChange: (isActive: boolean) => void;
+  isProgressOverlayActive: boolean;
 };
 
 export type ValidationResult = {
@@ -25,15 +46,28 @@ export type ValidationResult = {
 
 const StyledRoot = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  border: `1px dashed ${theme.palette.emphasis[400]}`,
+  border: `1px dashed ${theme.palette.emphasis[100]}`,
+  margin: '0px auto',
+  width: '100%',
+  position: 'relative',
+  backgroundColor: theme.palette.background.paper,
+  marginTop: '16px',
 }));
 
-const messageActions = container.resolve(MessageActions);
 const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
+  const { t } = useTranslate();
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
-  const ALLOWED_EXTENSIONS = ['json', 'zip', 'po', 'xliff', 'xlf'];
+  const ALLOWED_EXTENSIONS = [
+    'json',
+    'zip',
+    'po',
+    'xliff',
+    'xlf',
+    'properties',
+  ];
   const [resetKey, setResetKey] = useState(0);
+
   function resetInput() {
     setResetKey((key) => key + 1);
   }
@@ -131,49 +165,63 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   };
 
   return (
-    <ImportFileDropzone onNewFiles={onNewFiles}>
-      <StyledRoot
-        sx={{
-          mt: 4,
-          pt: 5,
-          pb: 5,
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexDirection: 'column',
-          display: 'flex',
-        }}
+    <ImportFileDropzone
+      onNewFiles={onNewFiles}
+      active={!props.isProgressOverlayActive}
+    >
+      <QuickStartHighlight
+        offset={10}
+        itemKey="pick_import_file"
+        message={t('quick_start_item_pick_import_file_hint')}
       >
-        <input
-          key={resetKey}
-          data-cy={'import-file-input'}
-          type="file"
-          style={{ display: 'none' }}
-          ref={fileRef}
-          onChange={(e) => onFileSelected(e)}
-          multiple
-          accept={ALLOWED_EXTENSIONS.join(',')}
-        />
-        <Typography variant="body1">
-          <T keyName="import_file_input_drop_file_text" />
-        </Typography>
-        <Box mt={2} mb={2}>
-          <LoadingButton
-            loading={props.loading}
-            onClick={() =>
-              fileRef.current?.dispatchEvent(new MouseEvent('click'))
-            }
-            variant="outlined"
-            color="primary"
-          >
-            <T keyName="import_file_input_select_file_button" />
-          </LoadingButton>
-        </Box>
-        <Typography variant="body1">
-          <T keyName="import_file_supported_formats" />
-        </Typography>
-      </StyledRoot>
+        <StyledRoot>
+          <ImportInputAreaLayout>
+            <ImportProgressOverlay
+              operation={props.operation}
+              importDone={props.importDone}
+              loading={props.loading}
+              onImportMore={props.onImportMore}
+              filesUploaded={props.filesUploaded}
+              operationStatus={props.operationStatus}
+              onActiveChange={(isActive) =>
+                props.onProgressOverlayActiveChange(isActive)
+              }
+            />
+            <ImportInputAreaLayoutTop>
+              <input
+                key={resetKey}
+                data-cy={'import-file-input'}
+                type="file"
+                style={{ display: 'none' }}
+                ref={fileRef}
+                onChange={(e) => onFileSelected(e)}
+                multiple
+                accept={ALLOWED_EXTENSIONS.join(',')}
+              />
+              <ImportInputAreaLayoutTitle>
+                <T keyName="import_file_input_drop_file_text" />
+              </ImportInputAreaLayoutTitle>
+            </ImportInputAreaLayoutTop>
+            <ImportInputAreaLayoutCenter>
+              <Button
+                onClick={() =>
+                  fileRef.current?.dispatchEvent(new MouseEvent('click'))
+                }
+                variant="outlined"
+                color="primary"
+              >
+                <T keyName="import_file_input_select_file_button" />
+              </Button>
+            </ImportInputAreaLayoutCenter>
+            <ImportInputAreaLayoutBottom>
+              <Typography variant="body1">
+                <T keyName="import_file_supported_formats" />
+              </Typography>
+            </ImportInputAreaLayoutBottom>
+          </ImportInputAreaLayout>
+        </StyledRoot>
+      </QuickStartHighlight>
     </ImportFileDropzone>
   );
 };
-
 export default ImportFileInput;

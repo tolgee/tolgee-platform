@@ -57,14 +57,15 @@ class RateLimitServiceTest {
 
   private val rateLimitProperties = Mockito.spy(RateLimitProperties::class.java)
 
-  private val rateLimitService = Mockito.spy(
-    RateLimitService(
-      cacheManager,
-      lockingProvider,
-      currentDateProvider,
-      rateLimitProperties,
+  private val rateLimitService =
+    Mockito.spy(
+      RateLimitService(
+        cacheManager,
+        lockingProvider,
+        currentDateProvider,
+        rateLimitProperties,
+      ),
     )
-  )
 
   private val userAccount = Mockito.mock(UserAccount::class.java)
 
@@ -125,9 +126,10 @@ class RateLimitServiceTest {
     assertThrows<TestException> { rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() } }
     rateLimitService.consumeBucketUnless(testPolicy) { true }
     assertThrows<TestException> { rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() } }
-    val ex1 = assertThrows<RateLimitedException> {
-      rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() }
-    }
+    val ex1 =
+      assertThrows<RateLimitedException> {
+        rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() }
+      }
     val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucketUnless(testPolicy) { true } }
 
     assertThat(ex1.retryAfter).isEqualTo(1000)
@@ -228,9 +230,13 @@ class RateLimitServiceTest {
   // Accessing the one from API package is a pain here.
   class TestLockingProvider : LockingProvider {
     private val lock = ReentrantLock()
+
     override fun getLock(name: String): Lock = lock
 
-    override fun <T> withLocking(name: String, fn: () -> T): T {
+    override fun <T> withLocking(
+      name: String,
+      fn: () -> T,
+    ): T {
       lock.lock()
       try {
         return fn()

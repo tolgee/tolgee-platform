@@ -6,6 +6,7 @@ enum class SubscriptionStatus {
   PAST_DUE,
   UNPAID,
   ERROR,
+
   // might be stored on the EE side, but not license server (billing) side
-  KEY_USED_BY_ANOTHER_INSTANCE
+  KEY_USED_BY_ANOTHER_INSTANCE,
 }

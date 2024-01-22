@@ -165,6 +165,7 @@ declare namespace DataCy {
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
+        "global-language-menu" |
         "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
@@ -184,6 +185,8 @@ declare namespace DataCy {
         "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
+        "import-progress" |
+        "import-progress-overlay" |
         "import-resolution-dialog-accept-imported-button" |
         "import-resolution-dialog-accept-old-button" |
         "import-resolution-dialog-close-button" |
@@ -346,6 +349,8 @@ declare namespace DataCy {
         "project-dashboard-progress" |
         "project-dashboard-project-totals" |
         "project-dashboard-reviewed-percentage" |
+        "project-dashboard-strings" |
+        "project-dashboard-strings-count" |
         "project-dashboard-tags" |
         "project-dashboard-text" |
         "project-dashboard-translated-percentage" |
@@ -358,7 +363,6 @@ declare namespace DataCy {
         "project-member-item" |
         "project-member-revoke-button" |
         "project-menu-item" |
-        "project-menu-item-api-keys" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
@@ -390,6 +394,13 @@ declare namespace DataCy {
         "project-transfer-autocomplete-suggested-option" |
         "project-transfer-confirmation-field" |
         "project-transfer-dialog" |
+        "quick-start-action" |
+        "quick-start-dialog" |
+        "quick-start-finish-action" |
+        "quick-start-finish-step" |
+        "quick-start-highlight" |
+        "quick-start-highlight-ok" |
+        "quick-start-step" |
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
         "screenshot-image" |
@@ -488,10 +499,12 @@ declare namespace DataCy {
         "translations-view-table" |
         "translations-view-table-button" |
         "user-delete-organization-message-item" |
+        "user-menu-language-switch" |
         "user-menu-logout" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |
         "user-menu-server-administration" |
+        "user-menu-theme-switch" |
         "user-menu-user-settings" |
         "user-profile" |
         "webhook-form-cancel" |

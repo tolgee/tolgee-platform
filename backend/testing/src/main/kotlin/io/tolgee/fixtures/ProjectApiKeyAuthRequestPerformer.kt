@@ -1,7 +1,7 @@
 package io.tolgee.fixtures
 
 import io.tolgee.API_KEY_HEADER_NAME
-import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
+import io.tolgee.dtos.response.ApiKeyDTO
 import io.tolgee.model.UserAccount
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.testing.annotations.ApiKeyPresentMode
@@ -18,23 +18,28 @@ class ProjectApiKeyAuthRequestPerformer(
   private val userAccountProvider: () -> UserAccount,
   private val scopes: Array<io.tolgee.model.enums.Scope>,
   projectUrlPrefix: String = "/api/project",
-  private val apiKeyPresentMode: ApiKeyPresentMode = ApiKeyPresentMode.HEADER
+  private val apiKeyPresentMode: ApiKeyPresentMode = ApiKeyPresentMode.HEADER,
 ) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {
-
   @field:Autowired
   lateinit var apiKeyService: ApiKeyService
 
   val apiKey: ApiKeyDTO by lazy {
-    ApiKeyDTO.fromEntity(
-      apiKeyService.create(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project)
+    io.tolgee.dtos.response.ApiKeyDTO.fromEntity(
+      apiKeyService.create(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project),
     )
   }
 
-  override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
+  override fun performProjectAuthPut(
+    url: String,
+    content: Any?,
+  ): ResultActions {
     return performPut(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
   }
 
-  override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
+  override fun performProjectAuthPost(
+    url: String,
+    content: Any?,
+  ): ResultActions {
     return performPost(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
   }
 
@@ -42,22 +47,25 @@ class ProjectApiKeyAuthRequestPerformer(
     return performGet(projectUrlPrefix + url.withApiKey, headersWithApiKey)
   }
 
-  override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
+  override fun performProjectAuthDelete(
+    url: String,
+    content: Any?,
+  ): ResultActions {
     return performDelete(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
   }
 
   override fun performProjectAuthMultipart(
     url: String,
     files: List<MockMultipartFile>,
-    params: Map<String, Array<String>>
+    params: Map<String, Array<String>>,
   ): ResultActions {
     val builder = MockMvcRequestBuilders.multipart(url)
     files.forEach { builder.file(it) }
     params.forEach { (name, values) -> builder.param(name, *values) }
     return mvc.perform(
       AuthorizedRequestFactory.addToken(
-        MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey)
-      )
+        MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey),
+      ),
     )
   }
 

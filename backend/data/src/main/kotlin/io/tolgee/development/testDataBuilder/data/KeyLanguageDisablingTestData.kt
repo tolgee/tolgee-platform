@@ -4,12 +4,12 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.enums.TranslationState
 
 class KeyLanguageDisablingTestData {
-
   val root: TestDataBuilder = TestDataBuilder()
 
-  val user = root.addUserAccount {
-    username = "user"
-  }.self
+  val user =
+    root.addUserAccount {
+      username = "user"
+    }.self
 
   val project = root.addProject { name = "project" }
 
@@ -20,19 +20,22 @@ class KeyLanguageDisablingTestData {
 
   val key = project.addKey("key")
 
-  val enTranslation = key.addTranslation {
-    language = english.self
-  }
+  val enTranslation =
+    key.addTranslation {
+      language = english.self
+    }
 
-  val deTranslation = key.addTranslation {
-    language = german.self
-    text = null
-    state = TranslationState.DISABLED
-  }
+  val deTranslation =
+    key.addTranslation {
+      language = german.self
+      text = null
+      state = TranslationState.DISABLED
+    }
 
-  val csTranslation = key.addTranslation {
-    language = czech.self
-    text = null
-    state = TranslationState.DISABLED
-  }
+  val csTranslation =
+    key.addTranslation {
+      language = czech.self
+      text = null
+      state = TranslationState.DISABLED
+    }
 }

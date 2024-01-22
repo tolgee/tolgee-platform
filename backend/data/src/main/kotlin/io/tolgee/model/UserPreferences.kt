@@ -1,12 +1,12 @@
 package io.tolgee.model
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.MapsId
-import javax.persistence.OneToOne
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.MapsId
+import jakarta.persistence.OneToOne
 
 @Entity
 class UserPreferences(
@@ -15,7 +15,6 @@ class UserPreferences(
   @JoinColumn(name = "user_account_id")
   var userAccount: UserAccount,
 ) : AuditModel() {
-
   constructor(userAccount: UserAccount, preferredOrganization: Organization?) : this(userAccount) {
     this.preferredOrganization = preferredOrganization
   }

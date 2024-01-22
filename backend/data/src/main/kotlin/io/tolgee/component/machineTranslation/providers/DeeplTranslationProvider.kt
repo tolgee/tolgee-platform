@@ -11,23 +11,23 @@ import org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class DeeplTranslationProvider(
   private val deeplMachineTranslationProperties: DeeplMachineTranslationProperties,
-  private val deeplApiService: DeeplApiService
+  private val deeplApiService: DeeplApiService,
 ) : AbstractMtValueProvider() {
-
   override val isEnabled: Boolean
     get() = !deeplMachineTranslationProperties.authKey.isNullOrEmpty()
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    val result = deeplApiService.translate(
-      params.text,
-      params.sourceLanguageTag.uppercase(),
-      params.targetLanguageTag.uppercase(),
-      getFormality(params)
-    )
+    val result =
+      deeplApiService.translate(
+        params.text,
+        params.sourceLanguageTag.uppercase(),
+        params.targetLanguageTag.uppercase(),
+        getFormality(params),
+      )
 
     return MtValueProvider.MtResult(
       result,
-      params.text.length * 100
+      params.text.length * 100,
     )
   }
 
@@ -38,52 +38,54 @@ class DeeplTranslationProvider(
     return params.formality ?: Formality.DEFAULT
   }
 
-  override val formalitySupportingLanguages = arrayOf(
-    "de",
-    "es",
-    "fr",
-    "it",
-    "ja",
-    "nl",
-    "pl",
-    "pt-pt",
-    "pt-br",
-    "ru",
-  )
+  override val formalitySupportingLanguages =
+    arrayOf(
+      "de",
+      "es",
+      "fr",
+      "it",
+      "ja",
+      "nl",
+      "pl",
+      "pt-pt",
+      "pt-br",
+      "ru",
+    )
 
-  override val supportedLanguages = arrayOf(
-    "bg",
-    "cs",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-gb",
-    "en-us",
-    "es",
-    "et",
-    "fi",
-    "fr",
-    "hu",
-    "it",
-    "id",
-    "ja",
-    "ko",
-    "lt",
-    "lv",
-    "nb",
-    "nl",
-    "pl",
-    "pt",
-    "pt-pt",
-    "pt-br",
-    "ro",
-    "ru",
-    "sk",
-    "sl",
-    "sv",
-    "tr",
-    "uk",
-    "zh"
-  )
+  override val supportedLanguages =
+    arrayOf(
+      "bg",
+      "cs",
+      "da",
+      "de",
+      "el",
+      "en",
+      "en-gb",
+      "en-us",
+      "es",
+      "et",
+      "fi",
+      "fr",
+      "hu",
+      "it",
+      "id",
+      "ja",
+      "ko",
+      "lt",
+      "lv",
+      "nb",
+      "nl",
+      "pl",
+      "pt",
+      "pt-pt",
+      "pt-br",
+      "ro",
+      "ru",
+      "sk",
+      "sl",
+      "sv",
+      "tr",
+      "uk",
+      "zh",
+    )
 }

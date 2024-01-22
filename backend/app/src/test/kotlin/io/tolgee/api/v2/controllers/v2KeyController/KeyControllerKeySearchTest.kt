@@ -73,23 +73,24 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
     }
 
     executeInNewTransaction {
-      val time = measureTimeMillis {
-        performProjectAuthGet("keys/search?search=Hello&languageTag=de").andAssertThatJson {
-          node("page.totalElements").isEqualTo(1)
-        }.andPrettyPrint
-      }
+      val time =
+        measureTimeMillis {
+          performProjectAuthGet("keys/search?search=Hello&languageTag=de").andAssertThatJson {
+            node("page.totalElements").isEqualTo(1)
+          }.andPrettyPrint
+        }
 
       logger.info("Completed in: $time ms")
       time.assert.isLessThan(4000)
     }
 
     executeInNewTransaction {
-      val time = measureTimeMillis {
-        performProjectAuthGet("keys/search?search=dol&languageTag=de").andAssertThatJson {
-          node("page.totalElements").isNumber.isGreaterThan(2000.toBigDecimal())
-          node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
-        }.andPrettyPrint
-      }
+      val time =
+        measureTimeMillis {
+          performProjectAuthGet("keys/search?search=dol&languageTag=de").andAssertThatJson {
+            node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
+          }.andPrettyPrint
+        }
 
       logger.info("Completed in: $time ms")
       time.assert.isLessThan(4000)
@@ -102,14 +103,15 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
     saveAndPrepare()
 
     executeInNewTransaction {
-      val time = measureTimeMillis {
-        performProjectAuthGet("keys/search?search=krasa&languageTag=de").andAssertThatJson {
-          node("_embedded.keys") {
-            isArray.hasSize(1)
-            node("[0].name").isEqualTo("beauty")
-          }
-        }.andPrettyPrint
-      }
+      val time =
+        measureTimeMillis {
+          performProjectAuthGet("keys/search?search=krasa&languageTag=de").andAssertThatJson {
+            node("_embedded.keys") {
+              isArray.hasSize(1)
+              node("[0].name").isEqualTo("beauty")
+            }
+          }.andPrettyPrint
+        }
 
       logger.info("Completed in: $time ms")
       time.assert.isLessThan(4000)

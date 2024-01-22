@@ -12,27 +12,19 @@ const StyledContent = styled('div')`
   flex-direction: column;
   align-items: stretch;
   position: relative;
-  contain: size;
+  max-width: 100%;
 `;
 
-interface Props {
-  topBarAutoHide?: boolean;
-}
-
-export const ProjectPage: FunctionComponent<Props> = ({
-  topBarAutoHide,
-  children,
-}) => {
+export const ProjectPage: FunctionComponent = ({ children }) => {
   const project = useProject();
 
   const isAdminAccess = project.computedPermission.origin === 'SERVER_ADMIN';
 
   return (
     <DashboardPage
-      topBarAutoHide={topBarAutoHide}
       isAdminAccess={isAdminAccess}
+      fixedContent={<ProjectMenu id={project.id} />}
     >
-      <ProjectMenu id={project.id} />
       <StyledContent>{children}</StyledContent>
     </DashboardPage>
   );

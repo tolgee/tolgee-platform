@@ -15,7 +15,7 @@ import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
@@ -38,7 +38,7 @@ class OrganizationProjectController(
   private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
   private val projectService: ProjectService,
   private val projectModelAssembler: ProjectModelAssembler,
-  private val projectWithStatsFacade: ProjectWithStatsFacade
+  private val projectWithStatsFacade: ProjectWithStatsFacade,
 ) {
   @GetMapping("/{id:[0-9]+}/projects")
   @Operation(summary = "Returns all organization projects the user has access to")
@@ -46,7 +46,7 @@ class OrganizationProjectController(
   fun getAllProjects(
     @PathVariable("id") id: Long,
     @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
+    @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {
     return organizationService.find(id)?.let { organization ->
       projectService.findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
@@ -62,7 +62,7 @@ class OrganizationProjectController(
   fun getAllProjects(
     @PathVariable("slug") slug: String,
     @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
+    @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {
     return organizationService.find(slug)?.let {
       getAllProjects(it.id, pageable, search)
@@ -70,30 +70,34 @@ class OrganizationProjectController(
   }
 
   @Operation(
-    summary = "Returns all projects (including statistics)" +
-      " where current user has any permission (except none)"
+    summary =
+      "Returns all projects (including statistics)" +
+        " where current user has any permission (except none)",
   )
   @GetMapping("/{organizationId:[0-9]+}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
   @UseDefaultPermissions
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
-    @PathVariable organizationId: Long
+    @PathVariable organizationId: Long,
   ): PagedModel<ProjectWithStatsModel> {
     val projects = projectService.findPermittedInOrganizationPaged(pageable, search, organizationId = organizationId)
     return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
   @Operation(
-    summary = "Returns all projects (including statistics) " +
-      "where current user has any permission (except none)"
+    summary =
+      "Returns all projects (including statistics) " +
+        "where current user has any permission (except none)",
   )
   @GetMapping("/{slug:.*[a-z].*}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
   @UseDefaultPermissions
   fun getAllWithStatistics(
-    @ParameterObject @SortDefault("id") pageable: Pageable,
+    @ParameterObject
+    @SortDefault("id")
+    pageable: Pageable,
     @RequestParam("search") search: String?,
-    @PathVariable("slug") organizationSlug: String
+    @PathVariable("slug") organizationSlug: String,
   ): PagedModel<ProjectWithStatsModel> {
     return organizationService.find(organizationSlug)?.let { organization ->
       return getAllWithStatistics(pageable, search, organization.id)

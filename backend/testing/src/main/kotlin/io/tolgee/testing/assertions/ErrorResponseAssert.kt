@@ -49,9 +49,9 @@ class ErrorResponseAssert(mvcResult: MvcResult?) :
         try {
           throw RuntimeException(
             """
-    Can not parse error response:
-    ${actual!!.response.contentAsString}
-            """.trimIndent()
+            Can not parse error response:
+            ${actual!!.response.contentAsString}
+            """.trimIndent(),
           )
         } catch (unsupportedEncodingException: UnsupportedEncodingException) {
           throw RuntimeException(unsupportedEncodingException)
@@ -60,9 +60,9 @@ class ErrorResponseAssert(mvcResult: MvcResult?) :
         try {
           throw RuntimeException(
             """
-    Can not parse error response:
-    ${actual!!.response.contentAsString}
-            """.trimIndent()
+            Can not parse error response:
+            ${actual!!.response.contentAsString}
+            """.trimIndent(),
           )
         } catch (unsupportedEncodingException: UnsupportedEncodingException) {
           throw RuntimeException(unsupportedEncodingException)

@@ -28,15 +28,16 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     commitTransaction()
     projectSupplier = { base.project }
     userAccount = base.userAccount
-    val mvcResult = performProjectAuthGet("export/jsonZip")
-      .andIsOk.andDo { obj: MvcResult -> obj.getAsyncResult(60000) }.andReturn()
+    val mvcResult =
+      performProjectAuthGet("export/jsonZip")
+        .andIsOk.andDo { obj: MvcResult -> obj.getAsyncResult(60000) }.andReturn()
     mvcResult.response
     val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
     project.languages.forEach(
       Consumer { l: Language ->
         val name = l.tag + ".json"
         Assertions.assertThat(fileSizes).containsKey(name)
-      }
+      },
     )
   }
 
@@ -47,14 +48,15 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     val base = dbPopulator.populate(generateUniqueString())
     commitTransaction()
     projectSupplier = { base.project }
-    val mvcResult = performProjectAuthGet("export/jsonZip")
-      .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+    val mvcResult =
+      performProjectAuthGet("export/jsonZip")
+        .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
     val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
     project.languages.forEach(
       Consumer { l: Language ->
         val name = l.tag + ".json"
         Assertions.assertThat(fileSizes).containsKey(name)
-      }
+      },
     )
   }
 
@@ -71,9 +73,10 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.viewEnOnlyUser
     projectSupplier = { testData.project }
-    val result = performProjectAuthGet("export/jsonZip")
-      .andDo { obj: MvcResult -> obj.asyncResult }
-      .andReturn()
+    val result =
+      performProjectAuthGet("export/jsonZip")
+        .andDo { obj: MvcResult -> obj.asyncResult }
+        .andReturn()
     val fileSizes = parseZip(result.response.contentAsByteArray)
     Assertions.assertThat(fileSizes).containsOnlyKeys("en.json")
   }
@@ -84,8 +87,8 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     val result = HashMap<String, Long>()
     var nextEntry: ZipEntry?
     while (zipInputStream.nextEntry.also {
-      nextEntry = it
-    } != null
+        nextEntry = it
+      } != null
     ) {
       result[nextEntry!!.name] = nextEntry!!.size
     }

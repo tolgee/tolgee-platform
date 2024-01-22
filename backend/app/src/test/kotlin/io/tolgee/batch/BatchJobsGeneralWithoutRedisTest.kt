@@ -6,6 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest
   properties = [
     "tolgee.cache.enabled=true",
   ],
-  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 class BatchJobsGeneralWithoutRedisTest : AbstractBatchJobsGeneralTest()

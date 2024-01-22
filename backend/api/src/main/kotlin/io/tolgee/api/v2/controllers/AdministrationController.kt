@@ -5,8 +5,8 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
-import io.tolgee.hateoas.user_account.UserAccountModel
-import io.tolgee.hateoas.user_account.UserAccountModelAssembler
+import io.tolgee.hateoas.userAccount.UserAccountModel
+import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -14,7 +14,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
@@ -33,8 +33,8 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/administration"
-  ]
+    "/v2/administration",
+  ],
 )
 @OpenApiTag(name = "Admin", description = "Server administration")
 class AdministrationController(
@@ -45,15 +45,16 @@ class AdministrationController(
   private val userAccountService: UserAccountService,
   private val pagedResourcesAssembler: PagedResourcesAssembler<UserAccount>,
   private val userAccountModelAssembler: UserAccountModelAssembler,
-  private val jwtService: JwtService
+  private val jwtService: JwtService,
 ) : IController {
-
   @GetMapping(value = ["/organizations"])
   @Operation(summary = "Get all server organizations")
   @RequiresSuperAuthentication
   fun getOrganizations(
-    @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
-    search: String? = null
+    @ParameterObject
+    @SortDefault(sort = ["name"])
+    pageable: Pageable,
+    search: String? = null,
   ): PagedModel<OrganizationModel> {
     val organizations = organizationService.findAllPaged(pageable, search, authenticationFacade.authenticatedUser.id)
     return pagedOrganizationResourcesAssembler.toModel(organizations, organizationModelAssembler)
@@ -63,8 +64,10 @@ class AdministrationController(
   @Operation(summary = "Get all server users")
   @RequiresSuperAuthentication
   fun getUsers(
-    @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
-    search: String? = null
+    @ParameterObject
+    @SortDefault(sort = ["name"])
+    pageable: Pageable,
+    search: String? = null,
   ): PagedModel<UserAccountModel> {
     val users = userAccountService.findAllWithDisabledPaged(pageable, search)
     return pagedResourcesAssembler.toModel(users, userAccountModelAssembler)
@@ -73,7 +76,9 @@ class AdministrationController(
   @DeleteMapping(value = ["/users/{userId}"])
   @Operation(summary = "Deletes an user")
   @RequiresSuperAuthentication
-  fun deleteUser(@PathVariable userId: Long) {
+  fun deleteUser(
+    @PathVariable userId: Long,
+  ) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
     }
@@ -83,7 +88,9 @@ class AdministrationController(
   @PutMapping(value = ["/users/{userId}/disable"])
   @Operation(summary = "Deletes an user")
   @RequiresSuperAuthentication
-  fun disableUser(@PathVariable userId: Long) {
+  fun disableUser(
+    @PathVariable userId: Long,
+  ) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
     }
@@ -93,7 +100,9 @@ class AdministrationController(
   @PutMapping(value = ["/users/{userId}/enable"])
   @Operation(summary = "Deletes an user")
   @RequiresSuperAuthentication
-  fun enableUser(@PathVariable userId: Long) {
+  fun enableUser(
+    @PathVariable userId: Long,
+  ) {
     userAccountService.enable(userId)
   }
 
@@ -102,7 +111,7 @@ class AdministrationController(
   @RequiresSuperAuthentication
   fun setRole(
     @PathVariable userId: Long,
-    @PathVariable role: UserAccount.Role
+    @PathVariable role: UserAccount.Role,
   ) {
     val user = userAccountService.get(userId)
     user.role = role

@@ -3,10 +3,11 @@ package io.tolgee.ee
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.AbstractSpringTest
 import io.tolgee.constants.Feature
-import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
+import io.tolgee.model.UserAccount
+import io.tolgee.service.security.SignUpService
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.KArgumentCaptor
@@ -20,7 +21,6 @@ import java.util.*
 
 @SpringBootTest()
 class UsageReportingTest : AbstractSpringTest() {
-
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
@@ -34,6 +34,9 @@ class UsageReportingTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeLicenseMockRequestUtil: EeLicensingMockRequestUtil
 
+  @Autowired
+  private lateinit var signUpService: SignUpService
+
   @Test
   fun `it checks for subscription changes`() {
     eeSubscriptionRepository.save(
@@ -45,7 +48,7 @@ class UsageReportingTest : AbstractSpringTest() {
         cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
-      }
+      },
     )
 
     eeLicenseMockRequestUtil.mock {
@@ -58,23 +61,23 @@ class UsageReportingTest : AbstractSpringTest() {
       }
 
       verify {
-        val user1 = userAccountService.createUser(
-          SignUpDto(
-            "Test",
-            email = "aa@a.a",
-            organizationName = "Ho",
-            password = "12345678"
+        val user1 =
+          userAccountService.createUser(
+            UserAccount(
+              name = "Test",
+              username = "aa@a.a",
+            ),
+            rawPassword = "12345678",
           )
-        )
         captor.assertSeats(1)
-        val user2 = userAccountService.createUser(
-          SignUpDto(
-            "Test",
-            email = "ab@a.a",
-            organizationName = "Ho",
-            password = "12345678"
+        val user2 =
+          userAccountService.createUser(
+            UserAccount(
+              name = "Test",
+              username = "ab@a.a",
+            ),
+            rawPassword = "12345678",
           )
-        )
         captor.assertSeats(2)
         userAccountService.delete(user1.id)
         captor.assertSeats(1)

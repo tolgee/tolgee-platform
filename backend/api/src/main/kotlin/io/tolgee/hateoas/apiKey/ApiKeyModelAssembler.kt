@@ -7,17 +7,19 @@ import org.springframework.stereotype.Component
 
 @Component
 class ApiKeyModelAssembler : RepresentationModelAssemblerSupport<ApiKey, ApiKeyModel>(
-  ApiKeyController::class.java, ApiKeyModel::class.java
+  ApiKeyController::class.java,
+  ApiKeyModel::class.java,
 ) {
-  override fun toModel(entity: ApiKey) = ApiKeyModel(
-    id = entity.id,
-    description = entity.description,
-    username = entity.userAccount.username,
-    userFullName = entity.userAccount.name,
-    projectId = entity.project.id,
-    projectName = entity.project.name,
-    scopes = entity.scopesEnum.map { it.value }.toSet(),
-    expiresAt = entity.expiresAt?.time,
-    lastUsedAt = entity.lastUsedAt?.time
-  )
+  override fun toModel(entity: ApiKey) =
+    ApiKeyModel(
+      id = entity.id,
+      description = entity.description,
+      username = entity.userAccount.username,
+      userFullName = entity.userAccount.name,
+      projectId = entity.project.id,
+      projectName = entity.project.name,
+      scopes = entity.scopesEnum.mapNotNull { it?.value }.toSet(),
+      expiresAt = entity.expiresAt?.time,
+      lastUsedAt = entity.lastUsedAt?.time,
+    )
 }

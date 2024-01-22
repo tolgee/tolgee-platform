@@ -12,11 +12,11 @@ import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.hibernate.jpa.TypedParameterValue
+import jakarta.persistence.EntityManager
+import org.hibernate.query.TypedParameterValue
 import org.hibernate.type.StandardBasicTypes
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobActivityFinalizer(
@@ -41,6 +41,7 @@ class BatchJobActivityFinalizer(
 
   fun finalizeActivityWhenJobCompleted(job: BatchJobDto) {
     activityHolder.afterActivityFlushed = afterFlush@{
+      entityManager.clear()
       try {
         logger.debug("Finalizing activity for job ${job.id} (after flush)")
         waitForOtherChunksToComplete(job)
@@ -67,17 +68,21 @@ class BatchJobActivityFinalizer(
     logger.debug("Committed chunks executions in this transaction: $committedInThisTransactions")
 
     retryWaitingWithBatchJobResetting(job.id) {
-      val committedChunks = batchJobStateProvider.get(job.id).values
-        .count { it.retry == false && it.transactionCommitted && it.status.completed }
+      val committedChunks =
+        batchJobStateProvider.get(job.id).values
+          .count { it.retry == false && it.transactionCommitted && it.status.completed }
       logger.debug(
         "Waiting for completed chunks and committed ($committedChunks) to be equal to all other chunks" +
-          " count (${job.totalChunks - committedInThisTransactions})"
+          " count (${job.totalChunks - committedInThisTransactions})",
       )
       committedChunks == job.totalChunks - committedInThisTransactions
     }
   }
 
-  private fun retryWaitingWithBatchJobResetting(jobId: Long, fn: () -> Boolean) {
+  private fun retryWaitingWithBatchJobResetting(
+    jobId: Long,
+    fn: () -> Boolean,
+  ) {
     waitForNotThrowing(WaitNotSatisfiedException::class) {
       try {
         waitFor(2000) {
@@ -90,7 +95,10 @@ class BatchJobActivityFinalizer(
     }
   }
 
-  private fun setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto: Long, job: BatchJobDto) {
+  private fun setJobIdAndAuthorIdToRevision(
+    activityRevisionIdToMergeInto: Long,
+    job: BatchJobDto,
+  ) {
     entityManager.createNativeQuery(
       """
         update activity_revision 
@@ -99,7 +107,7 @@ class BatchJobActivityFinalizer(
          batch_job_id = :jobId, 
          author_id = :authorId
         where id = :activityRevisionIdToMergeInto
-        """
+        """,
     )
       .setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
       .setParameter("jobId", job.id)
@@ -111,7 +119,7 @@ class BatchJobActivityFinalizer(
     entityManager.createNativeQuery(
       """
           delete from activity_revision where id in (:revisionIds)
-        """
+        """,
     )
       .setParameter("revisionIds", revisionIds)
       .executeUpdate()
@@ -119,13 +127,13 @@ class BatchJobActivityFinalizer(
 
   private fun mergeModifiedEntities(
     activityRevisionIdToMergeInto: Long,
-    revisionIds: MutableList<Long>
+    revisionIds: MutableList<Long>,
   ) {
     entityManager.createNativeQuery(
       """
         update activity_modified_entity set activity_revision_id = :activityRevisionIdToMergeInto
         where activity_revision_id in (:revisionIds)
-        """
+        """,
     )
       .setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
       .setParameter("revisionIds", revisionIds)
@@ -134,7 +142,7 @@ class BatchJobActivityFinalizer(
 
   private fun mergeDescribingEntities(
     activityRevisionIdToMergeInto: Long,
-    revisionIds: MutableList<Long>
+    revisionIds: MutableList<Long>,
   ) {
     removeDuplicityDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
 
@@ -142,7 +150,7 @@ class BatchJobActivityFinalizer(
       """
         update activity_describing_entity set activity_revision_id = :activityRevisionIdToMergeInto
         where activity_revision_id in (:revisionIds)
-        """
+        """,
     )
       .setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
       .setParameter("revisionIds", revisionIds)
@@ -151,42 +159,43 @@ class BatchJobActivityFinalizer(
 
   private fun removeDuplicityDescribingEntities(
     activityRevisionIdToMergeInto: Long,
-    revisionIds: MutableList<Long>
+    revisionIds: MutableList<Long>,
   ) {
     entityManager.createNativeQuery(
       """
-        delete from activity_describing_entity
-        where (entity_class, entity_id) in
-              (select entity_class, entity_id
-               from activity_describing_entity
-               where activity_revision_id in (:revisionIds)
+      delete from activity_describing_entity
+      where (entity_class, entity_id) in
+            (select entity_class, entity_id
+             from activity_describing_entity
+             where activity_revision_id in (:revisionIds)
+                or activity_revision_id = :activityRevisionIdToMergeInto
+             group by entity_class, entity_id
+             having count(*) > 1)
+      and
+          (activity_revision_id, entity_class, entity_id) not in (
+          select min(activity_revision_id), entity_class, entity_id
+              from activity_describing_entity
+              where activity_revision_id in (:revisionIds)
                   or activity_revision_id = :activityRevisionIdToMergeInto
-               group by entity_class, entity_id
-               having count(*) > 1)
-        and
-            (activity_revision_id, entity_class, entity_id) not in (
-            select min(activity_revision_id), entity_class, entity_id
-                from activity_describing_entity
-                where activity_revision_id in (:revisionIds)
-                    or activity_revision_id = :activityRevisionIdToMergeInto
-                group by entity_class, entity_id
-                having count(*) > 1)
-      """.trimIndent()
+              group by entity_class, entity_id
+              having count(*) > 1)
+      """.trimIndent(),
     )
       .setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
       .setParameter("revisionIds", revisionIds)
       .executeUpdate()
   }
 
-  private fun getRevisionIds(jobId: Long): MutableList<Long> = entityManager.createQuery(
-    """
+  private fun getRevisionIds(jobId: Long): MutableList<Long> =
+    entityManager.createQuery(
+      """
         select ar.id
         from ActivityRevision ar
         join ar.batchJobChunkExecution b
         where b.batchJob.id = :jobId
       """,
-    Long::class.javaObjectType
-  )
-    .setParameter("jobId", jobId)
-    .resultList
+      Long::class.javaObjectType,
+    )
+      .setParameter("jobId", jobId)
+      .resultList
 }

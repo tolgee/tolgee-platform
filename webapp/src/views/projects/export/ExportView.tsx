@@ -22,9 +22,7 @@ export const ExportView: FunctionComponent = () => {
           }),
         ],
       ]}
-      lg={7}
-      md={9}
-      containerMaxWidth="lg"
+      maxWidth="narrow"
     >
       <Route exact path={LINKS.PROJECT_EXPORT.template}>
         <ExportForm />

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
@@ -134,6 +134,7 @@ const getTheme = (mode: PaletteMode) => {
         secondary: c.textSecondary,
       },
       divider1: c.divider1,
+      tile: c.tile,
       cell: c.cell,
       background: {
         default: c.background,
@@ -147,11 +148,9 @@ const getTheme = (mode: PaletteMode) => {
       billingPlan: createColor(c.billingPlan),
       globalLoading: createColor(c.globalLoading),
       marker: c.marker,
-      topBanner: {
-        background: c.topBanner.background,
-        mainText: c.topBanner.mainText,
-        linkText: c.topBanner.linkText,
-      },
+      topBanner: c.topBanner,
+      quickStart: c.quickStart,
+      import: c.import,
     },
     mixins: {
       toolbar: {
@@ -259,8 +258,8 @@ const getTheme = (mode: PaletteMode) => {
 };
 
 const ThemeContext = React.createContext({
-  mode: 'light' as PaletteMode,
-  setMode: (mode: PaletteMode) => {},
+  mode: undefined as PaletteMode | undefined,
+  setMode: (mode: PaletteMode | undefined) => {},
 });
 
 export const useThemeContext = () => useContext(ThemeContext);
@@ -270,24 +269,31 @@ export const ThemeProvider: React.FC = ({ children }) => {
     noSsr: true,
   });
 
-  const [mode, _setMode] = useState<PaletteMode>(
-    (localStorage?.getItem(LOCALSTORAGE_THEME_MODE) as PaletteMode) ||
-      (prefersDarkMode ? 'dark' : 'light')
+  const [mode, _setMode] = useState<PaletteMode | undefined>(
+    (localStorage.getItem(LOCALSTORAGE_THEME_MODE) as PaletteMode) || undefined
   );
 
-  const setMode = useCallback(
-    (mode: PaletteMode) => {
+  const setMode = (mode: PaletteMode | undefined) => {
+    if (mode) {
       localStorage?.setItem(LOCALSTORAGE_THEME_MODE, mode);
-      _setMode(mode);
-    },
-    [_setMode]
-  );
+    } else {
+      localStorage?.removeItem(LOCALSTORAGE_THEME_MODE);
+    }
+    _setMode(mode);
+  };
 
-  const value = useMemo(() => ({ mode, setMode }), [mode, setMode]);
+  const value = {
+    mode: mode as PaletteMode,
+    setMode,
+  };
 
   return (
     <ThemeContext.Provider value={value}>
-      <MuiThemeProvider theme={getTheme(mode)}>{children}</MuiThemeProvider>
+      <MuiThemeProvider
+        theme={getTheme(value.mode ?? (prefersDarkMode ? 'dark' : 'light'))}
+      >
+        {children}
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 };

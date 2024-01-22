@@ -12,11 +12,15 @@ import {
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 
 describe('Organization Invitations', () => {
+  let organizationData: Record<string, { slug: string }>;
+
   beforeEach(() => {
     login();
     organizationTestData.clean();
-    organizationTestData.generate();
-    visit();
+    organizationTestData.generate().then((res) => {
+      organizationData = res.body as any;
+      visit();
+    });
   });
 
   it('generates invitations', () => {
@@ -65,13 +69,20 @@ describe('Organization Invitations', () => {
     organizationTestData.clean();
   });
 
+  function getTolgeeSlug() {
+    return organizationData['Tolgee'].slug;
+  }
+
   const visit = () => {
-    cy.visit(`${HOST}/organizations/tolgee/members`);
+    const slug = getTolgeeSlug();
+    cy.visit(`${HOST}/organizations/${slug}/members`);
   };
 
   const generateInvitation = (roleType: 'MEMBER' | 'OWNER', email = false) => {
     let clipboard: string;
-    cy.visit(`${HOST}/organizations/tolgee/members`, {
+    const slug = getTolgeeSlug();
+
+    cy.visit(`${HOST}/organizations/${slug}/members`, {
       onBeforeLoad(win) {
         if (!email) {
           cy.stub(win, 'prompt').callsFake((_, input) => {

@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.translate.TranslateClient
 @Configuration
 class MtServicesConfiguration(
   private val googleMachineTranslationProperties: GoogleMachineTranslationProperties,
-  private val awsMachineTranslationProperties: AwsMachineTranslationProperties
+  private val awsMachineTranslationProperties: AwsMachineTranslationProperties,
 ) {
   @Bean
   fun getGoogleTranslationService(): Translate? {
@@ -34,17 +34,20 @@ class MtServicesConfiguration(
 
   @Bean
   fun getAwsTranslationService(): TranslateClient? {
-    val chain = when (
-      awsMachineTranslationProperties.accessKey.isNullOrEmpty() ||
-        awsMachineTranslationProperties.secretKey.isNullOrEmpty()
-    ) {
-      true -> DefaultCredentialsProvider.create()
-      false -> StaticCredentialsProvider.create(
-        AwsBasicCredentials.create(
-          awsMachineTranslationProperties.accessKey, awsMachineTranslationProperties.secretKey
-        )
-      )
-    }
+    val chain =
+      when (
+        awsMachineTranslationProperties.accessKey.isNullOrEmpty() ||
+          awsMachineTranslationProperties.secretKey.isNullOrEmpty()
+      ) {
+        true -> DefaultCredentialsProvider.create()
+        false ->
+          StaticCredentialsProvider.create(
+            AwsBasicCredentials.create(
+              awsMachineTranslationProperties.accessKey,
+              awsMachineTranslationProperties.secretKey,
+            ),
+          )
+      }
 
     return TranslateClient.builder()
       .credentialsProvider(chain)

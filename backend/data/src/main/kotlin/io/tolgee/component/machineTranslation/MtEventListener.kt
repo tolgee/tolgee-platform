@@ -6,18 +6,20 @@ import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.service.machineTranslation.MtCreditBucketService
+import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
+import kotlin.time.ExperimentalTime
 
 @Component
 class MtEventListener(
   private val mtCreditBucketService: MtCreditBucketService,
   private val machineTranslationProperties: MachineTranslationProperties,
   private val publicBillingConfProvider: PublicBillingConfProvider,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
   @EventListener(OnBeforeMachineTranslationEvent::class)
+  @ExperimentalTime
   fun onBeforeMtEvent(event: OnBeforeMachineTranslationEvent) {
     if (shouldConsumeCredits()) {
       mtCreditBucketService.checkPositiveBalance(event.project)

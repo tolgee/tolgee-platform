@@ -47,7 +47,6 @@ export const LanguageAutocomplete: FC<{
   return (
     <Autocomplete
       id="language-name-select"
-      freeSolo
       options={options}
       onOpen={() => setOptions(getOptions(''))}
       filterOptions={(options) => options}

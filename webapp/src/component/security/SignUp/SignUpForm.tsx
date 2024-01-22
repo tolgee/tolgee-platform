@@ -1,3 +1,4 @@
+import React from 'react';
 import { Box, Link, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { T, useTranslate } from '@tolgee/react';
@@ -9,18 +10,20 @@ import {
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { SetPasswordFields } from '../SetPasswordFields';
+import { PasswordLabel } from '../SetPasswordField';
 import { useConfig } from 'tg.globalContext/helpers';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
-import { default as React, FC } from 'react';
 import { Alert } from '../../common/Alert';
 import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
+
+const PasswordFieldWithValidation = React.lazy(
+  () => import('tg.component/security/PasswordFieldWithValidation')
+);
 
 export type SignUpType = {
   name: string;
   email: string;
   password: string;
-  passwordRepeat?: string;
   organizationName: string;
   invitationCode?: string;
 };
@@ -30,7 +33,7 @@ type Props = {
   loadable: LoadableType;
 };
 
-const Error: FC<{ loadable: LoadableType }> = ({ loadable }) => {
+const Error: React.FC<{ loadable: LoadableType }> = ({ loadable }) => {
   if (loadable.error?.code === 'seats_spending_limit_exceeded') {
     return (
       <Alert severity="error">
@@ -65,7 +68,6 @@ export const SignUpForm = (props: Props) => {
       initialValues={
         {
           password: '',
-          passwordRepeat: '',
           name: '',
           email: '',
           organizationName: orgRequired ? '' : undefined,
@@ -79,7 +81,7 @@ export const SignUpForm = (props: Props) => {
             color="primary"
             type="submit"
             variant="contained"
-            loading={props.loadable.loading}
+            loading={props.loadable.isLoading}
           >
             <T keyName="sign_up_submit_button" />
           </LoadingButton>
@@ -105,7 +107,7 @@ export const SignUpForm = (props: Props) => {
           variant="standard"
         />
       )}
-      <SetPasswordFields />
+      <PasswordFieldWithValidation label={<PasswordLabel />} />
       <Box mt={2} mb={3}>
         <Typography variant="body2">
           <T

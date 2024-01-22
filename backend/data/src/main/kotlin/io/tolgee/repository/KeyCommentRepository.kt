@@ -9,12 +9,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface KeyCommentRepository : JpaRepository<KeyComment?, Long?> {
-
   @Modifying
   @Transactional
   @Query(
     "delete from KeyComment kc " +
-      "where kc.keyMeta in (select km from kc.keyMeta km where km.importKey.id in :keyIds)"
+      "where kc.keyMeta in (select km from kc.keyMeta km where km.importKey.id in :keyIds)",
   )
   fun deleteAllByImportKeyIds(keyIds: List<Long>)
 
@@ -22,15 +21,15 @@ interface KeyCommentRepository : JpaRepository<KeyComment?, Long?> {
   @Transactional
   @Query(
     "delete from KeyComment kc " +
-      "where kc.keyMeta in (select km from kc.keyMeta km where km.key.id in :keyIds)"
+      "where kc.keyMeta in (select km from kc.keyMeta km where km.key.id in :keyIds)",
   )
   fun deleteAllByKeyIds(keyIds: Collection<Long>)
 
   @Modifying
-  @Transactional
   @Query(
     "delete from KeyComment kc " +
-      "where kc.keyMeta in (select km from kc.keyMeta km where km.key.id = :keyId)"
+      "where kc.keyMeta in (select km from kc.keyMeta km where km.key.id in " +
+      "(select k.id from Key k where k.project.id = :projectId))",
   )
-  fun deleteAllByKeyId(keyId: Long)
+  fun deleteAllByProject(projectId: Long)
 }

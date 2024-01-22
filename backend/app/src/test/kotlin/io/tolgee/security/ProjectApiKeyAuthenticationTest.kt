@@ -3,12 +3,17 @@ package io.tolgee.security
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.controllers.AbstractApiKeyTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
-import io.tolgee.testing.assertions.UserApiAppAction
+import io.tolgee.testing.assertions.PakAction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -29,8 +34,9 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
 
   @Test
   fun accessWithApiKey_failure() {
-    val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations"))
-      .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
+    val mvcResult =
+      mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized).andReturn()
     Assertions.assertThat(mvcResult).error()
   }
 
@@ -52,14 +58,14 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.values()), base.project)
     performAction(
-      UserApiAppAction(
+      PakAction(
         apiKey = apiKey.key,
         url = "/v2/projects",
-        expectedStatus = HttpStatus.FORBIDDEN
-      )
+        expectedStatus = HttpStatus.FORBIDDEN,
+      ),
     )
     mvc.perform(MockMvcRequestBuilders.get("/v2/projects"))
-      .andIsForbidden
+      .andIsUnauthorized
   }
 
   @Test
@@ -73,7 +79,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       "/v2/api-keys/current",
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_" + testData.frantasKey.encodedKey)
-      }
+      },
     ).andIsOk.andAssertThatJson {
       node("description").isNotNull
     }
@@ -95,7 +101,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       "/v2/api-keys/current",
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_" + testData.expiredKey.encodedKey)
-      }
+      },
     ).andIsUnauthorized
   }
 
@@ -108,7 +114,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       "/v2/projects/${testData.frantasProject.id}",
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_" + testData.usersKey.encodedKey)
-      }
+      },
     ).andIsForbidden
   }
 
@@ -121,7 +127,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       "/v2/projects/${testData.projectBuilder.self.id}",
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_" + testData.usersKey.encodedKey)
-      }
+      },
     ).andIsOk
   }
 
@@ -134,7 +140,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       "/v2/projects/${testData.frantasProject.id}",
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_---aaajsjs")
-      }
+      },
     ).andIsUnauthorized
   }
 
@@ -148,7 +154,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       null,
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_" + testData.usersKeyFrantasProject.encodedKey)
-      }
+      },
     ).andIsOk
 
     // Revoke user permissions
@@ -158,7 +164,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       null,
       HttpHeaders().apply {
         add("Authorization", "Bearer $tokenFrantisek")
-      }
+      },
     ).andIsOk
 
     // Test if PAK is no longer able to set state
@@ -167,7 +173,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
       null,
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_" + testData.usersKeyFrantasProject.encodedKey)
-      }
+      },
     ).andIsForbidden
   }
 }

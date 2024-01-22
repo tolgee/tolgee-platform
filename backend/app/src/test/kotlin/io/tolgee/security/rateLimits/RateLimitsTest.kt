@@ -20,7 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest
     "tolgee.rate-limits.ip-request-window=10000",
     "tolgee.rate-limits.user-request-limit=15",
     "tolgee.rate-limits.user-request-window=10000",
-  ]
+  ],
 )
 class RateLimitsTest : AuthorizedControllerTest() {
   @BeforeEach

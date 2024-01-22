@@ -1,10 +1,8 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
@@ -12,8 +10,7 @@ import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
 import { CreateLanguageField } from './CreateLanguageField';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { ApiError } from 'tg.service/http/ApiError';
-
-const messageService = container.resolve(MessageService);
+import { messageService } from 'tg.service/MessageService';
 
 type LanguageDto = components['schemas']['LanguageDto'];
 

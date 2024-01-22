@@ -11,11 +11,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @DocProperty(description = "Configuration of Tolgee file storage.", displayName = "File storage")
 class FileStorageProperties(
   var s3: S3Settings = S3Settings(),
-
   @DocProperty(
     description = "Path to directory where Tolgee will store its files.",
     defaultExplanation = ", with docker `/data/`",
-    defaultValue = "~/.tolgee/"
+    defaultValue = "~/.tolgee/",
   )
   var fsDataPath: String = """${System.getProperty("user.home")}/.tolgee""",
 )

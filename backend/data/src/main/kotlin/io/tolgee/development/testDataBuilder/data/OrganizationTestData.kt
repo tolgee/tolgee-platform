@@ -25,11 +25,12 @@ class OrganizationTestData : BaseTestData() {
         user = franta
       }
 
-      val pepaBuilder = addUserAccountWithoutOrganization {
-        username = "pepa"
-        name = "Josef Tyl"
-        pepa = this
-      }
+      val pepaBuilder =
+        addUserAccountWithoutOrganization {
+          username = "pepa"
+          name = "Josef Tyl"
+          pepa = this
+        }
 
       projectBuilder.addPermission {
         user = pepa
@@ -53,17 +54,19 @@ class OrganizationTestData : BaseTestData() {
         }
       }
 
-      val jirinaBuilder = addUserAccountWithoutOrganization {
-        username = "jirina"
-        name = "Jirina Svetla"
-        jirina = this
-      }
+      val jirinaBuilder =
+        addUserAccountWithoutOrganization {
+          username = "jirina"
+          name = "Jirina Svetla"
+          jirina = this
+        }
 
-      val kvetoslavBuilder = addUserAccountWithoutOrganization {
-        username = "kvetoslav"
-        name = "Kvetoslav Barta"
-        kvetoslav = this
-      }
+      val kvetoslavBuilder =
+        addUserAccountWithoutOrganization {
+          username = "kvetoslav"
+          name = "Kvetoslav Barta"
+          kvetoslav = this
+        }
 
       projectBuilder.build {
         addPermission {

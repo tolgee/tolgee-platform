@@ -4,5 +4,5 @@ import io.tolgee.constants.MtServiceType
 
 data class MtSupportedService(
   val serviceType: MtServiceType,
-  val formalitySupported: Boolean
+  val formalitySupported: Boolean,
 )

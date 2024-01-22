@@ -16,7 +16,7 @@ interface ImportKeyRepository : JpaRepository<ImportKey, Long> {
           left join fetch ik.keyMeta km
           join fetch ik.file if 
           join fetch if.import im where im.id = :importId
-        """
+        """,
   )
   fun findAllByImport(importId: Long): List<ImportKey>
 

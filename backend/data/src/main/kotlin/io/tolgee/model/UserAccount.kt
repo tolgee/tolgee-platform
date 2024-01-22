@@ -1,44 +1,38 @@
 package io.tolgee.model
 
-import com.vladmihalcea.hibernate.type.array.ListArrayType
+import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.model.notifications.NotificationPreferences
 import io.tolgee.model.notifications.UserNotification
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.OrderBy
+import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.Where
 import java.util.*
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.OrderBy
-import javax.validation.constraints.NotBlank
 
 @Entity
-@TypeDef(name = "string-array", typeClass = ListArrayType::class)
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
-
   @field:NotBlank
   var username: String = "",
-
   var password: String? = null,
-
   var name: String = "",
-
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
-
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   var accountType: AccountType? = AccountType.LOCAL,
@@ -46,7 +40,7 @@ data class UserAccount(
   @Column(name = "totp_key", columnDefinition = "bytea")
   var totpKey: ByteArray? = null
 
-  @Type(type = "string-array")
+  @Type(ListArrayType::class)
   @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
   var mfaRecoveryCodes: List<String> = emptyList()
 
@@ -121,10 +115,13 @@ data class UserAccount(
     get() = this.accountType != AccountType.THIRD_PARTY || isMfaEnabled
 
   enum class Role {
-    USER, ADMIN
+    USER,
+    ADMIN,
   }
 
   enum class AccountType {
-    LOCAL, MANAGED, THIRD_PARTY
+    LOCAL,
+    MANAGED,
+    THIRD_PARTY,
   }
 }

@@ -25,11 +25,10 @@ import org.springframework.web.client.RestTemplate
 @SpringBootTest(
   properties = [
     "tolgee.telemetry.report-period-ms=200",
-    "tolgee.telemetry.enabled=false"
-  ]
+    "tolgee.telemetry.enabled=false",
+  ],
 )
 class TelemetryServiceTest : AbstractSpringTest() {
-
   @MockBean
   @Autowired
   lateinit var restTemplate: RestTemplate
@@ -62,17 +61,18 @@ class TelemetryServiceTest : AbstractSpringTest() {
   @Test
   fun `reports when enabled`() {
     telemetryProperties.enabled = true
-    val testData = BaseTestData().apply {
-      this.root.addProject { name = "bbbb" }.build {
-        val en = addEnglish()
-        addKey("a") {
-          addTranslation {
-            language = en.self
-            text = "Hello"
+    val testData =
+      BaseTestData().apply {
+        this.root.addProject { name = "bbbb" }.build {
+          val en = addEnglish()
+          addKey("a") {
+            addTranslation {
+              language = en.self
+              text = "Hello"
+            }
           }
         }
       }
-    }
     testDataService.saveTestData(testData.root)
     mockHttpRequest(restTemplate) {
       whenReq {

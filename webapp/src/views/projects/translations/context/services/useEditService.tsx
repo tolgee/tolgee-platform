@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { container } from 'tsyringe';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,9 +11,9 @@ import {
 import { useTranslationsService } from './useTranslationsService';
 import { useRefsService } from './useRefsService';
 import { confirmation } from 'tg.hooks/confirmation';
-import { MessageService } from 'tg.service/MessageService';
 import { AfterCommand, ChangeValue, Direction, Edit, SetEdit } from '../types';
 import { useProject } from 'tg.hooks/useProject';
+import { messageService } from 'tg.service/MessageService';
 
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
@@ -23,8 +22,6 @@ type Props = {
   translations: ReturnType<typeof useTranslationsService>;
   viewRefs: ReturnType<typeof useRefsService>;
 };
-
-const messaging = container.resolve(MessageService);
 
 export const useEditService = ({ translations, viewRefs }: Props) => {
   const [position, setPosition] = useState<Edit | undefined>(undefined);
@@ -191,7 +188,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     const { keyId, language, value } = position;
     if (!language && !value) {
       // key can't be empty
-      return messaging.error(<T keyName="global_empty_value" />);
+      return messageService.error(<T keyName="global_empty_value" />);
     }
     if (language) {
       // update translation

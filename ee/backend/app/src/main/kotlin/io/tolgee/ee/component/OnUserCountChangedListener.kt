@@ -8,9 +8,8 @@ import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class OnUserCountChangedListener(
-  private val eeSubscriptionService: EeSubscriptionService
+  private val eeSubscriptionService: EeSubscriptionService,
 ) {
-
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   fun onUserCountChanged(event: OnUserCountChanged) {
     eeSubscriptionService.reportUsage()

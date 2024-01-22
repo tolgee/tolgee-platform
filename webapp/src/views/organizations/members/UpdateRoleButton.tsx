@@ -1,17 +1,15 @@
 import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
-import { container } from 'tsyringe';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useUser } from 'tg.globalContext/helpers';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { RoleMenu } from 'tg.component/security/RoleMenu';
-import { useOrganization } from '../useOrganization';
+import { messageService } from 'tg.service/MessageService';
 
-const messagingService = container.resolve(MessageService);
+import { useOrganization } from '../useOrganization';
 
 export const UpdateRoleButton: FunctionComponent<{
   user: components['schemas']['UserAccountWithOrganizationRoleModel'];
@@ -36,7 +34,7 @@ export const UpdateRoleButton: FunctionComponent<{
           },
           {
             onSuccess: () => {
-              messagingService.success(
+              messageService.success(
                 <T keyName="organization_role_changed_message" />
               );
               queryClient.invalidateQueries([]);

@@ -47,7 +47,7 @@ type Props<T> = {
   searchPlaceholder?: string;
   title?: string;
   addNewTooltip?: string;
-  minWidth?: number | string;
+  minWidth?: number;
   compareFunction?: (prompt: string, label: string) => boolean;
 };
 

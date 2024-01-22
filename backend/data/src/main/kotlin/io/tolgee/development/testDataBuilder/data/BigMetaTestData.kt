@@ -15,24 +15,27 @@ class BigMetaTestData {
   lateinit var noNsKey: Key
   lateinit var yepKey: Key
 
-  val root = TestDataBuilder().apply {
-    addUserAccount {
-      username = "hehe@hehe"
-      userAccount = this
+  val root =
+    TestDataBuilder().apply {
+      addUserAccount {
+        username = "hehe@hehe"
+        userAccount = this
+      }
+      projectBuilder =
+        addProject {
+          name = "Project"
+          this@BigMetaTestData.project = this
+        }.build {
+          noNsKey = addKey(null, "key").self
+          yepKey = addKey("yep", "key").self
+        }
     }
-    projectBuilder = addProject {
-      name = "Project"
-      this@BigMetaTestData.project = this
-    }.build {
-      noNsKey = addKey(null, "key").self
-      yepKey = addKey("yep", "key").self
-    }
-  }
 
   fun addLotOfData(): List<Key> {
-    val keys = (0..1000).map {
-      projectBuilder.addKey(null, "key$it").self
-    }
+    val keys =
+      (0..5000).map {
+        projectBuilder.addKey(null, "key$it").self
+      }
 
     keys.forEachIndexed forEach1@{ idx1, key1 ->
       keys.forEachIndexed forEach2@{ idx2, key2 ->

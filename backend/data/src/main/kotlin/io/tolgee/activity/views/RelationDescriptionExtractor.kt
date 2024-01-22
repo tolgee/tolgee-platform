@@ -9,19 +9,20 @@ import org.springframework.stereotype.Component
 class RelationDescriptionExtractor {
   fun extract(
     value: EntityDescriptionRef,
-    describingEntities: List<ActivityDescribingEntity>
+    describingEntities: List<ActivityDescribingEntity>,
   ): EntityDescriptionWithRelations {
     val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
 
-    val relations = entity?.describingRelations
-      ?.map { it.key to extract(it.value, describingEntities) }
-      ?.toMap()
+    val relations =
+      entity?.describingRelations
+        ?.map { it.key to extract(it.value, describingEntities) }
+        ?.toMap()
 
     return EntityDescriptionWithRelations(
       entityClass = value.entityClass,
       entityId = value.entityId,
       data = entity?.data ?: mapOf(),
-      relations = relations ?: mapOf()
+      relations = relations ?: mapOf(),
     )
   }
 }

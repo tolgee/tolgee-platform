@@ -207,6 +207,7 @@ describe('Screenshots', { retries: 5 }, () => {
 
 const getCameraButton = (nth: number) => {
   // focus row checkbox, to make sure, row buttons are in place
+  cy.waitForDom();
   cy.xpath(`(//*[@data-cy='translations-row'])[${nth}]//input`).focus();
   return cy.xpath(
     `(//*[@data-cy='translations-row'])[${nth}]//*[@data-cy='translations-cell-screenshots-button']`

@@ -3,6 +3,7 @@ package io.tolgee.fixtures
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.nio.charset.StandardCharsets
+import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -11,7 +12,7 @@ fun verifyWebhookSignatureHeader(
   sigHeader: String,
   secret: String,
   tolerance: Long,
-  currentTimeInMs: Long
+  currentTimeInMs: Long,
 ): Boolean {
   val headerMap = jacksonObjectMapper().readValue<Map<String, Any>>(sigHeader)
 
@@ -21,22 +22,23 @@ fun verifyWebhookSignatureHeader(
 
   if (timestamp == null || timestamp <= 0 || signature == null) {
     throw SignatureVerificationException(
-      "Unable to extract timestamp and signature from header"
+      "Unable to extract timestamp and signature from header",
     )
   }
 
   val signedPayload = "$timestamp.$payload"
-  val expectedSignature: String = try {
-    computeHmacSha256(secret, signedPayload)
-  } catch (e: Exception) {
-    throw SignatureVerificationException(
-      "Unable to compute signature for payload"
-    )
-  }
+  val expectedSignature: String =
+    try {
+      computeHmacSha256(secret, signedPayload)
+    } catch (e: Exception) {
+      throw SignatureVerificationException(
+        "Unable to compute signature for payload",
+      )
+    }
 
   if (signature != expectedSignature) {
     throw SignatureVerificationException(
-      "Wrong signature"
+      "Wrong signature",
     )
   }
 
@@ -49,10 +51,12 @@ fun verifyWebhookSignatureHeader(
 
 class SignatureVerificationException(message: String) : Exception(message)
 
-@OptIn(ExperimentalStdlibApi::class)
-fun computeHmacSha256(key: String, message: String): String {
+fun computeHmacSha256(
+  key: String,
+  message: String,
+): String {
   val hasher = Mac.getInstance("HmacSHA256")
   hasher.init(SecretKeySpec(key.toByteArray(StandardCharsets.UTF_8), "HmacSHA256"))
   val hash = hasher.doFinal(message.toByteArray(StandardCharsets.UTF_8))
-  return hash.toHexString(HexFormat.Default)
+  return HexFormat.of().formatHex(hash)
 }

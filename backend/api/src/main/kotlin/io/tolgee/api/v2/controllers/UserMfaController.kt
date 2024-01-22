@@ -9,12 +9,12 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.MfaService
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @RestController
 @RequestMapping("/v2/user/mfa")
@@ -26,25 +26,34 @@ class UserMfaController(
 ) {
   @PutMapping("/totp")
   @Operation(summary = "Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
-  fun enableMfa(@RequestBody @Valid dto: UserTotpEnableRequestDto): JwtAuthenticationResponse {
+  fun enableMfa(
+    @RequestBody @Valid
+    dto: UserTotpEnableRequestDto,
+  ): JwtAuthenticationResponse {
     mfaService.enableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
     )
   }
 
   @DeleteMapping("/totp")
   @Operation(summary = "Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
-  fun disableMfa(@RequestBody @Valid dto: UserTotpDisableRequestDto): JwtAuthenticationResponse {
+  fun disableMfa(
+    @RequestBody @Valid
+    dto: UserTotpDisableRequestDto,
+  ): JwtAuthenticationResponse {
     mfaService.disableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
     )
   }
 
   @PutMapping("/recovery")
   @Operation(summary = "Regenerates multi-factor authentication recovery codes")
-  fun regenerateRecoveryCodes(@RequestBody @Valid dto: UserMfaRecoveryRequestDto): List<String> {
+  fun regenerateRecoveryCodes(
+    @RequestBody @Valid
+    dto: UserMfaRecoveryRequestDto,
+  ): List<String> {
     return mfaService.regenerateRecoveryCodes(authenticationFacade.authenticatedUserEntity, dto)
   }
 }

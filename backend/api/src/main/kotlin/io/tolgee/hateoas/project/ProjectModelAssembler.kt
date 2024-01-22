@@ -8,6 +8,7 @@ import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
 import io.tolgee.model.UserAccount
+import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -28,13 +29,15 @@ class ProjectModelAssembler(
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
 ) : RepresentationModelAssemblerSupport<ProjectWithLanguagesView, ProjectModel>(
-  V2ProjectsController::class.java, ProjectModel::class.java
-) {
+    V2ProjectsController::class.java,
+    ProjectModel::class.java,
+  ) {
   override fun toModel(view: ProjectWithLanguagesView): ProjectModel {
     val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
-    val baseLanguage = view.baseLanguage ?: let {
-      projectService.getOrCreateBaseLanguage(view.id)
-    }
+    val baseLanguage =
+      view.baseLanguage ?: let {
+        projectService.getOrCreateBaseLanguage(view.id)
+      }
 
     val computedPermissions = getComputedPermissions(view)
 
@@ -46,7 +49,7 @@ class ProjectModelAssembler(
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationRole = view.organizationRole,
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
-      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
+      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageViewImpl(baseLanguage, true)) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
     ).add(link).also { model ->
@@ -59,7 +62,7 @@ class ProjectModelAssembler(
       view.organizationRole,
       view.organizationOwner.basePermission,
       view.directPermission,
-      UserAccount.Role.USER
+      UserAccount.Role.USER,
     ).getAdminPermissions(authenticationFacade.authenticatedUserOrNull?.role)
   }
 }

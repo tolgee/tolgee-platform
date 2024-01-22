@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component
 @Component
 class KeySearchResultModelAssembler :
   RepresentationModelAssemblerSupport<KeySearchResultView, KeySearchSearchResultModel>(
-    KeyController::class.java, KeySearchSearchResultModel::class.java
+    KeyController::class.java,
+    KeySearchSearchResultModel::class.java,
   ) {
   override fun toModel(view: KeySearchResultView): KeySearchSearchResultModel {
     return KeySearchSearchResultModel(view)

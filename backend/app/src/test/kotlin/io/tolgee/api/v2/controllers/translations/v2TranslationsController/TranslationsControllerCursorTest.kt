@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TranslationsTestData
 
   @BeforeEach
@@ -146,7 +145,10 @@ class TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects
     assertWithCursorReturnsAll("sort=keyNamespace,DESC&sort=keyName", 5)
   }
 
-  private fun assertWithCursorReturnsAll(sortQuery: String, expectedSize: Int) {
+  private fun assertWithCursorReturnsAll(
+    sortQuery: String,
+    expectedSize: Int,
+  ) {
     var pageCount = 0
     var cursor: String? = null
     do {

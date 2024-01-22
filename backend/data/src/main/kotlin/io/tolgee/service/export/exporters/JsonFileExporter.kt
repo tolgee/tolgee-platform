@@ -9,9 +9,8 @@ import java.io.InputStream
 
 class JsonFileExporter(
   override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams
+  override val exportParams: IExportParams,
 ) : FileExporter {
-
   override val fileExtension: String = ExportFormat.JSON.extension
 
   val result: LinkedHashMap<String, LinkedHashMap<String, Any?>> = LinkedHashMap()
@@ -31,9 +30,7 @@ class JsonFileExporter(
     }
   }
 
-  private fun getFileContentResultMap(
-    translation: ExportTranslationView
-  ): LinkedHashMap<String, Any?> {
+  private fun getFileContentResultMap(translation: ExportTranslationView): LinkedHashMap<String, Any?> {
     val absolutePath = translation.getFilePath(translation.key.namespace)
     return result[absolutePath] ?: let {
       LinkedHashMap<String, Any?>().also { result[absolutePath] = it }
@@ -43,14 +40,15 @@ class JsonFileExporter(
   private fun addToMap(
     content: LinkedHashMap<String, Any?>,
     pathItems: List<String>,
-    translation: ExportTranslationView
+    translation: ExportTranslationView,
   ) {
     val pathItemsMutable = pathItems.toMutableList()
     val pathItem = pathItemsMutable.removeFirst()
     if (pathItemsMutable.size > 0) {
-      val map = content[pathItem] ?: LinkedHashMap<String, Any?>().also {
-        content[pathItem] = it
-      }
+      val map =
+        content[pathItem] ?: LinkedHashMap<String, Any?>().also {
+          content[pathItem] = it
+        }
 
       if (map !is Map<*, *>) {
         handleExistingStringScopeCollision(pathItems, content, translation)
@@ -68,7 +66,7 @@ class JsonFileExporter(
   private fun handleExistingStringScopeCollision(
     pathItems: List<String>,
     content: LinkedHashMap<String, Any?>,
-    translation: ExportTranslationView
+    translation: ExportTranslationView,
   ) {
     val delimiter = exportParams.structureDelimiter.toString()
     val last2joined = pathItems.takeLast(2).joinToString(delimiter)

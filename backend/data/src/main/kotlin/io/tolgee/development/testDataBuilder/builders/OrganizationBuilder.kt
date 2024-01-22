@@ -10,7 +10,7 @@ import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import org.springframework.core.io.ClassPathResource
 
 class OrganizationBuilder(
-  val testDataBuilder: TestDataBuilder
+  val testDataBuilder: TestDataBuilder,
 ) : BaseEntityDataBuilder<Organization, OrganizationBuilder>() {
   class DATA {
     var roles: MutableList<OrganizationRoleBuilder> = mutableListOf()
@@ -31,12 +31,14 @@ class OrganizationBuilder(
     return builder
   }
 
-  override var self: Organization = Organization().also {
-    it.basePermission = Permission(
-      organization = it,
-      type = VIEW
-    )
-  }
+  override var self: Organization =
+    Organization().also {
+      it.basePermission =
+        Permission(
+          organization = it,
+          type = VIEW,
+        )
+    }
 
   fun setAvatar(filePath: String) {
     data.avatarFile = ClassPathResource(filePath, this.javaClass.classLoader)

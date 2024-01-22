@@ -1,24 +1,27 @@
 package io.tolgee.model
 
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.SequenceGenerator
 import org.springframework.data.util.ProxyUtils
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.MappedSuperclass
-import javax.persistence.SequenceGenerator
+
+const val SEQUENCE_NAME = "hibernate_sequence"
+const val ALLOCATION_SIZE = 1000
 
 @MappedSuperclass
 abstract class StandardAuditModel : AuditModel(), EntityWithId {
   @Id
   @SequenceGenerator(
     name = "sequenceGenerator",
-    sequenceName = "hibernate_sequence",
+    sequenceName = SEQUENCE_NAME,
     initialValue = 1000000000,
-    allocationSize = 1000
+    allocationSize = ALLOCATION_SIZE,
   )
   @GeneratedValue(
     strategy = GenerationType.SEQUENCE,
-    generator = "sequenceGenerator"
+    generator = "sequenceGenerator",
   )
   override var id: Long = 0
 

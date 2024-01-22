@@ -19,8 +19,8 @@ import org.springframework.test.context.ContextConfiguration
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
     "tolgee.internal.fake-mt-providers=false",
-    "tolgee.machine-translation.free-credits-amount=10000000"
-  ]
+    "tolgee.machine-translation.free-credits-amount=10000000",
+  ],
 )
 @ContextConfiguration(initializers = [CacheWithRedisTest.Companion.Initializer::class])
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)

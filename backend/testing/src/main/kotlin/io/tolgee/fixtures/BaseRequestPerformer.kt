@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 @Scope("prototype")
 @Primary
 class BaseRequestPerformer : RequestPerformer {
-
   @field:Autowired
   lateinit var mvc: MockMvc
 
@@ -31,20 +30,31 @@ class BaseRequestPerformer : RequestPerformer {
   override fun performPut(
     url: String,
     content: Any?,
-    httpHeaders: HttpHeaders
+    httpHeaders: HttpHeaders,
   ): ResultActions {
     return perform(MockMvcRequestBuilders.put(url).withJsonContent(content).headers(httpHeaders))
   }
 
-  override fun performPost(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
+  override fun performPost(
+    url: String,
+    content: Any?,
+    httpHeaders: HttpHeaders,
+  ): ResultActions {
     return perform(MockMvcRequestBuilders.post(url).withJsonContent(content).headers(httpHeaders))
   }
 
-  override fun performGet(url: String, httpHeaders: HttpHeaders): ResultActions {
+  override fun performGet(
+    url: String,
+    httpHeaders: HttpHeaders,
+  ): ResultActions {
     return perform(MockMvcRequestBuilders.get(url).headers(httpHeaders))
   }
 
-  override fun performDelete(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
+  override fun performDelete(
+    url: String,
+    content: Any?,
+    httpHeaders: HttpHeaders,
+  ): ResultActions {
     return perform(MockMvcRequestBuilders.delete(url).withJsonContent(content).headers(httpHeaders))
   }
 

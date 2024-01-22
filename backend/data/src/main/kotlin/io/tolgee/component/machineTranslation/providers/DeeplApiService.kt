@@ -19,8 +19,12 @@ class DeeplApiService(
   private val deeplMachineTranslationProperties: DeeplMachineTranslationProperties,
   private val restTemplate: RestTemplate,
 ) {
-
-  fun translate(text: String, sourceTag: String, targetTag: String, formality: Formality): String? {
+  fun translate(
+    text: String,
+    sourceTag: String,
+    targetTag: String,
+    formality: Formality,
+  ): String? {
     val headers = HttpHeaders()
     headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
 
@@ -33,21 +37,26 @@ class DeeplApiService(
 
     addFormality(requestBody, formality)
 
-    val response = restTemplate.postForEntity<DeeplResponse>(
-      apiEndpointFromKey(),
-      requestBody
-    )
+    val response =
+      restTemplate.postForEntity<DeeplResponse>(
+        apiEndpointFromKey(),
+        requestBody,
+      )
 
     return response.body?.translations?.first()?.text
       ?: throw RuntimeException(response.toString())
   }
 
-  private fun addFormality(requestBody: MultiValueMap<String, String>, formality: Formality) {
-    val deeplFormality = when (formality) {
-      Formality.FORMAL -> "prefer_more"
-      Formality.INFORMAL -> "prefer_less"
-      else -> "default"
-    }
+  private fun addFormality(
+    requestBody: MultiValueMap<String, String>,
+    formality: Formality,
+  ) {
+    val deeplFormality =
+      when (formality) {
+        Formality.FORMAL -> "prefer_more"
+        Formality.INFORMAL -> "prefer_less"
+        else -> "default"
+      }
 
     return requestBody.add("formality", deeplFormality)
   }

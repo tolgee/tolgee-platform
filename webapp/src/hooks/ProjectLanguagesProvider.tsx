@@ -1,22 +1,18 @@
 import { createContext, FunctionComponent, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { container } from 'tsyringe';
 
 import { GlobalError } from '../error/GlobalError';
-import { ProjectPreferencesService } from '../service/ProjectPreferencesService';
 import { components } from '../service/apiSchema.generated';
 import { useApiQuery } from '../service/http/useQueryApi';
 import { AppState } from '../store';
-import { TranslationActions } from '../store/project/TranslationActions';
 import { useProject } from './useProject';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { translationActions } from 'tg.store/project/TranslationActions';
+import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 
 export const ProjectLanguagesContext =
   // @ts-ignore
   createContext<components['schemas']['PagedModelLanguageModel']>(null);
-
-const translationActions = container.resolve(TranslationActions);
-const selectedLanguagesService = container.resolve(ProjectPreferencesService);
 
 export const ProjectLanguagesProvider: FunctionComponent = (props) => {
   const projectDTO = useProject();
@@ -47,14 +43,14 @@ export const ProjectLanguagesProvider: FunctionComponent = (props) => {
     translationActions.select.dispatch(null);
     if (languagesLoadable.data) {
       if (languagesLoadable.data._embedded?.languages?.length) {
-        const selection = selectedLanguagesService.getFiltered(
+        const selection = projectPreferencesService.getFiltered(
           projectDTO.id,
           languagesLoadable.data._embedded.languages.map((l) => l.tag) || []
         );
         translationActions.select.dispatch(selection);
       } else {
         translationActions.select.dispatch(
-          selectedLanguagesService.getForProject(projectDTO.id)
+          projectPreferencesService.getForProject(projectDTO.id)
         );
       }
     }

@@ -17,5 +17,5 @@ open class ProjectInvitationModel(
   val createdAt: Date,
   val invitedUserName: String?,
   val invitedUserEmail: String?,
-  val permission: PermissionModel
+  val permission: PermissionModel,
 ) : RepresentationModel<ProjectInvitationModel>()

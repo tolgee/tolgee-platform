@@ -3,8 +3,7 @@ import React, { createRef, FC, useRef, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { T } from '@tolgee/react';
 import { ReactCropperElement } from 'react-cropper';
-import { container } from 'tsyringe';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { AvatarImg } from './AvatarImg';
 import { AvatarEditMenu } from './AvatarEditMenu';
 import { AvatarEditDialog } from './AvatarEditDialog';
@@ -40,7 +39,7 @@ const EditButtonWrapper = styled(Box)`
 const StyledBox = styled(Box)`
   position: relative;
 
-  &:hover ${StyledEditButton} {
+  &:hover .button {
     opacity: 1;
   }
 `;
@@ -54,7 +53,6 @@ const file2Base64 = (file: File): Promise<string> => {
   });
 };
 
-const messageService = container.resolve(MessageService);
 const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export const ProfileAvatar: FC<{
@@ -136,6 +134,7 @@ export const ProfileAvatar: FC<{
               data-cy="avatar-menu-open-button"
               size="small"
               ref={editAvatarRef as any}
+              className="button"
             >
               <EditIcon />
             </StyledEditButton>

@@ -11,7 +11,6 @@ import java.io.File
 class LocalFileStorage(
   tolgeeProperties: TolgeeProperties,
 ) : FileStorage {
-
   private val localDataPath = tolgeeProperties.fileStorage.fsDataPath
 
   override fun readFile(storageFilePath: String): ByteArray {
@@ -30,7 +29,10 @@ class LocalFileStorage(
     }
   }
 
-  override fun storeFile(storageFilePath: String, bytes: ByteArray) {
+  override fun storeFile(
+    storageFilePath: String,
+    bytes: ByteArray,
+  ) {
     val file = getLocalFile(storageFilePath)
     try {
       file.parentFile.mkdirs()

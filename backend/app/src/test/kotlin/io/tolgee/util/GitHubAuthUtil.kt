@@ -1,7 +1,7 @@
 package io.tolgee.util
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.security.third_party.GithubOAuthDelegate
+import io.tolgee.security.thirdParty.GithubOAuthDelegate
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate
 class GitHubAuthUtil(
   private val tolgeeProperties: TolgeeProperties,
   private var authMvc: MockMvc? = null,
-  private val restTemplate: RestTemplate? = null
+  private val restTemplate: RestTemplate? = null,
 ) {
   private val defaultEmailResponse: GithubOAuthDelegate.GithubEmailResponse
     get() {
@@ -46,14 +46,16 @@ class GitHubAuthUtil(
 
   fun authorizeGithubUser(
     tokenResponse: Map<String, String?>? = this.defaultTokenResponse,
-    userResponse: ResponseEntity<GithubOAuthDelegate.GithubUserResponse> = ResponseEntity(
-      this.defaultUserResponse,
-      HttpStatus.OK
-    ),
-    emailResponse: ResponseEntity<Array<GithubOAuthDelegate.GithubEmailResponse>> = ResponseEntity(
-      arrayOf(this.defaultEmailResponse),
-      HttpStatus.OK
-    )
+    userResponse: ResponseEntity<GithubOAuthDelegate.GithubUserResponse> =
+      ResponseEntity(
+        this.defaultUserResponse,
+        HttpStatus.OK,
+      ),
+    emailResponse: ResponseEntity<Array<GithubOAuthDelegate.GithubEmailResponse>> =
+      ResponseEntity(
+        arrayOf(this.defaultEmailResponse),
+        HttpStatus.OK,
+      ),
   ): MvcResult {
     val receivedCode = "ThiS_Is_Fake_valid_COde"
     val githubConf = tolgeeProperties.authentication.github
@@ -66,8 +68,8 @@ class GitHubAuthUtil(
         eq(githubConf.userUrl),
         eq(HttpMethod.GET),
         any(),
-        eq(GithubOAuthDelegate.GithubUserResponse::class.java)
-      )
+        eq(GithubOAuthDelegate.GithubUserResponse::class.java),
+      ),
     ).thenReturn(userResponse)
 
     whenever(
@@ -75,15 +77,15 @@ class GitHubAuthUtil(
         eq(value = githubConf.userUrl + "/emails"),
         eq(HttpMethod.GET),
         any(),
-        eq(Array<GithubOAuthDelegate.GithubEmailResponse>::class.java)
-      )
+        eq(Array<GithubOAuthDelegate.GithubEmailResponse>::class.java),
+      ),
     )
       .thenReturn(emailResponse)
 
     return authMvc!!.perform(
       MockMvcRequestBuilders.get("/api/public/authorize_oauth/github?code=$receivedCode")
         .accept(MediaType.APPLICATION_JSON)
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON),
     )
       .andReturn()
   }

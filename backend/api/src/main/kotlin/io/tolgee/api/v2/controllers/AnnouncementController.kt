@@ -2,8 +2,10 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.dtos.response.AnnouncementDto
-import io.tolgee.model.enums.Announcement
+import io.tolgee.model.enums.announcement.Announcement
+import io.tolgee.model.enums.announcement.AnnouncementTarget
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AnnouncementService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -17,17 +19,18 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/announcement",
-  ]
+  ],
 )
 @Tag(name = "New features announcements")
 class AnnouncementController(
   private val announcementService: AnnouncementService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
+  private val publicBillingConfProvider: PublicBillingConfProvider,
 ) : IController {
   @GetMapping("")
   @Operation(description = "Get latest announcement")
   fun getLatest(): AnnouncementDto? {
-    val announcement = Announcement.last
+    val announcement = getLastAnnouncement()
     val user = authenticationFacade.authenticatedUser
     if (this.announcementService.isAnnouncementExpired(announcement)) {
       return null
@@ -41,8 +44,20 @@ class AnnouncementController(
   @PostMapping("dismiss")
   @Operation(description = "Dismiss current announcement for current user")
   fun dismiss() {
-    val announcement = Announcement.last
+    val announcement = getLastAnnouncement()
     val user = authenticationFacade.authenticatedUser
     announcementService.dismissAnnouncement(announcement, user.id)
   }
+
+  private fun getLastAnnouncement(): Announcement {
+    val targets = getAnnouncementTargets()
+    return Announcement.entries.last { it.target in targets }
+  }
+
+  private fun getAnnouncementTargets() =
+    if (publicBillingConfProvider().enabled) {
+      listOf(AnnouncementTarget.ALL, AnnouncementTarget.CLOUD)
+    } else {
+      listOf(AnnouncementTarget.ALL, AnnouncementTarget.SELF_HOSTED)
+    }
 }

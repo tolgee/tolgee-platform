@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
@@ -27,12 +28,17 @@ class BusinessEventController(
 ) : Logging {
   @PostMapping("/report")
   @Operation(summary = "Reports business event")
-  fun report(@RequestBody eventData: BusinessEventReportRequest) {
+  fun report(
+    @RequestBody eventData: BusinessEventReportRequest,
+  ) {
     try {
       eventData.projectId?.let { securityService.checkAnyProjectPermission(it) }
       eventData.organizationId?.let { organizationRoleService.checkUserCanView(it) }
       businessEventPublisher.publish(eventData)
     } catch (e: Throwable) {
+      if (e is AuthenticationException) {
+        return
+      }
       logger.error("Error storing event", e)
       Sentry.captureException(e)
     }
@@ -40,7 +46,9 @@ class BusinessEventController(
 
   @PostMapping("/identify")
   @Operation(summary = "Identifies user")
-  fun identify(@RequestBody eventData: IdentifyRequest) {
+  fun identify(
+    @RequestBody eventData: IdentifyRequest,
+  ) {
     try {
       businessEventPublisher.publish(eventData)
     } catch (e: Throwable) {

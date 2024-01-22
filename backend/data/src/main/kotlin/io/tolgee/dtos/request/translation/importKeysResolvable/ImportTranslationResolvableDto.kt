@@ -8,7 +8,6 @@ class ImportTranslationResolvableDto(
    */
   @Schema(description = "Translation text", example = "Hello! I am a translation!")
   val text: String = "",
-
   @Schema(
     description = """Determines, how conflict is resolved.
 
@@ -16,7 +15,7 @@ class ImportTranslationResolvableDto(
 - OVERRIDE: Translation is overridden
 - NEW: New translation is created)
 """,
-    example = "OVERRIDE"
+    example = "OVERRIDE",
   )
   val resolution: ImportTranslationResolution = ImportTranslationResolution.NEW,
 )

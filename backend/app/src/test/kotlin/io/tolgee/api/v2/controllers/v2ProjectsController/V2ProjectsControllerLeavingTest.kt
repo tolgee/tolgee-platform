@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class V2ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/") {
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `user can leave project`() {

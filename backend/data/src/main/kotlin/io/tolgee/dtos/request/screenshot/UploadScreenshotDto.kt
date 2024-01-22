@@ -1,10 +1,10 @@
 package io.tolgee.dtos.request.screenshot
 
+import jakarta.validation.constraints.NotBlank
 import org.springframework.validation.annotation.Validated
-import javax.validation.constraints.NotBlank
 
 @Validated
 data class UploadScreenshotDto(
   @field:NotBlank
-  var key: String? = null
+  var key: String? = null,
 )

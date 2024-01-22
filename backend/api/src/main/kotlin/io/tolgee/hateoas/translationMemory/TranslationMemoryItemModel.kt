@@ -8,5 +8,5 @@ open class TranslationMemoryItemModel(
   var targetText: String,
   var baseText: String,
   var keyName: String,
-  var similarity: Float
+  var similarity: Float,
 ) : RepresentationModel<TranslationMemoryItemModel>()

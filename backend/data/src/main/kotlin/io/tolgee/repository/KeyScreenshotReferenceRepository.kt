@@ -10,14 +10,13 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface KeyScreenshotReferenceRepository : JpaRepository<KeyScreenshotReference, KeyScreenshotReferenceId> {
-
   fun getAllByScreenshot(screenshot: Screenshot): List<KeyScreenshotReference>
 
   @Query(
     """
     FROM KeyScreenshotReference ksr
     WHERE ksr.screenshot.id IN :screenshotIds
-  """
+  """,
   )
   fun findAll(screenshotIds: Collection<Long>): List<KeyScreenshotReference>
 
@@ -25,16 +24,19 @@ interface KeyScreenshotReferenceRepository : JpaRepository<KeyScreenshotReferenc
     """
     from KeyScreenshotReference ksr
     where ksr.key = :key and ksr.screenshot.id in :screenshotIds
-  """
+  """,
   )
-  fun findAll(key: Key, screenshotIds: List<Long>): List<KeyScreenshotReference>
+  fun findAll(
+    key: Key,
+    screenshotIds: List<Long>,
+  ): List<KeyScreenshotReference>
 
   @Query(
     """
     from KeyScreenshotReference ksr
     left join fetch ksr.screenshot
     where ksr.key.id in :keyIds
-  """
+  """,
   )
   fun getAllByKeyIdIn(keyIds: Collection<Long>): List<KeyScreenshotReference>
 }

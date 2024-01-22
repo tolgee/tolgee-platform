@@ -10,9 +10,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
 
-@SpringBootTest
+@SpringBootTest(
+  properties = ["tolgee.internal.use-in-memory-file-storage=false"],
+)
 class FileStorageFsTest : AbstractFileStorageServiceTest() {
-
   lateinit var file: File
 
   @BeforeEach
@@ -20,6 +21,11 @@ class FileStorageFsTest : AbstractFileStorageServiceTest() {
     file = File(tolgeeProperties.fileStorage.fsDataPath + testFilePath)
     file.parentFile.mkdirs()
     file.writeText(testFileContent)
+  }
+
+  @Test
+  fun `is LocalFileStorage`() {
+    assertThat(fileStorage is LocalFileStorage).isTrue()
   }
 
   @Test

@@ -19,12 +19,12 @@ package io.tolgee.security.authentication
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.service.security.UserAccountService
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class AuthenticationDisabledFilter(
@@ -32,18 +32,24 @@ class AuthenticationDisabledFilter(
   private val userAccountService: UserAccountService,
 ) : OncePerRequestFilter() {
   private val initialUser by lazy {
-    val account = userAccountService.findInitialUser()
-      ?: throw IllegalStateException("Initial user does not exists")
+    val account =
+      userAccountService.findInitialUser()
+        ?: throw IllegalStateException("Initial user does not exists")
     UserAccountDto.fromEntity(account)
   }
 
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     // Set the initial user as current user, always.
-    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-      null,
-      initialUser,
-      TolgeeAuthenticationDetails(true)
-    )
+    SecurityContextHolder.getContext().authentication =
+      TolgeeAuthentication(
+        null,
+        initialUser,
+        TolgeeAuthenticationDetails(true),
+      )
 
     filterChain.doFilter(request, response)
   }

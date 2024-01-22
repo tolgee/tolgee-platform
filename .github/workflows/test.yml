@@ -30,6 +30,9 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
+      - name: Compile kotlin
+        run: ./gradlew compileTestKotlin --parallel
+
       - name: Build backend
         run: ./gradlew bootJar --parallel
 
@@ -136,6 +139,15 @@ jobs:
           path: |
             ./**/build/reports/**/*
 
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Backend Tests
+          path: "**/build/test-results/**/TEST-*.xml"
+          reporter: java-junit
+
+
   e2e:
     needs: [frontend-build, backend-build, e2e-install-deps]
     runs-on: ubuntu-latest
@@ -194,7 +206,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: webapp
-          path: ./webapp/build
+          path: ./webapp/dist
 
       - name: Download dependencies
         uses: actions/download-artifact@v3
@@ -287,7 +299,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: webapp
-          path: webapp/build
+          path: webapp/dist
 
   frontend-code-check:
     name: Frontend static check 🪲
@@ -423,4 +435,4 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Run ktlint
-        run: ./gradlew ktlint
+        run: ./gradlew ktlintCheck

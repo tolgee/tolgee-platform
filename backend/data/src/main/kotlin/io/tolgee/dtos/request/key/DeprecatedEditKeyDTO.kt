@@ -3,14 +3,14 @@ package io.tolgee.dtos.request.key
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.dtos.PathDTO
-import javax.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotBlank
 
 @Deprecated(message = "Ugly naming", ReplaceWith("io/tolgee/dtos/request/EditKeyDTO.kt"))
 data class DeprecatedEditKeyDTO(
   @field:NotBlank
   var oldFullPathString: String = "",
   @field:NotBlank
-  var newFullPathString: String = ""
+  var newFullPathString: String = "",
 ) {
   @get:Hidden
   @get:JsonIgnore

@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 
 class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("/v2/projects/") {
-
   @Suppress("LateinitVarOverridesLateinitVar")
   @SpyBean
   @Autowired
@@ -32,15 +31,16 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   fun setup() {
     initMachineTranslationProperties(
       freeCreditsAmount = -1,
-      enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.TOLGEE, MtServiceType.DEEPL)
+      enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.TOLGEE, MtServiceType.DEEPL),
     )
     Mockito.clearInvocations(mtService)
     internalProperties.fakeMtProviders = true
 
-    testData = BaseTestData().apply {
-      czechLanguage = projectBuilder.addCzech().self
-      hindiLanguage = projectBuilder.addHindi().self
-    }
+    testData =
+      BaseTestData().apply {
+        czechLanguage = projectBuilder.addCzech().self
+        hindiLanguage = projectBuilder.addHindi().self
+      }
 
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -50,15 +50,16 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   @Test
   @ProjectJWTAuthTestMethod
   fun `it works`() {
-    val response = performProjectAuthPost(
-      "suggest/machine-translations-streaming",
-      mapOf(
-        "targetLanguageId" to czechLanguage.id,
-        "baseText" to "text"
-      )
-    ).andDo {
-      it.asyncResult
-    }.andReturn().response.contentAsString
+    val response =
+      performProjectAuthPost(
+        "suggest/machine-translations-streaming",
+        mapOf(
+          "targetLanguageId" to czechLanguage.id,
+          "baseText" to "text",
+        ),
+      ).andDo {
+        it.asyncResult
+      }.andReturn().response.contentAsString
 
     response.split("\n").filter { it.isNotBlank() }.map {
       jacksonObjectMapper().readValue(it, Any::class.java)
@@ -68,34 +69,36 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   @Test
   @ProjectJWTAuthTestMethod
   fun `it returns json error on 400`() {
-    val response = performProjectAuthPost(
-      "suggest/machine-translations-streaming",
-      mapOf(
-        "targetLanguageId" to czechLanguage.id,
-        "keyId" to -1
+    val response =
+      performProjectAuthPost(
+        "suggest/machine-translations-streaming",
+        mapOf(
+          "targetLanguageId" to czechLanguage.id,
+          "keyId" to -1,
+        ),
+      ).andPrettyPrint.andAssertThatJson.isEqualTo(
+        """
+        {
+          "code" : "key_not_found",
+          "params" : null
+        }
+        """.trimIndent(),
       )
-    ).andPrettyPrint.andAssertThatJson.isEqualTo(
-      """
-      {
-        "code" : "key_not_found",
-        "params" : null
-      }
-      """.trimIndent()
-    )
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `it does not return unsupporting services`() {
-    val response = performProjectAuthPost(
-      "suggest/machine-translations-streaming",
-      mapOf(
-        "targetLanguageId" to hindiLanguage.id,
-        "baseText" to "text"
-      )
-    ).andDo {
-      it.asyncResult
-    }.andReturn().response.contentAsString
+    val response =
+      performProjectAuthPost(
+        "suggest/machine-translations-streaming",
+        mapOf(
+          "targetLanguageId" to hindiLanguage.id,
+          "baseText" to "text",
+        ),
+      ).andDo {
+        it.asyncResult
+      }.andReturn().response.contentAsString
 
     response.split("\n").filter { it.isNotBlank() }.map {
       jacksonObjectMapper().readValue(it, Any::class.java)

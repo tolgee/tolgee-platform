@@ -3,10 +3,8 @@ import { Alert } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
-import { container } from 'tsyringe';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -15,10 +13,9 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 type LoginRequestDto = components['schemas']['LoginRequest'];
-
-const globalActions = container.resolve(GlobalActions);
 
 type Credentials = { username: string; password: string };
 type LoginViewTotpProps = {

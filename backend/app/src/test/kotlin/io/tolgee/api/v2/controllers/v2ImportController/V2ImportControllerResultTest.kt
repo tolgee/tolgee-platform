@@ -72,7 +72,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
-        "/import/result/languages/${testData.importEnglish.id}"
+        "/import/result/languages/${testData.importEnglish.id}",
     )
       .andPrettyPrint.andAssertThatJson {
         node("name").isEqualTo("en")
@@ -103,7 +103,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
-        "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true"
+        "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true",
     ).andIsOk
       .andPrettyPrint.andAssertThatJson {
         node("_embedded.translations") {
@@ -131,7 +131,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}" +
-        "/translations?search=extraordinary"
+        "/translations?search=extraordinary",
     ).andIsOk
       .andPrettyPrint.andAssertThatJson {
         node("_embedded.translations") {
@@ -145,7 +145,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}" +
-        "/translations?search=Imported"
+        "/translations?search=Imported",
     ).andIsOk
       .andPrettyPrint.andAssertThatJson {
         node("_embedded.translations") {
@@ -166,7 +166,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
-        "/import/result/languages/${testData.importEnglish.id}/translations?size=2"
+        "/import/result/languages/${testData.importEnglish.id}/translations?size=2",
     ).andIsOk
       .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(2) }
   }
@@ -180,13 +180,13 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
-        "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=false"
+        "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=false",
     ).andIsOk
       .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(5) }
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
-        "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true"
+        "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true",
     ).andIsOk
       .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
   }
@@ -194,34 +194,22 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `onlyUnresolved filter on translations works`() {
     val testData = ImportTestData()
-    val resolvedText = "Hello, I am resolved"
-
-    testData {
-      data.importFiles[0].addImportTranslation {
-
-        conflict = testData.conflict
-        this.resolve()
-        key = data.importFiles[0].data.importKeys[0].self
-        text = resolvedText
-        language = testData.importEnglish
-      }.self
-    }
-
+    testData.translationWithConflict.resolve()
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/" +
-        "translations?onlyConflicts=true"
+        "translations?onlyConflicts=true",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(4) }
+      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
-        "/import/result/languages/${testData.importEnglish.id}/translations?onlyUnresolved=true"
+        "/import/result/languages/${testData.importEnglish.id}/translations?onlyUnresolved=true",
     ).andIsOk
-      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
+      .andPrettyPrint.andAssertThatJson { node("_embedded.translations").isArray.hasSize(2) }
   }
 
   @Test
@@ -275,11 +263,11 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
       node("page.size").isEqualTo(20)
       node("_embedded.importFileIssues[0].params").isEqualTo(
         """
-               [{
-                 "value" : "1",
-                 "type" : "KEY_INDEX"
-              }]
-        """.trimIndent()
+         [{
+           "value" : "1",
+           "type" : "KEY_INDEX"
+        }]
+        """.trimIndent(),
       )
     }
   }

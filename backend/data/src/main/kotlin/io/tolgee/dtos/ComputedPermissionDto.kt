@@ -9,23 +9,25 @@ import io.tolgee.model.enums.Scope
 
 class ComputedPermissionDto(
   permission: IPermission,
-  val origin: ComputedPermissionOrigin = ComputedPermissionOrigin.NONE
+  val origin: ComputedPermissionOrigin = ComputedPermissionOrigin.NONE,
 ) : IPermission by permission {
-
   val expandedScopes: Array<Scope> by lazy {
     Scope.expand(this.scopes)
   }
 
   fun checkViewPermitted(vararg languageIds: Long) = checkLanguagePermitted(languageIds.toList(), viewLanguageIds)
-  fun checkTranslatePermitted(vararg languageIds: Long) = checkLanguagePermitted(
-    languageIds.toList(),
-    translateLanguageIds
-  )
 
-  fun checkStateChangePermitted(vararg languageIds: Long) = checkLanguagePermitted(
-    languageIds.toList(),
-    stateChangeLanguageIds
-  )
+  fun checkTranslatePermitted(vararg languageIds: Long) =
+    checkLanguagePermitted(
+      languageIds.toList(),
+      translateLanguageIds,
+    )
+
+  fun checkStateChangePermitted(vararg languageIds: Long) =
+    checkLanguagePermitted(
+      languageIds.toList(),
+      stateChangeLanguageIds,
+    )
 
   private fun isAllLanguagesPermitted(languageIds: Collection<Long>?): Boolean {
     if (scopes.isEmpty()) {
@@ -43,7 +45,10 @@ class ComputedPermissionDto(
     return false
   }
 
-  private fun checkLanguagePermitted(languageIds: Collection<Long>, permittedLanguageIds: Collection<Long>?) {
+  private fun checkLanguagePermitted(
+    languageIds: Collection<Long>,
+    permittedLanguageIds: Collection<Long>?,
+  ) {
     if (this.isAllLanguagesPermitted(permittedLanguageIds)) {
       return
     }
@@ -54,9 +59,7 @@ class ComputedPermissionDto(
 
   val isAllPermitted = this.expandedScopes.toSet().containsAll(Scope.values().toList())
 
-  fun getAdminPermissions(
-    userRole: UserAccount.Role?,
-  ): ComputedPermissionDto {
+  fun getAdminPermissions(userRole: UserAccount.Role?): ComputedPermissionDto {
     if (userRole == UserAccount.Role.ADMIN && !this.isAllPermitted) {
       return SERVER_ADMIN
     }
@@ -65,14 +68,19 @@ class ComputedPermissionDto(
 
   constructor(permission: IPermission) : this(
     permission,
-    origin = if (permission.organizationId != null)
-      ComputedPermissionOrigin.ORGANIZATION_BASE
-    else
-      ComputedPermissionOrigin.DIRECT
+    origin =
+      if (permission.organizationId != null) {
+        ComputedPermissionOrigin.ORGANIZATION_BASE
+      } else {
+        ComputedPermissionOrigin.DIRECT
+      },
   )
 
   companion object {
-    fun getEmptyPermission(scopes: Array<Scope>, type: ProjectPermissionType?): IPermission {
+    fun getEmptyPermission(
+      scopes: Array<Scope>,
+      type: ProjectPermissionType?,
+    ): IPermission {
       return object : IPermission {
         override val scopes: Array<Scope>
           get() = scopes
@@ -96,20 +104,22 @@ class ComputedPermissionDto(
     val NONE
       get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))
     val ORGANIZATION_OWNER
-      get() = ComputedPermissionDto(
-        getEmptyPermission(
-          scopes = arrayOf(Scope.ADMIN),
-          type = ProjectPermissionType.MANAGE
-        ),
-        origin = ComputedPermissionOrigin.ORGANIZATION_OWNER
-      )
+      get() =
+        ComputedPermissionDto(
+          getEmptyPermission(
+            scopes = arrayOf(Scope.ADMIN),
+            type = ProjectPermissionType.MANAGE,
+          ),
+          origin = ComputedPermissionOrigin.ORGANIZATION_OWNER,
+        )
     val SERVER_ADMIN
-      get() = ComputedPermissionDto(
-        getEmptyPermission(
-          scopes = arrayOf(Scope.ADMIN),
-          type = ProjectPermissionType.MANAGE
-        ),
-        origin = ComputedPermissionOrigin.SERVER_ADMIN
-      )
+      get() =
+        ComputedPermissionDto(
+          getEmptyPermission(
+            scopes = arrayOf(Scope.ADMIN),
+            type = ProjectPermissionType.MANAGE,
+          ),
+          origin = ComputedPermissionOrigin.SERVER_ADMIN,
+        )
   }
 }

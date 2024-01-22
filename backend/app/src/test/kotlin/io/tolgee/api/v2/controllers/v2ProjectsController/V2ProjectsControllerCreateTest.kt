@@ -24,10 +24,13 @@ import org.springframework.transaction.annotation.Transactional
 @AutoConfigureMockMvc
 @Transactional
 class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
-  private val languageDTO = LanguageDto(
-    "English",
-    "Original English", "en", "\uD83C\uDDEC\uD83C\uDDE7"
-  )
+  private val languageDTO =
+    LanguageDto(
+      "English",
+      "Original English",
+      "en",
+      "\uD83C\uDDEC\uD83C\uDDE7",
+    )
 
   lateinit var createForLanguagesDto: CreateProjectDTO
 
@@ -35,25 +38,27 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   fun setup() {
     val base = dbPopulator.createBase("SomeProject", "user")
     userAccount = base.userAccount
-    createForLanguagesDto = CreateProjectDTO(
-      name = "What a project",
-      organizationId = base.organization.id,
-      languages = listOf(
-        LanguageDto(
-          name = "English",
-          originalName = "English",
-          tag = "en",
-          flagEmoji = "a"
-        ),
-        LanguageDto(
-          name = "Czech",
-          originalName = "česky",
-          tag = "cs",
-          flagEmoji = "b"
-        )
-      ),
-      baseLanguageTag = "cs"
-    )
+    createForLanguagesDto =
+      CreateProjectDTO(
+        name = "What a project",
+        organizationId = base.organization.id,
+        languages =
+          listOf(
+            LanguageDto(
+              name = "English",
+              originalName = "English",
+              tag = "en",
+              flagEmoji = "a",
+            ),
+            LanguageDto(
+              name = "Czech",
+              originalName = "česky",
+              tag = "cs",
+              flagEmoji = "b",
+            ),
+          ),
+        baseLanguageTag = "cs",
+      )
   }
 
   @Test
@@ -81,26 +86,28 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
 
   @Test
   fun testCreateValidationEmptyLanguages() {
-    val request = CreateProjectDTO(
-      "A name",
-      listOf()
-    )
+    val request =
+      CreateProjectDTO(
+        "A name",
+        listOf(),
+      )
     performAuthPost("/v2/projects", request).andIsBadRequest
   }
 
   @Test
   fun `validates languages`() {
-    val request = CreateProjectDTO(
-      "A name",
-      listOf(
-        LanguageDto(
-          name = "English",
-          originalName = "English",
-          tag = "en,aa",
-          flagEmoji = "a"
-        )
+    val request =
+      CreateProjectDTO(
+        "A name",
+        listOf(
+          LanguageDto(
+            name = "English",
+            originalName = "English",
+            tag = "en,aa",
+            flagEmoji = "a",
+          ),
+        ),
       )
-    )
     performAuthPost("/v2/projects", request)
       .andPrettyPrint
       .andIsBadRequest
@@ -113,8 +120,8 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
     mvc.perform(
       AuthorizedRequestFactory.loggedPost("/v2/projects")
         .contentType(MediaType.APPLICATION_JSON).content(
-          jacksonObjectMapper().writeValueAsString(request)
-        )
+          jacksonObjectMapper().writeValueAsString(request),
+        ),
     )
       .andExpect(MockMvcResultMatchers.status().isOk)
       .andReturn()
@@ -137,10 +144,11 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   private fun testCreateValidationSizeLong() {
-    val request = CreateProjectDTO(
-      "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
-      listOf(languageDTO)
-    )
+    val request =
+      CreateProjectDTO(
+        "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+        listOf(languageDTO),
+      )
     val mvcResult = performAuthPost("/v2/projects", request).andIsBadRequest.andReturn()
     assertThat(mvcResult).error().isStandardValidation
   }

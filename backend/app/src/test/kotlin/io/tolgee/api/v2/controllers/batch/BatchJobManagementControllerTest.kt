@@ -25,9 +25,9 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.translation.AutoTranslationService
-import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.util.BatchDumper
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import kotlinx.coroutines.ensureActive
@@ -41,20 +41,14 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.stereotype.Service
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-@AutoConfigureMockMvc
-@ContextRecreatingTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
-
   lateinit var testData: BatchJobsTestData
 
   @Autowired
@@ -93,6 +87,9 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @Autowired
   lateinit var batchJobActivityFinalizer: BatchJobActivityFinalizer
 
+  @Autowired
+  lateinit var batchDumper: BatchDumper
+
   @BeforeEach
   fun setup() {
     batchJobChunkExecutionQueue.clear()
@@ -103,7 +100,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       autoTranslationService,
       machineTranslationChunkProcessor,
       preTranslationByTmChunkProcessor,
-      batchJobActivityFinalizer
+      batchJobActivityFinalizer,
     )
   }
 
@@ -128,7 +125,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         while (true) {
           val context = it.arguments[2] as CoroutineContext
           context.ensureActive()
-          Thread.sleep(100)
+          Thread.sleep(10)
         }
       }
       it.callRealMethod()
@@ -138,13 +135,14 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       "start-batch-job/machine-translate",
       mapOf(
         "keyIds" to keyIds,
-        "targetLanguageIds" to listOf(
-          testData.projectBuilder.getLanguageByTag("cs")!!.self.id
-        )
-      )
+        "targetLanguageIds" to
+          listOf(
+            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+          ),
+      ),
     ).andIsOk
 
-    Thread.sleep(2000)
+    Thread.sleep(500)
 
     val job = getSingleJob()
     performProjectAuthPut("batch-jobs/${job.id}/cancel")
@@ -166,38 +164,49 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @Test
   @ProjectJWTAuthTestMethod
   fun `exception from inner transaction doesn't break it`() {
-    val keys = testData.addTranslationOperationData(100)
-    saveAndPrepare()
+    finallyDump {
+      val keys = testData.addTranslationOperationData(100)
+      saveAndPrepare()
 
-    val keyIds = keys.map { it.id }.toList()
+      val keyIds = keys.map { it.id }.toList()
 
-    // although it passes once, there should be no successful targets, because the whole transaction is rolled back
-    doAnswer { it.callRealMethod() }
-      .doAnswer { throwingService.throwExceptionInTransaction() }
-      .whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+      // although it passes once, there should be no successful targets, because the whole transaction is rolled back
+      doAnswer { it.callRealMethod() }
+        .doAnswer { throwingService.throwExceptionInTransaction() }
+        .whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
 
-    performProjectAuthPost(
-      "start-batch-job/machine-translate",
-      mapOf(
-        "keyIds" to keyIds,
-        "targetLanguageIds" to listOf(
-          testData.projectBuilder.getLanguageByTag("cs")!!.self.id
-        )
-      )
-    ).andIsOk
+      performProjectAuthPost(
+        "start-batch-job/machine-translate",
+        mapOf(
+          "keyIds" to keyIds,
+          "targetLanguageIds" to
+            listOf(
+              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+            ),
+        ),
+      ).andIsOk
 
-    waitForNotThrowing(pollTime = 100) {
-      // lets move time fast
-      setForcedDate(currentDateProvider.date.addMinutes(1))
-      getSingleJob().status.assert.isEqualTo(BatchJobStatus.FAILED)
+      waitForNotThrowing(pollTime = 100) {
+        // lets move time fast
+        setForcedDate(currentDateProvider.date.addMinutes(1))
+        getSingleJob().status.assert.isEqualTo(BatchJobStatus.FAILED)
+      }
+
+      val executions = batchJobService.getExecutions(getSingleJob().id)
+      executions.assert.hasSize(80)
+      executions.forEach {
+        it.status.assert.isEqualTo(BatchJobChunkExecutionStatus.FAILED)
+        // no successful targets, since all was rolled back
+        it.successTargets.assert.isEmpty()
+      }
     }
+  }
 
-    val executions = batchJobService.getExecutions(getSingleJob().id)
-    executions.assert.hasSize(80)
-    executions.forEach {
-      it.status.assert.isEqualTo(BatchJobChunkExecutionStatus.FAILED)
-      // no successful targets, since all was rolled back
-      it.successTargets.assert.isEmpty()
+  fun <T> finallyDump(fn: () -> T): T {
+    return try {
+      fn()
+    } finally {
+      batchDumper.dump(getSingleJob().id)
     }
   }
 
@@ -245,7 +254,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         dtos.forEach {
           val state = batchJobStateProvider.getCached(it.id)
           println(
-            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}"
+            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}",
           )
         }
         dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(2)
@@ -414,16 +423,20 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     this.projectSupplier = { testData.projectBuilder.self }
   }
 
-  protected fun runChunkedJob(keyCount: Int, author: UserAccount = testData.user): BatchJob {
+  protected fun runChunkedJob(
+    keyCount: Int,
+    author: UserAccount = testData.user,
+  ): BatchJob {
     return executeInNewTransaction {
       batchJobService.startJob(
-        request = PreTranslationByTmRequest().apply {
-          keyIds = (1L..keyCount).map { it }
-        },
+        request =
+          PreTranslationByTmRequest().apply {
+            keyIds = (1L..keyCount).map { it }
+          },
         project = testData.projectBuilder.self,
         author = author,
         type = BatchJobType.PRE_TRANSLATE_BT_TM,
-        isHidden = false
+        isHidden = false,
       )
     }
   }

@@ -82,7 +82,10 @@ class RequestContextServiceTest {
     Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
   }
 
-  private fun makeRequest(path: String, id: String = ""): MockHttpServletRequest {
+  private fun makeRequest(
+    path: String,
+    id: String = "",
+  ): MockHttpServletRequest {
     val req = MockHttpServletRequest("GET", path.replace("{id}", id))
     req.setAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, path)
     req.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, mapOf("id" to id))

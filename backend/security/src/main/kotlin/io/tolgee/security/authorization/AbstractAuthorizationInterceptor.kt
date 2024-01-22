@@ -16,16 +16,20 @@
 
 package io.tolgee.security.authorization
 
+import jakarta.servlet.DispatcherType
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
-import javax.servlet.DispatcherType
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+  override fun preHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+  ): Boolean {
     if (handler !is HandlerMethod || DispatcherType.ASYNC == request.dispatcherType) {
       return super.preHandle(request, response, handler)
     }
@@ -48,7 +52,7 @@ abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
   abstract fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
-    handler: HandlerMethod
+    handler: HandlerMethod,
   ): Boolean
 
   private fun isGlobal(handler: HandlerMethod): Boolean {

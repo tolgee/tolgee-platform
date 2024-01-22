@@ -4,5 +4,5 @@ class ExportKeyView(
   val id: Long,
   val name: String,
   val namespace: String? = null,
-  val translations: MutableMap<String, ExportTranslationView> = mutableMapOf()
+  val translations: MutableMap<String, ExportTranslationView> = mutableMapOf(),
 )

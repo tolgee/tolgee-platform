@@ -1,10 +1,9 @@
 import { Button, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { container } from 'tsyringe';
 
 import { GlobalError as GlobalErrorError } from 'tg.error/GlobalError';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
 
 const StyledImage = styled('img')`
   filter: grayscale(50%);
@@ -45,7 +44,7 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
           variant="outlined"
           color="primary"
           onClick={() => {
-            container.resolve(GlobalActions).logout.dispatch();
+            globalActions.logout.dispatch();
             location.reload();
           }}
         >

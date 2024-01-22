@@ -4,7 +4,7 @@ import io.tolgee.development.testDataBuilder.EntityDataBuilder
 import io.tolgee.model.dataImport.ImportLanguage
 
 class ImportLanguageBuilder(
-  importFileBuilder: ImportFileBuilder
+  importFileBuilder: ImportFileBuilder,
 ) : EntityDataBuilder<ImportLanguage, ImportLanguageBuilder> {
   override var self: ImportLanguage = ImportLanguage("en", importFileBuilder.self)
 }

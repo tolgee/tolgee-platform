@@ -26,16 +26,14 @@ describe('Account security', () => {
   });
 
   it('changes password', () => {
-    const superNewPassword = 'super_new_password';
+    const superNewPassword = 'super_new_password!1';
     cy.xpath("//*[@name='currentPassword']").clear().type(INITIAL_PASSWORD);
     cy.xpath("//*[@name='password']").clear().type(superNewPassword);
-    cy.xpath("//*[@name='passwordRepeat']").clear().type(superNewPassword);
     cy.contains('Save').click();
     assertMessage('updated');
 
     cy.xpath("//*[@name='currentPassword']").should('not.have.value');
     cy.xpath("//*[@name='password']").should('not.have.value');
-    cy.xpath("//*[@name='passwordRepeat']").should('not.have.value');
 
     // Ensure we're still logged in
     cy.reload();

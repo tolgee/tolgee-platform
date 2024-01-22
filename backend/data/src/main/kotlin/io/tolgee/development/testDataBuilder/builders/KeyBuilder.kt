@@ -11,23 +11,24 @@ import io.tolgee.util.ImageConverter
 import org.springframework.core.io.Resource
 
 class KeyBuilder(
-  val projectBuilder: ProjectBuilder
+  val projectBuilder: ProjectBuilder,
 ) : BaseEntityDataBuilder<Key, KeyBuilder>() {
-
   class DATA {
     var meta: KeyMetaBuilder? = null
   }
 
   val data = DATA()
 
-  override var self: Key = Key().also {
-    it.project = projectBuilder.self
-  }
+  override var self: Key =
+    Key().also {
+      it.project = projectBuilder.self
+    }
 
   fun addTranslation(ft: FT<Translation>): TranslationBuilder {
-    val builder = TranslationBuilder(projectBuilder).apply {
-      self.key = this@KeyBuilder.self
-    }
+    val builder =
+      TranslationBuilder(projectBuilder).apply {
+        self.key = this@KeyBuilder.self
+      }
     return addOperation(projectBuilder.data.translations, builder, ft)
   }
 
@@ -41,39 +42,44 @@ class KeyBuilder(
       this.self.namespace = null
       return null
     }
-    val nsBuilder = projectBuilder.data.namespaces.singleOrNull { it.self.name === name }
-      ?: projectBuilder.addNamespace { this.name = name }
+    val nsBuilder =
+      projectBuilder.data.namespaces.singleOrNull { it.self.name === name }
+        ?: projectBuilder.addNamespace { this.name = name }
     this.self.namespace = nsBuilder.self
     return nsBuilder
   }
 
   fun addScreenshot(
     file: Resource? = null,
-    ft: Screenshot.(reference: KeyScreenshotReference) -> Unit
+    ft: Screenshot.(reference: KeyScreenshotReference) -> Unit,
   ): ScreenshotBuilder {
-
     val converter = file?.let { ImageConverter(file.inputStream) }
     val image = converter?.getImage()
     val thumbnail = converter?.getThumbnail()
 
-    val screenshotBuilder = projectBuilder.addScreenshot {
-      width = converter?.targetDimension?.width ?: 0
-      height = converter?.targetDimension?.height ?: 0
-    }
+    val screenshotBuilder =
+      projectBuilder.addScreenshot {
+        width = converter?.targetDimension?.width ?: 0
+        height = converter?.targetDimension?.height ?: 0
+      }
 
     screenshotBuilder.image = image
     screenshotBuilder.thumbnail = thumbnail
 
-    val reference = projectBuilder.addScreenshotReference {
-      key = this@KeyBuilder.self
-      screenshot = screenshotBuilder.self
-    }
+    val reference =
+      projectBuilder.addScreenshotReference {
+        key = this@KeyBuilder.self
+        screenshot = screenshotBuilder.self
+      }
 
     ft(screenshotBuilder.self, reference.self)
     return screenshotBuilder
   }
 
-  fun addTranslation(languageTag: String, text: String?) {
+  fun addTranslation(
+    languageTag: String,
+    text: String?,
+  ) {
     addTranslation {
       this.language = projectBuilder.getLanguageByTag(languageTag)!!.self
       this.text = text
@@ -83,17 +89,19 @@ class KeyBuilder(
   fun addTag(name: String): Tag {
     val meta = this.data.meta ?: addMeta { }
 
-    val tags = projectBuilder.data.keys
-      .mapNotNull { it.data.meta?.self?.tags }.flatten().filter { it.name == name }.distinct()
+    val tags =
+      projectBuilder.data.keys
+        .mapNotNull { it.data.meta?.self?.tags }.flatten().filter { it.name == name }.distinct()
 
     if (tags.size > 1) {
       throw IllegalStateException("More than one tag with name $name in the project")
     }
 
-    val tag = tags.firstOrNull() ?: Tag().apply {
-      this.name = name
-      this.project = projectBuilder.self
-    }
+    val tag =
+      tags.firstOrNull() ?: Tag().apply {
+        this.name = name
+        this.project = projectBuilder.self
+      }
 
     meta.self.tags.add(tag)
     return tag

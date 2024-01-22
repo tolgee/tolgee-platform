@@ -4,5 +4,5 @@ import io.tolgee.model.UserAccount
 
 class OnUserEmailVerifiedFirst(
   source: Any,
-  userAccount: UserAccount
+  userAccount: UserAccount,
 ) : UserAccountEvent(source, userAccount)

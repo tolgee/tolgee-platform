@@ -27,12 +27,12 @@ import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 /**
  * This interceptor performs authorization step to perform operations on a project or organization.
@@ -51,14 +51,15 @@ class ProjectAuthorizationInterceptor(
   override fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
-    handler: HandlerMethod
+    handler: HandlerMethod,
   ): Boolean {
     val userId = authenticationFacade.authenticatedUser.id
-    val project = requestContextService.getTargetProject(request)
-      // Two possible scenarios: we're on a "global" route, or the project was not found.
-      // In both cases, there is no authorization to perform, and we simply continue.
-      // It is not the job of the interceptor to return a 404 error.
-      ?: return true
+    val project =
+      requestContextService.getTargetProject(request)
+        // Two possible scenarios: we're on a "global" route, or the project was not found.
+        // In both cases, there is no authorization to perform, and we simply continue.
+        // It is not the job of the interceptor to return a 404 error.
+        ?: return true
 
     var bypassed = false
     val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
@@ -68,17 +69,18 @@ class ProjectAuthorizationInterceptor(
     logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
 
     val scopes =
-      if (authenticationFacade.isProjectApiKeyAuth)
+      if (authenticationFacade.isProjectApiKeyAuth) {
         authenticationFacade.projectApiKey.scopes.toTypedArray()
-      else
+      } else {
         securityService.getProjectPermissionScopes(project.id, userId) ?: emptyArray()
+      }
 
     if (scopes.isEmpty()) {
       if (!isAdmin) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - No view permissions",
           project.id,
-          userId
+          userId,
         )
 
         // Security consideration: if the user cannot see the project, pretend it does not exist.
@@ -94,12 +96,12 @@ class ProjectAuthorizationInterceptor(
           logger.debug(
             "Rejecting access to proj#{} for user#{} - Insufficient permissions",
             project.id,
-            userId
+            userId,
           )
 
           throw PermissionException(
             Message.OPERATION_NOT_PERMITTED,
-            requiredScopes.map { s -> s.value }
+            requiredScopes.map { s -> s.value },
           )
         }
 
@@ -115,7 +117,7 @@ class ProjectAuthorizationInterceptor(
           "Rejecting access to proj#{} for user#{} via pak#{} - API Key mismatch",
           project.id,
           userId,
-          pak.id
+          pak.id,
         )
 
         throw PermissionException()
@@ -128,12 +130,12 @@ class ProjectAuthorizationInterceptor(
             "Rejecting access to proj#{} for user#{} via pak#{} - Insufficient permissions granted to PAK",
             project.id,
             userId,
-            pak.id
+            pak.id,
           )
 
           throw PermissionException(
             Message.OPERATION_NOT_PERMITTED,
-            requiredScopes.map { s -> s.value }
+            requiredScopes.map { s -> s.value },
           )
         }
       }
@@ -156,7 +158,10 @@ class ProjectAuthorizationInterceptor(
     return true
   }
 
-  private fun getRequiredScopes(request: HttpServletRequest, handler: HandlerMethod): Array<Scope>? {
+  private fun getRequiredScopes(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+  ): Array<Scope>? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
     val projectPerms = AnnotationUtils.getAnnotation(handler.method, RequiresProjectPermissions::class.java)
 
@@ -168,14 +173,14 @@ class ProjectAuthorizationInterceptor(
     if (defaultPerms != null && projectPerms != null) {
       // Policy doesn't make sense
       throw RuntimeException(
-        "Both `@UseDefaultPermissions` and `@RequiresProjectPermissions` have been set for this endpoint!"
+        "Both `@UseDefaultPermissions` and `@RequiresProjectPermissions` have been set for this endpoint!",
       )
     }
 
     if (projectPerms?.scopes?.isEmpty() == true) {
       // No scopes set for RequiresProjectPermissions
       throw RuntimeException(
-        "`@RequiresProjectPermissions` requires at least one scope. Use `@UseDefaultPermissions` for any scope."
+        "`@RequiresProjectPermissions` requires at least one scope. Use `@UseDefaultPermissions` for any scope.",
       )
     }
 

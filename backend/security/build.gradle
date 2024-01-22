@@ -8,9 +8,9 @@ plugins {
     id 'java'
     id 'io.spring.dependency-management'
     id 'org.jetbrains.kotlin.jvm'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id "kotlin-allopen"
-
+    id "io.sentry.jvm.gradle"
 }
 
 group = 'io.tolgee.security'
@@ -18,7 +18,6 @@ group = 'io.tolgee.security'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
-apply plugin: 'org.springframework.boot'
 apply plugin: "kotlin-allopen"
 apply plugin: 'io.spring.dependency-management'
 
@@ -27,7 +26,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 allOpen {
@@ -47,27 +46,22 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocWebmvcApi
     implementation libs.springDocOpenApiUi
-    implementation libs.springDocOpenApiKotlin
-    implementation libs.springDocOpenApiDataRest
-    implementation libs.springDocOpenApiHateoas
+    implementation libs.springDocOpenApiCommon
 
-    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
-        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
-    }
-    implementation libs.redissonSpringData
+    implementation libs.redissonSpringBootStarter
 
     /**
      * Misc
      */
     implementation libs.commonsCodec
-    implementation libs.sentry
     implementation libs.jjwtApi
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
     api libs.postHog
+    implementation libs.kotlinReflect
 
     /**
      * Tests
@@ -81,7 +75,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    maxHeapSize = "2048m"
+    maxHeapSize = "4096m"
 }
 
 sourceSets {
@@ -89,8 +83,11 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)

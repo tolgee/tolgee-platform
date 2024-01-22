@@ -2,11 +2,11 @@ package io.tolgee.model.automations
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.model.StandardAuditModel
-import javax.persistence.Entity
-import javax.persistence.EnumType.STRING
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType.STRING
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
 
 @Entity
 class AutomationTrigger(

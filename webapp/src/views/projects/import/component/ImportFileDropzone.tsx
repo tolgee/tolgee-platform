@@ -1,52 +1,63 @@
 import clsx from 'clsx';
 import { Box, styled } from '@mui/material';
 import { green, red } from '@mui/material/colors';
-import { Backup, HighlightOff } from '@mui/icons-material';
+import { HighlightOff } from '@mui/icons-material';
 import React, { FunctionComponent, useState } from 'react';
 
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
 
 import { MAX_FILE_COUNT } from './ImportFileInput';
+import { DropzoneIcon } from 'tg.component/CustomIcons';
 
 export interface ScreenshotDropzoneProps {
   onNewFiles: (files: File[]) => void;
+  active: boolean;
 }
 
 const StyledWrapper = styled(Box)`
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s;
+  background-color: ${({ theme }) => theme.palette.background.paper};
 
-  &.valid {
-    backdrop-filter: blur(5px);
-    border: 1px solid ${green[200]};
-    background-color: ${green[50]};
-    opacity: 0.9;
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 4px;
+    height: 100%;
   }
 
+  &.valid,
   &.invalid {
-    border: 1px solid ${red[200]};
-    opacity: 0.9;
-    background-color: ${red[50]};
+    opacity: 1;
+  }
+
+  &.valid:before,
+  &.invalid:before {
     backdrop-filter: blur(5px);
+    opacity: 0.3;
+  }
+
+  &.valid:before {
+    background-color: ${green[200]};
+  }
+
+  &.invalid:before {
+    background-color: ${red[200]};
   }
 `;
 
-const StyledValidIcon = styled(Backup)`
-  filter: drop-shadow(1px 1px 0px ${green[200]})
-    drop-shadow(-1px 1px 0px ${green[200]})
-    drop-shadow(1px -1px 0px ${green[200]})
-    drop-shadow(-1px -1px 0px ${green[200]});
+const StyledValidIcon = styled(DropzoneIcon)`
   font-size: 100px;
-  color: ${({ theme }) => theme.palette.common.white};
+  color: ${({ theme }) => theme.palette.import.progressDone};
 `;
 
 const StyledInvalidIcon = styled(HighlightOff)`
-  filter: drop-shadow(1px 1px 0px ${red[200]})
-    drop-shadow(-1px 1px 0px ${red[200]}) drop-shadow(1px -1px 0px ${red[200]})
-    drop-shadow(-1px -1px 0px ${red[200]});
   font-size: 100px;
-  color: ${({ theme }) => theme.palette.common.white};
+  fill: ${({ theme }) => theme.palette.error.main};
 `;
 
 export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
@@ -58,6 +69,9 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
   );
 
   const onDragEnter = (e: React.DragEvent) => {
+    if (!props.active) {
+      return;
+    }
     e.stopPropagation();
     e.preventDefault();
     setDragEnterTarget(e.target);
@@ -74,6 +88,9 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
   };
 
   const onDragLeave = (e: React.DragEvent) => {
+    if (!props.active) {
+      return;
+    }
     e.stopPropagation();
     e.preventDefault();
     if (e.target === dragEnterTarget) {
@@ -82,6 +99,9 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
   };
 
   const onDrop = async (e: React.DragEvent) => {
+    if (!props.active) {
+      return;
+    }
     e.stopPropagation();
     e.preventDefault();
     if (e.dataTransfer.items) {

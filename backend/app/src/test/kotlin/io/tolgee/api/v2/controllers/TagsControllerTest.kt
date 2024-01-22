@@ -18,7 +18,6 @@ import java.math.BigDecimal
 
 @Transactional
 class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TagsTestData
 
   @BeforeEach

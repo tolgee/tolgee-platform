@@ -14,6 +14,7 @@ interface AzureFrontDoorConfig : ContentDeliveryPurgingConfig {
     get() = ContentDeliveryCachePurgingType.AZURE_FRONT_DOOR
 
   override val enabled: Boolean
-    get() = arrayOf(clientId, clientSecret, tenantId, subscriptionId, profileName, endpointName, resourceGroupName)
-      .all { it != null }
+    get() =
+      arrayOf(clientId, clientSecret, tenantId, subscriptionId, profileName, endpointName, resourceGroupName)
+        .all { it != null }
 }

@@ -44,8 +44,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
     loginAsUser(user.username)
-    val path = "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}" +
-      "/translations/${testData.translationWithConflict.id}/resolve/set-override"
+    val path =
+      "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}" +
+        "/translations/${testData.translationWithConflict.id}/resolve/set-override"
     performAuthPut(path, null).andIsOk
     val translation = importService.findTranslation(testData.translationWithConflict.id)
     assertThat(translation?.resolved).isTrue
@@ -59,8 +60,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
     loginAsUser(user.username)
-    val path = "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}" +
-      "/translations/${testData.translationWithConflict.id}/resolve/set-keep-existing"
+    val path =
+      "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}" +
+        "/translations/${testData.translationWithConflict.id}/resolve/set-keep-existing"
     performAuthPut(path, null).andIsOk
     val translation = importService.findTranslation(testData.translationWithConflict.id)
     assertThat(translation?.resolved).isTrue
@@ -88,8 +90,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
     loginAsUser(user.username)
-    val path = "/v2/projects/$projectId/import/result/languages/" +
-      "${testData.importEnglish.id}/resolve-all/set-keep-existing"
+    val path =
+      "/v2/projects/$projectId/import/result/languages/" +
+        "${testData.importEnglish.id}/resolve-all/set-keep-existing"
     performAuthPut(path, null).andIsOk
     val translation = importService.findTranslation(testData.translationWithConflict.id)
     assertThat(translation?.resolved).isTrue
@@ -105,8 +108,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
     loginAsUser(user.username)
-    val path = "/v2/projects/$projectId/import/result/languages/${testData.importFrench.id}/" +
-      "select-existing/${testData.french.id}"
+    val path =
+      "/v2/projects/$projectId/import/result/languages/${testData.importFrench.id}/" +
+        "select-existing/${testData.french.id}"
     performAuthPut(path, null).andIsOk
     assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
       .isEqualTo(testData.french)
@@ -126,8 +130,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
       val file = importService.findFile(testData.defaultNsFile.id)!!
       assertThat(file.namespace)
         .isEqualTo("new-ns")
-      val importLanguage = file.languages
-        .find { it.name == "de" }!!
+      val importLanguage =
+        file.languages
+          .find { it.name == "de" }!!
       importLanguage.translations
         .any { it.conflict != null }
         .assert.isEqualTo(false)
@@ -174,8 +179,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val projectId = testData.project.id
     loginAsUser(user.username)
     // try to assign with another french but in different namespace
-    val path = "/v2/projects/$projectId/import/result/languages/${nsData.importFrenchInNs.id}/" +
-      "select-existing/${testData.french.id}"
+    val path =
+      "/v2/projects/$projectId/import/result/languages/${nsData.importFrenchInNs.id}/" +
+        "select-existing/${testData.french.id}"
     performAuthPut(path, null).andIsOk
     assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
       .isEqualTo(testData.french)
@@ -192,8 +198,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val projectId = testData.project.id
     loginAsUser(user.username)
     // try to assign with another french but in different namespace
-    val path = "/v2/projects/$projectId/import/result/languages/${nsData.importFrenchInNs.id}/" +
-      "select-existing/${testData.french.id}"
+    val path =
+      "/v2/projects/$projectId/import/result/languages/${nsData.importFrenchInNs.id}/" +
+        "select-existing/${testData.french.id}"
     performAuthPut(path, null).andIsOk
     assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
       .isEqualTo(testData.french)

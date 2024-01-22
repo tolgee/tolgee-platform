@@ -9,18 +9,22 @@ import {
 } from '../../common/permissionsMenu';
 
 describe('Organization Base permissions', () => {
+  let organizationData: Record<string, { slug: string }>;
+
   beforeEach(() => {
     login();
     organizationTestData.clean();
-    organizationTestData.generate();
-    visitProfile();
+    organizationTestData.generate().then((res) => {
+      organizationData = res.body as any;
+      visitProfile('Tolgee');
+    });
   });
 
   it('changes member privileges', () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
     permissionsMenuSelectRole('Translate', { confirm: true });
-    visitMemberPrivileges();
+    visitMemberPrivileges('Tolgee');
     gcy('permissions-menu-button').contains('Translate');
   });
 
@@ -28,12 +32,12 @@ describe('Organization Base permissions', () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
     permissionsMenuSelectRole('Translate', { confirm: true });
-    visitProfile();
+    visitProfile('Tolgee');
     gcy('organization-name-field').within(() =>
       cy.get('input').should('have.value', 'Tolgee')
     );
     gcy('organization-address-part-field').within(() =>
-      cy.get('input').should('have.value', 'tolgee')
+      cy.get('input').should('contain.value', 'tolgee')
     );
     gcy('organization-description-field').within(() =>
       cy.get('input').should('have.value', 'This is us')
@@ -52,11 +56,20 @@ describe('Organization Base permissions', () => {
     organizationTestData.clean();
   });
 
-  const visitProfile = () => {
-    cy.visit(`${HOST}/organizations/tolgee/profile`);
+  const visitProfile = (name: string) => {
+    visitPath(name, `/profile`);
   };
 
-  const visitMemberPrivileges = () => {
-    cy.visit(`${HOST}/organizations/tolgee/member-privileges`);
+  const visitMemberPrivileges = (name: string) => {
+    visitPath(name, `/member-privileges`);
+  };
+
+  function visitSlug(slug: string, path: string) {
+    cy.visit(`${HOST}/organizations/${slug}${path}`);
+  }
+
+  const visitPath = (name: string, path: string) => {
+    const slug = organizationData[name].slug;
+    visitSlug(slug, path);
   };
 });

@@ -8,15 +8,16 @@ import org.springframework.stereotype.Component
 
 @Component
 class RevealedPatModelAssembler(
-  private val patModelAssembler: PatModelAssembler
+  private val patModelAssembler: PatModelAssembler,
 ) : RepresentationModelAssemblerSupport<Pat, RevealedPatModel>(
-  PatController::class.java, RevealedPatModel::class.java
-) {
+    PatController::class.java,
+    RevealedPatModel::class.java,
+  ) {
   override fun toModel(entity: Pat): RevealedPatModel {
     val token = entity.token ?: throw IllegalStateException("Token not regenerated.")
     return RevealedPatModel(
       patModel = patModelAssembler.toModel(entity),
-      token = "$PAT_PREFIX$token"
+      token = "$PAT_PREFIX$token",
     )
   }
 }

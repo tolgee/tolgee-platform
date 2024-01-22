@@ -11,5 +11,5 @@ data class TranslationView(
   val mtProvider: MtServiceType?,
   val commentCount: Long,
   val unresolvedCommentCount: Long,
-  val outdated: Boolean
+  val outdated: Boolean,
 )

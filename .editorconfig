@@ -1,7 +1,11 @@
 [*.{kt, kts}]
-disabled_rules = no-wildcard-imports
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_filename = disabled
 indent_size = 2
 insert_final_newline = true
 # possible values: number (e.g. 120) (package name, imports & comments are ignored), "off"
 # it's automatically set to 100 on `ktlint --android ...` (per Android Kotlin Style Guide)
 max_line_length = 120
+
+[backend/data/src/main/kotlin/io/tolgee/service/dataImport/processors/messageFormat/data/PluralData.kt]
+max_line_length = 500

@@ -18,11 +18,12 @@ import kotlin.system.measureTimeMillis
 
 class CleanDbTestListener : TestExecutionListener {
   private val logger = LoggerFactory.getLogger(this::class.java)
-  private val ignoredTables = listOf(
-    "mt_credits_price",
-    "databasechangelog",
-    "databasechangeloglock"
-  )
+  private val ignoredTables =
+    listOf(
+      "mt_credits_price",
+      "databasechangelog",
+      "databasechangeloglock",
+    )
 
   override fun beforeTestMethod(testContext: TestContext) {
     val appContext: ApplicationContext = testContext.applicationContext
@@ -39,27 +40,28 @@ class CleanDbTestListener : TestExecutionListener {
 
   private fun cleanWithRetries(testContext: TestContext) {
     logger.info("Cleaning DB")
-    val time = measureTimeMillis {
-      var i = 0
-      while (true) {
-        try {
-          withTimeout(3000) {
-            doClean(testContext)
-          }
-          break
-        } catch (e: Exception) {
-          when (e) {
-            is PSQLException, is TimeoutCancellationException -> {
-              if (i > 5) {
-                throw e
+    val time =
+      measureTimeMillis {
+        var i = 0
+        while (true) {
+          try {
+            withTimeout(3000) {
+              doClean(testContext)
+            }
+            break
+          } catch (e: Exception) {
+            when (e) {
+              is PSQLException, is TimeoutCancellationException -> {
+                if (i > 5) {
+                  throw e
+                }
               }
             }
-          }
 
-          i++
+            i++
+          }
         }
       }
-    }
     logger.info("DB cleaned in ${time}ms")
   }
 
@@ -70,15 +72,16 @@ class CleanDbTestListener : TestExecutionListener {
       val stmt = conn.createStatement()
       val databaseName: Any = "postgres"
       val ignoredTablesString = ignoredTables.joinToString(", ") { "'$it'" }
-      val rs: ResultSet = stmt.executeQuery(
-        String.format(
-          "SELECT table_schema, table_name" +
-            " FROM information_schema.tables" +
-            " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
-            "   and table_name not in ($ignoredTablesString)",
-          databaseName
+      val rs: ResultSet =
+        stmt.executeQuery(
+          String.format(
+            "SELECT table_schema, table_name" +
+              " FROM information_schema.tables" +
+              " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
+              "   and table_name not in ($ignoredTablesString)",
+            databaseName,
+          ),
         )
-      )
       val tables: MutableList<Pair<String, String>> = ArrayList()
       while (rs.next()) {
         tables.add(rs.getString(1) to rs.getString(2))
@@ -86,8 +89,8 @@ class CleanDbTestListener : TestExecutionListener {
       stmt.execute(
         java.lang.String.format(
           "TRUNCATE TABLE %s",
-          tables.joinToString(",") { it.first + "." + it.second }
-        )
+          tables.joinToString(",") { it.first + "." + it.second },
+        ),
       )
     }
   }
@@ -114,7 +117,10 @@ class CleanDbTestListener : TestExecutionListener {
   override fun prepareTestInstance(testContext: TestContext) {
   }
 
-  private fun withTimeout(timeout: Long, block: () -> Unit) {
+  private fun withTimeout(
+    timeout: Long,
+    block: () -> Unit,
+  ) {
     val executor = Executors.newSingleThreadExecutor()
     val future: Future<Any> = executor.submit<Any>(block)
 

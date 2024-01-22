@@ -19,12 +19,12 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.InvitationService
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
 @RestController
@@ -36,31 +36,36 @@ class V2ProjectsInvitationController(
   private val invitationService: InvitationService,
   private val projectInvitationModelAssembler: ProjectInvitationModelAssembler,
   private val projectPermissionFacade: ProjectPermissionFacade,
-  private val eeInvitationService: EeInvitationService
+  private val eeInvitationService: EeInvitationService,
 ) {
   @PutMapping("/{projectId}/invite")
   @Operation(summary = "Generates user invitation link for project")
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
-  fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
+  fun inviteUser(
+    @RequestBody @Valid
+    invitation: ProjectInviteUserDto,
+  ): ProjectInvitationModel {
     validatePermissions(invitation)
 
     val languagesPermissions = projectPermissionFacade.getLanguages(invitation, projectHolder.project.id)
 
-    val params = CreateProjectInvitationParams(
-      project = projectHolder.projectEntity,
-      type = invitation.type,
-      scopes = invitation.scopes,
-      email = invitation.email,
-      name = invitation.name,
-      languagePermissions = languagesPermissions
-    )
+    val params =
+      CreateProjectInvitationParams(
+        project = projectHolder.projectEntity,
+        type = invitation.type,
+        scopes = invitation.scopes,
+        email = invitation.email,
+        name = invitation.name,
+        languagePermissions = languagesPermissions,
+      )
 
-    val created = if (!params.scopes.isNullOrEmpty()) {
-      eeInvitationService.create(params)
-    } else {
-      invitationService.create(params)
-    }
+    val created =
+      if (!params.scopes.isNullOrEmpty()) {
+        eeInvitationService.create(params)
+      } else {
+        invitationService.create(params)
+      }
 
     return projectInvitationModelAssembler.toModel(created)
   }

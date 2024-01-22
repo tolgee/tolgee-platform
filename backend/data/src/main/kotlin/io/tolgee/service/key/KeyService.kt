@@ -18,10 +18,13 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.Logging
 import io.tolgee.util.setSimilarityLimit
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -30,7 +33,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class KeyService(
@@ -43,9 +45,9 @@ class KeyService(
   private val entityManager: EntityManager,
   @Lazy
   private var translationService: TranslationService,
-  private val languageRepository: LanguageRepository
-) {
-
+  private val languageRepository: LanguageRepository,
+  private val bigMetaService: BigMetaService,
+) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
   }
@@ -54,16 +56,28 @@ class KeyService(
     return keyRepository.getAllByProjectIdSortedById(projectId)
   }
 
-  fun get(projectId: Long, name: String, namespace: String?): Key {
+  fun get(
+    projectId: Long,
+    name: String,
+    namespace: String?,
+  ): Key {
     return keyRepository.getByNameAndNamespace(projectId, name, namespace)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
   }
 
-  fun find(projectId: Long, name: String, namespace: String?): Key? {
+  fun find(
+    projectId: Long,
+    name: String,
+    namespace: String?,
+  ): Key? {
     return this.findOptional(projectId, name, namespace).orElseGet { null }
   }
 
-  private fun findOptional(projectId: Long, name: String, namespace: String?): Optional<Key> {
+  private fun findOptional(
+    projectId: Long,
+    name: String,
+    namespace: String?,
+  ): Optional<Key> {
     return keyRepository.getByNameAndNamespace(projectId, name, namespace)
   }
 
@@ -89,18 +103,23 @@ class KeyService(
   }
 
   @Transactional
-  fun create(project: Project, dto: CreateKeyDto): Key {
+  fun create(
+    project: Project,
+    dto: CreateKeyDto,
+  ): Key {
     val key = create(project, dto.name, dto.namespace)
-    val created = dto.translations?.let {
-      if (it.isEmpty()) {
-        return@let null
+    val created =
+      dto.translations?.let {
+        if (it.isEmpty()) {
+          return@let null
+        }
+        translationService.setForKey(key, it)
       }
-      translationService.setForKey(key, it)
-    }
 
     dto.states?.map {
-      val translation = created?.get(it.key)
-        ?: throw BadRequestException(Message.CANNOT_SET_STATE_FOR_MISSING_TRANSLATION)
+      val translation =
+        created?.get(it.key)
+          ?: throw BadRequestException(Message.CANNOT_SET_STATE_FOR_MISSING_TRANSLATION)
       translation to it.value.translationState
     }?.toMap()?.let { translationService.setStateBatch(it) }
 
@@ -108,12 +127,17 @@ class KeyService(
       tagService.tagKey(key, it)
     }
 
+    bigMetaService.store(dto.relatedKeysInOrder, project)
+
     storeScreenshots(dto, key)
 
     return key
   }
 
-  private fun storeScreenshots(dto: CreateKeyDto, key: Key) {
+  private fun storeScreenshots(
+    dto: CreateKeyDto,
+    key: Key,
+  ) {
     @Suppress("DEPRECATION")
     val screenshotUploadedImageIds = dto.screenshotUploadedImageIds
     val screenshots = dto.screenshots
@@ -134,13 +158,21 @@ class KeyService(
   }
 
   @Transactional
-  fun create(project: Project, name: String, namespace: String?): Key {
+  fun create(
+    project: Project,
+    name: String,
+    namespace: String?,
+  ): Key {
     checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
     return createWithoutExistenceCheck(project, name, namespace)
   }
 
   @Transactional
-  fun createWithoutExistenceCheck(project: Project, name: String, namespace: String?): Key {
+  fun createWithoutExistenceCheck(
+    project: Project,
+    name: String,
+    namespace: String?,
+  ): Key {
     val key = Key(name = name, project = project)
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
@@ -149,12 +181,19 @@ class KeyService(
   }
 
   @Transactional
-  fun edit(keyId: Long, dto: EditKeyDto): Key {
+  fun edit(
+    keyId: Long,
+    dto: EditKeyDto,
+  ): Key {
     val key = findOptional(keyId).orElseThrow { NotFoundException() }
     return edit(key, dto.name, dto.namespace)
   }
 
-  fun edit(key: Key, newName: String, newNamespace: String?): Key {
+  fun edit(
+    key: Key,
+    newName: String,
+    newNamespace: String?,
+  ): Key {
     if (key.name == newName && key.namespace?.name == newNamespace) {
       return key
     }
@@ -179,27 +218,36 @@ class KeyService(
   }
 
   @Transactional
-  fun setNamespace(keyIds: List<Long>, namespace: String?) {
+  fun setNamespace(
+    keyIds: List<Long>,
+    namespace: String?,
+  ) {
     val keys = keyRepository.getKeysWithNamespaces(keyIds)
     val projectId = keys.map { it.project.id }.distinct().singleOrNull() ?: return
     val namespaceEntity = namespaceService.findOrCreate(namespace, projectId)
 
-    val oldNamespaces = keys.map {
-      val oldNamespace = it.namespace
-      it.namespace = namespaceEntity
-      oldNamespace
-    }
+    val oldNamespaces =
+      keys.map {
+        val oldNamespace = it.namespace
+        it.namespace = namespaceEntity
+        oldNamespace
+      }
 
-    val modifiedNamespaces = oldNamespaces
-      .filter { it?.name != namespace }
-      .filterNotNull()
-      .distinctBy { it.id }
+    val modifiedNamespaces =
+      oldNamespaces
+        .filter { it?.name != namespace }
+        .filterNotNull()
+        .distinctBy { it.id }
 
     namespaceService.deleteIfUnused(modifiedNamespaces)
     keyRepository.saveAll(keys)
   }
 
-  fun checkKeyNotExisting(projectId: Long, name: String, namespace: String?) {
+  fun checkKeyNotExisting(
+    projectId: Long,
+    name: String,
+    namespace: String?,
+  ) {
     if (findOptional(projectId, name, namespace).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
@@ -217,23 +265,48 @@ class KeyService(
 
   @Transactional
   fun deleteMultiple(ids: Collection<Long>) {
-    translationService.deleteAllByKeys(ids)
-    keyMetaService.deleteAllByKeyIdIn(ids)
-    screenshotService.deleteAllByKeyId(ids)
-    val keys = keyRepository.findAllByIdInForDelete(ids)
+    traceLogMeasureTime("delete multiple keys: delete translations") {
+      translationService.deleteAllByKeys(ids)
+    }
+
+    traceLogMeasureTime("delete multiple keys: delete key metas") {
+      keyMetaService.deleteAllByKeyIdIn(ids)
+    }
+
+    traceLogMeasureTime("delete multiple keys: delete screenshots") {
+      screenshotService.deleteAllByKeyId(ids)
+    }
+
+    val keys =
+      traceLogMeasureTime("delete multiple keys: fetch keys") {
+        keyRepository.findAllByIdInForDelete(ids)
+      }
+
     val namespaces = keys.map { it.namespace }
-    keyRepository.deleteAllByIdIn(keys.map { it.id })
+
+    traceLogMeasureTime("delete multiple keys: delete the keys") {
+      keyRepository.deleteAll(keys)
+    }
+
     namespaceService.deleteUnusedNamespaces(namespaces)
   }
 
   @Transactional
   fun deleteAllByProject(projectId: Long) {
-    val ids = keyRepository.getIdsByProjectId(projectId)
-    keyMetaService.deleteAllByKeyIdIn(ids)
-    this.deleteMultiple(ids)
+    keyMetaService.deleteAllByProject(projectId)
+    screenshotService.deleteAllByProject(projectId)
+
+    entityManager.createNativeQuery("""delete from key where project_id = :projectId""")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
+
+    namespaceService.deleteAllByProject(projectId)
   }
 
-  fun checkInProject(key: Key, projectId: Long) {
+  fun checkInProject(
+    key: Key,
+    projectId: Long,
+  ) {
     if (key.project.id != projectId) {
       throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
     }
@@ -242,7 +315,10 @@ class KeyService(
   fun saveAll(entities: Collection<Key>): MutableList<Key> = entities.map { save(it) }.toMutableList()
 
   @Transactional
-  fun importKeys(keys: List<ImportKeysItemDto>, project: Project) {
+  fun importKeys(
+    keys: List<ImportKeysItemDto>,
+    project: Project,
+  ) {
     KeysImporter(applicationContext, keys, project).import()
   }
 
@@ -251,29 +327,41 @@ class KeyService(
     search: String,
     languageTag: String?,
     project: ProjectDto,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<KeySearchResultView> {
     entityManager.setSimilarityLimit(0.00001)
     return keyRepository.searchKeys(search, project.id, languageTag, pageable)
   }
 
   @Transactional
-  fun importKeysResolvable(keys: List<ImportKeysResolvableItemDto>, projectEntity: Project): KeyImportResolvableResult {
-    val importer = ResolvingKeyImporter(
-      applicationContext = applicationContext,
-      keysToImport = keys,
-      projectEntity = projectEntity
-    )
+  fun importKeysResolvable(
+    keys: List<ImportKeysResolvableItemDto>,
+    projectEntity: Project,
+  ): KeyImportResolvableResult {
+    val importer =
+      ResolvingKeyImporter(
+        applicationContext = applicationContext,
+        keysToImport = keys,
+        projectEntity = projectEntity,
+      )
     return importer()
   }
 
   @Suppress("UNCHECKED_CAST")
-  fun getKeysInfo(dto: GetKeysRequestDto, projectId: Long): List<Pair<Key, List<Screenshot>>> {
+  fun getKeysInfo(
+    dto: GetKeysRequestDto,
+    projectId: Long,
+  ): List<Pair<Key, List<Screenshot>>> {
     return KeyInfoProvider(applicationContext, projectId, dto).get()
   }
 
-  fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
+  fun getPaged(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
+
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
+
   fun getKeysWithTagsById(keysIds: Iterable<Long>): Set<Key> = keyRepository.getWithTagsByIds(keysIds)
 
   fun find(id: List<Long>): List<Key> {
@@ -281,18 +369,29 @@ class KeyService(
   }
 
   @Transactional
-  fun getDisabledLanguages(projectId: Long, keyId: Long): List<Language> {
+  fun getDisabledLanguages(
+    projectId: Long,
+    keyId: Long,
+  ): List<Language> {
     return keyRepository.getDisabledLanguages(projectId, keyId)
   }
 
   @Transactional
-  fun setDisabledLanguages(projectId: Long, keyId: Long, languageIds: List<Long>): List<Language> {
+  fun setDisabledLanguages(
+    projectId: Long,
+    keyId: Long,
+    languageIds: List<Long>,
+  ): List<Language> {
     val key = keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException()
     enableRestOfLanguages(projectId, languageIds, key)
     return disableLanguages(projectId, languageIds, key)
   }
 
-  private fun enableRestOfLanguages(projectId: Long, languageIdsToDisable: List<Long>, key: Key) {
+  private fun enableRestOfLanguages(
+    projectId: Long,
+    languageIdsToDisable: List<Long>,
+    key: Key,
+  ) {
     val currentlyDisabledLanguages = keyRepository.getDisabledLanguages(projectId, key.id)
     val languagesToEnable = currentlyDisabledLanguages.filter { !languageIdsToDisable.contains(it.id) }
     languagesToEnable.forEach { language ->
@@ -305,7 +404,7 @@ class KeyService(
   private fun disableLanguages(
     projectId: Long,
     languageIds: List<Long>,
-    key: Key
+    key: Key,
   ): List<Language> {
     val languages = languageRepository.findAllByProjectIdAndIdInOrderById(projectId, languageIds)
     languages.map { language ->

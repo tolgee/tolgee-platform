@@ -2,7 +2,7 @@ import { Check } from '@mui/icons-material';
 import { Box, Typography } from '@mui/material';
 
 type Props = {
-  name: string;
+  name: React.ReactNode;
 };
 
 export function PlanFeature({ name }: Props) {

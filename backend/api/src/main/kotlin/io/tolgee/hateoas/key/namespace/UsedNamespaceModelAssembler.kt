@@ -6,10 +6,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class UsedNamespaceModelAssembler : RepresentationModelAssemblerSupport<Pair<Long?, String?>, UsedNamespaceModel>(
-  NamespaceController::class.java, UsedNamespaceModel::class.java
+  NamespaceController::class.java,
+  UsedNamespaceModel::class.java,
 ) {
-  override fun toModel(entity: Pair<Long?, String?>) = UsedNamespaceModel(
-    id = entity.first,
-    name = entity.second,
-  )
+  override fun toModel(entity: Pair<Long?, String?>) =
+    UsedNamespaceModel(
+      id = entity.first,
+      name = entity.second,
+    )
 }

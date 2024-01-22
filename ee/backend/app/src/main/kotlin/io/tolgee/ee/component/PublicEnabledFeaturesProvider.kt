@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 @Qualifier("publicEnabledFeaturesProvider")
 class PublicEnabledFeaturesProvider(
-  private val eeSubscriptionService: EeSubscriptionService
+  private val eeSubscriptionService: EeSubscriptionService,
 ) : EnabledFeaturesProvider {
   var forceEnabled: Set<Feature>? = null
 

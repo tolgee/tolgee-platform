@@ -1,18 +1,19 @@
 import { Link } from 'react-router-dom';
-import { Box, IconButton, styled, useTheme } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { DarkMode, LightMode } from '@mui/icons-material';
 
-import { LocaleMenu } from '../../LocaleMenu';
-import { UserMenu } from '../../security/UserMenu/UserMenu';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useConfig } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
-import { useTopBarHidden } from './TopBarContext';
-import { useThemeContext } from '../../../ThemeProvider';
+
+import { UserMenu } from '../../security/UserMenu/UserMenu';
 import { AdminInfo } from './AdminInfo';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
+import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
+import { AppState } from 'tg.store/index';
+import { useSelector } from 'react-redux';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -57,49 +58,37 @@ const StyledTolgeeLink = styled(Link)`
   text-decoration: inherit;
   outline: 0;
 
-  &:focus ${StyledLogoWrapper} {
+  &:focus .logoWrapper {
     filter: brightness(95%);
   }
 `;
 
-const StyledIconButton = styled(IconButton)`
-  width: 40px;
-  height: 40px;
-`;
-
 type Props = {
-  autoHide?: boolean;
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
 };
 
 export const TopBar: React.FC<Props> = ({
-  autoHide = false,
   isAdminAccess = false,
   isDebuggingCustomerAccount = false,
 }) => {
   const config = useConfig();
 
-  const trigger = useTopBarHidden() && autoHide;
-
+  const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
   const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
+  const userLogged = useSelector(
+    (state: AppState) => state.global.security.allowPrivate
+  );
 
-  const { mode, setMode } = useThemeContext();
   const theme = useTheme();
-
-  const toggleTheme = () => {
-    if (mode === 'dark') {
-      setMode('light');
-    } else {
-      setMode('dark');
-    }
-  };
 
   return (
     <StyledAppBar
       sx={{
         top: topBannerSize,
-        transform: trigger ? `translate(0px, ${-55}px)` : `translate(0px, 0px)`,
+        transform: topBarHidden
+          ? `translate(0px, -55px)`
+          : `translate(0px, 0px)`,
       }}
     >
       <StyledToolbar>
@@ -107,7 +96,12 @@ export const TopBar: React.FC<Props> = ({
           <Box>
             <StyledTolgeeLink to={'/'}>
               <Box display="flex" alignItems="center">
-                <StyledLogoWrapper pr={1} display="flex" justifyItems="center">
+                <StyledLogoWrapper
+                  pr={1}
+                  display="flex"
+                  justifyItems="center"
+                  className="logoWrapper"
+                >
                   <TolgeeLogo
                     fontSize="large"
                     sx={{ color: theme.palette.navbar.logo }}
@@ -129,11 +123,9 @@ export const TopBar: React.FC<Props> = ({
             debuggingCustomerAccount={isDebuggingCustomerAccount}
           />
         </Box>
-        <StyledIconButton onClick={toggleTheme} color="inherit">
-          {mode === 'dark' ? <LightMode /> : <DarkMode />}
-        </StyledIconButton>
-        <LocaleMenu />
-        <UserMenu />
+        <QuickStartTopBarButton />
+        {!userLogged && <LanguageMenu />}
+        {userLogged && <UserMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );

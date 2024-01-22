@@ -1,74 +1,116 @@
 package io.tolgee.activity
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.views.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.views.ProjectActivityViewByRevisionProvider
-import io.tolgee.dtos.query_results.TranslationHistoryView
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.util.Logging
-import io.tolgee.util.logger
+import io.tolgee.util.flushAndClear
+import jakarta.persistence.EntityManager
+import org.postgresql.util.PGobject
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityExistsException
-import javax.persistence.EntityManager
 
 @Service
 class ActivityService(
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
-  private val activityModifiedEntityRepository: ActivityModifiedEntityRepository
+  private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
+  private val currentDateProvider: CurrentDateProvider,
+  private val objectMapper: ObjectMapper,
+  private val jdbcTemplate: JdbcTemplate,
 ) : Logging {
   @Transactional
-  fun storeActivityData(activityRevision: ActivityRevision, modifiedEntities: ModifiedEntitiesType) {
-    val mergedActivityRevision = activityRevision.persist()
-    mergedActivityRevision.persistedDescribingRelations()
+  fun storeActivityData(
+    activityRevision: ActivityRevision,
+    modifiedEntities: ModifiedEntitiesType,
+  ) {
+    // let's keep the persistent context small
+    entityManager.flushAndClear()
 
-    mergedActivityRevision.modifiedEntities = modifiedEntities.values.flatMap { it.values }.toMutableList()
-    mergedActivityRevision.persistModifiedEntities()
+    val mergedActivityRevision = persistAcitivyRevision(activityRevision)
 
-    entityManager.flush()
-
+    persistedDescribingRelations(mergedActivityRevision)
+    mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
   }
 
-  private fun ActivityRevision.persistModifiedEntities() {
-    modifiedEntities.forEach { activityModifiedEntity ->
-      try {
-        entityManager.persist(activityModifiedEntity)
-      } catch (e: EntityExistsException) {
-        logger.debug("ModifiedEntity entity already exists in persistence context, skipping", e)
-      }
+  private fun persistModifiedEntities(modifiedEntities: ModifiedEntitiesType): MutableList<ActivityModifiedEntity> {
+    val list = modifiedEntities.values.flatMap { it.values }.toMutableList()
+    jdbcTemplate.batchUpdate(
+      "INSERT INTO activity_modified_entity " +
+        "(entity_class, entity_id, describing_data, " +
+        "describing_relations, modifications, revision_type, activity_revision_id) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+      list,
+      100,
+    ) { ps, entity ->
+      ps.setString(1, entity.entityClass)
+      ps.setLong(2, entity.entityId)
+      ps.setObject(3, getJsonbObject(entity.describingData))
+      ps.setObject(4, getJsonbObject(entity.describingRelations))
+      ps.setObject(5, getJsonbObject(entity.modifications))
+      ps.setInt(6, RevisionType.values().indexOf(entity.revisionType))
+      ps.setLong(7, entity.activityRevision.id)
+    }
+
+    return list
+  }
+
+  private fun persistedDescribingRelations(activityRevision: ActivityRevision) {
+    jdbcTemplate.batchUpdate(
+      "INSERT INTO activity_describing_entity " +
+        "(entity_class, entity_id, data, describing_relations, activity_revision_id) " +
+        "VALUES (?, ?, ?, ?, ?)",
+      activityRevision.describingRelations,
+      100,
+    ) { ps, entity ->
+      ps.setString(1, entity.entityClass)
+      ps.setLong(2, entity.entityId)
+      ps.setObject(3, getJsonbObject(entity.data))
+      ps.setObject(4, getJsonbObject(entity.describingRelations))
+      ps.setLong(5, activityRevision.id)
     }
   }
 
-  private fun ActivityRevision.persistedDescribingRelations() {
-    @Suppress("UselessCallOnCollection")
-    describingRelations.filterNotNull().forEach {
-      entityManager.persist(it)
-    }
+  private fun getJsonbObject(data: Any?): PGobject {
+    val pgObject = PGobject()
+    pgObject.type = "jsonb"
+    pgObject.value = objectMapper.writeValueAsString(data)
+    return pgObject
   }
 
-  private fun ActivityRevision.persist(): ActivityRevision {
-    return if (id == 0L) {
-      entityManager.persist(this)
-      this
+  private fun persistAcitivyRevision(activityRevision: ActivityRevision): ActivityRevision {
+    return if (activityRevision.id == 0L) {
+      entityManager.persist(activityRevision)
+      entityManager.flushAndClear()
+      activityRevision
     } else {
-      entityManager.getReference(ActivityRevision::class.java, id)
+      entityManager.getReference(ActivityRevision::class.java, activityRevision.id)
     }
   }
 
   @Transactional
-  fun getProjectActivity(projectId: Long, pageable: Pageable): Page<ProjectActivityView> {
+  fun getProjectActivity(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ProjectActivityView> {
     return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
-      pageable = pageable
+      pageable = pageable,
     ).get()
   }
 
@@ -76,16 +118,19 @@ class ActivityService(
   fun getProjectActivity(revisionId: Long): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
-      revisionId
+      revisionId,
     ).get()
   }
 
   @Transactional
-  fun getTranslationHistory(translationId: Long, pageable: Pageable): Page<TranslationHistoryView> {
+  fun getTranslationHistory(
+    translationId: Long,
+    pageable: Pageable,
+  ): Page<TranslationHistoryView> {
     return activityModifiedEntityRepository.getTranslationHistory(
       translationId = translationId,
       pageable = pageable,
-      ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD)
+      ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD),
     )
   }
 }

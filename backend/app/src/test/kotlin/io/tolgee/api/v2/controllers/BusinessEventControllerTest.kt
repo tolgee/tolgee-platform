@@ -43,21 +43,22 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         "eventName" to "TEST_EVENT",
         "organizationId" to testData.userAccountBuilder.defaultOrganizationBuilder.self.id,
         "projectId" to testData.projectBuilder.self.id,
-        "data" to mapOf("test" to "test")
+        "data" to mapOf("test" to "test"),
       ),
       HttpHeaders().also {
         it["Authorization"] = listOf(AuthorizedRequestFactory.getBearerTokenString(generateJwtToken(userAccount!!.id)))
-      }
+      },
     ).andIsOk
 
     var params: Map<String, Any?>? = null
     waitForNotThrowing(timeout = 10000) {
       verify(postHog, times(1)).capture(
-        any(), eq("TEST_EVENT"),
+        any(),
+        eq("TEST_EVENT"),
         argThat {
           params = this
           true
-        }
+        },
       )
     }
     params!!["organizationId"].assert.isNotNull

@@ -38,7 +38,7 @@ const StyledSmoothProgress = styled(SmoothProgress)`
 `;
 
 export type Props = {
-  width: number | string;
+  width: number;
   data: ReturnType<typeof useTranslationTools>;
   languageTag: string;
 };

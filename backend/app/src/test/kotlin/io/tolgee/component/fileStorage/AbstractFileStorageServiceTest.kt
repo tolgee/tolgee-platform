@@ -8,7 +8,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractFileStorageServiceTest {
-
   @set:Autowired
   lateinit var fileStorage: FileStorage
 

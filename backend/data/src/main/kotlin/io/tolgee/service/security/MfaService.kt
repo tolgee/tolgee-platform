@@ -22,11 +22,14 @@ class MfaService(
   private val totpGenerator: TimeBasedOneTimePasswordGenerator,
   private val userAccountService: UserAccountService,
   private val userCredentialsService: UserCredentialsService,
-  private val keyGenerator: KeyGenerator
+  private val keyGenerator: KeyGenerator,
 ) {
   private val base32 = Base32()
 
-  fun enableTotpFor(user: UserAccount, dto: UserTotpEnableRequestDto) {
+  fun enableTotpFor(
+    user: UserAccount,
+    dto: UserTotpEnableRequestDto,
+  ) {
     try {
       userCredentialsService.checkUserCredentials(user, dto.password)
     } catch (e: AuthenticationException) {
@@ -46,7 +49,10 @@ class MfaService(
     userAccountService.enableMfaTotp(user, key)
   }
 
-  fun disableTotpFor(user: UserAccount, dto: UserTotpDisableRequestDto) {
+  fun disableTotpFor(
+    user: UserAccount,
+    dto: UserTotpDisableRequestDto,
+  ) {
     try {
       userCredentialsService.checkUserCredentials(user, dto.password)
     } catch (e: AuthenticationException) {
@@ -61,7 +67,10 @@ class MfaService(
     userAccountService.disableMfaTotp(user)
   }
 
-  fun regenerateRecoveryCodes(user: UserAccount, dto: UserMfaRecoveryRequestDto): List<String> {
+  fun regenerateRecoveryCodes(
+    user: UserAccount,
+    dto: UserMfaRecoveryRequestDto,
+  ): List<String> {
     try {
       userCredentialsService.checkUserCredentials(user, dto.password)
     } catch (e: AuthenticationException) {
@@ -73,10 +82,11 @@ class MfaService(
       throw BadRequestException(Message.MFA_NOT_ENABLED)
     }
 
-    val codes = List(10) {
-      val key = keyGenerator.generate()
-      "${key.substring(0, 4)}-${key.substring(4, 8)}-${key.substring(8, 12)}-${key.substring(12, 16)}"
-    }
+    val codes =
+      List(10) {
+        val key = keyGenerator.generate()
+        "${key.substring(0, 4)}-${key.substring(4, 8)}-${key.substring(8, 12)}-${key.substring(12, 16)}"
+      }
 
     userAccountService.setMfaRecoveryCodes(user, codes)
     return codes
@@ -86,7 +96,10 @@ class MfaService(
     return user.totpKey?.isNotEmpty() == true
   }
 
-  fun checkMfa(user: UserAccount, otp: String?) {
+  fun checkMfa(
+    user: UserAccount,
+    otp: String?,
+  ) {
     if (!user.isMfaEnabled) {
       return
     }
@@ -104,12 +117,18 @@ class MfaService(
     }
   }
 
-  fun validateTotpCode(user: UserAccount, code: String): Boolean {
+  fun validateTotpCode(
+    user: UserAccount,
+    code: String,
+  ): Boolean {
     if (user.totpKey?.isNotEmpty() != true) return true
     return validateTotpCode(user.totpKey!!, code)
   }
 
-  fun validateTotpCode(key: ByteArray, code: String): Boolean {
+  fun validateTotpCode(
+    key: ByteArray,
+    code: String,
+  ): Boolean {
     if (code.length != 6) return false
 
     return try {

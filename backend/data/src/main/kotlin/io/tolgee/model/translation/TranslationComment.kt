@@ -7,20 +7,20 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType.LAZY
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.FetchType.LAZY
-import javax.persistence.Index
-import javax.persistence.ManyToOne
-import javax.persistence.Table
-import javax.validation.constraints.NotBlank
 
 @Entity
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["translation"])
 @Table(
-  indexes = [Index(columnList = "state")]
+  indexes = [Index(columnList = "state")],
 )
 class TranslationComment(
   @field:Length(max = 10000)
@@ -29,12 +29,10 @@ class TranslationComment(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String = "",
-
   @ActivityLoggedProp
   var state: TranslationCommentState = TranslationCommentState.NEEDS_RESOLUTION,
-
   @ManyToOne
-  var translation: Translation
+  var translation: Translation,
 ) : StandardAuditModel() {
   @ManyToOne(optional = false, fetch = LAZY)
   lateinit var author: UserAccount

@@ -1,7 +1,7 @@
 import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
 import { deleteSelected } from '../batchOperations';
 import { waitForGlobalLoading } from '../loading';
-import { confirmStandard } from '../shared';
+import { confirmStandard, dismissMenu } from '../shared';
 import { createTag } from '../tags';
 import { createTranslation, editCell } from '../translations';
 import { getLanguageId, getLanguages, ProjectInfo } from './shared';
@@ -49,7 +49,7 @@ export function testKeys(info: ProjectInfo) {
     }
     // close popup
     cy.waitForDom();
-    cy.get('body').type('{esc}');
+    dismissMenu();
   }
 
   if (

@@ -10,7 +10,7 @@ import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.events.OnProjectActivityStoredEvent
-import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.batch.BatchJobStatus
@@ -29,22 +29,22 @@ class ActivityWebsocketListener(
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
   private val userAccountService: UserAccountService,
   private val relationDescriptionExtractor: RelationDescriptionExtractor,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
-
   @Async
   @EventListener
   fun onActivity(event: OnProjectActivityStoredEvent) {
     event.activityRevision.projectId ?: return
 
-    val translationDataModifications = event.activityRevision.modifiedEntities.filter {
-      it.entityClass == Key::class.simpleName || it.entityClass == Translation::class.simpleName
-    }
+    val translationDataModifications =
+      event.activityRevision.modifiedEntities.filter {
+        it.entityClass == Key::class.simpleName || it.entityClass == Translation::class.simpleName
+      }
 
     if (translationDataModifications.isNotEmpty()) {
       onTranslationDataModified(
         event.activityRevision,
-        translationDataModifications
+        translationDataModifications,
       )
     }
   }
@@ -54,7 +54,7 @@ class ActivityWebsocketListener(
       val user = userAccountService.findDto(userId) ?: return@let null
       ActorInfo(
         type = ActorType.USER,
-        data = simpleUserAccountModelAssembler.toModel(user)
+        data = simpleUserAccountModelAssembler.toModel(user),
       )
     } ?: ActorInfo(type = ActorType.UNKNOWN, data = null)
   }
@@ -63,16 +63,21 @@ class ActivityWebsocketListener(
     activityRevision: ActivityRevision,
     translationDataModifications: List<ActivityModifiedEntity>,
   ) {
-    val data = if (translationDataModifications.size < 500) {
-      mapOf(
-        "keys" to translationDataModifications.filter { it.entityClass == Key::class.simpleName }.map {
-          getModifiedEntityView(it)
-        },
-        "translations" to translationDataModifications.filter { it.entityClass == Translation::class.simpleName }.map {
-          getModifiedEntityView(it)
-        }
-      )
-    } else null
+    val data =
+      if (translationDataModifications.size < 500) {
+        mapOf(
+          "keys" to
+            translationDataModifications.filter { it.entityClass == Key::class.simpleName }.map {
+              getModifiedEntityView(it)
+            },
+          "translations" to
+            translationDataModifications.filter { it.entityClass == Translation::class.simpleName }.map {
+              getModifiedEntityView(it)
+            },
+        )
+      } else {
+        null
+      }
 
     websocketEventPublisher(
       "/projects/${activityRevision.projectId!!}/${WebsocketEventType.TRANSLATION_DATA_MODIFIED.typeName}",
@@ -82,8 +87,8 @@ class ActivityWebsocketListener(
         sourceActivity = activityRevision.type,
         activityId = activityRevision.id,
         dataCollapsed = data == null,
-        timestamp = currentDateProvider.date.time
-      )
+        timestamp = currentDateProvider.date.time,
+      ),
     )
   }
 
@@ -91,10 +96,12 @@ class ActivityWebsocketListener(
   fun onBatchJobProgress(event: OnBatchJobProgress) {
     if (event.job.hidden) return
 
-    val realStatus = if (event.job.status == BatchJobStatus.PENDING)
-      BatchJobStatus.RUNNING
-    else
-      event.job.status
+    val realStatus =
+      if (event.job.status == BatchJobStatus.PENDING) {
+        BatchJobStatus.RUNNING
+      } else {
+        event.job.status
+      }
 
     websocketEventPublisher(
       "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
@@ -104,8 +111,8 @@ class ActivityWebsocketListener(
         sourceActivity = null,
         activityId = null,
         dataCollapsed = false,
-        timestamp = currentDateProvider.date.time
-      )
+        timestamp = currentDateProvider.date.time,
+      ),
     )
   }
 
@@ -124,7 +131,10 @@ class ActivityWebsocketListener(
     onBatchJobCompleted(event)
   }
 
-  fun onBatchJobCompleted(event: OnBatchJobCompleted, errorMessage: Message? = null) {
+  fun onBatchJobCompleted(
+    event: OnBatchJobCompleted,
+    errorMessage: Message? = null,
+  ) {
     if (event.job.hidden && event.job.status != BatchJobStatus.FAILED) return
 
     websocketEventPublisher(
@@ -135,8 +145,8 @@ class ActivityWebsocketListener(
         sourceActivity = null,
         activityId = null,
         dataCollapsed = false,
-        timestamp = currentDateProvider.date.time
-      )
+        timestamp = currentDateProvider.date.time,
+      ),
     )
   }
 
@@ -145,12 +155,14 @@ class ActivityWebsocketListener(
     it.describingData?.let { describingData -> data.putAll(describingData) }
     data["modifications"] = it.modifications
     data["changeType"] = it.revisionType
-    data["relations"] = it.describingRelations?.map { relationsEntry ->
-      relationsEntry.key to relationDescriptionExtractor.extract(
-        relationsEntry.value,
-        it.activityRevision.describingRelations
-      )
-    }?.toMap()
+    data["relations"] =
+      it.describingRelations?.map { relationsEntry ->
+        relationsEntry.key to
+          relationDescriptionExtractor.extract(
+            relationsEntry.value,
+            it.activityRevision.describingRelations,
+          )
+      }?.toMap()
     return data
   }
 }

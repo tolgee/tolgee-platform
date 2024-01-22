@@ -8,6 +8,7 @@ import io.tolgee.service.automations.AutomationService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -16,17 +17,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
-import javax.persistence.EntityManager
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",
-  ]
+  ],
 )
 class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private lateinit var testData: ContentDeliveryConfigTestData
 
   @Autowired
@@ -68,8 +67,8 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
       listOf(
         testData.projectBuilder.self.id,
         AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
-        null
-      )
+        null,
+      ),
     )
 
   @Test
@@ -92,16 +91,17 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     getFromCache().assert.isNull()
   }
 
-  private fun getEntityManagerInvocationsCount() = Mockito.mockingDetails(entityManager)
-    .invocations.count {
-      it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
-    }
+  private fun getEntityManagerInvocationsCount() =
+    Mockito.mockingDetails(entityManager)
+      .invocations.count {
+        it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
+      }
 
   private fun doGetAutomations() {
     automationService.getProjectAutomations(
       testData.projectBuilder.self.id,
       AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
-      null
+      null,
     )
   }
 }

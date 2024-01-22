@@ -1,10 +1,10 @@
 package io.tolgee.component
 
 import io.tolgee.util.Logging
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.filter.OncePerRequestFilter
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class TransferEncodingHeaderDebugFilter : OncePerRequestFilter(), Logging {
   init {
@@ -15,7 +15,11 @@ class TransferEncodingHeaderDebugFilter : OncePerRequestFilter(), Logging {
     return !this.logger.isDebugEnabled
   }
 
-  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain,
+  ) {
     filterChain.doFilter(request, response)
     val value = response.getHeader("Transport-Encoding")
     if (value != null) {

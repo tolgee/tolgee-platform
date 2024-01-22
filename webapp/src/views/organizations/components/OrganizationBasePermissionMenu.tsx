@@ -1,17 +1,14 @@
 import { FunctionComponent } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useUpdateBasePermissions } from './useUpdateBasePermissions';
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { confirmation } from 'tg.hooks/confirmation';
+import { messageService } from 'tg.service/MessageService';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-
-const messageService = container.resolve(MessageService);
 
 export const OrganizationBasePermissionMenu: FunctionComponent<{
   organization: OrganizationModel;

@@ -9,13 +9,20 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ContentStorageRepository : JpaRepository<ContentStorage?, Long?> {
-  fun findAllByProjectId(projectId: Long, pageable: Pageable): Page<ContentStorage>
-  fun getByProjectIdAndId(projectId: Long, contentDeliveryConfigId: Long): ContentStorage
+  fun findAllByProjectId(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<ContentStorage>
+
+  fun getByProjectIdAndId(
+    projectId: Long,
+    contentDeliveryConfigId: Long,
+  ): ContentStorage
 
   @Query(
     """
     select count(*) > 0 from ContentDeliveryConfig cdc where cdc.contentStorage = :storage
-  """
+  """,
   )
   fun isStorageInUse(storage: ContentStorage): Boolean
 }

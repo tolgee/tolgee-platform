@@ -31,12 +31,15 @@ open class S3FileStorage(
     }
   }
 
-  override fun storeFile(storageFilePath: String, bytes: ByteArray) {
+  override fun storeFile(
+    storageFilePath: String,
+    bytes: ByteArray,
+  ) {
     val byteArrayInputStream = ByteArrayInputStream(bytes)
     try {
       s3.putObject(
         { b -> b.bucket(bucketName).key(storageFilePath) },
-        RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong())
+        RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong()),
       )
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using s3 bucket!", storageFilePath, e)

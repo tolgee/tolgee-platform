@@ -77,9 +77,10 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     testDataService.saveTestData(testData.root)
     userAccount = testData.franta
-    val organization = testData.root.data.organizations.map { it.self }
-      .filter { it.name == "test_username" }
-      .single()
+    val organization =
+      testData.root.data.organizations.map { it.self }
+        .filter { it.name == "test_username" }
+        .single()
 
     performAuthGet("/v2/organizations/${organization.slug}/projects?size=100")
       .andPrettyPrint.andAssertThatJson.let {
@@ -175,7 +176,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   fun testCreate() {
     performAuthPost(
       "/v2/organizations",
-      dummyDto
+      dummyDto,
     ).andIsCreated.andPrettyPrint.andAssertThatJson {
       node("name").isEqualTo("Test org")
       node("slug").isEqualTo("test-org")
@@ -192,7 +193,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     performAuthPost(
       "/v2/organizations",
-      dummyDto.also { it.slug = "hello-1" }
+      dummyDto.also { it.slug = "hello-1" },
     ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
   }
 
@@ -202,7 +203,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     loginAsUserIfNotLogged()
     performAuthPost(
       "/v2/organizations",
-      dummyDto
+      dummyDto,
     ).andIsForbidden
     this.tolgeeProperties.authentication.userCanCreateOrganizations = true
   }
@@ -211,27 +212,27 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   fun testCreateValidation() {
     performAuthPost(
       "/v2/organizations",
-      dummyDto.also { it.slug = "" }
+      dummyDto.also { it.slug = "" },
     ).andIsBadRequest.let {
       assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
     }
     performAuthPost(
       "/v2/organizations",
-      dummyDto.also { it.name = "" }
+      dummyDto.also { it.name = "" },
     ).andIsBadRequest.let {
       assertThat(it.andReturn()).error().isStandardValidation.onField("name")
     }
 
     performAuthPost(
       "/v2/organizations",
-      dummyDto.also { it.slug = "sahsaldlasfhl " }
+      dummyDto.also { it.slug = "sahsaldlasfhl " },
     ).andIsBadRequest.let {
       assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
     }
 
     performAuthPost(
       "/v2/organizations",
-      dummyDto.also { it.slug = "a" }
+      dummyDto.also { it.slug = "a" },
     ).andIsBadRequest.let {
       assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
     }
@@ -241,7 +242,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   fun testCreateGeneratesSlug() {
     performAuthPost(
       "/v2/organizations",
-      dummyDto.also { it.slug = null }
+      dummyDto.also { it.slug = null },
     ).andIsCreated.andAssertThatJson { node("slug").isEqualTo("test-org") }
   }
 
@@ -255,7 +256,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
             organization.name = "Hello"
             organization.slug = "hello-1"
             organization.description = "This is changed description"
-          }
+          },
         ).andIsOk.andPrettyPrint.andAssertThatJson {
           node("name").isEqualTo("Hello")
           node("slug").isEqualTo("hello-1")
@@ -277,7 +278,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       "/v2/organizations/${organization.id}",
       dummyDto.also { organizationDto ->
         organizationDto.slug = "hello-1"
-      }
+      },
     ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
   }
 
@@ -291,11 +292,13 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     }
   }
 
-  private fun createOrganization(organizationDto: OrganizationDto) = executeInNewTransaction {
-    organizationService.create(
-      organizationDto, userAccount!!
-    )
-  }
+  private fun createOrganization(organizationDto: OrganizationDto) =
+    executeInNewTransaction {
+      organizationService.create(
+        organizationDto,
+        userAccount!!,
+      )
+    }
 
   @Test
   @Transactional
@@ -303,7 +306,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     withOwnerInOrganization { organization, owner, role ->
       performAuthPut(
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
-        SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
+        SetOrganizationRoleDto(OrganizationRoleType.MEMBER),
       ).andIsOk
       role.let { assertThat(it.type).isEqualTo(OrganizationRoleType.MEMBER) }
     }
@@ -316,7 +319,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       loginAsUser(owner)
       performAuthPut(
         "/v2/organizations/${organization.id}/set-base-permissions/REVIEW",
-        SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
+        SetOrganizationRoleDto(OrganizationRoleType.MEMBER),
       ).andIsOk
 
       organizationService.get(organization.id).basePermission.type.assert.isEqualTo(ProjectPermissionType.REVIEW)

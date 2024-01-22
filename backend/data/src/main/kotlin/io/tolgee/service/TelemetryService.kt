@@ -3,18 +3,18 @@ package io.tolgee.service
 import io.tolgee.component.HttpClient
 import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.dtos.TelemetryReportRequest
+import jakarta.persistence.EntityManager
 import org.springframework.http.HttpMethod
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Service
 class TelemetryService(
   private val instanceIdService: InstanceIdService,
   private val entityManager: EntityManager,
   private val httpClient: HttpClient,
-  private val telemetryProperties: TelemetryProperties
+  private val telemetryProperties: TelemetryProperties,
 ) {
   companion object {
     const val TELEMETRY_REPORT_PERIOD_MS = 24 * 60 * 60 * 1000L
@@ -31,7 +31,7 @@ class TelemetryService(
       "${telemetryProperties.server}/v2/public/telemetry/report",
       data,
       HttpMethod.POST,
-      Unit::class.java
+      Unit::class.java,
     )
   }
 
@@ -51,7 +51,7 @@ class TelemetryService(
       """
       select count(u) from UserAccount u
     """,
-      Long::class.javaObjectType
+      Long::class.javaObjectType,
     ).singleResult
   }
 
@@ -60,7 +60,7 @@ class TelemetryService(
       """
       select count(distinct l.tag) from Language l
     """,
-      Long::class.javaObjectType
+      Long::class.javaObjectType,
     ).singleResult
   }
 
@@ -69,7 +69,7 @@ class TelemetryService(
       """
       select count(l) from Language l
     """,
-      Long::class.javaObjectType
+      Long::class.javaObjectType,
     ).singleResult
   }
 
@@ -78,7 +78,7 @@ class TelemetryService(
       """
       select count(t) from Translation t
     """,
-      Long::class.javaObjectType
+      Long::class.javaObjectType,
     ).singleResult
   }
 
@@ -87,7 +87,7 @@ class TelemetryService(
       """
       select count(p) from Project p
     """,
-      Long::class.javaObjectType
+      Long::class.javaObjectType,
     ).singleResult
   }
 }

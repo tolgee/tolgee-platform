@@ -13,18 +13,25 @@ import org.springframework.web.client.RestTemplate
 class HttpClient(
   private val restTemplate: RestTemplate,
 ) {
-  fun <T> requestForJson(url: String, body: Any, method: HttpMethod, result: Class<T>): T? {
+  fun <T> requestForJson(
+    url: String,
+    body: Any,
+    method: HttpMethod,
+    result: Class<T>,
+  ): T? {
     val bodyJson = jacksonObjectMapper().writeValueAsString(body)
-    val headers = HttpHeaders().apply {
-      contentType = MediaType.APPLICATION_JSON
-    }
+    val headers =
+      HttpHeaders().apply {
+        contentType = MediaType.APPLICATION_JSON
+      }
 
-    val response = restTemplate.exchange(
-      url,
-      method,
-      HttpEntity(bodyJson, headers),
-      String::class.java
-    )
+    val response =
+      restTemplate.exchange(
+        url,
+        method,
+        HttpEntity(bodyJson, headers),
+        String::class.java,
+      )
 
     @Suppress("UNNECESSARY_SAFE_CALL")
     return response?.body?.let { stringResponseBody ->

@@ -36,7 +36,6 @@ class MtResultStreamer(
   private val applicationContext: ApplicationContext,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : Logging {
-
   private lateinit var outputStream: OutputStream
 
   fun stream(): StreamingResponseBody {
@@ -98,16 +97,17 @@ class MtResultStreamer(
   private fun writeTranslatedValue(
     writer: OutputStreamWriter,
     service: MtServiceType,
-    translated: Map<MtServiceType, TranslateResult?>?
+    translated: Map<MtServiceType, TranslateResult?>?,
   ) {
-    val model = translated?.get(service)
-      ?.let { it.translatedText?.let { text -> TranslationItemModel(text, it.contextDescription) } }
+    val model =
+      translated?.get(service)
+        ?.let { it.translatedText?.let { text -> TranslationItemModel(text, it.contextDescription) } }
 
     writer.writeJson(
       StreamedSuggestionItem(
         service,
         model,
-      )
+      ),
     )
   }
 
@@ -115,21 +115,21 @@ class MtResultStreamer(
     project: Project,
     key: Key?,
     dto: SuggestRequestDto,
-    service: MtServiceType
+    service: MtServiceType,
   ): Map<MtServiceType, TranslateResult> {
     return mtService.getMachineTranslations(
       project,
       key,
       dto.baseText,
       with(machineTranslationSuggestionFacade) { dto.targetLanguage },
-      setOf(service)
+      setOf(service),
     )
   }
 
   private fun writeException(
     e: Exception,
     writer: OutputStreamWriter,
-    service: MtServiceType
+    service: MtServiceType,
   ) {
     val exceptionWithMessage = (e as? ExceptionWithMessage)
     writer.writeJson(
@@ -138,8 +138,8 @@ class MtResultStreamer(
         null,
         errorMessage = exceptionWithMessage?.tolgeeMessage,
         errorParams = exceptionWithMessage?.params,
-        errorException = e::class.qualifiedName
-      )
+        errorException = e::class.qualifiedName,
+      ),
     )
     if (e !is BadRequestException && e !is NotFoundException) {
       Sentry.captureException(e)
@@ -186,7 +186,7 @@ class MtResultStreamer(
     mtService.getBaseTranslation(
       key = key,
       baseTranslationText = dto.baseText,
-      baseLanguage = baseLanguage
+      baseLanguage = baseLanguage,
     ).isNullOrBlank()
   }
 }

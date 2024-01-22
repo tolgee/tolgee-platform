@@ -62,18 +62,20 @@ class ProjectAuthorizationInterceptorTest {
 
   private val apiKey = Mockito.mock(ApiKeyDto::class.java)
 
-  private val projectAuthenticationInterceptor = ProjectAuthorizationInterceptor(
-    authenticationFacade,
-    organizationService,
-    securityService,
-    requestContextService,
-    Mockito.mock(ProjectHolder::class.java),
-    Mockito.mock(OrganizationHolder::class.java),
-  )
+  private val projectAuthenticationInterceptor =
+    ProjectAuthorizationInterceptor(
+      authenticationFacade,
+      organizationService,
+      securityService,
+      requestContextService,
+      Mockito.mock(ProjectHolder::class.java),
+      Mockito.mock(OrganizationHolder::class.java),
+    )
 
-  private val mockMvc = MockMvcBuilders.standaloneSetup(TestController::class.java)
-    .addInterceptors(projectAuthenticationInterceptor)
-    .build()
+  private val mockMvc =
+    MockMvcBuilders.standaloneSetup(TestController::class.java)
+      .addInterceptors(projectAuthenticationInterceptor)
+      .build()
 
   @BeforeEach
   fun setupMocks() {
@@ -230,24 +232,34 @@ class ProjectAuthorizationInterceptorTest {
     fun getAll() = "hello!"
 
     @GetMapping("/v2/projects/{id}/not-annotated")
-    fun notAnnotated(@PathVariable id: Long) = "henlo from project $id!"
+    fun notAnnotated(
+      @PathVariable id: Long,
+    ) = "henlo from project $id!"
 
     @GetMapping("/v2/projects/{id}/default-perms")
     @UseDefaultPermissions
-    fun defaultPerms(@PathVariable id: Long) = "henlo from project $id!"
+    fun defaultPerms(
+      @PathVariable id: Long,
+    ) = "henlo from project $id!"
 
     @GetMapping("/v2/projects/{id}/requires-single-scope")
     @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
-    fun requiresSingleScope(@PathVariable id: Long) = "henlo from project $id!"
+    fun requiresSingleScope(
+      @PathVariable id: Long,
+    ) = "henlo from project $id!"
 
     @GetMapping("/v2/projects/{id}/requires-multiple-scopes")
     @RequiresProjectPermissions([ Scope.KEYS_CREATE, Scope.MEMBERS_EDIT ])
-    fun requiresMultipleScopes(@PathVariable id: Long) = "henlo from project $id!"
+    fun requiresMultipleScopes(
+      @PathVariable id: Long,
+    ) = "henlo from project $id!"
 
     @GetMapping("/v2/projects/{id}/nonsense-perms")
     @UseDefaultPermissions
     @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
-    fun nonsensePerms(@PathVariable id: Long) = "henlo from project $id!"
+    fun nonsensePerms(
+      @PathVariable id: Long,
+    ) = "henlo from project $id!"
 
     @GetMapping("/v2/projects/implicit-access")
     @RequiresProjectPermissions([ Scope.KEYS_CREATE ])

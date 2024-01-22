@@ -7,8 +7,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.contentDelivery.AzureContentStorageConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.ContentStorageType
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureContentStorageConfig> {
@@ -16,7 +16,10 @@ class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureCo
     return dto.azureContentStorageConfig
   }
 
-  override fun clearParentEntity(storageEntity: ContentStorage, em: EntityManager) {
+  override fun clearParentEntity(
+    storageEntity: ContentStorage,
+    em: EntityManager,
+  ) {
     storageEntity.azureContentStorageConfig?.let { em.remove(it) }
     storageEntity.azureContentStorageConfig = null
   }
@@ -27,7 +30,7 @@ class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureCo
   override fun configDtoToEntity(
     dto: ContentStorageRequest,
     storageEntity: ContentStorage,
-    em: EntityManager
+    em: EntityManager,
   ): AzureContentStorageConfig {
     val azureDto = dto.azureContentStorageConfig ?: throw BadRequestException(Message.AZURE_CONFIG_REQUIRED)
     val entity = AzureContentStorageConfig(storageEntity)
@@ -39,7 +42,10 @@ class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureCo
     return entity
   }
 
-  override fun fillDtoSecrets(storageEntity: ContentStorage, dto: ContentStorageRequest) {
+  override fun fillDtoSecrets(
+    storageEntity: ContentStorage,
+    dto: ContentStorageRequest,
+  ) {
     val azureDto = dto.azureContentStorageConfig ?: return
     val entity = storageEntity.azureContentStorageConfig ?: return
     azureDto.connectionString = entity.connectionString

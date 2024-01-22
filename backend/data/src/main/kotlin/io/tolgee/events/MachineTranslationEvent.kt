@@ -13,5 +13,4 @@ open class MachineTranslationEvent(
    * The project containing translation
    */
   val project: Project,
-
 ) : ApplicationEvent(source)

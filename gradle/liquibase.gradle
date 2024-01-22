@@ -4,7 +4,7 @@ ext {
                 url         : "jdbc:postgresql://localhost:55432/postgres?currentSchema=$schema",
                 referenceUrl: referenceUrlPrefix +
                         '?dialect=io.tolgee.dialects.postgres.CustomPostgreSQLDialect' +
-                        '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
+                        '&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy' +
                         '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
                 username    : 'postgres',
                 password    : 'postgres',
@@ -15,7 +15,7 @@ ext {
             activities {
                 //noinspection GroovyAssignabilityCheck
                 main {
-                    changeLogFile changeLogPah
+                    changeLogFile "${project.projectDir}/${changeLogPah}"
                     url liveDb.url
                     referenceUrl liveDb.referenceUrl
                     username liveDb.username
@@ -34,11 +34,13 @@ ext {
                             "revision_sequence_generator," +
                             "billing_sequence," +
                             "activity_sequence," +
-                            "FK9xs5a07fba5yqje5jqm6qrehs,"+
-                            "column:textsearchable_.*,"
+                            "FK9xs5a07fba5yqje5jqm6qrehs," +
+                            "column:textsearchable_.*" +
                             "column:enabled_features"
                 }
             }
         }
+        diff.dependsOn compileKotlin
+        diffChangelog.dependsOn compileKotlin
     }
 }

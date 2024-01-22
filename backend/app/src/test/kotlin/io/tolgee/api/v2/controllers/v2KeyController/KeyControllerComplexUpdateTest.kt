@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
+import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
@@ -16,12 +17,15 @@ import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.ImageUploadService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
@@ -30,8 +34,10 @@ import java.math.BigDecimal
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: KeysTestData
+
+  @Autowired
+  lateinit var bigMetaService: BigMetaService
 
   val screenshotFile: InputStreamSource by lazy {
     generateImage(2000, 3000)
@@ -48,8 +54,8 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
 
   @ProjectApiKeyAuthTestMethod(
     scopes = [
-      Scope.TRANSLATIONS_EDIT
-    ]
+      Scope.TRANSLATIONS_EDIT,
+    ],
   )
   @Test
   fun `complex edit validates change state permissions`() {
@@ -61,7 +67,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
         name = keyName,
         translations = mapOf("en" to "EN", "de" to "DE"),
         states = mapOf("en" to AssignableTranslationState.REVIEWED),
-      )
+      ),
     ).andIsForbidden
   }
 
@@ -69,8 +75,8 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
     scopes = [
       Scope.KEYS_CREATE,
       Scope.TRANSLATIONS_EDIT,
-      Scope.TRANSLATIONS_STATE_EDIT
-    ]
+      Scope.TRANSLATIONS_STATE_EDIT,
+    ],
   )
   @Test
   fun `complex edit modifies state`() {
@@ -78,35 +84,37 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
     doUpdateAndVerifyStates(
       translations = mapOf("en" to "EN", "de" to "DE"),
       states = mapOf("en" to AssignableTranslationState.REVIEWED),
-      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.TRANSLATED)
+      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.TRANSLATED),
     )
 
     // existing translation
     doUpdateAndVerifyStates(
       translations = mapOf("en" to "EN", "de" to "DE"),
       states = mapOf("de" to AssignableTranslationState.REVIEWED),
-      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.REVIEWED)
+      statesToVerify = mapOf("en" to TranslationState.REVIEWED, "de" to TranslationState.REVIEWED),
     )
 
     doUpdateAndVerifyStates(
       translations = mapOf("cs" to "CS"),
       states = mapOf(),
-      statesToVerify = mapOf(
-        "cs" to TranslationState.TRANSLATED,
-        "en" to TranslationState.REVIEWED,
-        "de" to TranslationState.REVIEWED
-      )
+      statesToVerify =
+        mapOf(
+          "cs" to TranslationState.TRANSLATED,
+          "en" to TranslationState.REVIEWED,
+          "de" to TranslationState.REVIEWED,
+        ),
     )
 
     doUpdateAndVerifyStates(
       translations = mapOf("en" to "Test", "cs" to "Test"),
       states = mapOf("en" to AssignableTranslationState.REVIEWED, "cs" to AssignableTranslationState.REVIEWED),
-      statesToVerify = mapOf(
-        "cs" to TranslationState.REVIEWED,
-        "en" to TranslationState.REVIEWED,
-        // we modified the base, so it resets the state for the value, which is not modified
-        "de" to TranslationState.TRANSLATED
-      )
+      statesToVerify =
+        mapOf(
+          "cs" to TranslationState.REVIEWED,
+          "en" to TranslationState.REVIEWED,
+          // we modified the base, so it resets the state for the value, which is not modified
+          "de" to TranslationState.TRANSLATED,
+        ),
     )
   }
 
@@ -114,39 +122,42 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
     scopes = [
       Scope.KEYS_CREATE,
       Scope.TRANSLATIONS_EDIT,
-      Scope.TRANSLATIONS_STATE_EDIT
-    ]
+      Scope.TRANSLATIONS_STATE_EDIT,
+    ],
   )
   @Test
   fun `complex edit modifies state correctly when new translation created`() {
     doUpdateAndVerifyStates(
       translations = mapOf("en" to "Test", "cs" to "Test"),
       states = mapOf("en" to AssignableTranslationState.REVIEWED, "cs" to AssignableTranslationState.REVIEWED),
-      statesToVerify = mapOf(
-        "cs" to TranslationState.REVIEWED,
-        "en" to TranslationState.REVIEWED,
-      )
+      statesToVerify =
+        mapOf(
+          "cs" to TranslationState.REVIEWED,
+          "en" to TranslationState.REVIEWED,
+        ),
     )
 
     doUpdateAndVerifyStates(
       translations = mapOf("en" to "Test", "cs" to "Test", "de" to "Hello"),
-      states = mapOf(
-        "en" to AssignableTranslationState.REVIEWED,
-        "cs" to AssignableTranslationState.REVIEWED,
-        "de" to AssignableTranslationState.REVIEWED
-      ),
-      statesToVerify = mapOf(
-        "cs" to TranslationState.REVIEWED,
-        "en" to TranslationState.REVIEWED,
-        "de" to TranslationState.REVIEWED
-      )
+      states =
+        mapOf(
+          "en" to AssignableTranslationState.REVIEWED,
+          "cs" to AssignableTranslationState.REVIEWED,
+          "de" to AssignableTranslationState.REVIEWED,
+        ),
+      statesToVerify =
+        mapOf(
+          "cs" to TranslationState.REVIEWED,
+          "en" to TranslationState.REVIEWED,
+          "de" to TranslationState.REVIEWED,
+        ),
     )
   }
 
   private fun doUpdateAndVerifyStates(
     translations: Map<String, String>,
     states: Map<String, AssignableTranslationState>,
-    statesToVerify: Map<String, TranslationState>
+    statesToVerify: Map<String, TranslationState>,
   ) {
     doUpdate(translations, states)
     verifyStates(statesToVerify)
@@ -167,7 +178,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
 
   private fun doUpdate(
     translations: Map<String, String>,
-    states: Map<String, AssignableTranslationState>
+    states: Map<String, AssignableTranslationState>,
   ) {
     performProjectAuthPut(
       "keys/${testData.keyWithReferences.id}/complex-update",
@@ -175,7 +186,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
         name = "key_with_referecnces",
         translations = translations,
         states = states,
-      )
+      ),
     ).andIsOk
   }
 
@@ -184,8 +195,8 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
       Scope.KEYS_EDIT,
       Scope.TRANSLATIONS_EDIT,
       Scope.SCREENSHOTS_UPLOAD,
-      Scope.SCREENSHOTS_DELETE
-    ]
+      Scope.SCREENSHOTS_DELETE,
+    ],
   )
   @Test
   fun `updates key with translations and tags and screenshots`() {
@@ -200,8 +211,8 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
         translations = mapOf("en" to "EN", "de" to "DE"),
         tags = listOf("tag", "tag2"),
         screenshotUploadedImageIds = screenshotImageIds,
-        screenshotIdsToDelete = listOf(testData.screenshot.id)
-      )
+        screenshotIdsToDelete = listOf(testData.screenshot.id),
+      ),
     ).andIsOk.andAssertThatJson {
       node("id").isValidId
       node("name").isEqualTo(keyName)
@@ -254,7 +265,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
     assertThrows<FileStoreException> {
       screenshotImages.forEach {
         fileStorage.readFile(
-          "${ImageUploadService.UPLOADED_IMAGES_STORAGE_FOLDER_NAME}/${it.filenameWithExtension}"
+          "${ImageUploadService.UPLOADED_IMAGES_STORAGE_FOLDER_NAME}/${it.filenameWithExtension}",
         )
       }
     }
@@ -263,7 +274,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectApiKeyAuthTestMethod(
     scopes = [
       Scope.TRANSLATIONS_EDIT,
-    ]
+    ],
   )
   @Test
   fun `can modify permitted language translations`() {
@@ -273,9 +284,32 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
       ComplexEditKeyDto(
         name = testData.firstKey.name,
         translations = mapOf("en" to "Oh yes!"),
-        tags = listOf()
-      )
+        tags = listOf(),
+      ),
     ).andIsOk
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.TRANSLATIONS_EDIT,
+    ],
+  )
+  @Test
+  fun `stores big meta`() {
+    this.userAccount = testData.enOnlyUserAccount
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        relatedKeysInOrder =
+          mutableListOf(
+            RelatedKeyDto(null, "first_key"),
+            RelatedKeyDto(null, testData.firstKey.name),
+          ),
+      ),
+    ).andIsOk
+
+    bigMetaService.getCloseKeyIds(testData.firstKey.id).assert.hasSize(1)
   }
 
   @Test
@@ -284,8 +318,8 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
       Scope.KEYS_EDIT,
       Scope.TRANSLATIONS_EDIT,
       Scope.SCREENSHOTS_UPLOAD,
-      Scope.SCREENSHOTS_DELETE
-    ]
+      Scope.SCREENSHOTS_DELETE,
+    ],
   )
   fun `updates key screenshots with meta`() {
     val keyName = "super_key"
@@ -298,21 +332,23 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
         translations = mapOf("en" to "EN", "de" to "DE"),
         tags = listOf("tag", "tag2"),
         screenshotIdsToDelete = listOf(testData.screenshot.id),
-        screenshotsToAdd = screenshotImages.map {
-          KeyScreenshotDto().apply {
-            text = "text"
-            uploadedImageId = it.id
-            positions = listOf(
-              KeyInScreenshotPositionDto().apply {
-                x = 100
-                y = 120
-                width = 200
-                height = 300
-              }
-            )
-          }
-        }
-      )
+        screenshotsToAdd =
+          screenshotImages.map {
+            KeyScreenshotDto().apply {
+              text = "text"
+              uploadedImageId = it.id
+              positions =
+                listOf(
+                  KeyInScreenshotPositionDto().apply {
+                    x = 100
+                    y = 120
+                    width = 200
+                    height = 300
+                  },
+                )
+            }
+          },
+      ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("screenshots") {
         isArray.hasSize(3)
@@ -346,7 +382,7 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
       }
       assertThat(screenshots).hasSize(3)
       assertThat(
-        imageUploadService.find(screenshotImages.map { it.id })
+        imageUploadService.find(screenshotImages.map { it.id }),
       ).hasSize(0)
       screenshots.forEach {
         val position = it.keyScreenshotReferences[0].positions!![0]

@@ -189,7 +189,10 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                       filterState: values.states,
                       languages: values.languages,
                       structureDelimiter: values.nested ? '.' : '',
-                      filterNamespace: values.namespaces,
+                      filterNamespace: undefinedIfAllNamespaces(
+                        values.namespaces,
+                        allNamespaces
+                      ),
                       autoPublish: values.autoPublish,
                       contentStorageId: values.contentStorageId,
                     },
@@ -218,7 +221,10 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                       filterState: values.states,
                       languages: values.languages,
                       structureDelimiter: values.nested ? '.' : '',
-                      filterNamespace: values.namespaces,
+                      filterNamespace: undefinedIfAllNamespaces(
+                        values.namespaces,
+                        allNamespaces
+                      ),
                       autoPublish: values.autoPublish,
                       contentStorageId: values.contentStorageId,
                     },
@@ -319,3 +325,16 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
     </Dialog>
   );
 };
+
+function undefinedIfAllNamespaces(
+  selectedNamespaces: string[],
+  allNamespaces: string[] | undefined
+) {
+  if (!allNamespaces) {
+    return selectedNamespaces;
+  }
+  if (selectedNamespaces.length === allNamespaces.length) {
+    return undefined;
+  }
+  return selectedNamespaces;
+}

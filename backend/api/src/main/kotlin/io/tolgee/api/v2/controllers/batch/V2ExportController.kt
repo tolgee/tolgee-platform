@@ -14,7 +14,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -48,13 +48,14 @@ class V2ExportController(
   @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
   @AllowApiAccess
   fun export(
-    @ParameterObject params: ExportParams
+    @ParameterObject params: ExportParams,
   ): ResponseEntity<StreamingResponseBody> {
-    params.languages = languageService
-      .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.authenticatedUser.id)
-      .toList()
-      .map { language -> language.tag }
-      .toSet()
+    params.languages =
+      languageService
+        .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.authenticatedUser.id)
+        .toList()
+        .map { language -> language.tag }
+        .toSet()
     val exported = exportService.export(projectHolder.project.id, params)
     checkExportNotEmpty(exported)
     return getExportResponse(params, exported)
@@ -63,12 +64,12 @@ class V2ExportController(
   @PostMapping(value = [""])
   @Operation(
     summary = """Exports data (post). Useful when providing params exceeding allowed query size.
-  """
+  """,
   )
   @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
   @AllowApiAccess
   fun exportPost(
-    @RequestBody params: ExportParams
+    @RequestBody params: ExportParams,
   ): ResponseEntity<StreamingResponseBody> {
     return export(params)
   }
@@ -77,18 +78,22 @@ class V2ExportController(
     return getHeaders("$projectName.zip", "application/zip")
   }
 
-  private fun getHeaders(fileName: String, mediaType: String): HttpHeaders {
+  private fun getHeaders(
+    fileName: String,
+    mediaType: String,
+  ): HttpHeaders {
     val httpHeaders = HttpHeaders()
     httpHeaders.contentType = MediaType.valueOf(mediaType)
-    httpHeaders.contentDisposition = ContentDisposition.parse(
-      """attachment; filename="$fileName"""",
-    )
+    httpHeaders.contentDisposition =
+      ContentDisposition.parse(
+        """attachment; filename="$fileName"""",
+      )
     return httpHeaders
   }
 
   private fun getExportResponse(
     params: ExportParams,
-    exported: Map<String, InputStream>
+    exported: Map<String, InputStream>,
   ): ResponseEntity<StreamingResponseBody> {
     if (params.zip) {
       return getZipResponseEntity(exported)
@@ -106,7 +111,7 @@ class V2ExportController(
 
   private fun exportSingleFile(
     exported: Map<String, InputStream>,
-    params: ExportParams
+    params: ExportParams,
   ): ResponseEntity<StreamingResponseBody> {
     val (fileName, stream) = exported.entries.first()
     val fileNameWithoutSlash = fileName.replace("^/(.*)".toRegex(), "$1")
@@ -117,7 +122,7 @@ class V2ExportController(
         IOUtils.copy(stream, out)
         stream.close()
         out.close()
-      }
+      },
     )
   }
 
@@ -127,13 +132,13 @@ class V2ExportController(
     return ResponseEntity.ok().headers(httpHeaders).body(
       streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
         streamZipResponse(out, exported)
-      }
+      },
     )
   }
 
   private fun streamZipResponse(
     out: OutputStream,
-    exported: Map<String, InputStream>
+    exported: Map<String, InputStream>,
   ) {
     val zipOutputStream = ZipOutputStream(out)
 

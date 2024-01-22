@@ -1,4 +1,5 @@
 import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
+import { dismissMenu } from '../shared';
 import { getLanguageId, getLanguages, ProjectInfo } from './shared';
 
 export function testExport({ project, languages }: ProjectInfo) {
@@ -20,5 +21,5 @@ export function testExport({ project, languages }: ProjectInfo) {
         .should('not.exist');
     }
   });
-  cy.get('body').type('{esc}');
+  dismissMenu();
 }

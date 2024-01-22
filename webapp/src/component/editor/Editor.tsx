@@ -1,9 +1,6 @@
 import { useMemo, useRef } from 'react';
 import CodeMirror from 'codemirror';
-import {
-  Controlled as CodeMirrorReact,
-  DomEvent,
-} from 'react-codemirror2-react-17';
+import { Controlled as CodeMirrorReact, DomEvent } from 'react-codemirror2';
 import { parse } from '@formatjs/icu-messageformat-parser';
 import { GlobalStyles, styled } from '@mui/material';
 import 'codemirror/keymap/sublime';

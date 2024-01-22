@@ -14,50 +14,52 @@ class FormerUserTestData {
   lateinit var translation: Translation
   lateinit var project: Project
 
-  val root = TestDataBuilder().apply {
-    addUserAccount {
-      username = "admin@admin.com"
-      name = "Peter Administrator"
-      role = UserAccount.Role.ADMIN
-      activeUser = this
-    }.build {
-      organizationBuilder = defaultOrganizationBuilder
-    }
-
-    addUserAccountWithoutOrganization {
-      username = "will@be.removed"
-      name = "Will Be Removed"
-      role = UserAccount.Role.USER
-      formerUser = this
-    }
-
-    organizationBuilder.build {
-      addRole {
-        user = formerUser
-        type = OrganizationRoleType.OWNER
-      }
-    }
-
-    addProject {
-      organizationOwner = organizationBuilder.self
-      name = "project"
-      project = this
-    }.build {
-      val key = addKey {
-        name = "key"
-      }
-      val en = addEnglish()
-      addTranslation {
-        text = "helloo"
-        language = en.self
-        this.key = key.self
-        translation = this
+  val root =
+    TestDataBuilder().apply {
+      addUserAccount {
+        username = "admin@admin.com"
+        name = "Peter Administrator"
+        role = UserAccount.Role.ADMIN
+        activeUser = this
       }.build {
-        addComment {
-          text = "Hellooo!"
-          author = formerUser
+        organizationBuilder = defaultOrganizationBuilder
+      }
+
+      addUserAccountWithoutOrganization {
+        username = "will@be.removed"
+        name = "Will Be Removed"
+        role = UserAccount.Role.USER
+        formerUser = this
+      }
+
+      organizationBuilder.build {
+        addRole {
+          user = formerUser
+          type = OrganizationRoleType.OWNER
+        }
+      }
+
+      addProject {
+        organizationOwner = organizationBuilder.self
+        name = "project"
+        project = this
+      }.build {
+        val key =
+          addKey {
+            name = "key"
+          }
+        val en = addEnglish()
+        addTranslation {
+          text = "helloo"
+          language = en.self
+          this.key = key.self
+          translation = this
+        }.build {
+          addComment {
+            text = "Hellooo!"
+            author = formerUser
+          }
         }
       }
     }
-  }
 }

@@ -12,10 +12,10 @@ data class TranslationParams(
   val targetLanguageTag: String,
   val serviceInfo: MtServiceInfo,
   val metadata: Metadata?,
-  val isBatch: Boolean
+  val isBatch: Boolean,
 ) {
-
   val cacheKey: String
-    get() = jacksonObjectMapper()
-      .writeValueAsString(listOf(text, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata))
+    get() =
+      jacksonObjectMapper()
+        .writeValueAsString(listOf(text, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata))
 }

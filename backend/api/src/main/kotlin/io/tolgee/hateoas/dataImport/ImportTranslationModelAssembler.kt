@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component
 @Component
 class ImportTranslationModelAssembler :
   RepresentationModelAssemblerSupport<ImportTranslationView, ImportTranslationModel>(
-    V2ImportController::class.java, ImportTranslationModel::class.java
+    V2ImportController::class.java,
+    ImportTranslationModel::class.java,
   ) {
   override fun toModel(view: ImportTranslationView): ImportTranslationModel {
     return ImportTranslationModel(
@@ -19,7 +20,7 @@ class ImportTranslationModelAssembler :
       conflictId = view.conflictId,
       conflictText = view.conflictText,
       override = view.override,
-      resolved = view.resolvedHash != null
+      resolved = view.resolvedHash != null,
     )
   }
 }

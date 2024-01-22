@@ -10,23 +10,28 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface WebhookConfigRepository : JpaRepository<WebhookConfig, Long> {
-
   @Query(
     """
     from WebhookConfig wc
         left join fetch wc.automationActions aa
       where wc.id = :id and wc.project.id = :projectId
-  """
+  """,
   )
-  fun findByIdAndProjectId(id: Long, projectId: Long): WebhookConfig?
+  fun findByIdAndProjectId(
+    id: Long,
+    projectId: Long,
+  ): WebhookConfig?
 
   @Query(
     """
     from WebhookConfig wc
     where wc.project.id = :projectId
-  """
+  """,
   )
-  fun findByProjectId(projectId: Long, pageable: Pageable): Page<WebhookConfig>
+  fun findByProjectId(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<WebhookConfig>
 
   fun countByProject(project: Project): Int
 }

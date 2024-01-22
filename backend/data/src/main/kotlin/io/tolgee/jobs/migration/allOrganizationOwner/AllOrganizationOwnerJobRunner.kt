@@ -25,9 +25,8 @@ class AllOrganizationOwnerJobRunner(
   val jobLauncher: JobLauncher,
   val projectRepository: ProjectRepository,
   val userAccountRepository: UserAccountRepository,
-  val jobRepository: JobRepository
+  val jobRepository: JobRepository,
 ) : MigrationJobRunner {
-
   val log = LoggerFactory.getLogger(this::class.java)
 
   override fun run(): JobExecution? {
@@ -48,6 +47,6 @@ class AllOrganizationOwnerJobRunner(
     }
     val json = jacksonObjectMapper().writeValueAsBytes(mapOf("users" to userIds, "projects" to projectIds))
     val hash = DigestUtils.sha256Hex(json)
-    return JobParameters(mapOf("idsHash" to JobParameter(hash)))
+    return JobParameters(mapOf("idsHash" to JobParameter(hash, String::class.java)))
   }
 }

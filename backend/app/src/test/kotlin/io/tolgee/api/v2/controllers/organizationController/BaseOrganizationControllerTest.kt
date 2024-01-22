@@ -18,21 +18,23 @@ class BaseOrganizationControllerTest : AuthorizedControllerTest() {
   }
 
   private fun resetDto() {
-    dummyDto = OrganizationDto(
-      "Test org",
-      "This is description",
-      "test-org",
-    )
+    dummyDto =
+      OrganizationDto(
+        "Test org",
+        "This is description",
+        "test-org",
+      )
 
-    dummyDto2 = OrganizationDto(
-      "Test org 2",
-      "This is description 2",
-      "test-org-2",
-    )
+    dummyDto2 =
+      OrganizationDto(
+        "Test org 2",
+        "This is description 2",
+        "test-org-2",
+      )
   }
 
   protected fun withOwnerInOrganization(
-    fn: (organization: Organization, owner: UserAccount, ownerRole: OrganizationRole) -> Unit
+    fn: (organization: Organization, owner: UserAccount, ownerRole: OrganizationRole) -> Unit,
   ) {
     executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
       .let { organization ->
@@ -40,7 +42,7 @@ class BaseOrganizationControllerTest : AuthorizedControllerTest() {
           OrganizationRole(
             user = createdUser,
             organization = organization,
-            type = OrganizationRoleType.OWNER
+            type = OrganizationRoleType.OWNER,
           ).let { createdOwnerRole ->
             organizationRoleRepository.save(createdOwnerRole)
             fn(organization, createdUser, createdOwnerRole)

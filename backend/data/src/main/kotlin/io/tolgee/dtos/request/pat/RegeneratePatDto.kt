@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated
 data class RegeneratePatDto(
   @Schema(
     description = "Expiration date in epoch format (milliseconds). When null key never expires.",
-    example = "1661172869000"
+    example = "1661172869000",
   )
-  val expiresAt: Long? = null
+  val expiresAt: Long? = null,
 )

@@ -24,7 +24,7 @@ class GenericAutoTranslationChunkProcessor(
   private val autoTranslationService: AutoTranslationService,
   private val keyService: KeyService,
   private val currentDateProvider: CurrentDateProvider,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
 ) {
   fun process(
     job: BatchJobDto,
@@ -46,7 +46,7 @@ class GenericAutoTranslationChunkProcessor(
         forcedLanguageTags = listOf(languageTag),
         useTranslationMemory = useTranslationMemory,
         useMachineTranslation = useMachineTranslation,
-        isBatch = true
+        isBatch = true,
       )
     }
   }
@@ -54,7 +54,7 @@ class GenericAutoTranslationChunkProcessor(
   fun iterateCatching(
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    fn: (item: BatchTranslationTargetItem) -> Unit
+    fn: (item: BatchTranslationTargetItem) -> Unit,
   ) {
     val successfulTargets = mutableListOf<BatchTranslationTargetItem>()
     chunk.forEach { item ->
@@ -71,7 +71,7 @@ class GenericAutoTranslationChunkProcessor(
           e,
           (e.retryAt - currentDateProvider.date.time).toInt(),
           increaseFactor = 1,
-          maxRetries = -1
+          maxRetries = -1,
         )
       } catch (e: PlanTranslationLimitExceeded) {
         throw FailedDontRequeueException(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED, successfulTargets, e)

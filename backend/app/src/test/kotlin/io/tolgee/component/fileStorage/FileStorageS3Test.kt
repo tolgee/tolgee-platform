@@ -29,7 +29,8 @@ import software.amazon.awssdk.services.s3.model.S3Exception
     "tolgee.file-storage.s3.signing-region=dummy_signing_region",
     "tolgee.file-storage.s3.bucket-name=$BUCKET_NAME",
     "tolgee.authentication.initial-password=hey password manager, please don't use the filesystem :3",
-  ]
+    "tolgee.internal.use-in-memory-file-storage=false",
+  ],
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FileStorageS3Test : AbstractFileStorageServiceTest() {
@@ -56,6 +57,11 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   }
 
   @Test
+  fun `is LocalFileStorage`() {
+    assertThat(fileStorage is S3FileStorage).isTrue()
+  }
+
+  @Test
   fun testGetFile() {
     s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
     val fileByteContent = testFileContent.toByteArray(charset("UTF-8"))
@@ -78,7 +84,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   fun testStoreFile() {
     fileStorage.storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
     assertThat(
-      s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) }.readAllBytes()
+      s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) }.readAllBytes(),
     ).isEqualTo(testFileContent.toByteArray())
   }
 

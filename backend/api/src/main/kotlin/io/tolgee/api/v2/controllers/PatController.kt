@@ -20,7 +20,8 @@ import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.security.PatService
-import org.springdoc.api.annotations.ParameterObject
+import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -34,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @RestController
 @RequestMapping("/v2/pats")
@@ -48,22 +48,21 @@ class PatController(
   private val revealedPatModelAssembler: RevealedPatModelAssembler,
   private val patWithUserModelAssembler: PatWithUserModelAssembler,
 ) : IController {
-
   @GetMapping(value = [""])
   @Operation(summary = "Get all Personal Access Tokens")
   fun getAll(
-    @ParameterObject pageable: Pageable
+    @ParameterObject pageable: Pageable,
   ): PagedModel<PatModel> {
     return pagedResourcesAssembler.toModel(
       patService.findAll(authenticationFacade.authenticatedUser.id, pageable),
-      patModelAssembler
+      patModelAssembler,
     )
   }
 
   @GetMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Get Personal Access Token")
   fun get(
-    @PathVariable id: Long
+    @PathVariable id: Long,
   ): PatModel {
     checkOwner(id)
     return patModelAssembler.toModel(patService.get(id))
@@ -73,19 +72,24 @@ class PatController(
   @Operation(summary = "Creates new Personal Access Token")
   @ResponseStatus(HttpStatus.CREATED)
   @RequiresSuperAuthentication
-  fun create(@RequestBody @Valid dto: CreatePatDto): RevealedPatModel {
+  fun create(
+    @RequestBody @Valid
+    dto: CreatePatDto,
+  ): RevealedPatModel {
     return revealedPatModelAssembler.toModel(patService.create(dto, authenticationFacade.authenticatedUserEntity))
   }
 
   @PutMapping(value = ["/{id:[0-9]+}/regenerate"])
   @Operation(
-    summary = "Regenerates Personal Access Token. " +
-      "It generates new token value and updates its time of expiration."
+    summary =
+      "Regenerates Personal Access Token. " +
+        "It generates new token value and updates its time of expiration.",
   )
   @RequiresSuperAuthentication
   fun regenerate(
-    @RequestBody @Valid dto: RegeneratePatDto,
-    @PathVariable id: Long
+    @RequestBody @Valid
+    dto: RegeneratePatDto,
+    @PathVariable id: Long,
   ): RevealedPatModel {
     checkOwner(id)
     return revealedPatModelAssembler.toModel(patService.regenerate(id, dto.expiresAt))
@@ -95,8 +99,9 @@ class PatController(
   @Operation(summary = "Updates Personal Access Token")
   @RequiresSuperAuthentication
   fun update(
-    @RequestBody @Valid dto: UpdatePatDto,
-    @PathVariable id: Long
+    @RequestBody @Valid
+    dto: UpdatePatDto,
+    @PathVariable id: Long,
   ): PatModel {
     checkOwner(id)
     return patModelAssembler.toModel(patService.update(id, dto))
@@ -106,7 +111,7 @@ class PatController(
   @Operation(summary = "Deletes Personal Access Token")
   @RequiresSuperAuthentication
   fun delete(
-    @PathVariable id: Long
+    @PathVariable id: Long,
   ) {
     val pat = checkOwner(id)
     return patService.delete(pat)

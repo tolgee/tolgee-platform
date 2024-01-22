@@ -11,9 +11,21 @@ import java.util.*
 @Repository
 interface InvitationRepository : JpaRepository<Invitation?, Long?> {
   fun deleteAllByCreatedAtLessThan(date: Date)
+
   fun findOneByCode(code: String?): Optional<Invitation>
+
   fun findAllByPermissionProjectOrderByCreatedAt(project: Project): LinkedHashSet<Invitation>
-  fun getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization: Organization): List<Invitation>
+
+  @Query(
+    """
+    from Invitation i
+    left join fetch i.organizationRole orl
+    left join fetch i.permission p
+    where i.organizationRole.organization = :organization
+    order by i.createdAt
+  """,
+  )
+  fun getAllForOrganization(organization: Organization): List<Invitation>
 
   @Query(
     """
@@ -23,9 +35,12 @@ interface InvitationRepository : JpaRepository<Invitation?, Long?> {
     where 
         (i.email = :email or u.username = :email) and
         p.project = :project
-  """
+  """,
   )
-  fun countByUserOrInvitationWithEmailAndProject(email: String, project: Project): Int
+  fun countByUserOrInvitationWithEmailAndProject(
+    email: String,
+    project: Project,
+  ): Int
 
   @Query(
     """
@@ -35,7 +50,10 @@ interface InvitationRepository : JpaRepository<Invitation?, Long?> {
     where 
         (i.email = :email or u.username = :email) and
         orl.organization = :organization
-  """
+  """,
   )
-  fun countByUserOrInvitationWithEmailAndOrganization(email: String, organization: Organization): Int
+  fun countByUserOrInvitationWithEmailAndOrganization(
+    email: String,
+    organization: Organization,
+  ): Int
 }

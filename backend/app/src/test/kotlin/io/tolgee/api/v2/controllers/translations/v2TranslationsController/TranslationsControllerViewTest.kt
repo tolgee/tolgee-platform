@@ -3,7 +3,12 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ApiKeyPresentMode
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
@@ -19,7 +24,6 @@ import kotlin.system.measureTimeMillis
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: TranslationsTestData
 
   @BeforeEach
@@ -332,11 +336,12 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testData.generateLotOfData(2000)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    val time = measureTimeMillis {
-      performProjectAuthGet("/translations/select-all").andAssertThatJson {
-        node("ids").isArray.hasSize(2002)
+    val time =
+      measureTimeMillis {
+        performProjectAuthGet("/translations/select-all").andAssertThatJson {
+          node("ids").isArray.hasSize(2002)
+        }
       }
-    }
     assertThat(time).isLessThan(3000)
   }
 

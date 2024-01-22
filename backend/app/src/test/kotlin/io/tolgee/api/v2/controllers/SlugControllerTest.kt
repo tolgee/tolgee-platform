@@ -9,7 +9,6 @@ import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 
 class SlugControllerTest : AuthorizedControllerTest() {
-
   @Test
   fun testValidateOrganizationSlug() {
     performAuthGet("/v2/slug/validate-organization/hello-1").andIsOk.andAssertThatJson {
@@ -18,8 +17,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
     organizationRepository.save(
       Organization(
         name = "aaa",
-        slug = "hello-1"
-      )
+        slug = "hello-1",
+      ),
     )
     performAuthGet("/v2/slug/validate-organization/hello-1").andIsOk.andAssertThatJson {
       isEqualTo(false)
@@ -34,8 +33,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
     projectRepository.save(
       Project(
         name = "aaa",
-        slug = "hello-1"
-      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization }
+        slug = "hello-1",
+      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization },
     )
     performAuthGet("/v2/slug/validate-project/hello-1").andIsOk.andAssertThatJson {
       isEqualTo(false)
@@ -52,8 +51,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
     organizationRepository.save(
       Organization(
         name = "aaa",
-        slug = "hello-world"
-      )
+        slug = "hello-world",
+      ),
     )
 
     performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world"))
@@ -67,8 +66,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
     organizationRepository.save(
       Organization(
         name = "aaa",
-        slug = "hello-world"
-      )
+        slug = "hello-world",
+      ),
     )
 
     performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world", "hello-world"))
@@ -82,8 +81,8 @@ class SlugControllerTest : AuthorizedControllerTest() {
     projectRepository.save(
       Project(
         name = "aaa",
-        slug = "hello-world"
-      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization }
+        slug = "hello-world",
+      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization },
     )
     performAuthPost("/v2/slug/generate-project", GenerateSlugDto("Hello world"))
       .andIsOk.andAssertThatJson {

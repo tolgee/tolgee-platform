@@ -27,7 +27,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
-
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"
     private const val INVITED_NAME = "Franta"
@@ -41,11 +40,12 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    dummyDto = OrganizationDto(
-      "Test org",
-      "This is description",
-      "test-org",
-    )
+    dummyDto =
+      OrganizationDto(
+        "Test org",
+        "This is description",
+        "test-org",
+      )
     tolgeeProperties.frontEndUrl = null
     emailTestUtil.initMocks()
   }
@@ -55,12 +55,13 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
     this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val invitation = invitationService.create(
-        CreateOrganizationInvitationParams(
-          organization = organization,
-          type = OrganizationRoleType.MEMBER
+      val invitation =
+        invitationService.create(
+          CreateOrganizationInvitationParams(
+            organization = organization,
+            type = OrganizationRoleType.MEMBER,
+          ),
         )
-      )
       loginAsUser("hellouser")
       performAuthGet("/v2/organizations/${organization.id}/invitations")
         .andIsOk.andAssertThatJson {
@@ -93,12 +94,13 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
     this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val invitation = invitationService.create(
-        CreateOrganizationInvitationParams(
-          organization = organization,
-          type = OrganizationRoleType.OWNER
+      val invitation =
+        invitationService.create(
+          CreateOrganizationInvitationParams(
+            organization = organization,
+            type = OrganizationRoleType.OWNER,
+          ),
         )
-      )
       val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
       loginAsUser(invitedUser.username)
       performAuthGet("/v2/invitations/${invitation.code}/accept").andIsOk
@@ -115,12 +117,13 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
     this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val invitation = invitationService.create(
-        CreateOrganizationInvitationParams(
-          organization = organization,
-          type = OrganizationRoleType.MEMBER
+      val invitation =
+        invitationService.create(
+          CreateOrganizationInvitationParams(
+            organization = organization,
+            type = OrganizationRoleType.MEMBER,
+          ),
         )
-      )
       val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
       this.organizationRoleService.grantMemberRoleToUser(invitedUser, organization)
       loginAsUser(invitedUser.username)
@@ -132,12 +135,13 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   fun testDeleteInvitation() {
     val organization = prepareTestOrganization()
 
-    val invitation = invitationService.create(
-      CreateOrganizationInvitationParams(
-        organization = organization,
-        type = OrganizationRoleType.MEMBER
+    val invitation =
+      invitationService.create(
+        CreateOrganizationInvitationParams(
+          organization = organization,
+          type = OrganizationRoleType.MEMBER,
+        ),
       )
-    )
     performAuthDelete("/v2/invitations/${invitation.id!!}", null).andIsOk
     assertThatThrownBy { invitationService.getInvitation(invitation.code) }
       .isInstanceOf(BadRequestException::class.java)
@@ -201,8 +205,8 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
       OrganizationInviteUserDto(
         roleType = OrganizationRoleType.MEMBER,
         email = TEST_USERNAME,
-        name = INVITED_NAME
-      )
+        name = INVITED_NAME,
+      ),
     ).andIsBadRequest
   }
 
@@ -212,12 +216,13 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     return jacksonObjectMapper().readValue<Map<String, Any>>(invitationJson)["code"] as String
   }
 
-  private fun performCreateInvitation(organizationId: Long) = performAuthPut(
-    "/v2/organizations/$organizationId/invite",
-    OrganizationInviteUserDto(
-      roleType = OrganizationRoleType.MEMBER,
-      email = INVITED_EMAIL,
-      name = INVITED_NAME
+  private fun performCreateInvitation(organizationId: Long) =
+    performAuthPut(
+      "/v2/organizations/$organizationId/invite",
+      OrganizationInviteUserDto(
+        roleType = OrganizationRoleType.MEMBER,
+        email = INVITED_EMAIL,
+        name = INVITED_NAME,
+      ),
     )
-  )
 }

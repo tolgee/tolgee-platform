@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class AutomationActivityListener(
-  private val automationsBatchJobCreator: AutomationsBatchJobCreator
+  private val automationsBatchJobCreator: AutomationsBatchJobCreator,
 ) {
   @EventListener
   @Async
@@ -42,7 +42,7 @@ class AutomationActivityListener(
         Translation::class,
         Key::class,
         Language::class,
-        Project::class
+        Project::class,
       ).any { allowedClass -> allowedClass.simpleName == modifiedEntity.entityClass }
     }
   }

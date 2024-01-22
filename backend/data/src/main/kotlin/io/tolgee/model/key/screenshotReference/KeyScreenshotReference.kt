@@ -1,22 +1,17 @@
 package io.tolgee.model.key.screenshotReference
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.IdClass
+import jakarta.persistence.ManyToOne
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.IdClass
-import javax.persistence.ManyToOne
 
 @Entity
 @IdClass(KeyScreenshotReferenceId::class)
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
-)
 class KeyScreenshotReference {
   @ManyToOne(optional = false)
   @Id
@@ -26,7 +21,8 @@ class KeyScreenshotReference {
   @Id
   lateinit var screenshot: Screenshot
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
   var positions: MutableList<KeyInScreenshotPosition>? = mutableListOf()
 
   @Column(columnDefinition = "text", length = 5000)

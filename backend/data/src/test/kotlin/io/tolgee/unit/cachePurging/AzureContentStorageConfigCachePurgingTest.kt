@@ -16,38 +16,40 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
 class AzureContentStorageConfigCachePurgingTest() {
   @Test
   fun `correctly purges`() {
-    val config = object : AzureFrontDoorConfig {
-      override val clientId: String
-        get() = "fake-client-id"
-      override val clientSecret: String
-        get() = "fake-client-secret"
-      override val tenantId: String
-        get() = "fake-tenant-id"
-      override val contentRoot: String
-        get() = "/fake-content-root/"
-      override val subscriptionId: String
-        get() = "fake-subscription-id"
-      override val endpointName: String
-        get() = "fake-endpoint-name"
-      override val profileName: String
-        get() = "fake-profile-name"
-      override val resourceGroupName: String
-        get() = "fake-resource-group-name"
-    }
+    val config =
+      object : AzureFrontDoorConfig {
+        override val clientId: String
+          get() = "fake-client-id"
+        override val clientSecret: String
+          get() = "fake-client-secret"
+        override val tenantId: String
+          get() = "fake-tenant-id"
+        override val contentRoot: String
+          get() = "/fake-content-root/"
+        override val subscriptionId: String
+          get() = "fake-subscription-id"
+        override val endpointName: String
+          get() = "fake-endpoint-name"
+        override val profileName: String
+          get() = "fake-profile-name"
+        override val resourceGroupName: String
+          get() = "fake-resource-group-name"
+      }
     val restTemplateMock: RestTemplate = mock()
     val azureCredentialProviderMock: AzureCredentialProvider = mock()
     val purging = AzureContentDeliveryCachePurging(config, restTemplateMock, azureCredentialProviderMock)
-    val responseMock: ResponseEntity<*> = Mockito.mock(ResponseEntity::class.java, Mockito.RETURNS_DEEP_STUBS)
+    val responseMock: ResponseEntity<*> = Mockito.mock(ResponseEntity::class.java)
     whenever(restTemplateMock.exchange(any<String>(), any<HttpMethod>(), any(), eq(String::class.java))).doAnswer {
       responseMock as ResponseEntity<String>
     }
-    whenever(responseMock.statusCode.is2xxSuccessful).thenReturn(true)
+    whenever(responseMock.statusCode).thenReturn(HttpStatusCode.valueOf(200))
 
     val credentialMck: ClientSecretCredential =
       Mockito.mock(ClientSecretCredential::class.java, Mockito.RETURNS_DEEP_STUBS)
@@ -72,7 +74,7 @@ class AzureContentStorageConfigCachePurgingTest() {
         "/resourceGroups/${config.resourceGroupName}" +
         "/providers/Microsoft.Cdn/profiles/${config.profileName}" +
         "/afdEndpoints/${config.endpointName}" +
-        "/purge?api-version=2023-05-01"
+        "/purge?api-version=2023-05-01",
     )
   }
 }

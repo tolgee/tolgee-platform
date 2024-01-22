@@ -1,5 +1,12 @@
 import { default as React, FunctionComponent, useEffect } from 'react';
-import { Box, Step, StepContent, StepLabel, Stepper } from '@mui/material';
+import {
+  Box,
+  Link,
+  Step,
+  StepContent,
+  StepLabel,
+  Stepper,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -11,6 +18,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 const API_URL_PLACEHOLDER = '{{{apiUrl}}}';
@@ -48,21 +56,49 @@ export const IntegrateView: FunctionComponent = () => {
           }),
         ],
       ]}
-      md={11}
-      lg={9}
-      containerMaxWidth="lg"
+      maxWidth="normal"
     >
-      <Stepper activeStep={activeStep} orientation="vertical">
-        <Step expanded={true}>
-          <StepLabel data-cy="integrate-choose-your-weapon-step-label">
-            <T keyName="integrate_choose_your_weapon" />
-          </StepLabel>
-          <StepContent data-cy="integrate-choose-your-weapon-step-content">
-            <WeaponSelector
-              selected={selectedWeapon}
-              onSelect={onWeaponSelect}
-            />
-          </StepContent>
+      <Box my={2}>
+        <T
+          keyName="project_integrate_description"
+          params={{
+            link: (
+              <Link
+                href="https://tolgee.io/integrations"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            ),
+          }}
+        />
+      </Box>
+      <Stepper
+        activeStep={activeStep}
+        orientation="vertical"
+        sx={{ display: 'grid', maxWidth: '100%', contain: 'layout' }}
+      >
+        <Step expanded={true} sx={{ maxWidth: '100%' }}>
+          <QuickStartHighlight
+            itemKey="integrate_form"
+            message={t('quick_start_item_integrate_form_hint')}
+            offset={4}
+            borderRadius="5px"
+          >
+            <Box>
+              <StepLabel data-cy="integrate-choose-your-weapon-step-label">
+                <T keyName="integrate_choose_your_weapon" />
+              </StepLabel>
+              <StepContent
+                data-cy="integrate-choose-your-weapon-step-content"
+                sx={{ pb: 1 }}
+              >
+                <WeaponSelector
+                  selected={selectedWeapon}
+                  onSelect={onWeaponSelect}
+                />
+              </StepContent>
+            </Box>
+          </QuickStartHighlight>
         </Step>
         <Step expanded={activeStep > 0}>
           <StepLabel data-cy="integrate-select-api-key-step-label">
@@ -78,14 +114,14 @@ export const IntegrateView: FunctionComponent = () => {
             />
           </StepContent>
         </Step>
-        <Step>
+        <Step sx={{ overflowX: 'auto', maxWidth: '100%' }}>
           <StepLabel>
             <T keyName="integrate_step_integrate" />
           </StepLabel>
           <StepContent sx={{ maxWidth: '100%' }}>
             <React.Suspense fallback={<FullPageLoading />}>
               {selectedWeapon && selectedApiKey && (
-                <Box data-cy="integrate-guide" mb={12}>
+                <Box data-cy="integrate-guide">
                   <MdxProvider
                     modifyValue={(code) => {
                       return code
@@ -101,14 +137,13 @@ export const IntegrateView: FunctionComponent = () => {
                         )
                         .replace(
                           API_URL_PLACEHOLDER,
-                          process.env.REACT_APP_API_URL ||
+                          import.meta.env.VITE_APP_API_URL ||
                             window.location.origin
                         )
                         .replace(PROJECT_ID, String(project.id));
                     }}
-                  >
-                    {React.createElement(selectedWeapon.guide)}
-                  </MdxProvider>
+                    content={selectedWeapon.guide}
+                  />
                 </Box>
               )}
             </React.Suspense>

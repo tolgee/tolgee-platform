@@ -1,11 +1,13 @@
 package io.tolgee.service.organization
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
@@ -20,6 +22,7 @@ import io.tolgee.service.InvitationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.Cache
@@ -27,11 +30,11 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
@@ -51,40 +54,43 @@ class OrganizationService(
   private val tolgeeProperties: TolgeeProperties,
   private val permissionService: PermissionService,
   private val cacheManager: CacheManager,
-) {
+  private val currentDateProvider: CurrentDateProvider,
+  private val eventPublisher: ApplicationEventPublisher,
+) : Logging {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
   @set:Autowired
   lateinit var projectService: ProjectService
 
   @Transactional
-  fun create(
-    createDto: OrganizationDto,
-  ): Organization {
+  fun create(createDto: OrganizationDto): Organization {
     return create(createDto, authenticationFacade.authenticatedUserEntity)
   }
 
   @Transactional
   fun create(
     createDto: OrganizationDto,
-    userAccount: UserAccount
+    userAccount: UserAccount,
   ): Organization {
     if (createDto.slug != null && !validateSlugUniqueness(createDto.slug!!)) {
       throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
-    val slug = createDto.slug
-      ?: generateSlug(createDto.name)
+    val slug =
+      createDto.slug
+        ?: generateSlug(createDto.name)
 
-    val basePermission = Permission(
-      type = ProjectPermissionType.VIEW,
-    )
+    val basePermission =
+      Permission(
+        type = ProjectPermissionType.VIEW,
+      )
 
-    val organization = Organization(
-      name = createDto.name,
-      description = createDto.description,
-      slug = slug,
-    )
+    val organization =
+      Organization(
+        name = createDto.name,
+        description = createDto.description,
+        slug = slug,
+      )
 
     organization.basePermission = basePermission
 
@@ -96,11 +102,16 @@ class OrganizationService(
     return organization
   }
 
-  fun createPreferred(userAccount: UserAccount, name: String = userAccount.name): Organization {
-    val safeName = if (name.isNotEmpty() || name.length >= 3)
-      name
-    else
-      "${userAccount.username.take(3)} Organization"
+  fun createPreferred(
+    userAccount: UserAccount,
+    name: String = userAccount.name,
+  ): Organization {
+    val safeName =
+      if (name.isNotEmpty() || name.length >= 3) {
+        name
+      } else {
+        "${userAccount.username.take(3)} Organization"
+      }
     return this.create(OrganizationDto(name = safeName), userAccount = userAccount)
   }
 
@@ -112,18 +123,24 @@ class OrganizationService(
   /**
    * Returns any organizations accessible by user.
    */
-  fun findPreferred(userAccountId: Long, exceptOrganizationId: Long = 0): Organization? {
+  fun findPreferred(
+    userAccountId: Long,
+    exceptOrganizationId: Long = 0,
+  ): Organization? {
     return organizationRepository.findPreferred(
       userId = userAccountId,
       exceptOrganizationId,
-      PageRequest.of(0, 1)
+      PageRequest.of(0, 1),
     ).content.firstOrNull()
   }
 
   /**
    * Returns existing or created organization which seems to be potentially preferred.
    */
-  fun findOrCreatePreferred(userAccount: UserAccount, exceptOrganizationId: Long = 0): Organization? {
+  fun findOrCreatePreferred(
+    userAccount: UserAccount,
+    exceptOrganizationId: Long = 0,
+  ): Organization? {
     return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
       if (tolgeeProperties.authentication.userCanCreateOrganizations || userAccount.role == UserAccount.Role.ADMIN) {
         return@let createPreferred(userAccount)
@@ -135,13 +152,13 @@ class OrganizationService(
   fun findPermittedPaged(
     pageable: Pageable,
     requestParamsDto: OrganizationRequestParamsDto,
-    exceptOrganizationId: Long? = null
+    exceptOrganizationId: Long? = null,
   ): Page<OrganizationView> {
     return findPermittedPaged(
       pageable,
       requestParamsDto.filterCurrentUserOwner,
       requestParamsDto.search,
-      exceptOrganizationId
+      exceptOrganizationId,
     )
   }
 
@@ -149,31 +166,31 @@ class OrganizationService(
     pageable: Pageable,
     filterCurrentUserOwner: Boolean = false,
     search: String? = null,
-    exceptOrganizationId: Long? = null
+    exceptOrganizationId: Long? = null,
   ): Page<OrganizationView> {
     return organizationRepository.findAllPermitted(
       userId = authenticationFacade.authenticatedUser.id,
       pageable = pageable,
       roleType = if (filterCurrentUserOwner) OrganizationRoleType.OWNER else null,
       search = search,
-      exceptOrganizationId = exceptOrganizationId
+      exceptOrganizationId = exceptOrganizationId,
     )
   }
 
   fun get(id: Long): Organization {
-    return organizationRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    return organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
   fun find(id: Long): Organization? {
-    return organizationRepository.findByIdOrNull(id)
+    return organizationRepository.find(id)
   }
 
   fun get(slug: String): Organization {
-    return organizationRepository.getOneBySlug(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    return find(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
   fun find(slug: String): Organization? {
-    return organizationRepository.getOneBySlug(slug)
+    return organizationRepository.findBySlug(slug)
   }
 
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
@@ -187,7 +204,10 @@ class OrganizationService(
   }
 
   @CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
-  fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
+  fun edit(
+    id: Long,
+    editDto: OrganizationDto,
+  ): OrganizationView {
     val organization = this.find(id) ?: throw NotFoundException()
 
     // Evict slug-based cache entry
@@ -211,33 +231,49 @@ class OrganizationService(
     evict = [
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #organization.id}"),
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #organization.slug}"),
-    ]
+    ],
   )
   fun delete(organization: Organization) {
-    projectService.findAllInOrganization(organization.id).forEach {
-      projectService.deleteProject(it.id)
-    }
-
-    invitationService.getForOrganization(organization).forEach { invitation ->
-      invitationService.delete(invitation)
-    }
-
-    // `get` is important to help reducing the likelihood of a race-condition
-    // One may still occur, as a con of not relying on a DB-level cascade delete logic.
-    get(organization.id).preferredBy
+    organization.deletedAt = currentDateProvider.date
+    save(organization)
+    eventPublisher.publishEvent(BeforeOrganizationDeleteEvent(organization))
+    organization.preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
       .forEach {
-        it.preferredOrganization = findOrCreatePreferred(
-          userAccount = it.userAccount,
-          exceptOrganizationId = organization.id
-        )
+        it.preferredOrganization =
+          findOrCreatePreferred(
+            userAccount = it.userAccount,
+            exceptOrganizationId = organization.id,
+          )
         userPreferencesService.save(it)
       }
+  }
 
-    organizationRoleService.deleteAllInOrganization(organization)
+  @Transactional
+  fun deleteHard(organization: Organization) {
+    traceLogMeasureTime("deleteProjects") {
+      projectService.findAllInOrganization(organization.id).forEach {
+        projectService.deleteProject(it.id)
+      }
+    }
 
-    this.organizationRepository.delete(organization)
-    avatarService.unlinkAvatarFiles(organization)
+    traceLogMeasureTime("deleteInvitations") {
+      invitationService.getForOrganization(organization).forEach { invitation ->
+        invitationService.delete(invitation)
+      }
+    }
+
+    traceLogMeasureTime("deleteOrganizationRoles") {
+      organizationRoleService.deleteAllInOrganization(organization)
+    }
+
+    traceLogMeasureTime("deleteTheOrganization") {
+      this.organizationRepository.fetchData(organization)
+      this.organizationRepository.delete(organization)
+    }
+    traceLogMeasureTime("unlinkAvatarFiles") {
+      avatarService.unlinkAvatarFiles(organization)
+    }
   }
 
   @Transactional
@@ -245,7 +281,7 @@ class OrganizationService(
     evict = [
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
-    ]
+    ],
   )
   fun removeAvatar(organization: Organization) {
     avatarService.removeAvatar(organization)
@@ -256,25 +292,31 @@ class OrganizationService(
     evict = [
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
-    ]
+    ],
   )
-  fun setAvatar(organization: Organization, avatar: InputStream) {
+  fun setAvatar(
+    organization: Organization,
+    avatar: InputStream,
+  ) {
     avatarService.setAvatar(organization, avatar)
   }
 
   /**
-   * Checks address part uniqueness
+   * Checks slug uniqueness
    * @return Returns true if valid
    */
   fun validateSlugUniqueness(slug: String): Boolean {
-    return organizationRepository.countAllBySlug(slug) < 1
+    return !organizationRepository.organizationWithSlugExists(slug)
   }
 
   fun isThereAnotherOwner(id: Long): Boolean {
     return organizationRoleService.isAnotherOwnerInOrganization(id)
   }
 
-  fun generateSlug(name: String, oldSlug: String? = null): String {
+  fun generateSlug(
+    name: String,
+    oldSlug: String? = null,
+  ): String {
     return slugGenerator.generate(name, 3, 60) {
       if (it == oldSlug) {
         return@generate true
@@ -298,13 +340,17 @@ class OrganizationService(
     evict = [
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
       CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
-    ]
+    ],
   )
   fun save(organization: Organization) {
     organizationRepository.save(organization)
   }
 
-  fun findAllPaged(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView> {
+  fun findAllPaged(
+    pageable: Pageable,
+    search: String?,
+    userId: Long,
+  ): Page<OrganizationView> {
     return organizationRepository.findAllViews(pageable, search, userId)
   }
 
@@ -316,7 +362,10 @@ class OrganizationService(
     return organizationRepository.getProjectOwner(projectId)
   }
 
-  fun setBasePermission(organizationId: Long, permissionType: ProjectPermissionType) {
+  fun setBasePermission(
+    organizationId: Long,
+    permissionType: ProjectPermissionType,
+  ) {
     // Cache eviction: Not necessary, base permission is not cached here
     val organization = get(organizationId)
     val basePermission = organization.basePermission

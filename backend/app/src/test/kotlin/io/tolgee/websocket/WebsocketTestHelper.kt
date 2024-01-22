@@ -32,7 +32,7 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
 
   private val webSocketStompClient by lazy {
     WebSocketStompClient(
-      SockJsClient(listOf(WebSocketTransport(StandardWebSocketClient())))
+      SockJsClient(listOf(WebSocketTransport(StandardWebSocketClient()))),
     )
   }
 
@@ -43,11 +43,13 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
 
     webSocketStompClient.messageConverter = SimpleMessageConverter()
     sessionHandler = MySessionHandler(path, receivedMessages)
-    connection = webSocketStompClient.connect(
-      "http://localhost:$port/websocket", WebSocketHttpHeaders(),
-      StompHeaders().apply { add("jwtToken", jwtToken) },
-      sessionHandler!!
-    ).get(10, TimeUnit.SECONDS)
+    connection =
+      webSocketStompClient.connectAsync(
+        "http://localhost:$port/websocket",
+        WebSocketHttpHeaders(),
+        StompHeaders().apply { add("jwtToken", jwtToken) },
+        sessionHandler!!,
+      ).get(10, TimeUnit.SECONDS)
   }
 
   fun stop() {
@@ -64,12 +66,16 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
 
   private class MySessionHandler(
     val dest: String,
-    val receivedMessages: LinkedBlockingDeque<String>
+    val receivedMessages: LinkedBlockingDeque<String>,
   ) : StompSessionHandlerAdapter(), Logging {
-
     var subscription: StompSession.Subscription? = null
 
-    override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
+    override fun afterConnected(
+      session: StompSession,
+      connectedHeaders: StompHeaders,
+    ) {
+      logger.info("Connected to websocket")
+      logger.info("Subscribing to $dest")
       subscription = session.subscribe(dest, this)
     }
 
@@ -78,12 +84,15 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
       @Nullable command: StompCommand?,
       headers: StompHeaders,
       payload: ByteArray,
-      exception: Throwable
+      exception: Throwable,
     ) {
       logger.warn("Stomp Error:", exception)
     }
 
-    override fun handleTransportError(session: StompSession, exception: Throwable) {
+    override fun handleTransportError(
+      session: StompSession,
+      exception: Throwable,
+    ) {
       super.handleTransportError(session, exception)
       logger.warn("Stomp Transport Error:", exception)
     }
@@ -92,7 +101,10 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
       return ByteArray::class.java
     }
 
-    override fun handleFrame(stompHeaders: StompHeaders, o: Any?) {
+    override fun handleFrame(
+      stompHeaders: StompHeaders,
+      o: Any?,
+    ) {
       logger.info("Handle Frame with payload: {}", (o as? ByteArray)?.decodeToString())
       try {
         receivedMessages.add((o as ByteArray).decodeToString())
@@ -107,7 +119,7 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
    */
   fun assertNotified(
     dispatchCallback: () -> Unit,
-    assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit)
+    assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit),
   ) {
     Thread.sleep(200)
     dispatchCallback()

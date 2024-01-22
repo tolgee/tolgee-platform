@@ -4,6 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { BaseView } from 'tg.component/layout/BaseView';
+import { BaseViewAddButton } from 'tg.component/layout/BaseViewAddButton';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
@@ -13,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { Usage } from 'tg.component/billing/Usage';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -54,19 +56,31 @@ export const ProjectListView = () => {
 
   const isAdminAccess = !preferredOrganization?.currentUserRole && isAdmin;
 
+  const addAllowed = isOrganizationOwner || isAdminAccess;
+
+  const showSearch =
+    search || (listPermitted.data?.page?.totalElements ?? 0) > 5;
+
   return (
     <StyledWrapper>
       <DashboardPage isAdminAccess={isAdminAccess}>
         <BaseView
           windowTitle={t('projects_title')}
-          onSearch={setSearch}
-          containerMaxWidth="lg"
+          onSearch={showSearch ? setSearch : undefined}
+          searchPlaceholder={t('projects_search_placeholder')}
+          maxWidth={1000}
           allCentered
-          addLinkTo={
-            isOrganizationOwner || isAdminAccess
-              ? LINKS.PROJECT_ADD.build()
-              : undefined
+          addComponent={
+            addAllowed && (
+              <QuickStartHighlight itemKey="add_project">
+                <BaseViewAddButton
+                  addLinkTo={LINKS.PROJECT_ADD.build()}
+                  label={t('projects_add_button')}
+                />
+              </QuickStartHighlight>
+            )
           }
+          addLabel={t('projects_add_button')}
           hideChildrenOnLoading={false}
           navigation={[
             [<OrganizationSwitch key={0} />],

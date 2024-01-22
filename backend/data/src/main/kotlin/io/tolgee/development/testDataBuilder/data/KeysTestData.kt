@@ -24,88 +24,96 @@ class KeysTestData {
 
   var projectBuilder: ProjectBuilder
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    val userAccountBuilder = addUserAccount {
-      username = "Peter"
-      user = this
-    }
-
-    project2 = addProject {
-      name = "Other project"
-      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-    }.build {
-      addPermission {
-        user = this@KeysTestData.user
-        type = ProjectPermissionType.MANAGE
-      }
-    }.self
-
-    projectBuilder = addProject {
-      name = "Peter's project"
-      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-      project = this
-    }.build {
-      english = addLanguage {
-        name = "English"
-        tag = "en"
-      }.self
-
-      german = addLanguage {
-        name = "German"
-        tag = "de"
-      }.self
-
-      addPermission {
-        user = this@KeysTestData.user
-        type = ProjectPermissionType.MANAGE
-      }
-
-      firstKey = addKey {
-        name = "first_key"
-      }.self
-
-      secondKey = addKey {
-        name = "second_key"
-      }.build {
-        screenshot = addScreenshot { }.self
-      }.self
-
-      addKey {
-        name = "key_with_referecnces"
-        this@KeysTestData.keyWithReferences = this
-      }.build {
-        addScreenshotReference {
-          screenshot = this@KeysTestData.screenshot
-          key = this@build.self
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      val userAccountBuilder =
+        addUserAccount {
+          username = "Peter"
+          user = this
         }
-        addMeta {
-          tags.add(
-            Tag().apply {
-              project = projectBuilder.self
-              name = "test"
+
+      project2 =
+        addProject {
+          name = "Other project"
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        }.build {
+          addPermission {
+            user = this@KeysTestData.user
+            type = ProjectPermissionType.MANAGE
+          }
+        }.self
+
+      projectBuilder =
+        addProject {
+          name = "Peter's project"
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+          project = this
+        }.build {
+          english =
+            addLanguage {
+              name = "English"
+              tag = "en"
+            }.self
+
+          german =
+            addLanguage {
+              name = "German"
+              tag = "de"
+            }.self
+
+          addPermission {
+            user = this@KeysTestData.user
+            type = ProjectPermissionType.MANAGE
+          }
+
+          firstKey =
+            addKey {
+              name = "first_key"
+            }.self
+
+          secondKey =
+            addKey {
+              name = "second_key"
+            }.build {
+              screenshot = addScreenshot { }.self
+            }.self
+
+          addKey {
+            name = "key_with_referecnces"
+            this@KeysTestData.keyWithReferences = this
+          }.build {
+            addScreenshotReference {
+              screenshot = this@KeysTestData.screenshot
+              key = this@build.self
             }
-          )
-          addComment {
-            text = "What a text comment"
-          }
-          addCodeReference {
-            line = 20
-            path = "./code/exist.extension"
+            addMeta {
+              tags.add(
+                Tag().apply {
+                  project = projectBuilder.self
+                  name = "test"
+                },
+              )
+              addComment {
+                text = "What a text comment"
+              }
+              addCodeReference {
+                line = 20
+                path = "./code/exist.extension"
+              }
+            }
           }
         }
-      }
-    }
 
-    addUserAccountWithoutOrganization {
-      username = "enOnly"
-      projectBuilder.addPermission {
-        user = this@addUserAccountWithoutOrganization
-        type = ProjectPermissionType.TRANSLATE
-        translateLanguages = mutableSetOf(english)
+      addUserAccountWithoutOrganization {
+        username = "enOnly"
+        projectBuilder.addPermission {
+          user = this@addUserAccountWithoutOrganization
+          type = ProjectPermissionType.TRANSLATE
+          translateLanguages = mutableSetOf(english)
+        }
+        enOnlyUserAccount = this
       }
-      enOnlyUserAccount = this
     }
-  }
 
   fun addNKeys(n: Int) {
     (1..n).forEach {

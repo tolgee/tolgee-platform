@@ -2,7 +2,6 @@ import { FunctionComponent, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -13,7 +12,6 @@ import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
@@ -25,8 +23,7 @@ import { BaseProjectView } from '../BaseProjectView';
 import { useLeaveProject } from '../useLeaveProject';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
-
-const messageService = container.resolve(MessageService);
+import { messageService } from 'tg.service/MessageService';
 
 type ValueType = components['schemas']['EditProjectDTO'];
 
@@ -119,9 +116,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
 
   return (
     <BaseProjectView
-      lg={7}
-      md={9}
-      containerMaxWidth="lg"
+      maxWidth="narrow"
       windowTitle={t('project_settings_title')}
       navigation={[
         [

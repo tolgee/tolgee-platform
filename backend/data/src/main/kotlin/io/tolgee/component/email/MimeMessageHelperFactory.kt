@@ -14,7 +14,7 @@ class MimeMessageHelperFactory(
     return MimeMessageHelper(
       message,
       MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-      StandardCharsets.UTF_8.name()
+      StandardCharsets.UTF_8.name(),
     )
   }
 }

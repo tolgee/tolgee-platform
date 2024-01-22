@@ -11,12 +11,13 @@ data class ProjectDto(
   val organizationOwnerId: Long,
 ) : Serializable {
   companion object {
-    fun fromEntity(entity: Project) = ProjectDto(
-      name = entity.name,
-      description = entity.description,
-      slug = entity.slug,
-      id = entity.id,
-      organizationOwnerId = entity.organizationOwner.id,
-    )
+    fun fromEntity(entity: Project) =
+      ProjectDto(
+        name = entity.name,
+        description = entity.description,
+        slug = entity.slug,
+        id = entity.id,
+        organizationOwnerId = entity.organizationOwner.id,
+      )
   }
 }

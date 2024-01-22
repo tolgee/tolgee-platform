@@ -1,5 +1,5 @@
 import { FC, useMemo, useState } from 'react';
-import { Box, Slider, styled } from '@mui/material';
+import { Box, Link, Slider, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import {
@@ -103,15 +103,31 @@ export const Credits: FC = () => {
   return (
     <Plan>
       <PlanContent>
-        <PlanTitle
-          title={
-            <T
-              keyName="billing_extra_credits_title"
-              params={{ hint: <MtHint /> }}
-            />
-          }
-        />
+        <Box gridArea="title" gridColumn="1 / span 2">
+          <PlanTitle
+            title={
+              <T
+                keyName="billing_extra_credits_title"
+                params={{ hint: <MtHint /> }}
+              />
+            }
+          />
+        </Box>
         <Box gridArea="info">
+          <Box mb={2}>
+            <T
+              keyName="billing_credits_explanation"
+              params={{
+                link: (
+                  <Link
+                    href="https://tolgee.io/pricing#pricing-question-what-is-tolgee-translator"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                ),
+              }}
+            />
+          </Box>
           <StyledSliderWrapper>
             <StyledCreditAmount>{formatNumber(totalAmount)}</StyledCreditAmount>
             <Slider

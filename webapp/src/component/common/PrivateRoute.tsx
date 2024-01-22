@@ -1,10 +1,9 @@
 import { default as React, FunctionComponent } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
-import { SecurityService } from 'tg.service/SecurityService';
+import { securityService } from 'tg.service/SecurityService';
 import { AppState } from 'tg.store/index';
 
 interface PrivateRouteProps {}
@@ -15,11 +14,10 @@ export const PrivateRoute: FunctionComponent<
   const allowPrivate = useSelector(
     (state: AppState) => state.global.security.allowPrivate
   );
-  const ss = container.resolve(SecurityService);
-  const afterLoginLink = ss.getAfterLoginLink();
+  const afterLoginLink = securityService.getAfterLoginLink();
 
   if (allowPrivate && afterLoginLink) {
-    ss.removeAfterLoginLink();
+    securityService.removeAfterLoginLink();
     return <Redirect to={afterLoginLink} />;
   }
 

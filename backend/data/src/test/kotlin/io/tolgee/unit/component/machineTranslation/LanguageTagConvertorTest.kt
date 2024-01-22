@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class LanguageTagConvertorTest {
-
   @Test
   fun `it converts correctly`() {
     assertThat(LanguageTagConvertor.findSuitableTag(arrayOf("cs", "en", "de"), "cs-CZ_80"))

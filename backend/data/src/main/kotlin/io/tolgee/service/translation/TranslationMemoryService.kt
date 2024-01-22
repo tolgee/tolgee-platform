@@ -11,10 +11,9 @@ import org.springframework.stereotype.Service
 class TranslationMemoryService(
   private val translationsService: TranslationService,
 ) {
-
   fun getAutoTranslatedValue(
     key: Key,
-    targetLanguage: Language
+    targetLanguage: Language,
   ): TranslationMemoryItemView? {
     return translationsService.getTranslationMemoryValue(key, targetLanguage)
   }
@@ -22,7 +21,7 @@ class TranslationMemoryService(
   fun suggest(
     key: Key,
     targetLanguage: Language,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     return translationsService.getTranslationMemorySuggestions(key, targetLanguage, pageable)
   }
@@ -30,13 +29,13 @@ class TranslationMemoryService(
   fun suggest(
     baseTranslationText: String,
     targetLanguage: Language,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     return translationsService.getTranslationMemorySuggestions(
       baseTranslationText,
       null,
       targetLanguage,
-      pageable
+      pageable,
     )
   }
 }

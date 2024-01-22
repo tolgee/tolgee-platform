@@ -9,42 +9,45 @@ import io.tolgee.model.enums.ProjectPermissionType
 
 open class BaseTestData(
   userName: String = "test_username",
-  projectName: String = "test_project"
+  projectName: String = "test_project",
 ) {
   var projectBuilder: ProjectBuilder
   lateinit var englishLanguage: Language
   var user: UserAccount
   var userAccountBuilder: UserAccountBuilder
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    userAccountBuilder = addUserAccount {
-      username = userName
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      userAccountBuilder =
+        addUserAccount {
+          username = userName
+        }
+
+      user = userAccountBuilder.self
+
+      projectBuilder =
+        addProject {
+          name = projectName
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        }.build buildProject@{
+
+          addPermission {
+            project = this@buildProject.self
+            user = this@BaseTestData.user
+            type = ProjectPermissionType.MANAGE
+          }
+
+          addLanguage {
+            name = "English"
+            tag = "en"
+            originalName = "English"
+            englishLanguage = this
+            this@buildProject.self.baseLanguage = this
+          }
+
+          this.self {
+            baseLanguage = englishLanguage
+          }
+        }
     }
-
-    user = userAccountBuilder.self
-
-    projectBuilder = addProject {
-      name = projectName
-      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-    }.build buildProject@{
-
-      addPermission {
-        project = this@buildProject.self
-        user = this@BaseTestData.user
-        type = ProjectPermissionType.MANAGE
-      }
-
-      addLanguage {
-        name = "English"
-        tag = "en"
-        originalName = "English"
-        englishLanguage = this
-        this@buildProject.self.baseLanguage = this
-      }
-
-      this.self {
-        baseLanguage = englishLanguage
-      }
-    }
-  }
 }

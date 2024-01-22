@@ -12,7 +12,6 @@ import java.util.*
 
 @Repository
 interface KeyRepository : JpaRepository<Key, Long> {
-
   @Query(
     """
     from Key k
@@ -21,27 +20,33 @@ interface KeyRepository : JpaRepository<Key, Long> {
       k.name = :name 
       and k.project.id = :projectId 
       and (ns.name = :namespace or (ns is null and :namespace is null))
-  """
+  """,
   )
-  fun getByNameAndNamespace(projectId: Long, name: String, namespace: String?): Optional<Key>
+  fun getByNameAndNamespace(
+    projectId: Long,
+    name: String,
+    namespace: String?,
+  ): Optional<Key>
 
   @Query(
     """
       from Key k left join fetch k.namespace left join fetch k.keyMeta where k.project.id = :projectId
-    """
+    """,
   )
   fun getAllByProjectId(projectId: Long): Set<Key>
 
   @Query(
     """
       from Key k left join fetch k.namespace where k.project.id = :projectId order by k.id
-    """
+    """,
   )
   fun getAllByProjectIdSortedById(projectId: Long): List<Key>
 
-  @Query("select k.id from Key k where k.project.id = :projectId")
-  fun getIdsByProjectId(projectId: Long?): List<Long>
+  @Query("select k from Key k left join fetch k.keyMeta km where k.project.id = :projectId")
+  fun getByProjectIdWithFetchedMetas(projectId: Long?): List<Key>
+
   fun deleteAllByIdIn(ids: Collection<Long>)
+
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
 
   @Query(
@@ -51,7 +56,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       left join fetch k.keyMeta 
       left join fetch k.keyScreenshotReferences 
       where k.id in :ids
-    """
+    """,
   )
   fun findAllByIdInForDelete(ids: Collection<Long>): List<Key>
 
@@ -100,9 +105,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
           or lower(f_unaccent(t.text)) %> searchUnaccent
           or lower(f_unaccent(bt.text)) %> searchUnaccent
           )
-      """
+      """,
   )
-  fun searchKeys(search: String, projectId: Long, languageTag: String?, pageable: Pageable): Page<KeySearchResultView>
+  fun searchKeys(
+    search: String,
+    projectId: Long,
+    languageTag: String?,
+    pageable: Pageable,
+  ): Page<KeySearchResultView>
 
   @Query(
     """
@@ -112,9 +122,12 @@ interface KeyRepository : JpaRepository<Key, Long> {
     countQuery = """
       select count(k) from Key k 
       where k.project.id = :projectId
-    """
+    """,
   )
-  fun getAllByProjectId(projectId: Long, pageable: Pageable): Page<Key>
+  fun getAllByProjectId(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<Key>
 
   @Query(
     """
@@ -122,7 +135,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     left join fetch k.keyMeta km
     left join fetch km.tags
     where k in :keys
-  """
+  """,
   )
   fun getWithTags(keys: Set<Key>): List<Key>
 
@@ -132,14 +145,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
     left join fetch k.keyMeta km
     left join fetch km.tags
     where k.id in :keyIds
-  """
+  """,
   )
   fun getWithTagsByIds(keyIds: Iterable<Long>): Set<Key>
 
   @Query(
     """
     select k.project.id from Key k where k.id in :keysIds
-  """
+  """,
   )
   fun getProjectIdsForKeyIds(keysIds: List<Long>): List<Long>
 
@@ -148,7 +161,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     select k from Key k
     left join fetch k.namespace
     where k.id in :keyIds
-  """
+  """,
   )
   fun getKeysWithNamespaces(keyIds: List<Long>): List<Key>
 
@@ -156,13 +169,19 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     from Language l
     join l.translations t
-    where t.key.id = :keyId 
-      and l.project.id = :projectId 
+    where t.id in (select t.id from Key k join k.translations t where k.id = :keyId)
+      and l.project.id = :projectId
       and t.state = io.tolgee.model.enums.TranslationState.DISABLED
    order by l.id
-  """
+  """,
   )
-  fun getDisabledLanguages(projectId: Long, keyId: Long): List<Language>
+  fun getDisabledLanguages(
+    projectId: Long,
+    keyId: Long,
+  ): List<Language>
 
-  fun findByProjectIdAndId(projectId: Long, keyId: Long): Key?
+  fun findByProjectIdAndId(
+    projectId: Long,
+    keyId: Long,
+  ): Key?
 }

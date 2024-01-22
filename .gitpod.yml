@@ -34,7 +34,7 @@ tasks:
       printf "\033[3J\033c\033[3J"
 
       # Fix API server address for Gitpod VSCode Web
-      echo "REACT_APP_API_URL=$(gp url 8080)" > webapp/.env.local
+      echo "VITE_APP_API_URL=$(gp url 8080)" > webapp/.env.local
 
       until test -e /workspace/.f; do sleep 1; done
       # Schedule auto-refresh for the webapp preview window after backend is fully up,

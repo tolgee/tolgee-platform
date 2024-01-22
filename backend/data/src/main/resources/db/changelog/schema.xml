@@ -1788,9 +1788,6 @@
     <changeSet author="jenik (generated)" id="1650442105133-29">
         <dropTable tableName="key_aud"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-30">
-        <dropTable tableName="language_aud"/>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1650442105133-31">
         <dropTable tableName="organization_aud"/>
     </changeSet>
@@ -1833,96 +1830,8 @@
             <column name="project_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-10">
-        <dropForeignKeyConstraint baseTableName="email_verification_aud" constraintName="FK1diai27pxl7epr7wmiddlwns5"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-11">
-        <dropForeignKeyConstraint baseTableName="api_key_scopes_enum_aud" constraintName="FK3jkyqktbidh2cyx3xy3qml99l"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-12">
-        <dropForeignKeyConstraint baseTableName="key_aud" constraintName="FKcwyby3t6jg4ybxox3nchfbpqy"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-13">
-        <dropForeignKeyConstraint baseTableName="invitation_aud" constraintName="FKdkc05rqm5p3ahqp80ukr4y6se"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-14">
-        <dropForeignKeyConstraint baseTableName="user_account_aud" constraintName="FKfi9ywuk505xl9g17jib6b7urx"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-15">
-        <dropForeignKeyConstraint baseTableName="organization_role_aud" constraintName="FKgey5u1uwkslc6hhyp3uka2wj8"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-16">
-        <dropForeignKeyConstraint baseTableName="organization_aud" constraintName="FKgrkrhev0nmxi9r1h096cm8lxe"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-17">
-        <dropForeignKeyConstraint baseTableName="api_key_aud" constraintName="FKhqt2jx03076gcmame7hggtppa"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-18">
-        <dropForeignKeyConstraint baseTableName="translation_aud" constraintName="FKlkb2y39ix1nhtnjkco5pkwa5w"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-19">
-        <dropForeignKeyConstraint baseTableName="permission_aud" constraintName="FKlkd3khuueqm30qwpdrku4w6eo"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-20">
-        <dropForeignKeyConstraint baseTableName="language_aud" constraintName="FKq4t05s4qw8uasc9mjl2tk83sm"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-21">
-        <dropForeignKeyConstraint baseTableName="screenshot_aud" constraintName="FKq6jhbxmwvr0o19sfqwog5gk7s"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-22">
-        <dropForeignKeyConstraint baseTableName="translation_comment_aud" constraintName="FKq8g6phhnoyyuyjh9omekg8ja7"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-23">
-        <dropForeignKeyConstraint baseTableName="permission_languages_aud"
-                                  constraintName="FKqrbr6c2d8ujo1y43a6ftsdp8c"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-24">
-        <dropForeignKeyConstraint baseTableName="project_aud" constraintName="FKqsyp928iixx9oharj1ofavbk5"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-25">
-        <dropTable tableName="api_key_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-26">
-        <dropTable tableName="api_key_scopes_enum_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-27">
-        <dropTable tableName="email_verification_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-28">
-        <dropTable tableName="invitation_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-29">
-        <dropTable tableName="key_aud"/>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1650442105133-30">
         <dropTable tableName="language_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-31">
-        <dropTable tableName="organization_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-32">
-        <dropTable tableName="organization_role_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-33">
-        <dropTable tableName="permission_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-34">
-        <dropTable tableName="permission_languages_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-35">
-        <dropTable tableName="project_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-36">
-        <dropTable tableName="screenshot_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-37">
-        <dropTable tableName="translation_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-38">
-        <dropTable tableName="translation_comment_aud"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1650442105133-39">
-        <dropTable tableName="user_account_aud"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1650963584426-32">
         <dropColumn columnName="third_party_billing_id" tableName="organization"/>
@@ -2743,7 +2652,7 @@
             SET is_initial_user = true
             WHERE id = (
                 SELECT id FROM user_account WHERE username != '___implicit_user' ORDER BY id LIMIT 1
-            );
+                );
         </sql>
     </changeSet>
     <changeSet author="cynthia" id="1693517732527-3">
@@ -2954,6 +2863,173 @@
         <addColumn tableName="content_delivery_config">
             <column name="last_published" type="timestamp"/>
         </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1695640860120-1">
+        <createTable tableName="quick_start">
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="quick_startPK"/>
+            </column>
+            <column name="completed_steps" type="TEXT[]"/>
+            <column name="finished" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="open" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1695640860120-2">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="quick_start" constraintName="FK2gbjbrkjgdy770vc1nyuvbfal" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1695640860120-3">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="quick_start" constraintName="FK946dggx61o0jyux1oo5gby8v0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik" id="1694597673945-1">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <sqlCheck expectedResult="false">
+                    SELECT CASE
+                    WHEN EXISTS (SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'batch_job_execution_params'
+                    AND column_name = 'parameter_value')
+                    THEN 'true'
+                    ELSE 'false'
+                    END;
+                </sqlCheck>
+                <sqlCheck expectedResult="true">
+                    SELECT CASE
+                    WHEN EXISTS (SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'batch_job_execution_params')
+                    THEN 'true'
+                    ELSE 'false'
+                    END;
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql>
+            ALTER TABLE BATCH_STEP_EXECUTION ADD CREATE_TIME TIMESTAMP NOT NULL DEFAULT '1970-01-01 00:00:00';
+
+            ALTER TABLE BATCH_STEP_EXECUTION ALTER COLUMN START_TIME DROP NOT NULL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN DATE_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN LONG_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN DOUBLE_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN TYPE_CD TYPE VARCHAR(100);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME TYPE_CD TO PARAMETER_TYPE;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN KEY_NAME TYPE VARCHAR(100);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME KEY_NAME TO PARAMETER_NAME;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN STRING_VAL TYPE VARCHAR(2500);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME STRING_VAL TO PARAMETER_VALUE;
+        </sql>
+    </changeSet>
+    <changeSet id="1693517732528-0" author="jenik">
+        <addColumn tableName="project">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1693517732528-1" author="jenik">
+        <addColumn tableName="organization">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1693517732528-2" author="jenik">
+        <sql>
+            CREATE INDEX project_deleted_at_null ON project((deleted_at IS NULL));
+            CREATE INDEX organization_deleted_at_null ON organization((deleted_at IS NULL));
+        </sql>
+    </changeSet>
+    <changeSet id="1693517732529-0" author="jenik">
+        <dropUniqueConstraint tableName="import" constraintName="UKgf336yxrmsyau8skvim42lkuj" />
+        <addColumn tableName="import">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+        <sql>
+            CREATE INDEX import_deleted_at_null ON import((deleted_at IS NULL));
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1701253506661-1">
+        <createIndex indexName="IDX3vbfxy7bbtb4am22kbxdu8q01" tableName="keys_distance">
+            <column name="key2id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1701253506661-2">
+        <createIndex indexName="IDX9k594pjm6edcigab7mu2hq0s0" tableName="keys_distance">
+            <column name="key1id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-5">
+        <addUniqueConstraint columnNames="batch_job_chunk_execution_id" constraintName="UC_ACTIVITY_REVISIONBATCH_JOB_CHUNK_EXECUTION_ID_COL" tableName="activity_revision"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-6">
+        <addUniqueConstraint columnNames="batch_job_id" constraintName="UC_ACTIVITY_REVISIONBATCH_JOB_ID_COL" tableName="activity_revision"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-7">
+        <addUniqueConstraint columnNames="target_language_id" constraintName="UC_AUTO_TRANSLATION_CONFIGTARGET_LANGUAGE_ID_COL" tableName="auto_translation_config"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-8">
+        <addUniqueConstraint columnNames="conflict_id" constraintName="UC_IMPORT_TRANSLATIONCONFLICT_ID_COL" tableName="import_translation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-9">
+        <addUniqueConstraint columnNames="import_key_id" constraintName="UC_KEY_METAIMPORT_KEY_ID_COL" tableName="key_meta"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-10">
+        <addUniqueConstraint columnNames="key_id" constraintName="UC_KEY_METAKEY_ID_COL" tableName="key_meta"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-11">
+        <addUniqueConstraint columnNames="user_account_id" constraintName="UC_MT_CREDIT_BUCKETUSER_ACCOUNT_ID_COL" tableName="mt_credit_bucket"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-12">
+        <addUniqueConstraint columnNames="target_language_id" constraintName="UC_MT_SERVICE_CONFIGTARGET_LANGUAGE_ID_COL" tableName="mt_service_config"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-13">
+        <addUniqueConstraint columnNames="invitation_id" constraintName="UC_ORGANIZATION_ROLEINVITATION_ID_COL" tableName="organization_role"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-14">
+        <addUniqueConstraint columnNames="invitation_id" constraintName="UC_PERMISSIONINVITATION_ID_COL" tableName="permission"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-15">
+        <addUniqueConstraint columnNames="organization_id" constraintName="UC_PERMISSIONORGANIZATION_ID_COL" tableName="permission"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-16">
+        <addUniqueConstraint columnNames="base_language_id" constraintName="UC_PROJECTBASE_LANGUAGE_ID_COL" tableName="project"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-17">
+        <addUniqueConstraint columnNames="author_id, project_id" constraintName="UKgf336yxrmsyau8skvim42lkuj" tableName="import"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-18">
+        <dropColumn columnName="revision_type" tableName="activity_describing_entity"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-1">
+        <modifyDataType columnName="avatar_hash" newDataType="varchar(255)" tableName="organization"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-2">
+        <modifyDataType columnName="avatar_hash" newDataType="varchar(255)" tableName="project"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-3">
+        <modifyDataType columnName="avatar_hash" newDataType="varchar(255)" tableName="user_account"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1703766932501-4">
+        <modifyDataType columnName="structure_delimiter" newDataType="char(255)" tableName="content_delivery_config"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1704203594118-1">
+        <dropUniqueConstraint constraintName="UKgf336yxrmsyau8skvim42lkuj" tableName="import"/>
+        <sql>
+            create unique index import_author_project_unique on import(author_id, project_id) where deleted_at is null
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1704461236234-1">
+        <dropUniqueConstraint constraintName="uc_import_translationconflict_id_col" tableName="import_translation"/>
     </changeSet>
     <changeSet author="cynthia (generated)" id="1701635886941-1">
         <createSequence incrementBy="50" sequenceName="sequence_notifications" startValue="1"/>

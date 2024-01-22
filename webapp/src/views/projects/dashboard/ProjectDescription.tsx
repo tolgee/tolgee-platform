@@ -53,7 +53,6 @@ export const ProjectDescription: React.FC<Props> = ({ description }) => {
       <StyledContent>
         <ReactMarkdown
           components={{
-            // eslint-disable-next-line react/display-name
             a: (props) => (
               <MuiLink
                 href={props.href || ''}

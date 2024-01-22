@@ -19,7 +19,7 @@ package io.tolgee.dtos.cacheable
 import io.tolgee.model.ApiKey
 import io.tolgee.model.enums.Scope
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 data class ApiKeyDto(
   val id: Long,
@@ -37,7 +37,7 @@ data class ApiKeyDto(
         expiresAt = apiKey.expiresAt,
         projectId = apiKey.project.id,
         userAccountId = apiKey.userAccount.id,
-        scopes = apiKey.scopesEnum.toSet(),
+        scopes = apiKey.scopesEnum.filterNotNull().toSet(),
       )
     }
   }

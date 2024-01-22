@@ -1,10 +1,9 @@
-import { container } from 'tsyringe';
 import { Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 import { components } from 'tg.service/apiSchema.generated';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -15,8 +14,6 @@ type Props = {
   disabledLanguages: number[] | undefined;
   enableEmpty?: boolean;
 };
-
-const messaging = container.resolve(MessageService);
 
 export const getLanguagesContent = ({
   languages,
@@ -32,7 +29,7 @@ export const getLanguagesContent = ({
       : putBaseLangFirst([...value, lang], baseLang);
 
     if (!result?.length && !enableEmpty) {
-      messaging.error(<T keyName="set_at_least_one_language_error" />);
+      messageService.error(<T keyName="set_at_least_one_language_error" />);
       return;
     }
     onChange(result || []);

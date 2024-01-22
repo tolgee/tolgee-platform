@@ -17,9 +17,13 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.*
+import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.dtos.cacheable.PatDto
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.*
+import io.tolgee.model.ApiKey
+import io.tolgee.model.Pat
+import io.tolgee.model.UserAccount
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -37,8 +41,9 @@ class AuthenticationFacade(
     get() = SecurityContextHolder.getContext().authentication is TolgeeAuthentication
 
   val authentication: TolgeeAuthentication
-    get() = SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
-      ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+    get() =
+      SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
+        ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   // -- CURRENT USER
   val authenticatedUser: UserAccountDto
@@ -51,13 +56,14 @@ class AuthenticationFacade(
     get() = authenticatedUserEntityOrNull ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   val authenticatedUserEntityOrNull: UserAccount?
-    get() = authenticatedUserOrNull?.let {
-      if (authentication.userAccountEntity == null) {
-        authentication.userAccountEntity = userAccountService.findActive(it.id)
-      }
+    get() =
+      authenticatedUserOrNull?.let {
+        if (authentication.userAccountEntity == null) {
+          authentication.userAccountEntity = userAccountService.findActive(it.id)
+        }
 
-      return authentication.userAccountEntity
-    }
+        return authentication.userAccountEntity
+      }
 
   // -- AUTHENTICATION METHOD AND DETAILS
   val isUserSuperAuthenticated: Boolean
