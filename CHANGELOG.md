@@ -1,3 +1,10 @@
+# [3.46.0](https://github.com/tolgee/tolgee-platform/compare/v3.45.9...v3.46.0) (2024-01-22)
+
+
+### Features
+
+* Key Description, Tolgee AI Translator on self-hosted, AI prompt customizations ([#2092](https://github.com/tolgee/tolgee-platform/issues/2092)) ([ed58f62](https://github.com/tolgee/tolgee-platform/commit/ed58f6254d2dcd98d419123608550f2c9635a34e))
+
 ## [3.45.9](https://github.com/tolgee/tolgee-platform/compare/v3.45.8...v3.45.9) (2024-01-18)
 
 
