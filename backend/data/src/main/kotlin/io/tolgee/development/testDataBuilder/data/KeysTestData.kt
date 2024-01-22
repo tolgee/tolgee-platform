@@ -75,6 +75,7 @@ class KeysTestData {
             addKey {
               name = "second_key"
             }.build {
+              setDescription("description")
               screenshot = addScreenshot { }.self
             }.self
 

@@ -12,6 +12,8 @@ open class BaseTestData(
   projectName: String = "test_project",
 ) {
   var projectBuilder: ProjectBuilder
+  val project get() = projectBuilder.self
+
   lateinit var englishLanguage: Language
   var user: UserAccount
   var userAccountBuilder: UserAccountBuilder

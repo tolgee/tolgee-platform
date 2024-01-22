@@ -264,7 +264,7 @@ class OrganizationService(
     }
 
     traceLogMeasureTime("deleteOrganizationRoles") {
-      organizationRoleService.deleteAllInOrganization(organization)
+      organizationRoleService.onOrganizationDelete(organization)
     }
 
     traceLogMeasureTime("deleteTheOrganization") {

@@ -1,6 +1,6 @@
 package io.tolgee.service.project
 
-import io.tolgee.model.Language
+import io.tolgee.model.ILanguage
 import io.tolgee.model.LanguageStats
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
@@ -51,15 +51,15 @@ class ProjectStatsService(
   }
 
   fun computeProjectTotals(
-    baseLanguage: Language?,
+    baseLanguage: ILanguage,
     languageStats: List<LanguageStats>,
   ): ProjectStateTotals {
     val baseStats =
-      languageStats.find { it.language.id == baseLanguage?.id }
+      languageStats.find { it.language.id == baseLanguage.id }
         ?: return ProjectStateTotals(0, 0.0, 0.0)
 
     val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
-    val nonBaseLanguages = languageStats.filterNot { it.language.id == baseLanguage?.id }
+    val nonBaseLanguages = languageStats.filterNot { it.language.id == baseLanguage.id }
 
     val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
     val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }

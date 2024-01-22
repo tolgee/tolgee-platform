@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -13,7 +14,9 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 
 class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -26,6 +29,10 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
 
   lateinit var czechLanguage: Language
   lateinit var hindiLanguage: Language
+
+  @MockBean
+  @Autowired
+  private lateinit var eeSubscriptionInfoProvider: EeSubscriptionInfoProvider
 
   @BeforeEach
   fun setup() {
@@ -45,6 +52,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
+    whenever(eeSubscriptionInfoProvider.isSubscribed()).thenAnswer { true }
   }
 
   @Test

@@ -14,8 +14,8 @@ import { PreparedLanguage } from './PreparedLanguage';
 
 export const CreateLanguageField: FC<{
   onSubmit?: (value) => void;
-  value: components['schemas']['LanguageDto'] | null;
-  onChange: (value: components['schemas']['LanguageDto'] | null) => void;
+  value: components['schemas']['LanguageRequest'] | null;
+  onChange: (value: components['schemas']['LanguageRequest'] | null) => void;
   onPreparedLanguageEdit?: () => void;
   showSubmitButton?: boolean;
   onPreparedClear?: () => void;

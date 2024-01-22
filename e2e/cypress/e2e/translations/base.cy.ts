@@ -28,7 +28,7 @@ describe('Translations Base', () => {
   it("won't fail when language deleted", () => {
     waitForGlobalLoading();
 
-    createTranslation('Test key', 'Translated test key');
+    createTranslation({ key: 'Test key', translation: 'Translated test key' });
     toggleLang('Česky');
     visitProjectLanguages(project.id);
     visitLanguageSettings('cs');
@@ -48,7 +48,10 @@ describe('Translations Base', () => {
     () => {
       cy.wait(100);
       cy.gcy('global-empty-list').should('be.visible');
-      createTranslation('Test key', 'Translated test key');
+      createTranslation({
+        key: 'Test key',
+        translation: 'Translated test key',
+      });
       cy.contains('Key created').should('be.visible');
       cy.wait(100);
       cy.xpath(getAnyContainingText('Key', 'a'))
@@ -58,7 +61,10 @@ describe('Translations Base', () => {
       cy.xpath(getAnyContainingText('Key', 'a'))
         .xpath(getClosestContainingText('Translated test key'))
         .should('be.visible');
-      createTranslation('Test key 2', 'Translated test key 2');
+      createTranslation({
+        key: 'Test key 2',
+        translation: 'Translated test key 2',
+      });
       cy.xpath(getAnyContainingText('Key', 'a'))
         .xpath(getClosestContainingText('Test key 2'))
         .scrollIntoView()
@@ -72,10 +78,28 @@ describe('Translations Base', () => {
   it('will create translation with namespace', () => {
     cy.wait(100);
     cy.gcy('global-empty-list').should('be.visible');
-    createTranslation('Test key', 'Translated test key', undefined, 'test-ns');
+    createTranslation({
+      key: 'Test key',
+      translation: 'Translated test key',
+      namespace: 'test-ns',
+    });
 
     cy.gcy('translations-namespace-banner')
       .contains('test-ns')
+      .should('be.visible');
+  });
+
+  it('will create key with description', () => {
+    cy.wait(100);
+    cy.gcy('global-empty-list').should('be.visible');
+    createTranslation({
+      key: 'Test key',
+      translation: 'Translated test key',
+      description: 'Description of test key',
+    });
+
+    cy.gcy('translations-key-cell-description')
+      .contains('Description of test key')
       .should('be.visible');
   });
 

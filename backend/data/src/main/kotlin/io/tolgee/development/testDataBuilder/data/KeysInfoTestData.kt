@@ -11,6 +11,7 @@ class KeysInfoTestData : BaseTestData() {
       addGerman()
 
       addKey("namespace-1", "key-1") {
+        setDescription("description")
         addTranslation("en", "existing translation")
         addTranslation("de", "existing translation")
         key1and2Screenshot = addScreenshot { }.self
@@ -18,6 +19,7 @@ class KeysInfoTestData : BaseTestData() {
 
       val key2 =
         addKey("namespace-1", "key-2") {
+          setDescription("description")
           addTranslation("de", "existing translation")
         }
 
@@ -28,9 +30,11 @@ class KeysInfoTestData : BaseTestData() {
 
       (1..50).forEach {
         addKey("key-$it") {
+          setDescription("description")
           addTranslation("de", "existing translation")
         }
         addKey("ns", "key-$it") {
+          setDescription("description")
           addTranslation("de", "existing translation")
         }
       }

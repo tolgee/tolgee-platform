@@ -22,6 +22,7 @@ export type ValuesCreateType = {
   name: string;
   translations: Record<string, string>;
   tags: string[];
+  description: string | undefined;
 };
 
 type Props = {
@@ -90,6 +91,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         name: keyName,
         translations: translationValues,
         tags: [],
+        description: '',
         namespace,
       }}
       onSubmit={handleSubmit}

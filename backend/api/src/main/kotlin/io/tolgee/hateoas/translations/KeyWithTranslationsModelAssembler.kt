@@ -22,6 +22,7 @@ class KeyWithTranslationsModelAssembler(
       keyName = view.keyName,
       keyNamespaceId = view.keyNamespaceId,
       keyNamespace = view.keyNamespace,
+      keyDescription = view.keyDescription,
       keyTags = view.keyTags.map { tagModelAssembler.toModel(it) },
       contextPresent = view.contextPresent,
       translations =

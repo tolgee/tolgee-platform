@@ -2,6 +2,7 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.MachineTranslationLanguagePropsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
@@ -13,6 +14,7 @@ import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
 import io.tolgee.service.LanguageService
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 class MtServiceConfigService(
   private val applicationContext: ApplicationContext,
   private val mtServiceConfigRepository: MtServiceConfigRepository,
+  private val entityManager: EntityManager,
 ) {
   @set:Autowired
   @set:Lazy
@@ -35,15 +38,16 @@ class MtServiceConfigService(
    *
    * @return enabled translation services for project
    */
-  fun getEnabledServiceInfos(language: Language): List<MtServiceInfo> {
-    return getEnabledServiceInfosByStoredConfig(language) ?: getEnabledServicesByDefaultServerConfig(language)
+  fun getEnabledServiceInfos(language: LanguageDto): List<MtServiceInfo> {
+    return getEnabledServiceInfosByStoredConfig(language)
+      ?: getEnabledServicesByDefaultServerConfig(language)
   }
 
   fun getPrimaryServices(
     languagesIds: List<Long>,
-    project: Project,
+    projectId: Long,
   ): Map<Long, MtServiceInfo?> {
-    val configs = getStoredConfigs(languagesIds, project)
+    val configs = getStoredConfigs(languagesIds, projectId)
     return languagesIds.associateWith { languageId ->
       configs[languageId]?.primaryServiceInfo
         ?: getDefaultPrimaryServiceInfo()
@@ -55,7 +59,7 @@ class MtServiceConfigService(
     return MtServiceInfo(defaultPrimaryService, null)
   }
 
-  private fun getEnabledServicesByDefaultServerConfig(language: Language): MutableList<MtServiceInfo> {
+  private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> {
     return services.asSequence()
       .sortedBy { it.key.order }
       .sortedByDescending { it.value.first.defaultPrimary }
@@ -66,10 +70,10 @@ class MtServiceConfigService(
   }
 
   private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
-    return services.filter { it.value.first.defaultPrimary }.keys.firstOrNull()
+    return services.filter { it.value.first.defaultPrimary && it.value.second.isEnabled }.keys.minByOrNull { it.order }
   }
 
-  private fun getEnabledServiceInfosByStoredConfig(language: Language): List<MtServiceInfo>? {
+  private fun getEnabledServiceInfosByStoredConfig(language: LanguageDto): List<MtServiceInfo>? {
     getStoredConfig(language.id)?.let { storedConfig ->
       return storedConfig.enabledServicesInfo.toList()
         // return just enabled services
@@ -82,7 +86,7 @@ class MtServiceConfigService(
     return null
   }
 
-  private fun Language.isSupportedBy(serviceType: MtServiceType): Boolean {
+  private fun LanguageDto.isSupportedBy(serviceType: MtServiceType): Boolean {
     return services[serviceType]?.second?.isLanguageSupported(this.tag) ?: return false
   }
 
@@ -105,9 +109,9 @@ class MtServiceConfigService(
         storedConfigs.find { it.targetLanguage?.id == languageSetting.targetLanguageId }
           ?: MtServiceConfig().apply {
             this.project = project
-            this.targetLanguage =
-              languageSetting.targetLanguageId
-                ?.let { allLanguages.getLanguageOrThrow(it) }
+            languageSetting.targetLanguageId?.let {
+              this.targetLanguage = entityManager.getReference(Language::class.java, it)
+            }
           }
 
       setPrimaryService(entity, languageSetting)
@@ -138,14 +142,14 @@ class MtServiceConfigService(
     entity.primaryServiceFormality = primaryServiceInfo.formality
   }
 
-  private fun Map<Long, Language>.getLanguageOrThrow(id: Long?): Language? {
+  private fun Map<Long, LanguageDto>.getLanguageOrThrow(id: Long?): LanguageDto? {
     id ?: return null
     return this[id] ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
   private fun validateSettings(
     settings: List<MachineTranslationLanguagePropsDto>,
-    allLanguages: Map<Long, Language>,
+    allLanguages: Map<Long, LanguageDto>,
   ) {
     settings.forEach {
       validateSetting(allLanguages, it)
@@ -153,7 +157,7 @@ class MtServiceConfigService(
   }
 
   private fun validateSetting(
-    allLanguages: Map<Long, Language>,
+    allLanguages: Map<Long, LanguageDto>,
     languageProps: MachineTranslationLanguagePropsDto,
   ) {
     val language = allLanguages.getLanguageOrThrow(languageProps.targetLanguageId) ?: return
@@ -163,7 +167,7 @@ class MtServiceConfigService(
 
   private fun validateFormality(
     languageProps: MachineTranslationLanguagePropsDto,
-    language: Language,
+    language: LanguageDto,
   ) {
     validateEnabledServicesFormality(languageProps, language)
     validatePrimaryServiceFormality(languageProps, language)
@@ -171,7 +175,7 @@ class MtServiceConfigService(
 
   private fun validatePrimaryServiceFormality(
     languageProps: MachineTranslationLanguagePropsDto,
-    language: Language,
+    language: LanguageDto,
   ) {
     val primaryServiceInfo = languageProps.primaryServiceInfo ?: return
     if (primaryServiceInfo.formality === null) {
@@ -188,7 +192,7 @@ class MtServiceConfigService(
 
   private fun validateEnabledServicesFormality(
     languageProps: MachineTranslationLanguagePropsDto,
-    language: Language,
+    language: LanguageDto,
   ) {
     languageProps.enabledServicesInfo?.forEach {
       if (it.formality == Formality.DEFAULT || it.formality == null) {
@@ -204,7 +208,7 @@ class MtServiceConfigService(
 
   private fun throwFormalityNotSupported(
     mtServiceInfo: MtServiceInfo,
-    language: Language,
+    language: LanguageDto,
   ) {
     throw BadRequestException(
       Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE,
@@ -216,7 +220,7 @@ class MtServiceConfigService(
 
   private fun validateLanguageSupported(
     it: MachineTranslationLanguagePropsDto,
-    language: Language,
+    language: LanguageDto,
   ) {
     val allServices = getAllEnabledOrPrimaryServices(it)
     allServices.forEach {
@@ -286,7 +290,7 @@ class MtServiceConfigService(
         services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
           .keys.toMutableSet()
       this.project = project
-      primaryService = services.entries.find { it.value.first.defaultPrimary }?.key
+      primaryService = getPrimaryServiceByDefaultConfig()
     }
   }
 
@@ -306,10 +310,6 @@ class MtServiceConfigService(
     this.mtServiceConfigRepository.deleteAllByProjectId(projectId)
   }
 
-  fun deleteAllByTargetLanguageId(projectId: Long) {
-    this.mtServiceConfigRepository.deleteAllByTargetLanguageId(projectId)
-  }
-
   private fun getStoredConfig(languageId: Long): MtServiceConfig? {
     val entities = mtServiceConfigRepository.findAllByTargetLanguageId(languageId)
     return entities.find { it.targetLanguage != null } ?: entities.find { it.targetLanguage == null }
@@ -317,9 +317,9 @@ class MtServiceConfigService(
 
   private fun getStoredConfigs(
     languageIds: List<Long>,
-    project: Project,
+    projectId: Long,
   ): Map<Long, MtServiceConfig?> {
-    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, project)
+    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, projectId)
     return languageIds.associateWith { languageId ->
       entities.find { it.targetLanguage?.id == languageId } ?: entities.find { it.targetLanguage == null }
     }
@@ -340,7 +340,7 @@ class MtServiceConfigService(
   }
 
   val services by lazy {
-    MtServiceType.values().associateWith {
+    MtServiceType.entries.associateWith {
       (applicationContext.getBean(it.propertyClass) to applicationContext.getBean(it.providerClass))
     }
   }

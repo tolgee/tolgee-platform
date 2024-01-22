@@ -1,6 +1,6 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.model.Language
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -188,7 +188,7 @@ class ImportDataManager(
     this.populateStoredTranslations(importLanguage)
     this.resetConflicts(importLanguage)
     this.handleConflicts(false)
-    if (isExistingLanguageUsed(importLanguage.existingLanguage, importLanguage)) {
+    if (isExistingLanguageUsed(importLanguage.existingLanguage?.id, importLanguage)) {
       importLanguage.existingLanguage = null
     }
     this.importService.saveLanguages(listOf(importLanguage))
@@ -196,26 +196,26 @@ class ImportDataManager(
   }
 
   private fun isExistingLanguageUsed(
-    existing: Language?,
+    existingId: Long?,
     imported: ImportLanguage,
   ): Boolean {
-    existing ?: return false
+    existingId ?: return false
     return this.storedLanguages.any { storedLang ->
       imported != storedLang && // ignore when is assigned to self
-        storedLang.existingLanguage?.id == existing.id &&
+        storedLang.existingLanguage?.id == existingId &&
         storedLang.file.namespace == imported.file.namespace
     }
   }
 
-  fun findMatchingExistingLanguage(importLanguage: ImportLanguage): Language? {
+  fun findMatchingExistingLanguage(importLanguage: ImportLanguage): LanguageDto? {
     val possibleTag =
       """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
         .matchEntire(importLanguage.name)?.groups?.get(1)?.value
         ?: return null
 
-    val candidate = languageService.findByTag(possibleTag, import.project.id).orElse(null) ?: return null
+    val candidate = languageService.findByTag(possibleTag, import.project.id)
 
-    if (!isExistingLanguageUsed(candidate, importLanguage)) {
+    if (!isExistingLanguageUsed(candidate?.id, importLanguage)) {
       return candidate
     }
 

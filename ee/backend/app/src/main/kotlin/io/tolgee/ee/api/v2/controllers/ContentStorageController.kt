@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.contentDelivery.ContentStorageRequest
-import io.tolgee.ee.api.v2.hateoas.contentStorage.ContentStorageModel
-import io.tolgee.ee.api.v2.hateoas.contentStorage.ContentStorageModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.ContentStorageModelAssembler
 import io.tolgee.ee.data.StorageTestResult
 import io.tolgee.ee.service.ContentStorageService
+import io.tolgee.hateoas.ee.contentStorage.ContentStorageModel
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder

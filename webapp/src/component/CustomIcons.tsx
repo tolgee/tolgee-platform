@@ -14,6 +14,7 @@ import TadaSvg from '../svgs/icons/tada.svg?react';
 import RocketSvg from '../svgs/icons/rocket.svg?react';
 import DropZoneSvg from '../svgs/icons/dropzone.svg?react';
 import QSFinishedSvg from '../svgs/icons/qs-finished.svg?react';
+import StarsSvg from '../svgs/icons/stars.svg?react';
 
 type IconProps = ComponentProps<typeof SvgIcon>;
 
@@ -69,4 +70,8 @@ export const DropzoneIcon: React.FC<IconProps> = (props) => (
 
 export const QSFinishedIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={QSFinishedSvg} {...props} />
+);
+
+export const StarsIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={StarsSvg} {...props} />
 );

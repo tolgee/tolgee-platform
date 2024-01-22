@@ -51,6 +51,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("[0].id").isValidId
           node("[1].name").isEqualTo("second_key")
           node("[2].namespace").isEqualTo("null")
+          node("[1].description").isEqualTo("description")
         }
       }
     performProjectAuthGet("keys?page=1")
@@ -103,6 +104,17 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "test"))
       .andIsOk.andPrettyPrint.andAssertThatJson {
         node("name").isEqualTo("test")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `updates key description`() {
+    saveTestDataAndPrepare()
+
+    performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "name", description = "desc"))
+      .andIsOk.andPrettyPrint.andAssertThatJson {
+        node("description").isEqualTo("desc")
       }
   }
 
@@ -229,10 +241,12 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
               "name" to "first_key",
               "translations" to
                 mapOf("en" to "hello"),
+              "description" to "description",
               "tags" to listOf("tag1", "tag2"),
             ),
             mapOf(
               "name" to "new_key",
+              "description" to "description",
               "translations" to
                 mapOf("en" to "hello"),
               "tags" to listOf("tag1", "tag2", "test"),
@@ -253,13 +267,18 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
 
     executeInNewTransaction {
-      keyService.get(testData.firstKey.id).translations.find { it.language.tag == "en" }.assert.isNull()
+      val firstKey = keyService.get(testData.firstKey.id)
+      firstKey.translations.find { it.language.tag == "en" }.assert.isNull()
+      firstKey.keyMeta?.description.assert.isNull()
+
       val key =
         projectService.get(testData.project.id).keys.find {
           it.name == "new_key"
         }
+      key!!.keyMeta!!.description.assert.isEqualTo("description")
+
       key.assert.isNotNull()
-      key!!.keyMeta!!.tags.assert.hasSize(3)
+      key.keyMeta!!.tags.assert.hasSize(3)
       key.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
     }
   }

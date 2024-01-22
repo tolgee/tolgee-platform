@@ -42,7 +42,7 @@ export const UsageTable: FC<{
           />
         )}
 
-        {(usageData?.credits?.total?.valueOf() || 0) > 0 && (
+        {(usageData?.credits?.usedQuantity?.valueOf() || 0) > 0 && (
           <SumUsageItemRow
             item={usageData!.credits!}
             label={t('invoice_usage_dialog_table_mt_credits_item')}

@@ -1,7 +1,7 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Language
-import io.tolgee.model.views.LanguageView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -11,73 +11,70 @@ import java.util.*
 
 @Repository
 interface LanguageRepository : JpaRepository<Language, Long> {
-  fun findByTagAndProject(
-    abbreviation: String,
-    project: io.tolgee.model.Project,
-  ): Optional<Language>
-
   fun findByNameAndProject(
     name: String?,
     project: io.tolgee.model.Project,
-  ): Optional<Language>
-
-  fun findByTagAndProjectId(
-    abbreviation: String?,
-    projectId: Long,
   ): Optional<Language>
 
   fun findAllByProjectId(projectId: Long?): Set<Language>
 
   @Query(
     """
-    select l as language, (pb.id = l.id) as base 
+    select new io.tolgee.dtos.cacheable.LanguageDto(
+      l.id,
+      l.name,
+      l.tag,
+      l.originalName,
+      l.flagEmoji,
+      l.aiTranslatorPromptDescription,
+      coalesce((l.id = l.project.baseLanguage.id), false)
+    )
     from Language l
-      join l.project p
-      left join p.baseLanguage pb
     where l.project.id = :projectId
   """,
   )
   fun findAllByProjectId(
     projectId: Long?,
     pageable: Pageable,
-  ): Page<LanguageView>
+  ): Page<LanguageDto>
 
   fun findAllByTagInAndProjectId(
-    abbreviation: Collection<String?>?,
-    projectId: Long?,
+    tag: Collection<String>,
+    projectId: Long,
   ): List<Language>
 
   fun deleteAllByProjectId(projectId: Long?)
-
-  @Query(
-    """
-    select l as language, (l.id = bl.id) as base
-    from Language l
-    join l.project p
-    join p.baseLanguage bl
-    where l.id = :id
-  """,
-  )
-  fun findView(id: Long): LanguageView?
-
-  @Query(
-    """
-    select l as language, (l.id = coalesce(bl.id, 0)) as base
-    from Language l
-    join l.project p
-    left join p.baseLanguage bl
-    where l.project.id in :projectIds
-  """,
-  )
-  fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView>
-
-  fun countByIdInAndProjectId(
-    languageIds: Set<Long>,
-    projectId: Long,
-  ): Int
 
   fun findAllByProjectIdAndIdInOrderById(
     projectId: Long,
     languageIds: List<Long>,
   ): List<Language>
+
+  @Query(
+    """
+    select l
+    from Language l
+    where l.project.id = :projectId and l.id in :languageId
+  """,
+  )
+  fun find(
+    languageId: Long,
+    projectId: Long,
+  ): Language?
+
+  @Query(
+    """
+    select new io.tolgee.dtos.cacheable.LanguageDto(
+      l.id,
+      l.name,
+      l.tag,
+      l.originalName,
+      l.flagEmoji,
+      l.aiTranslatorPromptDescription,
+      coalesce((l.id = l.project.baseLanguage.id), false)
+    )
+    from Language l where l.project.id = :projectId
+  """,
+  )
+  fun findAllDtosByProjectId(projectId: Long): List<LanguageDto>
 }

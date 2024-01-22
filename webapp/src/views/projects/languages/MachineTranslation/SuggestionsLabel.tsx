@@ -1,25 +1,11 @@
-import { Help } from '@mui/icons-material';
-import { styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-
-const StyledPrimaryService = styled('div')`
-  display: flex;
-  gap: 4px;
-  align-items: center;
-`;
-
-const StyledHelpIcon = styled(Help)`
-  font-size: 15px;
-`;
+import { LabelHint } from 'tg.component/common/LabelHint';
 
 export const SuggestionsLabel = () => {
   const { t } = useTranslate();
   return (
-    <Tooltip title={t('project_mt_dialog_service_suggested_hint')}>
-      <StyledPrimaryService>
-        <div>{t('project_mt_dialog_service_suggested')}</div>
-        <StyledHelpIcon />
-      </StyledPrimaryService>
-    </Tooltip>
+    <LabelHint title={t('project_mt_dialog_service_suggested_hint')}>
+      {t('project_mt_dialog_service_suggested')}
+    </LabelHint>
   );
 };

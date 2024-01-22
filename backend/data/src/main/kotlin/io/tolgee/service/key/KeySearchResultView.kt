@@ -6,4 +6,5 @@ interface KeySearchResultView {
   val name: String
   val baseTranslation: String?
   val translation: String?
+  val description: String?
 }

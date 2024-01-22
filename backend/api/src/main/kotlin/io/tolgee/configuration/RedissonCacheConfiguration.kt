@@ -1,7 +1,7 @@
 package io.tolgee.configuration
 
+import io.tolgee.component.AllCachesProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.constants.Caches
 import org.redisson.Redisson
 import org.redisson.api.RedissonClient
 import org.redisson.spring.cache.CacheConfig
@@ -21,11 +21,15 @@ import org.springframework.data.redis.core.RedisOperations
 @ConditionalOnClass(Redisson::class, RedisOperations::class)
 @AutoConfigureAfter(ConditionalRedissonAutoConfiguration::class)
 @ConditionalOnExpression("\${tolgee.cache.use-redis:false} and \${tolgee.cache.enabled:false}")
-class RedissonCacheConfiguration(private val tolgeeProperties: TolgeeProperties) {
+class RedissonCacheConfiguration(
+  private val tolgeeProperties: TolgeeProperties,
+  private val allCachesProvider: AllCachesProvider,
+) {
   @Bean
   fun cacheManager(redissonClient: RedissonClient): CacheManager? {
     val config: MutableMap<String, CacheConfig> = HashMap()
-    Caches.caches.forEach {
+    val caches = allCachesProvider.getAllCaches()
+    caches.forEach {
       config[it] = CacheConfig(tolgeeProperties.cache.defaultTtl, tolgeeProperties.cache.defaultTtl)
     }
     val cacheManager = RedissonSpringCacheManager(redissonClient, config)

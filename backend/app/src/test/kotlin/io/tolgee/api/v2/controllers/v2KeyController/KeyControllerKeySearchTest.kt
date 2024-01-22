@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.KeySearchTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.retry
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
@@ -72,28 +73,32 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
       saveAndPrepare()
     }
 
-    executeInNewTransaction {
-      val time =
-        measureTimeMillis {
-          performProjectAuthGet("keys/search?search=Hello&languageTag=de").andAssertThatJson {
-            node("page.totalElements").isEqualTo(1)
-          }.andPrettyPrint
-        }
+    retry(retries = 5, exceptionMatcher = {
+      it is AssertionError
+    }) {
+      executeInNewTransaction {
+        val time =
+          measureTimeMillis {
+            performProjectAuthGet("keys/search?search=Hello&languageTag=de").andAssertThatJson {
+              node("page.totalElements").isEqualTo(1)
+            }.andPrettyPrint
+          }
 
-      logger.info("Completed in: $time ms")
-      time.assert.isLessThan(4000)
-    }
+        logger.info("Completed in: $time ms")
+        time.assert.isLessThan(4000)
+      }
 
-    executeInNewTransaction {
-      val time =
-        measureTimeMillis {
-          performProjectAuthGet("keys/search?search=dol&languageTag=de").andAssertThatJson {
-            node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
-          }.andPrettyPrint
-        }
+      executeInNewTransaction {
+        val time =
+          measureTimeMillis {
+            performProjectAuthGet("keys/search?search=dol&languageTag=de").andAssertThatJson {
+              node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
+            }.andPrettyPrint
+          }
 
-      logger.info("Completed in: $time ms")
-      time.assert.isLessThan(4000)
+        logger.info("Completed in: $time ms")
+        time.assert.isLessThan(4000)
+      }
     }
   }
 

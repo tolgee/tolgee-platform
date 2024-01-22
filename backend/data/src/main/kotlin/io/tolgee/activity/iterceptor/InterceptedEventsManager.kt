@@ -231,7 +231,7 @@ class InterceptedEventsManager(
         revision.projectId = projectHolder.project.id
         activityHolder.organizationId = projectHolder.project.organizationOwnerId
       } catch (e: ProjectNotSelectedException) {
-        logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
+        logger.debug("Project is not set in ProjectHolder. Activity will be stored without projectId.")
       }
       revision.type = activityHolder.activity
     }

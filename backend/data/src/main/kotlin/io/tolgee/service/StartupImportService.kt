@@ -5,7 +5,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Organization
@@ -135,7 +135,7 @@ class StartupImportService(
       fileDtos.map { file ->
         // remove extension
         val name = getLanguageName(file)
-        LanguageDto(name, name, name)
+        LanguageRequest(name, name, name)
       }.toSet().toList()
 
     val project =

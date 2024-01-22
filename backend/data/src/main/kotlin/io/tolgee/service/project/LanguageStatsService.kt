@@ -2,6 +2,7 @@ package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
 import io.tolgee.model.LanguageStats
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
@@ -14,7 +15,6 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
@@ -30,11 +30,11 @@ class LanguageStatsService(
 ) : Logging {
   fun refreshLanguageStats(projectId: Long) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId") {
-      executeInNewRepeatableTransaction(platformTransactionManager, TransactionDefinition.ISOLATION_READ_COMMITTED) tx@{
+      executeInNewRepeatableTransaction(platformTransactionManager) tx@{
         val languages = languageService.findAll(projectId)
         val allRawLanguageStats = getLanguageStatsRaw(projectId)
         try {
-          val baseLanguage = projectService.getOrCreateBaseLanguage(projectId)
+          val baseLanguage = projectService.getOrAssignBaseLanguage(projectId)
           val rawBaseLanguageStats =
             allRawLanguageStats.find { it.languageId == baseLanguage?.id }
               ?: return@tx
@@ -55,7 +55,7 @@ class LanguageStatsService(
               val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@tx
               val stats =
                 languageStats.computeIfAbsent(language.id) {
-                  LanguageStats(language)
+                  LanguageStats(entityManager.getReference(Language::class.java, language.id))
                 }
               stats.apply {
                 translatedKeys = rawLanguageStats.translatedKeys

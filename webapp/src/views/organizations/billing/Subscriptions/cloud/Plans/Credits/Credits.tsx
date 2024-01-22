@@ -116,7 +116,7 @@ export const Credits: FC = () => {
         <Box gridArea="info">
           <Box mb={2}>
             <T
-              keyName="billing_credits_explanation"
+              keyName="billing_credits_explanation_tolgee_unified"
               params={{
                 link: (
                   <Link

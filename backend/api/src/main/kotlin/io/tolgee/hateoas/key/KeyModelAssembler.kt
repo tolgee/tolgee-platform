@@ -1,19 +1,20 @@
 package io.tolgee.hateoas.key
 
 import io.tolgee.api.v2.controllers.translation.TranslationsController
-import io.tolgee.model.key.Key
+import io.tolgee.dtos.queryResults.KeyView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
-class KeyModelAssembler : RepresentationModelAssemblerSupport<Key, KeyModel>(
+class KeyModelAssembler : RepresentationModelAssemblerSupport<KeyView, KeyModel>(
   TranslationsController::class.java,
   KeyModel::class.java,
 ) {
-  override fun toModel(entity: Key) =
+  override fun toModel(view: KeyView) =
     KeyModel(
-      id = entity.id,
-      name = entity.name,
-      namespace = entity.namespace?.name,
+      id = view.id,
+      name = view.name,
+      namespace = view.namespace,
+      description = view.description,
     )
 }

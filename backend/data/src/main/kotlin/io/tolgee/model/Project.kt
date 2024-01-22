@@ -9,6 +9,8 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.webhook.WebhookConfig
+import io.tolgee.service.LanguageService
+import io.tolgee.service.project.ProjectService
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -21,6 +23,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.OrderBy
+import jakarta.persistence.PostLoad
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
@@ -28,6 +31,9 @@ import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import org.springframework.beans.factory.ObjectFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import java.util.*
 
 @Entity
@@ -44,6 +50,10 @@ class Project(
   @field:Size(min = 3, max = 2000)
   @ActivityLoggedProp
   var description: String? = null,
+  @field:Size(max = 2000)
+  @Column(columnDefinition = "text")
+  @ActivityLoggedProp
+  var aiTranslatorPromptDescription: String? = null,
   @Column(name = "address_part")
   @ActivityLoggedProp
   @field:Size(min = 3, max = 60)
@@ -122,12 +132,26 @@ class Project(
   }
 
   companion object {
+    @Configurable
     class ProjectListener {
+      @Autowired
+      lateinit var languageService: ObjectFactory<LanguageService>
+
+      @Autowired
+      lateinit var projectService: ObjectFactory<ProjectService>
+
       @PrePersist
       @PreUpdate
       fun preSave(project: Project) {
         if (!(!project::organizationOwner.isInitialized).xor(project.userOwner == null)) {
           throw Exception("Exactly one of organizationOwner or userOwner must be set!")
+        }
+      }
+
+      @PostLoad
+      fun postLoad(project: Project) {
+        if (project.baseLanguage == null) {
+          languageService.`object`.setNewProjectBaseLanguage(project)
         }
       }
     }

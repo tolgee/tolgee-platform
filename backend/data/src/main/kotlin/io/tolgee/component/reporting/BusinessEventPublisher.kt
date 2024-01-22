@@ -70,7 +70,9 @@ class BusinessEventPublisher(
     keyProvider: (e: OnBusinessEventToCaptureEvent) -> String = { it.eventName + "_" + it.userAccountId },
   ) {
     val key = keyProvider(event)
-    if (shouldPublishOnceInTime(key, onceIn)) {
+    val shouldPublish = shouldPublishOnceInTime(key, onceIn)
+    logger.debug("Publishing event $key: $shouldPublish")
+    if (shouldPublish) {
       publish(event)
       cachePublished(key)
     }

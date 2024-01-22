@@ -30,7 +30,7 @@ describe('Translation memory', () => {
 
   it("doesn't trigger auto translation when not enabled", () => {
     waitForGlobalLoading();
-    createTranslation('mykey', 'Cool translated text 1');
+    createTranslation({ key: 'mykey', translation: 'Cool translated text 1' });
     waitForGlobalLoading();
     cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
     cy.gcy('translations-table-cell')
@@ -47,7 +47,7 @@ describe('Translation memory', () => {
       usingMachineTranslation: true,
     });
     waitForGlobalLoading();
-    createTranslation('mykey', 'mytranslation');
+    createTranslation({ key: 'mykey', translation: 'mytranslation' });
     waitForGlobalLoading();
     cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
     cy.gcy('translations-table-cell')
@@ -67,7 +67,7 @@ describe('Translation memory', () => {
       usingMachineTranslation: true,
     });
     waitForGlobalLoading();
-    createTranslation('mykey', 'Cool translated text 1');
+    createTranslation({ key: 'mykey', translation: 'Cool translated text 1' });
     waitForGlobalLoading();
     cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
     cy.gcy('translations-table-cell')
@@ -93,7 +93,7 @@ describe('Translation memory', () => {
     });
 
     waitForGlobalLoading();
-    createTranslation('mykey', 'New translation');
+    createTranslation({ key: 'mykey', translation: 'New translation' });
     waitForGlobalLoading();
     cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
     getAutoTranslatedIndicator(
@@ -122,7 +122,7 @@ describe('Translation memory', () => {
     });
 
     waitForGlobalLoading();
-    createTranslation('mykey', 'New translation');
+    createTranslation({ key: 'mykey', translation: 'New translation' });
     waitForGlobalLoading();
     cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
     getAutoTranslatedIndicator(

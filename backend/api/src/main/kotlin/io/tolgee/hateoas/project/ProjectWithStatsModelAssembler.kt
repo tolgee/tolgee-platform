@@ -2,12 +2,12 @@ package io.tolgee.hateoas.project
 
 import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
 import io.tolgee.model.UserAccount
-import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -35,7 +35,7 @@ class ProjectWithStatsModelAssembler(
     val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage =
       view.baseLanguage ?: let {
-        projectService.getOrCreateBaseLanguage(view.id)
+        projectService.getOrAssignBaseLanguage(view.id)
       }
     val computedPermissions =
       permissionService.computeProjectPermission(
@@ -52,7 +52,7 @@ class ProjectWithStatsModelAssembler(
       slug = view.slug,
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationRole = view.organizationRole,
-      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageViewImpl(baseLanguage, true)) },
+      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),

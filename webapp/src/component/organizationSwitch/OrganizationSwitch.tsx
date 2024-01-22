@@ -38,9 +38,9 @@ export const OrganizationSwitch: React.FC<Props> = ({
     setIsOpen(true);
   };
 
-  const handleSelectOrganization = (organization: OrganizationModel) => {
+  const handleSelectOrganization = async (organization: OrganizationModel) => {
     handleClose();
-    updatePreferredOrganization(organization.id);
+    await updatePreferredOrganization(organization.id);
     onSelect?.(organization);
   };
 

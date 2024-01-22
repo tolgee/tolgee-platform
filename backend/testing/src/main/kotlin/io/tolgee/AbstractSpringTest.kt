@@ -1,7 +1,9 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.clear
 import io.tolgee.activity.ActivityService
+import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtServiceManager
@@ -49,6 +51,7 @@ import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -62,22 +65,7 @@ import java.time.Duration
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(
-//  exclude = [
-//    CompositeMeterRegistryAutoConfiguration::class,
-//    DataSourcePoolMetricsAutoConfiguration::class,
-//    DiskSpaceHealthContributorAutoConfiguration::class,
-//    InfoContributorAutoConfiguration::class,
-//    JmxAutoConfiguration::class,
-//    JvmMetricsAutoConfiguration::class,
-//    JmxEndpointAutoConfiguration::class,
-//    LdapAutoConfiguration::class,
-//    LiquibaseEndpointAutoConfiguration::class,
-//    MetricsEndpointAutoConfiguration::class,
-//    StartupTimeMetricsListenerAutoConfiguration::class,
-//    TomcatMetricsAutoConfiguration::class,
-//  ]
-)
+@SpringBootTest
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
@@ -138,7 +126,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   protected lateinit var organizationRoleService: OrganizationRoleService
 
   @Autowired
-  lateinit var organizationRoleRepository: OrganizationRoleRepository
+  open lateinit var organizationRoleRepository: OrganizationRoleRepository
 
   @Autowired
   open lateinit var projectRepository: ProjectRepository
@@ -233,10 +221,13 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
 
+  @Autowired
+  lateinit var allCachesProvider: AllCachesProvider
+
+  @BeforeEach
   fun clearCaches() {
-    cacheManager.cacheNames.stream().forEach { cacheName: String ->
-      @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-      cacheManager.getCache(cacheName).clear()
+    allCachesProvider.getAllCaches().forEach { cacheName ->
+      cacheManager.getCache(cacheName)?.clear()
     }
   }
 

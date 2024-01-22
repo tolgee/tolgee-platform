@@ -30,7 +30,6 @@ import io.tolgee.hateoas.translations.TranslationHistoryModel
 import io.tolgee.hateoas.translations.TranslationHistoryModelAssembler
 import io.tolgee.hateoas.translations.TranslationModel
 import io.tolgee.hateoas.translations.TranslationModelAssembler
-import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
@@ -257,9 +256,7 @@ When null, resulting file will be a flat key-value object.
     params: GetTranslationsParams,
     @ParameterObject pageable: Pageable,
   ): KeysWithTranslationsPageModel {
-    val baseLanguage = projectHolder.projectEntity.baseLanguage
-
-    val languages: Set<Language> =
+    val languages =
       languageService.getLanguagesForTranslationsView(
         params.languages,
         projectHolder.project.id,
@@ -279,7 +276,7 @@ When null, resulting file will be a flat key-value object.
     }
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
-    return pagedAssembler.toTranslationModel(data, languages, cursor, baseLanguage)
+    return pagedAssembler.toTranslationModel(data, languages, cursor)
   }
 
   @GetMapping(value = ["select-all"])
@@ -291,7 +288,7 @@ When null, resulting file will be a flat key-value object.
     @ModelAttribute("translationFilters")
     params: TranslationFilters,
   ): SelectAllResponse {
-    val languages: Set<Language> =
+    val languages =
       languageService.getLanguagesForTranslationsView(
         params.languages,
         projectHolder.project.id,

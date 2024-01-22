@@ -24,7 +24,10 @@ describe('Project stats', () => {
   it('Activity', () => {
     createProject('Project with activity', 'test_username');
     enterProject('Project with activity');
-    createTranslation('new translation', 'english translation');
+    createTranslation({
+      key: 'new translation',
+      translation: 'english translation',
+    });
     createTag('new tag');
     setStateToReviewed('english translation');
     createComment('new comment', 0, 'en');

@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyWithDataModel
 import io.tolgee.hateoas.key.KeyWithDataModelAssembler
+import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
@@ -15,6 +16,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
@@ -44,6 +46,7 @@ class KeyComplexEditHelper(
   private val transactionManager: PlatformTransactionManager =
     applicationContext.getBean(PlatformTransactionManager::class.java)
   private val bigMetaService = applicationContext.getBean(BigMetaService::class.java)
+  private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
 
   private lateinit var key: Key
   private var modifiedTranslations: Map<Long, String?>? = null
@@ -66,7 +69,7 @@ class KeyComplexEditHelper(
     if (all.isEmpty()) {
       return@lazy setOf()
     }
-    languageService.findByTags(all, projectHolder.project.id)
+    languageService.findEntitiesByTags(all, projectHolder.project.id)
   }
 
   private val existingTranslations: MutableMap<String, Translation> by lazy {
@@ -105,6 +108,9 @@ class KeyComplexEditHelper(
 
     if (isKeyModified) {
       key.project.checkKeysEditPermission()
+      keyMetaService.getOrCreateForKey(key).apply {
+        description = dto.description
+      }
       edited = keyService.edit(key, dto.name, dto.namespace)
     }
 
@@ -239,7 +245,9 @@ class KeyComplexEditHelper(
     areTranslationsModified = !modifiedTranslations.isNullOrEmpty()
     areStatesModified = !modifiedStates.isNullOrEmpty()
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
-    isKeyModified = key.name != dto.name || getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace)
+    isKeyModified = key.name != dto.name ||
+      getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace) ||
+      key.keyMeta?.description != dto.description
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
     isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()
@@ -268,11 +276,11 @@ class KeyComplexEditHelper(
         ?.map { languageByTag(it.key).id to it.value.translationState }?.toMap()
   }
 
-  private fun languageByTag(tag: String): io.tolgee.model.Language {
+  private fun languageByTag(tag: String): Language {
     return languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
-  private fun languageById(id: Long): io.tolgee.model.Language {
+  private fun languageById(id: Long): Language {
     return languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 

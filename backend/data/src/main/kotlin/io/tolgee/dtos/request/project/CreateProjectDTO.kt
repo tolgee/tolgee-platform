@@ -1,7 +1,7 @@
 package io.tolgee.dtos.request.project
 
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
@@ -15,7 +15,7 @@ data class CreateProjectDTO(
   var name: String = "",
   @field:NotEmpty
   @field:Valid
-  var languages: List<LanguageDto>? = null,
+  var languages: List<LanguageRequest>? = null,
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   @Schema(

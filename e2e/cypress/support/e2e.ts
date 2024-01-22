@@ -47,4 +47,5 @@ before(() => {
   setFeature('WEBHOOKS', true);
   setFeature('PROJECT_LEVEL_CONTENT_STORAGES', true);
   setFeature('MULTIPLE_CONTENT_DELIVERY_CONFIGS', true);
+  setFeature('AI_PROMPT_CUSTOMIZATION', true);
 });

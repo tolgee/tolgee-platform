@@ -26,7 +26,7 @@ const StyledEditorWrapper = styled('div')`
   }
 `;
 
-export const EditorWrapper: React.FC = ({ children }) => {
+export const EditorWrapper: React.FC = ({ children, ...props }) => {
   const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     const editor = (e.target as HTMLDivElement).querySelector(
       '.CodeMirror-code'
@@ -38,6 +38,7 @@ export const EditorWrapper: React.FC = ({ children }) => {
     <StyledEditorWrapper
       onMouseDown={(e) => e.preventDefault()}
       onClick={handleClick}
+      {...props}
     >
       {children}
     </StyledEditorWrapper>

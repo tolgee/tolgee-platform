@@ -7,11 +7,10 @@ import { ProjectContext } from 'tg.hooks/ProjectContext';
 import { ProjectPage } from './ProjectPage';
 import { ExportView } from './export/ExportView';
 import { ImportView } from './import/ImportView';
-import { LanguageEditView } from './languages/LanguageEdit/LanguageEditView';
 import { ProjectMembersView } from './members/ProjectMembersView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { TranslationsView } from './translations/TranslationsView';
-import { ProjectLanguagesView } from 'tg.views/projects/languages/ProjectLanguagesView';
+import { LanguageSettingsView } from 'tg.views/projects/languages/LanguageSettingsView';
 import { SingleKeyView } from './translations/SingleKeyView';
 import React from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
@@ -53,12 +52,8 @@ export const ProjectRouter = () => {
               <ProjectSettingsView />
             </Route>
 
-            <Route exact path={LINKS.PROJECT_LANGUAGES.template}>
-              <ProjectLanguagesView />
-            </Route>
-
-            <Route exact path={LINKS.PROJECT_EDIT_LANGUAGE.template}>
-              <LanguageEditView />
+            <Route path={LINKS.PROJECT_LANGUAGES.template}>
+              <LanguageSettingsView />
             </Route>
 
             <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>

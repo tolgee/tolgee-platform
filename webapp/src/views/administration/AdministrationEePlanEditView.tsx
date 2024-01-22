@@ -85,7 +85,6 @@ export const AdministrationEePlanEditView = () => {
                     'application/json': {
                       ...values,
                       stripeProductId: values.stripeProductId!,
-                      free: false,
                       forOrganizationIds: values.public
                         ? []
                         : values.forOrganizationIds,

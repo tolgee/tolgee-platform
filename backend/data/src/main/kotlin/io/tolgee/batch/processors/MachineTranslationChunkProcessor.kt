@@ -6,10 +6,9 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.constants.MtServiceType
-import io.tolgee.model.Project
 import io.tolgee.model.batch.params.MachineTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
-import jakarta.persistence.EntityManager
+import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
@@ -17,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
 class MachineTranslationChunkProcessor(
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
   private val mtServiceConfigService: MtServiceConfigService,
-  private val entityManager: EntityManager,
+  private val projectService: ProjectService,
 ) : ChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
@@ -61,8 +60,7 @@ class MachineTranslationChunkProcessor(
     projectId: Long,
   ): Int {
     val languageIds = request.targetLanguageIds
-    val project = entityManager.getReference(Project::class.java, projectId)
-    val services = mtServiceConfigService.getPrimaryServices(languageIds, project).values.toSet()
+    val services = mtServiceConfigService.getPrimaryServices(languageIds, projectId).values.toSet()
     if (services.map { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
       return 2
     }

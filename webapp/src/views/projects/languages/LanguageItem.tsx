@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
-
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -12,8 +11,8 @@ type Props = {
 export const LanguageItem: React.FC<Props> = ({ language }) => {
   return (
     <Box display="inline-flex" alignItems="center" mr={2}>
-      <Box mr={1} display="inline-flex" justifyContent="center">
-        <FlagImage width={20} flagEmoji={language.flagEmoji || '🏳️'} />
+      <Box mr={0.5} display="inline-flex" justifyContent="center">
+        <CircledLanguageIcon size={18} flag={language.flagEmoji} />
       </Box>
       {`${language.name}${
         language.name !== language.originalName

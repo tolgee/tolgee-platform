@@ -3031,4 +3031,22 @@
     <changeSet author="jenik (generated)" id="1704461236234-1">
         <dropUniqueConstraint constraintName="uc_import_translationconflict_id_col" tableName="import_translation"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1704882916394-1">
+        <addColumn tableName="key_meta">
+            <column name="description" type="text"/>
+        </addColumn>
+        <sql>
+            CREATE INDEX key_description_gin_trgm_index ON key_meta USING GIN (lower (f_unaccent(description)) gin_trgm_ops);
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1704970433633-1">
+        <addColumn tableName="language">
+            <column name="ai_translator_prompt_description" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1704970433633-2">
+        <addColumn tableName="project">
+            <column name="ai_translator_prompt_description" type="text"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

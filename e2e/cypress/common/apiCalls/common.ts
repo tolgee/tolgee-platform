@@ -123,7 +123,7 @@ export const getDefaultOrganization = () => {
 
 export const createProject = (createProjectDto: {
   name: string;
-  languages: Partial<components['schemas']['LanguageDto']>[];
+  languages: Partial<components['schemas']['LanguageRequest']>[];
 }): Chainable<Cypress.Response<any>> => {
   const create = () => {
     return getDefaultOrganization().then((org) => {

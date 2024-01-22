@@ -1,28 +1,14 @@
-import { useEffect, useState } from 'react';
-import { styled } from '@mui/material';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
-
-import { SmoothProgress } from 'tg.component/SmoothProgress';
-import { StyledLanguageTable } from '../tableStyles';
+import { Box, Typography, styled } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { useMachineTranslationSettings } from './useMachineTranslationSettings';
+import { StyledLanguageTable } from '../tableStyles';
 import { SettingsTable } from './SettingsTable';
+import { SmoothProgress } from 'tg.component/SmoothProgress';
 
 const StyledContainer = styled('div')`
   display: flex;
   flex-direction: column;
-`;
-
-const StyledToggle = styled('div')`
-  display: flex;
-  justify-content: center;
-  grid-column: 1 / -1;
-  cursor: pointer;
-  background-color: ${({ theme }) => theme.palette.emphasis[50]};
-  transition: background-color 0.1s ease-in-out;
-  &:active,
-  &:hover {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
-  }
 `;
 
 const StyledLoadingWrapper = styled('div')`
@@ -33,48 +19,36 @@ const StyledLoadingWrapper = styled('div')`
 `;
 
 export const MachineTranslation = () => {
-  const [expanded, setExpanded] = useState(false);
-
+  const { t } = useTranslate();
   const { settings, applyUpdate, isFetching } = useMachineTranslationSettings();
-
   const gridTemplateColumns = `1fr auto 1fr auto`;
 
-  useEffect(() => {
-    if (
-      (settings || [])?.filter(
-        ({ autoSettings, mtSettings }) => autoSettings || mtSettings
-      ).length > 1
-    ) {
-      setExpanded(true);
-    }
-  }, [settings]);
+  if (!settings) {
+    return null;
+  }
 
   return (
-    <>
-      {settings && settings && (
+    <Box>
+      <Box mt={4} mb={3}>
+        <Typography variant="h5">
+          <T keyName="machine_translation_title" />
+        </Typography>
+      </Box>
+      <QuickStartHighlight
+        itemKey="machine_translation"
+        message={t('quick_start_item_machine_translation_hint')}
+        borderRadius="5px"
+        offset={10}
+      >
         <StyledContainer>
           <StyledLanguageTable style={{ gridTemplateColumns }}>
-            <SettingsTable
-              settings={settings || []}
-              expanded={expanded}
-              onUpdate={applyUpdate}
-            />
-
-            {settings.length > 1 && (
-              <StyledToggle
-                role="button"
-                data-cy="machine-translations-settings-toggle"
-                onClick={() => setExpanded((expanded) => !expanded)}
-              >
-                {expanded ? <ExpandLess /> : <ExpandMore />}
-              </StyledToggle>
-            )}
+            <SettingsTable settings={settings || []} onUpdate={applyUpdate} />
             <StyledLoadingWrapper>
               <SmoothProgress loading={isFetching} />
             </StyledLoadingWrapper>
           </StyledLanguageTable>
         </StyledContainer>
-      )}
-    </>
+      </QuickStartHighlight>
+    </Box>
   );
 };

@@ -7,10 +7,12 @@ import {
   Cell,
   Editor,
   Emphasis,
+  ExampleBanner,
   Marker,
   Navbar,
   QuickStart,
   Tile,
+  TipsBanner,
   TopBanner,
 } from './colors';
 
@@ -40,6 +42,8 @@ declare module '@mui/material/styles/createPalette' {
     topBanner: TopBanner;
     quickStart: QuickStart;
     import: typeof all.import;
+    exampleBanner: ExampleBanner;
+    tipsBanner: TipsBanner;
   }
 
   interface PaletteOptions {
@@ -59,6 +63,8 @@ declare module '@mui/material/styles/createPalette' {
     topBanner: TopBanner;
     quickStart: QuickStart;
     import: typeof all.import;
+    exampleBanner: ExampleBanner;
+    tipsBanner: TipsBanner;
   }
 }
 

@@ -82,6 +82,16 @@ export type Navbar = {
   logo: string;
 };
 
+export type ExampleBanner = {
+  background: string;
+  text: string;
+  border: string;
+};
+
+export type TipsBanner = {
+  background: string;
+};
+
 export type QuickStart = {
   highlight: string;
   circleNormal: string;
@@ -169,6 +179,14 @@ export const colors = {
       progressDone: '#00B962',
       progressWorking: '#EC407A',
       progressBackground: '#D9D9D9',
+    },
+    exampleBanner: {
+      background: '#F6F6F8',
+      text: '#9DA7B4',
+      border: '#E1E5EB',
+    },
+    tipsBanner: {
+      background: '#FDECF280',
     },
   },
   dark: {
@@ -259,6 +277,14 @@ export const colors = {
       progressDone: '#00B962',
       progressWorking: '#EC407A',
       progressBackground: '#D9D9D9',
+    },
+    exampleBanner: {
+      background: '#243245',
+      text: '#b4bbc3',
+      border: '#2c3c52',
+    },
+    tipsBanner: {
+      background: '#29242580',
     },
   },
 } as const;

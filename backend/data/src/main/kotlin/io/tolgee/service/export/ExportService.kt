@@ -2,10 +2,8 @@ package io.tolgee.service.export
 
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
-import io.tolgee.constants.Message
 import io.tolgee.dtos.IExportParams
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Language
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
@@ -46,7 +44,9 @@ class ExportService(
           projectId = projectId,
         ),
         Duration.ofDays(1),
-      )
+      ) {
+        "EXPORT_$projectId"
+      }
     }
   }
 
@@ -57,7 +57,7 @@ class ExportService(
   private fun getBaseTranslationsProvider(
     exportParams: IExportParams,
     projectId: Long,
-    baseLanguage: Language,
+    baseLanguage: LanguageDto,
   ): () -> List<ExportTranslationView> {
     return {
       getDataForExport(projectId, exportParams, listOf(baseLanguage.tag))
@@ -77,8 +77,7 @@ class ExportService(
     ).getData()
   }
 
-  private fun getProjectBaseLanguage(projectId: Long): Language {
-    return projectService.getOrCreateBaseLanguage(projectId)
-      ?: throw NotFoundException(Message.CANNOT_FIND_BASE_LANGUAGE)
+  private fun getProjectBaseLanguage(projectId: Long): LanguageDto {
+    return projectService.getOrAssignBaseLanguage(projectId)
   }
 }

@@ -295,7 +295,10 @@ export class Validation {
 
   static readonly CLOUD_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
-    stripeProductId: Yup.string().required(),
+    stripeProductId: Yup.string().when('free', {
+      is: false,
+      then: Yup.string().required(),
+    }),
     forOrganizationIds: Yup.array().when('public', {
       is: false,
       then: Yup.array().min(1),
@@ -307,6 +310,7 @@ export class Validation {
         perThousandTranslations: Yup.number().moreThan(0),
       }),
     }),
+    free: Yup.boolean(),
   });
 
   static readonly EE_PLAN_FORM = Yup.object({

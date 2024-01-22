@@ -12,7 +12,7 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { ApiError } from 'tg.service/http/ApiError';
 import { messageService } from 'tg.service/MessageService';
 
-type LanguageDto = components['schemas']['LanguageDto'];
+type LanguageDto = components['schemas']['LanguageRequest'];
 
 export const CreateSingleLanguage: FunctionComponent<{
   onCancel: () => void;
