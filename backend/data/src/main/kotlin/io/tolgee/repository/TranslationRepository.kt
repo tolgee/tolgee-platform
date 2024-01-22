@@ -87,7 +87,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """
       select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
-        key.name as keyName, key.namespace as keyNamespace, key.id as keyId, 
+        key.name as keyName, ns.name as keyNamespace, key.id as keyId, 
       similarity(baseTranslation.text, :baseTranslationText) as similarity
       from Translation baseTranslation
       join baseTranslation.key key
