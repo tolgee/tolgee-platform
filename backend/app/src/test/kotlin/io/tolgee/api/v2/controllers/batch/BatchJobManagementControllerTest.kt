@@ -18,6 +18,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
@@ -124,6 +125,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       doAnswer {
         if (count.incrementAndGet() > 5) {
           while (true) {
+            // this simulates long running operation, which checks for active context
             val context = it.arguments[2] as CoroutineContext
             context.ensureActive()
             Thread.sleep(10)
@@ -143,13 +145,15 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         ),
       ).andIsOk
 
-      Thread.sleep(500)
+      waitFor {
+        batchJobConcurrentLauncher.runningJobs.size >= 5
+      }
 
       val job = getSingleJob()
       performProjectAuthPut("batch-jobs/${job.id}/cancel")
         .andIsOk
 
-      waitForNotThrowing(pollTime = 1000) {
+      waitForNotThrowing(pollTime = 100) {
         executeInNewTransaction {
           getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
           verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
