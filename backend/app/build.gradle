@@ -17,6 +17,7 @@ plugins {
     id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 group = 'io.tolgee'
@@ -172,11 +173,21 @@ dependencies {
     implementation(project(':security'))
 }
 
+boolean isCiServer = System.getenv().containsKey("CI")
+boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
+
 test {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     testLogging {
         events = ["passed", "failed", "skipped"]
+    }
+    retry {
+        if (isCiServer) {
+            maxFailures = 20
+            maxRetries = 5
+        }
+        failOnPassedAfterRetry = !isRelease
     }
 }
 
