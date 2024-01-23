@@ -13,6 +13,7 @@ import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.logger
+import io.tolgee.util.trace
 import jakarta.persistence.EntityManager
 import org.hibernate.LockOptions
 import org.springframework.beans.factory.InitializingBean
@@ -102,7 +103,7 @@ class BatchJobChunkExecutionQueue(
       }
     }
 
-    logger.debug {
+    logger.trace {
       val itemsString = toAdd.joinToString(", ") { it.chunkExecutionId.toString() }
       val filteredOutString = filteredOut.joinToString(", ") { it.chunkExecutionId.toString() }
       "Adding chunks [$itemsString] to queue.\n Not Added Items (already in the queue): [$filteredOutString]"
