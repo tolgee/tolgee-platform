@@ -8,6 +8,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -132,14 +133,16 @@ class ImportE2eDataController(
   @GetMapping(value = ["/clean"])
   @Transactional
   fun cleanup() {
-    entityManager.createQuery("select i from Import i").resultList.forEach {
-      importService.deleteImport(it as Import)
-    }
-    userAccountService.findActive("franta")?.let {
-      projectService.findAllPermitted(it).forEach { repo ->
-        projectService.deleteProject(repo.id!!)
+    tryUntilItDoesntBreakConstraint {
+      entityManager.createQuery("select i from Import i").resultList.forEach {
+        importService.deleteImport(it as Import)
       }
-      userAccountService.delete(it)
+      userAccountService.findActive("franta")?.let {
+        projectService.findAllPermitted(it).forEach { repo ->
+          projectService.deleteProject(repo.id!!)
+        }
+        userAccountService.delete(it)
+      }
     }
   }
 }

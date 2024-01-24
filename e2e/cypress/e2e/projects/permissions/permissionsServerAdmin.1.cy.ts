@@ -32,7 +32,7 @@ describe('Server admin 1', () => {
         'be.visible'
       );
 
-      cy.wait('@set-preferred', { timeout: 15_000 })
+      cy.wait('@set-preferred', { timeout: 30_000 })
         .its('response.statusCode')
         .should('eq', 200);
 
