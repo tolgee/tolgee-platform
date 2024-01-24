@@ -93,7 +93,7 @@ class MfaService(
   }
 
   fun hasMfaEnabled(user: UserAccount): Boolean {
-    return user.totpKey?.isNotEmpty() == true
+    return mfaEnabled(user.totpKey)
   }
 
   fun checkMfa(
@@ -146,5 +146,11 @@ class MfaService(
 
   fun generateStringCode(key: ByteArray): String {
     return generateCode(key).toString().padStart(6, '0')
+  }
+
+  companion object {
+    fun mfaEnabled(totpKeyOrNull: ByteArray?): Boolean {
+      return totpKeyOrNull?.isNotEmpty() == true
+    }
   }
 }

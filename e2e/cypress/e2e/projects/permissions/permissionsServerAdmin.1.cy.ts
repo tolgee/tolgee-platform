@@ -7,6 +7,7 @@ import {
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
 import {
+  assertSwitchedToOrganization,
   switchToOrganization,
   visitProjectDashboard,
 } from '../../../common/shared';
@@ -28,6 +29,8 @@ describe('Server admin 1', () => {
 
       // check that he has admin banner on project which is not his
       visitProjectDashboard(projectInfo.project.id);
+      assertSwitchedToOrganization('admin@admin.com');
+
       cy.gcy('administration-access-message', { timeout: 30_000 }).should(
         'be.visible'
       );

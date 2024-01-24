@@ -2,13 +2,13 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.constants.Message
+import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountModel
 import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
-import io.tolgee.model.views.OrganizationView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication

@@ -1,9 +1,8 @@
 package io.tolgee.hateoas.organization
 
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.queryResults.organization.PrivateOrganizationView
 import io.tolgee.hateoas.quickStart.QuickStartModelAssembler
-import io.tolgee.model.QuickStart
-import io.tolgee.model.views.OrganizationView
 import org.springframework.stereotype.Component
 
 @Component
@@ -12,14 +11,13 @@ class PrivateOrganizationModelAssembler(
   private val quickStartModelAssembler: QuickStartModelAssembler,
 ) {
   fun toModel(
-    organization: OrganizationView,
+    view: PrivateOrganizationView,
     features: Array<Feature>,
-    quickStart: QuickStart?,
   ): PrivateOrganizationModel {
     return PrivateOrganizationModel(
-      organizationModel = organizationModelAssembler.toModel(organization),
+      organizationModel = organizationModelAssembler.toModel(view.organization),
       enabledFeatures = features,
-      quickStart = quickStart?.let { quickStartModelAssembler.toModel(it) },
+      quickStart = view.quickStart?.let { quickStartModelAssembler.toModel(it) },
     )
   }
 }

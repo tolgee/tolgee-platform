@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -21,7 +22,7 @@ class UserPreferences(
 
   var language: String? = null
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   var preferredOrganization: Organization? = null
 
   @Id

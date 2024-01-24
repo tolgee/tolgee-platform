@@ -4,6 +4,8 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.dtos.queryResults.organization.OrganizationView
+import io.tolgee.dtos.queryResults.organization.PrivateOrganizationView
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -14,7 +16,6 @@ import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -372,5 +373,21 @@ class OrganizationService(
     basePermission.type = permissionType
     basePermission.scopes = arrayOf()
     permissionService.save(basePermission)
+  }
+
+  fun findPrivateView(
+    id: Long,
+    currentUserId: Long,
+  ): PrivateOrganizationView? {
+    return findView(id, currentUserId)?.let {
+      PrivateOrganizationView(it, null)
+    }
+  }
+
+  fun findView(
+    id: Long,
+    currentUserId: Long,
+  ): OrganizationView? {
+    return organizationRepository.findView(id, currentUserId)
   }
 }

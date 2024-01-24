@@ -1,34 +1,33 @@
 package io.tolgee.hateoas.userAccount
 
 import io.tolgee.api.v2.controllers.V2UserController
+import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.UserAccount
 import io.tolgee.service.AvatarService
-import io.tolgee.service.security.MfaService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
 class PrivateUserAccountModelAssembler(
   private val avatarService: AvatarService,
-  private val mfaService: MfaService,
-) : RepresentationModelAssemblerSupport<UserAccount, PrivateUserAccountModel>(
+) : RepresentationModelAssemblerSupport<UserAccountView, PrivateUserAccountModel>(
     V2UserController::class.java,
     PrivateUserAccountModel::class.java,
   ) {
-  override fun toModel(entity: UserAccount): PrivateUserAccountModel {
-    val avatar = avatarService.getAvatarLinks(entity.avatarHash)
+  override fun toModel(view: UserAccountView): PrivateUserAccountModel {
+    val avatar = avatarService.getAvatarLinks(view.avatarHash)
 
     return PrivateUserAccountModel(
-      id = entity.id,
-      username = entity.username,
-      name = entity.name,
-      emailAwaitingVerification = entity.emailVerification?.newEmail,
-      mfaEnabled = mfaService.hasMfaEnabled(entity),
+      id = view.id,
+      username = view.username,
+      name = view.name,
+      emailAwaitingVerification = view.emailAwaitingVerification,
+      mfaEnabled = view.isMfaEnabled,
       avatar = avatar,
-      accountType = entity.accountType ?: UserAccount.AccountType.LOCAL,
-      globalServerRole = entity.role ?: UserAccount.Role.USER,
-      deletable = entity.isDeletable,
-      needsSuperJwtToken = entity.needsSuperJwt,
+      accountType = view.accountType ?: UserAccount.AccountType.LOCAL,
+      globalServerRole = view.role ?: UserAccount.Role.USER,
+      deletable = view.isDeletable,
+      needsSuperJwtToken = view.needsSuperJwt,
     )
   }
 }
