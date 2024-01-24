@@ -9,7 +9,7 @@ class BasePermissionView(
   override val type: ProjectPermissionType?,
 ) : IPermission {
   override val scopes: Array<Scope>
-    get() = _scopes ?: emptyArray()
+    get() = getScopesFromTypeAndScopes(type, _scopes)
 
   override val projectId: Long? = null
   override val organizationId: Long = 0

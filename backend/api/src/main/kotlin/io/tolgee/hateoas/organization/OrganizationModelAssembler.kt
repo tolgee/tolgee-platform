@@ -18,13 +18,12 @@ class OrganizationModelAssembler(
   ) {
   override fun toModel(view: OrganizationView): OrganizationModel {
     val link = linkTo<OrganizationController> { get(view.slug) }.withSelfRel()
-    val basePermission = view.basePermission
     return OrganizationModel(
       view.id,
       view.name,
       view.slug,
       view.description,
-      basePermissions = permissionModelAssembler.toModel(basePermission),
+      basePermissions = permissionModelAssembler.toModel(view.basePermission),
       currentUserRole = view.currentUserRole,
       avatar = avatarService.getAvatarLinks(view.avatarHash),
     ).add(link)

@@ -20,6 +20,7 @@ import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.InvitationService
+import io.tolgee.service.QuickStartService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
@@ -57,6 +58,7 @@ class OrganizationService(
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
   private val eventPublisher: ApplicationEventPublisher,
+  private val quickStartService: QuickStartService,
 ) : Logging {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
@@ -380,7 +382,8 @@ class OrganizationService(
     currentUserId: Long,
   ): PrivateOrganizationView? {
     return findView(id, currentUserId)?.let {
-      PrivateOrganizationView(it, null)
+      val quickStart = quickStartService.findView(currentUserId, id)
+      PrivateOrganizationView(it, quickStart)
     }
   }
 
