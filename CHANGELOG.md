@@ -1,3 +1,10 @@
+## [3.46.2](https://github.com/tolgee/tolgee-platform/compare/v3.46.1...v3.46.2) (2024-01-24)
+
+
+### Bug Fixes
+
+* Minor fixes & better sentry logging ([#2098](https://github.com/tolgee/tolgee-platform/issues/2098)) ([9ee52ca](https://github.com/tolgee/tolgee-platform/commit/9ee52caf26958335fcaef1fdd66df0e9e8a7d3eb))
+
 ## [3.46.1](https://github.com/tolgee/tolgee-platform/compare/v3.46.0...v3.46.1) (2024-01-22)
 
 
