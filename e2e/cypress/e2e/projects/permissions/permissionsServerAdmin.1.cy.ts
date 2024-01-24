@@ -7,6 +7,7 @@ import {
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
 import {
+  assertSwitchedToOrganization,
   switchToOrganization,
   visitProjectDashboard,
 } from '../../../common/shared';
@@ -21,23 +22,18 @@ describe('Server admin 1', () => {
       switchToOrganization('admin');
       cy.gcy('administration-access-message').should('not.exist');
 
-      cy.intercept(
-        'PUT',
-        '**/v2/user-preferences/set-preferred-organization/**'
-      ).as('set-preferred');
-
       // check that he has admin banner on project which is not his
       visitProjectDashboard(projectInfo.project.id);
+      assertSwitchedToOrganization('admin@admin.com');
+
       cy.gcy('administration-access-message', { timeout: 30_000 }).should(
         'be.visible'
       );
 
-      cy.wait('@set-preferred', { timeout: 30_000 })
-        .its('response.statusCode')
-        .should('eq', 200);
-
       cy.visit(HOST);
-      cy.gcy('administration-access-message').should('be.visible');
+      cy.gcy('administration-access-message', { timeout: 30_000 }).should(
+        'be.visible'
+      );
       cy.visit(`${HOST}/organizations/admin-admin-com/profile`);
       cy.gcy('administration-access-message').should('be.visible');
 

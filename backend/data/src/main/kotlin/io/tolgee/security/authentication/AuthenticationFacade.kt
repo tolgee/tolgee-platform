@@ -20,6 +20,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
@@ -63,6 +64,19 @@ class AuthenticationFacade(
         }
 
         return authentication.userAccountEntity
+      }
+
+  val authenticatedUserView: UserAccountView
+    get() = authenticatedUserViewOrNull ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+
+  val authenticatedUserViewOrNull: UserAccountView?
+    get() =
+      authenticatedUserOrNull?.let {
+        if (authentication.userAccountView == null) {
+          authentication.userAccountView = userAccountService.findActiveView(it.id)
+        }
+
+        return authentication.userAccountView
       }
 
   // -- AUTHENTICATION METHOD AND DETAILS

@@ -292,9 +292,9 @@ class V2ProjectsController(
     val options =
       organizations.content.map {
         ProjectTransferOptionModel(
-          name = it.organization.name,
-          slug = it.organization.slug,
-          id = it.organization.id,
+          name = it.name,
+          slug = it.slug,
+          id = it.id,
         )
       }.toMutableList()
     options.sortBy { it.name }

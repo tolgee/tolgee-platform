@@ -8,7 +8,6 @@ import io.tolgee.constants.Message
 import io.tolgee.model.batch.params.SetKeysNamespaceParams
 import io.tolgee.service.key.KeyService
 import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceException
 import kotlinx.coroutines.ensureActive
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage
 import org.springframework.stereotype.Component
@@ -30,17 +29,30 @@ class SetKeysNamespaceChunkProcessor(
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      try {
+      catchingKeyAlreadyInNamespace {
         keyService.setNamespace(subChunk, params.namespace)
         entityManager.flush()
-      } catch (e: PersistenceException) {
-        if (getRootCauseMessage(e).contains("key_project_id_name_namespace_id_idx")) {
-          throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
-        }
-        throw e
       }
       progress += subChunk.size
       onProgress.invoke(progress)
+    }
+  }
+
+  private fun catchingKeyAlreadyInNamespace(fn: () -> Unit) {
+    try {
+      fn.invoke()
+    } catch (e: Exception) {
+      val rootCause = getRootCauseMessage(e)
+      val isKeyAlreadyInNamespace =
+        rootCause
+          .contains("key_project_id_name_namespace_id_idx")
+      val isKeyAlreadyInProjectWithoutNamespace =
+        rootCause
+          .contains("key_project_id_name_idx")
+      if (isKeyAlreadyInNamespace || isKeyAlreadyInProjectWithoutNamespace) {
+        throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
+      }
+      throw e
     }
   }
 

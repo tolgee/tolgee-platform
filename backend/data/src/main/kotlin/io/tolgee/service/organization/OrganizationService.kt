@@ -4,6 +4,8 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.dtos.queryResults.organization.OrganizationView
+import io.tolgee.dtos.queryResults.organization.PrivateOrganizationView
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -14,11 +16,11 @@ import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.InvitationService
+import io.tolgee.service.QuickStartService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
@@ -56,6 +58,7 @@ class OrganizationService(
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
   private val eventPublisher: ApplicationEventPublisher,
+  private val quickStartService: QuickStartService,
 ) : Logging {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
@@ -372,5 +375,22 @@ class OrganizationService(
     basePermission.type = permissionType
     basePermission.scopes = arrayOf()
     permissionService.save(basePermission)
+  }
+
+  fun findPrivateView(
+    id: Long,
+    currentUserId: Long,
+  ): PrivateOrganizationView? {
+    return findView(id, currentUserId)?.let {
+      val quickStart = quickStartService.findView(currentUserId, id)
+      PrivateOrganizationView(it, quickStart)
+    }
+  }
+
+  fun findView(
+    id: Long,
+    currentUserId: Long,
+  ): OrganizationView? {
+    return organizationRepository.findView(id, currentUserId)
   }
 }

@@ -17,6 +17,7 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
@@ -30,6 +31,7 @@ class TolgeeAuthentication(
   private val details: TolgeeAuthenticationDetails?,
 ) : Authentication {
   var userAccountEntity: UserAccount? = null
+  var userAccountView: UserAccountView? = null
   var projectApiKeyEntity: ApiKey? = null
   var personalAccessTokenEntity: Pat? = null
 

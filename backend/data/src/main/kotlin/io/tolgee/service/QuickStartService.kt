@@ -2,6 +2,7 @@ package io.tolgee.service
 
 import io.tolgee.component.demoProject.DemoProjectCreator
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.queryResults.organization.QuickStartView
 import io.tolgee.model.Organization
 import io.tolgee.model.QuickStart
 import io.tolgee.model.UserAccount
@@ -67,5 +68,13 @@ class QuickStartService(
   ): QuickStart? {
     organizationId ?: return null
     return quickStartRepository.findByUserAccountIdAndOrganizationId(userAccountId, organizationId)
+  }
+
+  fun findView(
+    userAccountId: Long,
+    organizationId: Long?,
+  ): QuickStartView? {
+    organizationId ?: return null
+    return quickStartRepository.findView(userAccountId, organizationId)
   }
 }

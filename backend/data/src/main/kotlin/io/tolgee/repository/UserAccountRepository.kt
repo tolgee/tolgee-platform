@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -45,6 +46,25 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     user: UserAccount,
     now: Date,
   )
+
+  @Query(
+    """
+  select new io.tolgee.dtos.queryResults.UserAccountView(
+    ua.id,
+    ua.username,
+    ua.name,
+    ev.newEmail,
+    ua.avatarHash,
+    ua.accountType,
+    ua.role,
+    ua.isInitialUser,
+    ua.totpKey
+  ) from UserAccount ua
+  left join ua.emailVerification ev
+  where ua.id = :userAccountId and ua.deletedAt is null and ua.disabledAt is null
+  """,
+  )
+  fun findActiveView(userAccountId: Long): UserAccountView
 
   @Query(
     """

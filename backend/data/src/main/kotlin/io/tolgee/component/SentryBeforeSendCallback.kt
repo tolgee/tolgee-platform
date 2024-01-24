@@ -7,25 +7,47 @@ import org.springframework.stereotype.Component
 
 @Component
 class SentryBeforeSendCallback : SentryOptions.BeforeSendCallback {
+  companion object {
+    val IGNORED_MESSAGE_CONTAINS =
+      listOf(
+        "Failed to send message to MessageChannel",
+        "Cannot render error page for request [/websocket",
+      )
+
+    val IGNORED_EXCEPTIONS =
+      listOf(
+        "FailedDontRequeueException",
+        "ClientAbortException",
+      )
+  }
+
   override fun execute(
     event: SentryEvent,
     hint: Hint,
   ): SentryEvent? {
-    if (event.containsMessage("Failed to send message to MessageChannel")) {
+    if (isMessageIgnored(event)) {
       return null
     }
 
-    if (event.containsExceptionOfType("FailedDontRequeueException")) {
+    if (event.isExceptionIgnored()) {
       return null
     }
 
-    if (event.containsExceptionOfType("ClientAbortException")) {
+    if (event.containsMessage("Invalid connection string") && hasNoException(event)) {
       return null
     }
-
-    if (event.containsMessage("Cannot render error page for request [/websocket")) return null
 
     return event
+  }
+
+  private fun hasNoException(event: SentryEvent) = event.exceptions.isNullOrEmpty()
+
+  private fun SentryEvent.isExceptionIgnored(): Boolean {
+    return IGNORED_EXCEPTIONS.any { containsExceptionOfType(it) }
+  }
+
+  private fun isMessageIgnored(event: SentryEvent): Boolean {
+    return IGNORED_MESSAGE_CONTAINS.any { event.containsMessage(it) }
   }
 
   private fun SentryEvent.containsMessage(string: String): Boolean {

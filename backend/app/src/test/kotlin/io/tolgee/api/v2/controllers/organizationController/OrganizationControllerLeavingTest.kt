@@ -20,9 +20,9 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
   fun testLeaveOrganization() {
     val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
     organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), testOrg)
-    assertThat(getPermittedOrgs().find { testOrg.id == it.organization.id }).isNotNull
+    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNotNull
     performAuthPut("/v2/organizations/${testOrg.id}/leave", null).andIsOk
-    assertThat(getPermittedOrgs().find { testOrg.id == it.organization.id }).isNull()
+    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNull()
   }
 
   private fun getPermittedOrgs() =
@@ -34,13 +34,15 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.jirina
 
-    assertThat(userPreferencesService.find(testData.jirina.id)!!.preferredOrganization?.name)
-      .isEqualTo(testData.jirinaOrg.name)
+    executeInNewTransaction {
+      assertThat(userPreferencesService.find(testData.jirina.id)!!.preferredOrganization?.name)
+        .isEqualTo(testData.jirinaOrg.name)
 
-    performAuthPut("/v2/organizations/${testData.jirinaOrg.id}/leave", null).andIsOk
+      performAuthPut("/v2/organizations/${testData.jirinaOrg.id}/leave", null).andIsOk
 
-    assertThat(userPreferencesService.find(testData.jirina.id)!!.preferredOrganization?.name)
-      .isNotEqualTo(testData.jirinaOrg.name)
+      assertThat(userPreferencesService.find(testData.jirina.id)!!.preferredOrganization?.name)
+        .isNotEqualTo(testData.jirinaOrg.name)
+    }
   }
 
   @Test
