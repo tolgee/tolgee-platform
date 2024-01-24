@@ -6,6 +6,7 @@ import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.HttpClient
+import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
@@ -46,6 +47,7 @@ class EeSubscriptionServiceImpl(
   private val platformTransactionManager: PlatformTransactionManager,
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: EeSubscriptionServiceImpl,
+  private val billingConfProvider: PublicBillingConfProvider,
 ) : EeSubscriptionProvider {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
@@ -239,7 +241,8 @@ class EeSubscriptionServiceImpl(
     seats: Long,
     subscription: EeSubscriptionDto?,
   ) {
-    if (subscription == null) {
+    val isCloud = billingConfProvider.invoke().enabled
+    if (subscription == null && !isCloud) {
       if (seats > 10) {
         throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
       }
