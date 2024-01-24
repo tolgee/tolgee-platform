@@ -9,7 +9,6 @@ import { resolve } from 'path';
 
 import { extractDataCy } from './dataCy.plugin';
 import rehypeHighlight from 'rehype-highlight';
-import { loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };

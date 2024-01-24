@@ -228,10 +228,29 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun reportUsage() {
-    val subscription = findSubscriptionEntity()
+  fun checkCountAndReportUsage() {
+    val seats = userAccountService.countAllEnabled()
+    val subscription = self.findSubscriptionDto()
+    reportUsage(seats, subscription)
+    checkUserCount(seats, subscription)
+  }
+
+  private fun checkUserCount(
+    seats: Long,
+    subscription: EeSubscriptionDto?,
+  ) {
+    if (subscription == null) {
+      if (seats > 10) {
+        throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+      }
+    }
+  }
+
+  private fun reportUsage(
+    seats: Long,
+    subscription: EeSubscriptionDto?,
+  ) {
     if (subscription != null) {
-      val seats = userAccountService.countAllEnabled()
       catchingSeatsSpendingLimit {
         catchingLicenseNotFound {
           reportUsageRemote(subscription, seats)
@@ -263,7 +282,7 @@ class EeSubscriptionServiceImpl(
   }
 
   private fun reportUsageRemote(
-    subscription: EeSubscription,
+    subscription: EeSubscriptionDto,
     seats: Long,
   ) {
     postRequest<Any>(
