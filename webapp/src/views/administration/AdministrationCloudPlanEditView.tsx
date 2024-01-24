@@ -71,6 +71,7 @@ export const AdministrationCloudPlanEditView = () => {
             loading={planEditLoadable.isLoading}
             initialData={{
               ...planData,
+              autoAssign: false,
               includedUsage: {
                 seats: planData.includedUsage.seats,
                 mtCredits: planData.includedUsage.mtCredits,
@@ -88,7 +89,6 @@ export const AdministrationCloudPlanEditView = () => {
                     'application/json': {
                       ...values,
                       stripeProductId: values.stripeProductId!,
-                      free: false,
                       forOrganizationIds: values.public
                         ? []
                         : values.forOrganizationIds,

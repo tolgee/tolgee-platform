@@ -25,7 +25,7 @@ describe('Machine translation settings', () => {
   });
 
   it('will update default settings', { retries: 5 }, () => {
-    cy.gcy('machine-translations-settings-language-options').click();
+    cy.gcy('machine-translations-settings-language-options').first().click();
     getEnableCheckbox('GOOGLE').click();
     getPrimaryRadio('AWS').click();
     cy.gcy('mt-language-dialog-auto-for-import').click();
@@ -49,14 +49,13 @@ describe('Machine translation settings', () => {
       1
     );
     cy.gcy('global-editor').type('{esc}');
-    createTranslation('aaa_key', 'test translation');
+    createTranslation({ key: 'aaa_key', translation: 'test translation' });
     cy.contains('test translation translated with AWS from en to cs').should(
       'be.visible'
     );
   });
 
   it('will update language specific settings', { retries: 5 }, () => {
-    cy.gcy('machine-translations-settings-toggle').click();
     gcyAdvanced({
       value: 'machine-translations-settings-language-options',
       language: 'es',
@@ -99,7 +98,7 @@ describe('Machine translation settings', () => {
     );
     cy.gcy('global-editor').type('{esc}');
 
-    createTranslation('aaa_key', 'test translation');
+    createTranslation({ key: 'aaa_key', translation: 'test translation' });
     cy.contains(
       'test translation translated with AWS from en to es FORMAL'
     ).should('be.visible');
@@ -107,7 +106,7 @@ describe('Machine translation settings', () => {
   });
 
   const visit = () => {
-    cy.visit(`${HOST}/projects/${project.id}/languages`);
+    cy.visit(`${HOST}/projects/${project.id}/languages/mt`);
   };
 
   const openEditor = (text: string) => {

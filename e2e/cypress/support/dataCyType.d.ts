@@ -7,7 +7,9 @@ declare namespace DataCy {
         "activity-detail" |
         "add-box" |
         "administration-access-message" |
+        "administration-cloud-plan-field-auto-assign-to-selected" |
         "administration-cloud-plan-field-feature" |
+        "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-mt-credits" |
         "administration-cloud-plan-field-included-translations" |
         "administration-cloud-plan-field-name" |
@@ -29,10 +31,12 @@ declare namespace DataCy {
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-field-feature" |
+        "administration-ee-plan-field-included-mt-credits" |
         "administration-ee-plan-field-included-seats" |
         "administration-ee-plan-field-name" |
         "administration-ee-plan-field-price-monthly" |
         "administration-ee-plan-field-price-per-seat" |
+        "administration-ee-plan-field-price-per-thousand-mt-credits" |
         "administration-ee-plan-field-price-yearly" |
         "administration-ee-plan-field-public" |
         "administration-ee-plan-field-stripe-product" |
@@ -52,6 +56,11 @@ declare namespace DataCy {
         "administration-user-menu" |
         "administration-user-role-select" |
         "administration-users-list-item" |
+        "ai-customization-project-description" |
+        "ai-customization-project-description-add" |
+        "ai-customization-project-description-edit" |
+        "ai-languages-description" |
+        "ai-languages-description-edit" |
         "api-key-expiry-info" |
         "api-key-list-item" |
         "api-key-list-item-delete-button" |
@@ -236,6 +245,8 @@ declare namespace DataCy {
         "key-edit-tab-advanced" |
         "key-edit-tab-context" |
         "key-edit-tab-general" |
+        "language-ai-prompt-dialog-description-input" |
+        "language-ai-prompt-dialog-save" |
         "language-delete-button" |
         "language-modify-form" |
         "languages-create-autocomplete-field" |
@@ -244,6 +255,9 @@ declare namespace DataCy {
         "languages-create-customize-button" |
         "languages-create-submit-button" |
         "languages-flag-selector-open-button" |
+        "languages-menu-ai-prompt-customization" |
+        "languages-menu-machine-translation" |
+        "languages-menu-project-languages" |
         "languages-modify-apply-button" |
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
@@ -251,7 +265,6 @@ declare namespace DataCy {
         "machine-translations-settings-language-enabled-service" |
         "machine-translations-settings-language-options" |
         "machine-translations-settings-language-primary-service" |
-        "machine-translations-settings-toggle" |
         "mfa-disable-button" |
         "mfa-disable-dialog" |
         "mfa-disable-dialog-content" |
@@ -330,6 +343,8 @@ declare namespace DataCy {
         "permissions-menu-inherited-message" |
         "permissions-menu-reset-to-organization" |
         "permissions-menu-save" |
+        "project-ai-prompt-dialog-description-input" |
+        "project-ai-prompt-dialog-save" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |
         "project-dashboard-base-word-count" |
@@ -381,6 +396,7 @@ declare namespace DataCy {
         "project-settings-delete-button" |
         "project-settings-description" |
         "project-settings-languages" |
+        "project-settings-languages-add" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
         "project-settings-name" |
@@ -441,6 +457,7 @@ declare namespace DataCy {
         "top-banner-content" |
         "top-banner-dismiss-button" |
         "transfer-project-apply-button" |
+        "translation-create-description-input" |
         "translation-create-key-input" |
         "translation-create-namespace-input" |
         "translation-create-translation-input" |
@@ -472,7 +489,10 @@ declare namespace DataCy {
         "translations-filter-select" |
         "translations-filters-subheader" |
         "translations-history-load-more-button" |
+        "translations-key-cell-description" |
         "translations-key-count" |
+        "translations-key-edit-description-field" |
+        "translations-key-edit-key-field" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |
         "translations-namespace-banner" |

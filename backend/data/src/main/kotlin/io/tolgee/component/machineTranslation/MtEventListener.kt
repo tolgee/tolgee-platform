@@ -22,14 +22,14 @@ class MtEventListener(
   @ExperimentalTime
   fun onBeforeMtEvent(event: OnBeforeMachineTranslationEvent) {
     if (shouldConsumeCredits()) {
-      mtCreditBucketService.checkPositiveBalance(event.project)
+      mtCreditBucketService.checkPositiveBalance(event.organizationId)
     }
   }
 
   @EventListener(OnAfterMachineTranslationEvent::class)
   fun onAfterMtEvent(event: OnAfterMachineTranslationEvent) {
     if (shouldConsumeCredits()) {
-      val bucket = mtCreditBucketService.consumeCredits(event.project, event.actualSumPrice)
+      val bucket = mtCreditBucketService.consumeCredits(event.organizationId, event.actualSumPrice)
       detachBucketAfterConsumption(bucket)
     }
   }

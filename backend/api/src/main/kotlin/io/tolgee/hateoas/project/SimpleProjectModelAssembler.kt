@@ -1,9 +1,9 @@
 package io.tolgee.hateoas.project
 
 import io.tolgee.api.v2.controllers.V2ProjectsController
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.model.Project
-import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -26,7 +26,7 @@ class SimpleProjectModelAssembler(
       baseLanguage =
         entity.baseLanguage?.let {
           languageModelAssembler.toModel(
-            LanguageViewImpl(it, true),
+            LanguageDto.fromEntity(it, it.id),
           )
         },
     )

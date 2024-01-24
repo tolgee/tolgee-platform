@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.constants.MtServiceType
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
@@ -11,6 +12,7 @@ import java.util.*
 class SuggestionTestData : BaseTestData() {
   var germanLanguage: Language
   lateinit var beautifulKey: Key
+  lateinit var beautifulKeyBuilder: KeyBuilder
   lateinit var thisIsBeautifulKey: Key
   val fakerEn: Faker = Faker(Locale.ENGLISH)
   val fakerDe: Faker = Faker(Locale.GERMAN)
@@ -90,6 +92,7 @@ class SuggestionTestData : BaseTestData() {
       name = "key 4"
       beautifulKey = this
     }.build keyBuilder@{
+      beautifulKeyBuilder = this
       addTranslation {
         language = englishLanguage
         key = this@keyBuilder.self
@@ -224,5 +227,11 @@ class SuggestionTestData : BaseTestData() {
       credits = 1000
       extraCredits = 1000
     }
+  }
+
+  fun addAiDescriptions() {
+    beautifulKeyBuilder.addMeta { description = "This key is Beautiful" }
+    germanLanguage.aiTranslatorPromptDescription = "This is a description for AI translator"
+    project.aiTranslatorPromptDescription = "This is a description for AI translator"
   }
 }

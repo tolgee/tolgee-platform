@@ -1,7 +1,7 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
-import io.tolgee.model.Language
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.service.key.TagService
 import io.tolgee.service.queryBuilders.CursorUtil
@@ -19,7 +19,7 @@ class TranslationViewDataProvider(
 ) {
   fun getData(
     projectId: Long,
-    languages: Set<Language>,
+    languages: Set<LanguageDto>,
     pageable: Pageable,
     params: TranslationFilters = TranslationFilters(),
     cursor: String? = null,
@@ -49,7 +49,7 @@ class TranslationViewDataProvider(
 
   fun getSelectAllKeys(
     projectId: Long,
-    languages: Set<Language>,
+    languages: Set<LanguageDto>,
     params: TranslationFilters = TranslationFilters(),
   ): MutableList<Long> {
     val translationsViewQueryBuilder =
@@ -65,7 +65,7 @@ class TranslationViewDataProvider(
 
   private fun getTranslationsViewQueryBuilder(
     projectId: Long,
-    languages: Set<Language>,
+    languages: Set<LanguageDto>,
     params: TranslationFilters,
     pageable: Pageable,
     cursor: String?,

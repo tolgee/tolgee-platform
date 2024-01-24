@@ -76,7 +76,7 @@ export const LimitedHeightText: React.FC<Props> = ({
   wrap = 'break-word',
   width,
   overlayPadding = 8,
-  lineHeight = '1.2rem',
+  lineHeight = '1.2em',
   overlay = true,
 }) => {
   const textRef = useRef<HTMLDivElement>();
@@ -177,6 +177,7 @@ export const LimitedHeightText: React.FC<Props> = ({
               left: -overlayPadding,
               padding: overlayPadding,
               lineHeight: lineHeight,
+              fontSize: window.getComputedStyle(textRef.current).fontSize,
             }}
           >
             {children}

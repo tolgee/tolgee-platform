@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertError
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   private val languageDTO =
-    LanguageDto(
+    LanguageRequest(
       "English",
       "Original English",
       "en",
@@ -44,13 +44,13 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
         organizationId = base.organization.id,
         languages =
           listOf(
-            LanguageDto(
+            LanguageRequest(
               name = "English",
               originalName = "English",
               tag = "en",
               flagEmoji = "a",
             ),
-            LanguageDto(
+            LanguageRequest(
               name = "Czech",
               originalName = "česky",
               tag = "cs",
@@ -100,7 +100,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
       CreateProjectDTO(
         "A name",
         listOf(
-          LanguageDto(
+          LanguageRequest(
             name = "English",
             originalName = "English",
             tag = "en,aa",

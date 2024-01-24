@@ -6,10 +6,10 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.EeInvitationService
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
-import io.tolgee.ee.service.EeInvitationService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.hateoas.invitation.ProjectInvitationModel

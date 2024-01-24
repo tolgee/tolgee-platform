@@ -2,8 +2,8 @@ package io.tolgee.ee
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.AbstractSpringTest
+import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
-import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.model.UserAccount

@@ -1,7 +1,6 @@
 package io.tolgee.repository
 
 import io.tolgee.jobs.migration.translationStats.StatsMigrationTranslationView
-import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -39,17 +38,17 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     "from Translation t " +
       "join fetch Key k on t.key = k " +
-      "where k = :key and k.project = :project and t.language in :languages",
+      "where k = :key and k.project = :project and t.language.id in :languageIds",
   )
   fun getTranslations(
     key: Key,
     project: Project,
-    languages: Collection<Language>,
+    languageIds: Collection<Long>,
   ): Set<Translation>
 
-  fun findOneByKeyAndLanguage(
+  fun findOneByKeyAndLanguageId(
     key: Key,
-    language: Language,
+    languageId: Long,
   ): Optional<Translation>
 
   fun findOneByKeyIdAndLanguageId(
@@ -87,16 +86,19 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
    */
   @Query(
     """
-      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, key.id as keyId, 
+      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
+        key.name as keyName, ns.name as keyNamespace, key.id as keyId, 
       similarity(baseTranslation.text, :baseTranslationText) as similarity
       from Translation baseTranslation
       join baseTranslation.key key
+      left join key.namespace ns
+      join key.project p
       join Translation target on 
             target.key = key and 
-            target.language = :targetLanguage and
+            target.language.id = :targetLanguageId and
             target.text <> '' and
             target.text is not null
-      where baseTranslation.language = :baseLanguage and
+      where baseTranslation.language.id = p.baseLanguage.id and
         cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
         (:key is null or key <> :key)
       order by similarity desc
@@ -105,8 +107,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getTranslateMemorySuggestions(
     baseTranslationText: String,
     key: Key? = null,
-    baseLanguage: Language,
-    targetLanguage: Language,
+    targetLanguageId: Long,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView>
 
@@ -116,12 +117,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
       1 as similarity
       from Translation baseTranslation
       join baseTranslation.key key
+      join key.project p
       join Translation target on 
             target.key = key and 
-            target.language = :targetLanguage and
+            target.language.id = :targetLanguageId and
             target.text <> '' and
             target.text is not null
-      where baseTranslation.language = :baseLanguage and
+      where baseTranslation.language = p.baseLanguage and
         baseTranslation.text = :baseTranslationText and
         key <> :key
       """,
@@ -129,8 +131,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getTranslationMemoryValue(
     baseTranslationText: String,
     key: Key,
-    baseLanguage: Language,
-    targetLanguage: Language,
+    targetLanguageId: Long,
     pageable: Pageable = PageRequest.of(0, 1),
   ): List<TranslationMemoryItemView>
 

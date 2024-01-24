@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -22,9 +22,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 @SpringBootTest
 @AutoConfigureMockMvc
 class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-  private val languageDTO = LanguageDto("en", "en", "en")
-  private val languageDTOBlank = LanguageDto("", "")
-  private val languageDTOCorrect = LanguageDto("Spanish", "Espanol", "es")
+  private val languageDTO = LanguageRequest("en", "en", "en")
+  private val languageDTOBlank = LanguageRequest("", "")
+  private val languageDTOCorrect = LanguageRequest("Spanish", "Espanol", "es")
 
   @Test
   fun createLanguage() {
@@ -40,7 +40,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val project = base.project
     val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
     val languageDTO =
-      LanguageDto(
+      LanguageRequest(
         name = "newEnglish",
         tag = "newEn",
         originalName = "newOriginalEnglish",
@@ -53,10 +53,10 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("flagEmoji").isEqualTo(languageDTO.flagEmoji)
     }
     val dbLanguage = languageService.findByTag(languageDTO.tag, project.id)
-    Assertions.assertThat(dbLanguage).isPresent
-    Assertions.assertThat(dbLanguage.get().name).isEqualTo(languageDTO.name)
-    Assertions.assertThat(dbLanguage.get().originalName).isEqualTo(languageDTO.originalName)
-    Assertions.assertThat(dbLanguage.get().flagEmoji).isEqualTo(languageDTO.flagEmoji)
+    Assertions.assertThat(dbLanguage).isNotNull
+    Assertions.assertThat(dbLanguage!!.name).isEqualTo(languageDTO.name)
+    Assertions.assertThat(dbLanguage.originalName).isEqualTo(languageDTO.originalName)
+    Assertions.assertThat(dbLanguage.flagEmoji).isEqualTo(languageDTO.flagEmoji)
   }
 
   @Test
@@ -77,7 +77,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
     performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
     executeInNewTransaction {
-      Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+      Assertions.assertThat(languageService.findEntity(deutsch.id)).isNull()
     }
   }
 
@@ -92,7 +92,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthDelete("languages/${deutsch.id}", null)
       .andExpect(MockMvcResultMatchers.status().isOk)
     executeInNewTransaction {
-      Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+      Assertions.assertThat(languageService.findEntity(deutsch.id)).isNull()
     }
   }
 
@@ -126,14 +126,23 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `automatically sets base language`() {
     val base = dbPopulator.createBase(generateUniqueString())
-    executeInNewTransaction {
-      val project = projectService.get(base.project.id)
-      val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
-      project.baseLanguage = null
-      projectService.save(project)
-      performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
-        node("code").isEqualTo("cannot_delete_base_language")
+
+    val project =
+      executeInNewTransaction {
+        val project = projectService.get(base.project.id)
+        project.baseLanguage = null
+        projectService.save(project)
       }
+
+    val en =
+      executeInNewTransaction {
+        // base language is set on load, so this should set new language
+        val projectLocal = projectService.get(base.project.id)
+        projectLocal.findLanguageOptional("en").orElseThrow { NotFoundException() }
+      }
+
+    performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("cannot_delete_base_language")
     }
   }
 
@@ -143,7 +152,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val project = base.project
     performCreate(
       project.id,
-      LanguageDto(originalName = "Original name", name = "Name", tag = "aa,aa"),
+      LanguageRequest(originalName = "Original name", name = "Name", tag = "aa,aa"),
     ).andIsBadRequest.andAssertThatJson {
       node("STANDARD_VALIDATION.tag").isEqualTo("can not contain coma")
     }
@@ -155,8 +164,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("tag").isEqualTo(languageDTOCorrect.tag)
     }
     val es = languageService.findByTag("es", repoId)
-    Assertions.assertThat(es).isPresent
-    Assertions.assertThat(es.get().name).isEqualTo(languageDTOCorrect.name)
+    Assertions.assertThat(es!!.name).isEqualTo(languageDTOCorrect.name)
   }
 
   fun createLanguageTestValidation(repoId: Long) {
@@ -184,7 +192,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun performCreate(
     projectId: Long,
-    content: LanguageDto,
+    content: LanguageRequest,
   ): ResultActions {
     return performAuthPost("/v2/projects/$projectId/languages", content)
   }
@@ -192,7 +200,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun performEdit(
     projectId: Long,
     languageId: Long,
-    content: LanguageDto,
+    content: LanguageRequest,
   ): ResultActions {
     return performAuthPut("/v2/projects/$projectId/languages/$languageId", content)
   }

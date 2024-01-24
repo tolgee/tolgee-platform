@@ -148,6 +148,14 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
       return <T keyName="activity_entity_key_meta" params={params} />;
     },
     fields: {
+      description: {
+        type: 'text',
+        label(params) {
+          return (
+            <T keyName="activity_entity_key_meta.description" params={params} />
+          );
+        },
+      },
       tags: {
         type: 'key_tags',
         label(params) {

@@ -9,6 +9,7 @@ export type HighlightItem =
   | 'menu_integrate'
   | 'add_project'
   | 'add_language'
+  | 'machine_translation_tab'
   | 'machine_translation'
   | 'invitations'
   | 'members'

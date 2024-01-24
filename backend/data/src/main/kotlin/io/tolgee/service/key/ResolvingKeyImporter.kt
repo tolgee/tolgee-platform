@@ -54,7 +54,8 @@ class ResolvingKeyImporter(
     importedKeys = tryImport()
     checkErrors()
     val screenshots = importScreenshots()
-    return KeyImportResolvableResult(importedKeys, screenshots)
+    val keyViews = keyService.getViewsByKeyIds(importedKeys.map { it.id })
+    return KeyImportResolvableResult(keyViews, screenshots)
   }
 
   private fun tryImport(): List<Key> {
@@ -65,7 +66,7 @@ class ResolvingKeyImporter(
 
       keyToImport.mapLanguageAsKey().forEach translations@{ (language, resolvable) ->
         language ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-        val existingTranslation = getExistingTranslation(key, language)
+        val existingTranslation = getExistingTranslation(key, language.tag)
 
         val isEmpty = existingTranslation !== null && existingTranslation.text.isNullOrEmpty()
 
@@ -73,7 +74,7 @@ class ResolvingKeyImporter(
 
         val translationExists = !isEmpty && !isNew
 
-        if (validate(translationExists, resolvable, key, language)) return@translations
+        if (validate(translationExists, resolvable, key, language.tag)) return@translations
 
         if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
           translationService.setTranslation(existingTranslation!!, resolvable.text)
@@ -84,7 +85,7 @@ class ResolvingKeyImporter(
           val translation =
             Translation(resolvable.text).apply {
               this.key = key
-              this.language = language
+              this.language = entityManager.getReference(Language::class.java, language.id)
             }
           translationService.save(translation)
         }
@@ -181,18 +182,18 @@ class ResolvingKeyImporter(
     translationExists: Boolean,
     resolvable: ImportTranslationResolvableDto,
     key: Key,
-    language: Language,
+    languageTag: String,
   ): Boolean {
     if (translationExists && resolvable.resolution == ImportTranslationResolution.NEW) {
       errors.add(
-        listOf(Message.TRANSLATION_EXISTS.code, key.namespace?.name, key.name, language.tag),
+        listOf(Message.TRANSLATION_EXISTS.code, key.namespace?.name, key.name, languageTag),
       )
       return true
     }
 
     if (!translationExists && resolvable.resolution != ImportTranslationResolution.NEW) {
       errors.add(
-        listOf(Message.TRANSLATION_NOT_FOUND.code, key.namespace?.name, key.name, language.tag),
+        listOf(Message.TRANSLATION_NOT_FOUND.code, key.namespace?.name, key.name, languageTag),
       )
       return true
     }
@@ -201,8 +202,8 @@ class ResolvingKeyImporter(
 
   private fun getExistingTranslation(
     key: Key,
-    language: Language,
-  ) = existingTranslations[key.namespace?.name to key.name]?.get(language.tag)
+    languageTag: String,
+  ) = existingTranslations[key.namespace?.name to key.name]?.get(languageTag)
 
   private fun ImportKeysResolvableItemDto.mapLanguageAsKey() =
     translations.mapNotNull { (languageTag, value) ->

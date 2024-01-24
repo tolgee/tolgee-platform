@@ -1,23 +1,23 @@
 package io.tolgee.hateoas.language
 
 import io.tolgee.api.v2.controllers.V2LanguagesController
-import io.tolgee.model.views.LanguageView
+import io.tolgee.dtos.cacheable.LanguageDto
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
-class LanguageModelAssembler : RepresentationModelAssemblerSupport<LanguageView, LanguageModel>(
+class LanguageModelAssembler : RepresentationModelAssemblerSupport<LanguageDto, LanguageModel>(
   V2LanguagesController::class.java,
   LanguageModel::class.java,
 ) {
-  override fun toModel(view: LanguageView): LanguageModel {
+  override fun toModel(languageDto: LanguageDto): LanguageModel {
     return LanguageModel(
-      id = view.language.id,
-      name = view.language.name ?: "",
-      originalName = view.language.originalName,
-      tag = view.language.tag,
-      flagEmoji = view.language.flagEmoji,
-      base = view.base,
+      id = languageDto.id,
+      name = languageDto.name,
+      originalName = languageDto.originalName,
+      tag = languageDto.tag,
+      flagEmoji = languageDto.flagEmoji,
+      base = languageDto.base,
     )
   }
 }

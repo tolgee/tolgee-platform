@@ -2,8 +2,8 @@ package io.tolgee.api.v2.controllers.suggestion
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
-import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ExceptionWithMessage
@@ -11,14 +11,10 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.machineTranslation.StreamedSuggestionInfo
 import io.tolgee.hateoas.machineTranslation.StreamedSuggestionItem
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
-import io.tolgee.model.Project
-import io.tolgee.model.key.Key
 import io.tolgee.security.ProjectHolder
-import io.tolgee.service.LanguageService
-import io.tolgee.service.machineTranslation.MtCreditBucketService
+import io.tolgee.service.machineTranslation.MachineTranslationParams
 import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.machineTranslation.MtServiceInfo
-import io.tolgee.service.project.ProjectService
+import io.tolgee.service.machineTranslation.MtTranslatorResult
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.logger
@@ -37,12 +33,19 @@ class MtResultStreamer(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : Logging {
   private lateinit var outputStream: OutputStream
+  private lateinit var project: ProjectDto
 
   fun stream(): StreamingResponseBody {
-    init()
+    project = projectHolder.project
+    val info = getInfo()
+
     return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
       this.outputStream = outputStream
-      writeInfo()
+      try {
+        writer.writeJson(info)
+      } catch (e: Exception) {
+        throw e
+      }
 
       if (!baseBlank) {
         writeServiceResultsAsync()
@@ -52,19 +55,8 @@ class MtResultStreamer(
     }
   }
 
-  /**
-   * Init the props which setting possibly throws an exception, so it's caught by ExceptionHandler
-   * before the stream is started
-   */
-  private fun init() {
-    key = with(machineTranslationSuggestionFacade) { dto.key }
-    val targetLanguage = applicationContext.getBean(LanguageService::class.java).get(dto.targetLanguageId)
-    servicesToUse = mtService.getServicesToUse(targetLanguage, dto.services)
-    project = projectHolder.projectEntity
-  }
-
-  private fun writeInfo() {
-    writer.writeJson(StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseBlank))
+  private fun getInfo(): StreamedSuggestionInfo {
+    return StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseBlank)
   }
 
   private fun writeServiceResultsAsync() {
@@ -77,11 +69,15 @@ class MtResultStreamer(
     }
   }
 
+  private val servicesToUse
+    get() = mtTranslator.getServicesToUseByDesiredServices(dto.targetLanguageId, dto.services)
+
   private fun writeServiceResult(service: MtServiceType) {
     try {
       with(machineTranslationSuggestionFacade) {
-        catchingOutOfCredits(balanceBefore) {
-          val translated = getTranslatedValue(project, key, dto, service)
+        catchingOutOfCredits(project.organizationOwnerId) {
+          val translated = getTranslatedValue(dto, service)
+          translated?.exception?.let { throw it }
           writeTranslatedValue(writer, service, translated)
         }
       }
@@ -97,10 +93,10 @@ class MtResultStreamer(
   private fun writeTranslatedValue(
     writer: OutputStreamWriter,
     service: MtServiceType,
-    translated: Map<MtServiceType, TranslateResult?>?,
+    translated: MtTranslatorResult?,
   ) {
     val model =
-      translated?.get(service)
+      translated
         ?.let { it.translatedText?.let { text -> TranslationItemModel(text, it.contextDescription) } }
 
     writer.writeJson(
@@ -112,18 +108,19 @@ class MtResultStreamer(
   }
 
   private fun getTranslatedValue(
-    project: Project,
-    key: Key?,
     dto: SuggestRequestDto,
     service: MtServiceType,
-  ): Map<MtServiceType, TranslateResult> {
-    return mtService.getMachineTranslations(
-      project,
-      key,
-      dto.baseText,
-      with(machineTranslationSuggestionFacade) { dto.targetLanguage },
-      setOf(service),
-    )
+  ): MtTranslatorResult? {
+    return mtTranslator.translate(
+      listOf(
+        MachineTranslationParams(
+          keyId = dto.keyId,
+          baseTranslationText = dto.baseText,
+          targetLanguageId = dto.targetLanguageId,
+          desiredServices = setOf(service),
+        ),
+      ),
+    ).singleOrNull()
   }
 
   private fun writeException(
@@ -159,34 +156,19 @@ class MtResultStreamer(
     applicationContext.getBean(MtService::class.java)
   }
 
-  private val mtCreditBucketService by lazy {
-    applicationContext.getBean(MtCreditBucketService::class.java)
-  }
-
   private val projectHolder by lazy {
     applicationContext.getBean(ProjectHolder::class.java)
   }
 
-  private val projectService by lazy {
-    applicationContext.getBean(ProjectService::class.java)
-  }
-
-  var key: Key? = null
   private val writer by lazy { OutputStreamWriter(outputStream) }
-  private lateinit var servicesToUse: Set<MtServiceInfo>
 
-  private val balanceBefore by lazy {
-    mtCreditBucketService.getCreditBalances(project)
+  private val mtTranslator by lazy {
+    mtService.getMtTranslator(projectHolder.project.id, false)
   }
-
-  private lateinit var project: Project
-  private var baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(projectHolder.project.id)
 
   private val baseBlank by lazy {
-    mtService.getBaseTranslation(
-      key = key,
-      baseTranslationText = dto.baseText,
-      baseLanguage = baseLanguage,
-    ).isNullOrBlank()
+    mtTranslator
+      .getBaseTranslation(dto.keyId, dto.baseText)
+      .isNullOrBlank()
   }
 }

@@ -53,6 +53,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
           node("keyNamespace").isEqualTo(null)
           node("keyId").isValidId
           node("keyTags").isArray.hasSize(1)
+          node("keyDescription").isEqualTo("A key description")
           node("keyTags[0].name").isEqualTo("Cool tag")
           node("screenshotCount").isEqualTo(0)
           node("translations.de") {

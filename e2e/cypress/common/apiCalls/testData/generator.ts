@@ -6,19 +6,19 @@ export const cleanTestData = (
   options?: ArgumentTypes<typeof cy.request>[0]
 ) => {
   return internalFetch(`e2e-data/${resource}/clean`, {
-    timeout: 20000,
+    timeout: 60000,
     ...options,
   });
 };
 
 export const generateTestData = (resource: string) => {
-  return internalFetch(`e2e-data/${resource}/generate`);
+  return internalFetch(`e2e-data/${resource}/generate`, { timeout: 60000 });
 };
 
 export const generateStandardTestData = (resource: string) => {
-  return internalFetch(
-    `e2e-data/${resource}/generate-standard`
-  ) as Cypress.Chainable<Cypress.Response<TestDataStandardResponse>>;
+  return internalFetch(`e2e-data/${resource}/generate-standard`, {
+    timeout: 60000,
+  }) as Cypress.Chainable<Cypress.Response<TestDataStandardResponse>>;
 };
 
 export type TestDataStandardResponse = {

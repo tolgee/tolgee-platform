@@ -32,7 +32,7 @@ class MtCreditsController(
   fun getProjectCredits(
     @PathVariable projectId: Long,
   ): CreditBalanceModel {
-    return mtCreditBucketService.getCreditBalances(projectHolder.projectEntity).model
+    return mtCreditBucketService.getCreditBalances(projectHolder.project.organizationOwnerId).model
   }
 
   @GetMapping("/organizations/{organizationId:\\d+}/machine-translation-credit-balance")

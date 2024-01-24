@@ -1,9 +1,9 @@
 package io.tolgee.dtos
 
+import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.model.Screenshot
-import io.tolgee.model.key.Key
 
 data class KeyImportResolvableResult(
-  val keys: List<Key>,
+  val keys: List<KeyView>,
   val screenshots: Map<Long, Screenshot>,
 )

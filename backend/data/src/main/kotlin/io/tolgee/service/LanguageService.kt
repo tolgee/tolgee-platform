@@ -1,13 +1,14 @@
 package io.tolgee.service
 
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.views.LanguageView
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -17,6 +18,8 @@ import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -34,6 +37,9 @@ class LanguageService(
   private val securityService: SecurityService,
   @Lazy
   private val autoTranslationService: AutoTranslationService,
+  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  private val self: LanguageService,
+  private val cacheManager: org.springframework.cache.CacheManager,
 ) {
   @set:Autowired
   @set:Lazy
@@ -41,48 +47,57 @@ class LanguageService(
 
   @Transactional
   fun createLanguage(
-    dto: LanguageDto?,
+    dto: LanguageRequest?,
     project: Project,
   ): Language {
     val language = fromRequestDTO(dto!!)
     language.project = project
     projectService.refresh(project).languages.add(language)
     languageRepository.save(language)
+    evictCache(language)
     return language
   }
 
   @Transactional
-  fun deleteLanguage(id: Long) {
-    val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
+  fun deleteLanguage(
+    languageId: Long,
+    projectId: Long,
+  ) {
+    val language = getEntity(languageId, projectId)
+    deleteLanguage(language)
+  }
+
+  @Transactional
+  fun deleteLanguage(language: Language) {
     permissionService.removeLanguageFromPermissions(language)
     languageRepository.delete(language)
     entityManager.flush()
+    evictCache(language)
+  }
+
+  @Transactional
+  fun deleteLanguage(id: Long) {
+    deleteLanguage(getEntity(id))
   }
 
   @Transactional
   fun editLanguage(
-    id: Long,
-    dto: LanguageDto,
+    languageId: Long,
+    projectId: Long,
+    dto: LanguageRequest,
   ): Language {
-    val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
-    return editLanguage(language, dto)
-  }
-
-  @Transactional
-  fun editLanguage(
-    language: Language,
-    dto: LanguageDto,
-  ): Language {
+    val language = getEntity(languageId, projectId)
     language.updateByDTO(dto)
     entityManager.persist(language)
+    evictCache(language)
     return language
   }
 
   fun getImplicitLanguages(
     projectId: Long,
     userId: Long,
-  ): Set<Language> {
-    val all = languageRepository.findAllByProjectId(projectId)
+  ): Set<LanguageDto> {
+    val all = getProjectLanguages(projectId)
     val viewLanguageIds =
       permissionService.getProjectPermissionData(
         projectId,
@@ -100,48 +115,80 @@ class LanguageService(
   }
 
   @Transactional
-  fun findAll(projectId: Long): Set<Language> {
-    return languageRepository.findAllByProjectId(projectId).toSet()
+  fun findAll(projectId: Long): Set<LanguageDto> {
+    return self.getProjectLanguages(projectId).toSet()
   }
 
-  fun get(id: Long): Language {
-    return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  fun get(
+    languageId: Long,
+    projectId: Long,
+  ): LanguageDto {
+    return find(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
-  @Transactional
-  fun getView(id: Long): LanguageView {
-    return findView(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  fun find(
+    languageId: Long,
+    projectId: Long,
+  ): LanguageDto? {
+    return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
   }
 
-  @Transactional
-  fun findView(id: Long): LanguageView? {
-    return languageRepository.findView(id)
-  }
-
-  fun find(id: Long): Language? {
+  fun findEntity(id: Long): Language? {
     return languageRepository.findById(id).orElse(null)
   }
 
-  @Deprecated("use find method", replaceWith = ReplaceWith("find"))
-  fun findById(id: Long): Optional<Language> {
-    return languageRepository.findById(id)
+  fun getEntity(id: Long): Language {
+    return this.findEntity(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  fun getEntity(
+    languageId: Long,
+    projectId: Long,
+  ): Language {
+    return findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  fun findEntity(
+    languageId: Long,
+    projectId: Long,
+  ): Language? {
+    return languageRepository.find(languageId, projectId)
   }
 
   fun findByTag(
     tag: String,
     project: Project,
-  ): Optional<Language> {
-    return languageRepository.findByTagAndProject(tag, project)
+  ): LanguageDto? {
+    return self.getProjectLanguages(project.id).singleOrNull { tag == it.tag }
+  }
+
+  fun getByTag(
+    tag: String,
+    project: Project,
+  ): LanguageDto {
+    return findByTag(tag, project) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
   fun findByTag(
     tag: String?,
     projectId: Long,
-  ): Optional<Language> {
-    return languageRepository.findByTagAndProjectId(tag, projectId)
+  ): LanguageDto? {
+    return self.getProjectLanguages(projectId).singleOrNull { tag == it.tag }
   }
 
   fun findByTags(
+    tags: Collection<String>,
+    projectId: Long,
+  ): Set<LanguageDto> {
+    val languages = self.getProjectLanguages(projectId).filter { tags.contains(it.tag) }
+    val sortedByTagsParam =
+      languages.sortedBy { language ->
+        tags.indexOfFirst { tag -> language.tag == tag }
+      }
+    return sortedByTagsParam.toSet()
+  }
+
+  fun findEntitiesByTags(
     tags: Collection<String>,
     projectId: Long,
   ): Set<Language> {
@@ -158,7 +205,7 @@ class LanguageService(
     languages: Set<String>?,
     projectId: Long,
     userId: Long,
-  ): Set<Language> {
+  ): Set<LanguageDto> {
     if (languages == null) {
       return permissionService.getPermittedViewLanguages(projectId, userId).toSet()
     } else {
@@ -172,7 +219,7 @@ class LanguageService(
     languages: Set<String>?,
     projectId: Long,
     userId: Long,
-  ): Set<Language> {
+  ): Set<LanguageDto> {
     val canViewTranslations =
       permissionService.getProjectPermissionScopes(projectId, userId)?.contains(Scope.TRANSLATIONS_VIEW) == true
 
@@ -190,7 +237,7 @@ class LanguageService(
     projectId: Long,
     userId: Long,
     languages: Set<String>,
-  ): Set<Language> {
+  ): Set<LanguageDto> {
     val viewLanguageIds =
       permissionService.getProjectPermissionData(
         projectId,
@@ -232,20 +279,37 @@ class LanguageService(
     entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
       .setParameter("projectId", projectId)
       .executeUpdate()
+    evictCacheForProject(projectId)
   }
 
   fun save(language: Language): Language {
+    evictCache(language)
     return this.languageRepository.save(language)
   }
 
   fun saveAll(languages: Iterable<Language>): MutableList<Language>? {
+    evictCache(languages)
     return this.languageRepository.saveAll(languages)
+  }
+
+  private fun evictCache(languages: Iterable<Language>) {
+    languages.map { it.project.id }.toSet().forEach {
+      evictCacheForProject(it)
+    }
+  }
+
+  fun evictCacheForProject(projectId: Long) {
+    cacheManager.getCache(Caches.LANGUAGES)?.evict(projectId)
+  }
+
+  private fun evictCache(language: Language) {
+    cacheManager.getCache(Caches.LANGUAGES)?.evict(language.project.id)
   }
 
   fun getPaged(
     projectId: Long,
     pageable: Pageable,
-  ): Page<LanguageView> {
+  ): Page<LanguageDto> {
     return this.languageRepository.findAllByProjectId(projectId, pageable)
   }
 
@@ -261,8 +325,96 @@ class LanguageService(
   }
 
   @Transactional
-  fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView> {
-    return languageRepository.getViewsOfProjects(projectIds)
+  fun getDtosOfProjects(projectIds: List<Long>): Map<Long, List<LanguageDto>> {
+    return projectIds.associateWith { self.getProjectLanguages(it) }
+  }
+
+  @Cacheable(Caches.LANGUAGES, key = "#projectId")
+  @Transactional
+  fun getProjectLanguages(projectId: Long): List<LanguageDto> {
+    val cache = cacheManager.getCache(Caches.LANGUAGES)
+    val list =
+      (
+        (cache?.get(projectId)?.get() as? List<LanguageDto>)
+          ?: languageRepository.findAllDtosByProjectId(projectId)
+      ).toMutableList()
+
+    handleMissingBaseLanguage(list, projectId)
+    sortLanguages(list)
+    cache?.put(projectId, list)
+    return list
+  }
+
+  private fun sortLanguages(list: MutableList<LanguageDto>): MutableList<LanguageDto> {
+    list.sortBy { it.tag }
+    list.sortBy { !it.base }
+    return list
+  }
+
+  private fun handleMissingBaseLanguage(
+    all: MutableList<LanguageDto>,
+    projectId: Long,
+  ) {
+    if (all.none { it.base }) {
+      val newBase = setNewProjectBaseLanguage(all, projectId)
+      all.find { it.id == newBase.id }?.also { it.base = true } ?: let {
+        all.add(newBase)
+      }
+    }
+    sortLanguages(all)
+  }
+
+  @Transactional
+  fun getProjectBaseLanguage(projectId: Long): LanguageDto {
+    val projectLanguages = self.getProjectLanguages(projectId)
+    return projectLanguages.singleOrNull { it.base } ?: let {
+      setNewProjectBaseLanguage(projectLanguages, projectId)
+    }
+  }
+
+  fun setNewProjectBaseLanguage(project: Project) {
+    val projectLanguages = self.getProjectLanguages(project.id)
+    val newBase = projectLanguages.firstOrNull() ?: self.createDefaultLanguage(project.id)
+    project.baseLanguage = entityManager.getReference(Language::class.java, newBase.id)
+    projectService.save(project)
+    evictCacheForProject(project.id)
+  }
+
+  private fun setNewProjectBaseLanguage(
+    projectLanguages: List<LanguageDto>,
+    projectId: Long,
+  ): LanguageDto {
+    val newBase =
+      projectLanguages.find { it.tag == "en" }
+        ?: projectLanguages.firstOrNull()
+        ?: self.createDefaultLanguage(projectId)
+    val project = projectService.get(projectId)
+    project.baseLanguage = entityManager.getReference(Language::class.java, newBase.id)
+    projectService.save(project)
+    evictCacheForProject(projectId)
+    return LanguageDto.fromEntity(newBase, newBase.id)
+  }
+
+  @Transactional
+  fun dtosFromEntities(
+    entities: List<Language>,
+    projectId: Long,
+  ): List<LanguageDto> {
+    val all = self.getProjectLanguages(projectId)
+    return entities.map { entity ->
+      all.find { it.id == entity.id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    }
+  }
+
+  @CacheEvict(Caches.LANGUAGES, key = "#projectId")
+  fun createDefaultLanguage(projectId: Long): Language {
+    val language = Language()
+    language.name = "English"
+    language.originalName = "English"
+    language.flagEmoji = "🇬🇧"
+    language.tag = "en"
+    language.project = entityManager.getReference(Project::class.java, projectId)
+    return languageRepository.save(language)
   }
 
   fun getBaseLanguageForProject(project: Project): Long? {

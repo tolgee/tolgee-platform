@@ -2,18 +2,14 @@ package io.tolgee.api.v2.controllers.suggestion
 
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
-import io.tolgee.dtos.MtCreditBalanceDto
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
-import io.tolgee.model.Language
-import io.tolgee.model.key.Key
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.security.SecurityService
@@ -27,7 +23,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 class MachineTranslationSuggestionFacade(
   private val projectHolder: ProjectHolder,
   private val mtService: MtService,
-  private val keyService: KeyService,
   private val languageService: LanguageService,
   private val securityService: SecurityService,
   private val mtCreditBucketService: MtCreditBucketService,
@@ -42,9 +37,7 @@ class MachineTranslationSuggestionFacade(
       listOf(targetLanguage.id),
     )
 
-    val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
-
-    return catchingOutOfCredits(balanceBefore) {
+    return catchingOutOfCredits(projectHolder.project.organizationOwnerId) {
       val resultData = getTranslationResults(dto, targetLanguage)
       val baseBlank = resultData == null
 
@@ -68,26 +61,26 @@ class MachineTranslationSuggestionFacade(
    */
   private fun getTranslationResults(
     dto: SuggestRequestDto,
-    targetLanguage: Language,
+    targetLanguage: LanguageDto,
   ): Map<MtServiceType, TranslationItemModel>? {
-    val key = dto.key
-
-    val resultMap =
+    val result =
       mtService.getMachineTranslations(
-        projectHolder.projectEntity,
-        key,
-        dto.baseText,
-        targetLanguage,
-        dto.services,
-      )
+        projectHolder.project.id,
+        false,
+      ) {
+        baseTranslationText = dto.baseText
+        keyId = dto.keyId
+        desiredServices = dto.services
+        useAllEnabledServices = dto.services.isNullOrEmpty()
+        targetLanguageId = targetLanguage.id
+      }
 
     val resultData =
-      resultMap
-        .map { (key, value) ->
-          key to TranslationItemModel(value.translatedText.orEmpty(), value.contextDescription)
-        }.toMap()
+      result.associate { resultItem ->
+        resultItem.service to TranslationItemModel(resultItem.translatedText.orEmpty(), resultItem.contextDescription)
+      }
 
-    if (resultMap.values.all { it.baseBlank }) {
+    if (result.all { it.baseBlank }) {
       return null
     }
 
@@ -95,7 +88,7 @@ class MachineTranslationSuggestionFacade(
   }
 
   fun <T> catchingOutOfCredits(
-    balanceBefore: MtCreditBalanceDto,
+    organizationId: Long,
     fn: () -> T,
   ): T {
     try {
@@ -106,27 +99,14 @@ class MachineTranslationSuggestionFacade(
           Message.CREDIT_SPENDING_LIMIT_EXCEEDED,
         )
       }
+      val balance = mtCreditBucketService.getCreditBalances(organizationId)
       throw BadRequestException(
         Message.OUT_OF_CREDITS,
-        listOf(balanceBefore.creditBalance, balanceBefore.extraCreditBalance),
+        listOf(balance.creditBalance, balance.extraCreditBalance),
       )
     }
   }
 
-  val SuggestRequestDto.key
-    get() =
-      if (this.baseText != null) {
-        null
-      } else {
-        keyService.findOptional(this.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }?.also {
-          it.checkInProject()
-        }
-      }
-
   val SuggestRequestDto.targetLanguage
-    get() = languageService.get(this.targetLanguageId)
-
-  private fun Key.checkInProject() {
-    keyService.checkInProject(this, projectHolder.project.id)
-  }
+    get() = languageService.get(this.targetLanguageId, projectHolder.project.id)
 }

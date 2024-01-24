@@ -4,7 +4,7 @@ import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.events.OnLanguagePrePersist
 import io.tolgee.events.OnLanguagePreRemove
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
@@ -22,6 +22,7 @@ import jakarta.persistence.PrePersist
 import jakarta.persistence.PreRemove
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import org.springframework.beans.factory.ObjectFactory
@@ -56,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional
 )
 @ActivityLoggedEntity
 @ActivityReturnsExistence
-class Language : StandardAuditModel() {
+class Language : StandardAuditModel(), ILanguage {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language", orphanRemoval = true)
   var translations: MutableSet<Translation>? = null
 
@@ -67,20 +68,21 @@ class Language : StandardAuditModel() {
   @field:NotEmpty
   @ActivityLoggedProp
   @ActivityDescribingProp
-  var tag: String = ""
+  override var tag: String = ""
 
   @ActivityLoggedProp
   @ActivityDescribingProp
-  var name: String? = null
+  @field:NotBlank
+  override var name: String = ""
 
   @ActivityLoggedProp
-  var originalName: String? = null
+  override var originalName: String? = null
 
   @field:Size(max = 20)
   @Column(length = 20)
   @ActivityLoggedProp
   @ActivityDescribingProp
-  var flagEmoji: String? = null
+  override var flagEmoji: String? = null
 
   @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true, fetch = FetchType.LAZY)
   var mtServiceConfig: MtServiceConfig? = null
@@ -91,7 +93,12 @@ class Language : StandardAuditModel() {
   @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
   var stats: LanguageStats? = null
 
-  fun updateByDTO(dto: LanguageDto) {
+  @field:Size(max = 2000)
+  @ActivityLoggedProp
+  @Column(columnDefinition = "text")
+  override var aiTranslatorPromptDescription: String? = null
+
+  fun updateByDTO(dto: LanguageRequest) {
     name = dto.name
     tag = dto.tag
     originalName = dto.originalName
@@ -104,7 +111,7 @@ class Language : StandardAuditModel() {
 
   companion object {
     @JvmStatic
-    fun fromRequestDTO(dto: LanguageDto): Language {
+    fun fromRequestDTO(dto: LanguageRequest): Language {
       val language = Language()
       language.name = dto.name
       language.tag = dto.tag

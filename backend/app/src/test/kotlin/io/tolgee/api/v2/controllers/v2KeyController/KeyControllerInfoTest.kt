@@ -55,6 +55,7 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
           node("[20]") {
             node("namespace").isEqualTo("namespace-1")
             node("name").isEqualTo("key-1")
+            node("description").isEqualTo("description")
             node("screenshots") {
               isArray
               node("[0]") {

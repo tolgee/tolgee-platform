@@ -30,7 +30,7 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 export const PreparedLanguage: React.FC<
-  components['schemas']['LanguageDto'] & {
+  components['schemas']['LanguageRequest'] & {
     onReset: () => void;
     onEdit: () => void;
   }

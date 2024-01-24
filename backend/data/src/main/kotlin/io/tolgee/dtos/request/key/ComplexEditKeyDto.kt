@@ -8,6 +8,7 @@ import io.tolgee.dtos.WithRelatedKeysInOrder
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.util.getSafeNamespace
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import org.hibernate.validator.constraints.Length
 import org.springframework.validation.annotation.Validated
 
@@ -34,6 +35,9 @@ data class ComplexEditKeyDto(
   val screenshotUploadedImageIds: List<Long>? = null,
   val screenshotsToAdd: List<KeyScreenshotDto>? = null,
   override var relatedKeysInOrder: MutableList<RelatedKeyDto>? = null,
+  @field:Size(max = 2000)
+  @Schema(description = "Description of the key. It's also used as a context for Tolgee AI translator")
+  val description: String? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

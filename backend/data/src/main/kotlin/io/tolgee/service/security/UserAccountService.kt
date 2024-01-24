@@ -58,6 +58,9 @@ class UserAccountService(
   @Lazy private val userNotificationService: UserNotificationService,
   @Lazy private val notificationPreferencesService: NotificationPreferencesService,
   private val cacheManager: CacheManager,
+  @Suppress("SelfReferenceConstructorParameter")
+  @Lazy
+  private val self: UserAccountService,
 ) : Logging {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -93,6 +96,10 @@ class UserAccountService(
     return userAccountRepository.findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
+  }
+
+  fun getDto(id: Long): UserAccountDto {
+    return self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
   @Transactional

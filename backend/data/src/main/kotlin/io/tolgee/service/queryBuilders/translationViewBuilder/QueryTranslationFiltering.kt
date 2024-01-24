@@ -1,8 +1,8 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
-import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Expression
@@ -15,7 +15,7 @@ class QueryTranslationFiltering(
   private val cb: CriteriaBuilder,
 ) {
   fun apply(
-    language: Language,
+    language: LanguageDto,
     translationTextField: Path<String>,
     translationStateField: Path<TranslationState>,
   ) {

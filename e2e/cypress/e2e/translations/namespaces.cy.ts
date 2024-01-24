@@ -35,7 +35,7 @@ describe('namespaces in translations', () => {
   });
 
   it('displays <none>', () => {
-    createTranslation('new-key', undefined, undefined, 'new-ns');
+    createTranslation({ key: 'new-key', namespace: 'new-ns' });
     gcy('translations-namespace-banner')
       .contains('new-ns')
       .should('be.visible');
@@ -70,7 +70,10 @@ describe('namespaces in translations', () => {
       .findDcy('translations-table-cell')
       .first()
       .click();
-    cy.gcy('global-editor').type(' edited translation').type('{enter}');
+    cy.gcy('translations-key-edit-key-field')
+      .findDcy('global-editor')
+      .type(' edited translation')
+      .type('{enter}');
     waitForGlobalLoading();
     cy.gcy('translations-table-cell')
       .contains('edited translation')

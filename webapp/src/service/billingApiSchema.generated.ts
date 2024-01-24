@@ -257,7 +257,6 @@ export interface components {
     };
     SelfHostedEePlanRequest: {
       name: string;
-      free: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -341,6 +340,7 @@ export interface components {
       /** Format: date-time */
       usableUntil?: string;
       forOrganizationIds: number[];
+      autoAssign: boolean;
     };
     CloudPlanAdministrationModel: {
       /** Format: int64 */

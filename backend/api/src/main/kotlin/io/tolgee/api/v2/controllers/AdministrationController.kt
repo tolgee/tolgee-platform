@@ -56,7 +56,12 @@ class AdministrationController(
     pageable: Pageable,
     search: String? = null,
   ): PagedModel<OrganizationModel> {
-    val organizations = organizationService.findAllPaged(pageable, search, authenticationFacade.authenticatedUser.id)
+    val organizations =
+      organizationService.findAllPaged(
+        pageable = pageable,
+        search = search,
+        userId = authenticationFacade.authenticatedUser.id,
+      )
     return pagedOrganizationResourcesAssembler.toModel(organizations, organizationModelAssembler)
   }
 

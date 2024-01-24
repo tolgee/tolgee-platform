@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box, ListItem, ListItemText, styled } from '@mui/material';
+import { Box, Chip, ListItem, ListItemText, styled } from '@mui/material';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -62,6 +62,7 @@ export const AdministrationUsers = ({
           <PaginatedHateoasList
             onSearchChange={setSearch}
             onPageChange={setPage}
+            searchText={search}
             loadable={listPermitted}
             renderItem={(u) => (
               <ListItem
@@ -69,7 +70,7 @@ export const AdministrationUsers = ({
                 sx={{ display: 'grid', gridTemplateColumns: '1fr auto' }}
               >
                 <ListItemText>
-                  {u.name} | {u.username}
+                  {u.name} | {u.username} <Chip size="small" label={u.id} />
                 </ListItemText>
                 <Box display="flex" justifyContent="center" gap={1}>
                   <DebugCustomerAccountButton userId={u.id} />

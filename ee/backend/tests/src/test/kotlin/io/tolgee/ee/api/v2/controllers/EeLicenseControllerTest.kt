@@ -1,12 +1,12 @@
 package io.tolgee.ee.api.v2.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.ee.EeLicensingMockRequestUtil
-import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.ee.service.EeSubscriptionService
+import io.tolgee.ee.service.EeSubscriptionServiceImpl
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -44,7 +44,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   lateinit var eeLicensingMockRequestUtil: EeLicensingMockRequestUtil
 
   @Autowired
-  private lateinit var eeSubscriptionService: EeSubscriptionService
+  private lateinit var eeSubscriptionService: EeSubscriptionServiceImpl
 
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository

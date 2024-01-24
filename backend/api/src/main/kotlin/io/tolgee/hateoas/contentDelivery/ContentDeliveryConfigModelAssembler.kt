@@ -2,14 +2,14 @@ package io.tolgee.hateoas.contentDelivery
 
 import io.tolgee.api.v2.controllers.contentDelivery.ContentDeliveryConfigController
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.ee.api.v2.hateoas.contentStorage.ContentStorageModelAssembler
+import io.tolgee.hateoas.ee.contentStorage.IContentStorageModelAssembler
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
 class ContentDeliveryConfigModelAssembler(
-  private val contentStorageModelAssembler: ContentStorageModelAssembler,
+  private val contentStorageModelAssembler: IContentStorageModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
 ) : RepresentationModelAssemblerSupport<ContentDeliveryConfig, ContentDeliveryConfigModel>(
     ContentDeliveryConfigController::class.java,

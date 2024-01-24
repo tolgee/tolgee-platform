@@ -70,10 +70,16 @@ export function SideMenuItem({
       )
     : match.pathname === linkTo;
 
+  const matchesExactly = match.pathname === linkTo || selected;
+
   function wrapWithQuickStart(children: React.ReactNode) {
     if (quickStart) {
       return (
-        <QuickStartHighlight {...quickStart} offset={-1} fullfiled={isSelected}>
+        <QuickStartHighlight
+          {...quickStart}
+          offset={-1}
+          fullfiled={matchesExactly}
+        >
           {children}
         </QuickStartHighlight>
       );

@@ -49,7 +49,6 @@ export const AdministrationCloudPlanCreateView = () => {
                     'application/json': {
                       ...values,
                       stripeProductId: values.stripeProductId!,
-                      free: false,
                       forOrganizationIds: values.public
                         ? []
                         : values.forOrganizationIds,
@@ -85,6 +84,8 @@ export const AdministrationCloudPlanCreateView = () => {
               enabledFeatures: [],
               public: true,
               forOrganizationIds: [],
+              free: false,
+              autoAssign: false,
             }}
           />
         </Box>

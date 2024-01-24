@@ -44,6 +44,8 @@ export function useFeatureTranslation() {
         return t('billing_subscriptions_multiple_content_delivery_configs');
       case 'WEBHOOKS':
         return t('billing_subscriptions_webhooks');
+      case 'AI_PROMPT_CUSTOMIZATION':
+        return t('billing_subscriptions_ai_prompt_customization');
       default:
         exhaustiveMatchingGuard(value);
         return value;

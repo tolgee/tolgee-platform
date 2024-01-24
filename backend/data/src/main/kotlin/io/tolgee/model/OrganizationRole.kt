@@ -23,13 +23,13 @@ class OrganizationRole(
   @OneToOne
   var invitation: Invitation? = null,
   @Enumerated(EnumType.ORDINAL)
-  var type: OrganizationRoleType? = null,
+  var type: OrganizationRoleType,
 ) : StandardAuditModel() {
   constructor(
     user: UserAccount? = null,
     invitation: Invitation? = null,
     organization: Organization?,
-    type: OrganizationRoleType?,
+    type: OrganizationRoleType,
   ) : this(invitation, type) {
     this.organization = organization
     this.user = user

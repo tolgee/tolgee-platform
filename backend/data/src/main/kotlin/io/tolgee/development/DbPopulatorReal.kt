@@ -1,7 +1,7 @@
 package io.tolgee.development
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Language
@@ -292,7 +292,7 @@ class DbPopulatorReal(
     name: String,
     project: Project,
   ): Language {
-    return languageService.createLanguage(LanguageDto(name, name, name), project)
+    return languageService.createLanguage(LanguageRequest(name, name, name), project)
   }
 
   private fun createTranslation(

@@ -30,7 +30,7 @@ class InvitationEmailSender(
           <a href="$url">$url</a><br/><br/>
           
           Regards,<br/>
-          Tolgee<br/><br/>
+          Tolgee
           """.trimIndent(),
       )
     tolgeeEmailSender.sendEmail(params)

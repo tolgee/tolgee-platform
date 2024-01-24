@@ -10,8 +10,8 @@ import { LanguageModifyFields } from './LanguageModifyFields';
 
 export const LanguageModifyForm: FC<{
   preferredEmojis: string[];
-  values: components['schemas']['LanguageDto'];
-  onModified: (values: components['schemas']['LanguageDto']) => void;
+  values: components['schemas']['LanguageRequest'];
+  onModified: (values: components['schemas']['LanguageRequest']) => void;
   onCancel: () => void;
   inDialog?: boolean;
 }> = (props) => {
@@ -31,7 +31,10 @@ export const LanguageModifyForm: FC<{
   return (
     <Wrapper>
       <Formik
-        initialValues={props.values}
+        initialValues={{
+          ...props.values,
+          flagEmoji: props.values.flagEmoji || '🏳️',
+        }}
         validationSchema={Validation.LANGUAGE(t)}
         onSubmit={(values) => {
           props.onModified(values);

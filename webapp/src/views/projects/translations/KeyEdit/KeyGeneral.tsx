@@ -9,11 +9,18 @@ import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelec
 import { TagInput } from '../Tags/TagInput';
 import { KeyFormType } from './types';
 import { Tag } from '../Tags/Tag';
+import { RequiredField } from 'tg.component/common/form/RequiredField';
+import { LabelHint } from 'tg.component/common/LabelHint';
 
-const StyledSection = styled('div')`
+const StyledSection = styled('div')``;
+
+const StyledKeyNsContainer = styled('div')`
   display: grid;
-  align-items: stretch;
-  max-width: 100%;
+  grid-template-columns: 1fr 300px;
+  gap: 0px 16px;
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const StyledTags = styled('div')`
@@ -37,33 +44,60 @@ export const KeyGeneral = () => {
 
   return (
     <>
+      <StyledKeyNsContainer>
+        <StyledSection>
+          <FieldLabel>
+            <RequiredField>{t('translations_key_edit_label')}</RequiredField>
+          </FieldLabel>
+          <EditorWrapper data-cy="translations-key-edit-key-field">
+            <Editor
+              autofocus
+              value={values.name}
+              onChange={(val) => setFieldValue('name', val)}
+              onSave={submitForm}
+              plaintext
+              minHeight="unset"
+            />
+          </EditorWrapper>
+          <FieldError error={errors.name} />
+        </StyledSection>
+        <StyledSection>
+          <FieldLabel>
+            <LabelHint title={t('translations_key_edit_label_namespace_hint')}>
+              {t('translations_key_edit_label_namespace')}
+            </LabelHint>
+          </FieldLabel>
+          <NamespaceSelector
+            value={values.namespace}
+            onChange={(value) => setFieldValue('namespace', value)}
+            SearchSelectProps={{
+              SelectProps: {
+                sx: { background: theme.palette.background.default },
+              },
+            }}
+          />
+          <FieldError error={errors.namespace} />
+        </StyledSection>
+      </StyledKeyNsContainer>
+
       <StyledSection>
-        <FieldLabel>{t('translations_key_edit_label')}</FieldLabel>
-        <EditorWrapper>
+        <FieldLabel>
+          <LabelHint title={t('translations_key_edit_label_description_hint')}>
+            {t('translations_key_edit_label_description')}
+          </LabelHint>
+        </FieldLabel>
+        <EditorWrapper data-cy="translations-key-edit-description-field">
           <Editor
-            autofocus
-            value={values.name}
-            onChange={(val) => setFieldValue('name', val)}
+            value={values.description || ''}
+            onChange={(val) => setFieldValue('description', val)}
             onSave={submitForm}
             plaintext
-            minHeight="unset"
+            minHeight={50}
           />
         </EditorWrapper>
-        <FieldError error={errors.name} />
+        <FieldError error={errors.description} />
       </StyledSection>
-      <StyledSection>
-        <FieldLabel>{t('translations_key_edit_label_namespace')}</FieldLabel>
-        <NamespaceSelector
-          value={values.namespace}
-          onChange={(value) => setFieldValue('namespace', value)}
-          SearchSelectProps={{
-            SelectProps: {
-              sx: { background: theme.palette.background.default },
-            },
-          }}
-        />
-        <FieldError error={errors.namespace} />
-      </StyledSection>
+
       <StyledSection>
         <FieldLabel>{t('translations_key_edit_label_tags')}</FieldLabel>
         <StyledTags>

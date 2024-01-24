@@ -1,5 +1,6 @@
 package io.tolgee.service.translation
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
@@ -20,7 +21,7 @@ class TranslationMemoryService(
 
   fun suggest(
     key: Key,
-    targetLanguage: Language,
+    targetLanguage: LanguageDto,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     return translationsService.getTranslationMemorySuggestions(key, targetLanguage, pageable)
@@ -28,7 +29,7 @@ class TranslationMemoryService(
 
   fun suggest(
     baseTranslationText: String,
-    targetLanguage: Language,
+    targetLanguage: LanguageDto,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     return translationsService.getTranslationMemorySuggestions(

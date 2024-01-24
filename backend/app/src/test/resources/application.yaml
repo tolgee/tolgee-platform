@@ -89,3 +89,4 @@ logging:
     io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
     io.tolgee: DEBUG
     io.tolgee.component.CurrentDateProvider: DEBUG
+    io.tolgee.component.reporting.BusinessEventPublisher: DEBUG

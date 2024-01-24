@@ -30,10 +30,7 @@ class ProjectWithStatsFacade(
   fun getPagedModelWithStats(projects: Page<ProjectWithLanguagesView>): PagedModel<ProjectWithStatsModel> {
     val projectIds = projects.content.map { it.id }
     val totals = projectStatsService.getProjectsTotals(projectIds)
-    val languages =
-      languageService.getViewsOfProjects(projectIds)
-        .groupBy { it.language.project.id }
-
+    val languages = languageService.getDtosOfProjects(projectIds)
     val languageStats = languageStatsService.getLanguageStats(projectIds)
 
     val projectsWithStatsContent =
@@ -75,8 +72,8 @@ class ProjectWithStatsFacade(
 
         val projectLanguages =
           languages[projectWithLanguagesView.id]
-            ?.sortedBy { it.language.name }
-            ?.sortedBy { it.language.id != baseLanguage?.id } ?: listOf()
+            ?.sortedBy { it.name }
+            ?.sortedBy { it.id != baseLanguage?.id } ?: listOf()
 
         ProjectWithStatsView(
           view = projectWithLanguagesView,

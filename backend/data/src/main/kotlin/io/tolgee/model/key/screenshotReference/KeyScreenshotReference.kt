@@ -25,6 +25,6 @@ class KeyScreenshotReference {
   @Column(columnDefinition = "jsonb")
   var positions: MutableList<KeyInScreenshotPosition>? = mutableListOf()
 
-  @Column(columnDefinition = "text", length = 5000)
+  @Column(columnDefinition = "text", length = 2000)
   var originalText: String? = null
 }

@@ -100,7 +100,7 @@ class PublicController(
           If you have not requested this e-mail, please ignore it.<br/><br/>
           
           Regards,<br/>
-          Tolgee<br/><br/>
+          Tolgee
           """.trimIndent(),
       )
 

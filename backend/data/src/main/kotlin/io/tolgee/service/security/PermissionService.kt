@@ -7,6 +7,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.ProjectPermissionData
 import io.tolgee.dtos.cacheable.IPermission
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.PermissionDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
@@ -454,7 +455,7 @@ class PermissionService(
   fun getPermittedViewLanguages(
     projectId: Long,
     userId: Long,
-  ): Collection<Language> {
+  ): Collection<LanguageDto> {
     val permissionData = this.getProjectPermissionData(projectId, userId)
 
     val allLanguages = languageService.findAll(projectId)

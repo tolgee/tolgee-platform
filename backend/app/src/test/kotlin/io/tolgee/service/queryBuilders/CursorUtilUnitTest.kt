@@ -22,6 +22,7 @@ class CursorUtilUnitTest {
         keyName = "Super key",
         keyNamespaceId = null,
         keyNamespace = null,
+        keyDescription = "Super key description",
         screenshotCount = 1,
         translations =
           mutableMapOf(

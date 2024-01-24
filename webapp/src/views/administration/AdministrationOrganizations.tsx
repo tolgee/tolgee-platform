@@ -4,6 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 import {
   Box,
   Button,
+  Chip,
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
@@ -76,10 +77,13 @@ export const AdministrationOrganizations = ({
             wrapperComponentProps={{ className: 'listWrapper' }}
             onPageChange={setPage}
             onSearchChange={setSearch}
+            searchText={search}
             loadable={listPermitted}
             renderItem={(o) => (
               <ListItem data-cy="administration-organizations-list-item">
-                <ListItemText>{o.name}</ListItemText>
+                <ListItemText>
+                  {o.name} <Chip size="small" label={o.id} />
+                </ListItemText>
                 <ListItemSecondaryAction>
                   <Box display="flex">
                     <Button

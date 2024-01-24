@@ -33,6 +33,8 @@ type FormData = {
   enabledFeatures: EnabledFeature[];
   forOrganizationIds: number[];
   public: boolean;
+  free: boolean;
+  autoAssign: boolean;
 };
 
 type Props = {
@@ -70,16 +72,20 @@ export function CloudPlanForm({
 
   return (
     <Formik
-      initialValues={{
-        type: initialData.type,
-        name: initialData.name,
-        prices: initialData.prices,
-        includedUsage: initialData.includedUsage,
-        stripeProductId: initialData.stripeProductId,
-        enabledFeatures: initialData.enabledFeatures,
-        public: initialData.public,
-        forOrganizationIds: initialData.forOrganizationIds,
-      }}
+      initialValues={
+        {
+          type: initialData.type,
+          name: initialData.name,
+          prices: initialData.prices,
+          includedUsage: initialData.includedUsage,
+          stripeProductId: initialData.stripeProductId,
+          enabledFeatures: initialData.enabledFeatures,
+          public: initialData.public,
+          forOrganizationIds: initialData.forOrganizationIds,
+          free: initialData.free,
+          autoAssign: false,
+        } as FormData
+      }
       enableReinitialize
       onSubmit={(values) => {
         let prices = values.prices;
@@ -290,6 +296,18 @@ export function CloudPlanForm({
               label={t('administration_cloud_plan_field_public')}
             />
 
+            <FormControlLabel
+              disabled={!!planId}
+              control={
+                <Switch
+                  checked={values.free}
+                  onChange={() => setFieldValue('free', !values.free)}
+                />
+              }
+              data-cy="administration-cloud-plan-field-free"
+              label={t('administration_cloud_plan_field_free')}
+            />
+
             {!values.public && (
               <Box>
                 <CloudPlanOrganizations
@@ -304,6 +322,23 @@ export function CloudPlanForm({
                   <Typography color="error">
                     {errors.forOrganizationIds}
                   </Typography>
+                )}
+
+                {values.free && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={values.autoAssign}
+                        onChange={() =>
+                          setFieldValue('autoAssign', !values.autoAssign)
+                        }
+                      />
+                    }
+                    data-cy="administration-cloud-plan-field-auto-assign-to-selected"
+                    label={t(
+                      'administration_cloud_plan_field_auto-assign-to-selected'
+                    )}
+                  />
                 )}
               </Box>
             )}

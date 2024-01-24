@@ -1,9 +1,8 @@
 package io.tolgee.hateoas.translations
 
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
-import io.tolgee.model.Language
 import io.tolgee.model.views.KeyWithTranslationsView
-import io.tolgee.model.views.LanguageViewImpl
 import org.springframework.data.domain.Page
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver
 import org.springframework.data.web.PagedResourcesAssembler
@@ -20,9 +19,8 @@ class KeysWithTranslationsPagedResourcesAssembler(
 ) : PagedResourcesAssembler<KeyWithTranslationsView>(resolver, baseUri) {
   fun toTranslationModel(
     entities: Page<KeyWithTranslationsView>,
-    selectedLanguages: Collection<Language>,
+    selectedLanguages: Collection<LanguageDto>,
     nextCursor: String?,
-    baseLanguage: Language?,
   ): KeysWithTranslationsPageModel {
     val pageModel = toModel(entities, keyWithTranslationsModelAssembler)
     return KeysWithTranslationsPageModel(
@@ -31,12 +29,7 @@ class KeysWithTranslationsPagedResourcesAssembler(
       links = pageModel.links.toList().toTypedArray(),
       selectedLanguages =
         selectedLanguages.map {
-          languageModelAssembler.toModel(
-            LanguageViewImpl(
-              it,
-              it.id == baseLanguage?.id,
-            ),
-          )
+          languageModelAssembler.toModel(it)
         },
       nextCursor = nextCursor,
     )

@@ -337,7 +337,7 @@ class TestDataService(
     val languages =
       builder.data.languages.map {
         // refresh entity if updating to get new stats
-        if (it.self.id != 0L) languageService.get(it.self.id) else it.self
+        if (it.self.id != 0L) languageService.getEntity(it.self.id) else it.self
       }
     languageService.saveAll(languages)
   }

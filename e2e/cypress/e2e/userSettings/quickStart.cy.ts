@@ -43,6 +43,7 @@ describe('Quick start guide', () => {
     gcy('quick-start-action').contains('Set up').click();
     getHighlight('menu_languages').click();
     getHighlightOkButton('add_language').click();
+    cy.get('#machine-translation-tab').click();
     getHighlightOkButton('machine_translation').click();
     assertStepComplete('languages');
 

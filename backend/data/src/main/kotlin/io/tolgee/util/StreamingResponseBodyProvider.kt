@@ -34,7 +34,7 @@ import java.io.OutputStreamWriter
 class StreamingResponseBodyProvider(
   private val entityManager: EntityManager,
   private val objectMapper: ObjectMapper,
-) {
+) : Logging {
   fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody {
     return StreamingResponseBody {
       val session = entityManager.unwrap(Session::class.java)
