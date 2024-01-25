@@ -47,7 +47,9 @@ class WebhookConfigService(
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
-    return webhookConfigRepository.save(webhookConfig)
+    webhookConfigRepository.save(webhookConfig)
+    automationService.createForWebhookConfig(webhookConfig)
+    return webhookConfig
   }
 
   fun test(
