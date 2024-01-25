@@ -3049,4 +3049,39 @@
             <column name="ai_translator_prompt_description" type="text"/>
         </addColumn>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1706176485702-1">
+        <createTable tableName="slack_subscription">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_subscriptionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="slack_user_id" type="VARCHAR(255)"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1706176485702-2">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="slack_subscription" constraintName="FKdhn7v1yg5xmi1s08xb9u66jhv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1706185027083-1">
+        <createTable tableName="slack_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1706185027083-2">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="slack_config" constraintName="FKsgau8dxyxblao9sa16fnka0t1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

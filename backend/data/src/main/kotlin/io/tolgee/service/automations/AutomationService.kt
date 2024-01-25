@@ -11,6 +11,7 @@ import io.tolgee.model.automations.AutomationActionType
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.AutomationRepository
 import jakarta.persistence.EntityManager
@@ -110,6 +111,11 @@ class AutomationService(
     addWebhookTriggersAndActions(webhookConfig, automation)
     webhookConfig.automationActions.addAll(automation.actions)
     return save(automation)
+  }
+
+  @Transactional
+  fun createForSlackIntegration(slackConfig: SlackConfig) {
+
   }
 
   @Transactional
