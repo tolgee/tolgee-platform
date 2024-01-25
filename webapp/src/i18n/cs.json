@@ -451,6 +451,7 @@
   "file_too_big" : "Soubor je příliš velký",
   "formality_not_supported_by_service" : "Služba nepodporuje formálnost",
   "former-user-name" : "Bývalý uživatel",
+  "free_self_hosted_seat_limit_exceeded" : "Byl překročen limit volných uživatelských míst na této samo-hostované instanci. Pro přidání dalších uživatelů si prosím upgradujte svůj předplatný plán.",
   "generate_api_key_title" : "Generovat API klíč projektu",
   "generate_pat_title" : "Generovat nový PAT token",
   "global_add_button" : "Přidat",

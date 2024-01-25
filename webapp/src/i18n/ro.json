@@ -451,6 +451,7 @@
   "file_too_big" : "Fișierul este prea mare",
   "formality_not_supported_by_service" : "Serviciul nu suportă formalitatea",
   "former-user-name" : "Utilizator anterior",
+  "free_self_hosted_seat_limit_exceeded" : "Limita de locuri gratuite pentru utilizatori pe această instanță auto-găzduită a fost depășită. Vă rugăm să faceți upgrade la planul de abonament pentru a adăuga mai mulți utilizatori.",
   "generate_api_key_title" : "Generare cheie API proiect",
   "generate_pat_title" : "Generați un nou Token de acces personal",
   "global_add_button" : "Adăugați",

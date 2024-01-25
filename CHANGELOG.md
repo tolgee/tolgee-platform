@@ -1,3 +1,10 @@
+## [3.46.3](https://github.com/tolgee/tolgee-platform/compare/v3.46.2...v3.46.3) (2024-01-25)
+
+
+### Bug Fixes
+
+* Debouncing job can fail on multiple results returned by key ([#2104](https://github.com/tolgee/tolgee-platform/issues/2104)) ([5fedace](https://github.com/tolgee/tolgee-platform/commit/5fedace428952a716153b84d086f1e430581b004))
+
 ## [3.46.2](https://github.com/tolgee/tolgee-platform/compare/v3.46.1...v3.46.2) (2024-01-24)
 
 
