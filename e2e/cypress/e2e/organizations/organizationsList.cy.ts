@@ -11,6 +11,7 @@ import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
 
 describe('Organization List', () => {
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     organizationTestData.clean();
     organizationTestData
       .generate()
@@ -20,10 +21,6 @@ describe('Organization List', () => {
 
   afterEach(() => {
     organizationTestData.clean();
-  });
-
-  beforeEach(() => {
-    setBypassSeatCountCheck(true);
   });
 
   afterEach(() => {

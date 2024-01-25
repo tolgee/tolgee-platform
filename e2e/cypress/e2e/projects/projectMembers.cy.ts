@@ -26,20 +26,23 @@ import { ProjectInfo } from '../../common/permissions/shared';
 import { openMemberSettings, revokeMemberAccess } from '../../common/members';
 
 describe('Project members', () => {
+  before(() => {
+    setBypassSeatCountCheck(true);
+  });
+
+  after(() => {
+    setBypassSeatCountCheck(false);
+  });
+
   describe('Permission settings', () => {
     describe('Not modifying', () => {
       before(() => {
-        setBypassSeatCountCheck(true);
         projectTestData.clean();
         projectTestData.generate();
       });
 
       beforeEach(() => {
         login('cukrberg@facebook.com', 'admin');
-      });
-
-      after(() => {
-        setBypassSeatCountCheck(false);
       });
 
       it('Can search in permissions', () => {

@@ -12,6 +12,7 @@ describe('Organization switching', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean({
       timeout: 120000,
@@ -24,7 +25,7 @@ describe('Organization switching', () => {
 
   afterEach(() => {
     organizationTestData.clean();
-    setBypassSeatCountCheck(true);
+    setBypassSeatCountCheck(false);
   });
 
   it('stores preferred organization on BE', () => {
