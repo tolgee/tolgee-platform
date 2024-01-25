@@ -12,16 +12,13 @@ describe('Organization Base permissions', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean();
     organizationTestData.generate().then((res) => {
       organizationData = res.body as any;
       visitProfile('Tolgee');
     });
-  });
-
-  beforeEach(() => {
-    setBypassSeatCountCheck(true);
   });
 
   afterEach(() => {

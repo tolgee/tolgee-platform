@@ -29,16 +29,16 @@ describe('Project members', () => {
   describe('Permission settings', () => {
     describe('Not modifying', () => {
       before(() => {
+        setBypassSeatCountCheck(true);
         projectTestData.clean();
         projectTestData.generate();
       });
 
       beforeEach(() => {
-        setBypassSeatCountCheck(true);
         login('cukrberg@facebook.com', 'admin');
       });
 
-      afterEach(() => {
+      after(() => {
         setBypassSeatCountCheck(false);
       });
 

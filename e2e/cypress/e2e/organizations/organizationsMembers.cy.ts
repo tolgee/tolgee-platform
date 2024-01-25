@@ -13,6 +13,7 @@ describe('Organization Members', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean();
     organizationTestData
@@ -27,10 +28,6 @@ describe('Organization Members', () => {
 
   afterEach(() => {
     organizationTestData.clean();
-  });
-
-  beforeEach(() => {
-    setBypassSeatCountCheck(true);
   });
 
   afterEach(() => {
