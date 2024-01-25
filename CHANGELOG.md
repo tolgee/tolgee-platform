@@ -1,3 +1,10 @@
+## [3.46.4](https://github.com/tolgee/tolgee-platform/compare/v3.46.3...v3.46.4) (2024-01-25)
+
+
+### Bug Fixes
+
+* Create automation on webhook creation ([#2106](https://github.com/tolgee/tolgee-platform/issues/2106)) ([2b130e6](https://github.com/tolgee/tolgee-platform/commit/2b130e6a425d8b008dc2288108bb517056c1ae97))
+
 ## [3.46.3](https://github.com/tolgee/tolgee-platform/compare/v3.46.2...v3.46.3) (2024-01-25)
 
 
