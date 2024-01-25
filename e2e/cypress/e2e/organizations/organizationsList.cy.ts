@@ -7,7 +7,7 @@ import {
   switchToOrganization,
 } from '../../common/shared';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
 
 describe('Organization List', () => {
   beforeEach(() => {
@@ -20,6 +20,14 @@ describe('Organization List', () => {
 
   afterEach(() => {
     organizationTestData.clean();
+  });
+
+  beforeEach(() => {
+    setBypassSeatCountCheck(true);
+  });
+
+  afterEach(() => {
+    setBypassSeatCountCheck(false);
   });
 
   it('creates organization', () => {

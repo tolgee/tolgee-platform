@@ -58,6 +58,8 @@ class EeSubscriptionServiceImpl(
     const val REPORT_ERROR_PATH: String = "/v2/public/licensing/report-error"
   }
 
+  var bypassSeatCountCheck = false
+
   @Cacheable(Caches.EE_SUBSCRIPTION, key = "1")
   override fun findSubscriptionDto(): EeSubscriptionDto? {
     return this.findSubscriptionEntity()?.toDto()
@@ -241,6 +243,9 @@ class EeSubscriptionServiceImpl(
     seats: Long,
     subscription: EeSubscriptionDto?,
   ) {
+    if (bypassSeatCountCheck) {
+      return
+    }
     val isCloud = billingConfProvider.invoke().enabled
     if (subscription == null && !isCloud) {
       if (seats > 10) {

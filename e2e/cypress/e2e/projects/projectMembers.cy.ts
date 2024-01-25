@@ -11,7 +11,7 @@ import {
 import { enterProjectSettings, visitList } from '../../common/projects';
 
 import { projectTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
 import {
   permissionsMenuSelectAdvanced,
   permissionsMenuSelectRole,
@@ -34,7 +34,12 @@ describe('Project members', () => {
       });
 
       beforeEach(() => {
+        setBypassSeatCountCheck(true);
         login('cukrberg@facebook.com', 'admin');
+      });
+
+      afterEach(() => {
+        setBypassSeatCountCheck(false);
       });
 
       it('Can search in permissions', () => {

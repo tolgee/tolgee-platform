@@ -10,9 +10,8 @@ ext {
 }
 
 
-def getE2eTestsToRun() {
+def getE2eChunks() {
     def totalJobs = System.getenv("E2E_TOTAL_JOBS")
-    def jobIndex = System.getenv("E2E_JOB_INDEX")
     def list = []
 
     def dir = new File("$E2E_DIR/cypress/e2e")
@@ -22,17 +21,30 @@ def getE2eTestsToRun() {
         }
     }
 
-    if (totalJobs == null || jobIndex == null) {
-        return list
+    list.sort()
+
+    if (totalJobs == null) {
+        return List.of(list)
     }
 
     def remainingChunks = Integer.parseInt(totalJobs)
-    def chunks = []
+    def chunks = [] as ArrayList<List<String>>
     while (remainingChunks > 0) {
         def toIndex = Math.ceil(list.size().toFloat() / remainingChunks.toFloat()).toInteger()
         chunks.add(list.subList(0, toIndex))
         list = list.subList(toIndex, list.size())
         remainingChunks--
+    }
+    return chunks
+}
+
+def getE2eTestsToRun() {
+    def chunks = getE2eChunks()
+
+    def jobIndex = System.getenv("E2E_JOB_INDEX")
+
+    if (jobIndex == null) {
+        return chunks.flatten()
     }
 
     return chunks[Integer.parseInt(jobIndex)]
@@ -81,7 +93,16 @@ task runE2e(type: Exec, group: "e2e") {
     finalizedBy "saveServerLogs", "stopDockerE2e", "cleanupDockerE2e"
 }
 
-task saveServerLogs(type: Exec, group: "e2E"){
+task printE2eGroups() {
+    doLast {
+        getE2eChunks().indexed().forEach { index, chunk ->
+            println("Chunk: $index")
+            chunk.forEach { println(" $it") }
+        }
+    }
+}
+
+task saveServerLogs(type: Exec, group: "e2E") {
     commandLine "bash", "-c", "docker-compose logs > server.log"
     workingDir E2E_DIR
 }
