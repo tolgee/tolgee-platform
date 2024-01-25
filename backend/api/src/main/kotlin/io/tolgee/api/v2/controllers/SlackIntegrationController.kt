@@ -32,7 +32,7 @@ class SlackIntegrationController(
 
     projectHolder.project = ProjectDto.fromEntity(project)
     activityHolder.activityRevision.projectId = projectHolder.project.id
-    slackConfigService.create(project = project)
+    slackConfigService.create(project = project, payload)
     return SlackMessageDto(
       text = "subscribed"
     )

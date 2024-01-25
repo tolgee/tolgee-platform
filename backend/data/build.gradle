@@ -185,12 +185,18 @@ dependencies {
      */
     implementation(project(':misc'))
 
-
     /**
      * AZURE
      */
     implementation 'com.azure:azure-storage-blob:12.25.1'
     implementation 'com.azure:azure-identity:1.10.4'
+
+    /**
+     * SLACK SDK
+     */
+    implementation 'com.slack.api:slack-api-client:1.37.0'
+    implementation 'com.slack.api:slack-api-model-kotlin-extension:1.37.0'
+    implementation 'com.slack.api:slack-api-client-kotlin-extension:1.37.0'
 }
 
 test {

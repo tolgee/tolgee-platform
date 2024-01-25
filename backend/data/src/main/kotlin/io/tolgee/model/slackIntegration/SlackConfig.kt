@@ -16,4 +16,6 @@ class SlackConfig(
 
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
+
+  var channelId: String? = ""
 }

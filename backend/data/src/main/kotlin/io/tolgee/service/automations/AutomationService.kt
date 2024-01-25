@@ -5,11 +5,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.dtos.cacheable.automations.AutomationDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
-import io.tolgee.model.automations.Automation
-import io.tolgee.model.automations.AutomationAction
-import io.tolgee.model.automations.AutomationActionType
-import io.tolgee.model.automations.AutomationTrigger
-import io.tolgee.model.automations.AutomationTriggerType
+import io.tolgee.model.automations.*
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
@@ -114,8 +110,11 @@ class AutomationService(
   }
 
   @Transactional
-  fun createForSlackIntegration(slackConfig: SlackConfig) {
-
+  fun createForSlackIntegration(slackConfig: SlackConfig): Automation {
+    val automation = Automation(slackConfig.project)
+    addSlackSubscriptionTriggersAndActions(slackConfig, automation)
+    slackConfig.automationActions.addAll(automation.actions)
+    return save(automation)
   }
 
   @Transactional
@@ -154,6 +153,26 @@ class AutomationService(
       AutomationAction(automation).apply {
         this.type = AutomationActionType.WEBHOOK
         this.webhookConfig = webhookConfig
+      },
+    )
+  }
+
+  private fun addSlackSubscriptionTriggersAndActions(
+    slackConfig: SlackConfig,
+    automation: Automation
+  ) {
+    automation.triggers.add(
+      AutomationTrigger(automation).apply {
+        this.type = AutomationTriggerType.ACTIVITY
+        this.activityType = null
+        this.debounceDurationInMs = 0
+      },
+    )
+
+    automation.actions.add(
+      AutomationAction(automation).apply {
+        this.type = AutomationActionType.SLACK_SUBSCRIPTION
+        this.slackConfig = slackConfig
       },
     )
   }

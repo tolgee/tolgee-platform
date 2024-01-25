@@ -3092,4 +3092,9 @@
     <changeSet author="huglx (generated)" id="1706198026252-2">
         <addForeignKeyConstraint baseColumnNames="slack_config_id" baseTableName="automation_action" constraintName="FKi7itqbhkl11obx32m5k0fgpc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="slack_config" validate="true"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1706201448208-1">
+        <addColumn tableName="slack_config">
+            <column name="channel_id" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

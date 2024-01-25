@@ -3,8 +3,8 @@ package io.tolgee.model.automations
 import io.tolgee.batch.BatchOperationParams
 import io.tolgee.component.automations.AutomationProcessor
 import io.tolgee.component.automations.processors.ContentDeliveryPublishProcessor
-import io.tolgee.component.automations.processors.SlackSubscriptionProcessor
 import io.tolgee.component.automations.processors.WebhookProcessor
+import io.tolgee.component.automations.processors.slackIntegration.SlackSubscriptionProcessor
 import io.tolgee.dtos.cacheable.automations.AutomationActionDto
 import io.tolgee.dtos.cacheable.automations.AutomationTriggerDto
 import kotlin.reflect.KClass
