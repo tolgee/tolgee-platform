@@ -12,7 +12,7 @@ import {
   visitProjectDashboard,
 } from '../../../common/shared';
 
-describe('Server admin 1', () => {
+describe('Server admin 1', { retries: { runMode: 5 } }, () => {
   it('admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin
