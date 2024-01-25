@@ -3,7 +3,9 @@ package io.tolgee.component.automations.processors
 import io.tolgee.activity.ActivityService
 import io.tolgee.component.automations.AutomationProcessor
 import io.tolgee.model.automations.AutomationAction
+import org.springframework.stereotype.Component
 
+@Component
 class SlackSubscriptionProcessor(
   private val activityService: ActivityService
 ): AutomationProcessor {
