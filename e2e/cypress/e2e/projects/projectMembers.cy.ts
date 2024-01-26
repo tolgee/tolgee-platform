@@ -11,7 +11,7 @@ import {
 import { enterProjectSettings, visitList } from '../../common/projects';
 
 import { projectTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
 import {
   permissionsMenuSelectAdvanced,
   permissionsMenuSelectRole,
@@ -26,6 +26,14 @@ import { ProjectInfo } from '../../common/permissions/shared';
 import { openMemberSettings, revokeMemberAccess } from '../../common/members';
 
 describe('Project members', () => {
+  before(() => {
+    setBypassSeatCountCheck(true);
+  });
+
+  after(() => {
+    setBypassSeatCountCheck(false);
+  });
+
   describe('Permission settings', () => {
     describe('Not modifying', () => {
       before(() => {
