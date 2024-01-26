@@ -67,7 +67,7 @@ class ProjectService(
   @Lazy private val batchJobService: BatchJobService,
   @Lazy private val userNotificationService: UserNotificationService,
   @Lazy private val notificationPreferencesService: NotificationPreferencesService,
-	private val currentDateProvider: CurrentDateProvider,
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -288,14 +288,15 @@ class ProjectService(
         keyService.deleteAllByProject(project.id)
       }
 
-		avatarService.unlinkAvatarFiles(project)
-    batchJobService.deleteAllByProjectId(project.id)
-    bigMetaService.deleteAllByProjectId(project.id)
+      avatarService.unlinkAvatarFiles(project)
+      batchJobService.deleteAllByProjectId(project.id)
+      bigMetaService.deleteAllByProjectId(project.id)
 
-    userNotificationService.deleteAllByProjectId(project.id)
-    notificationPreferencesService.deleteAllByProjectId(project.id)
+      userNotificationService.deleteAllByProjectId(project.id)
+      notificationPreferencesService.deleteAllByProjectId(project.id)
 
-    projectRepository.delete(project)}
+      projectRepository.delete(project)
+    }
   }
 
   /**

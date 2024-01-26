@@ -29,7 +29,10 @@ data class NotificationCreateDto(
   val modifiedEntities: MutableList<ActivityModifiedEntity>? = null,
   val batchJob: BatchJob? = null,
 ) {
-  fun toUserNotificationEntity(params: UserNotificationParamsDto, em: EntityManager): UserNotification {
+  fun toUserNotificationEntity(
+    params: UserNotificationParamsDto,
+    em: EntityManager,
+  ): UserNotification {
     return UserNotification(
       type = type,
       recipient = params.recipient,

@@ -19,9 +19,7 @@ package io.tolgee.notifications.listeners
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.events.OnProjectActivityStoredEvent
-import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
-import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -33,7 +31,6 @@ import io.tolgee.notifications.events.NotificationCreateEvent
 import io.tolgee.service.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -267,7 +264,7 @@ class ActivityEventListener(
 
   private fun processOutdatedFlagUpdate(
     projectId: Long,
-		responsibleUserId: Long?,
+    responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
   ) {
     val outdatedTranslations =

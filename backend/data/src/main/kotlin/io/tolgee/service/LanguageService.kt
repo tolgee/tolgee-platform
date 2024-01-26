@@ -16,7 +16,6 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
-import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable

@@ -3,7 +3,6 @@ package io.tolgee.repository
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
-import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.model.views.UserProjectMetadataView
 import org.springframework.data.domain.Page

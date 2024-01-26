@@ -21,20 +21,14 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.notifications.NotificationPreferences
 
 data class UserProjectMetadataView(
-	val userAccountId: Long,
-
-	val projectId: Long,
-
-	val organizationRole: OrganizationRoleType?,
-
-	val basePermissions: Permission?,
-
-	val permissions: Permission?,
-
-	val globalNotificationPreferences: NotificationPreferences?,
-
-	val projectNotificationPreferences: NotificationPreferences?,
+  val userAccountId: Long,
+  val projectId: Long,
+  val organizationRole: OrganizationRoleType?,
+  val basePermissions: Permission?,
+  val permissions: Permission?,
+  val globalNotificationPreferences: NotificationPreferences?,
+  val projectNotificationPreferences: NotificationPreferences?,
 ) {
-	val notificationPreferences
-		get() = projectNotificationPreferences ?: globalNotificationPreferences
+  val notificationPreferences
+    get() = projectNotificationPreferences ?: globalNotificationPreferences
 }

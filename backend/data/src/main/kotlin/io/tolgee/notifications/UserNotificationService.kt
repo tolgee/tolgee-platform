@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserNotificationService(
-	private val entityManager: EntityManager,
+  private val entityManager: EntityManager,
   private val userNotificationRepository: UserNotificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val userNotificationDebouncer: UserNotificationDebouncer,

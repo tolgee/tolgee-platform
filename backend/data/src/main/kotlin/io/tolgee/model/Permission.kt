@@ -135,19 +135,19 @@ class Permission(
   override val organizationId: Long?
     get() = this.organization?.id
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "permission_languages", joinColumns = [JoinColumn(name = "permission_id")])
-	@Column(name = "languages_id")
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "permission_languages", joinColumns = [JoinColumn(name = "permission_id")])
+  @Column(name = "languages_id")
   override val translateLanguageIds: Set<Long>? = null
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "permission_view_languages", joinColumns = [JoinColumn(name = "permission_id")])
-	@Column(name = "view_languages_id")
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "permission_view_languages", joinColumns = [JoinColumn(name = "permission_id")])
+  @Column(name = "view_languages_id")
   override val viewLanguageIds: Set<Long>? = null
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "permission_state_change_languages", joinColumns = [JoinColumn(name = "permission_id")])
-	@Column(name = "state_change_languages_id")
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "permission_state_change_languages", joinColumns = [JoinColumn(name = "permission_id")])
+  @Column(name = "state_change_languages_id")
   override val stateChangeLanguageIds: Set<Long>? = null
 
   companion object {

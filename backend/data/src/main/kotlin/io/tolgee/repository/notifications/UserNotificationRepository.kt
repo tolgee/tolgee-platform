@@ -16,7 +16,6 @@
 
 package io.tolgee.repository.notifications
 
-import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.notifications.UserNotification
 import io.tolgee.notifications.NotificationType
@@ -147,12 +146,12 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
 
   @Modifying
   @Query(
-		"""
+    """
 			UPDATE UserNotification un
 			SET un.unread = false, un.markedDoneAt = CURRENT_TIMESTAMP()
 			WHERE un.recipient.id = ?1
-		"""
-	)
+		""",
+  )
   fun markAllAsDone(recipient: Long)
 
   @Modifying

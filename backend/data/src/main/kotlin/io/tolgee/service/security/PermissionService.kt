@@ -22,7 +22,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
@@ -221,8 +220,8 @@ class PermissionService(
   fun computeProjectPermission(userProjectMetadataView: UserProjectMetadataView): ComputedPermissionDto {
     return computeProjectPermission(
       userProjectMetadataView.organizationRole,
-			userProjectMetadataView.basePermissions,
-			userProjectMetadataView.permissions,
+      userProjectMetadataView.basePermissions,
+      userProjectMetadataView.permissions,
     )
   }
 

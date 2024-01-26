@@ -16,7 +16,6 @@
 
 package io.tolgee.notifications.events
 
-import io.tolgee.model.UserAccount
 import io.tolgee.notifications.dto.NotificationCreateDto
 
 data class NotificationCreateEvent(

@@ -17,7 +17,6 @@
 package io.tolgee.notifications.listeners
 
 import io.tolgee.batch.events.OnBatchJobFailed
-import io.tolgee.model.Project
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.notifications.NotificationType
 import io.tolgee.notifications.dto.NotificationCreateDto

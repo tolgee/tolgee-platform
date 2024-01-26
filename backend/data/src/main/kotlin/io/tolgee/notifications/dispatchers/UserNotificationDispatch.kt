@@ -17,7 +17,6 @@
 package io.tolgee.notifications.dispatchers
 
 import io.tolgee.dtos.ComputedPermissionDto
-import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -98,15 +97,16 @@ class UserNotificationDispatch(
   }
 
   private fun handleActivityNotificationForUser(
-		e: NotificationCreateEvent,
-		translationToLanguageMap: Map<Long, Long>,
-		userProjectMetadataView: UserProjectMetadataView,
+    e: NotificationCreateEvent,
+    translationToLanguageMap: Map<Long, Long>,
+    userProjectMetadataView: UserProjectMetadataView,
   ): UserNotificationParamsDto? {
-    val permissions = permissionService.computeProjectPermission(
-			userProjectMetadataView.organizationRole,
-			userProjectMetadataView.basePermissions,
-			userProjectMetadataView.permissions,
-		)
+    val permissions =
+      permissionService.computeProjectPermission(
+        userProjectMetadataView.organizationRole,
+        userProjectMetadataView.basePermissions,
+        userProjectMetadataView.permissions,
+      )
 
     // Filter the entities the user is allowed to see
     val filteredModifiedEntities =

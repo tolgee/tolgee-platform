@@ -58,7 +58,7 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
     performAuthPost(
       url = "/v2/projects/${testData.calmProject.id}/languages",
       content =
-				LanguageRequest(
+        LanguageRequest(
           name = "Meow",
           originalName = "meow",
           tag = "meow-en",

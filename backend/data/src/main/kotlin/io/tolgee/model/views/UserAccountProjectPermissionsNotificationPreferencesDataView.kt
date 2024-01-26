@@ -18,7 +18,6 @@ package io.tolgee.model.views
 
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
-import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
@@ -27,55 +26,53 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 
 data class UserProjectMetadata(
-	@Id
-	val id: Long,
-
-	@Id
-	val projectId: Long,
-
-	@OneToMany
-	val organizationRole: OrganizationRole?,
-
-	@OneToMany
-	val basePermissions: Permission?,
-
-	@OneToMany
-	val permissions: Permission?,
-
-	@OneToMany
-	val globalNotificationPreferences: NotificationPreferences?,
-
-	@OneToMany
-	val projectNotificationPreferences: NotificationPreferences?,
+  @Id
+  val id: Long,
+  @Id
+  val projectId: Long,
+  @OneToMany
+  val organizationRole: OrganizationRole?,
+  @OneToMany
+  val basePermissions: Permission?,
+  @OneToMany
+  val permissions: Permission?,
+  @OneToMany
+  val globalNotificationPreferences: NotificationPreferences?,
+  @OneToMany
+  val projectNotificationPreferences: NotificationPreferences?,
 ) {
-	val notificationPreferences
-		get() = projectNotificationPreferences ?: globalNotificationPreferences
+  val notificationPreferences
+    get() = projectNotificationPreferences ?: globalNotificationPreferences
 }
 
 class UserAccountProjectPermissionsNotificationPreferencesDataView(data: Map<String, Any>) {
-	init {
-		println(data["permittedViewLanguages"])
-	}
+  init {
+    println(data["permittedViewLanguages"])
+  }
 
-	val id = data["id"] as? Long ?: throw IllegalArgumentException()
+  val id = data["id"] as? Long ?: throw IllegalArgumentException()
 
-	val projectId = data["projectId"] as? Long ?: throw IllegalArgumentException()
+  val projectId = data["projectId"] as? Long ?: throw IllegalArgumentException()
 
-	val organizationRole = data["organizationRole"] as? OrganizationRoleType
+  val organizationRole = data["organizationRole"] as? OrganizationRoleType
 
-	val basePermissionsBasic = data["basePermissionsBasic"] as? ProjectPermissionType
+  val basePermissionsBasic = data["basePermissionsBasic"] as? ProjectPermissionType
 
-  val basePermissionsGranular = (data["basePermissionsGranular"] as? Array<*>)
-		?.map { enumValueOf<Scope>((it as? Enum<*>)?.name ?: throw IllegalArgumentException()) }
+  val basePermissionsGranular =
+    (data["basePermissionsGranular"] as? Array<*>)
+      ?.map { enumValueOf<Scope>((it as? Enum<*>)?.name ?: throw IllegalArgumentException()) }
 
-	val permissionsBasic = data["permissionsBasic"] as? ProjectPermissionType
+  val permissionsBasic = data["permissionsBasic"] as? ProjectPermissionType
 
-  val permissionsGranular = (data["permissionsGranular"] as? Array<*>)
-		?.map { enumValueOf<Scope>((it as? Enum<*>)?.name ?: throw IllegalArgumentException()) }
+  val permissionsGranular =
+    (data["permissionsGranular"] as? Array<*>)
+      ?.map { enumValueOf<Scope>((it as? Enum<*>)?.name ?: throw IllegalArgumentException()) }
 
- 	val permittedViewLanguages = (data["permittedViewLanguages"] as? Array<*>)
-		?.map { (it as? String)?.toLong() ?: throw IllegalArgumentException() }
+  val permittedViewLanguages =
+    (data["permittedViewLanguages"] as? Array<*>)
+      ?.map { (it as? String)?.toLong() ?: throw IllegalArgumentException() }
 
-  val notificationPreferences = (data["projectNotificationPreferences"] ?: data["globalNotificationPreferences"])
-		as? NotificationPreferences
+  val notificationPreferences =
+    (data["projectNotificationPreferences"] ?: data["globalNotificationPreferences"])
+      as? NotificationPreferences
 }

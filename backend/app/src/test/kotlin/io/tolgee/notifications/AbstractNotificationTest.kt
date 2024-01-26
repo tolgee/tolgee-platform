@@ -55,7 +55,7 @@ abstract class AbstractNotificationTest : AuthorizedControllerTest() {
 
       entityManager.refresh(it.arguments[0])
 
-			println("Dispatched!")
+      println("Dispatched!")
       // Wait a bit to make sure everything's *actually* persisted
       // Kind of an ugly way to synchronize everything, but it is what it is
       taskScheduler.schedule(
