@@ -4,6 +4,8 @@ import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
+import io.tolgee.component.automations.processors.slackIntegration.SlackNotConnectedException
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -19,6 +21,7 @@ import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -40,7 +43,10 @@ import java.util.*
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class ExceptionHandlers {
+class ExceptionHandlers(
+  @Lazy private val slackExecutor: SlackExecutor
+) {
+
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -243,4 +249,10 @@ class ExceptionHandlers {
     val headerXFF = request.getHeader("X-FORWARDED-FOR")
     logger.warn(message, request.method, request.requestURL, request.remoteAddr, headerXFF)
   }
+
+  @ExceptionHandler(SlackNotConnectedException::class)
+  fun handleNotConnectedExceptions(exception: SlackNotConnectedException) {
+    slackExecutor.sendErrorMessage(Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT, exception.slackChannelId)
+  }
+
 }

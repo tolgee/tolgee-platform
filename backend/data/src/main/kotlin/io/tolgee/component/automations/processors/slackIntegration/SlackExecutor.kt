@@ -57,6 +57,32 @@ class SlackExecutor {
     }
   }
 
+  fun sendErrorMessage(errorMessage: Message, slackChannelId: String) {
+    val response = slackClient.methods(SLACK_TOKEN).chatPostMessage {
+      it.channel(slackChannelId)
+        .blocks {
+          section {
+            val emojiUnicode = "x"
+            markdownText(":$emojiUnicode: ${errorMessage.code}")
+          }
+
+          if(errorMessage == Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT) {
+            context {
+              elements {
+                val suggestion = "Try to use /login"
+                plainText(suggestion)
+              }
+            }
+          }
+        }
+    }
+
+    if (response.isOk) {
+      println("Sent to ${slackChannelId}")
+    } else {
+      println("Error: ${response.error}")
+    }
+  }
   companion object {
     val SLACK_TOKEN = "xoxb-6460981223175-6480877302916-kVJzxYw4v4AdNjX4x3wWck32" //TODO refactor
     val slackClient = Slack.getInstance()
