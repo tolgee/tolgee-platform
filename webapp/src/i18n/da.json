@@ -451,6 +451,7 @@
   "file_too_big" : "Filen fylder for meget",
   "formality_not_supported_by_service" : "Tjenesten understøtter ikke tone formalitet",
   "former-user-name" : "Tidligere bruger",
+  "free_self_hosted_seat_limit_exceeded" : "Grænsen for gratis brugerpladser på denne selvhostede instans er overskredet. Opgrader dit abonnement for at tilføje flere brugere.",
   "generate_api_key_title" : "Generer Projekt API-nøgle",
   "generate_pat_title" : "Generer ny Personlig Adgangstoken",
   "global_add_button" : "Tilføj",

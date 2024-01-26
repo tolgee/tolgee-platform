@@ -45,6 +45,16 @@ const Error: React.FC<{ loadable: LoadableType }> = ({ loadable }) => {
     );
   }
 
+  if (loadable.error?.code === 'free_self_hosted_seat_limit_exceeded') {
+    return (
+      <Alert severity="error">
+        <Typography variant="h5" sx={{ mb: 1 }}>
+          <T keyName="free_self_hosted_seat_limit_exceeded" />
+        </Typography>
+      </Alert>
+    );
+  }
+
   return (
     <>
       {loadable && loadable.error && (

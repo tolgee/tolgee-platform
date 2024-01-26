@@ -26,6 +26,9 @@ pluginManagement {
             if (requested.id.id == 'io.sentry.jvm.gradle') {
                 useVersion('4.0.0')
             }
+            if(requested.id.id == 'org.gradle.test-retry') {
+                useVersion('1.5.8')
+            }
         }
     }
 }

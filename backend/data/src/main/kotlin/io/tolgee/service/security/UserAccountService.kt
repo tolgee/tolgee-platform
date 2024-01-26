@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -513,4 +514,6 @@ class UserAccountService(
 
     userAccountRepository.deleteById(legacyImplicitUser.id)
   }
+
+  fun findActiveView(id: Long): UserAccountView? = userAccountRepository.findActiveView(id)
 }

@@ -1,3 +1,31 @@
+# [3.47.0](https://github.com/tolgee/tolgee-platform/compare/v3.46.4...v3.47.0) (2024-01-26)
+
+
+### Features
+
+* Limit number of seats on free self-hosted instances ([#2103](https://github.com/tolgee/tolgee-platform/issues/2103)) ([732a033](https://github.com/tolgee/tolgee-platform/commit/732a033b1ad298b56b3ec0aeb3730ce28b789292))
+
+## [3.46.4](https://github.com/tolgee/tolgee-platform/compare/v3.46.3...v3.46.4) (2024-01-25)
+
+
+### Bug Fixes
+
+* Create automation on webhook creation ([#2106](https://github.com/tolgee/tolgee-platform/issues/2106)) ([2b130e6](https://github.com/tolgee/tolgee-platform/commit/2b130e6a425d8b008dc2288108bb517056c1ae97))
+
+## [3.46.3](https://github.com/tolgee/tolgee-platform/compare/v3.46.2...v3.46.3) (2024-01-25)
+
+
+### Bug Fixes
+
+* Debouncing job can fail on multiple results returned by key ([#2104](https://github.com/tolgee/tolgee-platform/issues/2104)) ([5fedace](https://github.com/tolgee/tolgee-platform/commit/5fedace428952a716153b84d086f1e430581b004))
+
+## [3.46.2](https://github.com/tolgee/tolgee-platform/compare/v3.46.1...v3.46.2) (2024-01-24)
+
+
+### Bug Fixes
+
+* Minor fixes & better sentry logging ([#2098](https://github.com/tolgee/tolgee-platform/issues/2098)) ([9ee52ca](https://github.com/tolgee/tolgee-platform/commit/9ee52caf26958335fcaef1fdd66df0e9e8a7d3eb))
+
 ## [3.46.1](https://github.com/tolgee/tolgee-platform/compare/v3.46.0...v3.46.1) (2024-01-22)
 
 

@@ -8,8 +8,6 @@ import io.tolgee.exceptions.FileStoreException
 import io.tolgee.model.contentDelivery.AzureBlobConfig
 import io.tolgee.model.contentDelivery.S3Config
 import io.tolgee.model.contentDelivery.StorageConfig
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.springframework.stereotype.Component
 
 @Component
@@ -68,15 +66,55 @@ class ContentDeliveryFileStorageProvider(
     }
 
     val shouldBeOk = tolgeeProperties.internal.e3eContentStorageBypassOk!!
-    val mock = mock(FileStorage::class.java)
 
     if (shouldBeOk) {
-      return mock
+      return okFileStorage
     }
-    Mockito.`when`(mock.test())
-      .thenThrow(FileStoreException("Bypassed storage test exception", "test", IllegalStateException()))
-    Mockito.`when`(mock.storeFile(Mockito.any(), Mockito.any()))
-      .thenThrow(FileStoreException("Bypassed storage put exception", "test", IllegalStateException()))
-    return mock
+
+    return failingFileStorage
   }
+
+  private val okFileStorage
+    get() =
+      object : FileStorage {
+        override fun readFile(storageFilePath: String): ByteArray {
+          return ByteArray(0)
+        }
+
+        override fun deleteFile(storageFilePath: String) {}
+
+        override fun storeFile(
+          storageFilePath: String,
+          bytes: ByteArray,
+        ) {}
+
+        override fun fileExists(storageFilePath: String): Boolean = true
+      }
+
+  private val failingFileStorage
+    get() =
+      object : FileStorage {
+        override fun readFile(storageFilePath: String): ByteArray {
+          throw FileStoreException("Bypassed storage get exception", "test", IllegalStateException())
+        }
+
+        override fun deleteFile(storageFilePath: String) {
+          throw FileStoreException("Bypassed storage delete exception", "test", IllegalStateException())
+        }
+
+        override fun storeFile(
+          storageFilePath: String,
+          bytes: ByteArray,
+        ) {
+          throw FileStoreException("Bypassed storage put exception", "test", IllegalStateException())
+        }
+
+        override fun fileExists(storageFilePath: String): Boolean {
+          throw FileStoreException("Bypassed storage exists exception", "test", IllegalStateException())
+        }
+
+        override fun test() {
+          throw FileStoreException("Bypassed storage test exception", "test", IllegalStateException())
+        }
+      }
 }

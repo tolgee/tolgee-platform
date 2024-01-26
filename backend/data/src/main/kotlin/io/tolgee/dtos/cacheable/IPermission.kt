@@ -12,4 +12,9 @@ interface IPermission {
   val stateChangeLanguageIds: Set<Long>?
   val type: ProjectPermissionType?
   val granular: Boolean?
+
+  fun getScopesFromTypeAndScopes(
+    type: ProjectPermissionType?,
+    scopes: Array<Scope>?,
+  ): Array<Scope> = scopes ?: type?.availableScopes ?: throw IllegalStateException()
 }

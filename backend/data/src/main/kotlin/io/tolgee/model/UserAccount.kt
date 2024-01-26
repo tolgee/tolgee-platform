@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
+import io.tolgee.api.IUserAccount
 import io.tolgee.model.notifications.NotificationPreferences
 import io.tolgee.model.notifications.UserNotification
 import jakarta.persistence.CascadeType
@@ -34,10 +35,10 @@ data class UserAccount(
   var role: Role? = Role.USER,
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
-  var accountType: AccountType? = AccountType.LOCAL,
-) : AuditModel(), ModelWithAvatar {
+  override var accountType: AccountType? = AccountType.LOCAL,
+) : AuditModel(), ModelWithAvatar, IUserAccount {
   @Column(name = "totp_key", columnDefinition = "bytea")
-  var totpKey: ByteArray? = null
+  override var totpKey: ByteArray? = null
 
   @Type(ListArrayType::class)
   @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
@@ -84,7 +85,7 @@ data class UserAccount(
 
   @Column(name = "is_initial_user", nullable = false)
   @ColumnDefault("false")
-  var isInitialUser: Boolean = false
+  override var isInitialUser: Boolean = false
 
   @Column(name = "password_changed", nullable = false)
   @ColumnDefault("true")
@@ -103,15 +104,6 @@ data class UserAccount(
 
   val globalNotificationPreferences: NotificationPreferences?
     get() = _globalNotificationPreferences.firstOrNull()
-
-  val isDeletable: Boolean
-    get() = this.accountType != AccountType.MANAGED && !this.isInitialUser
-
-  val isMfaEnabled: Boolean
-    get() = this.totpKey?.isNotEmpty() ?: false
-
-  val needsSuperJwt: Boolean
-    get() = this.accountType != AccountType.THIRD_PARTY || isMfaEnabled
 
   enum class Role {
     USER,

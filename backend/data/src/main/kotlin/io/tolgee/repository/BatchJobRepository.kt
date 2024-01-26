@@ -106,7 +106,8 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     from BatchJob j
     where j.debouncingKey = :debouncingKey
     and j.status = 'PENDING'
+    and j.id = (select max(j2.id) from BatchJob j2 where j2.debouncingKey = :debouncingKey and j2.status = 'PENDING')
   """,
   )
-  fun findBatchJobByDebouncingKey(debouncingKey: String?): BatchJob?
+  fun findBatchJobByDebouncingKey(debouncingKey: String): BatchJob?
 }

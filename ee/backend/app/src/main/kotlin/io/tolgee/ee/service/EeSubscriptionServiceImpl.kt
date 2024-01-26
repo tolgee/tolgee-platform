@@ -6,6 +6,7 @@ import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.HttpClient
+import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
@@ -46,6 +47,7 @@ class EeSubscriptionServiceImpl(
   private val platformTransactionManager: PlatformTransactionManager,
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: EeSubscriptionServiceImpl,
+  private val billingConfProvider: PublicBillingConfProvider,
 ) : EeSubscriptionProvider {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
@@ -55,6 +57,8 @@ class EeSubscriptionServiceImpl(
     const val RELEASE_KEY_PATH: String = "/v2/public/licensing/release-key"
     const val REPORT_ERROR_PATH: String = "/v2/public/licensing/report-error"
   }
+
+  var bypassSeatCountCheck = false
 
   @Cacheable(Caches.EE_SUBSCRIPTION, key = "1")
   override fun findSubscriptionDto(): EeSubscriptionDto? {
@@ -228,10 +232,33 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun reportUsage() {
-    val subscription = findSubscriptionEntity()
+  fun checkCountAndReportUsage() {
+    val seats = userAccountService.countAllEnabled()
+    val subscription = self.findSubscriptionDto()
+    reportUsage(seats, subscription)
+    checkUserCount(seats, subscription)
+  }
+
+  private fun checkUserCount(
+    seats: Long,
+    subscription: EeSubscriptionDto?,
+  ) {
+    if (bypassSeatCountCheck) {
+      return
+    }
+    val isCloud = billingConfProvider.invoke().enabled
+    if (subscription == null && !isCloud) {
+      if (seats > 10) {
+        throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+      }
+    }
+  }
+
+  private fun reportUsage(
+    seats: Long,
+    subscription: EeSubscriptionDto?,
+  ) {
     if (subscription != null) {
-      val seats = userAccountService.countAllEnabled()
       catchingSeatsSpendingLimit {
         catchingLicenseNotFound {
           reportUsageRemote(subscription, seats)
@@ -263,7 +290,7 @@ class EeSubscriptionServiceImpl(
   }
 
   private fun reportUsageRemote(
-    subscription: EeSubscription,
+    subscription: EeSubscriptionDto,
     seats: Long,
   ) {
     postRequest<Any>(

@@ -11,7 +11,9 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
+import io.tolgee.util.debug
 import io.tolgee.util.logger
+import io.tolgee.util.trace
 import jakarta.persistence.EntityManager
 import org.hibernate.LockOptions
 import org.springframework.beans.factory.InitializingBean
@@ -90,11 +92,24 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
+    val toAdd = mutableListOf<ExecutionQueueItem>()
+    val filteredOut = mutableListOf<ExecutionQueueItem>()
+
     data.forEach {
       if (!queue.contains(it)) {
-        queue.add(it)
+        toAdd.add(it)
+      } else {
+        filteredOut.add(it)
       }
     }
+
+    logger.trace {
+      val itemsString = toAdd.joinToString(", ") { it.chunkExecutionId.toString() }
+      val filteredOutString = filteredOut.joinToString(", ") { it.chunkExecutionId.toString() }
+      "Adding chunks [$itemsString] to queue.\n Not Added Items (already in the queue): [$filteredOutString]"
+    }
+
+    queue.addAll(toAdd)
   }
 
   fun addToQueue(
@@ -152,6 +167,7 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun clear() {
+    logger.debug("Clearing queue")
     queue.clear()
   }
 

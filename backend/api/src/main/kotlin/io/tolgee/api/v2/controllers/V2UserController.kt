@@ -55,7 +55,7 @@ class V2UserController(
   @GetMapping("")
   @AllowApiAccess
   fun getInfo(): PrivateUserAccountModel {
-    val userAccount = authenticationFacade.authenticatedUserEntity
+    val userAccount = authenticationFacade.authenticatedUserView
     return privateUserAccountModelAssembler.toModel(userAccount)
   }
 
@@ -80,7 +80,10 @@ class V2UserController(
     dto: UserUpdateRequestDto?,
   ): PrivateUserAccountModel {
     val userAccount = userAccountService.update(authenticationFacade.authenticatedUserEntity, dto!!)
-    return privateUserAccountModelAssembler.toModel(userAccount)
+    val view =
+      userAccountService.findActiveView(userAccount.id)
+        ?: throw IllegalStateException("User not found")
+    return privateUserAccountModelAssembler.toModel(view)
   }
 
   @PutMapping("/password")
@@ -104,7 +107,10 @@ class V2UserController(
     imageUploadService.validateIsImage(avatar)
     val entity = authenticationFacade.authenticatedUserEntity
     userAccountService.setAvatar(entity, avatar.inputStream)
-    return privateUserAccountModelAssembler.toModel(entity)
+    val view =
+      userAccountService.findActiveView(entity.id)
+        ?: throw IllegalStateException("User not found")
+    return privateUserAccountModelAssembler.toModel(view)
   }
 
   @DeleteMapping("/avatar")
@@ -113,7 +119,10 @@ class V2UserController(
   fun removeAvatar(): PrivateUserAccountModel {
     val entity = authenticationFacade.authenticatedUserEntity
     userAccountService.removeAvatar(entity)
-    return privateUserAccountModelAssembler.toModel(entity)
+    val view =
+      userAccountService.findActiveView(entity.id)
+        ?: throw IllegalStateException("User not found")
+    return privateUserAccountModelAssembler.toModel(view)
   }
 
   @GetMapping("/single-owned-organizations")

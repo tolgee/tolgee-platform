@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
+import java.util.function.Consumer
 
 class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: WebhooksTestData
@@ -45,7 +46,17 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `creates webhook config`() {
     createWebhook().andAssertThatJson {
-      node("id").isValidId
+      node("id").isValidId.satisfies(
+        Consumer {
+          it.toLong().let { id ->
+            webhookConfigService.find(id).assert.isNotNull()
+            entityManager.createQuery("""from AutomationAction aa where aa.webhookConfig.id = :id""")
+              .setParameter("id", id)
+              .resultList
+              .assert.isNotEmpty()
+          }
+        },
+      )
       node("url").isEqualTo("https://hello.com")
     }
   }

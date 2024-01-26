@@ -451,6 +451,7 @@
   "file_too_big" : "File is too big",
   "formality_not_supported_by_service" : "Service doesn't support formality",
   "former-user-name" : "Former user",
+  "free_self_hosted_seat_limit_exceeded" : "The limit of free user seats on this self-hosted instance was exceeded. Please upgrade your subscription plan to add more users.",
   "generate_api_key_title" : "Generate Project API key",
   "generate_pat_title" : "Generate new Personal Access Token",
   "global_add_button" : "Add",

@@ -62,7 +62,7 @@ class Permission(
     }
 
   override var scopes: Array<Scope>
-    get() = _scopes ?: type?.availableScopes ?: throw IllegalStateException()
+    get() = getScopesFromTypeAndScopes(this.type, this._scopes)
     set(value) {
       this._scopes = value
     }

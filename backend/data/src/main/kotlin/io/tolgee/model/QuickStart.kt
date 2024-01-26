@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.StringArrayType
+import io.tolgee.dtos.queryResults.organization.IQuickStart
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -16,7 +17,7 @@ data class QuickStart(
   @MapsId
   @JoinColumn(name = "user_account_id")
   var userAccount: UserAccount,
-) {
+) : IQuickStart {
   @Id
   @Column(name = "user_account_id")
   var userAccountId: Long = 0
@@ -24,11 +25,11 @@ data class QuickStart(
   @ManyToOne
   var organization: Organization? = null
 
-  var finished = false
+  override var finished = false
 
-  var open: Boolean = true
+  override var open: Boolean = true
 
   @Type(StringArrayType::class)
   @Column(columnDefinition = "text[]")
-  var completedSteps: Array<String> = arrayOf()
+  override var completedSteps: Array<String> = arrayOf()
 }
