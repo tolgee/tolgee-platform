@@ -84,10 +84,10 @@ interface LanguageRepository : JpaRepository<Language, Long> {
       SELECT new map(t.id as translationId, t.language.id as languageId)
       FROM Translation t
       WHERE t.id IN :translationIds
-    """
+    """,
   )
   fun findLanguageIdsOfTranslations(translationIds: List<Long>): List<Map<String, Long>>
 
-  @Query("SELECT l.id FROM Language l, Project p WHERE p = :project AND l = p.baseLanguage")
-  fun getBaseLanguageForProject(project: Project): Long?
+  @Query("SELECT l.id FROM Language l, Project p WHERE p.id = :projectId AND l = p.baseLanguage")
+  fun getBaseLanguageForProjectId(projectId: Long): Long?
 }

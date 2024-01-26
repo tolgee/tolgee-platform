@@ -10,7 +10,6 @@ import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.security.UserAccountService
-import io.tolgee.util.EntityUtil
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
@@ -65,13 +64,15 @@ class ActivityViewByRevisionsProvider(
 
     rawModifiedEntities = getModifiedEntitiesRaw()
 
-    val modifiedEntitiesViewProvider = ModifiedEntitiesViewProvider(
-      applicationContext,
-      rawModifiedEntities
-    )
+    val modifiedEntitiesViewProvider =
+      ModifiedEntitiesViewProvider(
+        applicationContext,
+        rawModifiedEntities,
+      )
 
-    modifiedEntities = modifiedEntitiesViewProvider.get()
-      .groupBy { it.activityRevision.id }
+    modifiedEntities =
+      modifiedEntitiesViewProvider.get()
+        .groupBy { it.activityRevision.id }
 
     params = getParams()
 

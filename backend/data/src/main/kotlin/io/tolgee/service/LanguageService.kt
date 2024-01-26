@@ -417,8 +417,7 @@ class LanguageService(
     return languageRepository.save(language)
   }
 
-  fun getBaseLanguageForProject(project: Project): Long? {
-    if (Hibernate.isInitialized(project)) return project.baseLanguage?.id
-    return languageRepository.getBaseLanguageForProject(project)
+  fun getBaseLanguageForProjectId(projectId: Long): Long? {
+    return languageRepository.getBaseLanguageForProjectId(projectId)
   }
 }

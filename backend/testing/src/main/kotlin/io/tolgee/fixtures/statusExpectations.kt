@@ -67,7 +67,7 @@ fun ResultActions.andAssertThatJson(jsonAssert: JsonAssert.ConfigurableJsonAsser
             val diff = if (a > b) a - b else b - a
             diff <= (tolerance ?: BigDecimal.ZERO)
           }
-        }
+        },
     )
 
     this

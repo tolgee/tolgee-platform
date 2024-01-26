@@ -23,8 +23,8 @@ import io.tolgee.model.notifications.NotificationPreferences
 import io.tolgee.notifications.dto.NotificationPreferencesDto
 import io.tolgee.repository.notifications.NotificationPreferencesRepository
 import io.tolgee.service.security.SecurityService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class NotificationPreferencesService(
@@ -42,31 +42,42 @@ class NotificationPreferencesService(
   }
 
   fun getGlobalPreferences(user: Long): NotificationPreferencesDto {
-    val entity = notificationPreferencesRepository.findByUserAccountIdAndProjectId(user, null)
-      ?: return NotificationPreferencesDto.createBlank()
+    val entity =
+      notificationPreferencesRepository.findByUserAccountIdAndProjectId(user, null)
+        ?: return NotificationPreferencesDto.createBlank()
 
     return NotificationPreferencesDto.fromEntity(entity)
   }
 
-  fun getProjectPreferences(user: Long, project: Long): NotificationPreferencesDto {
+  fun getProjectPreferences(
+    user: Long,
+    project: Long,
+  ): NotificationPreferencesDto {
     // If the user cannot see the project, the project "does not exist".
     val scopes = securityService.getProjectPermissionScopes(project, user) ?: emptyArray()
     if (scopes.isEmpty()) throw NotFoundException()
 
-    val entity = notificationPreferencesRepository.findByUserAccountIdAndProjectId(user, null)
-      ?: throw NotFoundException()
+    val entity =
+      notificationPreferencesRepository.findByUserAccountIdAndProjectId(user, null)
+        ?: throw NotFoundException()
 
     return NotificationPreferencesDto.fromEntity(entity)
   }
 
-  fun setPreferencesOfUser(user: Long, dto: NotificationPreferencesDto): NotificationPreferences {
+  fun setPreferencesOfUser(
+    user: Long,
+    dto: NotificationPreferencesDto,
+  ): NotificationPreferences {
     return setPreferencesOfUser(
       entityManager.getReference(UserAccount::class.java, user),
       dto,
     )
   }
 
-  fun setPreferencesOfUser(user: UserAccount, dto: NotificationPreferencesDto): NotificationPreferences {
+  fun setPreferencesOfUser(
+    user: UserAccount,
+    dto: NotificationPreferencesDto,
+  ): NotificationPreferences {
     return doSetPreferencesOfUser(user, null, dto)
   }
 
@@ -106,11 +117,14 @@ class NotificationPreferencesService(
         user,
         project,
         dto.disabledNotifications.toTypedArray(),
-      )
+      ),
     )
   }
 
-  fun deleteProjectPreferencesOfUser(user: Long, project: Long) {
+  fun deleteProjectPreferencesOfUser(
+    user: Long,
+    project: Long,
+  ) {
     notificationPreferencesRepository.deleteByUserAccountIdAndProjectId(user, project)
   }
 

@@ -16,7 +16,6 @@
 
 package io.tolgee.notifications
 
-import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.notifications.UserNotification
@@ -35,7 +34,7 @@ typealias UserNotificationDebounceResult = Pair<List<UserNotification>, List<Use
  */
 @Component
 class UserNotificationDebouncer(
-  private val userNotificationRepository: UserNotificationRepository
+  private val userNotificationRepository: UserNotificationRepository,
 ) {
   /**
    * Updates existing notifications when possible according to the debouncing policy.
@@ -44,7 +43,7 @@ class UserNotificationDebouncer(
    */
   fun debounce(
     notificationDto: NotificationCreateDto,
-    params: List<UserNotificationParamsDto>
+    params: List<UserNotificationParamsDto>,
   ): UserNotificationDebounceResult {
     if (NotificationType.ACTIVITY_NOTIFICATIONS.contains(notificationDto.type)) {
       return debounceActivityNotification(notificationDto, params)
@@ -81,74 +80,79 @@ class UserNotificationDebouncer(
     notificationDto: NotificationCreateDto,
     recipients: List<UserAccount>,
   ): Map<Long, UserNotification> {
-    val notifications = when {
-      translationUpdateNotificationTypes.contains(notificationDto.type) ->
-        findCandidatesForTranslationUpdateNotificationDebouncing(
-          notificationDto.type,
-          notificationDto.project,
-          recipients,
-          notificationDto.modifiedEntities,
-        )
+    val notifications =
+      when {
+        translationUpdateNotificationTypes.contains(notificationDto.type) ->
+          findCandidatesForTranslationUpdateNotificationDebouncing(
+            notificationDto.type,
+            notificationDto.projectId,
+            recipients,
+            notificationDto.modifiedEntities,
+          )
 
-      commentNotificationTypes.contains(notificationDto.type) ->
-        findCandidatesForCommentNotificationDebouncing(
-          notificationDto.project,
-          recipients,
-          notificationDto.modifiedEntities,
-        )
+        commentNotificationTypes.contains(notificationDto.type) ->
+          findCandidatesForCommentNotificationDebouncing(
+            notificationDto.projectId,
+            recipients,
+            notificationDto.modifiedEntities,
+          )
 
-      else ->
-        userNotificationRepository.findCandidatesForNotificationDebouncing(
-          notificationDto.type,
-          notificationDto.project,
-          recipients,
-        )
-    }
+        else ->
+          userNotificationRepository.findCandidatesForNotificationDebouncing(
+            notificationDto.type,
+            notificationDto.projectId,
+            recipients,
+          )
+      }
 
     return notifications.associateBy { it.recipient.id }
   }
 
   private fun findCandidatesForTranslationUpdateNotificationDebouncing(
     type: NotificationType,
-    project: Project,
+    projectId: Long,
     recipients: List<UserAccount>,
     entities: List<ActivityModifiedEntity>?,
   ): List<UserNotification> {
-    val keyId = entities?.find { it.entityClass == Translation::class.simpleName }
-      ?.describingRelations?.get("key")?.entityId ?: 0L
+    val keyId =
+      entities?.find { it.entityClass == Translation::class.simpleName }
+        ?.describingRelations?.get("key")?.entityId ?: 0L
 
     return userNotificationRepository.findCandidatesForTranslationUpdateNotificationDebouncing(
       type,
-      project,
+      projectId,
       recipients,
       keyId,
     )
   }
 
   private fun findCandidatesForCommentNotificationDebouncing(
-    project: Project,
+    projectId: Long,
     recipients: List<UserAccount>,
     entities: List<ActivityModifiedEntity>?,
   ): List<UserNotification> {
-    val translationId = entities?.find { it.entityClass == TranslationComment::class.simpleName }
-      ?.describingRelations?.get("translation")?.entityId ?: 0L
+    val translationId =
+      entities?.find { it.entityClass == TranslationComment::class.simpleName }
+        ?.describingRelations?.get("translation")?.entityId ?: 0L
 
     return userNotificationRepository.findCandidatesForCommentNotificationDebouncing(
-      project,
+      projectId,
       recipients,
       translationId,
     )
   }
 
   companion object {
-    val translationUpdateNotificationTypes: EnumSet<NotificationType> = EnumSet.of(
-      NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED,
-      NotificationType.ACTIVITY_TRANSLATIONS_UPDATED,
-    )
+    val translationUpdateNotificationTypes: EnumSet<NotificationType> =
+      EnumSet.of(
+        NotificationType.ACTIVITY_SOURCE_STRINGS_UPDATED,
+        NotificationType.ACTIVITY_TRANSLATIONS_UPDATED,
+      )
 
-    val commentNotificationTypes: EnumSet<NotificationType> = EnumSet.of(
-      NotificationType.ACTIVITY_NEW_COMMENTS,
-      NotificationType.ACTIVITY_COMMENTS_MENTION,
-    )
+    val commentNotificationTypes: EnumSet<NotificationType> =
+      EnumSet.of(
+        NotificationType.ACTIVITY_NEW_COMMENTS,
+        NotificationType.ACTIVITY_COMMENTS_MENTION,
+      )
   }
 }

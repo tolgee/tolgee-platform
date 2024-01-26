@@ -43,20 +43,27 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
   fun `it does properly remap imports to key and translation notifications`() {
     performAuthMultipart(
       url = "/v2/projects/${testData.project1.id}/import",
-      files = listOf(
-        MockMultipartFile(
-          "files", "en.json", "application/json",
-          """{"new-key1": "New string 1", "new-key2": "New string 2"}""".toByteArray()
+      files =
+        listOf(
+          MockMultipartFile(
+            "files",
+            "en.json",
+            "application/json",
+            """{"new-key1": "New string 1", "new-key2": "New string 2"}""".toByteArray(),
+          ),
+          MockMultipartFile(
+            "files",
+            "fr.json",
+            "application/json",
+            """{"some-key": "Updated", "new-key1": "New FR string 1", "new-key2": "New FR string 2"}""".toByteArray(),
+          ),
+          MockMultipartFile(
+            "files",
+            "cs.json",
+            "application/json",
+            """{"new-key1": "New CZ string 1", "new-key2": "New CZ string 2"}""".toByteArray(),
+          ),
         ),
-        MockMultipartFile(
-          "files", "fr.json", "application/json",
-          """{"some-key": "Updated", "new-key1": "New FR string 1", "new-key2": "New FR string 2"}""".toByteArray()
-        ),
-        MockMultipartFile(
-          "files", "cs.json", "application/json",
-          """{"new-key1": "New CZ string 1", "new-key2": "New CZ string 2"}""".toByteArray()
-        )
-      )
     ).andIsOk
 
     performAuthPut("/v2/projects/${testData.project1.id}/import/apply?forceMode=OVERRIDE", null).andIsOk
@@ -155,15 +162,19 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
 
   @Test
   fun `it does remap complex key edits to relevant notification types`() {
-    val screenshotId = performAuthMultipart(
-      url = "/v2/image-upload",
-      files = listOf(
-        MockMultipartFile(
-          "image", "image.png", "image/png",
-          generateImage(100, 100).inputStream.readAllBytes()
-        )
-      )
-    ).andIsCreated.andGetContentAsJsonMap["id"].let { (it as Int).toLong() }
+    val screenshotId =
+      performAuthMultipart(
+        url = "/v2/image-upload",
+        files =
+          listOf(
+            MockMultipartFile(
+              "image",
+              "image.png",
+              "image/png",
+              generateImage(100, 100).inputStream.readAllBytes(),
+            ),
+          ),
+      ).andIsCreated.andGetContentAsJsonMap["id"].let { (it as Int).toLong() }
 
     performAuthPut(
       "/v2/projects/${testData.project1.id}/keys/${testData.keyProject1.id}/complex-update",
@@ -171,10 +182,11 @@ class RemappedNotificationsTest : AbstractNotificationTest() {
         name = "new-name",
         namespace = "new-namespace",
         translations = mapOf("en" to "New EN string", "fr" to "New FR string"),
-        screenshotsToAdd = listOf(
-          KeyScreenshotDto(uploadedImageId = screenshotId)
-        )
-      )
+        screenshotsToAdd =
+          listOf(
+            KeyScreenshotDto(uploadedImageId = screenshotId),
+          ),
+      ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch(25)

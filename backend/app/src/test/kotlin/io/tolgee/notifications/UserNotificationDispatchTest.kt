@@ -42,7 +42,7 @@ class UserNotificationDispatchTest : AbstractNotificationTest() {
   fun `it dispatches notifications to everyone in project`() {
     performAuthPost(
       "/v2/projects/${testData.project1.id}/keys/create",
-      CreateKeyDto(name = "test-key")
+      CreateKeyDto(name = "test-key"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch(7)
@@ -74,12 +74,15 @@ class UserNotificationDispatchTest : AbstractNotificationTest() {
   fun `it does not dispatch notifications to people without the permission to see the change`() {
     performAuthMultipart(
       url = "/v2/projects/${testData.project1.id}/keys/${testData.keyProject1.id}/screenshots",
-      files = listOf(
-        MockMultipartFile(
-          "screenshot", "originalShot.png", "image/png",
-          generateImage(100, 100).inputStream.readAllBytes()
-        )
-      )
+      files =
+        listOf(
+          MockMultipartFile(
+            "screenshot",
+            "originalShot.png",
+            "image/png",
+            generateImage(100, 100).inputStream.readAllBytes(),
+          ),
+        ),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch(6)
@@ -107,10 +110,11 @@ class UserNotificationDispatchTest : AbstractNotificationTest() {
   fun `it does not dispatch notifications to people without the permission to see the target language`() {
     performAuthPut(
       url = "/v2/projects/${testData.project1.id}/translations",
-      content = SetTranslationsWithKeyDto(
-        key = testData.keyProject1.name,
-        translations = mapOf("fr" to "Superb French translation!")
-      )
+      content =
+        SetTranslationsWithKeyDto(
+          key = testData.keyProject1.name,
+          translations = mapOf("fr" to "Superb French translation!"),
+        ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch(5)
@@ -138,10 +142,11 @@ class UserNotificationDispatchTest : AbstractNotificationTest() {
   fun `it does dispatch notifications with trimmed data to people who can only see part of the changes`() {
     performAuthPut(
       url = "/v2/projects/${testData.project1.id}/translations",
-      content = SetTranslationsWithKeyDto(
-        key = testData.keyProject1.name,
-        translations = mapOf("fr" to "Superb French translation!", "cs" to "Superb Czech translation!")
-      )
+      content =
+        SetTranslationsWithKeyDto(
+          key = testData.keyProject1.name,
+          translations = mapOf("fr" to "Superb French translation!", "cs" to "Superb Czech translation!"),
+        ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch(6)
@@ -183,7 +188,7 @@ class UserNotificationDispatchTest : AbstractNotificationTest() {
     loginAsUser(testData.projectManager)
     performAuthPost(
       "/v2/projects/${testData.project1.id}/keys/create",
-      CreateKeyDto(name = "test-key")
+      CreateKeyDto(name = "test-key"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch(6)

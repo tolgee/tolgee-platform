@@ -17,7 +17,7 @@
 package io.tolgee.notifications
 
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
-import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
 import io.tolgee.fixtures.andIsCreated
@@ -41,7 +41,7 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
   fun `it debounces notifications of the same type`() {
     performAuthPost(
       "/v2/projects/${testData.calmProject.id}/keys/create",
-      CreateKeyDto(name = "test-key-1")
+      CreateKeyDto(name = "test-key-1"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()
@@ -49,7 +49,7 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
 
     performAuthPost(
       "/v2/projects/${testData.calmProject.id}/keys/create",
-      CreateKeyDto(name = "test-key-2")
+      CreateKeyDto(name = "test-key-2"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()
@@ -57,11 +57,12 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
 
     performAuthPost(
       url = "/v2/projects/${testData.calmProject.id}/languages",
-      content = LanguageDto(
-        name = "Meow",
-        originalName = "meow",
-        tag = "meow-en",
-      )
+      content =
+				LanguageRequest(
+          name = "Meow",
+          originalName = "meow",
+          tag = "meow-en",
+        ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch()
@@ -72,7 +73,7 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
   fun `it only debounces notifications within the same project`() {
     performAuthPost(
       "/v2/projects/${testData.calmProject.id}/keys/create",
-      CreateKeyDto(name = "test-key-1")
+      CreateKeyDto(name = "test-key-1"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()
@@ -80,7 +81,7 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
 
     performAuthPost(
       "/v2/projects/${testData.project2.id}/keys/create",
-      CreateKeyDto(name = "test-key-2")
+      CreateKeyDto(name = "test-key-2"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()
@@ -94,8 +95,8 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
       TranslationCommentWithLangKeyDto(
         keyId = testData.keyCalmProject.id,
         languageId = testData.keyCalmEnTranslation.language.id,
-        text = "This is a test"
-      )
+        text = "This is a test",
+      ),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()
@@ -106,8 +107,8 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
       TranslationCommentWithLangKeyDto(
         keyId = testData.keyCalmProject.id,
         languageId = testData.keyCalmEnTranslation.language.id,
-        text = "This is a test 2"
-      )
+        text = "This is a test 2",
+      ),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()
@@ -118,8 +119,8 @@ class UserNotificationDebounceTest : AbstractNotificationTest() {
       TranslationCommentWithLangKeyDto(
         keyId = testData.keyCalmProject.id,
         languageId = testData.calmProjectFr.id,
-        text = "This is a test"
-      )
+        text = "This is a test",
+      ),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()

@@ -5,7 +5,9 @@ import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
+import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
@@ -79,7 +81,7 @@ class Permission(
    * Languages for TRANSLATIONS_EDIT scope.
    * When specified, user is restricted to edit specific language translations.
    */
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "permission_languages", inverseJoinColumns = [JoinColumn(name = "languages_id")])
   var translateLanguages: MutableSet<Language> = mutableSetOf()
 
@@ -87,14 +89,14 @@ class Permission(
    * Languages for TRANSLATIONS_EDIT scope.
    * When specified, user is restricted to edit specific language translations.
    */
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   var viewLanguages: MutableSet<Language> = mutableSetOf()
 
   /**
    * Languages for TRANSLATIONS_EDIT scope.
    * When specified, user is restricted to edit specific language translations.
    */
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   var stateChangeLanguages: MutableSet<Language> = mutableSetOf()
 
   constructor(
@@ -132,14 +134,21 @@ class Permission(
     get() = this.project?.id
   override val organizationId: Long?
     get() = this.organization?.id
-  override val translateLanguageIds: Set<Long>?
-    get() = this.translateLanguages.map { it.id }.toSet()
 
-  override val viewLanguageIds: Set<Long>?
-    get() = this.viewLanguages.map { it.id }.toSet()
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "permission_languages", joinColumns = [JoinColumn(name = "permission_id")])
+	@Column(name = "languages_id")
+  override val translateLanguageIds: Set<Long>? = null
 
-  override val stateChangeLanguageIds: Set<Long>?
-    get() = this.stateChangeLanguages.map { it.id }.toSet()
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "permission_view_languages", joinColumns = [JoinColumn(name = "permission_id")])
+	@Column(name = "view_languages_id")
+  override val viewLanguageIds: Set<Long>? = null
+
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "permission_state_change_languages", joinColumns = [JoinColumn(name = "permission_id")])
+	@Column(name = "state_change_languages_id")
+  override val stateChangeLanguageIds: Set<Long>? = null
 
   companion object {
     class PermissionListeners {

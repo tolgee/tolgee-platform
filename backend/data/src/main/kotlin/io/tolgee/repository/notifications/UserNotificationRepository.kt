@@ -40,7 +40,7 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
           ('READ' IN :status AND un.unread = false AND un.markedDoneAt IS NULL) OR
           ('DONE' IN :status AND un.markedDoneAt IS NOT NULL)
         )
-    """
+    """,
   )
   fun findNotificationsOfUserFilteredPaged(
     recipient: Long,
@@ -54,13 +54,13 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
       WHERE
         un.unread = true AND
         un.type = :type AND
-        un.project = :project AND
+        un.project.id = :projectId AND
         un.recipient IN :recipients
-    """
+    """,
   )
   fun findCandidatesForNotificationDebouncing(
     type: NotificationType,
-    project: Project,
+    projectId: Long,
     recipients: Collection<UserAccount>,
   ): List<UserNotification>
 
@@ -71,7 +71,7 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
       INNER JOIN un.modifiedEntities me
       WHERE
         un.unread = true AND
-        un.project = :project AND
+        un.project.id = :projectId AND
         un.recipient IN :recipients AND (
           un.type = :type OR (
             un.type = io.tolgee.notifications.NotificationType.ACTIVITY_KEYS_CREATED AND
@@ -80,11 +80,11 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
           )
         )
       ORDER BY un.type DESC
-    """
+    """,
   )
   fun findCandidatesForTranslationUpdateNotificationDebouncing(
     type: NotificationType,
-    project: Project,
+    projectId: Long,
     recipients: Collection<UserAccount>,
     keyId: Long,
   ): List<UserNotification>
@@ -100,23 +100,26 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
         me.entityClass = 'TranslationComment' AND
         de.entityClass = 'Translation' AND
         de.entityId = :translationId AND
-        un.project = :project AND
+        un.project.id = :projectId AND
         un.recipient IN :recipients AND
         un.type IN (
           io.tolgee.notifications.NotificationType.ACTIVITY_NEW_COMMENTS,
           io.tolgee.notifications.NotificationType.ACTIVITY_COMMENTS_MENTION
         )
-    """
+    """,
   )
   fun findCandidatesForCommentNotificationDebouncing(
-    project: Project,
+    projectId: Long,
     recipients: Collection<UserAccount>,
     translationId: Long,
   ): List<UserNotification>
 
   @Modifying
   @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient.id = ?1 AND un.id IN ?2")
-  fun markAsRead(recipient: Long, notifications: Collection<Long>)
+  fun markAsRead(
+    recipient: Long,
+    notifications: Collection<Long>,
+  )
 
   @Modifying
   @Query("UPDATE UserNotification un SET un.unread = false WHERE un.recipient.id = ?1")
@@ -124,25 +127,40 @@ interface UserNotificationRepository : JpaRepository<UserNotification, Long> {
 
   @Modifying
   @Query("UPDATE UserNotification un SET un.unread = true WHERE un.recipient.id = ?1 AND un.id IN ?2")
-  fun markAsUnread(recipient: Long, notifications: Collection<Long>)
+  fun markAsUnread(
+    recipient: Long,
+    notifications: Collection<Long>,
+  )
 
   @Modifying
   @Query(
     """
       UPDATE UserNotification un
-      SET un.unread = false, un.markedDoneAt = NOW()
+      SET un.unread = false, un.markedDoneAt = CURRENT_TIMESTAMP()
       WHERE un.recipient.id = ?1 AND un.id IN ?2
-    """
+    """,
   )
-  fun markAsDone(recipient: Long, notifications: Collection<Long>)
+  fun markAsDone(
+    recipient: Long,
+    notifications: Collection<Long>,
+  )
 
   @Modifying
-  @Query("UPDATE UserNotification un SET un.unread = false, un.markedDoneAt = NOW() WHERE un.recipient.id = ?1")
+  @Query(
+		"""
+			UPDATE UserNotification un
+			SET un.unread = false, un.markedDoneAt = CURRENT_TIMESTAMP()
+			WHERE un.recipient.id = ?1
+		"""
+	)
   fun markAllAsDone(recipient: Long)
 
   @Modifying
   @Query("UPDATE UserNotification un SET un.markedDoneAt = null WHERE un.recipient.id = ?1 AND un.id IN ?2")
-  fun unmarkAsDone(recipient: Long, notifications: Collection<Long>)
+  fun unmarkAsDone(
+    recipient: Long,
+    notifications: Collection<Long>,
+  )
 
   @Modifying
   @Query("DELETE FROM user_notification WHERE marked_done_at < NOW() - INTERVAL '90 DAY'", nativeQuery = true)

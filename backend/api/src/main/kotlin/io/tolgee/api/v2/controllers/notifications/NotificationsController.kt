@@ -23,7 +23,7 @@ import io.tolgee.hateoas.notifications.UserNotificationModelAssembler
 import io.tolgee.notifications.NotificationStatus
 import io.tolgee.notifications.UserNotificationService
 import io.tolgee.security.authentication.AuthenticationFacade
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -48,11 +48,12 @@ class NotificationsController(
     @RequestParam("status", defaultValue = "UNREAD,READ") status: Set<NotificationStatus>,
     @ParameterObject pageable: Pageable,
   ): List<UserNotificationModel> {
-    val notifications = userNotificationService.findNotificationsOfUserFilteredPaged(
-      authenticationFacade.authenticatedUser.id,
-      status,
-      pageable,
-    )
+    val notifications =
+      userNotificationService.findNotificationsOfUserFilteredPaged(
+        authenticationFacade.authenticatedUser.id,
+        status,
+        pageable,
+      )
 
     return notifications.map { userNotificationModelAssembler.toModel(it) }
   }
@@ -60,7 +61,9 @@ class NotificationsController(
   @PostMapping("/mark-as-read")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Marks a given set of notifications as read.")
-  fun markNotificationsAsRead(@RequestBody notifications: List<Long>) {
+  fun markNotificationsAsRead(
+    @RequestBody notifications: List<Long>,
+  ) {
     userNotificationService.markAsRead(
       authenticationFacade.authenticatedUser.id,
       notifications,
@@ -77,7 +80,9 @@ class NotificationsController(
   @PostMapping("/mark-as-unread")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Marks a given set of notifications as unread.")
-  fun markNotificationsAsUnread(@RequestBody notifications: List<Long>) {
+  fun markNotificationsAsUnread(
+    @RequestBody notifications: List<Long>,
+  ) {
     userNotificationService.markAsUnread(
       authenticationFacade.authenticatedUser.id,
       notifications,
@@ -87,7 +92,9 @@ class NotificationsController(
   @PostMapping("/mark-as-done")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Marks a given set of notifications as done.")
-  fun markNotificationsAsDone(@RequestBody notifications: List<Long>) {
+  fun markNotificationsAsDone(
+    @RequestBody notifications: List<Long>,
+  ) {
     userNotificationService.markAsDone(
       authenticationFacade.authenticatedUser.id,
       notifications,
@@ -104,7 +111,9 @@ class NotificationsController(
   @PostMapping("/unmark-as-done")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Un-marks a given set of notifications as done.")
-  fun unmarkNotificationsAsDone(@RequestBody notifications: Collection<Long>) {
+  fun unmarkNotificationsAsDone(
+    @RequestBody notifications: Collection<Long>,
+  ) {
     userNotificationService.unmarkAsDone(
       authenticationFacade.authenticatedUser.id,
       notifications,

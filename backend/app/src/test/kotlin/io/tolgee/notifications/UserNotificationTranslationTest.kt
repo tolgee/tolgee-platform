@@ -40,10 +40,11 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
   fun `it does not dispatch the same type of notification for source strings and translated strings`() {
     performAuthPut(
       url = "/v2/projects/${testData.calmProject.id}/translations",
-      content = SetTranslationsWithKeyDto(
-        key = testData.keyCalmProject.name,
-        translations = mapOf("en" to "Superb English translation!")
-      )
+      content =
+        SetTranslationsWithKeyDto(
+          key = testData.keyCalmProject.name,
+          translations = mapOf("en" to "Superb English translation!"),
+        ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch()
@@ -54,10 +55,11 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
 
     performAuthPut(
       url = "/v2/projects/${testData.calmProject.id}/translations",
-      content = SetTranslationsWithKeyDto(
-        key = testData.keyCalmProject.name,
-        translations = mapOf("fr" to "Superb French translation!")
-      )
+      content =
+        SetTranslationsWithKeyDto(
+          key = testData.keyCalmProject.name,
+          translations = mapOf("fr" to "Superb French translation!"),
+        ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch()
@@ -71,17 +73,18 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
   fun `it does debounce key creation and setting strings as a single notification`() {
     performAuthPost(
       "/v2/projects/${testData.calmProject.id}/keys/create",
-      CreateKeyDto(name = "test-key")
+      CreateKeyDto(name = "test-key"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch()
 
     performAuthPut(
       url = "/v2/projects/${testData.calmProject.id}/translations",
-      content = SetTranslationsWithKeyDto(
-        key = "test-key",
-        translations = mapOf("en" to "Superb English translation!", "fr" to "Superb French translation!")
-      )
+      content =
+        SetTranslationsWithKeyDto(
+          key = "test-key",
+          translations = mapOf("en" to "Superb English translation!", "fr" to "Superb French translation!"),
+        ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch()
@@ -93,10 +96,11 @@ class UserNotificationTranslationTest : AbstractNotificationTest() {
   fun `it does not dispatch outdated notifications if it was not done manually`() {
     performAuthPut(
       url = "/v2/projects/${testData.calmProject.id}/translations",
-      content = SetTranslationsWithKeyDto(
-        key = testData.keyCalmProject.name,
-        translations = mapOf("en" to "Superb English translation!")
-      )
+      content =
+        SetTranslationsWithKeyDto(
+          key = testData.keyCalmProject.name,
+          translations = mapOf("en" to "Superb English translation!"),
+        ),
     ).andIsOk
 
     waitUntilUserNotificationDispatch()

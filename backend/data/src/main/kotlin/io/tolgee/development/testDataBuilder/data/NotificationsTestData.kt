@@ -139,11 +139,12 @@ class NotificationsTestData {
             val en = addEnglish()
             calmProjectFr = addFrench().self
 
-            val key = addKey {
-              name = "some-key"
+            val key =
+              addKey {
+                name = "some-key"
 
-              this@NotificationsTestData.keyCalmProject = this@addKey
-            }
+                this@NotificationsTestData.keyCalmProject = this@addKey
+              }
 
             addTranslation {
               this.key = key.self
@@ -204,11 +205,12 @@ class NotificationsTestData {
           val cz = addCzech()
           val de = addGerman()
 
-          val key = addKey {
-            name = "some-key"
+          val key =
+            addKey {
+              name = "some-key"
 
-            this@NotificationsTestData.keyProject1 = this@addKey
-          }
+              this@NotificationsTestData.keyProject1 = this@addKey
+            }
 
           addTranslation {
             this.key = key.self
@@ -303,11 +305,12 @@ class NotificationsTestData {
           project2 = this
         }.build {
           val en = addEnglish()
-          val key = addKey {
-            name = "some-key"
+          val key =
+            addKey {
+              name = "some-key"
 
-            this@NotificationsTestData.keyProject2 = this@addKey
-          }
+              this@NotificationsTestData.keyProject2 = this@addKey
+            }
 
           addTranslation {
             this.key = key.self

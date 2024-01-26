@@ -23,6 +23,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
+import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.LanguageService
@@ -195,7 +196,7 @@ class PermissionService(
 
   fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
-    organizationBasePermission: IPermission,
+    organizationBasePermission: IPermission?,
     directPermission: IPermission?,
     userRole: UserAccount.Role? = null,
   ): ComputedPermissionDto {
@@ -203,7 +204,7 @@ class PermissionService(
       when {
         organizationRole == OrganizationRoleType.OWNER -> ComputedPermissionDto.ORGANIZATION_OWNER
         directPermission != null -> ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
-        organizationRole == OrganizationRoleType.MEMBER ->
+        organizationRole == OrganizationRoleType.MEMBER && organizationBasePermission != null ->
           ComputedPermissionDto(
             organizationBasePermission,
             ComputedPermissionOrigin.ORGANIZATION_BASE,
@@ -217,35 +218,11 @@ class PermissionService(
     } ?: computed
   }
 
-  fun computeProjectPermission(
-    projectPermissionDataView: UserAccountProjectPermissionsNotificationPreferencesDataView
-  ): ComputedPermissionDto {
-    val basePermissions = ComputedPermissionDto.getEmptyPermission(
-      type = projectPermissionDataView.basePermissionsBasic,
-      scopes = projectPermissionDataView.basePermissionsGranular?.toTypedArray()
-        ?: projectPermissionDataView.basePermissionsBasic?.availableScopes
-        ?: emptyArray(),
-    )
-
-    if (projectPermissionDataView.permissionsBasic == null && projectPermissionDataView.permissionsGranular == null) {
-      return computeProjectPermission(
-        projectPermissionDataView.organizationRole,
-        basePermissions,
-        directPermission = null,
-      )
-    }
-
-    val directPermissions = ComputedPermissionDto.getEmptyPermission(
-      type = projectPermissionDataView.permissionsBasic,
-      scopes = projectPermissionDataView.permissionsGranular?.toTypedArray()
-        ?: projectPermissionDataView.permissionsBasic?.availableScopes
-        ?: emptyArray()
-    )
-
+  fun computeProjectPermission(userProjectMetadataView: UserProjectMetadataView): ComputedPermissionDto {
     return computeProjectPermission(
-      projectPermissionDataView.organizationRole,
-      basePermissions,
-      directPermissions,
+      userProjectMetadataView.organizationRole,
+			userProjectMetadataView.basePermissions,
+			userProjectMetadataView.permissions,
     )
   }
 

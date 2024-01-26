@@ -35,6 +35,5 @@ class UserAccountBuilder(
 
   fun addPat(ft: FT<Pat>) = addOperation(data.pats, ft)
 
-  fun addNotificationPreferences(ft: FT<NotificationPreferences>) =
-    addOperation(data.notificationPreferences, ft)
+  fun addNotificationPreferences(ft: FT<NotificationPreferences>) = addOperation(data.notificationPreferences, ft)
 }

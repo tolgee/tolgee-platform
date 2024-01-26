@@ -20,6 +20,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.notifications.NotificationPreferencesService
 import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.UserAccountRepository
@@ -167,8 +168,8 @@ class UserAccountService(
       entityManager.remove(it)
     }
 
-    userNotificationService.deleteAllByUserId(userAccount.id)
-    notificationPreferencesService.deleteAllByUserId(userAccount.id)
+    userNotificationService.deleteAllByUserId(toDelete.id)
+    notificationPreferencesService.deleteAllByUserId(toDelete.id)
 
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(this))
@@ -341,9 +342,8 @@ class UserAccountService(
     }
   }
 
-  fun getAllPermissionInformationOfPermittedUsersInProject(projectId: Long):
-    List<UserAccountProjectPermissionsNotificationPreferencesDataView> {
-    return userAccountRepository.findAllPermittedUsersProjectPermissionNotificationPreferencesView(projectId)
+  fun getAllConnectedUserProjectMetadataViews(projectId: Long): List<UserProjectMetadataView> {
+    return userAccountRepository.findAllUserProjectMetadataViews(projectId)
   }
 
   @Transactional
@@ -466,7 +466,7 @@ class UserAccountService(
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
-  private fun transferLegacyNoAuthUser() {
+  fun transferLegacyNoAuthUser() {
     val legacyImplicitUser =
       findActive("___implicit_user")
         ?: return

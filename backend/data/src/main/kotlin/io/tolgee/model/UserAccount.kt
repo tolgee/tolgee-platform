@@ -18,7 +18,6 @@ import jakarta.persistence.OrderBy
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.Where
 import java.util.*
 

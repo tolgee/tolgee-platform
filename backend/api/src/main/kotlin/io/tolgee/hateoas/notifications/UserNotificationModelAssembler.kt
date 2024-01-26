@@ -35,15 +35,17 @@ class UserNotificationModelAssembler(
   private val batchJobModelAssembler: BatchJobModelAssembler,
   private val applicationContext: ApplicationContext,
 ) : RepresentationModelAssemblerSupport<UserNotification, UserNotificationModel>(
-  NotificationsController::class.java, UserNotificationModel::class.java
-) {
+    NotificationsController::class.java,
+    UserNotificationModel::class.java,
+  ) {
   override fun toModel(entity: UserNotification): UserNotificationModel {
     val project = entity.project?.let { simpleProjectModelAssembler.toModel(it) }
     val modifiedEntities = assembleEntityChanges(entity.modifiedEntities).ifEmpty { null }
-    val batchJob = entity.batchJob?.let {
-      val view = batchJobService.getView(it)
-      batchJobModelAssembler.toModel(view)
-    }
+    val batchJob =
+      entity.batchJob?.let {
+        val view = batchJobService.getView(it)
+        batchJobModelAssembler.toModel(view)
+      }
 
     return UserNotificationModel(
       id = entity.id,
@@ -58,10 +60,11 @@ class UserNotificationModelAssembler(
   }
 
   private fun assembleEntityChanges(modifiedEntities: List<ActivityModifiedEntity>): List<SimpleModifiedEntityView> {
-    val provider = ModifiedEntitiesViewProvider(
-      applicationContext,
-      modifiedEntities
-    )
+    val provider =
+      ModifiedEntitiesViewProvider(
+        applicationContext,
+        modifiedEntities,
+      )
 
     return provider.getSimple()
   }

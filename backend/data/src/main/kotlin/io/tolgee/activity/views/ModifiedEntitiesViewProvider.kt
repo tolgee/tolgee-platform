@@ -28,12 +28,12 @@ import io.tolgee.model.views.activity.SimpleModifiedEntityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.EntityUtil
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
-import javax.persistence.EntityManager
 
 class ModifiedEntitiesViewProvider(
   applicationContext: ApplicationContext,
-  private val modifiedEntities: Collection<ActivityModifiedEntity>
+  private val modifiedEntities: Collection<ActivityModifiedEntity>,
 ) {
   val userAccountService: UserAccountService =
     applicationContext.getBean(UserAccountService::class.java)
@@ -61,7 +61,7 @@ class ModifiedEntitiesViewProvider(
         exists = entityExistences[entity.entityClass to entity.entityId],
         modifications = entity.modifications,
         description = entity.describingData,
-        describingRelations = relations
+        describingRelations = relations,
       )
     }
   }
@@ -75,7 +75,7 @@ class ModifiedEntitiesViewProvider(
         exists = entityExistences[entity.entityClass to entity.entityId],
         modifications = entity.modifications,
         description = entity.describingData,
-        describingRelations = relations
+        describingRelations = relations,
       )
     }
   }
@@ -89,11 +89,11 @@ class ModifiedEntitiesViewProvider(
             it.value,
             describingEntities[entity.activityRevision.id] ?: let { _ ->
               Sentry.captureException(
-                IllegalStateException("No relation data for revision ${entity.activityRevision.id}")
+                IllegalStateException("No relation data for revision ${entity.activityRevision.id}"),
               )
               return@mapNotNull null
-            }
-          )
+            },
+          ),
         )
       }
       ?.toMap()
@@ -134,20 +134,21 @@ class ModifiedEntitiesViewProvider(
 
   private fun extractCompressedRef(
     value: EntityDescriptionRef,
-    describingEntities: List<ActivityDescribingEntity>
+    describingEntities: List<ActivityDescribingEntity>,
   ): ExistenceEntityDescription {
     val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
 
-    val relations = entity?.describingRelations
-      ?.map { it.key to extractCompressedRef(it.value, describingEntities) }
-      ?.toMap()
+    val relations =
+      entity?.describingRelations
+        ?.map { it.key to extractCompressedRef(it.value, describingEntities) }
+        ?.toMap()
 
     return ExistenceEntityDescription(
       entityClass = value.entityClass,
       entityId = value.entityId,
       exists = entityExistences[value.entityClass to value.entityId],
       data = entity?.data ?: mapOf(),
-      relations = relations ?: mapOf()
+      relations = relations ?: mapOf(),
     )
   }
 }

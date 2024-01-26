@@ -24,10 +24,10 @@ import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.events.NotificationCreateEvent
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobListener(
@@ -43,17 +43,16 @@ class BatchJobListener(
     )
 
     val job = entityManager.getReference(BatchJob::class.java, e.job.id)
-    val project = entityManager.getReference(Project::class.java, e.job.projectId)
     applicationEventPublisher.publishEvent(
       NotificationCreateEvent(
         NotificationCreateDto(
           type = NotificationType.BATCH_JOB_ERRORED,
-          project = project,
+          projectId = e.job.projectId,
           batchJob = job,
         ),
         source = e,
-        responsibleUser = null,
-      )
+        responsibleUserId = null,
+      ),
     )
   }
 }

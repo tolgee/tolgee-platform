@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-package io.tolgee.notifications.dto
+package io.tolgee.model.views
 
-import io.tolgee.model.UserAccount
-import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.Permission
+import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.notifications.NotificationPreferences
 
-data class UserNotificationParamsDto(
-  val recipient: UserAccount,
-  val modifiedEntities: Set<ActivityModifiedEntity> = emptySet(),
-)
+data class UserProjectMetadataView(
+	val userAccountId: Long,
+
+	val projectId: Long,
+
+	val organizationRole: OrganizationRoleType?,
+
+	val basePermissions: Permission?,
+
+	val permissions: Permission?,
+
+	val globalNotificationPreferences: NotificationPreferences?,
+
+	val projectNotificationPreferences: NotificationPreferences?,
+) {
+	val notificationPreferences
+		get() = projectNotificationPreferences ?: globalNotificationPreferences
+}

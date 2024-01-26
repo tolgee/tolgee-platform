@@ -21,50 +21,46 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.notifications.NotificationType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OrderBy
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Temporal
+import jakarta.persistence.TemporalType
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.UpdateTimestamp
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.JoinTable
-import javax.persistence.ManyToMany
-import javax.persistence.ManyToOne
-import javax.persistence.OrderBy
-import javax.persistence.SequenceGenerator
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
 
 @Entity
 class UserNotification(
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   val type: NotificationType,
-
   // This data is very likely to be useless when consuming the entity: lazy
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   val recipient: UserAccount,
-
   // We most definitely need this to show the notification: eager
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(nullable = true)
   val project: Project?,
-
   // We most definitely need this to show the notification: eager
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "user_notification_modified_entities")
   val modifiedEntities: MutableList<ActivityModifiedEntity> = mutableListOf(),
-
   // We most definitely need this to show the notification: eager
   @ManyToOne(fetch = FetchType.EAGER)
-  val batchJob: BatchJob? = null
+  val batchJob: BatchJob? = null,
 ) {
   @Id
   @SequenceGenerator(name = "notification_seq", sequenceName = "sequence_notifications")

@@ -59,17 +59,20 @@ class NotificationPreferencesController(
   fun updateGlobalPreferences(
     @RequestBody @Validated preferencesDto: NotificationPreferencesDto,
   ): NotificationPreferencesDto {
-    val updated = notificationPreferencesService.setPreferencesOfUser(
-      authenticationFacade.authenticatedUser.id,
-      preferencesDto,
-    )
+    val updated =
+      notificationPreferencesService.setPreferencesOfUser(
+        authenticationFacade.authenticatedUser.id,
+        preferencesDto,
+      )
 
     return NotificationPreferencesDto.fromEntity(updated)
   }
 
   @GetMapping("/project/{id}")
   @Operation(summary = "Fetch the notification preferences of the current user for a specific project")
-  fun getPerProjectPreferences(@PathVariable("id") id: Long): NotificationPreferencesDto {
+  fun getPerProjectPreferences(
+    @PathVariable("id") id: Long,
+  ): NotificationPreferencesDto {
     return notificationPreferencesService.getProjectPreferences(
       authenticationFacade.authenticatedUser.id,
       id,
@@ -82,11 +85,12 @@ class NotificationPreferencesController(
     @PathVariable("id") id: Long,
     @RequestBody @Validated preferencesDto: NotificationPreferencesDto,
   ): NotificationPreferencesDto {
-    val updated = notificationPreferencesService.setProjectPreferencesOfUser(
-      authenticationFacade.authenticatedUser.id,
-      id,
-      preferencesDto,
-    )
+    val updated =
+      notificationPreferencesService.setProjectPreferencesOfUser(
+        authenticationFacade.authenticatedUser.id,
+        id,
+        preferencesDto,
+      )
 
     return NotificationPreferencesDto.fromEntity(updated)
   }
@@ -94,7 +98,9 @@ class NotificationPreferencesController(
   @DeleteMapping("/project/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Delete the notification preferences of the current user for a specific project")
-  fun deletePerProjectPreferences(@PathVariable("id") id: Long) {
+  fun deletePerProjectPreferences(
+    @PathVariable("id") id: Long,
+  ) {
     notificationPreferencesService.deleteProjectPreferencesOfUser(
       authenticationFacade.authenticatedUser.id,
       id,
@@ -103,7 +109,9 @@ class NotificationPreferencesController(
 
   @PostMapping("/project/{id}/subscribe")
   @Operation(summary = "Subscribe to notifications for a given project")
-  fun subscribeToProject(@PathVariable("id") id: Long): ResponseEntity<String> {
+  fun subscribeToProject(
+    @PathVariable("id") id: Long,
+  ): ResponseEntity<String> {
     return ResponseEntity(
       "Coming soon! Please see https://github.com/tolgee/tolgee-platform/issues/1360 for progress on this. :D",
       HttpHeaders().also {
@@ -111,7 +119,7 @@ class NotificationPreferencesController(
         it.add(
           "x-hey-curious-reader",
           "oh hey there, didn't expect you here... " +
-            "if you're here, might as well join us! https://tolgee.io/career"
+            "if you're here, might as well join us! https://tolgee.io/career",
         )
       },
       HttpStatus.NOT_IMPLEMENTED,

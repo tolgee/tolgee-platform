@@ -22,7 +22,7 @@ import io.tolgee.notifications.NotificationType
 
 data class NotificationPreferencesDto(
   @Schema(description = "List of notification types the user does not want to receive.")
-  val disabledNotifications: List<NotificationType>
+  val disabledNotifications: List<NotificationType>,
 ) {
   companion object {
     fun fromEntity(notificationPreferences: NotificationPreferences): NotificationPreferencesDto {

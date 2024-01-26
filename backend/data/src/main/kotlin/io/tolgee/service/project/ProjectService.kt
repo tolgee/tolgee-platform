@@ -286,7 +286,9 @@ class ProjectService(
 
       traceLogMeasureTime("deleteProject: delete keys") {
         keyService.deleteAllByProject(project.id)
-      }avatarService.unlinkAvatarFiles(project)
+      }
+
+		avatarService.unlinkAvatarFiles(project)
     batchJobService.deleteAllByProjectId(project.id)
     bigMetaService.deleteAllByProjectId(project.id)
 

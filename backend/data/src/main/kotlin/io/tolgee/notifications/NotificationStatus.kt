@@ -17,5 +17,7 @@
 package io.tolgee.notifications
 
 enum class NotificationStatus {
-  UNREAD, READ, DONE
+  UNREAD,
+  READ,
+  DONE,
 }

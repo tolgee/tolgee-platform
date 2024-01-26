@@ -16,35 +16,24 @@
 
 package io.tolgee.model.notifications
 
-import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.hypersistence.utils.hibernate.type.array.EnumArrayType
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.notifications.NotificationType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.Index
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.Table
 
 @Entity
-@TypeDef(
-  name = "enum-array",
-  typeClass = EnumArrayType::class,
-  parameters = [
-    Parameter(
-      name = EnumArrayType.SQL_ARRAY_TYPE,
-      value = "varchar"
-    )
-  ]
-)
 @Table(
   indexes = [
     Index(
@@ -54,24 +43,22 @@ import javax.persistence.Table
     ),
     Index(
       name = "notification_preferences_user",
-      columnList = "user_account_id"
+      columnList = "user_account_id",
     ),
     Index(
       name = "notification_preferences_project",
       columnList = "project_id",
-    )
-  ]
+    ),
+  ],
 )
 class NotificationPreferences(
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   val userAccount: UserAccount,
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = true)
   var project: Project?,
-
-  @Type(type = "enum-array")
+  @Type(EnumArrayType::class, parameters = [Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "varchar")])
   @Column(nullable = false, columnDefinition = "varchar[]")
   var disabledNotifications: Array<NotificationType>,
 ) {

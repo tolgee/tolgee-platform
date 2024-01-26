@@ -4,6 +4,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.model.views.UserProjectMetadataView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -184,41 +185,35 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-      SELECT new io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView(
+      SELECT new io.tolgee.model.views.UserProjectMetadataView(
         ua.id,
         p.id,
         org_r.type,
-        perm_org.type,
-        perm_org._scopes,
-        perm.type,
-        perm._scopes,
-        array_to_string(array_agg(l.id), ','),
+        perm_org,
+        perm,
         np_global,
         np_project
       )
-      FROM UserAccount ua, Project p
+      FROM UserAccount ua
+			LEFT JOIN Project p ON p.id = :projectId
       LEFT JOIN OrganizationRole org_r ON
         org_r.user = ua AND
         org_r.organization = p.organizationOwner
-      LEFT JOIN Permission perm ON
+      LEFT JOIN FETCH Permission perm ON
         perm.user = ua AND
         perm.project = p
-      LEFT JOIN Permission perm_org ON
+      LEFT JOIN FETCH Permission perm_org ON
         org_r.user = ua AND
         org_r.organization = p.organizationOwner AND
         perm_org.organization = p.organizationOwner
-      LEFT JOIN Language l ON l IN elements(perm.viewLanguages)
       LEFT JOIN FETCH NotificationPreferences np_global ON np_global.userAccount = ua AND np_global.project IS NULL
       LEFT JOIN FETCH NotificationPreferences np_project ON np_project.userAccount = ua AND np_project.project = p
       WHERE
-        p.id = :projectId AND
         ua.deletedAt IS NULL AND (
-          (perm._scopes IS NOT NULL AND perm._scopes != '{}') OR perm.type IS NOT NULL OR
-          (perm_org._scopes IS NOT NULL AND perm_org._scopes != '{}') OR perm_org.type IS NOT NULL
+          (perm._scopes IS NOT NULL AND cast(perm._scopes as string) != '{}') OR perm.type IS NOT NULL OR
+          (perm_org._scopes IS NOT NULL AND cast(perm_org._scopes as string) != '{}') OR perm_org.type IS NOT NULL
         )
-      GROUP BY ua.id, p.id, org_r.type, perm_org.type, perm_org._scopes, perm.type, perm._scopes, np_global, np_project
-    """
+    """,
   )
-  fun findAllPermittedUsersProjectPermissionNotificationPreferencesView(projectId: Long):
-    List<UserAccountProjectPermissionsNotificationPreferencesDataView>
+  fun findAllUserProjectMetadataViews(projectId: Long): List<UserProjectMetadataView>
 }

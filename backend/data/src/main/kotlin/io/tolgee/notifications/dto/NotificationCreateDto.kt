@@ -21,23 +21,27 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.notifications.UserNotification
 import io.tolgee.notifications.NotificationType
+import jakarta.persistence.EntityManager
 
 data class NotificationCreateDto(
   val type: NotificationType,
-  val project: Project,
+  val projectId: Long,
   val modifiedEntities: MutableList<ActivityModifiedEntity>? = null,
-  val batchJob: BatchJob? = null
+  val batchJob: BatchJob? = null,
 ) {
-  fun toUserNotificationEntity(params: UserNotificationParamsDto): UserNotification {
+  fun toUserNotificationEntity(params: UserNotificationParamsDto, em: EntityManager): UserNotification {
     return UserNotification(
       type = type,
       recipient = params.recipient,
-      project = project,
-      modifiedEntities = params.modifiedEntities.toMutableList()
+      project = em.getReference(Project::class.java, projectId),
+      modifiedEntities = params.modifiedEntities.toMutableList(),
     )
   }
 
-  fun mergeIntoUserNotificationEntity(userNotification: UserNotification, params: UserNotificationParamsDto) {
+  fun mergeIntoUserNotificationEntity(
+    userNotification: UserNotification,
+    params: UserNotificationParamsDto,
+  ) {
     when {
       NotificationType.ACTIVITY_NOTIFICATIONS.contains(userNotification.type) ->
         mergeIntoNotificationEntityActivity(userNotification, params)

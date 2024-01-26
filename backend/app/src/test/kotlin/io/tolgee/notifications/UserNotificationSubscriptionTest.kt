@@ -38,7 +38,7 @@ class UserNotificationSubscriptionTest : AbstractNotificationTest() {
   fun `it respects global notification subscription settings`() {
     performAuthPost(
       "/v2/projects/${testData.project1.id}/keys/create",
-      CreateKeyDto(name = "test-key")
+      CreateKeyDto(name = "test-key"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch(1)
@@ -54,7 +54,7 @@ class UserNotificationSubscriptionTest : AbstractNotificationTest() {
   fun `it respects project-level notification subscription settings`() {
     performAuthPost(
       "/v2/projects/${testData.project2.id}/keys/create",
-      CreateKeyDto(name = "test-key")
+      CreateKeyDto(name = "test-key"),
     ).andIsCreated
 
     waitUntilUserNotificationDispatch(1)

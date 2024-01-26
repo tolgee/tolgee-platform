@@ -41,17 +41,19 @@ class NotificationSubscriptionTestData {
         role = UserAccount.Role.ADMIN
       }
 
-      val user1Builder = addUserAccountWithoutOrganization {
-        name = "User 1"
-        username = "user1"
-        user1 = this
-      }
+      val user1Builder =
+        addUserAccountWithoutOrganization {
+          name = "User 1"
+          username = "user1"
+          user1 = this
+        }
 
-      val user2Builder = addUserAccountWithoutOrganization {
-        name = "User 2"
-        username = "user2"
-        user2 = this
-      }
+      val user2Builder =
+        addUserAccountWithoutOrganization {
+          name = "User 2"
+          username = "user2"
+          user2 = this
+        }
 
       addOrganization {
         name = "Test org"

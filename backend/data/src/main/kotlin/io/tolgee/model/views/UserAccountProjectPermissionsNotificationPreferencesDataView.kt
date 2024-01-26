@@ -16,32 +16,66 @@
 
 package io.tolgee.model.views
 
+import io.tolgee.model.OrganizationRole
+import io.tolgee.model.Permission
+import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.notifications.NotificationPreferences
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 
-class UserAccountProjectPermissionsNotificationPreferencesDataView(
-  val id: Long,
-  val projectId: Long,
-  val organizationRole: OrganizationRoleType?,
-  val basePermissionsBasic: ProjectPermissionType?,
-  basePermissionsGranular: Array<Enum<Scope>>?,
-  val permissionsBasic: ProjectPermissionType?,
-  permissionsGranular: Array<Enum<Scope>>?,
-  permittedViewLanguages: String?,
-  globalNotificationPreferences: NotificationPreferences?,
-  projectNotificationPreferences: NotificationPreferences?
+data class UserProjectMetadata(
+	@Id
+	val id: Long,
+
+	@Id
+	val projectId: Long,
+
+	@OneToMany
+	val organizationRole: OrganizationRole?,
+
+	@OneToMany
+	val basePermissions: Permission?,
+
+	@OneToMany
+	val permissions: Permission?,
+
+	@OneToMany
+	val globalNotificationPreferences: NotificationPreferences?,
+
+	@OneToMany
+	val projectNotificationPreferences: NotificationPreferences?,
 ) {
-  // My love for Hibernate have no limit 🥰🥰🥰
-  val basePermissionsGranular = basePermissionsGranular?.map { enumValueOf<Scope>(it.name) }
-  val permissionsGranular = permissionsGranular?.map { enumValueOf<Scope>(it.name) }
-  val permittedViewLanguages = permittedViewLanguages?.let {
-    it.split(',')
-      .filter { part -> part.isNotEmpty() }
-      .map { part -> part.toLong() }
-      .ifEmpty { null }
-  }
+	val notificationPreferences
+		get() = projectNotificationPreferences ?: globalNotificationPreferences
+}
 
-  val notificationPreferences = projectNotificationPreferences ?: globalNotificationPreferences
+class UserAccountProjectPermissionsNotificationPreferencesDataView(data: Map<String, Any>) {
+	init {
+		println(data["permittedViewLanguages"])
+	}
+
+	val id = data["id"] as? Long ?: throw IllegalArgumentException()
+
+	val projectId = data["projectId"] as? Long ?: throw IllegalArgumentException()
+
+	val organizationRole = data["organizationRole"] as? OrganizationRoleType
+
+	val basePermissionsBasic = data["basePermissionsBasic"] as? ProjectPermissionType
+
+  val basePermissionsGranular = (data["basePermissionsGranular"] as? Array<*>)
+		?.map { enumValueOf<Scope>((it as? Enum<*>)?.name ?: throw IllegalArgumentException()) }
+
+	val permissionsBasic = data["permissionsBasic"] as? ProjectPermissionType
+
+  val permissionsGranular = (data["permissionsGranular"] as? Array<*>)
+		?.map { enumValueOf<Scope>((it as? Enum<*>)?.name ?: throw IllegalArgumentException()) }
+
+ 	val permittedViewLanguages = (data["permittedViewLanguages"] as? Array<*>)
+		?.map { (it as? String)?.toLong() ?: throw IllegalArgumentException() }
+
+  val notificationPreferences = (data["projectNotificationPreferences"] ?: data["globalNotificationPreferences"])
+		as? NotificationPreferences
 }

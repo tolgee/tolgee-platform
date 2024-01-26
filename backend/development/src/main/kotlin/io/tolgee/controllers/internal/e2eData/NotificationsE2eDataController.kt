@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tolgee.controllers.internal.e2e_data
+package io.tolgee.controllers.internal.e2eData
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder

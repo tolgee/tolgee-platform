@@ -19,8 +19,8 @@ package io.tolgee.notifications.events
 import io.tolgee.model.UserAccount
 import io.tolgee.notifications.dto.NotificationCreateDto
 
-class NotificationCreateEvent(
+data class NotificationCreateEvent(
   val notification: NotificationCreateDto,
-  val responsibleUser: UserAccount?,
-  val source: Any? = null
+  val responsibleUserId: Long?,
+  val source: Any? = null,
 )

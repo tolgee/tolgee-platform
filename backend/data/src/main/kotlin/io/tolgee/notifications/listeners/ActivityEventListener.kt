@@ -33,18 +33,17 @@ import io.tolgee.notifications.events.NotificationCreateEvent
 import io.tolgee.service.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 private typealias SortedTranslations = List<Pair<NotificationType, MutableList<ActivityModifiedEntity>>>
 
 @Component
 class ActivityEventListener(
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val entityManager: EntityManager,
   private val languageService: LanguageService,
 ) : Logging {
   @EventListener
@@ -56,39 +55,37 @@ class ActivityEventListener(
       "Received project activity event - {} on proj#{} ({} entities modified)",
       e.activityRevision.type,
       e.activityRevision.projectId,
-      e.activityRevision.modifiedEntities.size
+      e.activityRevision.modifiedEntities.size,
     )
 
     val projectId = e.activityRevision.projectId ?: return
-    val project = entityManager.getReference(Project::class.java, projectId)
-    val responsibleUser = e.activityRevision.authorId?.let {
-      entityManager.getReference(UserAccount::class.java, it)
-    }
+    val responsibleUserId = e.activityRevision.authorId
 
     when (e.activityRevision.type) {
       // ACTIVITY_LANGUAGES_CREATED
       ActivityType.CREATE_LANGUAGE ->
-        processSimpleActivity(NotificationType.ACTIVITY_LANGUAGES_CREATED, project, responsibleUser, e)
+        processSimpleActivity(NotificationType.ACTIVITY_LANGUAGES_CREATED, projectId, responsibleUserId, e)
 
       // ACTIVITY_KEYS_CREATED
       ActivityType.CREATE_KEY ->
-        processSimpleActivity(NotificationType.ACTIVITY_KEYS_CREATED, project, responsibleUser, e)
+        processSimpleActivity(NotificationType.ACTIVITY_KEYS_CREATED, projectId, responsibleUserId, e)
 
       // ACTIVITY_KEYS_UPDATED
       ActivityType.KEY_TAGS_EDIT,
       ActivityType.KEY_NAME_EDIT,
       ActivityType.BATCH_TAG_KEYS,
       ActivityType.BATCH_UNTAG_KEYS,
-      ActivityType.BATCH_SET_KEYS_NAMESPACE ->
-        processSimpleActivity(NotificationType.ACTIVITY_KEYS_UPDATED, project, responsibleUser, e)
+      ActivityType.BATCH_SET_KEYS_NAMESPACE,
+      ->
+        processSimpleActivity(NotificationType.ACTIVITY_KEYS_UPDATED, projectId, responsibleUserId, e)
 
       // ACTIVITY_KEYS_UPDATED, ACTIVITY_KEYS_SCREENSHOTS_UPLOADED, ACTIVITY_TRANSLATIONS_*
       ActivityType.COMPLEX_EDIT ->
-        processComplexEdit(project, responsibleUser, e)
+        processComplexEdit(projectId, responsibleUserId, e)
 
       // ACTIVITY_KEYS_SCREENSHOTS_UPLOADED
       ActivityType.SCREENSHOT_ADD ->
-        processScreenshotUpdate(project, responsibleUser, e)
+        processScreenshotUpdate(projectId, responsibleUserId, e)
 
       // ACTIVITY_TRANSLATIONS_*
       ActivityType.SET_TRANSLATIONS,
@@ -98,19 +95,20 @@ class ActivityEventListener(
       ActivityType.AUTO_TRANSLATE,
       ActivityType.BATCH_CLEAR_TRANSLATIONS,
       ActivityType.BATCH_COPY_TRANSLATIONS,
-      ActivityType.BATCH_SET_TRANSLATION_STATE ->
-        processSetTranslations(project, responsibleUser, e)
+      ActivityType.BATCH_SET_TRANSLATION_STATE,
+      ->
+        processSetTranslations(projectId, responsibleUserId, e)
 
       ActivityType.SET_OUTDATED_FLAG ->
-        processOutdatedFlagUpdate(project, responsibleUser, e)
+        processOutdatedFlagUpdate(projectId, responsibleUserId, e)
 
       // ACTIVITY_NEW_COMMENTS (ACTIVITY_COMMENTS_MENTION is user-specific and not computed here)
       ActivityType.TRANSLATION_COMMENT_ADD ->
-        processSimpleActivity(NotificationType.ACTIVITY_NEW_COMMENTS, project, responsibleUser, e)
+        processSimpleActivity(NotificationType.ACTIVITY_NEW_COMMENTS, projectId, responsibleUserId, e)
 
       // ACTIVITY_KEYS_CREATED, ACTIVITY_TRANSLATIONS_*
       ActivityType.IMPORT ->
-        processImport(project, responsibleUser, e)
+        processImport(projectId, responsibleUserId, e)
 
       // We don't care about those, ignore them.
       // They're explicitly not written as a single `else` branch,
@@ -129,7 +127,8 @@ class ActivityEventListener(
       ActivityType.EDIT_PROJECT,
       ActivityType.NAMESPACE_EDIT,
       ActivityType.AUTOMATION,
-      null -> {}
+      null,
+      -> {}
     }
   }
 
@@ -138,16 +137,16 @@ class ActivityEventListener(
    */
   private fun processSimpleActivity(
     type: NotificationType,
-    project: Project,
-    responsibleUser: UserAccount?,
+    projectId: Long,
+    responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
   ) {
     applicationEventPublisher.publishEvent(
       NotificationCreateEvent(
-        NotificationCreateDto(type, project, e.activityRevision.modifiedEntities),
-        responsibleUser,
+        NotificationCreateDto(type, projectId, e.activityRevision.modifiedEntities),
+        responsibleUserId,
         source = e,
-      )
+      ),
     )
   }
 
@@ -155,41 +154,42 @@ class ActivityEventListener(
    * Emits multiple notification create events depending on the details of the complex edition.
    */
   private fun processComplexEdit(
-    project: Project,
-    responsibleUser: UserAccount?,
+    projectId: Long,
+    responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
   ) {
-    processComplexEditKeyUpdate(project, responsibleUser, e)
-    processScreenshotUpdate(project, responsibleUser, e)
-    processSetTranslations(project, responsibleUser, e)
+    processComplexEditKeyUpdate(projectId, responsibleUserId, e)
+    processScreenshotUpdate(projectId, responsibleUserId, e)
+    processSetTranslations(projectId, responsibleUserId, e)
   }
 
   private fun processComplexEditKeyUpdate(
-    project: Project,
-    responsibleUser: UserAccount?,
+    projectId: Long,
+    responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
   ) {
     // The key was updated if:
     // The entity is a Key and its name or namespace was modified;
     // The entity is a KeyMeta and its tags were modified.
-    val relevantEntities = e.activityRevision.modifiedEntities.filter {
-      (
-        it.entityClass == Key::class.simpleName &&
-          (it.modifications.containsKey("name") || it.modifications.containsKey("namespace"))
-        ) ||
+    val relevantEntities =
+      e.activityRevision.modifiedEntities.filter {
         (
-          it.entityClass == KeyMeta::class.simpleName &&
-            it.modifications.containsKey("tags")
+          it.entityClass == Key::class.simpleName &&
+            (it.modifications.containsKey("name") || it.modifications.containsKey("namespace"))
+        ) ||
+          (
+            it.entityClass == KeyMeta::class.simpleName &&
+              it.modifications.containsKey("tags")
           )
-    }
+      }
 
     if (relevantEntities.isNotEmpty()) {
       applicationEventPublisher.publishEvent(
         NotificationCreateEvent(
-          NotificationCreateDto(NotificationType.ACTIVITY_KEYS_UPDATED, project, relevantEntities.toMutableList()),
-          responsibleUser,
+          NotificationCreateDto(NotificationType.ACTIVITY_KEYS_UPDATED, projectId, relevantEntities.toMutableList()),
+          responsibleUserId,
           source = e,
-        )
+        ),
       )
     }
   }
@@ -200,31 +200,35 @@ class ActivityEventListener(
    * Refer to the Hacking Documentation, Notifications, Activity Notifications - User Dispatch, §2.2.2.
    */
   private fun processSetTranslations(
-    project: Project,
-    responsibleUser: UserAccount?,
+    projectId: Long,
+    responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
-    modifiedEntities: List<ActivityModifiedEntity> = e.activityRevision.modifiedEntities
+    modifiedEntities: List<ActivityModifiedEntity> = e.activityRevision.modifiedEntities,
   ) {
-    val baseLanguageId = languageService.getBaseLanguageForProject(project)
-    val sortedTranslations = sortTranslations(
-      modifiedEntities,
-      baseLanguage = baseLanguageId ?: 0L
-    )
+    val baseLanguageId = languageService.getBaseLanguageForProjectId(projectId)
+    val sortedTranslations =
+      sortTranslations(
+        modifiedEntities,
+        baseLanguage = baseLanguageId ?: 0L,
+      )
 
     for ((type, translations) in sortedTranslations) {
       if (translations.isNotEmpty()) {
         applicationEventPublisher.publishEvent(
           NotificationCreateEvent(
-            NotificationCreateDto(type, project, translations),
-            responsibleUser,
+            NotificationCreateDto(type, projectId, translations),
+            responsibleUserId,
             source = e,
-          )
+          ),
         )
       }
     }
   }
 
-  private fun sortTranslations(entities: List<ActivityModifiedEntity>, baseLanguage: Long): SortedTranslations {
+  private fun sortTranslations(
+    entities: List<ActivityModifiedEntity>,
+    baseLanguage: Long,
+  ): SortedTranslations {
     val updatedSourceTranslations = mutableListOf<ActivityModifiedEntity>()
     val updatedTranslations = mutableListOf<ActivityModifiedEntity>()
     val reviewedTranslations = mutableListOf<ActivityModifiedEntity>()
@@ -238,16 +242,19 @@ class ActivityEventListener(
 
       if (text != null) {
         val languageId = it.describingRelations?.get("language")?.entityId
-        if (languageId == baseLanguage)
+        if (languageId == baseLanguage) {
           updatedSourceTranslations.add(it)
-        else
+        } else {
           updatedTranslations.add(it)
+        }
       }
 
-      if (state?.new == TranslationState.REVIEWED.name)
+      if (state?.new == TranslationState.REVIEWED.name) {
         reviewedTranslations.add(it)
-      if (state?.new == TranslationState.TRANSLATED.name && state.old == TranslationState.REVIEWED.name)
+      }
+      if (state?.new == TranslationState.TRANSLATED.name && state.old == TranslationState.REVIEWED.name) {
         unreviewedTranslations.add(it)
+      }
     }
 
     return listOf(
@@ -259,80 +266,84 @@ class ActivityEventListener(
   }
 
   private fun processOutdatedFlagUpdate(
-    project: Project,
-    responsibleUser: UserAccount?,
+    projectId: Long,
+		responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
   ) {
-    val outdatedTranslations = e.activityRevision.modifiedEntities
-      .filter { it.modifications["outdated"]?.new == true }
+    val outdatedTranslations =
+      e.activityRevision.modifiedEntities
+        .filter { it.modifications["outdated"]?.new == true }
 
     if (outdatedTranslations.isNotEmpty()) {
       applicationEventPublisher.publishEvent(
         NotificationCreateEvent(
           NotificationCreateDto(
             type = NotificationType.ACTIVITY_TRANSLATION_OUTDATED,
-            project = project,
-            modifiedEntities = outdatedTranslations.toMutableList()
+            projectId = projectId,
+            modifiedEntities = outdatedTranslations.toMutableList(),
           ),
-          responsibleUser,
+          responsibleUserId,
           source = e,
-        )
+        ),
       )
     }
   }
 
   private fun processScreenshotUpdate(
-    project: Project,
-    responsibleUser: UserAccount?,
+    projectId: Long,
+    responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
   ) {
-    val addedScreenshots = e.activityRevision.modifiedEntities
-      .filter { it.entityClass == Screenshot::class.simpleName && it.revisionType == RevisionType.ADD }
+    val addedScreenshots =
+      e.activityRevision.modifiedEntities
+        .filter { it.entityClass == Screenshot::class.simpleName && it.revisionType == RevisionType.ADD }
 
     if (addedScreenshots.isNotEmpty()) {
       applicationEventPublisher.publishEvent(
         NotificationCreateEvent(
           NotificationCreateDto(
             type = NotificationType.ACTIVITY_KEYS_SCREENSHOTS_UPLOADED,
-            project = project,
-            modifiedEntities = addedScreenshots.toMutableList()
+            projectId = projectId,
+            modifiedEntities = addedScreenshots.toMutableList(),
           ),
-          responsibleUser,
+          responsibleUserId,
           source = e,
-        )
+        ),
       )
     }
   }
 
   private fun processImport(
-    project: Project,
-    responsibleUser: UserAccount?,
+    projectId: Long,
+    responsibleUserId: Long?,
     e: OnProjectActivityStoredEvent,
   ) {
-    val createdKeys = e.activityRevision.modifiedEntities
-      .filter { it.entityClass == Key::class.simpleName && it.revisionType == RevisionType.ADD }
-      .toMutableList()
+    val createdKeys =
+      e.activityRevision.modifiedEntities
+        .filter { it.entityClass == Key::class.simpleName && it.revisionType == RevisionType.ADD }
+        .toMutableList()
 
     val keyIds = createdKeys.map { it.entityId }.toSet()
-    val updatedTranslations = e.activityRevision.modifiedEntities
-      .filter {
-        val isFromNewKey = keyIds.contains(it.describingRelations?.get("key")?.entityId ?: 0L)
-        if (isFromNewKey) createdKeys.add(it)
-        !isFromNewKey
-      }
+    val updatedTranslations =
+      e.activityRevision.modifiedEntities
+        .filter {
+          val isFromNewKey = keyIds.contains(it.describingRelations?.get("key")?.entityId ?: 0L)
+          if (isFromNewKey) createdKeys.add(it)
+          !isFromNewKey
+        }
 
     if (createdKeys.isNotEmpty()) {
       applicationEventPublisher.publishEvent(
         NotificationCreateEvent(
-          NotificationCreateDto(NotificationType.ACTIVITY_KEYS_CREATED, project, createdKeys.toMutableList()),
-          responsibleUser,
+          NotificationCreateDto(NotificationType.ACTIVITY_KEYS_CREATED, projectId, createdKeys.toMutableList()),
+          responsibleUserId,
           source = e,
-        )
+        ),
       )
     }
 
     if (updatedTranslations.isNotEmpty()) {
-      processSetTranslations(project, responsibleUser, e, updatedTranslations)
+      processSetTranslations(projectId, responsibleUserId, e, updatedTranslations)
     }
   }
 }

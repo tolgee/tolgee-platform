@@ -21,6 +21,7 @@ import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.dto.UserNotificationParamsDto
 import io.tolgee.notifications.events.UserNotificationPushEvent
 import io.tolgee.repository.notifications.UserNotificationRepository
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -28,29 +29,36 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserNotificationService(
+	private val entityManager: EntityManager,
   private val userNotificationRepository: UserNotificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val userNotificationDebouncer: UserNotificationDebouncer,
 ) {
   @Transactional
-  fun dispatchNotification(notificationDto: NotificationCreateDto, params: UserNotificationParamsDto) {
+  fun dispatchNotification(
+    notificationDto: NotificationCreateDto,
+    params: UserNotificationParamsDto,
+  ) {
     return dispatchNotifications(notificationDto, listOf(params))
   }
 
   @Transactional
-  fun dispatchNotifications(notificationDto: NotificationCreateDto, params: List<UserNotificationParamsDto>) {
+  fun dispatchNotifications(
+    notificationDto: NotificationCreateDto,
+    params: List<UserNotificationParamsDto>,
+  ) {
     val createdUserNotificationObjects = mutableSetOf<UserNotification>()
     val updatedUserNotificationObjects = mutableSetOf<UserNotification>()
 
     val (processed, remaining) = userNotificationDebouncer.debounce(notificationDto, params)
     updatedUserNotificationObjects.addAll(
-      userNotificationRepository.saveAll(processed)
+      userNotificationRepository.saveAll(processed),
     )
 
     remaining.forEach {
-      val notification = notificationDto.toUserNotificationEntity(it)
+      val notification = notificationDto.toUserNotificationEntity(it, entityManager)
       createdUserNotificationObjects.add(
-        userNotificationRepository.save(notification)
+        userNotificationRepository.save(notification),
       )
     }
 
@@ -59,7 +67,7 @@ class UserNotificationService(
       UserNotificationPushEvent(
         createdUserNotificationObjects,
         updatedUserNotificationObjects,
-      )
+      ),
     )
   }
 
@@ -80,7 +88,10 @@ class UserNotificationService(
   }
 
   @Transactional
-  fun markAsRead(user: Long, notifications: Collection<Long>) {
+  fun markAsRead(
+    user: Long,
+    notifications: Collection<Long>,
+  ) {
     return userNotificationRepository.markAsRead(user, notifications)
   }
 
@@ -90,12 +101,18 @@ class UserNotificationService(
   }
 
   @Transactional
-  fun markAsUnread(user: Long, notifications: Collection<Long>) {
+  fun markAsUnread(
+    user: Long,
+    notifications: Collection<Long>,
+  ) {
     return userNotificationRepository.markAsUnread(user, notifications)
   }
 
   @Transactional
-  fun markAsDone(user: Long, notifications: Collection<Long>) {
+  fun markAsDone(
+    user: Long,
+    notifications: Collection<Long>,
+  ) {
     return userNotificationRepository.markAsDone(user, notifications)
   }
 
@@ -105,7 +122,10 @@ class UserNotificationService(
   }
 
   @Transactional
-  fun unmarkAsDone(user: Long, notifications: Collection<Long>) {
+  fun unmarkAsDone(
+    user: Long,
+    notifications: Collection<Long>,
+  ) {
     return userNotificationRepository.unmarkAsDone(user, notifications)
   }
 

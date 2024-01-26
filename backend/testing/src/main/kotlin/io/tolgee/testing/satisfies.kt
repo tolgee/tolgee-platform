@@ -26,7 +26,9 @@ fun <S : AbstractAssert<S, E>, E> AbstractAssert<S, E>.satisfies(fn: (actual: E)
 }
 
 fun <S : AbstractAssert<S, E>, E> AbstractAssert<S, E>.satisfiesIf(fn: (actual: E) -> Boolean): S {
-  return satisfies(object : Condition<E>() {
-    override fun matches(value: E): Boolean = fn(value)
-  })
+  return satisfies(
+    object : Condition<E>() {
+      override fun matches(value: E): Boolean = fn(value)
+    },
+  )
 }

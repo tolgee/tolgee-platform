@@ -16,12 +16,14 @@
 
 package io.tolgee.notifications.dispatchers
 
+import io.tolgee.dtos.ComputedPermissionDto
+import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.views.UserAccountProjectPermissionsNotificationPreferencesDataView
+import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.notifications.NotificationType
 import io.tolgee.notifications.UserNotificationService
 import io.tolgee.notifications.dto.UserNotificationParamsDto
@@ -31,12 +33,14 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
+@EnableAsync(proxyTargetClass = true)
 class UserNotificationDispatch(
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
@@ -60,20 +64,23 @@ class UserNotificationDispatch(
   }
 
   private fun handleActivityNotification(e: NotificationCreateEvent) {
-    val users = userAccountService.getAllPermissionInformationOfPermittedUsersInProject(e.notification.project.id)
-      .filter {
-        it.notificationPreferences?.disabledNotifications?.contains(e.notification.type) != true &&
-          it.id != e.responsibleUser?.id
+    val users =
+      userAccountService.getAllConnectedUserProjectMetadataViews(e.notification.projectId)
+        .filter {
+          it.notificationPreferences?.disabledNotifications?.contains(e.notification.type) != true &&
+            it.userAccountId != e.responsibleUserId
+        }
+
+    val translationToLanguageMap =
+      e.notification.modifiedEntities!!
+        .filter { it.entityClass == Translation::class.simpleName }
+        .map { it.entityId }
+        .let { if (it.isEmpty()) emptyMap() else languageService.findLanguageIdsOfTranslations(it) }
+
+    val notifications =
+      users.mapNotNull {
+        handleActivityNotificationForUser(e, translationToLanguageMap, it)
       }
-
-    val translationToLanguageMap = e.notification.modifiedEntities!!
-      .filter { it.entityClass == Translation::class.simpleName }
-      .map { it.entityId }
-      .let { if (it.isEmpty()) emptyMap() else languageService.findLanguageIdsOfTranslations(it) }
-
-    val notifications = users.mapNotNull {
-      handleActivityNotificationForUser(e, translationToLanguageMap, it)
-    }
 
     userNotificationService.dispatchNotifications(e.notification, notifications)
   }
@@ -86,37 +93,40 @@ class UserNotificationDispatch(
     val author = batchJob.author ?: return
     userNotificationService.dispatchNotification(
       e.notification,
-      UserNotificationParamsDto(author)
+      UserNotificationParamsDto(author),
     )
   }
 
   private fun handleActivityNotificationForUser(
-    e: NotificationCreateEvent,
-    translationToLanguageMap: Map<Long, Long>,
-    userPermissionData: UserAccountProjectPermissionsNotificationPreferencesDataView,
+		e: NotificationCreateEvent,
+		translationToLanguageMap: Map<Long, Long>,
+		userProjectMetadataView: UserProjectMetadataView,
   ): UserNotificationParamsDto? {
-    val permissions = permissionService.computeProjectPermission(userPermissionData).expandedScopes
+    val permissions = permissionService.computeProjectPermission(
+			userProjectMetadataView.organizationRole,
+			userProjectMetadataView.basePermissions,
+			userProjectMetadataView.permissions,
+		)
 
     // Filter the entities the user is allowed to see
-    val filteredModifiedEntities = filterModifiedEntities(
-      e.notification.modifiedEntities!!,
-      permissions,
-      userPermissionData.permittedViewLanguages,
-      translationToLanguageMap,
-    )
+    val filteredModifiedEntities =
+      filterModifiedEntities(
+        e.notification.modifiedEntities!!,
+        permissions,
+        translationToLanguageMap,
+      )
 
     if (filteredModifiedEntities.isEmpty()) return null
 
     return UserNotificationParamsDto(
-      recipient = entityManager.getReference(UserAccount::class.java, userPermissionData.id),
+      recipient = entityManager.getReference(UserAccount::class.java, userProjectMetadataView.userAccountId),
       modifiedEntities = filteredModifiedEntities.toSet(),
     )
   }
 
   private fun filterModifiedEntities(
     modifiedEntities: List<ActivityModifiedEntity>,
-    permissions: Array<Scope>,
-    permittedViewLanguages: List<Long>?,
+    permissions: ComputedPermissionDto,
     translationToLanguageMap: Map<Long, Long>,
   ): Set<ActivityModifiedEntity> {
     return modifiedEntities
@@ -125,25 +135,24 @@ class UserNotificationDispatch(
           Screenshot::class.simpleName ->
             isUserAllowedToSeeScreenshot(permissions)
           Translation::class.simpleName ->
-            isUserAllowedToSeeTranslation(it, permissions, permittedViewLanguages, translationToLanguageMap)
+            isUserAllowedToSeeTranslation(it, permissions, translationToLanguageMap)
           else -> true
         }
       }.toSet()
   }
 
-  private fun isUserAllowedToSeeScreenshot(permissions: Array<Scope>): Boolean {
-    return permissions.contains(Scope.SCREENSHOTS_VIEW)
+  private fun isUserAllowedToSeeScreenshot(permissions: ComputedPermissionDto): Boolean {
+    return permissions.expandedScopes.contains(Scope.SCREENSHOTS_VIEW)
   }
 
   private fun isUserAllowedToSeeTranslation(
     entity: ActivityModifiedEntity,
-    permissions: Array<Scope>,
-    permittedViewLanguages: List<Long>?,
+    permissions: ComputedPermissionDto,
     translationToLanguageMap: Map<Long, Long>,
   ): Boolean {
-    if (!permissions.contains(Scope.TRANSLATIONS_VIEW)) return false
+    if (!permissions.expandedScopes.contains(Scope.TRANSLATIONS_VIEW)) return false
 
     val language = translationToLanguageMap[entity.entityId] ?: return false
-    return permittedViewLanguages?.contains(language) != false
+    return permissions.viewLanguageIds.isNullOrEmpty() || permissions.viewLanguageIds.contains(language)
   }
 }
