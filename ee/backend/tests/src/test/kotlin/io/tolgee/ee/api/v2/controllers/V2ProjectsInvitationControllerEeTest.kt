@@ -59,8 +59,10 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
         translateLanguages = setOf(getLang("en"))
       }.andIsOk
 
-    val invitation = invitationTestUtil.getInvitation(result)
-    invitation.permission!!.translateLanguages.map { it.tag }.assert.containsExactlyInAnyOrder("en")
+		executeInNewTransaction {
+			val invitation = invitationTestUtil.getInvitation(result)
+			invitation.permission!!.translateLanguages.map { it.tag }.assert.containsExactlyInAnyOrder("en")
+		}
   }
 
   @Test
