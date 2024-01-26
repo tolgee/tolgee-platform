@@ -1,3 +1,10 @@
+# [3.47.0](https://github.com/tolgee/tolgee-platform/compare/v3.46.4...v3.47.0) (2024-01-26)
+
+
+### Features
+
+* Limit number of seats on free self-hosted instances ([#2103](https://github.com/tolgee/tolgee-platform/issues/2103)) ([732a033](https://github.com/tolgee/tolgee-platform/commit/732a033b1ad298b56b3ec0aeb3730ce28b789292))
+
 ## [3.46.4](https://github.com/tolgee/tolgee-platform/compare/v3.46.3...v3.46.4) (2024-01-25)
 
 
