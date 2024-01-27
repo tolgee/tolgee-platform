@@ -137,7 +137,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     whenever(
       permissionRepository
         .findOneByProjectIdAndUserIdAndOrganizationId(null, null, organizationId = 1),
-    ).then { permission }
+    ).then { Permission.PermissionWithLanguageIdsWrapper(permission, null, null, null) }
 
     permissionService.find(organizationId = 1)
     Mockito.verify(permissionRepository, times(1))
