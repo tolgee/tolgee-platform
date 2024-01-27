@@ -343,6 +343,7 @@ class UserAccountService(
   }
 
   fun getAllConnectedUserProjectMetadataViews(projectId: Long): List<UserProjectMetadataView> {
+    userAccountRepository.findAllUserProjectMetadataViews(projectId).forEach { println(it.userAccountId) }
     return userAccountRepository.findAllUserProjectMetadataViews(projectId)
   }
 

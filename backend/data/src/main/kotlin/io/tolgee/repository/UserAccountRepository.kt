@@ -204,12 +204,14 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-      SELECT new io.tolgee.model.views.UserProjectMetadataView(
+      SELECT DISTINCT new io.tolgee.model.views.UserProjectMetadataView(
         ua.id,
         p.id,
         org_r.type,
         perm_org,
+        array_agg(vl_org.id) OVER (PARTITION BY perm_org.id),
         perm,
+        array_agg(vl.id) OVER (PARTITION BY perm.id),
         np_global,
         np_project
       )
@@ -221,10 +223,12 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       LEFT JOIN FETCH Permission perm ON
         perm.user = ua AND
         perm.project = p
+      LEFT JOIN perm.viewLanguages vl
       LEFT JOIN FETCH Permission perm_org ON
         org_r.user = ua AND
         org_r.organization = p.organizationOwner AND
         perm_org.organization = p.organizationOwner
+      LEFT JOIN perm_org.viewLanguages vl_org
       LEFT JOIN FETCH NotificationPreferences np_global ON np_global.userAccount = ua AND np_global.project IS NULL
       LEFT JOIN FETCH NotificationPreferences np_project ON np_project.userAccount = ua AND np_project.project = p
       WHERE
