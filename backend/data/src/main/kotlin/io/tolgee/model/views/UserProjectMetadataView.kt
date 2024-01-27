@@ -33,21 +33,23 @@ class UserProjectMetadataView(
 ) {
   val notificationPreferences = projectNotificationPreferences ?: globalNotificationPreferences
 
-  val basePermissions = basePermissions?.let {
-    Permission.PermissionWithLanguageIdsWrapper(
-      basePermissions,
-      fetchedBaseViewLanguages,
-      null,
-      null
-    )
-  }?.permission
+  val basePermissions =
+    basePermissions?.let {
+      Permission.PermissionWithLanguageIdsWrapper(
+        basePermissions,
+        fetchedBaseViewLanguages,
+        null,
+        null,
+      )
+    }?.permission
 
-  val permissions = permissions?.let {
-    Permission.PermissionWithLanguageIdsWrapper(
-      permissions,
-      fetchedViewLanguages,
-      null,
-      null
-    )
-  }?.permission
+  val permissions =
+    permissions?.let {
+      Permission.PermissionWithLanguageIdsWrapper(
+        permissions,
+        fetchedViewLanguages,
+        null,
+        null,
+      )
+    }?.permission
 }

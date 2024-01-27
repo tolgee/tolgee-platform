@@ -84,11 +84,11 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
         languages = setOf(getLang("en"))
       }.andIsOk
 
-		executeInNewTransaction {
-			val invitation = invitationTestUtil.getInvitation(result)
-			invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
-			invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
-		}
+    executeInNewTransaction {
+      val invitation = invitationTestUtil.getInvitation(result)
+      invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
+      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+    }
   }
 
   @Test
@@ -101,11 +101,11 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
         stateChangeLanguages = setOf(getLang("en"))
       }.andIsOk
 
-		executeInNewTransaction {
-			val invitation = invitationTestUtil.getInvitation(result)
-			invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
-			invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
-		}
+    executeInNewTransaction {
+      val invitation = invitationTestUtil.getInvitation(result)
+      invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
+      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+    }
   }
 
   @Test
