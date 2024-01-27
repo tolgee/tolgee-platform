@@ -53,14 +53,11 @@ abstract class AbstractNotificationTest : AuthorizedControllerTest() {
       entityManager.persist(it.arguments[0])
       entityManager.flush()
 
-      entityManager.refresh(it.arguments[0])
-
-      println("Dispatched!")
       // Wait a bit to make sure everything's *actually* persisted
       // Kind of an ugly way to synchronize everything, but it is what it is
       taskScheduler.schedule(
         { semaphore.release() },
-        Date().addMilliseconds(100),
+        Date().addMilliseconds(100).toInstant(),
       )
 
       it.arguments[0]
@@ -77,7 +74,7 @@ abstract class AbstractNotificationTest : AuthorizedControllerTest() {
       // Kind of an ugly way to synchronize everything, but it is what it is
       taskScheduler.schedule(
         { semaphore.release(list.size) },
-        Date().addMilliseconds(100),
+        Date().addMilliseconds(100).toInstant(),
       )
 
       it.arguments[0]

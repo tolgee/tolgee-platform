@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query(
     """
-      SELECT new io.tolgee.model.Permission${'$'}PermissionWithLanguageIdsWrapper(
+      SELECT DISTINCT new io.tolgee.model.Permission${'$'}PermissionWithLanguageIdsWrapper(
         p,
         array_agg(vl.id) OVER (PARTITION BY p.id),
         array_agg(tl.id) OVER (PARTITION BY p.id),
