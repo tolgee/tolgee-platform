@@ -19,6 +19,7 @@ package io.tolgee.security.authentication
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
@@ -66,7 +67,7 @@ class AuthenticationFilter(
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return !authenticationProperties.enabled || request.method == "OPTIONS"
+    return request.method == "OPTIONS"
   }
 
   private fun doAuthenticate(request: HttpServletRequest) {
@@ -92,6 +93,16 @@ class AuthenticationFilter(
       // Might be a legacy key
       pakAuth(apiKey)
     }
+
+    if (!authenticationProperties.enabled)
+      {
+        SecurityContextHolder.getContext().authentication =
+          TolgeeAuthentication(
+            null,
+            initialUser,
+            TolgeeAuthenticationDetails(true),
+          )
+      }
   }
 
   private fun pakAuth(key: String) {
@@ -142,5 +153,12 @@ class AuthenticationFilter(
         userAccount,
         TolgeeAuthenticationDetails(false),
       )
+  }
+
+  private val initialUser by lazy {
+    val account =
+      userAccountService.findInitialUser()
+        ?: throw IllegalStateException("Initial user does not exists")
+    UserAccountDto.fromEntity(account)
   }
 }
