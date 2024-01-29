@@ -1,3 +1,10 @@
+## [3.47.1](https://github.com/tolgee/tolgee-platform/compare/v3.47.0...v3.47.1) (2024-01-29)
+
+
+### Bug Fixes
+
+* Current permissions -> PAK with no-auth mode  ([#2113](https://github.com/tolgee/tolgee-platform/issues/2113)) ([51e2251](https://github.com/tolgee/tolgee-platform/commit/51e2251a3e624c6a7fcb9f2a057c374874c86591))
+
 # [3.47.0](https://github.com/tolgee/tolgee-platform/compare/v3.46.4...v3.47.0) (2024-01-26)
 
 
