@@ -95,6 +95,8 @@ class AuthenticationFilter(
       return
     }
 
+    // even if the authentication is disabled, they still might be using PAK for in-context editing,
+    // so we still need to try tho authenticate using API key, to have API key authentication in the security context
     if (!authenticationProperties.enabled) {
       SecurityContextHolder.getContext().authentication =
         TolgeeAuthentication(
