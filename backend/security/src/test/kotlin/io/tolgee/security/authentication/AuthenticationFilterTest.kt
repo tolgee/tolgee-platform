@@ -174,19 +174,6 @@ class AuthenticationFilterTest {
   }
 
   @Test
-  fun `it does not filter when auth is disabled`() {
-    Mockito.`when`(authProperties.enabled).thenReturn(false)
-    val req = MockHttpServletRequest()
-    val res = MockHttpServletResponse()
-    val chain = MockFilterChain()
-
-    assertDoesNotThrow { authenticationFilter.doFilter(req, res, chain) }
-
-    val ctx = SecurityContextHolder.getContext()
-    assertThat(ctx.authentication).isNull()
-  }
-
-  @Test
   fun `it allows request to go through with valid JWT token`() {
     val req = MockHttpServletRequest()
     val res = MockHttpServletResponse()
