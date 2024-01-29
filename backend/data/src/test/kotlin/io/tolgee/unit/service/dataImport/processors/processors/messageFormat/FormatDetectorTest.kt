@@ -1,11 +1,11 @@
 package io.tolgee.unit.service.dataImport.processors.processors.messageFormat
 
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.formats.po.`in`.FormatDetector
+import io.tolgee.formats.po.`in`.SupportedFormat
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.messageFormat.FormatDetector
-import io.tolgee.service.dataImport.processors.messageFormat.SupportedFormat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

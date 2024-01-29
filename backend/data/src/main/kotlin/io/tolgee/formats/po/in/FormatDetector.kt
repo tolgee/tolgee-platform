@@ -1,4 +1,4 @@
-package io.tolgee.service.dataImport.processors.messageFormat
+package io.tolgee.formats.po.`in`
 
 class FormatDetector(private val messages: List<String>) {
   /**
@@ -6,11 +6,7 @@ class FormatDetector(private val messages: List<String>) {
    */
   operator fun invoke(): SupportedFormat {
     val regulars =
-      mapOf(
-        SupportedFormat.C to ToICUConverter.C_PARAM_REGEX,
-        SupportedFormat.PHP to ToICUConverter.PHP_PARAM_REGEX,
-        SupportedFormat.PYTHON to ToICUConverter.PYTHON_PARAM_REGEX,
-      )
+      SupportedFormat.entries.associateWith { it.paramConvertorFactory().regex }
 
     val hitsMap = mutableMapOf<SupportedFormat, Int>()
     regulars.forEach { regularEntry ->

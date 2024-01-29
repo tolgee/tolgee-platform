@@ -3,12 +3,12 @@ package io.tolgee.service.dataImport.processors.po
 import com.ibm.icu.util.ULocale
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.PoParserException
+import io.tolgee.formats.po.`in`.FormatDetector
+import io.tolgee.formats.po.`in`.SupportedFormat
+import io.tolgee.formats.po.`in`.ToICUConverter
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
-import io.tolgee.service.dataImport.processors.messageFormat.FormatDetector
-import io.tolgee.service.dataImport.processors.messageFormat.SupportedFormat
-import io.tolgee.service.dataImport.processors.messageFormat.ToICUConverter
 import io.tolgee.service.dataImport.processors.po.data.PoParsedTranslation
 import io.tolgee.service.dataImport.processors.po.data.PoParserResult
 
@@ -69,14 +69,14 @@ class PoFileProcessor(
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
       val icuMessage =
-        ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
+        ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation))
           .convertPoPlural(plurals)
       context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage, idx)
     }
   }
 
   private fun getToIcuConverter(poTranslation: PoParsedTranslation): ToICUConverter {
-    return ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
+    return ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation))
   }
 
   private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): SupportedFormat {

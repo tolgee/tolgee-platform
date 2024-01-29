@@ -1,0 +1,28 @@
+package io.tolgee.formats.po.`in`
+
+class CLikeParameterParser {
+  fun parse(match: MatchResult): ParsedCLikeParam? {
+    val specifierGroup = match.groups["specifier"] ?: return null
+    val specifier = specifierGroup.value
+
+    return ParsedCLikeParam(
+      argNum = match.groups.getGroupOrNull("argnum")?.value,
+      argName = match.groups.getGroupOrNull("argname")?.value,
+      width = match.groups.getGroupOrNull("width")?.value?.toInt(),
+      precision = match.groups.getGroupOrNull("precision")?.value?.toInt(),
+      specifier = specifier,
+      flags = match.groups.getGroupOrNull("flags")?.value,
+    )
+  }
+
+  private fun MatchGroupCollection.getGroupOrNull(name: String): MatchGroup? {
+    try {
+      return this[name]
+    } catch (e: IllegalArgumentException) {
+      if (e.message?.contains("No group with name") != true) {
+        throw e
+      }
+      return null
+    }
+  }
+}

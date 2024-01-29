@@ -1,4 +1,4 @@
-package io.tolgee.service.export.exporters
+package io.tolgee.formats.po.out
 
 import com.ibm.icu.text.MessagePattern.ArgType
 import com.ibm.icu.text.MessagePatternUtil
@@ -10,11 +10,15 @@ import com.ibm.icu.text.PluralRules
 import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
 import io.tolgee.constants.Message
+import io.tolgee.formats.po.FromIcuParamConvertor
+import io.tolgee.formats.po.getLocaleFromTag
+import io.tolgee.formats.po.getPluralDataOrNull
 import io.tolgee.service.dataImport.processors.messageFormat.data.PluralData
+import io.tolgee.service.export.exporters.ConversionResult
 
 class BaseIcuMessageToPoConvertor(
   val message: String,
-  val argumentConverter: (ArgNode) -> String = { "%s" },
+  val argumentConverter: FromIcuParamConvertor,
   val languageTag: String = "en",
 ) {
   companion object {
@@ -24,12 +28,11 @@ class BaseIcuMessageToPoConvertor(
   private lateinit var tree: MessageNode
 
   private val locale: ULocale by lazy {
-    ULocale.forLanguageTag(languageTag)
+    getLocaleFromTag(languageTag)
   }
 
   private val languagePluralData by lazy {
-    PluralData.DATA[locale.language] ?: let {
-      warnings.add(Message.PLURAL_FORMS_NOT_FOUND_FOR_LANGUAGE to listOf(languageTag))
+    getPluralDataOrNull(locale) ?: let {
       PluralData.DATA["en"]!!
     }
   }
@@ -124,7 +127,7 @@ class BaseIcuMessageToPoConvertor(
   ) {
     when (node.argType) {
       ArgType.SIMPLE, ArgType.NONE -> {
-        addToResult(argumentConverter(node), form)
+        addToResult(argumentConverter.convert(node), form)
       }
 
       ArgType.PLURAL -> {

@@ -1,20 +1,23 @@
 package io.tolgee.unit.export
 
-import io.tolgee.service.export.exporters.BaseIcuMessageToPoConvertor
+import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
+import io.tolgee.formats.po.out.php.PhpFromIcuParamConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
 class BaseIcuMessageToPoConvertorTest {
   @Test
   fun `converts simple message`() {
-    BaseIcuMessageToPoConvertor("Hello {hello} {hello, number} {hello, number, .00}")
-      .convert().result.assert.isEqualTo("Hello %s %s %s")
+    BaseIcuMessageToPoConvertor(
+      "Hello {hello} {hello, number} {hello, number, .00}",
+      PhpFromIcuParamConvertor(),
+    ).convert().result.assert.isEqualTo("Hello %s %d %.2f")
   }
 
   @Test
   fun `converts with plurals`() {
     val forms =
-      BaseIcuMessageToPoConvertor("{0, plural, one {# dog} other {# dogs}}")
+      BaseIcuMessageToPoConvertor("{0, plural, one {# dog} other {# dogs}}", PhpFromIcuParamConvertor())
         .convert().forms
 
     forms!![0].assert.isEqualTo("%d dog")
@@ -27,6 +30,7 @@ class BaseIcuMessageToPoConvertorTest {
       BaseIcuMessageToPoConvertor(
         message = "{0, plural, one {# pes} few {# psi} other {# psů}}",
         languageTag = "cs",
+        argumentConverter = PhpFromIcuParamConvertor(),
       ).convert().forms
 
     forms!![0].assert.isEqualTo("%d pes")
