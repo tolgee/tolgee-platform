@@ -25,6 +25,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
 import org.springframework.mock.web.MockFilterChain
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
@@ -36,13 +38,14 @@ class AuthenticationDisabledFilterTest {
     const val TEST_INITIAL_USER_NAME = "admin"
   }
 
-  private val authProperties = Mockito.mock(AuthenticationProperties::class.java)
+  private val authProperties = mock(AuthenticationProperties::class.java)
 
-  private val userAccountService = Mockito.mock(UserAccountService::class.java)
+  private val userAccountService = mock(UserAccountService::class.java)
 
-  private val userAccount = Mockito.mock(UserAccount::class.java)
+  private val userAccount = mock(UserAccount::class.java)
 
-  private val authenticationDisabledFilter = AuthenticationDisabledFilter(authProperties, userAccountService)
+  private val authenticationDisabledFilter =
+    AuthenticationFilter(authProperties, mock(), mock(), mock(), userAccountService, mock(), mock())
 
   @BeforeEach
   fun setupMocksAndSecurityCtx() {
