@@ -92,17 +92,17 @@ class AuthenticationFilter(
       // Attempt PAK auth even if it doesn't have the prefix
       // Might be a legacy key
       pakAuth(apiKey)
+      return
     }
 
-    if (!authenticationProperties.enabled)
-      {
-        SecurityContextHolder.getContext().authentication =
-          TolgeeAuthentication(
-            null,
-            initialUser,
-            TolgeeAuthenticationDetails(true),
-          )
-      }
+    if (!authenticationProperties.enabled) {
+      SecurityContextHolder.getContext().authentication =
+        TolgeeAuthentication(
+          null,
+          initialUser,
+          TolgeeAuthenticationDetails(true),
+        )
+    }
   }
 
   private fun pakAuth(key: String) {
