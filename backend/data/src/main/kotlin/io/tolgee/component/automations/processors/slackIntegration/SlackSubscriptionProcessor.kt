@@ -1,6 +1,7 @@
 package io.tolgee.component.automations.processors.slackIntegration
 
 import io.tolgee.activity.ActivityService
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.component.automations.AutomationProcessor
 import io.tolgee.model.automations.AutomationAction
@@ -23,9 +24,26 @@ class SlackSubscriptionProcessor(
     )
     val config = action.slackConfig ?: return
 
-    slackExecutor.sendMessage(
-      slackConfig = config,
-      data = data
-    )
+    when(activityModel.type) {
+      ActivityType.KEY_DELETE, ActivityType.KEY_NAME_EDIT, ActivityType.KEY_TAGS_EDIT -> {
+        slackExecutor.sendMessageOnKeyChange(
+          slackConfig = config,
+          data = data
+        )
+      }
+
+      ActivityType.CREATE_KEY -> {
+        slackExecutor.sendMessageOnKeyAdded(
+          slackConfig = config,
+          data = data
+        )
+      }
+      else -> {
+        slackExecutor.sendMessageOnKeyChange(
+          slackConfig = config,
+          data = data
+        )
+      }
+    }
   }
 }
