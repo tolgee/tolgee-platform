@@ -24,25 +24,18 @@ class SlackSubscriptionProcessor(
     )
     val config = action.slackConfig ?: return
 
+    slackExecutor.setHelper(data = data, slackConfig = config)
+
     when(activityModel.type) {
       ActivityType.KEY_DELETE, ActivityType.KEY_NAME_EDIT, ActivityType.KEY_TAGS_EDIT -> {
-        slackExecutor.sendMessageOnKeyChange(
-          slackConfig = config,
-          data = data
-        )
+        slackExecutor.sendMessageOnKeyChange()
       }
 
       ActivityType.CREATE_KEY -> {
-        slackExecutor.sendMessageOnKeyAdded(
-          slackConfig = config,
-          data = data
-        )
+        slackExecutor.sendMessageOnKeyAdded()
       }
       else -> {
-        slackExecutor.sendMessageOnKeyChange(
-          slackConfig = config,
-          data = data
-        )
+        slackExecutor.sendMessageOnKeyChange()
       }
     }
   }
