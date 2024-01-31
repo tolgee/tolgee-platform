@@ -10,10 +10,11 @@ import com.ibm.icu.text.PluralRules
 import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
 import io.tolgee.constants.Message
+import io.tolgee.formats.IcuMessageEscapeRemover
+import io.tolgee.formats.pluralData.PluralData
 import io.tolgee.formats.po.FromIcuParamConvertor
 import io.tolgee.formats.po.getLocaleFromTag
 import io.tolgee.formats.po.getPluralDataOrNull
-import io.tolgee.service.dataImport.processors.messageFormat.data.PluralData
 import io.tolgee.service.export.exporters.ConversionResult
 
 class BaseIcuMessageToPoConvertor(
@@ -41,9 +42,10 @@ class BaseIcuMessageToPoConvertor(
     value: String,
     keyword: String? = null,
   ) {
+    val unescaped = IcuMessageEscapeRemover(value, keyword != null).escapeRemoved
     if (keyword == null) {
-      otherResult.append(value)
-      pluralFormsResult?.values?.forEach { it.append(value) }
+      otherResult.append(unescaped)
+      pluralFormsResult?.values?.forEach { it.append(unescaped) }
       return
     }
 
@@ -52,11 +54,11 @@ class BaseIcuMessageToPoConvertor(
     }
 
     pluralFormsResult?.compute(keyword) { _, v ->
-      (v ?: StringBuilder(otherResult)).append(value)
+      (v ?: StringBuilder(otherResult)).append(unescaped)
     }
 
     if (keyword == OTHER_KEYWORD) {
-      otherResult.append(value)
+      otherResult.append(unescaped)
     }
   }
 

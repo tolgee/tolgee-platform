@@ -1,10 +1,10 @@
-package io.tolgee.formats.po.out.php
+package io.tolgee.formats.po.out.c
 
 import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
 import io.tolgee.formats.po.out.ToPoMessageConverter
 import io.tolgee.service.export.exporters.ConversionResult
 
-class ToPhpPoMessageConverter(
+class ToCPoMessageConverter(
   val message: String,
   val languageTag: String = "en",
 ) : ToPoMessageConverter {
@@ -12,7 +12,7 @@ class ToPhpPoMessageConverter(
     BaseIcuMessageToPoConvertor(
       message = message,
       languageTag = languageTag,
-      argumentConverter = PhpFromIcuParamConvertor(),
+      argumentConverter = CFromIcuParamConvertor(),
     )
 
   override fun convert(): ConversionResult {

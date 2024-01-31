@@ -1,9 +1,11 @@
 package io.tolgee.service.dataImport.processors
 
+import StringsdictFileProcessor
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
-import io.tolgee.service.dataImport.processors.po.PoFileProcessor
-import io.tolgee.service.dataImport.processors.xliff.XliffFileProcessor
+import io.tolgee.formats.ios.strings.StringsFileProcessor
+import io.tolgee.formats.po.`in`.PoFileProcessor
+import io.tolgee.formats.xliff.XliffFileProcessor
 import org.springframework.stereotype.Component
 
 @Component
@@ -22,6 +24,8 @@ class ProcessorFactory {
     return when (file.name.fileNameExtension) {
       "json" -> JsonFileProcessor(context)
       "po" -> PoFileProcessor(context)
+      "strings" -> StringsFileProcessor(context)
+      "stringsdict" -> StringsdictFileProcessor(context)
       "xliff" -> XliffFileProcessor(context)
       "xlf" -> XliffFileProcessor(context)
       "properties" -> PropertyFileProcessor(context)

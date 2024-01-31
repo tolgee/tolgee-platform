@@ -1,0 +1,12 @@
+"welcome_header" = "Hello, %@";
+"welcome_sub_header" = "Hello, %s";
+"another key" = "Dies ist ein weiterer Schlüssel.";
+"another key \" with escaping" = "Dies ist ein weiterer \" Schlüssel.";
+"another key \\ with escaping 2" = "Dies ist ein weiterer \\ Schlüssel.";
+"another key with escaping 3\\" = "Dies ist ein weiterer Schlüssel\\";
+"another key
+
+ multiline" = "Dies ist ein weiterer
+
+Schlüssel.";
+

@@ -1,5 +1,6 @@
 package io.tolgee.formats.po.`in`.paramConvertors
 
+import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.po.`in`.ToIcuParamConvertor
 

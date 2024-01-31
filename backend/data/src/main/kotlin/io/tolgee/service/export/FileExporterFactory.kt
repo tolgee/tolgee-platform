@@ -3,7 +3,7 @@ package io.tolgee.service.export
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.export.ExportFormat
-import io.tolgee.formats.po.`in`.SupportedFormat
+import io.tolgee.formats.po.SupportedFormat
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import io.tolgee.service.export.exporters.JsonFileExporter

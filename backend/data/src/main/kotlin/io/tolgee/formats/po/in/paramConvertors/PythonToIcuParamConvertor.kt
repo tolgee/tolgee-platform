@@ -1,6 +1,6 @@
 package io.tolgee.formats.po.`in`
 
-import io.tolgee.formats.po.`in`.paramConvertors.convertFloatToIcu
+import io.tolgee.formats.convertFloatToIcu
 
 class PythonToIcuParamConvertor : ToIcuParamConvertor {
   private val parser = CLikeParameterParser()
@@ -33,7 +33,7 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
       (?:\((?<argname>[\w-]+)\))?
       (?<flags>[-+\s0\#]+)?
       (?<width>[\d*]+)?
-      (?<precision>.[\d*]+)?
+      (?:\.(?<precision>\d+))?
       (?<length>[hlL])?
       (?<specifier>[diouxXeEfFgGcrs%])
       )

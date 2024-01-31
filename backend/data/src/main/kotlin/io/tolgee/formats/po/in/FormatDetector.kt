@@ -1,5 +1,7 @@
 package io.tolgee.formats.po.`in`
 
+import io.tolgee.formats.po.SupportedFormat
+
 class FormatDetector(private val messages: List<String>) {
   /**
    * Tries to detect message format by on all messages in file

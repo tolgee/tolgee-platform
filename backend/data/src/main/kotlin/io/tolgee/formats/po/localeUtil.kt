@@ -1,8 +1,8 @@
 package io.tolgee.formats.po
 
 import com.ibm.icu.util.ULocale
-import io.tolgee.service.dataImport.processors.messageFormat.data.PluralData
-import io.tolgee.service.dataImport.processors.messageFormat.data.PluralLanguage
+import io.tolgee.formats.pluralData.PluralData
+import io.tolgee.formats.pluralData.PluralLanguage
 
 fun getLocaleFromTag(tag: String): ULocale {
   return ULocale.forLanguageTag(tag)
