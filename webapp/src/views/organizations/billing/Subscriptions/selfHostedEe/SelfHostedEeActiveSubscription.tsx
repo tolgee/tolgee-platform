@@ -57,7 +57,10 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
 
         <PlanInfoArea>
           <Box>{description}</Box>
-          <IncludedFeatures features={subscription.plan.enabledFeatures} />
+          <IncludedFeatures
+            features={subscription.plan.enabledFeatures}
+            includedUsage={subscription.plan.includedUsage}
+          />
         </PlanInfoArea>
 
         <PlanPrice prices={subscription.plan.prices} period={period} />

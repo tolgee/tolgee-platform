@@ -315,7 +315,10 @@ export class Validation {
 
   static readonly EE_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
-    stripeProductId: Yup.string().required(),
+    stripeProductId: Yup.string().when('free', {
+      is: false,
+      then: Yup.string().required(),
+    }),
     forOrganizationIds: Yup.array().when('public', {
       is: false,
       then: Yup.array().min(1),
