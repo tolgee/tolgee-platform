@@ -10,7 +10,6 @@ import { PlanPrice } from '../cloud/Plans/PlanPrice';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { IncludedFeatures } from './IncludedFeatures';
 import { BillingPeriodType, PeriodSwitch } from '../cloud/Plans/PeriodSwitch';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 export const SelfHostedEePlan = (props: {
   plan: components['schemas']['SelfHostedEePlanModel'];
