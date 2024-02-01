@@ -4,7 +4,6 @@ import { T } from '@tolgee/react';
 import { Box, styled, Typography } from '@mui/material';
 import { PlanFeature } from './PlanFeature';
 import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';
-import { Check } from '@mui/icons-material';
 
 const StyledListWrapper = styled(Box)`
   display: grid;
