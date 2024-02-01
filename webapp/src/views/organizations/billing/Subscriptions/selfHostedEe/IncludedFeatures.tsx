@@ -28,6 +28,11 @@ function Included(props: IncludedProps) {
           />
         </Box>
       )}
+      {props.included.seats == -1 && (
+        <Box>
+          <T keyName="billinb_self_hosted_plan_unlimited_seats" />
+        </Box>
+      )}
       {props.included.mtCredits > 0 && (
         <Box>
           <T
