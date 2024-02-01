@@ -1,10 +1,10 @@
-import {FC} from 'react';
-import {components} from 'tg.service/apiSchema.generated';
-import {T} from '@tolgee/react';
-import {Box, styled, Typography} from '@mui/material';
-import {PlanFeature} from './PlanFeature';
-import {useFeatureTranslation} from 'tg.translationTools/useFeatureTranslation';
-import {IncludedUsage} from "./IncludedUsage";
+import { FC } from 'react';
+import { components } from 'tg.service/apiSchema.generated';
+import { T } from '@tolgee/react';
+import { Box, styled, Typography } from '@mui/material';
+import { PlanFeature } from './PlanFeature';
+import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';
+import { IncludedUsage } from './IncludedUsage';
 
 const StyledListWrapper = styled(Box)`
   display: grid;
