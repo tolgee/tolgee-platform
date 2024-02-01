@@ -30,16 +30,7 @@ export const SelfHostedEePlan = (props: {
     }
 
     if (!hasPrice) {
-      return (
-        <T
-          keyName="billing_subscriptions_pay_for_what_you_use"
-          params={{
-            includedSeats: props.plan.includedUsage.seats,
-            includedMtCredits: props.plan.includedUsage.mtCredits,
-            b: (chunks) => <b>{chunks}</b>,
-          }}
-        />
-      );
+      return <T keyName="billing_subscriptions_pay_for_what_you_use" />;
     }
 
     return null;
