@@ -36,6 +36,9 @@ export interface paths {
     get: operations["getSelfHostedEeSubscriptions"];
     post: operations["setupEeSubscription"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscribe-free": {
+    post: operations["setupFreeEeSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
@@ -152,10 +155,12 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
+      free: boolean;
     };
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
@@ -197,6 +202,7 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -271,11 +277,12 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       prices: components["schemas"]["PlanPricesRequest"];
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
       public: boolean;
-      stripeProductId: string;
+      stripeProductId?: string;
       /** Format: date-time */
       notAvailableBefore?: string;
       /** Format: date-time */
@@ -283,6 +290,7 @@ export interface components {
       /** Format: date-time */
       usableUntil?: string;
       forOrganizationIds: number[];
+      free: boolean;
     };
     SelfHostedEePlanAdministrationModel: {
       /** Format: int64 */
@@ -303,12 +311,14 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       stripeProductId: string;
       forOrganizationIds: number[];
+      free: boolean;
     };
     CloudPlanRequest: {
       name: string;
@@ -327,6 +337,7 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesRequest"];
@@ -361,6 +372,7 @@ export interface components {
         | "PROJECT_LEVEL_CONTENT_STORAGES"
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -388,6 +400,13 @@ export interface components {
        */
       planId: number;
       period: "MONTHLY" | "YEARLY";
+    };
+    SelfHostedEeFreeSubscribeRequest: {
+      /**
+       * Format: int64
+       * @description Id of the subscription plan
+       */
+      planId: number;
     };
     BuyMoreCreditsRequest: {
       /** Format: int64 */
@@ -998,6 +1017,38 @@ export interface operations {
       };
     };
   };
+  setupFreeEeSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SelfHostedEeFreeSubscribeRequest"];
+      };
+    };
+  };
   getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
       path: {
@@ -1561,6 +1612,7 @@ export interface operations {
             | "PROJECT_LEVEL_CONTENT_STORAGES"
             | "WEBHOOKS"
             | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+            | "AI_PROMPT_CUSTOMIZATION"
           )[];
         };
       };

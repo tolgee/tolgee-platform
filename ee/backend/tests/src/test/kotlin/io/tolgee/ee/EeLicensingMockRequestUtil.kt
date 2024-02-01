@@ -34,6 +34,7 @@ class EeLicensingMockRequestUtil {
           perSeat = 20.toBigDecimal(),
           subscriptionMonthly = 200.toBigDecimal(),
         ),
+      free = false,
     )
 
   final val mockedSubscriptionResponse =

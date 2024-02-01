@@ -10,6 +10,7 @@ import { PlanPrice } from '../cloud/Plans/PlanPrice';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { IncludedFeatures } from './IncludedFeatures';
 import { BillingPeriodType, PeriodSwitch } from '../cloud/Plans/PeriodSwitch';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 export const SelfHostedEePlan = (props: {
   plan: components['schemas']['SelfHostedEePlanModel'];
@@ -40,6 +41,38 @@ export const SelfHostedEePlan = (props: {
     },
   });
 
+  const subscribeFreeMutation = useBillingApiMutation({
+    url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscribe-free',
+    method: 'post',
+    options: {
+      onSuccess: () => {},
+    },
+    invalidatePrefix: '/v2/organizations/{organizationId}/billing',
+  });
+
+  const onSubscribe = () => {
+    if (props.plan.free) {
+      subscribeFreeMutation.mutate({
+        path: { organizationId: organization!.id },
+        content: {
+          'application/json': {
+            planId: props.plan.id,
+          },
+        },
+      });
+      return;
+    }
+    subscribeMutation.mutate({
+      path: { organizationId: organization!.id },
+      content: {
+        'application/json': {
+          planId: props.plan.id,
+          period: props.period,
+        },
+      },
+    });
+  };
+
   return (
     <>
       <Plan data-cy="billing-self-hosted-ee-plan">
@@ -60,17 +93,7 @@ export const SelfHostedEePlan = (props: {
           <PlanActionButton
             data-cy="billing-self-hosted-ee-plan-subscribe-button"
             loading={subscribeMutation.isLoading}
-            onClick={() =>
-              subscribeMutation.mutate({
-                path: { organizationId: organization!.id },
-                content: {
-                  'application/json': {
-                    planId: props.plan.id,
-                    period: props.period,
-                  },
-                },
-              })
-            }
+            onClick={onSubscribe}
           >
             {t('billing_plan_subscribe')}
           </PlanActionButton>
