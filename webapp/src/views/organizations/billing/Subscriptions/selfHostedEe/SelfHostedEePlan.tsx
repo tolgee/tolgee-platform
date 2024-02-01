@@ -1,4 +1,4 @@
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
@@ -18,17 +18,34 @@ export const SelfHostedEePlan = (props: {
 }) => {
   const { t } = useTranslate();
 
-  const hasFixedPrice = Boolean(
+  const hasPrice = Boolean(
     props.plan.prices.subscriptionMonthly ||
       props.plan.prices.subscriptionYearly
   );
   const organization = useOrganization();
 
-  const description = !hasFixedPrice
-    ? t('billing_subscriptions_pay_for_what_you_use')
-    : t('billing_subscriptions_pay_fixed_price', {
-        includedSeats: props.plan.includedUsage.seats,
-      });
+  function getDescription() {
+    if (props.plan.free) {
+      return <T keyName="billing_subscriptions_free_plan_description" />;
+    }
+
+    if (!hasPrice) {
+      return (
+        <T
+          keyName="billing_subscriptions_pay_for_what_you_use"
+          params={{
+            includedSeats: props.plan.includedUsage.seats,
+            includedMtCredits: props.plan.includedUsage.mtCredits,
+            b: (chunks) => <b>{chunks}</b>,
+          }}
+        />
+      );
+    }
+
+    return null;
+  }
+
+  const description = getDescription();
 
   const subscribeMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions',
@@ -80,10 +97,13 @@ export const SelfHostedEePlan = (props: {
 
           <Box gridArea="info">
             <Box>{description}</Box>
-            <IncludedFeatures features={props.plan.enabledFeatures} />
+            <IncludedFeatures
+              features={props.plan.enabledFeatures}
+              includedUsage={props.plan.includedUsage}
+            />
           </Box>
 
-          {hasFixedPrice && (
+          {hasPrice && (
             <PeriodSwitch value={props.period} onChange={props.onChange} />
           )}
 
