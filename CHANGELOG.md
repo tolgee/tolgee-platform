@@ -1,3 +1,15 @@
+# [3.48.0](https://github.com/tolgee/tolgee-platform/compare/v3.47.1...v3.48.0) (2024-02-02)
+
+
+### Bug Fixes
+
+* Fix wrong pricing plan description ([#2119](https://github.com/tolgee/tolgee-platform/issues/2119)) ([69e4043](https://github.com/tolgee/tolgee-platform/commit/69e40437b1a1044c9f349374dad1bf50841525ca))
+
+
+### Features
+
+* Enable free self-hosted licenses for open-source and schools ([#2117](https://github.com/tolgee/tolgee-platform/issues/2117)) ([8bff206](https://github.com/tolgee/tolgee-platform/commit/8bff2062d1285ee4c58649af8db71342947b1398))
+
 ## [3.47.1](https://github.com/tolgee/tolgee-platform/compare/v3.47.0...v3.47.1) (2024-01-29)
 
 
