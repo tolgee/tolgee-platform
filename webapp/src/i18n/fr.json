@@ -278,7 +278,6 @@
   "billing_subscriptions_ee_license_inactive" : "Votre licence est inactive.",
   "billing_subscriptions_granular_permissions_feature" : "Permissions granulaires",
   "billing_subscriptions_multiple_content_delivery_configs" : "Livraisons de contenu multiples",
-  "billing_subscriptions_pay_fixed_price" : "Ce plan contient {includedSeats} sièges inclus. Lorsque vous en utilisez davantage, nous vous facturons au fur et à mesure.",
   "billing_subscriptions_pay_for_what_you_use" : "Ne payez que ce que vous utilisez.",
   "billing_subscriptions_plan_includes_title" : "Inclus dans ce plan :",
   "billing_subscriptions_premium_support_feature" : "Support premium",
