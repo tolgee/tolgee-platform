@@ -28,7 +28,7 @@ class PhpPoConversionTest {
 
   private fun testString(string: String) {
     val icuString = convertToIcu(string)
-    val phpString = ToPhpPoMessageConverter(icuString).convert().result
+    val phpString = ToPhpPoMessageConverter(icuString).convert().singleResult
     phpString.assert
       .describedAs("Input:\n${string}\nICU:\n$icuString\nPhpString:\n$phpString")
       .isEqualTo(string)

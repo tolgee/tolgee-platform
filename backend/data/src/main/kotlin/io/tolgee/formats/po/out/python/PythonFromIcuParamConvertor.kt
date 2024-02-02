@@ -7,7 +7,10 @@ import io.tolgee.formats.po.FromIcuParamConvertor
 class PythonFromIcuParamConvertor : FromIcuParamConvertor {
   private var argIndex = -1
 
-  override fun convert(node: MessagePatternUtil.ArgNode): String {
+  override fun convert(
+    node: MessagePatternUtil.ArgNode,
+    isInPlural: Boolean,
+  ): String {
     argIndex++
     val argNumString = getArgNameString(node)
     val type = node.argType
@@ -19,6 +22,13 @@ class PythonFromIcuParamConvertor : FromIcuParamConvertor {
     }
 
     return "%${argNumString}s"
+  }
+
+  override fun convertReplaceNumber(
+    node: MessagePatternUtil.MessageContentsNode,
+    argName: String?,
+  ): String {
+    return "%($argName)d"
   }
 
   private fun convertNumber(node: MessagePatternUtil.ArgNode): String {

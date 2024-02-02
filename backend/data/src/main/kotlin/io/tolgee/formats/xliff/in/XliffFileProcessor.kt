@@ -1,4 +1,4 @@
-package io.tolgee.formats.xliff
+package io.tolgee.formats.xliff.`in`
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.UnsupportedXliffVersionException

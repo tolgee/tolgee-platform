@@ -8,7 +8,10 @@ class PhpFromIcuParamConvertor : FromIcuParamConvertor {
   private var argIndex = -1
   private var wasNumberedArg = false
 
-  override fun convert(node: MessagePatternUtil.ArgNode): String {
+  override fun convert(
+    node: MessagePatternUtil.ArgNode,
+    isInPlural: Boolean,
+  ): String {
     argIndex++
     val argNum = node.name?.toIntOrNull()
     val argNumString = getArgNumString(argNum)
@@ -21,6 +24,13 @@ class PhpFromIcuParamConvertor : FromIcuParamConvertor {
     }
 
     return "%${argNumString}s"
+  }
+
+  override fun convertReplaceNumber(
+    node: MessagePatternUtil.MessageContentsNode,
+    argName: String?,
+  ): String {
+    return "%d"
   }
 
   private fun convertNumber(

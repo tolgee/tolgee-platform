@@ -1,54 +1,69 @@
-package io.tolgee.formats.po.out.c
+package io.tolgee.formats.ios.out
 
 import com.ibm.icu.text.MessagePattern
 import com.ibm.icu.text.MessagePatternUtil
 import io.tolgee.formats.po.FromIcuParamConvertor
 
-class CFromIcuParamConvertor : FromIcuParamConvertor {
+class IOsFromIcuParamConvertor : FromIcuParamConvertor {
   private var argIndex = -1
+  private var wasNumberedArg = false
 
   override fun convert(
     node: MessagePatternUtil.ArgNode,
     isInPlural: Boolean,
   ): String {
     argIndex++
+    val argNum = node.name?.toIntOrNull()
+    val argNumString = getArgNumString(argNum)
     val type = node.argType
 
     if (type == MessagePattern.ArgType.SIMPLE) {
       when (node.typeName) {
-        "number" -> return convertNumber(node)
+        "number" -> return convertNumber(node, argNum)
+        "" -> return "%$argNumString\$@"
       }
     }
 
-    return "%s"
+    return node.toString()
   }
 
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
   ): String {
-    return "%d"
+    return "%li"
   }
 
-  private fun convertNumber(node: MessagePatternUtil.ArgNode): String {
+  private fun convertNumber(
+    node: MessagePatternUtil.ArgNode,
+    argNum: Int?,
+  ): String {
     if (node.simpleStyle?.trim() == "scientific") {
-      return "%e"
+      return "%${getArgNumString(argNum)}e"
     }
     val precision = getPrecision(node)
     if (precision == 6) {
-      return "%f"
+      return "%${getArgNumString(argNum)}f"
     }
     if (precision != null) {
-      return "%.${precision}f"
+      return "%${getArgNumString(argNum)}.${precision}f"
     }
 
-    return "%d"
+    return "%${getArgNumString(argNum)}d"
   }
 
   private fun getPrecision(node: MessagePatternUtil.ArgNode): Int? {
     val precisionMatch = ICU_PRECISION_REGEX.matchEntire(node.simpleStyle ?: "")
     precisionMatch ?: return null
     return precisionMatch.groups["precision"]?.value?.length
+  }
+
+  private fun getArgNumString(icuArgNum: Int?): String {
+    if ((icuArgNum != argIndex || wasNumberedArg) && icuArgNum != null) {
+      wasNumberedArg = true
+      return "${icuArgNum + 1}$"
+    }
+    return ""
   }
 
   companion object {

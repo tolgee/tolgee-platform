@@ -3,12 +3,12 @@ package io.tolgee.service.export
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.export.ExportFormat
+import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.out.PoFileExporter
+import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
-import io.tolgee.service.export.exporters.JsonFileExporter
-import io.tolgee.service.export.exporters.PoFileExporter
-import io.tolgee.service.export.exporters.XliffFileExporter
 import org.springframework.stereotype.Component
 
 @Component

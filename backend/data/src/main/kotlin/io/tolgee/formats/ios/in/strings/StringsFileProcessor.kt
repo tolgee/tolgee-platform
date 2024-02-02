@@ -1,4 +1,4 @@
-package io.tolgee.formats.ios.strings
+package io.tolgee.formats.ios.`in`.strings
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.convertMessage

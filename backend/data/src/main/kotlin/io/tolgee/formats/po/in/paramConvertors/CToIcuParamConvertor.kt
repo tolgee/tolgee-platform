@@ -21,13 +21,12 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
     val name = ((index - 1).toString())
 
     when (parsed?.specifier) {
-      "d", "i", "u" -> return "{$name, number}"
-      "e", "E" -> return "{$name, number, scientific}"
-      "f", "F", "a", "A" ->
-        return convertFloatToIcu(parsed, name)
+      "d" -> return "{$name, number}"
+      "e" -> return "{$name, number, scientific}"
+      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(parsed.fullMatch)
     }
 
-    return "{$name}"
+    return escapeIcu(matchResult.value)
   }
 
   companion object {

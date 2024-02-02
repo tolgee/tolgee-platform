@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.xliff
 
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.xliff.Xliff12FileProcessor
+import io.tolgee.formats.xliff.`in`.Xliff12FileProcessor
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType

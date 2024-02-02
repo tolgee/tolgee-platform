@@ -1,10 +1,11 @@
-package io.tolgee.service.export.exporters
+package io.tolgee.formats.xliff.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.service.export.exporters.FileExporter
 import org.dom4j.Document
 import org.dom4j.DocumentException
 import org.dom4j.DocumentHelper

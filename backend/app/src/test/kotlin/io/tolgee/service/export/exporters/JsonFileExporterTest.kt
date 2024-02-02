@@ -3,6 +3,7 @@ package io.tolgee.service.export.exporters
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView

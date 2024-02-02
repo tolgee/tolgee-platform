@@ -1,8 +1,8 @@
 package io.tolgee.formats.po.out.php
 
 import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
+import io.tolgee.formats.po.out.ToPoConversionResult
 import io.tolgee.formats.po.out.ToPoMessageConverter
-import io.tolgee.service.export.exporters.ConversionResult
 
 class ToPhpPoMessageConverter(
   val message: String,
@@ -15,7 +15,7 @@ class ToPhpPoMessageConverter(
       argumentConverter = PhpFromIcuParamConvertor(),
     )
 
-  override fun convert(): ConversionResult {
+  override fun convert(): ToPoConversionResult {
     return baseIcuMessageToPoConvertor.convert()
   }
 }

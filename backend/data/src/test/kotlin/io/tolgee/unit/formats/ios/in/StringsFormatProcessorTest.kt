@@ -1,7 +1,7 @@
-package io.tolgee.unit.formats.ios
+package io.tolgee.unit.formats.ios.`in`
 
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.ios.strings.StringsFileProcessor
+import io.tolgee.formats.ios.`in`.strings.StringsFileProcessor
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext

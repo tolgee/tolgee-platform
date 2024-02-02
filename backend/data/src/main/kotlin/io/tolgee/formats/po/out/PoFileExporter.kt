@@ -1,10 +1,11 @@
-package io.tolgee.service.export.exporters
+package io.tolgee.formats.po.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.po.SupportedFormat
 import io.tolgee.formats.po.getPluralData
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class PoFileExporter(
@@ -36,7 +37,7 @@ class PoFileExporter(
 
       resultBuilder.appendLine()
       resultBuilder.writeMsgId(translation.key.name)
-      resultBuilder.writeMsgStr(translation, converted)
+      resultBuilder.writeMsgStr(converted)
     }
   }
 
@@ -65,26 +66,16 @@ class PoFileExporter(
     return builder
   }
 
-  val baseTranslations by lazy {
-    baseTranslationsProvider().associateBy { it.key.namespace to it.key.name }
-  }
-
-  private fun StringBuilder.writeMsgStr(
-    translation: ExportTranslationView,
-    converted: ConversionResult,
-  ) {
+  private fun StringBuilder.writeMsgStr(converted: ToPoConversionResult) {
     if (converted.isPlural()) {
-      writePlural(translation, converted.forms)
+      writePlural(converted.formsResult)
       return
     }
 
-    writeSingle(converted.result)
+    writeSingle(converted.singleResult)
   }
 
-  private fun StringBuilder.writePlural(
-    translation: ExportTranslationView,
-    forms: List<String>?,
-  ) {
+  private fun StringBuilder.writePlural(forms: List<String>?) {
     forms?.forEachIndexed { index, form ->
       this.appendLine("msgstr[$index] \"${form.escape()}\"")
     }

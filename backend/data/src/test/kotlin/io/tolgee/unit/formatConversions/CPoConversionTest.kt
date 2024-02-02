@@ -28,7 +28,7 @@ class CPoConversionTest {
 
   private fun testString(string: String) {
     val icuString = convertToIcu(string)
-    val cString = ToCPoMessageConverter(icuString).convert().result
+    val cString = ToCPoMessageConverter(icuString).convert().singleResult
     cString.assert
       .describedAs("Input:\n${string}\nICU:\n$icuString\nC String:\n$cString")
       .isEqualTo(string)

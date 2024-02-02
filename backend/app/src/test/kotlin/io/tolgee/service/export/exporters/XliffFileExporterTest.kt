@@ -1,6 +1,7 @@
 package io.tolgee.service.export.exporters
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView

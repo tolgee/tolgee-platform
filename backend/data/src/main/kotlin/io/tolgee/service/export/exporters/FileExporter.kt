@@ -12,7 +12,14 @@ interface FileExporter {
   fun produceFiles(): Map<String, InputStream>
 
   fun ExportTranslationView.getFilePath(namespace: String?): String {
-    val filename = "${this.languageTag}.$fileExtension"
+    return getFilePath(namespace, fileExtension)
+  }
+
+  fun ExportTranslationView.getFilePath(
+    namespace: String?,
+    extension: String,
+  ): String {
+    val filename = "${this.languageTag}.$extension"
     val filePath = namespace ?: ""
     return "$filePath/$filename".replace("^/".toRegex(), "")
   }

@@ -28,7 +28,7 @@ class PythonPoConversionTest {
 
   private fun testString(string: String) {
     val icuString = convertToIcu(string)
-    val pythonString = ToPythonPoMessageConverter(icuString).convert().result
+    val pythonString = ToPythonPoMessageConverter(icuString).convert().singleResult
     pythonString.assert
       .describedAs("Input:\n${string}\nICU:\n$icuString\nPython String:\n$pythonString")
       .isEqualTo(string)

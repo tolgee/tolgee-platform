@@ -7,4 +7,6 @@ data class ParsedCLikeParam(
   val width: Int?,
   val precision: Int?,
   val flags: String?,
+  val fullMatch: String,
+  val length: Int?,
 )

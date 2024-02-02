@@ -1,6 +1,6 @@
-package io.tolgee.formats.ios.stringdict
+package io.tolgee.formats.ios.`in`.stringdict
 
-import io.tolgee.formats.ios.strings.IOsToIcuParamConvertor.Companion.REGEX
+import io.tolgee.formats.ios.`in`.strings.IOsToIcuParamConvertor.Companion.REGEX
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.po.`in`.ToIcuParamConvertor
 

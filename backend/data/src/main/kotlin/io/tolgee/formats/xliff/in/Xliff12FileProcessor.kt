@@ -1,4 +1,4 @@
-package io.tolgee.formats.xliff
+package io.tolgee.formats.xliff.`in`
 
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType

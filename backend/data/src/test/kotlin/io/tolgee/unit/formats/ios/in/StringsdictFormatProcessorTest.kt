@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.ios
+package io.tolgee.unit.formats.ios.`in`
 
 import StringsdictFileProcessor
 import io.tolgee.dtos.dataImport.ImportFileDto

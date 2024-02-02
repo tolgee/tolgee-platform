@@ -1,19 +1,19 @@
-package io.tolgee.service.export.exporters
+package io.tolgee.formats
 
 import io.tolgee.constants.Message
 
-class ConversionResult(
-  val result: String?,
-  val forms: List<String>?,
+class PossiblePluralConversionResult(
+  val singleResult: String?,
+  val formsResult: Map<String, String>?,
   val warnings: List<Pair<Message, List<Any>>>,
 ) {
   init {
-    if (result == null && forms == null) {
+    if (singleResult == null && formsResult == null) {
       throw IllegalArgumentException("Both result and forms cannot be null")
     }
   }
 
   fun isPlural(): Boolean {
-    return forms != null
+    return formsResult != null
   }
 }

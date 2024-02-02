@@ -2,6 +2,7 @@ package io.tolgee.service.export.exporters
 
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView

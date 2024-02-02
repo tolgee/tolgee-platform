@@ -1,4 +1,4 @@
-package io.tolgee.unit.export
+package io.tolgee.unit.formats.po
 
 import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
 import io.tolgee.formats.po.out.php.PhpFromIcuParamConvertor
@@ -11,14 +11,14 @@ class BaseIcuMessageToPoConvertorTest {
     BaseIcuMessageToPoConvertor(
       "Hello {hello} {hello, number} {hello, number, .00}",
       PhpFromIcuParamConvertor(),
-    ).convert().result.assert.isEqualTo("Hello %s %d %.2f")
+    ).convert().singleResult.assert.isEqualTo("Hello %s %d %.2f")
   }
 
   @Test
   fun `converts with plurals`() {
     val forms =
       BaseIcuMessageToPoConvertor("{0, plural, one {# dog} other {# dogs}}", PhpFromIcuParamConvertor())
-        .convert().forms
+        .convert().formsResult
 
     forms!![0].assert.isEqualTo("%d dog")
     forms[1].assert.isEqualTo("%d dogs")
@@ -31,7 +31,7 @@ class BaseIcuMessageToPoConvertorTest {
         message = "{0, plural, one {# pes} few {# psi} other {# psů}}",
         languageTag = "cs",
         argumentConverter = PhpFromIcuParamConvertor(),
-      ).convert().forms
+      ).convert().formsResult
 
     forms!![0].assert.isEqualTo("%d pes")
     forms[1].assert.isEqualTo("%d psi")

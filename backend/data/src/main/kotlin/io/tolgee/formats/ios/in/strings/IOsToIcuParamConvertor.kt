@@ -1,4 +1,4 @@
-package io.tolgee.formats.ios.strings
+package io.tolgee.formats.ios.`in`.strings
 
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
@@ -12,23 +12,23 @@ class IOsToIcuParamConvertor() : ToIcuParamConvertor {
     get() = REGEX
 
   override fun convert(matchResult: MatchResult): String {
-    val parsed = parser.parse(matchResult)
-    if (parsed?.specifier == "%") {
+    val parsed = parser.parse(matchResult) ?: return escapeIcu(matchResult.value)
+    if (parsed.specifier == "%") {
       return "%"
     }
 
     index++
-    val zeroIndexedArgNum = parsed?.argNum?.toIntOrNull()?.minus(1)?.toString()
+    val zeroIndexedArgNum = parsed.argNum?.toIntOrNull()?.minus(1)?.toString()
     val name = zeroIndexedArgNum ?: ((index - 1).toString())
 
-    when (parsed?.specifier) {
-      "s" -> return "{$name}"
-      "d", "u", "i" -> return "{$name, number}"
-      "e", "E" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name)
+    when (parsed.specifier) {
+      "@" -> return "{$name}"
+      "d" -> return "{$name, number}"
+      "e" -> return "{$name, number, scientific}"
+      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(parsed.fullMatch)
     }
 
-    return "{$name}"
+    return escapeIcu(parsed.fullMatch)
   }
 
   companion object {

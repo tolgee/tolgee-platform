@@ -9,17 +9,17 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
     get() = PYTHON_PARAM_REGEX
 
   override fun convert(matchResult: MatchResult): String {
-    val parsed = parser.parse(matchResult)
-    if (parsed?.specifier == "%") {
+    val parsed = parser.parse(matchResult) ?: return escapeIcu(matchResult.value)
+    if (parsed.specifier == "%") {
       return "%"
     }
 
-    val argName = parsed?.argName ?: throw IllegalArgumentException("Python spec requires named arguments")
+    val argName = parsed.argName ?: throw IllegalArgumentException("Python spec requires named arguments")
 
     when (parsed.specifier) {
-      "d", "i", "u", "g", "G" -> return "{$argName, number}"
-      "f", "F" -> return convertFloatToIcu(parsed, argName)
-      "e", "E" -> return "{$argName, number, scientific}"
+      "d" -> return "{$argName, number}"
+      "f" -> return convertFloatToIcu(parsed, argName) ?: return escapeIcu(matchResult.value)
+      "e" -> return "{$argName, number, scientific}"
     }
 
     return "{$argName}"

@@ -1,7 +1,7 @@
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.convertMessage
-import io.tolgee.formats.ios.stringdict.IOsPluralToIcuParamConvertor
+import io.tolgee.formats.ios.`in`.stringdict.IOsPluralToIcuParamConvertor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import javax.xml.stream.XMLInputFactory

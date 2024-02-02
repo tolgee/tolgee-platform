@@ -24,13 +24,11 @@ class PhpToIcuParamConvertor : ToIcuParamConvertor {
     when (parsed?.specifier) {
       "s" -> return "{$name}"
       "d" -> return "{$name, number}"
-      "u" -> return "{$name, number}"
       "e" -> return "{$name, number, scientific}"
-      "E" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name)
+      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(matchResult.value)
     }
 
-    return "{$name}"
+    return escapeIcu(matchResult.value)
   }
 
   companion object {
