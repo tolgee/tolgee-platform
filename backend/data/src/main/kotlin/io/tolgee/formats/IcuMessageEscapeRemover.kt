@@ -42,10 +42,9 @@ class IcuMessageEscapeRemover(
           }
 
           State.StateEscapedMaybe -> {
-            if (ch == ESCAPE_CHAR)
-              {
-                state = State.StateText
-              } else if (escapableChars.contains(ch)) {
+            if (ch == ESCAPE_CHAR) {
+              state = State.StateText
+            } else if (escapableChars.contains(ch)) {
               state = State.StateEscaped
             } else {
               state = State.StateText

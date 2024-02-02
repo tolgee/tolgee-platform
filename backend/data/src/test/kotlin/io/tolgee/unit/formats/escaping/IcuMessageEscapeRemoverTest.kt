@@ -32,7 +32,7 @@ class IcuMessageEscapeRemoverTest {
   }
 
   @Test
-  fun `removes the escape char on end of string`()  {
+  fun `removes the escape char on end of string`() {
     val escaped = "Another ''''' more complex ' '''{ string }''' with many weird '} cases ''''}'"
     IcuMessageEscapeRemover(escaped, false)
       .escapeRemoved.assert.isEqualTo("Another ''' more complex ' '{ string }' with many weird } cases '}")
