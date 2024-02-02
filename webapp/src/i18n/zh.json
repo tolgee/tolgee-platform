@@ -204,7 +204,6 @@
   "billing_subscriptions_deployment_assistance" : "安装协助",
   "billing_subscriptions_ee_license_inactive" : "您的许可证已失效。",
   "billing_subscriptions_granular_permissions_feature" : "精细权限",
-  "billing_subscriptions_pay_fixed_price" : "此套餐包含 {includedSeats} 个席位。若您需要更多，我们会按您的实际使用量收费。",
   "billing_subscriptions_pay_for_what_you_use" : "只需按实际用量付费。",
   "billing_subscriptions_plan_includes_title" : "本套餐包括：",
   "billing_subscriptions_premium_support_feature" : "高级技术支持",
