@@ -221,6 +221,13 @@ class AutomationService(
     webhookConfig.automationActions.clear()
   }
 
+  fun deleteForSlackIntegration(slackConfig: SlackConfig) {
+    slackConfig.automationActions.forEach {
+      delete(it.automation)
+    }
+    slackConfig.automationActions.clear()
+  }
+
   @Transactional
   fun get(
     projectId: Long,
@@ -284,4 +291,5 @@ class AutomationService(
       },
     )
   }
+
 }

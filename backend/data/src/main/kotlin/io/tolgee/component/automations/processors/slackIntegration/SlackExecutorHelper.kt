@@ -36,9 +36,23 @@ class SlackExecutorHelper(
         plainText("Author: $author")
       }
     }
+
+    input {
+      plainTextInput {
+        actionId("translate_text_input")
+      }
+      label(text = "Translate me", emoji = true)
+    }
+    actions {
+      button {
+        text("Submit", emoji = true)
+        value("your translation")
+        actionId("submit_translation")
+      }
+    }
   }
 
-  fun createKetAddMessage(activities: IProjectActivityModel) = withBlocks {
+  fun createKeyAddMessage(activities: IProjectActivityModel) = withBlocks {
     // Header Section
     section {
       markdownText("New Translation Key Added :exclamation:")

@@ -38,7 +38,7 @@ class SlackExecutor(
 
     slackClient.methods(slackToken).chatPostMessage {
       it.channel(slackExecutorHelper.slackConfig.channelId)
-        .blocks(slackExecutorHelper.createKetAddMessage(activities))
+        .blocks(slackExecutorHelper.createKeyAddMessage(activities))
     }
   }
 
