@@ -7,12 +7,13 @@ import {
   goToPage,
 } from '../../common/shared';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
 
 describe('Organization Members', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean();
     organizationTestData
@@ -27,6 +28,10 @@ describe('Organization Members', () => {
 
   afterEach(() => {
     organizationTestData.clean();
+  });
+
+  afterEach(() => {
+    setBypassSeatCountCheck(false);
   });
 
   it('contains organization users', () => {

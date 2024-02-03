@@ -1,3 +1,29 @@
+# [3.48.0](https://github.com/tolgee/tolgee-platform/compare/v3.47.1...v3.48.0) (2024-02-02)
+
+
+### Bug Fixes
+
+* Fix wrong pricing plan description ([#2119](https://github.com/tolgee/tolgee-platform/issues/2119)) ([69e4043](https://github.com/tolgee/tolgee-platform/commit/69e40437b1a1044c9f349374dad1bf50841525ca))
+
+
+### Features
+
+* Enable free self-hosted licenses for open-source and schools ([#2117](https://github.com/tolgee/tolgee-platform/issues/2117)) ([8bff206](https://github.com/tolgee/tolgee-platform/commit/8bff2062d1285ee4c58649af8db71342947b1398))
+
+## [3.47.1](https://github.com/tolgee/tolgee-platform/compare/v3.47.0...v3.47.1) (2024-01-29)
+
+
+### Bug Fixes
+
+* Current permissions -> PAK with no-auth mode  ([#2113](https://github.com/tolgee/tolgee-platform/issues/2113)) ([51e2251](https://github.com/tolgee/tolgee-platform/commit/51e2251a3e624c6a7fcb9f2a057c374874c86591))
+
+# [3.47.0](https://github.com/tolgee/tolgee-platform/compare/v3.46.4...v3.47.0) (2024-01-26)
+
+
+### Features
+
+* Limit number of seats on free self-hosted instances ([#2103](https://github.com/tolgee/tolgee-platform/issues/2103)) ([732a033](https://github.com/tolgee/tolgee-platform/commit/732a033b1ad298b56b3ec0aeb3730ce28b789292))
+
 ## [3.46.4](https://github.com/tolgee/tolgee-platform/compare/v3.46.3...v3.46.4) (2024-01-25)
 
 

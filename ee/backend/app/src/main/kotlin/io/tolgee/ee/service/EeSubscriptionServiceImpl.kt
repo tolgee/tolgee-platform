@@ -6,6 +6,7 @@ import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.HttpClient
+import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
@@ -23,7 +24,9 @@ import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.service.InstanceIdService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
@@ -46,7 +49,8 @@ class EeSubscriptionServiceImpl(
   private val platformTransactionManager: PlatformTransactionManager,
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: EeSubscriptionServiceImpl,
-) : EeSubscriptionProvider {
+  private val billingConfProvider: PublicBillingConfProvider,
+) : EeSubscriptionProvider, Logging {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
     const val PREPARE_SET_KEY_PATH: String = "/v2/public/licensing/prepare-set-key"
@@ -55,6 +59,8 @@ class EeSubscriptionServiceImpl(
     const val RELEASE_KEY_PATH: String = "/v2/public/licensing/release-key"
     const val REPORT_ERROR_PATH: String = "/v2/public/licensing/report-error"
   }
+
+  var bypassSeatCountCheck = false
 
   @Cacheable(Caches.EE_SUBSCRIPTION, key = "1")
   override fun findSubscriptionDto(): EeSubscriptionDto? {
@@ -228,10 +234,37 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun reportUsage() {
-    val subscription = findSubscriptionEntity()
-    if (subscription != null) {
+  fun checkCountAndReportUsage() {
+    try {
       val seats = userAccountService.countAllEnabled()
+      val subscription = self.findSubscriptionDto()
+      reportUsage(seats, subscription)
+      checkUserCount(seats, subscription)
+    } catch (e: NoActiveSubscriptionException) {
+      logger.debug("No active subscription, skipping usage reporting.")
+    }
+  }
+
+  private fun checkUserCount(
+    seats: Long,
+    subscription: EeSubscriptionDto?,
+  ) {
+    if (bypassSeatCountCheck) {
+      return
+    }
+    val isCloud = billingConfProvider.invoke().enabled
+    if (subscription == null && !isCloud) {
+      if (seats > 10) {
+        throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+      }
+    }
+  }
+
+  private fun reportUsage(
+    seats: Long,
+    subscription: EeSubscriptionDto?,
+  ) {
+    if (subscription != null) {
       catchingSeatsSpendingLimit {
         catchingLicenseNotFound {
           reportUsageRemote(subscription, seats)
@@ -249,9 +282,10 @@ class EeSubscriptionServiceImpl(
         throw e
       }
       executeInNewTransaction(platformTransactionManager) {
-        val entity = findSubscriptionEntity() ?: throw e
+        val entity = findSubscriptionEntity() ?: throw NoActiveSubscriptionException()
         entity.status = SubscriptionStatus.ERROR
         self.save(entity)
+        throw e
       }
       throw e
     }
@@ -263,7 +297,7 @@ class EeSubscriptionServiceImpl(
   }
 
   private fun reportUsageRemote(
-    subscription: EeSubscription,
+    subscription: EeSubscriptionDto,
     seats: Long,
   ) {
     postRequest<Any>(

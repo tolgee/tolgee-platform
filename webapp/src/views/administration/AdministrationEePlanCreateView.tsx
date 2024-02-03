@@ -48,7 +48,7 @@ export const AdministrationEePlanCreateView = () => {
                   content: {
                     'application/json': {
                       ...values,
-                      stripeProductId: values.stripeProductId!,
+                      stripeProductId: values.stripeProductId,
                       forOrganizationIds: values.public
                         ? []
                         : values.forOrganizationIds,
@@ -72,6 +72,7 @@ export const AdministrationEePlanCreateView = () => {
                 perSeat: 0,
                 subscriptionMonthly: 0,
                 subscriptionYearly: 0,
+                perThousandMtCredits: 0,
               },
               includedUsage: {
                 seats: 0,
@@ -81,6 +82,7 @@ export const AdministrationEePlanCreateView = () => {
               forOrganizationIds: [],
               enabledFeatures: [],
               public: true,
+              free: false,
             }}
           />
         </Box>

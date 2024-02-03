@@ -1,7 +1,7 @@
 ext {
     configureLiquibase = { schema, referenceUrlPrefix, changeLogPah ->
         def liveDb = [
-                url         : "jdbc:postgresql://localhost:55432/postgres?currentSchema=$schema",
+                url         : "jdbc:postgresql://localhost:55538/postgres?currentSchema=$schema",
                 referenceUrl: referenceUrlPrefix +
                         '?dialect=io.tolgee.dialects.postgres.CustomPostgreSQLDialect' +
                         '&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy' +
