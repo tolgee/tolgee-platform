@@ -2,6 +2,9 @@ package io.tolgee.formats.ios.`in`.strings
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.convertMessage
+import io.tolgee.formats.ios.`in`.IOsToIcuParamConvertor
+import io.tolgee.formats.ios.`in`.guessLanguageFromPath
+import io.tolgee.formats.ios.`in`.guessNamespaceFromPath
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 
@@ -14,6 +17,11 @@ class StringsFileProcessor(
   private var wasLastCharEscape = false
 
   override fun process() {
+    parseFileToContext()
+    context.namespace = guessNamespaceFromPath(context.file.name)
+  }
+
+  private fun parseFileToContext() {
     context.file.data.decodeToString().forEachIndexed { index, char ->
       if (!wasLastCharEscape && char == '\\') {
         wasLastCharEscape = true
@@ -78,11 +86,7 @@ class StringsFileProcessor(
   }
 
   private val languageName: String by lazy {
-    guessLanguageFromPath() ?: "unknown"
-  }
-
-  private fun guessLanguageFromPath(): String? {
-    return context.file.path.split("/").find { it.endsWith(".lproj") }?.removeSuffix(".lproj")
+    guessLanguageFromPath(context.file.name)
   }
 
   enum class State {

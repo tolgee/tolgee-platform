@@ -13,8 +13,10 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.ProcessorFactory
 import io.tolgee.util.Logging
+import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
 
 class CoreImportFilesProcessor(
@@ -71,7 +73,7 @@ class CoreImportFilesProcessor(
       )
     val processor = processorFactory.getProcessor(file, fileProcessorContext)
     processor.process()
-    processor.context.processResult()
+    processor.processResult()
   }
 
   private fun processArchive(
@@ -100,18 +102,23 @@ class CoreImportFilesProcessor(
     return importService.saveFile(entity)
   }
 
-  private fun FileProcessorContext.processResult() {
-    this.fileEntity.preselectNamespace()
-    this.processLanguages()
-    this.processTranslations()
-    importService.saveAllFileIssues(this.fileEntity.issues)
-    importService.saveAllFileIssueParams(this.fileEntity.issues.flatMap { it.params ?: emptyList() })
+  private fun ImportFileProcessor.processResult() {
+    context.preselectNamespace()
+    context.processLanguages()
+    context.processTranslations()
+    importService.saveAllFileIssues(this.context.fileEntity.issues)
   }
 
-  private fun ImportFile.preselectNamespace() {
-    val namespace = """^[\/]?([^/\\]+)[/\\].*""".toRegex().matchEntire(this.name!!)?.groups?.get(1)?.value
+  private fun FileProcessorContext.preselectNamespace() {
+    if (this.namespace != null) {
+      // namespace was selected by processor
+      this.fileEntity.namespace = getSafeNamespace(this.namespace)
+      return
+    }
+    // select namespace from file name
+    val namespace = """^[\/]?([^/\\]+)[/\\].*""".toRegex().matchEntire(this.fileEntity.name!!)?.groups?.get(1)?.value
     if (!namespace.isNullOrBlank()) {
-      this.namespace = namespace
+      this.fileEntity.namespace = namespace
     }
   }
 
@@ -144,24 +151,46 @@ class CoreImportFilesProcessor(
     this.translations.forEach { entry ->
       val keyEntity = getOrCreateKey(entry.key)
       entry.value.forEach translationForeach@{ newTranslation ->
-        val storedTranslations = importDataManager.getStoredTranslations(keyEntity, newTranslation.language)
         newTranslation.key = keyEntity
-        if (storedTranslations.size > 0) {
-          storedTranslations.forEach { collidingTranslations ->
-            fileEntity.addIssue(
-              FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
-              mapOf(
-                FileIssueParamType.KEY_ID to collidingTranslations.key.id.toString(),
-                FileIssueParamType.LANGUAGE_ID to collidingTranslations.language.id.toString(),
-              ),
-            )
-          }
+        val fileCollisions = checkForInFileCollisions(newTranslation)
+        if (fileCollisions.isNotEmpty()) {
+          fileEntity.addIssues(fileCollisions)
           return@translationForeach
+        }
+        val otherFilesCollisions =
+          importDataManager.checkForOtherFilesCollisions(newTranslation)
+        if (otherFilesCollisions.isNotEmpty()) {
+          fileEntity.addIssues(otherFilesCollisions)
+          newTranslation.isSelectedToImport = false
         }
         this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
       }
     }
     importDataManager.saveAllStoredKeys()
     importDataManager.saveAllStoredTranslations()
+  }
+
+  private fun checkForInFileCollisions(
+    newTranslation: ImportTranslation,
+  ): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
+    val issues =
+      mutableListOf<Pair<FileIssueType, Map<FileIssueParamType, String>>>()
+    val storedTranslations =
+      importDataManager
+        .getStoredTranslations(newTranslation.key, newTranslation.language)
+    if (storedTranslations.isNotEmpty()) {
+      storedTranslations.forEach { collidingTranslations ->
+        issues.add(
+          FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE to
+            mapOf(
+              FileIssueParamType.KEY_ID to collidingTranslations.key.id.toString(),
+              FileIssueParamType.LANGUAGE_ID to collidingTranslations.language.id.toString(),
+              FileIssueParamType.KEY_NAME to collidingTranslations.key.name,
+              FileIssueParamType.LANGUAGE_NAME to collidingTranslations.language.name,
+            ),
+        )
+      }
+    }
+    return issues
   }
 }

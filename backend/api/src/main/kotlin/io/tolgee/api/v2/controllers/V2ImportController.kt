@@ -4,7 +4,6 @@
 
 package io.tolgee.api.v2.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -92,7 +91,6 @@ class V2ImportController(
   private val namespaceService: NamespaceService,
   private val importFileIssueModelAssembler: ImportFileIssueModelAssembler,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
-  private val objectMapper: ObjectMapper,
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(description = "Prepares provided files to import.", summary = "Add files")

@@ -65,6 +65,8 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     'xliff',
     'xlf',
     'properties',
+    'stringsdict',
+    'strings',
   ];
   const [resetKey, setResetKey] = useState(0);
 

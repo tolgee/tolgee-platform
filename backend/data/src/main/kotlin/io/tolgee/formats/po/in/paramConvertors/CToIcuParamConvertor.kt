@@ -11,7 +11,10 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
   override val regex: Regex
     get() = C_PARAM_REGEX
 
-  override fun convert(matchResult: MatchResult): String {
+  override fun convert(
+    matchResult: MatchResult,
+    isInPlural: Boolean,
+  ): String {
     val parsed = parser.parse(matchResult)
     if (parsed?.specifier == "%") {
       return "%"
@@ -23,10 +26,10 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
     when (parsed?.specifier) {
       "d" -> return "{$name, number}"
       "e" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(parsed.fullMatch)
+      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(parsed.fullMatch, isInPlural)
     }
 
-    return escapeIcu(matchResult.value)
+    return escapeIcu(matchResult.value, isInPlural)
   }
 
   companion object {

@@ -2,7 +2,7 @@ package io.tolgee.formats.json.out
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.IExportParams
-import io.tolgee.dtos.request.export.ExportFormat
+import io.tolgee.formats.ExportFormat
 import io.tolgee.helpers.TextHelper
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter

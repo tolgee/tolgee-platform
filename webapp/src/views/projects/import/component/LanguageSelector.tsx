@@ -67,17 +67,7 @@ export const LanguageSelector: React.FC<{
     languageHelper.onSelectExisting(value);
   };
 
-  const availableLanguages = languages.filter(
-    (lang) =>
-      props.value == lang.id ||
-      usedLanguages.findIndex(
-        (usedLanguage) =>
-          usedLanguage.existingId === lang.id &&
-          usedLanguage.namespace === props.row.namespace
-      ) < 0
-  );
-
-  const items = availableLanguages.map((l) => (
+  const items = languages.map((l) => (
     <StyledItem value={l.id} key={l.id}>
       {l.flagEmoji} {l.name}
     </StyledItem>

@@ -19,7 +19,7 @@ data class FileProcessorContext(
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
   var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
   val keys: MutableMap<String, ImportKey> = mutableMapOf()
-
+  var namespace: String? = null
   lateinit var languageNameGuesses: List<String>
 
   fun addTranslation(

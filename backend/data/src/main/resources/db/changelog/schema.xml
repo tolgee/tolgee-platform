@@ -3049,4 +3049,16 @@
             <column name="ai_translator_prompt_description" type="text"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1707039103481-2">
+        <addColumn tableName="import_translation">
+            <column defaultValueBoolean="true" name="is_selected_to_import" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707039103481-3">
+        <addColumn tableName="content_delivery_config">
+            <column name="message_format" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

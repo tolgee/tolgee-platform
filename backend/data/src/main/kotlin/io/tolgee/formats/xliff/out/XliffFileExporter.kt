@@ -1,7 +1,7 @@
 package io.tolgee.formats.xliff.out
 
 import io.tolgee.dtos.IExportParams
-import io.tolgee.dtos.request.export.ExportFormat
+import io.tolgee.formats.ExportFormat
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView

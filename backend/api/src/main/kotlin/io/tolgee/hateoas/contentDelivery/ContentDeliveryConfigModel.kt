@@ -1,7 +1,8 @@
 package io.tolgee.hateoas.contentDelivery
 
 import io.tolgee.dtos.IExportParams
-import io.tolgee.dtos.request.export.ExportFormat
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.hateoas.ee.contentStorage.ContentStorageModel
 import io.tolgee.model.enums.TranslationState
 import org.springframework.hateoas.RepresentationModel
@@ -28,4 +29,5 @@ class ContentDeliveryConfigModel(
   override var filterKeyPrefix: String? = null
   override var filterState: List<TranslationState>? = null
   override var filterNamespace: List<String?>? = null
+  override var messageFormat: ExportMessageFormat? = null
 }

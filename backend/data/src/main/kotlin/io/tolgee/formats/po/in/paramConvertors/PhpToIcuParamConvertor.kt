@@ -11,7 +11,10 @@ class PhpToIcuParamConvertor : ToIcuParamConvertor {
   override val regex: Regex
     get() = REGEX
 
-  override fun convert(matchResult: MatchResult): String {
+  override fun convert(
+    matchResult: MatchResult,
+    isInPlural: Boolean,
+  ): String {
     val parsed = parser.parse(matchResult)
     if (parsed?.specifier == "%") {
       return "%"
@@ -25,10 +28,10 @@ class PhpToIcuParamConvertor : ToIcuParamConvertor {
       "s" -> return "{$name}"
       "d" -> return "{$name, number}"
       "e" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(matchResult.value)
+      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(matchResult.value, isInPlural)
     }
 
-    return escapeIcu(matchResult.value)
+    return escapeIcu(matchResult.value, isInPlural)
   }
 
   companion object {

@@ -20,9 +20,13 @@ class IOsFromIcuParamConvertor : FromIcuParamConvertor {
     if (type == MessagePattern.ArgType.SIMPLE) {
       when (node.typeName) {
         "number" -> return convertNumber(node, argNum)
-        "" -> return "%$argNumString\$@"
       }
     }
+
+    if (type == MessagePattern.ArgType.NONE)
+      {
+        return "%@"
+      }
 
     return node.toString()
   }

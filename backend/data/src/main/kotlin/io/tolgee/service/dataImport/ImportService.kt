@@ -41,6 +41,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -66,6 +67,7 @@ class ImportService(
   private val self: ImportService,
   private val fileStorage: FileStorage,
   private val tolgeeProperties: TolgeeProperties,
+  private val jdbcTemplate: JdbcTemplate,
 ) {
   @Transactional
   fun addFiles(
@@ -143,18 +145,11 @@ class ImportService(
     val import = importLanguage.file.import
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
-    existingLanguage?.let {
-      val langAlreadySelectedInTheSameNS =
-        dataManager.storedLanguages.any {
-          it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
-        }
-      if (langAlreadySelectedInTheSameNS) {
-        throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
-      }
-    }
+    val oldExistingLanguage = importLanguage.existingLanguage
     importLanguage.existingLanguage = existingLanguage
     importLanguageRepository.save(importLanguage)
     dataManager.resetLanguage(importLanguage)
+    dataManager.resetCollisionsBetweenFiles(importLanguage, oldExistingLanguage)
   }
 
   @Transactional
@@ -169,6 +164,7 @@ class ImportService(
     importFileRepository.save(file)
     file.languages.forEach {
       dataManager.resetLanguage(it)
+      dataManager.resetCollisionsBetweenFiles(it, null)
     }
   }
 
@@ -381,6 +377,7 @@ class ImportService(
 
   fun saveAllFileIssues(issues: Iterable<ImportFileIssue>) {
     this.importFileIssueRepository.saveAll(issues)
+    this.saveAllFileIssueParams(issues.flatMap { it.params })
   }
 
   fun getAllByProject(projectId: Long) = this.importRepository.findAllByProjectId(projectId)
@@ -415,4 +412,43 @@ class ImportService(
   }
 
   private fun getFileStorageImportRoot(importId: Long) = "importFiles/$importId"
+
+  fun deleteAllBetweenFileCollisionsForFiles(
+    ids: List<Long>,
+    importLanguageIds: List<Long>,
+  ) {
+    val languageIdStrings = importLanguageIds.map { it.toString() }
+    entityManager.createNativeQuery(
+      """
+      with deleted as (  
+        delete from import_file_issue_param
+        where issue_id in (
+          select import_file_issue.id from import_file_issue
+          join import_file_issue_param ifip on 
+              import_file_issue.id = ifip.issue_id 
+              and ifip.type = 2 
+              and ifip.value in :importLanguageIds
+          where file_id in :ids and import_file_issue.type = 10
+        ) returning issue_id
+      )
+      delete from import_file_issue
+      where id in (select issue_id from deleted)
+    """,
+    )
+      .setParameter("ids", ids)
+      .setParameter("importLanguageIds", languageIdStrings)
+      .executeUpdate()
+  }
+
+  fun updateIsSelectedForTranslations(translations: List<ImportTranslation>) {
+    jdbcTemplate.batchUpdate(
+      "update import_translation set is_selected_to_import = ? where id = ?",
+      translations,
+      100,
+    ) { ps, entity ->
+      ps.setBoolean(1, entity.isSelectedToImport)
+      ps.setLong(2, entity.id)
+    }
+    entityManager.clear()
+  }
 }

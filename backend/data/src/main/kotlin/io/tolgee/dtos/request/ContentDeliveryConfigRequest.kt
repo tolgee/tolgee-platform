@@ -2,7 +2,8 @@ package io.tolgee.dtos.request
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.IExportParams
-import io.tolgee.dtos.request.export.ExportFormat
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
 import jakarta.validation.constraints.NotBlank
 
@@ -41,4 +42,5 @@ class ContentDeliveryConfigRequest : IExportParams {
     )
 
   override var filterNamespace: List<String?>? = null
+  override var messageFormat: ExportMessageFormat? = null
 }

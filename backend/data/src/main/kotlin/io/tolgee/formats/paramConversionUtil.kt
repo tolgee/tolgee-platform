@@ -13,13 +13,16 @@ fun convertFloatToIcu(
 ): String? {
   val precision = parsed.precision?.toLong() ?: 6
   val tooPrecise = precision > 50
-  val usesUnsupportedFeature = parsed.width != null || parsed.flags != null || parsed.length != null
+  val usesUnsupportedFeature = usesUnsupportedFeature(parsed)
   if (tooPrecise || usesUnsupportedFeature) {
     return null
   }
   val precisionString = ".${(1..precision).joinToString("") { "0" }}"
   return "{$name, number, $precisionString}"
 }
+
+fun usesUnsupportedFeature(parsed: ParsedCLikeParam) =
+  parsed.width != null || parsed.flags != null || parsed.length != null
 
 fun convertMessage(
   message: String,
@@ -31,7 +34,7 @@ fun convertMessage(
     string = message,
     regex = convertor.regex,
     matchedCallback = {
-      convertor.convert(it)
+      convertor.convert(it, isPlural)
     },
     unmatchedCallback = {
       PreIcuMessageEscaper(it, isPlural).escaped

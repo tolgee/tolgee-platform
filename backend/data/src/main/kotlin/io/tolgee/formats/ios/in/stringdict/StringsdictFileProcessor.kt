@@ -1,7 +1,9 @@
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.convertMessage
-import io.tolgee.formats.ios.`in`.stringdict.IOsPluralToIcuParamConvertor
+import io.tolgee.formats.ios.`in`.IOsToIcuParamConvertor
+import io.tolgee.formats.ios.`in`.guessLanguageFromPath
+import io.tolgee.formats.ios.`in`.guessNamespaceFromPath
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import javax.xml.stream.XMLInputFactory
@@ -20,7 +22,6 @@ open class StringsdictFileProcessor(
     PluralForm,
   }
 
-  private lateinit var languageName: String
   var state = ParseState.Initial
   private var translationKey: String = ""
 
@@ -32,8 +33,6 @@ open class StringsdictFileProcessor(
 
   override fun process() {
     try {
-      languageName = decideLanguage()
-
       while (eventReader.hasNext()) {
         val event = eventReader.nextEvent()
 
@@ -48,6 +47,7 @@ open class StringsdictFileProcessor(
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message)
     }
+    context.namespace = guessNamespaceFromPath(context.file.name)
   }
 
   private fun handleStartElement(startElement: StartElement) {
@@ -109,7 +109,7 @@ open class StringsdictFileProcessor(
     if (state == ParseState.PluralForm) {
       forms[pluralForm] =
         convertMessage(value, true) {
-          IOsPluralToIcuParamConvertor()
+          IOsToIcuParamConvertor()
         }
       state = ParseState.FormatValues
       return
@@ -146,13 +146,12 @@ open class StringsdictFileProcessor(
     }
   }
 
+  private val languageName: String by lazy {
+    guessLanguageFromPath(context.file.name)
+  }
+
   private fun addTranslation() {
     val translation = FormsToIcuPluralConvertor(forms).convert()
     context.addTranslation(translationKey, languageName, translation)
-  }
-
-  private fun decideLanguage(): String {
-    // Here, language is detected somehow, maybe based on file name or path.
-    return "en"
   }
 }

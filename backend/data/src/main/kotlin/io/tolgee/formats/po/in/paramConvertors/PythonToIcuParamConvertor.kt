@@ -8,8 +8,11 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
   override val regex: Regex
     get() = PYTHON_PARAM_REGEX
 
-  override fun convert(matchResult: MatchResult): String {
-    val parsed = parser.parse(matchResult) ?: return escapeIcu(matchResult.value)
+  override fun convert(
+    matchResult: MatchResult,
+    isInPlural: Boolean,
+  ): String {
+    val parsed = parser.parse(matchResult) ?: return escapeIcu(matchResult.value, isInPlural)
     if (parsed.specifier == "%") {
       return "%"
     }
@@ -18,7 +21,7 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
 
     when (parsed.specifier) {
       "d" -> return "{$argName, number}"
-      "f" -> return convertFloatToIcu(parsed, argName) ?: return escapeIcu(matchResult.value)
+      "f" -> return convertFloatToIcu(parsed, argName) ?: return escapeIcu(matchResult.value, isInPlural)
       "e" -> return "{$argName, number, scientific}"
     }
 

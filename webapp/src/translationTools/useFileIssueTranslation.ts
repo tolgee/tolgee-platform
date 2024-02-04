@@ -20,6 +20,8 @@ export const useFileIssueTranslation = () => {
         return t('file_issue_type_value_is_empty');
       case 'value_is_not_string':
         return t('file_issue_type_value_is_not_string');
+      case 'translation_defined_in_another_file':
+        return t('translation_defined_in_another_file');
       case 'key_is_blank':
         return t('key_is_blank');
       default:

@@ -8,9 +8,9 @@ class CLikeParameterParser {
     return ParsedCLikeParam(
       argNum = match.groups.getGroupOrNull("argnum")?.value,
       argName = match.groups.getGroupOrNull("argname")?.value,
-      width = match.groups.getGroupOrNull("width")?.value?.toInt(),
+      width = match.groups.getGroupOrNull("width")?.value?.toIntOrNull(),
       precision = match.groups.getGroupOrNull("precision")?.value?.toInt(),
-      length = match.groups.getGroupOrNull("length")?.value?.toInt(),
+      length = match.groups.getGroupOrNull("length")?.value,
       specifier = specifier,
       flags = match.groups.getGroupOrNull("flags")?.value,
       fullMatch = match.value,

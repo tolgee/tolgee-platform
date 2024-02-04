@@ -181,6 +181,9 @@ class StoredDataImporter(
   }
 
   private fun ImportTranslation.doImport() {
+    if (!this.isSelectedToImport) {
+      return
+    }
     this.checkConflictResolved()
     if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
       val language =
