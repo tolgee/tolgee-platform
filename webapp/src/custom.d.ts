@@ -1,4 +1,3 @@
-import API from '@openreplay/tracker';
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
 import {
@@ -71,11 +70,5 @@ declare module '@mui/material/styles/createPalette' {
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     default: true;
-  }
-}
-
-declare global {
-  interface Window {
-    openReplayTracker?: API;
   }
 }
