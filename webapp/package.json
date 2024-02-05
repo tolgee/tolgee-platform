@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@dicebear/avatars": "4.10.2",
-    "@dicebear/avatars-identicon-sprites": "4.10.2",
-    "@dicebear/avatars-initials-sprites": "4.10.2",
+    "@dicebear/core": "^7.0.4",
+    "@dicebear/identicon": "^7.0.4",
+    "@dicebear/initials": "^7.0.4",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@formatjs/icu-messageformat-parser": "^2.0.8",
@@ -33,8 +33,6 @@
     "react": "^17.0.1",
     "react-codemirror2": "^7.3.0",
     "react-cropper": "^2.3.3",
-    "react-dnd": "^14.0.2",
-    "react-dnd-html5-backend": "^14.0.0",
     "react-dom": "^17.0.2",
     "react-draggable": "^4.4.3",
     "react-google-recaptcha-v3": "1.9.5",
@@ -102,7 +100,7 @@
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
     "@tginternal/language-util": "^1.0.6",
-    "@tolgee/cli": "^1.0.1",
+    "@tolgee/cli": "^1.3.2",
     "@types/codemirror": "^5.60.2",
     "@types/diff": "^5.0.2",
     "@types/jest": "^26.0.24",
@@ -121,14 +119,21 @@
     "eslint-plugin-react": "^7.24.0",
     "openapi-typescript": "^4.0.2",
     "prettier": "^2.3.1",
-    "redux-devtools-extension": "^2.13.9",
+    "@redux-devtools/extension": "^3.3.0",
     "rehype-highlight": "^7.0.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.3.3",
     "vite": "^5.0.12",
-    "vite-plugin-node-polyfills": "^0.19.0",
     "vite-plugin-static-copy": "^1.0.0",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.2.3"
+  },
+  "overrides": {
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    },
+    "@mdx-js/rollup": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
   }
 }

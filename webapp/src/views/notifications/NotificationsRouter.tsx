@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { Switch } from 'react-router-dom'
-import { DashboardPage } from 'tg.component/layout/DashboardPage'
+import React from 'react';
+import { Switch } from 'react-router-dom';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
 
 export const NotificationsRouter: React.FC = () => {
-	return (
-		<DashboardPage>
-			<Switch>
-			</Switch>
-		</DashboardPage>
-	)
-}
+  return (
+    <DashboardPage>
+      <Switch></Switch>
+    </DashboardPage>
+  );
+};
