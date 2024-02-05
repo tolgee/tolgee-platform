@@ -1,6 +1,7 @@
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { PrivateRoute } from './common/PrivateRoute';
+import { NotificationsRouter } from 'tg.views/notifications/NotificationsRouter';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
@@ -81,9 +82,12 @@ export const RootRouter = () => (
     <PrivateRoute path={LINKS.GO_TO_SELF_HOSTED_BILLING.template}>
       <OrganizationBillingRedirect selfHosted={true} />
     </PrivateRoute>
-    <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-      <UserSettingsRouter />
-    </PrivateRoute>
+      <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+          <UserSettingsRouter />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.NOTIFICATIONS.template}>
+          <NotificationsRouter />
+      </PrivateRoute>
     <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
       <AdministrationView />
     </PrivateRoute>

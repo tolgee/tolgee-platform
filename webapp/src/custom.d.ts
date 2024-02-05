@@ -20,6 +20,7 @@ declare module '*.svg' {
   export default content;
 }
 import { colors } from './colors';
+import { ComponentType, ElementType } from 'react'
 
 const all = { ...colors.light, ...colors.dark };
 
@@ -70,5 +71,11 @@ declare module '@mui/material/styles/createPalette' {
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     default: true;
+  }
+}
+
+declare module '@mui/material/ButtonBase' {
+  interface ButtonBaseOwnProps<TProps, T extends React.ElementType<TProps>> extends TProps {
+    component?: T;
   }
 }

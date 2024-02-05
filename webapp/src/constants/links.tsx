@@ -159,6 +159,12 @@ export class LINKS {
   );
 
   /**
+   * Notifications
+   */
+
+  static NOTIFICATIONS = Link.ofRoot('notifications');
+
+  /**
    * Administration
    */
 

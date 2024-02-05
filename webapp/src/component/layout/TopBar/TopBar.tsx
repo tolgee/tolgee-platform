@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Box, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
@@ -13,7 +14,7 @@ import { AdminInfo } from './AdminInfo';
 import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
 import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
 import { AppState } from 'tg.store/index';
-import { useSelector } from 'react-redux';
+import { NotificationBell } from 'tg.component/layout/TopBar/NotificationBell';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -125,7 +126,12 @@ export const TopBar: React.FC<Props> = ({
         </Box>
         <QuickStartTopBarButton />
         {!userLogged && <LanguageMenu />}
-        {userLogged && <UserMenu />}
+        {userLogged && (
+          <>
+            <NotificationBell />
+            <UserMenu />
+          </>
+        )}
       </StyledToolbar>
     </StyledAppBar>
   );
