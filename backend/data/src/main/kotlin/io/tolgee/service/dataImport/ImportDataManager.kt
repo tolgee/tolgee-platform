@@ -289,18 +289,17 @@ class ImportDataManager(
         newTranslation.key.file.namespace,
         otherLanguages,
       )
-    if (storedTranslations.isNotEmpty()) {
-      storedTranslations.forEach { collidingTranslation ->
-        issues.add(
-          FileIssueType.TRANSLATION_DEFINED_IN_ANOTHER_FILE to
-            mapOf(
-              FileIssueParamType.KEY_ID to collidingTranslation.key.id.toString(),
-              FileIssueParamType.LANGUAGE_ID to collidingTranslation.language.id.toString(),
-              FileIssueParamType.KEY_NAME to collidingTranslation.key.name,
-              FileIssueParamType.LANGUAGE_NAME to collidingTranslation.language.name,
-            ),
-        )
-      }
+
+    storedTranslations.firstOrNull { it.text != newTranslation.text }?.let { collision ->
+      issues.add(
+        FileIssueType.TRANSLATION_DEFINED_IN_ANOTHER_FILE to
+          mapOf(
+            FileIssueParamType.KEY_ID to collision.key.id.toString(),
+            FileIssueParamType.LANGUAGE_ID to collision.language.id.toString(),
+            FileIssueParamType.KEY_NAME to collision.key.name,
+            FileIssueParamType.LANGUAGE_NAME to collision.language.name,
+          ),
+      )
     }
     return issues
   }

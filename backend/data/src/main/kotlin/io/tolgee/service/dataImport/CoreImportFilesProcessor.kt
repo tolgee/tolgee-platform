@@ -152,8 +152,8 @@ class CoreImportFilesProcessor(
       val keyEntity = getOrCreateKey(entry.key)
       entry.value.forEach translationForeach@{ newTranslation ->
         newTranslation.key = keyEntity
-        val fileCollisions = checkForInFileCollisions(newTranslation)
-        if (fileCollisions.isNotEmpty()) {
+        val (isCollision, fileCollisions) = checkForInFileCollisions(newTranslation)
+        if (isCollision) {
           fileEntity.addIssues(fileCollisions)
           return@translationForeach
         }
@@ -172,25 +172,31 @@ class CoreImportFilesProcessor(
 
   private fun checkForInFileCollisions(
     newTranslation: ImportTranslation,
-  ): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
+  ): Pair<Boolean, MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>>> {
+    var isCollision = false
     val issues =
       mutableListOf<Pair<FileIssueType, Map<FileIssueParamType, String>>>()
     val storedTranslations =
       importDataManager
         .getStoredTranslations(newTranslation.key, newTranslation.language)
     if (storedTranslations.isNotEmpty()) {
-      storedTranslations.forEach { collidingTranslations ->
+      isCollision = true
+      storedTranslations.forEach { collision ->
+        if (newTranslation.text == collision.text)
+          {
+            return@forEach
+          }
         issues.add(
           FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE to
             mapOf(
-              FileIssueParamType.KEY_ID to collidingTranslations.key.id.toString(),
-              FileIssueParamType.LANGUAGE_ID to collidingTranslations.language.id.toString(),
-              FileIssueParamType.KEY_NAME to collidingTranslations.key.name,
-              FileIssueParamType.LANGUAGE_NAME to collidingTranslations.language.name,
+              FileIssueParamType.KEY_ID to collision.key.id.toString(),
+              FileIssueParamType.LANGUAGE_ID to collision.language.id.toString(),
+              FileIssueParamType.KEY_NAME to collision.key.name,
+              FileIssueParamType.LANGUAGE_NAME to collision.language.name,
             ),
         )
       }
     }
-    return issues
+    return isCollision to issues
   }
 }

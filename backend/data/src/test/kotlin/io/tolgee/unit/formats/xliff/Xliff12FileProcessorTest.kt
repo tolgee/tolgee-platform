@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.xliff
 
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.xliff.`in`.Xliff12FileProcessor
+import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
@@ -29,6 +30,8 @@ class Xliff12FileProcessorTest {
       return inputFactory.createXMLEventReader(importFileDto.data.inputStream())
     }
 
+  private val parsed get() = XliffParser(xmlEventReader).parse()
+
   @BeforeEach
   fun setup() {
     importMock = mock()
@@ -44,7 +47,7 @@ class Xliff12FileProcessorTest {
 
   @Test
   fun `processes xliff 12 file correctly`() {
-    Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
+    Xliff12FileProcessor(fileProcessorContext, parsed).process()
     assertThat(fileProcessorContext.languages).hasSize(2)
     assertThat(fileProcessorContext.translations).hasSize(176)
     assertThat(fileProcessorContext.translations["vpn.devices.removeA11Y"]!![0].text).isEqualTo("Remove %1")
@@ -82,7 +85,7 @@ class Xliff12FileProcessorTest {
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.data.inputStream())
     val start = System.currentTimeMillis()
-    Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
+    Xliff12FileProcessor(fileProcessorContext, parsed).process()
     assertThat(System.currentTimeMillis() - start).isLessThan(4000)
   }
 
@@ -95,7 +98,7 @@ class Xliff12FileProcessorTest {
       )
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.data.inputStream())
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
-    Xliff12FileProcessor(fileProcessorContext, xmlEventReader).process()
+    Xliff12FileProcessor(fileProcessorContext, parsed).process()
     assertThat(fileProcessorContext.translations).hasSize(2)
     fileProcessorContext.fileEntity.issues.let { issues ->
       assertThat(issues).hasSize(4)

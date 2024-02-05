@@ -24,6 +24,8 @@ export const useFileIssueTranslation = () => {
         return t('translation_defined_in_another_file');
       case 'key_is_blank':
         return t('key_is_blank');
+      case 'multiple_values_for_key_and_language':
+        return t('multiple_values_for_key_and_language');
       default:
         return type;
     }
