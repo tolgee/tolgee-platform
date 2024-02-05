@@ -23,10 +23,9 @@ class IOsFromIcuParamConvertor : FromIcuParamConvertor {
       }
     }
 
-    if (type == MessagePattern.ArgType.NONE)
-      {
-        return "%@"
-      }
+    if (type == MessagePattern.ArgType.NONE) {
+      return "%@"
+    }
 
     return node.toString()
   }
