@@ -46,12 +46,12 @@ class PoFileProcessor(
           }
           if (poTranslation.meta.extractedComments.isNotEmpty()) {
             val extractedComments = poTranslation.meta.extractedComments.joinToString(" ")
-            context.addKeyComment(keyName, extractedComments)
+            context.addKeyDescription(keyName, extractedComments)
           }
 
           if (poTranslation.meta.translatorComments.isNotEmpty()) {
             val translatorComments = poTranslation.meta.translatorComments.joinToString(" ")
-            context.addKeyComment(keyName, translatorComments)
+            context.addKeyDescription(keyName, translatorComments)
           }
         }
       }

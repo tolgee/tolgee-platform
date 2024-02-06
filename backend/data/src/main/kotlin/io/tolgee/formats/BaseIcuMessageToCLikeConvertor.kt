@@ -66,7 +66,7 @@ class BaseIcuMessageToCLikeConvertor(
     handleNode(tree)
 
     if (pluralFormsResult == null) {
-      return PossiblePluralConversionResult(otherResult.toString(), null, warnings)
+      return PossiblePluralConversionResult(singleResult.toString(), null, warnings)
     }
 
     return getPluralResult()

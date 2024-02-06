@@ -38,7 +38,7 @@ class Xliff12FileProcessor(
           )
         }
 
-        transUnit.note?.let { context.addKeyComment(transUnitId, it) }
+        transUnit.note?.let { context.addKeyDescription(transUnitId, it) }
       }
     }
   }

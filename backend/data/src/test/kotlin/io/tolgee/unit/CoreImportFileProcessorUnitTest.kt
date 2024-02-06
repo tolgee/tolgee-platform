@@ -31,7 +31,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
-import java.util.*
 
 class CoreImportFileProcessorUnitTest {
   private lateinit var existingLanguageEntity: Language
@@ -138,7 +137,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addTranslation("test_key", "lng", "value")
     fileProcessorContext.addKeyCodeReference("test_key", "hello.php", 10)
     fileProcessorContext.addKeyCodeReference("test_key", "hello2.php", 10)
-    fileProcessorContext.addKeyComment("test_key", "test comment")
+    fileProcessorContext.addKeyDescription("test_key", "test comment")
     whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
 
     processor.processFiles(listOf(importFileDto))

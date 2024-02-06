@@ -37,4 +37,32 @@ class BaseIcuMessageToPoConvertorTest {
     forms[1].assert.isEqualTo("%d psi")
     forms[2].assert.isEqualTo("%d psů")
   }
+
+  @Test
+  fun `fallbacks to other`() {
+    val forms =
+      BaseIcuMessageToPoConvertor(
+        message = "{0, plural, one {# pes} other {# psů}}",
+        languageTag = "cs",
+        argumentConverter = PhpFromIcuParamConvertor(),
+      ).convert().formsResult
+
+    forms!![0].assert.isEqualTo("%d pes")
+    forms[1].assert.isEqualTo("%d psů")
+    forms[2].assert.isEqualTo("%d psů")
+  }
+
+  @Test
+  fun `fallbacks works when unsupported form is present other`() {
+    val forms =
+      BaseIcuMessageToPoConvertor(
+        message = "{0, plural, one {# pes} many {# pesos} other {# psů}}",
+        languageTag = "cs",
+        argumentConverter = PhpFromIcuParamConvertor(),
+      ).convert().formsResult
+
+    forms!![0].assert.isEqualTo("%d pes")
+    forms[1].assert.isEqualTo("%d psů")
+    forms[2].assert.isEqualTo("%d psů")
+  }
 }

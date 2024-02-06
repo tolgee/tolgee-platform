@@ -67,7 +67,7 @@ class IOsStringsStringsdictExporter(
     convertedText: String,
   ) {
     val preparedFile = getResultPreparedFile(rawData)
-    preparedFile.stringsWriter.addEntry(rawData.key.name, convertedText)
+    preparedFile.stringsWriter.addEntry(rawData.key.name, convertedText, rawData.key.description)
   }
 
   private fun getResultPreparedFile(translation: ExportTranslationView): PreparedFile {

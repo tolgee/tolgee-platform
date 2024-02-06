@@ -69,6 +69,7 @@ class ExportDataProvider(
       key.get(Key_.id),
       key.get(Key_.name),
       keyMetaJoin.get(KeyMeta_.custom),
+      keyMetaJoin.get(KeyMeta_.description),
       namespaceJoin.get(Namespace_.name),
       languageJoin.get(Language_.id),
       languageJoin.get(Language_.tag),
@@ -179,7 +180,13 @@ class ExportDataProvider(
       val keyView =
         keyMap.computeIfAbsent(dataView.keyId) {
           @Suppress("UNCHECKED_CAST")
-          ExportKeyView(dataView.keyId, dataView.keyName, dataView.keyCustom as? Map<String, Any?>?, dataView.namespace)
+          ExportKeyView(
+            dataView.keyId,
+            dataView.keyName,
+            dataView.keyCustom as? Map<String, Any?>?,
+            dataView.keyDescription,
+            dataView.namespace,
+          )
         }
 
       keyView.translations[dataView.languageTag] =

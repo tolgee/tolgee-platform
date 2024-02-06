@@ -74,7 +74,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     transUnit: XliffTransUnit,
     transUnitId: String,
   ) {
-    context.addKeyComment(transUnitId, transUnit.note)
+    context.addKeyDescription(transUnitId, transUnit.note)
   }
 
   private fun handleSingle(

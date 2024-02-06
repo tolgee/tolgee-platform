@@ -37,12 +37,26 @@ class StringsFormatProcessorTest {
     Assertions.assertThat(fileProcessorContext.languages).hasSize(1)
     Assertions.assertThat(fileProcessorContext.translations).hasSize(7)
     assertParsed("""welcome_header""", """Hello, {0}""")
-    assertParsed("""welcome_sub_header""", """Hello, {0}""")
+    assertParsed("""welcome_sub_header""", """Hello, %s""")
     assertParsed("""another key""", """Dies ist ein weiterer Schlüssel.""")
     assertParsed("""another key " with escaping""", """Dies ist ein weiterer " Schlüssel.""")
     assertParsed("""another key \ with escaping 2""", """Dies ist ein weiterer \ Schlüssel.""")
     assertParsed("""another key with escaping 3\""", """Dies ist ein weiterer Schlüssel\""")
     assertParsed("another key\n\n multiline", "Dies ist ein weiterer\n\nSchlüssel.")
+
+    assertKeyDescription(
+      "welcome_sub_header",
+      "Welcome header comment" +
+        "\nit's a multiline comment\n*/\n\nI cannot trick you!",
+    )
+
+    assertKeyDescription("another key", null)
+    assertKeyDescription("another key \" with escaping", null)
+    assertKeyDescription("another key \\ with escaping 2", null)
+    assertKeyDescription(
+      "another key\n\n multiline",
+      null,
+    )
   }
 
   private fun assertParsed(
@@ -50,5 +64,13 @@ class StringsFormatProcessorTest {
     translationText: String,
   ) {
     fileProcessorContext.translations[key]!!.single().text.assert.isEqualTo(translationText)
+  }
+
+  private fun assertKeyDescription(
+    keyName: String,
+    expectedDescription: String?,
+  ) {
+    val actualDescription = fileProcessorContext.keys[keyName]?.keyMeta?.description
+    actualDescription.assert.isEqualTo(expectedDescription)
   }
 }

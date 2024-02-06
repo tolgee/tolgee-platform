@@ -101,7 +101,7 @@ data class FileProcessorContext(
     }
   }
 
-  fun addKeyComment(
+  fun addKeyDescription(
     key: String,
     text: String?,
   ) {
@@ -109,9 +109,7 @@ data class FileProcessorContext(
       return
     }
     val keyMeta = getOrCreateKeyMeta(key)
-    keyMeta.addComment {
-      this.text = text
-    }
+    keyMeta.description = text.trim()
   }
 
   fun addKeyCodeReference(

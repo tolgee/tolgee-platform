@@ -6,8 +6,17 @@ class StringsWriter {
   fun addEntry(
     key: String,
     value: String,
+    comment: String? = null,
   ) {
-    content.append("\"${escaped(key)}\" = \"${escaped(value)}\";\n")
+    comment?.let {
+      val escaped = escapeComment(it)
+      content.append("/* $escaped */\n")
+    }
+    content.append("\"${escaped(key)}\" = \"${escaped(value)}\";\n\n")
+  }
+
+  private fun escapeComment(s: String): String {
+    return s.replace("*/", "\\*/")
   }
 
   private fun escaped(string: String): String {

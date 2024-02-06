@@ -15,6 +15,9 @@ class StringsFileProcessor(
   private var key: String? = null
   private var value: String? = null
   private var wasLastCharEscape = false
+  private var wasTheCharBeforeLastCharEscape = false
+  private var currentComment: StringBuilder? = null
+  private var lastChar: Char? = null
 
   override fun process() {
     parseFileToContext()
@@ -42,6 +45,16 @@ class StringsFileProcessor(
 
             state = State.EXPECT_VALUE
           }
+
+          if (char == '/' && lastChar == '/') {
+            currentComment = null
+            state = State.INSIDE_INLINE_COMMENT
+          }
+
+          if (lastChar == '/' && char == '*') {
+            currentComment = null
+            state = State.INSIDE_BLOCK_COMMENT
+          }
         }
 
         State.EXPECT_VALUE -> {
@@ -62,27 +75,46 @@ class StringsFileProcessor(
         State.INSIDE_VALUE -> {
           if (char == '\"' && !wasLastCharEscape) {
             state = State.OUTSIDE
-            onPairParsed(key!!, value!!)
+            onPairParsed()
             key = null
             value = null
           } else {
             value += char
           }
         }
+
+        State.INSIDE_INLINE_COMMENT -> {
+          // inline comment is ignored
+          if (char == '\n' && !wasLastCharEscape) {
+            state = State.OUTSIDE
+          }
+        }
+
+        State.INSIDE_BLOCK_COMMENT -> {
+          if (lastChar == '*' && char == '/' && !wasTheCharBeforeLastCharEscape) {
+            currentComment?.let {
+              it.deleteCharAt(it.length - 1)
+            }
+            state = State.OUTSIDE
+          } else {
+            currentComment = (currentComment ?: StringBuilder()).also { it.append(char) }
+          }
+        }
       }
+      lastChar = char
+      wasTheCharBeforeLastCharEscape = wasLastCharEscape
       wasLastCharEscape = false
     }
   }
 
-  private fun onPairParsed(
-    key: String,
-    value: String,
-  ) {
+  private fun onPairParsed() {
     val convertedMessage =
-      convertMessage(value, false) {
+      convertMessage(value ?: return, false) {
         IOsToIcuParamConvertor()
       }
-    context.addTranslation(key, languageName, convertedMessage)
+    context.addKeyDescription(key ?: return, currentComment?.toString())
+    context.addTranslation(key ?: return, languageName, convertedMessage)
+    currentComment = null
   }
 
   private val languageName: String by lazy {
@@ -91,6 +123,8 @@ class StringsFileProcessor(
 
   enum class State {
     OUTSIDE,
+    INSIDE_INLINE_COMMENT,
+    INSIDE_BLOCK_COMMENT,
     INSIDE_KEY,
     INSIDE_VALUE,
     EXPECT_VALUE,
