@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
@@ -157,7 +158,7 @@ class ImportDataManager(
               ?.let { it[importedTranslation.language.file.namespace to importedTranslation.key.name] }
           if (existingTranslation != null) {
             // remove if text is the same
-            if (existingTranslation.text == importedTranslation.text) {
+            if (existingTranslation.text isSamePossiblePlural importedTranslation.text) {
               toRemove.add(importedTranslation)
             } else {
               importedTranslation.conflict = existingTranslation

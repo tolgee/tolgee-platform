@@ -4,10 +4,10 @@ import com.ibm.icu.text.PluralRules
 import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
 import io.tolgee.formats.BaseIcuMessageToCLikeConvertor
+import io.tolgee.formats.getPluralDataOrNull
+import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
 import io.tolgee.formats.po.FromIcuParamConvertor
-import io.tolgee.formats.po.getLocaleFromTag
-import io.tolgee.formats.po.getPluralDataOrNull
 
 class BaseIcuMessageToPoConvertor(
   val message: String,
@@ -21,7 +21,7 @@ class BaseIcuMessageToPoConvertor(
   }
 
   private val locale: ULocale by lazy {
-    getLocaleFromTag(languageTag)
+    getULocaleFromTag(languageTag)
   }
 
   private val languagePluralData by lazy {

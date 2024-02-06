@@ -29,8 +29,9 @@ class BaseIcuMessageToCLikeConvertor(
       IcuMessageEscapeRemover(value, keyword != null)
         .escapeRemoved
     if (keyword == null) {
-      otherResult.append(unescaped)
+      singleResult.append(unescaped)
       pluralFormsResult?.values?.forEach { it.append(unescaped) }
+      otherResult?.append(unescaped)
       return
     }
 
@@ -39,11 +40,14 @@ class BaseIcuMessageToCLikeConvertor(
     }
 
     pluralFormsResult?.compute(keyword) { _, v ->
-      (v ?: StringBuilder(otherResult)).append(unescaped)
+      (v ?: StringBuilder(singleResult)).append(unescaped)
     }
 
     if (keyword == OTHER_KEYWORD) {
-      otherResult.append(unescaped)
+      if (otherResult == null) {
+        otherResult = StringBuilder(singleResult)
+      }
+      otherResult!!.append(unescaped)
     }
   }
 
@@ -52,7 +56,8 @@ class BaseIcuMessageToCLikeConvertor(
    */
   private var pluralFormsResult: MutableMap<String, StringBuilder>? = null
 
-  private var otherResult = StringBuilder()
+  private var otherResult: StringBuilder? = null
+  private var singleResult = StringBuilder()
 
   private val warnings = mutableListOf<Pair<Message, List<String>>>()
 

@@ -1,8 +1,8 @@
 package io.tolgee.formats.po.out
 
 import io.tolgee.dtos.IExportParams
+import io.tolgee.formats.getPluralData
 import io.tolgee.formats.po.SupportedFormat
-import io.tolgee.formats.po.getPluralData
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter

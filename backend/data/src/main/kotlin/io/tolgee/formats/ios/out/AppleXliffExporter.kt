@@ -151,7 +151,7 @@ class AppleXliffExporter(
         val file =
           XliffFile().apply {
             this.original = targetFileOriginal
-            this.sourceLanguage = translation.languageTag
+            this.sourceLanguage = baseLanguage.tag
             this.targetLanguage = translation.languageTag
           }
         xliffModel.files.add(file)
