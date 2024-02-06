@@ -42,13 +42,15 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
 
         addNote(transUnit, transUnitId)
 
-        val pluralFormMatch = PLURAL_FORM_REGEX.matchEntire(transUnitId)
+        val (pluralFormRegex, pluralDefRegex) = getPluralRegexes(file)
+
+        val pluralFormMatch = pluralFormRegex.matchEntire(transUnitId)
         if (pluralFormMatch != null) {
           handlePlural(pluralFormMatch, file, transUnit)
           return@transUnitsForeach
         }
 
-        if (transUnitId.matches(PLURAL_DEF_REGEX)) {
+        if (pluralDefRegex != null && transUnitId.matches(pluralDefRegex)) {
           // let's ignore this one, since it has no meaning for us now
           return@transUnitsForeach
         }
@@ -60,14 +62,19 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     handlePlurals()
   }
 
+  private fun getPluralRegexes(file: XliffFile): Pair<Regex, Regex?> {
+    if (file.original?.contains(".stringsdict") == true) {
+      return STRINGSDICT_PLURAL_FORM_REGEX to STRINGSDICT_PLURAL_DEF_REGEX
+    }
+
+    return XCSTRINGS_PLURAL_FORM_REGEX to null
+  }
+
   private fun addNote(
     transUnit: XliffTransUnit,
     transUnitId: String,
   ) {
-    val note = transUnit.note
-    if (!note.isNullOrBlank()) {
-      context.addKeyComment(transUnitId, note)
-    }
+    context.addKeyComment(transUnitId, transUnit.note)
   }
 
   private fun handleSingle(
@@ -89,8 +96,8 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     transUnit: XliffTransUnit,
   ) {
     val keyName = pluralFormMatch.groups["keyname"]?.value ?: return
-    val propertyName = pluralFormMatch.groups["property"]?.value ?: return
-    context.setCustom(keyName, APPLE_PLURAL_PROPERTY_KEY, propertyName)
+
+    assignPropertyName(keyName, pluralFormMatch)
 
     val pluralFile =
       allPlurals.computeIfAbsent(file) { mutableMapOf() }
@@ -100,6 +107,18 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
       val form = pluralFormMatch.groups["form"]?.value ?: return@compute formMap
       formMap[form] = transUnit.source to transUnit.target
       formMap
+    }
+  }
+
+  private fun assignPropertyName(
+    keyName: String,
+    pluralFormMatch: MatchResult,
+  ) {
+    try {
+      val propertyName = pluralFormMatch.groups["property"]?.value ?: return
+      context.setCustom(keyName, APPLE_PLURAL_PROPERTY_KEY, propertyName)
+    } catch (e: IllegalArgumentException) {
+      // the property group is optional, so it might throw
     }
   }
 
@@ -161,9 +180,11 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
   }
 
   companion object {
-    private val PLURAL_DEF_REGEX =
+    private val XCSTRINGS_PLURAL_FORM_REGEX =
+      "^/?(?<keyname>[^:]+)\\|==\\|plural\\.(?<form>[a-z0-9=]+)\$".toRegex()
+    private val STRINGSDICT_PLURAL_DEF_REGEX =
       "^/?(?<keyname>[^:]+):dict/(?<property>[^:]+):dict/:string$".toRegex()
-    private val PLURAL_FORM_REGEX =
+    private val STRINGSDICT_PLURAL_FORM_REGEX =
       "^/?(?<keyname>[^:]+):dict/(?<property>[^:]+):dict/(?<form>[a-z0-9=]+):dict/:string\$".toRegex()
   }
 }

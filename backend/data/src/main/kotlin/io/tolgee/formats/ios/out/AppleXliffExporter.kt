@@ -83,15 +83,19 @@ class AppleXliffExporter(
     source: PossiblePluralConversionResult?,
     target: PossiblePluralConversionResult?,
   ) {
+    val fileType = resultItem.getFileType ?: FileType.STRINGSDICT
+
     val property = targetTranslation.key.custom?.get(APPLE_PLURAL_PROPERTY_KEY) as? String ?: "property"
 
-    resultItem.transUnits.add(
-      XliffTransUnit().apply {
-        this.id = "/${targetTranslation.key.name}:dict/NSStringLocalizedFormatKey:dict/:string"
-        this.source = "%#@$property@"
-        this.target = "%#@$property@"
-      },
-    )
+    if (fileType == FileType.STRINGSDICT) {
+      resultItem.transUnits.add(
+        XliffTransUnit().apply {
+          this.id = "/${targetTranslation.key.name}:dict/NSStringLocalizedFormatKey:dict/:string"
+          this.source = "%#@$property@"
+          this.target = "%#@$property@"
+        },
+      )
+    }
 
     val sourceForms = populateForms(baseLanguage.tag, source)
     val targetForms = populateForms(targetTranslation.languageTag, target)
@@ -101,11 +105,23 @@ class AppleXliffExporter(
     allFormKeywords.forEach { keyword ->
       resultItem.transUnits.add(
         XliffTransUnit().apply {
-          this.id = "/${targetTranslation.key.name}:dict/$property:dict/$keyword:dict/:string"
+          this.id = getPluralTransUnitId(targetTranslation.key.name, property, keyword, fileType)
           this.source = sourceForms[keyword] ?: sourceForms["other"] ?: ""
           this.target = targetForms[keyword] ?: targetForms["other"]
         },
       )
+    }
+  }
+
+  private fun getPluralTransUnitId(
+    keyName: String,
+    property: String,
+    keyword: String,
+    fileType: FileType,
+  ): String {
+    return when (fileType) {
+      FileType.XCSTRINGS -> return "$keyName|==|plural.$keyword"
+      FileType.STRINGSDICT -> "/$keyName:dict/$property:dict/$keyword:dict/:string"
     }
   }
 
@@ -142,5 +158,20 @@ class AppleXliffExporter(
         file
       }
     return file
+  }
+
+  private val XliffFile.getFileType: FileType?
+    get() {
+      if (this.original?.endsWith(".stringsdict") == true) {
+        return FileType.STRINGSDICT
+      } else if (this.original?.endsWith(".xcstrings") == true) {
+        return FileType.XCSTRINGS
+      }
+      return null
+    }
+
+  enum class FileType {
+    XCSTRINGS,
+    STRINGSDICT,
   }
 }

@@ -27,7 +27,7 @@ class XliffParser(
 
   fun parse(): XliffModel {
     var currentTextValue: String? = null
-
+    parseVersion()
     while (xmlEventReader.hasNext()) {
       val event = xmlEventReader.nextEvent()
       when {
@@ -121,6 +121,21 @@ class XliffParser(
       }
     }
     return result
+  }
+
+  private fun parseVersion() {
+    while (xmlEventReader.hasNext()) {
+      val event = xmlEventReader.nextEvent()
+      if (event.isStartElement &&
+        (event as? StartElement)?.name?.localPart?.lowercase(Locale.getDefault()) == "xliff"
+      ) {
+        val versionAttr = event.getAttributeByName(QName(null, "version"))
+        if (versionAttr != null) {
+          result.version = versionAttr.value
+          return
+        }
+      }
+    }
   }
 
   private val isAnyToContentSaveOpen

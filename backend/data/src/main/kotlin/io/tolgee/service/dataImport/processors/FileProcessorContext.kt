@@ -103,8 +103,11 @@ data class FileProcessorContext(
 
   fun addKeyComment(
     key: String,
-    text: String,
+    text: String?,
   ) {
+    if (text.isNullOrBlank()) {
+      return
+    }
     val keyMeta = getOrCreateKeyMeta(key)
     keyMeta.addComment {
       this.text = text
