@@ -3061,4 +3061,9 @@
             <column name="message_format" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1707213133613-1">
+        <addColumn tableName="key_meta">
+            <column name="custom" type="jsonb"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

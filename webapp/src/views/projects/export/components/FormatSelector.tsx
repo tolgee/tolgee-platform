@@ -7,6 +7,7 @@ export const FORMATS = [
   'XLIFF',
   'PO',
   'IOS_STRINGS_STRINGSDICT',
+  'APPLE_XLIFF',
 ] as const;
 
 type Props = {

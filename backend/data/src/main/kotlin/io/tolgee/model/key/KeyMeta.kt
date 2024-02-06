@@ -1,5 +1,6 @@
 package io.tolgee.model.key
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
@@ -17,6 +18,7 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.Type
 
 @Entity
 @EntityListeners(KeyMeta.Companion.KeyMetaListener::class)
@@ -46,6 +48,10 @@ class KeyMeta(
   @Size(max = 2000)
   var description: String? = null
 
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  var custom: MutableMap<String, Any?>? = null
+
   fun addComment(
     author: UserAccount? = null,
     ft: KeyComment.() -> Unit,
@@ -64,6 +70,18 @@ class KeyMeta(
       ft()
       codeReferences.add(this)
     }
+  }
+
+  fun setCustom(
+    key: String,
+    value: Any?,
+  ) {
+    val custom =
+      custom ?: mutableMapOf<String, Any?>()
+        .also {
+          custom = it
+        }
+    custom[key] = value
   }
 
   companion object {

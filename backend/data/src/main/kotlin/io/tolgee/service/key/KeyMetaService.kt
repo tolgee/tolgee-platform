@@ -44,6 +44,14 @@ class KeyMetaService(
     target.codeReferences.import(target, source.codeReferences.toList()) { a, b ->
       a.line == b.line && a.path == b.path
     }
+    source.custom?.let { sourceCustom ->
+      val targetCustom =
+        target.custom ?: mutableMapOf<String, Any?>()
+          .also {
+            target.custom = it
+          }
+      targetCustom.putAll(sourceCustom)
+    }
   }
 
   private inline fun <T : WithKeyMetaReference> List<T>.import(

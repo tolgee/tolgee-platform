@@ -1,6 +1,6 @@
 package io.tolgee.formats.xliff.`in`
 
-import io.tolgee.formats.xliff.`in`.parser.XliffParserResult
+import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -8,7 +8,7 @@ import io.tolgee.service.dataImport.processors.ImportFileProcessor
 
 class Xliff12FileProcessor(
   override val context: FileProcessorContext,
-  private val parsed: XliffParserResult,
+  private val parsed: XliffModel,
 ) : ImportFileProcessor() {
   override fun process() {
     parsed.files.forEach { file ->
@@ -22,10 +22,9 @@ class Xliff12FileProcessor(
             )
             return@transUnitsForeach
           }
-        if (!fileOriginal.isNullOrBlank())
-          {
-            context.addKeyCodeReference(transUnitId, fileOriginal, null)
-          }
+        if (!fileOriginal.isNullOrBlank()) {
+          context.addKeyCodeReference(transUnitId, fileOriginal, null)
+        }
         transUnit.source?.let { source ->
           context.addTranslation(transUnitId, file.sourceLanguage ?: "unknown source", source)
         }

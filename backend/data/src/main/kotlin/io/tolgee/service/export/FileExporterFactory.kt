@@ -4,6 +4,7 @@ import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.ios.out.AppleXliffExporter
 import io.tolgee.formats.ios.out.IOsStringsStringsdictExporter
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.SupportedFormat
@@ -24,6 +25,7 @@ class FileExporterFactory {
     return when (exportParams.format) {
       ExportFormat.JSON -> JsonFileExporter(data, exportParams)
       ExportFormat.XLIFF -> XliffFileExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
+      ExportFormat.APPLE_XLIFF -> AppleXliffExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
       ExportFormat.PO ->
         getPoExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
       ExportFormat.IOS_STRINGS_STRINGSDICT ->

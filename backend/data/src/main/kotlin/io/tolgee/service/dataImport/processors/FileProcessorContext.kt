@@ -89,6 +89,15 @@ data class FileProcessorContext(
     }
   }
 
+  fun setCustom(
+    translationKey: String,
+    customMapKey: String,
+    value: Any,
+  ) {
+    val keyMeta = getOrCreateKeyMeta(translationKey)
+    keyMeta.setCustom(customMapKey, value)
+  }
+
   private fun getOrCreateKey(name: String): ImportKey {
     return keys[name] ?: let { ImportKey(name, this.fileEntity).also { keys[name] = it } }
   }

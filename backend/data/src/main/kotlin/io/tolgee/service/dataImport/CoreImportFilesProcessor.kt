@@ -182,10 +182,9 @@ class CoreImportFilesProcessor(
     if (storedTranslations.isNotEmpty()) {
       isCollision = true
       storedTranslations.forEach { collision ->
-        if (newTranslation.text == collision.text)
-          {
-            return@forEach
-          }
+        if (newTranslation.text == collision.text) {
+          return@forEach
+        }
         issues.add(
           FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE to
             mapOf(

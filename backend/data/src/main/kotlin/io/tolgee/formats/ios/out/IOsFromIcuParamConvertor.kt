@@ -24,7 +24,7 @@ class IOsFromIcuParamConvertor : FromIcuParamConvertor {
     }
 
     if (type == MessagePattern.ArgType.NONE) {
-      return "%@"
+      return "%$argNumString@"
     }
 
     return node.toString()

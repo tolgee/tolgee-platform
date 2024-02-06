@@ -1,5 +1,8 @@
 package io.tolgee.formats.xliff.`in`.parser
 
+import io.tolgee.formats.xliff.model.XliffFile
+import io.tolgee.formats.xliff.model.XliffModel
+import io.tolgee.formats.xliff.model.XliffTransUnit
 import java.io.StringWriter
 import java.util.*
 import javax.xml.namespace.QName
@@ -18,11 +21,11 @@ class XliffParser(
   private val currentOpenElement: String?
     get() = openElements.lastOrNull()
 
-  private val result = XliffParserResult()
-  private var currentFile: XliffParserResultFile? = null
-  private var currentTransUnit: XliffParserResultTransUnit? = null
+  private val result = XliffModel()
+  private var currentFile: XliffFile? = null
+  private var currentTransUnit: XliffTransUnit? = null
 
-  fun parse(): XliffParserResult {
+  fun parse(): XliffModel {
     var currentTextValue: String? = null
 
     while (xmlEventReader.hasNext()) {
@@ -37,7 +40,7 @@ class XliffParser(
             openElements.add(startElement.name.localPart.lowercase(Locale.getDefault()))
             when (currentOpenElement) {
               "file" -> {
-                val file = XliffParserResultFile()
+                val file = XliffFile()
                 currentFile = file
                 result.files.add(file)
                 file.original =
@@ -55,10 +58,11 @@ class XliffParser(
                 if (currentFile == null) {
                   throw IllegalStateException("Unexpected trans-unit element")
                 }
-                val transUnit = XliffParserResultTransUnit()
+                val transUnit = XliffTransUnit()
                 currentTransUnit = transUnit
                 currentFile!!.transUnits.add(transUnit)
                 transUnit.id = startElement.getAttributeByName(QName(null, "id"))?.value
+                transUnit.translate = startElement.getAttributeByName(QName(null, "translate"))?.value
               }
             }
           }

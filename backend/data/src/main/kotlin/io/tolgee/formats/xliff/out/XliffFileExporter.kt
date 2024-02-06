@@ -2,18 +2,12 @@ package io.tolgee.formats.xliff.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
-import io.tolgee.helpers.TextHelper
+import io.tolgee.formats.xliff.model.XliffFile
+import io.tolgee.formats.xliff.model.XliffModel
+import io.tolgee.formats.xliff.model.XliffTransUnit
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
-import org.dom4j.Document
-import org.dom4j.DocumentException
-import org.dom4j.DocumentHelper
-import org.dom4j.Element
-import org.dom4j.Node
-import org.dom4j.io.OutputFormat
-import org.dom4j.io.XMLWriter
-import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
 class XliffFileExporter(
@@ -24,97 +18,52 @@ class XliffFileExporter(
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.XLIFF.extension
 
-  val result = mutableMapOf<String, ResultItem>()
-  private val baseTranslations: Map<String, ExportTranslationView>
-
-  init {
-    this.baseTranslations = baseTranslationsProvider().associateBy { it.key.name }
+  /**
+   * Path -> Xliff Model
+   */
+  val models = mutableMapOf<String, XliffModel>()
+  private val baseTranslations by lazy {
+    baseTranslationsProvider().associateBy { it.key.namespace to it.key.name }
   }
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, resultItem) ->
-      val outputStream = ByteArrayOutputStream()
-      val writer = XMLWriter(outputStream, OutputFormat.createPrettyPrint())
-      writer.write(resultItem.document)
-      fileName to outputStream.toByteArray().inputStream()
+    return models.asSequence().map { (fileName, resultItem) ->
+      fileName to XliffFileWriter(xliffModel = resultItem, enableHtml = true).produceFiles()
     }.toMap()
   }
 
   private fun prepare() {
     translations.forEach { translation ->
-      val path = TextHelper.splitOnNonEscapedDelimiter(translation.key.name, exportParams.structureDelimiter)
-      val resultItem = getResultItem(translation)
-      addToFileElement(resultItem.fileBodyElement, path, translation)
+      val resultItem = getResultXliffFile(translation)
+      addTranslation(resultItem, translation)
     }
   }
 
-  private fun addToFileElement(
-    fileBodyElement: Element,
-    pathItems: List<String>,
+  private fun addTranslation(
+    resultItem: XliffFile,
     translation: ExportTranslationView,
   ) {
-    val transUnitElement =
-      fileBodyElement.addElement("trans-unit")
-        .addAttribute("id", pathItems.joinToString(exportParams.structureDelimiter.toString()))
-        .addAttribute("datatype", "html")
-
-    baseTranslations[translation.key.name]?.text?.let {
-      transUnitElement.addElement("source").addFromHtmlOrText(it)
-    }
-    translation.text?.let {
-      transUnitElement.addElement("target").addFromHtmlOrText(it)
-    }
+    resultItem.transUnits.add(
+      XliffTransUnit().apply {
+        this.id = translation.key.name
+        this.source = baseTranslations[translation.key.namespace to translation.key.name]?.text
+        this.target = translation.text
+      },
+    )
   }
 
-  private fun getResultItem(translation: ExportTranslationView): ResultItem {
+  private fun getResultXliffFile(translation: ExportTranslationView): XliffFile {
     val absolutePath = translation.getFilePath(translation.key.namespace)
-    return result[absolutePath] ?: let {
-      val resultItem = createBaseDocumentStructure(translation)
-      result[absolutePath] = resultItem
-      return resultItem
-    }
-  }
-
-  private fun createBaseDocumentStructure(translation: ExportTranslationView): ResultItem {
-    val document = DocumentHelper.createDocument()
-    document.xmlEncoding = "UTF-8"
-    val fileBodyElement =
-      document.addElement("xliff")
-        .addNamespace("", "urn:oasis:names:tc:xliff:document:1.2")
-        .addAttribute("version", "1.2")
-        .addElement("file", "urn:oasis:names:tc:xliff:document:1.2")
-        .addAttribute("original", "undefined")
-        .addAttribute("datatype", "plaintext")
-        .addAttribute("source-language", baseLanguage.tag)
-        .addAttribute("target-language", translation.languageTag)
-        .addElement("body")
-    return ResultItem(document, fileBodyElement)
-  }
-
-  private fun String.parseHtml(): MutableIterator<Any?> {
-    val fragment =
-      DocumentHelper
-        .parseText("<root>$this</root>")
-    return fragment.rootElement.nodeIterator()
-  }
-
-  /**
-   * For string containing something, which is not parseable as xml such as
-   * "Value has to be < 1"
-   * It just appends text.
-   */
-  private fun Element.addFromHtmlOrText(string: String) {
-    try {
-      string.parseHtml().forEach { node ->
-        if (node !is Node) return@forEach
-        node.parent = null
-        this.add(node)
+    return models.computeIfAbsent(absolutePath) {
+      XliffModel().apply {
+        files.add(
+          XliffFile().apply {
+            this.sourceLanguage = baseLanguage.tag
+            this.targetLanguage = translation.languageTag
+          },
+        )
       }
-    } catch (e: DocumentException) {
-      this.addText(string)
-    }
+    }.files.first()
   }
-
-  data class ResultItem(val document: Document, val fileBodyElement: Element)
 }
