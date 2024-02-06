@@ -5,7 +5,7 @@ import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.ios.APPLE_FILE_ORIGINAL_CUSTOM_KEY
-import io.tolgee.formats.ios.APPLE_FILE_ORIGINAL_PROPERTY_KEY
+import io.tolgee.formats.ios.APPLE_PLURAL_PROPERTY_KEY
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -83,7 +83,7 @@ class AppleXliffExporter(
     source: PossiblePluralConversionResult?,
     target: PossiblePluralConversionResult?,
   ) {
-    val property = targetTranslation.key.custom?.get(APPLE_FILE_ORIGINAL_PROPERTY_KEY) as? String ?: "property"
+    val property = targetTranslation.key.custom?.get(APPLE_PLURAL_PROPERTY_KEY) as? String ?: "property"
 
     resultItem.transUnits.add(
       XliffTransUnit().apply {

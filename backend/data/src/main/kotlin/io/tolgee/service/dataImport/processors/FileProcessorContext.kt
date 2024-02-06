@@ -27,27 +27,11 @@ data class FileProcessorContext(
     languageName: String,
     value: Any?,
     idx: Int = 0,
+    isPlural: Boolean = false,
   ) {
     val stringValue = value as? String
 
-    if (keyName.isBlank()) {
-      this.fileEntity.addKeyIsBlankIssue(idx)
-      return
-    }
-
-    if (value !is String?) {
-      this.fileEntity.addValueIsNotStringIssue(keyName, idx, value)
-      return
-    }
-
-    if (value.isNullOrEmpty()) {
-      this.fileEntity.addValueIsEmptyIssue(keyName)
-    }
-
-    if (stringValue != null && stringValue.length > maxTranslationTextLength) {
-      fileEntity.addIssue(FileIssueType.TRANSLATION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to keyName))
-      return
-    }
+    if (!validateAndSaveIssues(keyName, idx, value, stringValue)) return
 
     val language = getOrCreateLanguage(languageName)
 
@@ -56,9 +40,59 @@ data class FileProcessorContext(
     }
 
     if (value != null) {
-      val entity = ImportTranslation(stringValue, language)
+      val entity = ImportTranslation(stringValue, language).also { it._isPlural = isPlural }
       translations[keyName]!!.add(entity)
     }
+  }
+
+  fun addPluralTranslationReplacingNonPlurals(
+    keyName: String,
+    languageName: String,
+    value: Any?,
+    idx: Int = 0,
+  ) {
+    val stringValue = value as? String
+
+    if (!validateAndSaveIssues(keyName, idx, value, stringValue)) return
+
+    val language = getOrCreateLanguage(languageName)
+
+    if (translations[keyName] == null) {
+      translations[keyName] = mutableListOf()
+    }
+
+    if (value != null) {
+      val entity = ImportTranslation(stringValue, language).also { it._isPlural = true }
+      translations[keyName]!!.removeIf { it.language == language && !it._isPlural }
+      translations[keyName]!!.add(entity)
+    }
+  }
+
+  private fun validateAndSaveIssues(
+    keyName: String,
+    idx: Int,
+    value: Any?,
+    stringValue: String?,
+  ): Boolean {
+    if (keyName.isBlank()) {
+      this.fileEntity.addKeyIsBlankIssue(idx)
+      return false
+    }
+
+    if (value !is String?) {
+      this.fileEntity.addValueIsNotStringIssue(keyName, idx, value)
+      return false
+    }
+
+    if (value.isNullOrEmpty()) {
+      this.fileEntity.addValueIsEmptyIssue(keyName)
+    }
+
+    if (stringValue != null && stringValue.length > maxTranslationTextLength) {
+      fileEntity.addIssue(FileIssueType.TRANSLATION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to keyName))
+      return false
+    }
+    return true
   }
 
   private fun getOrCreateLanguage(languageName: String): ImportLanguage {

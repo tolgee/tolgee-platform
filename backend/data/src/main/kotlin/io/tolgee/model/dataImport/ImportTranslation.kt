@@ -5,6 +5,7 @@ import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.codec.digest.MurmurHash3
 import org.hibernate.annotations.ColumnDefault
@@ -53,6 +54,13 @@ class ImportTranslation(
    */
   @ColumnDefault("true")
   var isSelectedToImport: Boolean = true
+
+  /**
+   * Just a helper field to store whether the translation is plural or not
+   * It's only assigned during import, don't rely on it if you don't know what you are doing
+   */
+  @Transient
+  internal var _isPlural = false
 
   private fun String?.computeMurmur(): String? {
     if (this == null) {

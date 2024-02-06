@@ -2,7 +2,7 @@ package io.tolgee.formats.ios.`in`
 
 import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.ios.APPLE_FILE_ORIGINAL_CUSTOM_KEY
-import io.tolgee.formats.ios.APPLE_FILE_ORIGINAL_PROPERTY_KEY
+import io.tolgee.formats.ios.APPLE_PLURAL_PROPERTY_KEY
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -13,12 +13,13 @@ import io.tolgee.service.dataImport.processors.ImportFileProcessor
 
 class AppleXliffFileProcessor(override val context: FileProcessorContext, private val parsed: XliffModel) :
   ImportFileProcessor() {
+  /**
+   * file -> Map (KeyName -> Map (Form -> Pair (Source, Target )))
+   */
+  private val allPlurals = mutableMapOf<XliffFile, MutableMap<String, MutableMap<String, Pair<String?, String?>>>>()
+
   override fun process() {
     parsed.files.forEach { file ->
-      /**
-       * KeyName -> Map (Form -> Pair (Source, Target ))
-       */
-      val filePluralUnits = mutableMapOf<String, MutableMap<String, Pair<String?, String?>>>()
 
       file.transUnits.forEach transUnitsForeach@{ transUnit ->
         // if there is a key defined in base .stringsdict but is missing in the target .stringsdict
@@ -39,11 +40,11 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
             return@transUnitsForeach
           }
 
-        transUnit.note?.let { context.addKeyComment(transUnitId, it) }
+        addNote(transUnit, transUnitId)
 
         val pluralFormMatch = PLURAL_FORM_REGEX.matchEntire(transUnitId)
         if (pluralFormMatch != null) {
-          handlePlural(pluralFormMatch, fileOriginal, filePluralUnits, transUnit)
+          handlePlural(pluralFormMatch, file, transUnit)
           return@transUnitsForeach
         }
 
@@ -54,8 +55,18 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
 
         handleSingle(fileOriginal, transUnitId, transUnit, file)
       }
+    }
 
-      handlePlurals(filePluralUnits, file)
+    handlePlurals()
+  }
+
+  private fun addNote(
+    transUnit: XliffTransUnit,
+    transUnitId: String,
+  ) {
+    val note = transUnit.note
+    if (!note.isNullOrBlank()) {
+      context.addKeyComment(transUnitId, note)
     }
   }
 
@@ -74,19 +85,17 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
 
   private fun handlePlural(
     pluralFormMatch: MatchResult,
-    fileOriginal: String?,
-    pluralsUnits: MutableMap<String, MutableMap<String, Pair<String?, String?>>>,
+    file: XliffFile,
     transUnit: XliffTransUnit,
   ) {
     val keyName = pluralFormMatch.groups["keyname"]?.value ?: return
     val propertyName = pluralFormMatch.groups["property"]?.value ?: return
+    context.setCustom(keyName, APPLE_PLURAL_PROPERTY_KEY, propertyName)
 
-    if (!fileOriginal.isNullOrBlank()) {
-      context.setCustom(keyName, APPLE_FILE_ORIGINAL_CUSTOM_KEY, fileOriginal)
-      context.setCustom(keyName, APPLE_FILE_ORIGINAL_PROPERTY_KEY, propertyName)
-    }
+    val pluralFile =
+      allPlurals.computeIfAbsent(file) { mutableMapOf() }
 
-    pluralsUnits.compute(keyName) { _, map ->
+    pluralFile.compute(keyName) { _, map ->
       val formMap = map ?: mutableMapOf()
       val form = pluralFormMatch.groups["form"]?.value ?: return@compute formMap
       formMap[form] = transUnit.source to transUnit.target
@@ -94,15 +103,21 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     }
   }
 
-  private fun handlePlurals(
-    pluralsUnits: MutableMap<String, MutableMap<String, Pair<String?, String?>>>,
-    file: XliffFile,
-  ) {
-    pluralsUnits.forEach { (keyName, forms) ->
-      val sourceForms = forms.mapValues { it.value.first }
-      val targetForms = forms.mapValues { it.value.second }
-      addPluralTranslation(keyName, sourceForms, file.sourceLanguage ?: "unknown source")
-      addPluralTranslation(keyName, targetForms, file.targetLanguage ?: "unknown target")
+  /**
+   * The plurals have to be handled last. We need to replace te non-plural translations, because
+   * the plural keys appear in the .strings file section in xliff if missing in localizad .stringsdict file
+   * if the non-plural keys were not removed from the .strings section it would show false positive file issues
+   * (key defined multiple times in the same file)
+   */
+  private fun handlePlurals() {
+    allPlurals.forEach { (file, pluralsUnits) ->
+      pluralsUnits.forEach { (keyName, forms) ->
+        context.setCustom(keyName, APPLE_FILE_ORIGINAL_CUSTOM_KEY, file.original ?: "")
+        val sourceForms = forms.mapValues { it.value.first }
+        val targetForms = forms.mapValues { it.value.second }
+        addPluralTranslation(keyName, sourceForms, file.sourceLanguage ?: "unknown source")
+        addPluralTranslation(keyName, targetForms, file.targetLanguage ?: "unknown target")
+      }
     }
   }
 
@@ -118,7 +133,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
           it.key to convertMessage(value, true)
         }.toMap()
       val converted = FormsToIcuPluralConvertor(formsNotNull).convert()
-      context.addTranslation(keyName, language, converted)
+      context.addPluralTranslationReplacingNonPlurals(keyName, language, converted)
     }
   }
 
