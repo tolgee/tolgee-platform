@@ -83,7 +83,7 @@ class CoreImportFilesProcessor(
   ): MutableList<ErrorResponseBody> {
     val processor = processorFactory.getArchiveProcessor(archive)
     val files = processor.process(archive)
-    val filtered = filterFiles(files.associateBy { it.name })
+    val filtered = filterFiles(files.map { it.name to it })
     errors.addAll(processFiles(filtered))
     return errors
   }
@@ -168,7 +168,6 @@ class CoreImportFilesProcessor(
       }
     }
     importDataManager.saveAllStoredKeys()
-    importDataManager.deleteTranslationsToDelete()
     importDataManager.saveAllStoredTranslations()
   }
 

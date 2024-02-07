@@ -100,5 +100,7 @@ class PoFileProcessor(
     FormatDetector(messages.toList())()
   }
 
-  val uLocale = getULocaleFromTag(languageId)
+  private val uLocale by lazy {
+    getULocaleFromTag(languageId)
+  }
 }

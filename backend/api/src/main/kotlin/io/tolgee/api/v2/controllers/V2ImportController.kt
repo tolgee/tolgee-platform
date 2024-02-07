@@ -43,7 +43,6 @@ import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.filterFiles
-import jakarta.servlet.http.HttpServletRequest
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -101,7 +100,7 @@ class V2ImportController(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams,
   ): ImportAddFilesResultModel {
-    val filteredFiles = filterFiles(files.associateBy { it.originalFilename ?: "" })
+    val filteredFiles = filterFiles(files.map { (it.originalFilename ?: "") to it })
     val fileDtos =
       filteredFiles.map {
         ImportFileDto(it.originalFilename ?: "", it.inputStream.readAllBytes())
@@ -302,7 +301,6 @@ class V2ImportController(
   fun selectNamespace(
     @PathVariable fileId: Long,
     @RequestBody req: SetFileNamespaceRequest,
-    request: HttpServletRequest,
   ) {
     val file = checkFileFromProject(fileId)
     this.importService.selectNamespace(file, req.namespace)

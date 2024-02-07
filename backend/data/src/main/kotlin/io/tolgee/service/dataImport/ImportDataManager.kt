@@ -59,7 +59,7 @@ class ImportDataManager(
 
   val storedTranslations = mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
 
-  val translationsToDeleteDueToHandledCollisions = mutableListOf<ImportTranslation>()
+  val translationsToUpdateDueToCollisions = mutableListOf<ImportTranslation>()
 
   /**
    * LanguageId to (Map of Pair(Namespace,KeyName) to Translation)
@@ -249,8 +249,14 @@ class ImportDataManager(
     resetBetweenFileCollisionIssuesForFiles(affectedFiles.map { it.id }, affectedLanguages.map { it.id })
     val handledLanguages = mutableListOf<ImportLanguage>()
     val issuesToSave = mutableListOf<ImportFileIssue>()
-    val translationsToUpdate = mutableListOf<ImportTranslation>()
     affectedLanguages.forEach { language ->
+      getStoredTranslations(language).forEach {
+        if (!it.isSelectedToImport) {
+          translationsToUpdateDueToCollisions.add(it)
+        }
+        it.isSelectedToImport = true
+      }
+
       if (handledLanguages.isEmpty()) {
         handledLanguages.add(language)
         resetIsSelected(language)
@@ -261,8 +267,7 @@ class ImportDataManager(
         val withSameExistingLanguage =
           handledLanguages.filter { it.existingLanguage == language.existingLanguage && it.existingLanguage != null }
         val fileCollisions = checkForOtherFilesCollisions(translation, withSameExistingLanguage)
-        translation.isSelectedToImport = true
-        translationsToUpdate.add(translation)
+        translationsToUpdateDueToCollisions.add(translation)
         if (fileCollisions.isNotEmpty()) {
           translation.isSelectedToImport = false
           fileCollisions.forEach { (type, params) ->
@@ -273,10 +278,13 @@ class ImportDataManager(
       }
     }
 
-    deleteTranslationsToDelete()
-
-    importService.updateIsSelectedForTranslations(translationsToUpdate)
+    updateTranslationsDueToCollisions()
     importService.saveAllFileIssues(issuesToSave)
+  }
+
+  private fun updateTranslationsDueToCollisions() {
+    importService.updateIsSelectedForTranslations(translationsToUpdateDueToCollisions)
+    translationsToUpdateDueToCollisions.clear()
   }
 
   private fun resetIsSelected(language: ImportLanguage) {
@@ -303,7 +311,9 @@ class ImportDataManager(
         otherLanguages,
       )
 
-    storedTranslations.firstOrNull { it.text != newTranslation.text }?.let { collision ->
+    storedTranslations.firstOrNull {
+      it.isSelectedToImport && it.text != newTranslation.text
+    }?.let { collision ->
       val handled = tryHandleUsingCollisionHandlers(listOf(newTranslation) + storedTranslations)
       if (handled) {
         return issues
@@ -322,16 +332,14 @@ class ImportDataManager(
   }
 
   private fun tryHandleUsingCollisionHandlers(importTranslations: List<ImportTranslation>): Boolean {
-    val toDelete =
+    val toIgnore =
       collisionHandlers.firstNotNullOfOrNull {
         it.handle(importTranslations)
       } ?: return false
 
-    toDelete.forEach {
-      storedTranslations[it.language]?.get(it.key)?.remove(it)
-      if (it.id != 0L) {
-        translationsToDeleteDueToHandledCollisions.add(it)
-      }
+    toIgnore.forEach {
+      translationsToUpdateDueToCollisions.add(it)
+      it.isSelectedToImport = false
     }
 
     return true
@@ -348,15 +356,5 @@ class ImportDataManager(
     newTranslation: ImportTranslation,
   ): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
     return checkForOtherFilesCollisions(newTranslation, getLanguagesWithSameExisting(newTranslation.language))
-  }
-
-  fun deleteTranslationsToDelete() {
-    importService.deleteTranslations(translationsToDeleteDueToHandledCollisions)
-    translationsToDeleteDueToHandledCollisions.forEach {
-      storedKeys
-    }
-
-    translationsToDeleteDueToHandledCollisions.clear()
-    entityManager.flush()
   }
 }

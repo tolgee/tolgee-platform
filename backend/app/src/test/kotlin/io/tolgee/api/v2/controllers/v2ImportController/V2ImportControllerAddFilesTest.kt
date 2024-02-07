@@ -79,7 +79,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     commitTransaction()
 
     val fileName = "zipOfUnknown.zip"
-    performImport(projectId = base.project.id, mapOf(Pair(fileName, zipOfUnknown))).andAssertThatJson {
+    performImport(projectId = base.project.id, listOf(Pair(fileName, zipOfUnknown))).andAssertThatJson {
       node("errors[2].code").isEqualTo("cannot_parse_file")
     }
 
@@ -92,7 +92,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     commitTransaction()
 
     val fileName = "zipOfUnknown.zip"
-    performImport(projectId = base.project.id, mapOf(Pair(fileName, zipOfUnknown)))
+    performImport(projectId = base.project.id, listOf(Pair(fileName, zipOfUnknown)))
     doesStoredFileExists(fileName, base.project.id).assert.isFalse()
   }
 
@@ -108,7 +108,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   fun `it handles po file`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = base.project.id, mapOf(Pair("example.po", poFile)))
+    performImport(projectId = base.project.id, listOf(Pair("example.po", poFile)))
       .andPrettyPrint.andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(1)
       }.andReturn()
@@ -125,7 +125,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   fun `it handles xliff file`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = base.project.id, mapOf(Pair("example.xliff", xliffFile)))
+    performImport(projectId = base.project.id, listOf(Pair("example.xliff", xliffFile)))
       .andPrettyPrint.andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(2)
       }.andReturn()
@@ -135,7 +135,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   fun `it returns error when json could not be parsed`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = base.project.id, mapOf(Pair("error.json", errorJson)))
+    performImport(projectId = base.project.id, listOf(Pair("error.json", errorJson)))
       .andIsOk.andAssertThatJson {
         node("errors[0].code").isEqualTo("cannot_parse_file")
         node("errors[0].params[0]").isEqualTo("error.json")
@@ -147,7 +147,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   fun `it throws when more then 100 languages`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
-    val data = (1..101).associate { "simple$it.json" as String? to simpleJson }
+    val data = (1..101).map { "simple$it.json" to simpleJson }
 
     performImport(projectId = base.project.id, data)
       .andIsBadRequest.andPrettyPrint.andAssertThatJson {
@@ -159,7 +159,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   fun `it imports empty keys`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = base.project.id, mapOf("empty-keys.json" to emptyKeys))
+    performImport(projectId = base.project.id, listOf("empty-keys.json" to emptyKeys))
       .andIsOk.andPrettyPrint
 
     entityManager.clear()
@@ -173,7 +173,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   fun `it imports nested keys with provided delimiter`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = base.project.id, mapOf("nested.json" to nested), mapOf("structureDelimiter" to ";"))
+    performImport(projectId = base.project.id, listOf("nested.json" to nested), mapOf("structureDelimiter" to ";"))
       .andIsOk
 
     entityManager.clear()
@@ -188,7 +188,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performImport(projectId = base.project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
+    performImport(projectId = base.project.id, listOf(Pair("zipOfJsons.zip", zipOfJsons)))
       .andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(3)
       }
@@ -204,7 +204,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("tooLongTranslation.json", tooLongTranslation)),
+        listOf(Pair("tooLongTranslation.json", tooLongTranslation)),
       ).andIsOk
     }
 
@@ -244,7 +244,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("namespaces.zip", namespacesZip)),
+        listOf(Pair("namespaces.zip", namespacesZip)),
       ).andIsOk
     }
 
@@ -268,7 +268,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("namespaces.zip", namespacesMacZip)),
+        listOf(Pair("namespaces.zip", namespacesMacZip)),
       ).andIsOk
     }
 
@@ -287,7 +287,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = base.project.id,
-        mapOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue)),
+        listOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue)),
       ).andIsOk
     }
 
@@ -312,7 +312,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       performImport(
         projectId = testData.project.id,
-        mapOf(Pair("importWithConflicts.zip", importWithConflicts)),
+        listOf(Pair("importWithConflicts.zip", importWithConflicts)),
       ).andIsOk.andAssertThatJson {
         node("result.page.totalElements").isEqualTo(2)
         node("result._embedded.languages[0].conflictCount").isEqualTo(1)
@@ -345,7 +345,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   private fun performImport(
     projectId: Long,
-    files: Map<String?, Resource>?,
+    files: List<Pair<String, Resource>>?,
     params: Map<String, Any?> = mapOf(),
   ): ResultActions {
     val builder =
@@ -356,9 +356,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
       builder.file(
         MockMultipartFile(
           "files",
-          it.key,
+          it.first,
           "application/zip",
-          it.value.file.readBytes(),
+          it.second.file.readBytes(),
         ),
       )
     }
