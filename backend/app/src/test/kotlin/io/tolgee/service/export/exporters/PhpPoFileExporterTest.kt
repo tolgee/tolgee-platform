@@ -93,6 +93,70 @@ class PhpPoFileExporterTest {
     )
   }
 
+  @Test
+  fun `exports multilines correctly`() {
+    val exporter = getWithMultilinesExporter()
+    val files = exporter.produceFiles().map { it.key to it.value.bufferedReader().readText() }.toMap()
+    val cs = files["cs.po"]
+    cs.assert.isEqualTo(
+      """
+      msgid ""
+      msgstr ""
+      "Language: cs\n"
+      "MIME-Version: 1.0\n"
+      "Content-Type: text/plain; charset=UTF-8\n"
+      "Content-Transfer-Encoding: 8bit\n"
+      "Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+      "X-Generator: Tolgee\n"
+
+      msgid ""
+      "I am key\n"
+      "Look at me\n"
+      "Hello!"
+      msgstr[0] ""
+      "%d den\n"
+      "newline"
+      msgstr[1] "dny"
+      msgstr[2] "%d dnů"
+
+      msgid ""
+      "I am key\n"
+      "Look at me\n"
+      "Hello!"
+      msgstr ""
+      "I am value\n"
+      "Look at me\n"
+      "Hello!"
+
+      """.trimIndent(),
+    )
+  }
+
+  @Test
+  fun `escapes correctly`() {
+    val exporter = getEscapingTestExporter()
+    val files = exporter.produceFiles().map { it.key to it.value.bufferedReader().readText() }.toMap()
+    val cs = files["en.po"]
+    cs.assert.isEqualTo(
+      """
+      msgid ""
+      msgstr ""
+      "Language: en\n"
+      "MIME-Version: 1.0\n"
+      "Content-Type: text/plain; charset=UTF-8\n"
+      "Content-Transfer-Encoding: 8bit\n"
+      "Plural-Forms: nplurals = 2; plural = (n !== 1)\n"
+      "X-Generator: Tolgee\n"
+      
+      msgid "key"
+      msgstr ""
+      "\" \n"
+      " \\\" \\\\"
+      
+      """.trimIndent(),
+    )
+  }
+
   private fun getSimpleExporter() =
     getExporter(
       listOf(
@@ -135,6 +199,39 @@ class PhpPoFileExporterTest {
           "{count, plural, one {# den} few {dny} other {# dnů}}",
           TranslationState.TRANSLATED,
           ExportKeyView(1, "key"),
+          "cs",
+        ),
+      ),
+    )
+
+  private fun getEscapingTestExporter() =
+    getExporter(
+      listOf(
+        ExportTranslationView(
+          1,
+          "\" \n \\\" \\\\",
+          TranslationState.TRANSLATED,
+          ExportKeyView(1, "key"),
+          "en",
+        ),
+      ),
+    )
+
+  private fun getWithMultilinesExporter() =
+    getExporter(
+      listOf(
+        ExportTranslationView(
+          1,
+          "{count, plural, one {# den\nnewline} few {dny} other {# dnů}}",
+          TranslationState.TRANSLATED,
+          ExportKeyView(1, "I am key\nLook at me\nHello!"),
+          "cs",
+        ),
+        ExportTranslationView(
+          1,
+          "I am value\nLook at me\nHello!",
+          TranslationState.TRANSLATED,
+          ExportKeyView(1, "I am key\nLook at me\nHello!"),
           "cs",
         ),
       ),

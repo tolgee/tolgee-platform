@@ -42,7 +42,7 @@ class PoFileExporter(
   }
 
   private fun StringBuilder.writeMsgId(keyName: String) {
-    this.appendLine("msgid \"${keyName.escape()}\"")
+    this.append(convertToPoMultilineString("msgid", keyName))
   }
 
   private fun getResultStringBuilder(translation: ExportTranslationView): StringBuilder {
@@ -77,15 +77,11 @@ class PoFileExporter(
 
   private fun StringBuilder.writePlural(forms: List<String>?) {
     forms?.forEachIndexed { index, form ->
-      this.appendLine("msgstr[$index] \"${form.escape()}\"")
+      this.append(convertToPoMultilineString("msgstr[$index]", form))
     }
   }
 
   private fun StringBuilder.writeSingle(result: String?) {
-    this.appendLine("msgstr \"${result?.escape()}\"")
-  }
-
-  private fun String.escape(): String {
-    return replace("\"", "\\\"").replace("\n", "\\n\"\n\"")
+    this.append(convertToPoMultilineString("msgstr", result ?: ""))
   }
 }
