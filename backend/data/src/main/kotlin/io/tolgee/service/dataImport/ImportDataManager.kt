@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
@@ -20,6 +21,7 @@ import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.getSafeNamespace
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
 class ImportDataManager(
@@ -33,6 +35,12 @@ class ImportDataManager(
   private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
 
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
+
+  private val entityManager: EntityManager by lazy { applicationContext.getBean(EntityManager::class.java) }
+
+  private val collisionHandlers by lazy {
+    applicationContext.getBeansOfType(CollisionHandler::class.java).values
+  }
 
   private val keyMetaService: KeyMetaService by lazy {
     applicationContext.getBean(KeyMetaService::class.java)
@@ -50,6 +58,8 @@ class ImportDataManager(
   }
 
   val storedTranslations = mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
+
+  val translationsToDeleteDueToHandledCollisions = mutableListOf<ImportTranslation>()
 
   /**
    * LanguageId to (Map of Pair(Namespace,KeyName) to Translation)
@@ -263,6 +273,8 @@ class ImportDataManager(
       }
     }
 
+    deleteTranslationsToDelete()
+
     importService.updateIsSelectedForTranslations(translationsToUpdate)
     importService.saveAllFileIssues(issuesToSave)
   }
@@ -292,6 +304,10 @@ class ImportDataManager(
       )
 
     storedTranslations.firstOrNull { it.text != newTranslation.text }?.let { collision ->
+      val handled = tryHandleUsingCollisionHandlers(listOf(newTranslation) + storedTranslations)
+      if (handled) {
+        return issues
+      }
       issues.add(
         FileIssueType.TRANSLATION_DEFINED_IN_ANOTHER_FILE to
           mapOf(
@@ -305,6 +321,22 @@ class ImportDataManager(
     return issues
   }
 
+  private fun tryHandleUsingCollisionHandlers(importTranslations: List<ImportTranslation>): Boolean {
+    val toDelete =
+      collisionHandlers.firstNotNullOfOrNull {
+        it.handle(importTranslations)
+      } ?: return false
+
+    toDelete.forEach {
+      storedTranslations[it.language]?.get(it.key)?.remove(it)
+      if (it.id != 0L) {
+        translationsToDeleteDueToHandledCollisions.add(it)
+      }
+    }
+
+    return true
+  }
+
   private fun resetBetweenFileCollisionIssuesForFiles(
     fileIds: List<Long>,
     languageIds: List<Long>,
@@ -316,5 +348,15 @@ class ImportDataManager(
     newTranslation: ImportTranslation,
   ): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
     return checkForOtherFilesCollisions(newTranslation, getLanguagesWithSameExisting(newTranslation.language))
+  }
+
+  fun deleteTranslationsToDelete() {
+    importService.deleteTranslations(translationsToDeleteDueToHandledCollisions)
+    translationsToDeleteDueToHandledCollisions.forEach {
+      storedKeys
+    }
+
+    translationsToDeleteDueToHandledCollisions.clear()
+    entityManager.flush()
   }
 }

@@ -168,6 +168,7 @@ class CoreImportFilesProcessor(
       }
     }
     importDataManager.saveAllStoredKeys()
+    importDataManager.deleteTranslationsToDelete()
     importDataManager.saveAllStoredTranslations()
   }
 

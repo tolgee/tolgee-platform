@@ -332,7 +332,12 @@ class ImportService(
     this.importLanguageRepository.delete(language)
     if (this.findLanguages(import = language.file.import).isEmpty()) {
       deleteImport(import)
+      return
     }
+    entityManager.clear()
+    entityManager.refresh(entityManager.merge(import))
+    val dataManager = ImportDataManager(applicationContext, import)
+    dataManager.resetCollisionsBetweenFiles(language, null)
   }
 
   fun findTranslation(translationId: Long): ImportTranslation? {
@@ -450,5 +455,9 @@ class ImportService(
       ps.setLong(2, entity.id)
     }
     entityManager.clear()
+  }
+
+  fun deleteTranslations(it: Collection<ImportTranslation>) {
+    importTranslationRepository.deleteAll(it)
   }
 }

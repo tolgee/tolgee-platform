@@ -181,7 +181,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
                 ref={fileRef}
                 onChange={(e) => onFileSelected(e)}
                 multiple
-                webkitdirectory="true"
+                webkitdirectory
               />
               <ImportInputAreaLayoutTitle>
                 <T keyName="import_file_input_drop_file_text" />

@@ -10,13 +10,29 @@ export class FileUploadFixtures {
   };
 }
 
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
 export async function getFilesAsync(dataTransfer: DataTransfer) {
   const files: FilesType = [];
-  for (let i = 0; i < dataTransfer.items.length; i++) {
-    const item = dataTransfer.items[i];
+
+  const items = [...dataTransfer.items].map((item) => ({
+    // looks like the dataTransfer is suspect to bugs in browsers, so we need to extract the data from it,
+    // or it's pruned when iterating over it
+    kind: item.kind,
+    webkitEntry:
+      typeof item.webkitGetAsEntry === 'function' && !isSafari
+        ? item.webkitGetAsEntry()
+        : null,
+    getAsFile: item.getAsFile,
+  }));
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     if (item.kind === 'file') {
-      if (typeof item.webkitGetAsEntry === 'function') {
-        const entry = item.webkitGetAsEntry();
+      // Safari doesn't support the File System Access API and hangs
+
+      if (item.webkitEntry != null) {
+        const entry = item.webkitEntry;
         if (!entry) {
           continue;
         }
