@@ -5,6 +5,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { T } from '@tolgee/react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useEffect } from 'react';
+import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 
 type ResultType = components['schemas']['PagedModelImportLanguageModel'];
 
@@ -95,7 +96,7 @@ export const useImportDataHelper = () => {
     },
   });
 
-  const onNewFiles = async (files: File[]) => {
+  const onNewFiles = async (files: FilesType) => {
     addFilesMutation.mutate({
       path: {
         projectId: project.id,
@@ -103,7 +104,9 @@ export const useImportDataHelper = () => {
       query: {},
       content: {
         'multipart/form-data': {
-          files: files as any,
+          files: files.map((f) => {
+            return new File([f.file], f.name, { type: f.file.type });
+          }) as any,
         },
       },
     });

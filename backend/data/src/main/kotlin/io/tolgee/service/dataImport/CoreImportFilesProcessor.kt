@@ -16,6 +16,7 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.ProcessorFactory
 import io.tolgee.util.Logging
+import io.tolgee.util.filterFiles
 import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
 
@@ -82,8 +83,8 @@ class CoreImportFilesProcessor(
   ): MutableList<ErrorResponseBody> {
     val processor = processorFactory.getArchiveProcessor(archive)
     val files = processor.process(archive)
-
-    errors.addAll(processFiles(files))
+    val filtered = filterFiles(files.associateBy { it.name })
+    errors.addAll(processFiles(filtered))
     return errors
   }
 

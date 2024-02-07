@@ -15,7 +15,6 @@ class StringsFileProcessor(
   private var key: String? = null
   private var value: String? = null
   private var wasLastCharEscape = false
-  private var wasTheCharBeforeLastCharEscape = false
   private var currentComment: StringBuilder? = null
   private var lastChar: Char? = null
 
@@ -91,7 +90,7 @@ class StringsFileProcessor(
         }
 
         State.INSIDE_BLOCK_COMMENT -> {
-          if (lastChar == '*' && char == '/' && !wasTheCharBeforeLastCharEscape) {
+          if (lastChar == '*' && char == '/' && !wasLastCharEscape) {
             currentComment?.let {
               it.deleteCharAt(it.length - 1)
             }
@@ -102,7 +101,6 @@ class StringsFileProcessor(
         }
       }
       lastChar = char
-      wasTheCharBeforeLastCharEscape = wasLastCharEscape
       wasLastCharEscape = false
     }
   }

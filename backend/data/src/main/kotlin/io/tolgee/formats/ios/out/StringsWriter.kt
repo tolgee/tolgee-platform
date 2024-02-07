@@ -16,7 +16,7 @@ class StringsWriter {
   }
 
   private fun escapeComment(s: String): String {
-    return s.replace("*/", "\\*/")
+    return s.replace("*/", "*\\/")
   }
 
   private fun escaped(string: String): String {

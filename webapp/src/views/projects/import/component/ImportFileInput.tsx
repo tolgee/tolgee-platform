@@ -16,6 +16,7 @@ import {
   ImportInputAreaLayoutTitle,
   ImportInputAreaLayoutTop,
 } from './ImportInputAreaLayout';
+import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 
 export const MAX_FILE_COUNT = 20;
 
@@ -28,7 +29,7 @@ export type OperationStatusType =
   | 'FINALIZING';
 
 type ImportFileInputProps = {
-  onNewFiles: (files: File[]) => void;
+  onNewFiles: (files: FilesType) => void;
   loading: boolean;
   operation?: OperationType;
   operationStatus?: OperationStatusType;
@@ -58,16 +59,6 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   const { t } = useTranslate();
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
-  const ALLOWED_EXTENSIONS = [
-    'json',
-    'zip',
-    'po',
-    'xliff',
-    'xlf',
-    'properties',
-    'stringsdict',
-    'strings',
-  ];
   const [resetKey, setResetKey] = useState(0);
 
   function resetInput() {
@@ -90,7 +81,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
           files.push(item);
         }
       }
-      props.onNewFiles(files);
+      props.onNewFiles(files.map((f) => ({ file: f, name: f.name })));
     };
 
     window.addEventListener('dragover', listener, false);
@@ -116,12 +107,12 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
         filtered.push(item);
       }
     }
-    onNewFiles(filtered);
+    onNewFiles(filtered.map((f) => ({ file: f, name: f.name })));
   }
 
-  const onNewFiles = (files: File[]) => {
+  const onNewFiles = (files: FilesType) => {
     resetInput();
-    const validation = validate(files);
+    const validation = validate(files.map((f) => f.file));
     if (validation.valid) {
       props.onNewFiles(files);
       return;
@@ -150,22 +141,14 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
           />
         );
       }
-      const extension =
-        file.name.indexOf('.') > -1 ? file.name.replace(/.*\.(.+)$/, '$1') : '';
-      if (ALLOWED_EXTENSIONS.indexOf(extension) < 0) {
-        result.errors.push(
-          <T
-            keyName="translations.screenshots.validation.unsupported_format"
-            params={{ filename: file.name }}
-          />
-        );
-      }
     });
 
     const valid = result.errors.length === 0;
     return { ...result, valid };
   };
 
+  /*
+                @ts-ignore */
   return (
     <ImportFileDropzone
       onNewFiles={onNewFiles}
@@ -198,7 +181,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
                 ref={fileRef}
                 onChange={(e) => onFileSelected(e)}
                 multiple
-                accept={ALLOWED_EXTENSIONS.join(',')}
+                webkitdirectory="true"
               />
               <ImportInputAreaLayoutTitle>
                 <T keyName="import_file_input_drop_file_text" />

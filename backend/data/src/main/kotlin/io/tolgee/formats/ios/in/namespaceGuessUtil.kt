@@ -1,7 +1,12 @@
 package io.tolgee.formats.ios.`in`
 
 fun guessNamespaceFromPath(filePath: String): String {
-  return REGEX.find(filePath)?.groups?.get("namespace")?.value ?: ""
+  val guessed = REGEX.find(filePath)?.groups?.get("namespace")?.value ?: return ""
+  // "Localizable" is default tableName in Apple suite
+  if (guessed == "Localizable") {
+    return ""
+  }
+  return guessed
 }
 
-val REGEX = "(?<namespace>[\\w-.&#$@{}*^~\\s]+)/[\\w-]+\\.lproj/.*".toRegex()
+val REGEX = "(?:[\\w-]+\\.lproj/)?(?<namespace>[\\w-.&#\$@{}*^~\\s]+)\\.strings(?:dict)?".toRegex()

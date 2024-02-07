@@ -3,11 +3,11 @@
 /*
 Welcome header comment
 it's a multiline comment
-\*/
+*\/
 
 I cannot trick you!
 
-*/
+\*/
 "welcome_sub_header" = "Hello, %s"; // this is an inline comment\n dada
 "another key" = "Dies ist ein weiterer Schlüssel.";
 "another key \" with escaping" = "Dies ist ein weiterer \" Schlüssel.";

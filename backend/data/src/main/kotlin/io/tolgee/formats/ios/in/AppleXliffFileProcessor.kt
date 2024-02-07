@@ -19,8 +19,9 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
   private val allPlurals = mutableMapOf<XliffFile, MutableMap<String, MutableMap<String, Pair<String?, String?>>>>()
 
   override fun process() {
+    // for apple xliff, we currently don't support namespaces
+    handleNamespace()
     parsed.files.forEach { file ->
-
       file.transUnits.forEach transUnitsForeach@{ transUnit ->
         // if there is a key defined in base .stringsdict but is missing in the target .stringsdict
         // it adds the key also in the .strings file section in xliff, and sets the "translate" value to "no"
@@ -60,6 +61,10 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     }
 
     handlePlurals()
+  }
+
+  private fun handleNamespace() {
+    context.namespace = ""
   }
 
   private fun getPluralRegexes(file: XliffFile): Pair<Regex, Regex?> {

@@ -42,6 +42,7 @@ import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.util.StreamingResponseBodyProvider
+import io.tolgee.util.filterFiles
 import jakarta.servlet.http.HttpServletRequest
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
@@ -100,7 +101,11 @@ class V2ImportController(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams,
   ): ImportAddFilesResultModel {
-    val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream.readAllBytes()) }
+    val filteredFiles = filterFiles(files.associateBy { it.originalFilename ?: "" })
+    val fileDtos =
+      filteredFiles.map {
+        ImportFileDto(it.originalFilename ?: "", it.inputStream.readAllBytes())
+      }
     val errors =
       importService.addFiles(
         files = fileDtos,
