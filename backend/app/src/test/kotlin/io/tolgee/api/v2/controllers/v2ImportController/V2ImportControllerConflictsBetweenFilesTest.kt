@@ -54,15 +54,9 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
     val testData = prepareTestData()
     val importResult = createConflictingImport(testData)
 
-    performProjectAuthPut(
-      "import/result/files/${importResult.file2Id}/select-namespace",
-      mapOf("namespace" to "namespaced"),
-    ).andIsOk
+    selectNamespace(importResult.file2Id)
     assertNoConflicts()
-    performProjectAuthPut(
-      "import/result/files/${importResult.file2Id}/select-namespace",
-      mapOf("namespace" to null),
-    ).andIsOk
+    resetNamespace(fileId = importResult.file2Id)
     assertHasConflicts()
   }
 
@@ -86,11 +80,15 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
     val testData = prepareTestData()
     val importResult = createConflictingImport(testData)
 
-    performProjectAuthDelete(
-      "import/result/languages/${importResult.language1Id}",
-    ).andIsOk
+    deleteLanguage(importResult.language1Id)
 
     assertNoConflicts()
+  }
+
+  private fun deleteLanguage(languageId: Long) {
+    performProjectAuthDelete(
+      "import/result/languages/$languageId",
+    ).andIsOk
   }
 
   @Test
@@ -103,7 +101,7 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
 
   @Test
   @ProjectApiKeyAuthTestMethod
-  fun `resets apple conflict when language selected`() {
+  fun `resets apple conflict when existing language selected`() {
     val testData = prepareTestData()
     val data = createAppleConflictingImport(testData)
     selectLanguage(data.language2Id, testData.french.id)
@@ -113,6 +111,35 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
     selectLanguage(data.language1Id, testData.french.id)
     assertAllToImport()
     selectLanguage(data.language2Id, testData.french.id)
+    assertOnlyStringdictKeyToImport()
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `resets apple conflict on existing language reset`() {
+    val testData = prepareTestData()
+    val data = createAppleConflictingImport(testData)
+    resetLanguage(data.language2Id)
+    assertAllToImport()
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `resets apple conflict when language deleted`() {
+    val testData = prepareTestData()
+    val data = createAppleConflictingImport(testData)
+    deleteLanguage(data.language2Id)
+    assertFirstToImport()
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `resets apple conflict when namespace selected`() {
+    val testData = prepareTestData()
+    val data = createAppleConflictingImport(testData)
+    selectNamespace(data.file2Id)
+    assertAllToImport()
+    resetNamespace(data.file2Id)
     assertOnlyStringdictKeyToImport()
   }
 
@@ -204,11 +231,21 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
   }
 
   private fun assertAllToImport() {
+    assertFirstToImport()
+    assertSecondToImport()
+  }
+
+  private fun assertSecondToImport() {
+    performProjectAuthGet("import/result").andIsOk.andAssertThatJson {
+      node("_embedded.languages[1].totalCount").isEqualTo(1)
+      node("_embedded.languages[1].importFileIssueCount").isEqualTo(0)
+    }
+  }
+
+  private fun assertFirstToImport() {
     performProjectAuthGet("import/result").andIsOk.andAssertThatJson {
       node("_embedded.languages[0].totalCount").isEqualTo(1)
       node("_embedded.languages[0].importFileIssueCount").isEqualTo(0)
-      node("_embedded.languages[1].totalCount").isEqualTo(1)
-      node("_embedded.languages[1].importFileIssueCount").isEqualTo(0)
     }
   }
 
@@ -273,5 +310,19 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
 
   fun mapToQueryString(map: Map<String, Any?>): String {
     return map.entries.joinToString("&") { "${it.key}=${it.value}" }
+  }
+
+  private fun selectNamespace(fileId: Long) {
+    performProjectAuthPut(
+      "import/result/files/$fileId/select-namespace",
+      mapOf("namespace" to "namespaced"),
+    ).andIsOk
+  }
+
+  private fun resetNamespace(fileId: Long) {
+    performProjectAuthPut(
+      "import/result/files/$fileId/select-namespace",
+      mapOf("namespace" to null),
+    ).andIsOk
   }
 }
