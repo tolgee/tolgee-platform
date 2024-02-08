@@ -1,7 +1,7 @@
 package io.tolgee.configuration
 
 import org.redisson.Redisson
-import org.redisson.spring.starter.RedissonAutoConfiguration
+import org.redisson.spring.starter.RedissonAutoConfigurationV2
 import org.redisson.spring.starter.RedissonProperties
 import org.springframework.boot.autoconfigure.AutoConfigureBefore
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
@@ -20,4 +20,4 @@ import org.springframework.data.redis.core.RedisOperations
   "\${tolgee.websocket.use-redis:false} or " +
     "(\${tolgee.cache.use-redis:false} and \${tolgee.cache.enabled:false})",
 )
-class ConditionalRedissonAutoConfiguration : RedissonAutoConfiguration()
+class ConditionalRedissonAutoConfiguration : RedissonAutoConfigurationV2()

@@ -65,8 +65,7 @@ dependencyResolutionManagement {
             library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.25.1")
             library('liquibasePicoli', "info.picocli:picocli:4.6.3")
             library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.7.0")
-            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.23.2")
-            library('redissonSpringData', 'org.redisson:redisson-spring-data-27:3.23.2')
+            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.26.0")
             library('postHog', 'com.posthog.java:posthog:1.1.1')
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.9.12")
         }
