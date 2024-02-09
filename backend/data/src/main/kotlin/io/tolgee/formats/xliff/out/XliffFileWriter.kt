@@ -3,102 +3,77 @@ package io.tolgee.formats.xliff.out
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
-import org.dom4j.Document
-import org.dom4j.DocumentException
-import org.dom4j.DocumentHelper
-import org.dom4j.Element
-import org.dom4j.Node
-import org.dom4j.io.OutputFormat
-import org.dom4j.io.XMLWriter
-import java.io.ByteArrayOutputStream
+import io.tolgee.util.appendXmlOrText
+import io.tolgee.util.attr
+import io.tolgee.util.buildDom
+import io.tolgee.util.element
+import org.w3c.dom.Document
+import org.w3c.dom.Element
 import java.io.InputStream
 
-class XliffFileWriter(
-  private val xliffModel: XliffModel,
-  private val enableHtml: Boolean,
-) {
-  private lateinit var document: Document
+class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlContent: Boolean) {
   private lateinit var xliffElement: Element
 
   fun produceFiles(): InputStream {
-    xliffElement = createBaseDocumentStructure()
+    return buildDom {
+      xliffElement = createBaseDocumentStructure()
 
-    xliffModel.files.forEach { xliffFile ->
-      val file = createFileBody(xliffFile)
-      xliffFile.transUnits.forEach { transUnit ->
-        addToFileElement(file, transUnit)
+      for (xliffFile in xliffModel.files) {
+        val file = createFileBody(xliffFile)
+        for (transUnit in xliffFile.transUnits) {
+          file.addToElement(transUnit)
+        }
       }
-    }
-
-    val outputStream = ByteArrayOutputStream()
-    val writer = XMLWriter(outputStream, OutputFormat.createPrettyPrint())
-    writer.write(document)
-    return outputStream.toByteArray().inputStream()
+    }.write().toByteArray().inputStream()
   }
 
-  private fun addToFileElement(
-    fileBodyElement: Element,
-    transUnit: XliffTransUnit,
-  ) {
-    val transUnitElement =
-      fileBodyElement.addElement("trans-unit")
-        .addAttribute("id", transUnit.id)?.also {
-          if (enableHtml) {
-            it.addAttribute("datatype", "html")
-          }
-        }!!
-
-    transUnit.source?.let {
-      transUnitElement.addElement("source").addFromHtmlOrText(it)
+  private fun Document.createBaseDocumentStructure(): Element {
+    return element("xliff") {
+      attr("version", "1.2")
+      attr("xmlns", "urn:oasis:names:tc:xliff:document:1.2")
     }
-
-    transUnit.target?.let {
-      transUnitElement.addElement("target").addFromHtmlOrText(it)
-    }
-  }
-
-  private fun createBaseDocumentStructure(): Element {
-    document = DocumentHelper.createDocument()
-    document.xmlEncoding = "UTF-8"
-    return document.addElement("xliff")
-      .addNamespace("", "urn:oasis:names:tc:xliff:document:1.2")
-      .addAttribute("version", "1.2")
   }
 
   private fun createFileBody(file: XliffFile): Element {
-    return xliffElement.addElement("file", "urn:oasis:names:tc:xliff:document:1.2")
-      .addAttribute("original", file.original ?: "")
-      .addAttribute("datatype", "plaintext")
-      .addAttribute("source-language", file.sourceLanguage)
-      .addAttribute("target-language", file.targetLanguage)
-      .addElement("body")
+    return xliffElement.element("file") {
+      attr("original", file.original ?: "")
+      attr("datatype", file.datatype)
+      file.sourceLanguage?.let { attr("source-language", it) }
+      file.targetLanguage?.let { attr("target-language", it) }
+      return element("body")
+    }
   }
 
-  private fun String.parseHtml(): MutableIterator<Any?> {
-    val fragment =
-      DocumentHelper
-        .parseText("<root>$this</root>")
-    return fragment.rootElement.nodeIterator()
+  private fun Element.addToElement(transUnit: XliffTransUnit) {
+    element("trans-unit") {
+      attr("id", transUnit.id)
+
+      element("source") {
+        attr("xml:space", "preserve")
+        appendXmlIfEnabledOrText(transUnit.source)
+      }
+
+      if (transUnit.target != null) {
+        element("target") {
+          attr("xml:space", "preserve")
+          appendXmlIfEnabledOrText(transUnit.target)
+        }
+      }
+
+      if (transUnit.note != null) {
+        element("note") {
+          attr("xml:space", "preserve")
+          appendXmlIfEnabledOrText(transUnit.note)
+        }
+      }
+    }
   }
 
-  /**
-   * For string containing something, which is not parseable as xml such as
-   * "Value has to be < 1"
-   * It just appends text.
-   */
-  private fun Element.addFromHtmlOrText(string: String) {
-    if (!enableHtml) {
-      this.addText(string)
+  private fun Element.appendXmlIfEnabledOrText(content: String?) {
+    if (!enableXmlContent) {
+      textContent = content
       return
     }
-    try {
-      string.parseHtml().forEach { node ->
-        if (node !is Node) return@forEach
-        node.parent = null
-        this.add(node)
-      }
-    } catch (e: DocumentException) {
-      this.addText(string)
-    }
+    this.appendXmlOrText(content)
   }
 }

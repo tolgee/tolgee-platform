@@ -2,12 +2,11 @@ package io.tolgee.formats.xliff.`in`
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.UnsupportedXliffVersionException
-import io.tolgee.formats.ios.`in`.AppleXliffFileProcessor
+import io.tolgee.formats.apple.`in`.AppleXliffFileProcessor
 import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
-import java.util.*
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 

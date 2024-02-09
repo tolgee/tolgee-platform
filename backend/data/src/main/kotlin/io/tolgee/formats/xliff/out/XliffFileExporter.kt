@@ -29,7 +29,7 @@ class XliffFileExporter(
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
     return models.asSequence().map { (fileName, resultItem) ->
-      fileName to XliffFileWriter(xliffModel = resultItem, enableHtml = true).produceFiles()
+      fileName to XliffFileWriter(xliffModel = resultItem, enableXmlContent = true).produceFiles()
     }.toMap()
   }
 
@@ -49,6 +49,7 @@ class XliffFileExporter(
         this.id = translation.key.name
         this.source = baseTranslations[translation.key.namespace to translation.key.name]?.text
         this.target = translation.text
+        this.note = translation.key.description
       },
     )
   }

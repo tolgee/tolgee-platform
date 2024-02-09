@@ -5,6 +5,7 @@ class XliffFile {
   var original: String? = null
   var sourceLanguage: String? = null
   var targetLanguage: String? = null
+  val datatype: String = "plaintext"
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

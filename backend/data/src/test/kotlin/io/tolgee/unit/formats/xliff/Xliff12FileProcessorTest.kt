@@ -22,6 +22,7 @@ class Xliff12FileProcessorTest {
   private lateinit var importFileDto: ImportFileDto
   private lateinit var fileProcessorContext: FileProcessorContext
   private val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
+
   private lateinit var xmlStreamReader: XMLEventReader
 
   private val xmlEventReader: XMLEventReader
