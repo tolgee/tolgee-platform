@@ -1,3 +1,10 @@
+## [3.48.1](https://github.com/tolgee/tolgee-platform/compare/v3.48.0...v3.48.1) (2024-02-09)
+
+
+### Bug Fixes
+
+* Upgrade redisson (fixes writing to read-only replicas) ([#2121](https://github.com/tolgee/tolgee-platform/issues/2121)) ([bfafd7e](https://github.com/tolgee/tolgee-platform/commit/bfafd7ea5413df97b5bf17ff419d197496c3a50b))
+
 # [3.48.0](https://github.com/tolgee/tolgee-platform/compare/v3.47.1...v3.48.0) (2024-02-02)
 
 
