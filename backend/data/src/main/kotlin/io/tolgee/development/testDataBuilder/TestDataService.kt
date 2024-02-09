@@ -211,6 +211,14 @@ class TestDataService(
     saveContentDeliveryConfigs(builder)
     saveWebhookConfigs(builder)
     saveAutomations(builder)
+    saveImportSettings(builder)
+  }
+
+  private fun saveImportSettings(builder: ProjectBuilder) {
+    builder.data.importSettings?.let {
+      entityManager.merge(it.userAccount)
+      entityManager.persist(it)
+    }
   }
 
   private fun saveWebhookConfigs(builder: ProjectBuilder) {

@@ -48,6 +48,7 @@ class KeyMeta(
   @Size(max = 2000)
   var description: String? = null
 
+  @ActivityLoggedProp
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var custom: MutableMap<String, Any?>? = null

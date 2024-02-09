@@ -26,6 +26,7 @@ import jakarta.persistence.PreRemove
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.ColumnDefault
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -60,6 +61,10 @@ class Key(
 
   @OneToMany(mappedBy = "key", orphanRemoval = true)
   var keyScreenshotReferences: MutableList<KeyScreenshotReference> = mutableListOf()
+
+  @ActivityLoggedProp
+  @ColumnDefault("false")
+  var isPlural: Boolean = false
 
   constructor(
     name: String,

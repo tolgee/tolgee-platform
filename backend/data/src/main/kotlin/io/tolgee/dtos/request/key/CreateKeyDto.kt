@@ -40,6 +40,8 @@ class CreateKeyDto(
     example = "This key is used on homepage. It's a label of sign up button.",
   )
   val description: String? = null,
+  @Schema(description = "If key is pluralized. If it will be reflected in the editor")
+  val isPlural: Boolean = false,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

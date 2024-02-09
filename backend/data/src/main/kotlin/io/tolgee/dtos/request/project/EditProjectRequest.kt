@@ -1,10 +1,11 @@
 package io.tolgee.dtos.request.project
 
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-data class EditProjectDTO(
+data class EditProjectRequest(
   @field:NotBlank
   @field:Size(min = 3, max = 50)
   var name: String = "",
@@ -14,4 +15,6 @@ data class EditProjectDTO(
   var baseLanguageId: Long? = null,
   @field:Size(min = 3, max = 2000)
   var description: String? = null,
+  @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
+  var disableIcuPlaceholders: Boolean = false,
 )

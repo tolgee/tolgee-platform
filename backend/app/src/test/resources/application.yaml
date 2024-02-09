@@ -90,3 +90,4 @@ logging:
     io.tolgee: DEBUG
     io.tolgee.component.CurrentDateProvider: DEBUG
     io.tolgee.component.reporting.BusinessEventPublisher: DEBUG
+    io.tolgee.ExceptionHandlers: DEBUG

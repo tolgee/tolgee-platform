@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.dataImport
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter

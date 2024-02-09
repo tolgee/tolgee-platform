@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
+import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 
 @SpringBootTest
@@ -426,5 +427,39 @@ class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/"
         description = "a".repeat(2001),
       ),
     ).andIsBadRequest
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_EDIT,
+    ],
+  )
+  @Test
+  fun `updates isPlural`() {
+    performIsPluralModification().andIsOk.andAssertThatJson {
+      node("isPlural").isEqualTo(true)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.TRANSLATIONS_EDIT,
+    ],
+  )
+  @Test
+  fun `checks for KEY_EDIT permissions when updating isPlural`() {
+    performIsPluralModification().andIsForbidden
+  }
+
+  private fun performIsPluralModification(): ResultActions {
+    val keyName = "super_key"
+
+    return performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = keyName,
+        isPlural = true,
+      ),
+    )
   }
 }

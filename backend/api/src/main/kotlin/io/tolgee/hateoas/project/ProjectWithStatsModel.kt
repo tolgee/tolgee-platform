@@ -31,4 +31,6 @@ open class ProjectWithStatsModel(
   val computedPermission: ComputedPermissionModel,
   val stats: ProjectStatistics,
   val languages: List<LanguageModel>,
+  @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
+  var disableIcuPlaceholders: Boolean = false,
 ) : RepresentationModel<ProjectWithStatsModel>()

@@ -3066,4 +3066,49 @@
             <column name="custom" type="jsonb"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-1">
+        <createTable tableName="import_settings">
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="convert_placeholders_to_icu" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="override_key_descriptions" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-2">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="disable_icu_placeholders" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-3">
+        <addColumn tableName="key">
+            <column defaultValueBoolean="false" name="is_plural" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-4">
+        <addPrimaryKey columnNames="project_id, user_account_id" constraintName="import_settingsPK" tableName="import_settings"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-5">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="import_settings" constraintName="FK7soifoin7r9oo67hubts9x1k1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-6">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="import_settings" constraintName="FKh3y42gacmr9fm5emmte5oa8hc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

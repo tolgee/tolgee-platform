@@ -16,7 +16,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
         bl as baseLanguage, o as organizationOwner,
-        role.type as organizationRole, p as directPermission
+        role.type as organizationRole, p as directPermission, r.disableIcuPlaceholders as disableIcuPlaceholders
         from Project r
         left join r.baseLanguage bl
         left join Permission p on p.project = r and p.user.id = :userAccountId

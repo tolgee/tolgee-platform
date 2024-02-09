@@ -23,7 +23,6 @@ import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.executeInNewTransaction
-import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import kotlin.properties.Delegates
@@ -56,10 +55,13 @@ class KeyComplexEditHelper(
   private var areTranslationsModified by Delegates.notNull<Boolean>()
   private var areStatesModified by Delegates.notNull<Boolean>()
   private var areTagsModified by Delegates.notNull<Boolean>()
-  private var isKeyModified by Delegates.notNull<Boolean>()
+  private var isKeyNameModified by Delegates.notNull<Boolean>()
   private var isScreenshotDeleted by Delegates.notNull<Boolean>()
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
   private var isBigMetaProvided by Delegates.notNull<Boolean>()
+  private var isNamespaceChanged: Boolean = false
+  private var isDescriptionChanged: Boolean = false
+  private var isIsPluralChanged: Boolean = false
 
   private val languages by lazy {
     val translationLanguages = dto.translations?.keys ?: setOf()
@@ -106,11 +108,19 @@ class KeyComplexEditHelper(
   private fun doUpdateKey(): KeyWithDataModel {
     var edited = key
 
-    if (isKeyModified) {
+    if (requireKeyEditPermission) {
       key.project.checkKeysEditPermission()
+    }
+
+    if (isDescriptionChanged) {
       keyMetaService.getOrCreateForKey(key).apply {
         description = dto.description
       }
+    }
+
+    key.isPlural = dto.isPlural
+
+    if (isKeyNameModified || isNamespaceChanged) {
       edited = keyService.edit(key, dto.name, dto.namespace)
     }
 
@@ -206,7 +216,7 @@ class KeyComplexEditHelper(
       return
     }
 
-    if (isKeyModified) {
+    if (isKeyNameModified) {
       activityHolder.activity = ActivityType.KEY_NAME_EDIT
       return
     }
@@ -228,7 +238,7 @@ class KeyComplexEditHelper(
         areTranslationsModified,
         areStatesModified,
         areTagsModified,
-        isKeyModified,
+        isKeyNameModified,
         isScreenshotAdded,
         isScreenshotDeleted,
       ).sumOf { if (it) 1 as Int else 0 } == 0
@@ -245,9 +255,10 @@ class KeyComplexEditHelper(
     areTranslationsModified = !modifiedTranslations.isNullOrEmpty()
     areStatesModified = !modifiedStates.isNullOrEmpty()
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
-    isKeyModified = key.name != dto.name ||
-      getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace) ||
-      key.keyMeta?.description != dto.description
+    isKeyNameModified = key.name != dto.name
+    isNamespaceChanged = key.namespace?.name != dto.namespace
+    isDescriptionChanged = key.keyMeta?.description != dto.description
+    isIsPluralChanged = key.isPlural != dto.isPlural
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
     isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()
@@ -263,6 +274,8 @@ class KeyComplexEditHelper(
 
     return !currentTagsContainAllNewTags || !newTagsContainAllCurrentTags
   }
+
+  val requireKeyEditPermission get() = isKeyNameModified || isNamespaceChanged || isDescriptionChanged || isIsPluralChanged
 
   private fun prepareModifiedTranslations() {
     modifiedTranslations =

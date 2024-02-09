@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-data class CreateProjectDTO(
+data class CreateProjectRequest(
   @field:NotBlank
   @field:Size(min = 3, max = 50)
   var name: String = "",
@@ -33,4 +33,6 @@ data class CreateProjectDTO(
         "first language will be selected as base.",
   )
   var baseLanguageTag: String? = null,
+  @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
+  var disableIcuPlaceholders: Boolean = false,
 )

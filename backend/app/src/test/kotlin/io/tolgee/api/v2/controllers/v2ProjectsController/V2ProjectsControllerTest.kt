@@ -40,6 +40,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
       it.node("[0].organizationOwner.name").isEqualTo("kim")
       it.node("[2].organizationOwner.name").isEqualTo("cool")
       it.node("[2].organizationOwner.slug").isEqualTo("cool")
+      it.node("[2].disableIcuPlaceholders").isEqualTo(false)
     }
   }
 

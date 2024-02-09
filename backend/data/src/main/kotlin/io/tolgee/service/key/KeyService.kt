@@ -128,6 +128,8 @@ class KeyService(
       description = dto.description
     }
 
+    key.isPlural = dto.isPlural
+
     dto.tags?.forEach {
       tagService.tagKey(key, it)
     }
