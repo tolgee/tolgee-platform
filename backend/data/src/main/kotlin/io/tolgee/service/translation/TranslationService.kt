@@ -542,10 +542,9 @@ class TranslationService(
     text: String,
     newIsPlural: Boolean,
   ): String {
-    if (newIsPlural)
-      {
-        return "{value, plural, other {$text}}"
-      }
+    if (newIsPlural) {
+      return "{value, plural, other {$text}}"
+    }
     TODO()
   }
 }
