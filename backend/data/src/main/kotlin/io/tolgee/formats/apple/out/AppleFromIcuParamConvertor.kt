@@ -1,8 +1,8 @@
 package io.tolgee.formats.apple.out
 
 import com.ibm.icu.text.MessagePattern
-import com.ibm.icu.text.MessagePatternUtil
-import io.tolgee.formats.po.FromIcuParamConvertor
+import io.tolgee.formats.FromIcuParamConvertor
+import io.tolgee.formats.MessagePatternUtil
 
 class AppleFromIcuParamConvertor : FromIcuParamConvertor {
   private var argIndex = -1

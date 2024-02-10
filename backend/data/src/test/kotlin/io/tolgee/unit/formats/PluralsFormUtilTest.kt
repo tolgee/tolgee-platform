@@ -50,6 +50,53 @@ class PluralsFormUtilTest {
   }
 
   @Test
+  fun `nested plurals work fine`() {
+    getPluralForms(
+      "{count, plural, " +
+        "one {{tireCount, plural, one {# car has one tire} other {# car has # tires}}} " +
+        "other {{tireCount, plural, one {# cars each have one tire} other {# cars each have # tires}}}" +
+        "}",
+    ).assert.isEqualTo(
+      mapOf(
+        "one" to "{tireCount, plural, one {# car has one tire} other {# car has # tires}}",
+        "other" to "{tireCount, plural, one {# cars each have one tire} other {# cars each have # tires}}",
+      ),
+    )
+  }
+
+  @Test
+  fun `nested selects work fine`() {
+    val nested = "{gender, select, man {I am a man!} woman {I am a woman!} other {}}"
+    getPluralForms(
+      "{count, plural, " +
+        "one {$nested}" +
+        "other {$nested}" +
+        "}",
+    ).assert.isEqualTo(
+      mapOf(
+        "one" to nested,
+        "other" to nested,
+      ),
+    )
+  }
+
+  @Test
+  fun `nested choice work fine`() {
+    val nested = "Hello, {count, choice, 0#There are no dogs|1#There is one dog|1<There are # dogs}!"
+    getPluralForms(
+      "{count, plural, " +
+        "one {$nested}" +
+        "other {$nested}" +
+        "}",
+    ).assert.isEqualTo(
+      mapOf(
+        "one" to nested,
+        "other" to nested,
+      ),
+    )
+  }
+
+  @Test
   fun `compares plurals correctly`() {
     (
       "I have {count, plural, other {# dogs} one {# dog} many {# dogs}}." isSamePossiblePlural

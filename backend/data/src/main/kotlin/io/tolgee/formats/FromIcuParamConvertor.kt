@@ -1,11 +1,8 @@
-package io.tolgee.formats.po
-
-import com.ibm.icu.text.MessagePatternUtil.ArgNode
-import com.ibm.icu.text.MessagePatternUtil.MessageContentsNode
+package io.tolgee.formats
 
 interface FromIcuParamConvertor {
   fun convert(
-    node: ArgNode,
+    node: MessagePatternUtil.ArgNode,
     isInPlural: Boolean,
   ): String
 
@@ -13,7 +10,7 @@ interface FromIcuParamConvertor {
    * How to # in ICU plural form
    */
   fun convertReplaceNumber(
-    node: MessageContentsNode,
+    node: MessagePatternUtil.MessageContentsNode,
     argName: String? = null,
   ): String
 }

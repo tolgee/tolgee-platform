@@ -1,13 +1,7 @@
 package io.tolgee.formats
 
-import com.ibm.icu.text.MessagePattern.ArgType
-import com.ibm.icu.text.MessagePatternUtil
-import com.ibm.icu.text.MessagePatternUtil.ArgNode
-import com.ibm.icu.text.MessagePatternUtil.MessageContentsNode
-import com.ibm.icu.text.MessagePatternUtil.MessageNode
-import com.ibm.icu.text.MessagePatternUtil.TextNode
+import com.ibm.icu.text.MessagePattern
 import io.tolgee.constants.Message
-import io.tolgee.formats.po.FromIcuParamConvertor
 
 class BaseIcuMessageConvertor(
   private val message: String,
@@ -19,7 +13,7 @@ class BaseIcuMessageConvertor(
 
   private var pluralArgName: String? = null
 
-  private lateinit var tree: MessageNode
+  private lateinit var tree: MessagePatternUtil.MessageNode
 
   private fun addToResult(
     value: String,
@@ -86,22 +80,22 @@ class BaseIcuMessageConvertor(
     form: String? = null,
   ) {
     when (node) {
-      is ArgNode -> {
+      is MessagePatternUtil.ArgNode -> {
         handleArgNode(node, form)
       }
 
-      is TextNode -> {
+      is MessagePatternUtil.TextNode -> {
         addToResult(node.text, form)
       }
 
-      is MessageNode -> {
+      is MessagePatternUtil.MessageNode -> {
         node.contents.forEach {
           handleNode(it, form)
         }
       }
 
-      is MessageContentsNode -> {
-        if (node.type == MessageContentsNode.Type.REPLACE_NUMBER) {
+      is MessagePatternUtil.MessageContentsNode -> {
+        if (node.type == MessagePatternUtil.MessageContentsNode.Type.REPLACE_NUMBER) {
           addToResult(argumentConverter.convertReplaceNumber(node, pluralArgName), form)
         }
       }
@@ -112,34 +106,37 @@ class BaseIcuMessageConvertor(
   }
 
   private fun handleArgNode(
-    node: ArgNode,
+    node: MessagePatternUtil.ArgNode,
     form: String?,
   ) {
     when (node.argType) {
-      ArgType.SIMPLE, ArgType.NONE -> {
+      MessagePattern.ArgType.SIMPLE, MessagePattern.ArgType.NONE -> {
         val isInPlural = form != null
         addToResult(argumentConverter.convert(node, isInPlural), form)
       }
 
-      ArgType.PLURAL -> {
+      MessagePattern.ArgType.PLURAL -> {
         if (form != null) {
-          warnings.add(Message.NESTED_PLURALS_NOT_SUPPORTED to listOf(node.toString()))
-          addToResult(node.toString(), form)
+          warnings.add(Message.NESTED_PLURALS_NOT_SUPPORTED to listOf(node.patternString))
+          addToResult(node.patternString, form)
+          return
         }
         handlePlural(node)
       }
 
       else -> {
-        addToResult(node.toString())
-        warnings.add(Message.ADVANCED_PARAMS_NOT_SUPPORTED to listOf(node.toString()))
+        addToResult(node.patternString, form)
+        warnings.add(Message.ADVANCED_PARAMS_NOT_SUPPORTED to listOf(node.patternString))
       }
     }
   }
 
-  private fun handlePlural(node: ArgNode) {
+  private fun handlePlural(node: MessagePatternUtil.ArgNode) {
     pluralArgName = node.name
-    node.complexStyle.variants.forEach {
+    node.complexStyle?.variants?.forEach {
       handleNode(it.message, it.selector)
+    } ?: run {
+      addToResult(node.patternString)
     }
   }
 }
