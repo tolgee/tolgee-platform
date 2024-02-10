@@ -3,7 +3,7 @@ package io.tolgee.formats.po.out
 import com.ibm.icu.text.PluralRules
 import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
-import io.tolgee.formats.BaseIcuMessageToCLikeConvertor
+import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.getPluralDataOrNull
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
@@ -14,7 +14,7 @@ class BaseIcuMessageToPoConvertor(
   val argumentConverter: FromIcuParamConvertor,
   val languageTag: String = "en",
 ) {
-  private val cLikeConvertor = BaseIcuMessageToCLikeConvertor(message, argumentConverter)
+  private val cLikeConvertor = BaseIcuMessageConvertor(message, argumentConverter)
 
   companion object {
     const val OTHER_KEYWORD = "other"

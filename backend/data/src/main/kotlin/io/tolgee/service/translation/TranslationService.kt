@@ -522,4 +522,30 @@ class TranslationService(
         "language_id IN (SELECT id FROM language WHERE project_id = :projectId)",
     ).setParameter("projectId", projectId).executeUpdate()
   }
+
+  fun onKeyIsPluralChanged(
+    keyIds: List<Long>,
+    newIsPlural: Boolean,
+  ) {
+    val translations = translationRepository.getAllByKeyIdIn(keyIds)
+    translations.forEach { handleIsPluralChanged(it, newIsPlural) }
+  }
+
+  private fun handleIsPluralChanged(
+    it: Translation,
+    newIsPlural: Boolean,
+  ) {
+    it.text = it.text?.let { it1 -> getNewText(it1, newIsPlural) }
+  }
+
+  private fun getNewText(
+    text: String,
+    newIsPlural: Boolean,
+  ): String {
+    if (newIsPlural)
+      {
+        return "{value, plural, other {$text}}"
+      }
+    TODO()
+  }
 }

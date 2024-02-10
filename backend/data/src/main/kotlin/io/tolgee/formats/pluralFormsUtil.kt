@@ -28,13 +28,18 @@ val formKeywords = listOf("zero", "one", "two", "few", "many", "other")
  * It also sorts it, so the strings can be compared and should be the same for the same forms
  */
 fun optimizePossiblePlural(string: String): String {
-  val converted = BaseIcuMessageToCLikeConvertor(string, NoOpFromIcuParamConvertor()).convert()
-  if (!converted.isPlural()) {
-    return string
-  }
-  val forms = converted.formsResult!!
+  val forms = getPluralForms(string) ?: return string
   val optimizedForms = optimizePluralForms(forms)
   return FormsToIcuPluralConvertor(optimizedForms).convert()
+}
+
+/**
+ * Returns all plural forms from the given ICU string
+ * Returns null if the string is not a plural
+ */
+fun getPluralForms(string: String): Map<String, String>? {
+  val converted = BaseIcuMessageConvertor(string, NoOpFromIcuParamConvertor()).convert()
+  return converted.formsResult
 }
 
 fun optimizePluralForms(forms: Map<String, String>): Map<String, String> {

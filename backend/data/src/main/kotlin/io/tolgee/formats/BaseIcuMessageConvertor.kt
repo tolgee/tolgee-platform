@@ -9,7 +9,7 @@ import com.ibm.icu.text.MessagePatternUtil.TextNode
 import io.tolgee.constants.Message
 import io.tolgee.formats.po.FromIcuParamConvertor
 
-class BaseIcuMessageToCLikeConvertor(
+class BaseIcuMessageConvertor(
   private val message: String,
   private val argumentConverter: FromIcuParamConvertor,
 ) {

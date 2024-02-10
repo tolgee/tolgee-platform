@@ -1,5 +1,6 @@
 package io.tolgee.unit.formats
 
+import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.formats.optimizePluralForms
@@ -37,6 +38,15 @@ class PluralsFormUtilTest {
 
     optimizePossiblePlural("{0, plural, one {same} other {same} many {same} few {same}}")
       .assert.isEqualTo("{0, plural,\nother {same}\n}")
+  }
+
+  @Test
+  fun `returns correct plural forms`() {
+    getPluralForms("Hello!").assert.isNull()
+    getPluralForms("{hi, number, .00}").assert.isNull()
+    getPluralForms("{count, plural, other {Hello! {hi, number, .00}}}").assert.isEqualTo(
+      mapOf("other" to "Hello! {hi, number, .00}"),
+    )
   }
 
   @Test

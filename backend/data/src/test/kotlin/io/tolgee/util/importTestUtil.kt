@@ -1,6 +1,6 @@
 package io.tolgee.util
 
-import io.tolgee.formats.BaseIcuMessageToCLikeConvertor
+import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.NoOpFromIcuParamConvertor
 import io.tolgee.formats.optimizePossiblePlural
 import io.tolgee.model.dataImport.ImportTranslation
@@ -76,7 +76,7 @@ data class ImportTranslationInContextAssertions(
   }
 
   fun getPossiblePlural() =
-    this.translation.text!!.let { BaseIcuMessageToCLikeConvertor(it, NoOpFromIcuParamConvertor()).convert() }
+    this.translation.text!!.let { BaseIcuMessageConvertor(it, NoOpFromIcuParamConvertor()).convert() }
 
   fun assertHasExactPluralForms(forms: Set<String>): ImportTranslationInContextAssertions {
     this.getPossiblePlural().formsResult!!.keys.assert.isEqualTo(forms)

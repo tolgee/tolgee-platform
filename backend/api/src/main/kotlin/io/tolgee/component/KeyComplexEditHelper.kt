@@ -22,9 +22,10 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
-import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.executeInNewRepeatableTransaction
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import kotlin.properties.Delegates
 
 class KeyComplexEditHelper(
@@ -83,7 +84,10 @@ class KeyComplexEditHelper(
   }
 
   fun doComplexUpdate(): KeyWithDataModel {
-    return executeInNewTransaction(transactionManager = transactionManager) {
+    return executeInNewRepeatableTransaction(
+      transactionManager = transactionManager,
+      isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE,
+    ) {
       prepareData()
       prepareConditions()
       setActivityHolder()
@@ -118,7 +122,10 @@ class KeyComplexEditHelper(
       }
     }
 
-    key.isPlural = dto.isPlural
+    if (isIsPluralChanged) {
+      key.isPlural = dto.isPlural
+      translationService.onKeyIsPluralChanged(key)
+    }
 
     if (isKeyNameModified || isNamespaceChanged) {
       edited = keyService.edit(key, dto.name, dto.namespace)
