@@ -3,17 +3,18 @@ package io.tolgee.api.v2.controllers.v2KeyController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.isValidId
 import io.tolgee.model.enums.Scope
-import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
@@ -29,9 +30,6 @@ private const val NORMALIZED_PLURAL =
 @AutoConfigureMockMvc
 class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: KeysTestData
-
-  @Autowired
-  lateinit var bigMetaService: BigMetaService
 
   val screenshotFile: InputStreamSource by lazy {
     generateImage(2000, 3000)
@@ -56,6 +54,7 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
   )
   @Test
   fun `validates incoming plurals`() {
+    saveAndPrepare()
     val keyName = "super_key"
 
     performProjectAuthPut(
@@ -67,7 +66,7 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       ),
     ).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("invalid_plural_form")
-      node("params[0][0]").isEqualTo("Not a plural")
+      node("params").isEqualTo(" [ [ \"Not a plural\" ] ]")
     }
   }
 
@@ -79,6 +78,7 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
   )
   @Test
   fun `normalizes incoming plurals`() {
+    saveAndPrepare()
     val keyName = "super_key"
 
     performProjectAuthPut(
@@ -128,5 +128,41 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       node("translations.de.text").isString.isEqualTo(NORMALIZED_PLURAL)
       node("translations.cs.text").isString.isEqualTo(NORMALIZED_PLURAL)
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `normalizes on create`() {
+    saveAndPrepare()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "new_key",
+        translations = mapOf("en" to RAW_PLURAL),
+        isPlural = true,
+      ),
+    ).andIsCreated.andAssertThatJson {
+      node("id").isValidId
+      node("name").isEqualTo("new_key")
+      node("isPlural").isBoolean.isTrue
+      node("translations.en.text").isString.isEqualTo(NORMALIZED_PLURAL)
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `validates on create`() {
+    saveAndPrepare()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "new_key",
+        translations =
+          mapOf(
+            "en" to "Not a plural",
+          ),
+        isPlural = true,
+      ),
+    ).andIsBadRequest
   }
 }

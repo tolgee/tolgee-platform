@@ -17,6 +17,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.bigMeta.BigMetaService
@@ -109,13 +110,9 @@ class KeyService(
     dto: CreateKeyDto,
   ): Key {
     val key = create(project, dto.name, dto.namespace)
-    val created =
-      dto.translations?.let {
-        if (it.isEmpty()) {
-          return@let null
-        }
-        translationService.setForKey(key, it)
-      }
+    key.isPlural = dto.isPlural
+
+    val created = createTranslationsOnKeyCreate(dto, key)
 
     dto.states?.map {
       val translation =
@@ -128,8 +125,6 @@ class KeyService(
       description = dto.description
     }
 
-    key.isPlural = dto.isPlural
-
     dto.tags?.forEach {
       tagService.tagKey(key, it)
     }
@@ -139,6 +134,27 @@ class KeyService(
     storeScreenshots(dto, key)
 
     return key
+  }
+
+  private fun createTranslationsOnKeyCreate(
+    dto: CreateKeyDto,
+    key: Key,
+  ): Map<String, Translation>? {
+    val withNormalizedPlurals =
+      dto.translations?.let {
+        if (!key.isPlural) {
+          return@let null
+        }
+        translationService.validateAndNormalizePlurals(it)
+      }
+    val created =
+      withNormalizedPlurals?.let {
+        if (it.isEmpty()) {
+          return@let null
+        }
+        translationService.setForKey(key, it)
+      }
+    return created
   }
 
   private fun storeScreenshots(
