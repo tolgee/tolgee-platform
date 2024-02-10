@@ -1,5 +1,6 @@
 package io.tolgee.unit.formats
 
+import io.tolgee.formats.convertToIcuPlural
 import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.isSamePossiblePlural
@@ -97,6 +98,13 @@ class PluralsFormUtilTest {
   }
 
   @Test
+  fun `works with escaping correct plural forms`() {
+    getPluralForms("{count, plural, other {Hello! {hi, number, .00} '{escaped}'}}").assert.isEqualTo(
+      mapOf("other" to "Hello! {hi, number, .00} '{escaped}'"),
+    )
+  }
+
+  @Test
   fun `compares plurals correctly`() {
     (
       "I have {count, plural, other {# dogs} one {# dog} many {# dogs}}." isSamePossiblePlural
@@ -112,5 +120,30 @@ class PluralsFormUtilTest {
     (null isSamePossiblePlural "I have dogs").assert.isFalse()
     ("I have dogs" isSamePossiblePlural null).assert.isFalse()
     (null isSamePossiblePlural null).assert.isTrue()
+  }
+
+  @Test
+  fun `converts text to plural`() {
+    "Simple one".convertToIcuPlural().assert.isEqualTo("{value, plural, other {Simple one}}")
+
+    "Simple one with # hash".convertToIcuPlural().assert.isEqualTo("{value, plural, other {Simple one with '#' hash}}")
+
+    "This one would break stuff }"
+      .convertToIcuPlural().assert.isEqualTo("{value, plural, other {This one would break stuff '}'}}")
+
+    "This one has valid param: {name} and would break stuff }"
+      .convertToIcuPlural().assert
+      .isEqualTo("{value, plural, other {This one has valid param: {name} and would break stuff '}'}}")
+
+    "{0, plural, one {# dog} other {# dogs}} This will break it too }".convertToIcuPlural()
+      .assert.isEqualTo(
+        "{0, plural,\n" +
+          "one {# dog This will break it too '}'}\n" +
+          "other {# dogs This will break it too '}'}\n" +
+          "}",
+      )
+
+    "This } is invalid".convertToIcuPlural()
+      .assert.isEqualTo("{value, plural, other {This '}' is invalid}}")
   }
 }

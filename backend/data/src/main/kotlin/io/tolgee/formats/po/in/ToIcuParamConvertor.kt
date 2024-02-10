@@ -1,6 +1,6 @@
 package io.tolgee.formats.po.`in`
 
-import io.tolgee.formats.PreIcuMessageEscaper
+import io.tolgee.formats.IcuMessageEscaper
 
 interface ToIcuParamConvertor {
   fun convert(
@@ -17,6 +17,6 @@ interface ToIcuParamConvertor {
     paramString: String,
     isInPlural: Boolean,
   ): String {
-    return PreIcuMessageEscaper(paramString, isInPlural).escaped
+    return IcuMessageEscaper(paramString, isInPlural).escaped
   }
 }

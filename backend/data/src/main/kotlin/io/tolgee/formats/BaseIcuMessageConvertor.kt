@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 class BaseIcuMessageConvertor(
   private val message: String,
   private val argumentConverter: FromIcuParamConvertor,
+  private val keepEscaping: Boolean = false,
 ) {
   companion object {
     const val OTHER_KEYWORD = "other"
@@ -19,13 +20,15 @@ class BaseIcuMessageConvertor(
     value: String,
     keyword: String? = null,
   ) {
-    val unescaped =
-      IcuMessageEscapeRemover(value, keyword != null)
-        .escapeRemoved
+    // we have added something to the result and it wasn't plural
+    if (value.isNotEmpty() && keyword == null) {
+      isWholeStringWrappedInPlural = false
+    }
+
     if (keyword == null) {
-      singleResult.append(unescaped)
-      pluralFormsResult?.values?.forEach { it.append(unescaped) }
-      otherResult?.append(unescaped)
+      singleResult.append(value)
+      pluralFormsResult?.values?.forEach { it.append(value) }
+      otherResult?.append(value)
       return
     }
 
@@ -34,14 +37,14 @@ class BaseIcuMessageConvertor(
     }
 
     pluralFormsResult?.compute(keyword) { _, v ->
-      (v ?: StringBuilder(singleResult)).append(unescaped)
+      (v ?: StringBuilder(singleResult)).append(value)
     }
 
     if (keyword == OTHER_KEYWORD) {
       if (otherResult == null) {
         otherResult = StringBuilder(singleResult)
       }
-      otherResult!!.append(unescaped)
+      otherResult!!.append(value)
     }
   }
 
@@ -54,13 +57,20 @@ class BaseIcuMessageConvertor(
   private var singleResult = StringBuilder()
 
   private val warnings = mutableListOf<Pair<Message, List<String>>>()
+  private var isWholeStringWrappedInPlural = message.startsWith("{")
 
   fun convert(): PossiblePluralConversionResult {
     tree = MessagePatternUtil.buildMessageNode(message)
     handleNode(tree)
 
     if (pluralFormsResult == null) {
-      return PossiblePluralConversionResult(singleResult.toString(), null, warnings)
+      return PossiblePluralConversionResult(
+        singleResult.toString(),
+        null,
+        null,
+        isWholeStringWrappedInPlural = false,
+        warnings,
+      )
     }
 
     return getPluralResult()
@@ -72,7 +82,13 @@ class BaseIcuMessageConvertor(
         ?.mapValues { it.value.toString() }
         ?.toMutableMap() ?: mutableMapOf()
     result.computeIfAbsent(OTHER_KEYWORD) { otherResult.toString() }
-    return PossiblePluralConversionResult(null, result, warnings)
+    return PossiblePluralConversionResult(
+      null,
+      result,
+      pluralArgName,
+      isWholeStringWrappedInPlural,
+      warnings,
+    )
   }
 
   private fun handleNode(
@@ -85,7 +101,7 @@ class BaseIcuMessageConvertor(
       }
 
       is MessagePatternUtil.TextNode -> {
-        addToResult(node.text, form)
+        appendFromTextNode(node, form)
       }
 
       is MessagePatternUtil.MessageNode -> {
@@ -103,6 +119,17 @@ class BaseIcuMessageConvertor(
       else -> {
       }
     }
+  }
+
+  private fun appendFromTextNode(
+    node: MessagePatternUtil.TextNode,
+    form: String?,
+  ) {
+    if (keepEscaping) {
+      addToResult(node.patternString, form)
+      return
+    }
+    addToResult(node.text, form)
   }
 
   private fun handleArgNode(

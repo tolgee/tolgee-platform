@@ -5,6 +5,8 @@ import io.tolgee.constants.Message
 class PossiblePluralConversionResult(
   val singleResult: String?,
   val formsResult: Map<String, String>?,
+  val argName: String?,
+  val isWholeStringWrappedInPlural: Boolean,
   val warnings: List<Pair<Message, List<Any>>>,
 ) {
   init {

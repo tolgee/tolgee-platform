@@ -29,18 +29,34 @@ val formKeywords = listOf("zero", "one", "two", "few", "many", "other")
  */
 fun optimizePossiblePlural(string: String): String {
   val forms = getPluralForms(string) ?: return string
-  val optimizedForms = optimizePluralForms(forms)
-  return FormsToIcuPluralConvertor(optimizedForms).convert()
+  val optimizedForms = optimizePluralForms(forms.forms)
+  return FormsToIcuPluralConvertor(optimizedForms, escape = false).convert()
 }
 
 /**
  * Returns all plural forms from the given ICU string
  * Returns null if the string is not a plural
  */
-fun getPluralForms(string: String): Map<String, String>? {
-  val converted = BaseIcuMessageConvertor(string, NoOpFromIcuParamConvertor()).convert()
-  return converted.formsResult
+fun getPluralForms(string: String): PluralForms? {
+  val converted =
+    BaseIcuMessageConvertor(
+      string,
+      NoOpFromIcuParamConvertor(),
+      keepEscaping = true,
+    ).convert()
+
+  return PluralForms(
+    converted.formsResult ?: return null,
+    converted.argName ?: throw IllegalStateException("Plural argument name not found"),
+    converted.isWholeStringWrappedInPlural,
+  )
 }
+
+data class PluralForms(
+  val forms: Map<String, String>,
+  val argName: String,
+  val isWholeStringWrappedInPlural: Boolean,
+)
 
 fun optimizePluralForms(forms: Map<String, String>): Map<String, String> {
   val otherForm = forms[PluralRules.KEYWORD_OTHER] ?: return forms
@@ -60,4 +76,42 @@ infix fun String?.isSamePossiblePlural(other: String?): Boolean {
     return false
   }
   return optimizePossiblePlural(this) == optimizePossiblePlural(other)
+}
+
+fun String.convertToIcuPlural(): String {
+  try {
+    return this.normalizePlural()
+  } catch (e: Exception) {
+    // ignore errors, we will just escape everything and put it to other form
+  }
+  return allToOtherForm(this.preparePluralForm(escapeHash = true))
+}
+
+fun String.normalizePlural(): String {
+  val forms =
+    try {
+      getPluralForms(this)
+    } catch (e: Exception) {
+      null
+    } ?: throw StringIsNotPluralException()
+  val preparedForms = forms.forms.mapValues { it.value.preparePluralForm(escapeHash = false) }
+  return FormsToIcuPluralConvertor(preparedForms, forms.argName, escape = false).convert()
+}
+
+class StringIsNotPluralException : RuntimeException("String is not a plural")
+
+private fun allToOtherForm(text: String): String {
+  return "{value, plural, other {$text}}"
+}
+
+private fun String.preparePluralForm(escapeHash: Boolean = true): String {
+  val result = StringBuilder()
+  MessagePatternUtil.buildMessageNode(this).contents.forEach {
+    if (it !is MessagePatternUtil.TextNode) {
+      result.append(it.patternString)
+      return@forEach
+    }
+    result.append(IcuMessageEscaper(it.patternString, escapeHash).escaped)
+  }
+  return result.toString()
 }

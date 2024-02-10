@@ -3,9 +3,9 @@ package io.tolgee.formats
 /**
  * It escapes controlling characters in ICU message, so it's not interpreted when in comes from other formats
  */
-class PreIcuMessageEscaper(
+class IcuMessageEscaper(
   private val input: String,
-  private val isPlural: Boolean = false,
+  private val escapeHash: Boolean = false,
 ) {
   companion object {
     private const val ESCAPE_CHAR = '\''
@@ -19,7 +19,7 @@ class PreIcuMessageEscaper(
 
   private val escapableChars by lazy {
     val base = setOf('{', '}', '\'')
-    if (isPlural) {
+    if (escapeHash) {
       base + setOf('#')
     } else {
       base

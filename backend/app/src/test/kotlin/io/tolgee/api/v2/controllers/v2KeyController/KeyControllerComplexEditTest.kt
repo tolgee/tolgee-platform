@@ -36,7 +36,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerComplexUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: KeysTestData
 
   @Autowired

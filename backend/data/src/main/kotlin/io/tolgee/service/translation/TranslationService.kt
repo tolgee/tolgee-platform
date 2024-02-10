@@ -8,6 +8,10 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.StringIsNotPluralException
+import io.tolgee.formats.convertToIcuPlural
+import io.tolgee.formats.getPluralForms
+import io.tolgee.formats.normalizePlural
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
@@ -34,6 +38,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.Serializable
 import java.util.*
 
 @Service
@@ -529,22 +534,58 @@ class TranslationService(
   ) {
     val translations = translationRepository.getAllByKeyIdIn(keyIds)
     translations.forEach { handleIsPluralChanged(it, newIsPlural) }
+    saveAll(translations)
   }
 
   private fun handleIsPluralChanged(
     it: Translation,
     newIsPlural: Boolean,
   ) {
-    it.text = it.text?.let { it1 -> getNewText(it1, newIsPlural) }
+    it.text = it.text?.let { text -> getNewText(text, newIsPlural) }
   }
 
+  /**
+   * @param newIsPlural - if true, we are converting value to plural,
+   * if not, we are converting it from plural
+   */
   private fun getNewText(
     text: String,
     newIsPlural: Boolean,
   ): String {
     if (newIsPlural) {
-      return "{value, plural, other {$text}}"
+      return text.convertToIcuPlural()
     }
-    TODO()
+    val forms = getPluralForms(text)
+    return forms?.forms?.get("other") ?: text
+  }
+
+  fun validateAndNormalizePlural(text: String): String {
+    try {
+      return text.normalizePlural()
+    } catch (e: StringIsNotPluralException) {
+      throw BadRequestException(Message.MESSAGE_IS_NOT_PLURAL)
+    }
+  }
+
+  fun <T> validateAndNormalizePlurals(texts: Map<T, String?>): Map<T, String?> {
+    val invalidMessages = mutableListOf<String>()
+    val result =
+      texts.map { (languageTag, text) ->
+        val normalized =
+          text?.let {
+            try {
+              validateAndNormalizePlural(it)
+            } catch (e: BadRequestException) {
+              invalidMessages.add(text)
+              null
+            }
+          }
+        languageTag to normalized
+      }.toMap()
+    if (invalidMessages.isNotEmpty()) {
+      @Suppress("UNCHECKED_CAST")
+      throw BadRequestException(Message.INVALID_PLURAL_FORM, listOf(invalidMessages) as List<Serializable>)
+    }
+    return result
   }
 }

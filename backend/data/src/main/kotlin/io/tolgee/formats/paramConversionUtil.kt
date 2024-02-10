@@ -37,7 +37,7 @@ fun convertMessage(
       convertor.convert(it, isPlural)
     },
     unmatchedCallback = {
-      PreIcuMessageEscaper(it, isPlural).escaped
+      IcuMessageEscaper(it, isPlural).escaped
     },
   )
 }

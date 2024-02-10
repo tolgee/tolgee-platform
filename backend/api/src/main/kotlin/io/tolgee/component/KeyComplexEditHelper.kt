@@ -63,6 +63,7 @@ class KeyComplexEditHelper(
   private var isNamespaceChanged: Boolean = false
   private var isDescriptionChanged: Boolean = false
   private var isIsPluralChanged: Boolean = false
+  private var newIsPlural by Delegates.notNull<Boolean>()
 
   private val languages by lazy {
     val translationLanguages = dto.translations?.keys ?: setOf()
@@ -84,6 +85,7 @@ class KeyComplexEditHelper(
   }
 
   fun doComplexUpdate(): KeyWithDataModel {
+    // we don't want phantoms, since we are updating all the translations when isPlural is changed
     return executeInNewRepeatableTransaction(
       transactionManager = transactionManager,
       isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE,
@@ -91,8 +93,7 @@ class KeyComplexEditHelper(
       prepareData()
       prepareConditions()
       setActivityHolder()
-
-      doTranslationUpdate()
+      doTranslationsUpdate()
       doStateUpdate()
       doUpdateTags()
       doUpdateScreenshots()
@@ -123,8 +124,8 @@ class KeyComplexEditHelper(
     }
 
     if (isIsPluralChanged) {
-      key.isPlural = dto.isPlural
-      translationService.onKeyIsPluralChanged(key)
+      key.isPlural = dto.isPlural!!
+      translationService.onKeyIsPluralChanged(listOf(key.id), dto.isPlural!!)
     }
 
     if (isKeyNameModified || isNamespaceChanged) {
@@ -164,7 +165,7 @@ class KeyComplexEditHelper(
     }
   }
 
-  private fun doTranslationUpdate() {
+  private fun doTranslationsUpdate() {
     if (modifiedTranslations != null && areTranslationsModified) {
       projectHolder.projectEntity.checkTranslationsEditPermission()
       securityService.checkLanguageTranslatePermissionsByLanguageId(
@@ -173,6 +174,8 @@ class KeyComplexEditHelper(
       )
 
       val modifiedTranslations = getModifiedTranslationsByTag()
+      val normalizedPlurals = validateAndNormalizePlurals(modifiedTranslations)
+
       val existingTranslationsByTag = getExistingTranslationsByTag()
       val oldTranslations =
         modifiedTranslations.map {
@@ -183,7 +186,7 @@ class KeyComplexEditHelper(
         translationService.setForKey(
           key,
           oldTranslations = oldTranslations,
-          translations = modifiedTranslations,
+          translations = normalizedPlurals,
         )
 
       translations.forEach {
@@ -192,6 +195,13 @@ class KeyComplexEditHelper(
         }
       }
     }
+  }
+
+  private fun validateAndNormalizePlurals(modifiedTranslations: Map<Language, String?>): Map<Language, String?> {
+    if (newIsPlural) {
+      return translationService.validateAndNormalizePlurals(modifiedTranslations)
+    }
+    return modifiedTranslations
   }
 
   private fun getExistingTranslationsByTag() =
@@ -256,6 +266,7 @@ class KeyComplexEditHelper(
     key.checkInProject()
     prepareModifiedTranslations()
     prepareModifiedStates()
+    newIsPlural = dto.isPlural ?: key.isPlural
   }
 
   private fun prepareConditions() {
@@ -265,7 +276,7 @@ class KeyComplexEditHelper(
     isKeyNameModified = key.name != dto.name
     isNamespaceChanged = key.namespace?.name != dto.namespace
     isDescriptionChanged = key.keyMeta?.description != dto.description
-    isIsPluralChanged = key.isPlural != dto.isPlural
+    isIsPluralChanged = dto.isPlural != null && key.isPlural != dto.isPlural
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
     isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()
