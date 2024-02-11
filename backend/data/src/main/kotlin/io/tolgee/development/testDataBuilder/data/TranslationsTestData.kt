@@ -425,4 +425,11 @@ class TranslationsTestData {
       }
     }
   }
+
+  fun addPluralKey()  {
+    projectBuilder.addKey {
+      name = "plural_key"
+      isPlural = true
+    }
+  }
 }

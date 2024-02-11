@@ -185,9 +185,10 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    isPlural: Boolean = false,
   ): Key {
     checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
-    return createWithoutExistenceCheck(project, name, namespace)
+    return createWithoutExistenceCheck(project, name, namespace, isPlural)
   }
 
   @Transactional
@@ -195,8 +196,9 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    isPlural: Boolean,
   ): Key {
-    val key = Key(name = name, project = project)
+    val key = Key(name = name, project = project).apply { this.isPlural = isPlural }
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
     }

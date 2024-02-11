@@ -210,6 +210,7 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
+    val normalized = validateAndNormalizePlurals(translations, key.isPlural)
     val languages = languageService.findEntitiesByTags(translations.keys, key.project.id)
     val oldTranslations =
       getKeyTranslations(languages, key.project, key).associate {
@@ -221,7 +222,7 @@ class TranslationService(
 
     return setForKey(
       key,
-      translations.map { languageByTagFromLanguages(it.key, languages) to it.value }
+      normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
       oldTranslations,
     ).mapKeys { it.key.tag }
@@ -568,6 +569,17 @@ class TranslationService(
     } catch (e: StringIsNotPluralException) {
       throw BadRequestException(Message.MESSAGE_IS_NOT_PLURAL)
     }
+  }
+
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    isKeyPlural: Boolean,
+  ): Map<T, String?> {
+    if (isKeyPlural) {
+      return validateAndNormalizePlurals(texts)
+    }
+
+    return texts
   }
 
   fun <T> validateAndNormalizePlurals(texts: Map<T, String?>): Map<T, String?> {

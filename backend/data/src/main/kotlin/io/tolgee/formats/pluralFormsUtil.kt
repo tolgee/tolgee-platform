@@ -116,3 +116,27 @@ private fun String.preparePluralForm(escapeHash: Boolean = true): String {
   }
   return result.toString()
 }
+
+fun String.isPluralString(): Boolean {
+  return try {
+    getPluralForms(this)?.forms != null
+  } catch (e: Exception) {
+    false
+  }
+}
+
+/**
+ * Returns new map with plural forms if any of the values is plural
+ * Returns null if none of the values is plural
+ */
+fun <T> Map<T, String?>.convertToPluralIfAnyIsPlural(): Map<T, String?>? {
+  val shouldBePlural = this.any { it.value?.isPluralString() == true }
+  if (!shouldBePlural)
+    {
+      return null
+    }
+
+  return this.mapValues {
+    it.value?.convertToIcuPlural()
+  }
+}

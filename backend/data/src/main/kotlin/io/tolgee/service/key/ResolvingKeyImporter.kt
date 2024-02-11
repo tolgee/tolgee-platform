@@ -215,9 +215,10 @@ class ResolvingKeyImporter(
     existingKeys.computeIfAbsent(keyToImport.namespace to keyToImport.name) {
       securityService.checkProjectPermission(projectEntity.id, Scope.KEYS_CREATE)
       keyService.createWithoutExistenceCheck(
+        project = projectEntity,
         name = keyToImport.name,
         namespace = keyToImport.namespace,
-        project = projectEntity,
+        isPlural = TODO(),
       )
     }
 

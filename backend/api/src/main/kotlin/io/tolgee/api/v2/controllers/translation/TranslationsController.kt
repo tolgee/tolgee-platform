@@ -23,6 +23,7 @@ import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
 import io.tolgee.hateoas.translations.SetTranslationsResponseModel
@@ -209,15 +210,21 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
+    val convertedToPlurals = dto.translations.convertToPluralIfAnyIsPlural()
+    val isPlural = convertedToPlurals != null
+
     val key =
       keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
         activityHolder.activity = ActivityType.SET_TRANSLATIONS
       } ?: let {
         checkKeyEditScope()
         activityHolder.activity = ActivityType.CREATE_KEY
-        keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
+        keyService.create(projectHolder.projectEntity, dto.key, dto.namespace, isPlural)
       }
-    val translations = translationService.setForKey(key, dto.translations)
+
+    val translations =
+      translationService
+        .setForKey(key, convertedToPlurals ?: dto.translations)
     return getSetTranslationsResponse(key, translations)
   }
 
@@ -373,6 +380,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
       keyId = key.id,
       keyName = key.name,
       keyNamespace = key.namespace?.name,
+      keyIsPlural = key.isPlural,
       translations =
         translations.entries.associate { (languageTag, translation) ->
           languageTag to translationModelAssembler.toModel(translation)
