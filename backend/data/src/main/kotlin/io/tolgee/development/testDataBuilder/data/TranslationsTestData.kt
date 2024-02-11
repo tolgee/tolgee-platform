@@ -426,7 +426,7 @@ class TranslationsTestData {
     }
   }
 
-  fun addPluralKey()  {
+  fun addPluralKey() {
     projectBuilder.addKey {
       name = "plural_key"
       isPlural = true
