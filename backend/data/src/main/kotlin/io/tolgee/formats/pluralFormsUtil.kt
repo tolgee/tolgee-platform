@@ -85,7 +85,8 @@ fun String.convertToIcuPlural(): String {
   } catch (e: Exception) {
     // ignore errors, we will just escape everything and put it to other form
   }
-  return allToOtherForm(this.preparePluralForm(escapeHash = true))
+  val preparedForm = this.preparePluralForm(escapeHash = true)
+  return allToOtherForm(preparedForm.prepared, preparedForm.firstArgName)
 }
 
 fun String.normalizePlural(): String {
@@ -95,27 +96,38 @@ fun String.normalizePlural(): String {
     } catch (e: Exception) {
       null
     } ?: throw StringIsNotPluralException()
-  val preparedForms = forms.forms.mapValues { it.value.preparePluralForm(escapeHash = false) }
+  val preparedForms = forms.forms.mapValues { it.value.preparePluralForm(escapeHash = false).prepared }
   return FormsToIcuPluralConvertor(preparedForms, forms.argName, escape = false).convert()
 }
 
 class StringIsNotPluralException : RuntimeException("String is not a plural")
 
-private fun allToOtherForm(text: String): String {
-  return "{value, plural, other {$text}}"
+private fun allToOtherForm(
+  text: String,
+  argName: String?,
+): String {
+  return "{${argName ?: "value"}, plural, other {$text}}"
 }
 
-private fun String.preparePluralForm(escapeHash: Boolean = true): String {
+private fun String.preparePluralForm(escapeHash: Boolean = true): PreparePluralFormResult {
   val result = StringBuilder()
+  var firstArgName: String? = null
   MessagePatternUtil.buildMessageNode(this).contents.forEach {
+    if (it is MessagePatternUtil.ArgNode && it.complexStyle == null) {
+      if (firstArgName == null) {
+        firstArgName = it.name
+      }
+    }
     if (it !is MessagePatternUtil.TextNode) {
       result.append(it.patternString)
       return@forEach
     }
     result.append(IcuMessageEscaper(it.patternString, escapeHash).escaped)
   }
-  return result.toString()
+  return PreparePluralFormResult(result.toString(), firstArgName)
 }
+
+data class PreparePluralFormResult(val prepared: String, val firstArgName: String?)
 
 fun String.isPluralString(): Boolean {
   return try {
@@ -131,10 +143,9 @@ fun String.isPluralString(): Boolean {
  */
 fun <T> Map<T, String?>.convertToPluralIfAnyIsPlural(): Map<T, String?>? {
   val shouldBePlural = this.any { it.value?.isPluralString() == true }
-  if (!shouldBePlural)
-    {
-      return null
-    }
+  if (!shouldBePlural) {
+    return null
+  }
 
   return this.mapValues {
     it.value?.convertToIcuPlural()

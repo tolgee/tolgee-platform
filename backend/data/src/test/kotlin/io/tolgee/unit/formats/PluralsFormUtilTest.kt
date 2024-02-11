@@ -133,7 +133,7 @@ class PluralsFormUtilTest {
 
     "This one has valid param: {name} and would break stuff }"
       .convertToIcuPlural().assert
-      .isEqualTo("{value, plural, other {This one has valid param: {name} and would break stuff '}'}}")
+      .isEqualTo("{name, plural, other {This one has valid param: {name} and would break stuff '}'}}")
 
     "{0, plural, one {# dog} other {# dogs}} This will break it too }".convertToIcuPlural()
       .assert.isEqualTo(
@@ -145,5 +145,24 @@ class PluralsFormUtilTest {
 
     "This } is invalid".convertToIcuPlural()
       .assert.isEqualTo("{value, plural, other {This '}' is invalid}}")
+  }
+
+  @Test
+  fun `works with multiple first leve plurals`() {
+    "{0, plural, one {# dog} other {# dogs}} {0, plural, one {# dog} other {# dogs}}".convertToIcuPlural()
+      .assert.isEqualTo(
+        "{0, plural,\n" +
+          "one {# dog {0, plural, one {# dog} other {# dogs}}}\n" +
+          "other {# dogs {0, plural, one {# dog} other {# dogs}}}\n" +
+          "}",
+      )
+  }
+
+  @Test
+  fun `uses first param when converting to plural`() {
+    "Use {me} not {notme}".convertToIcuPlural()
+      .assert.isEqualTo(
+        "{me, plural, other {Use {me} not {notme}}}",
+      )
   }
 }

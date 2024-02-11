@@ -12,6 +12,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -164,5 +165,146 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
         isPlural = true,
       ),
     ).andIsBadRequest
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `correctly imports with non-resolvable endpoint`() {
+    testData.projectBuilder.addCzech()
+    saveAndPrepare()
+    performProjectAuthPost(
+      "keys/import",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "plural_key",
+              "translations" to
+                mapOf(
+                  "en" to "Hello! I have {count} dogs.",
+                  "cs" to "Ahoj! Já mám {count, plural, one {jednoho psa} few {# psi} other {# psů}}",
+                ),
+            ),
+            mapOf(
+              "name" to "not_plural_key",
+              "translations" to
+                mapOf(
+                  "en" to "Hello!",
+                  "cs" to "Ahoj!",
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val pluralKey = keyService.find(testData.project.id, "plural_key", null)
+      pluralKey!!.isPlural.assert.isTrue()
+      pluralKey.translations.find { it.language.tag == "en" }!!
+        .text.assert.isEqualTo("{count, plural, other {Hello! I have {count} dogs.}}")
+      pluralKey.translations.find { it.language.tag == "cs" }!!
+        .text.assert.isEqualTo(
+          "{count, plural,\n" +
+            "one {Ahoj! Já mám jednoho psa}\n" +
+            "few {Ahoj! Já mám # psi}\n" +
+            "other {Ahoj! Já mám # psů}\n" +
+            "}",
+        )
+
+      val notPluralKey = keyService.find(testData.project.id, "not_plural_key", null)
+      notPluralKey!!.isPlural.assert.isFalse()
+      notPluralKey.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("Hello!")
+      notPluralKey.translations.find { it.language.tag == "cs" }!!.text.assert.isEqualTo("Ahoj!")
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `correctly imports with resolvable endpoint`() {
+    testData.projectBuilder.addCzech()
+    testData.projectBuilder.addKey {
+      name = "existing_non_plural"
+    }.build {
+      addTranslation("en", "Hello!")
+    }
+    saveAndPrepare()
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "plural_key",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "Hello! I have {count} dogs.",
+                      "resolution" to "NEW",
+                    ),
+                  "cs" to
+                    mapOf(
+                      "text" to "Ahoj! Já mám {count, plural, one {jednoho psa} few {# psi} other {# psů}}",
+                      "resolution" to "NEW",
+                    ),
+                ),
+            ),
+            mapOf(
+              "name" to "not_plural_key",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "Hello!",
+                      "resolution" to "NEW",
+                    ),
+                  "cs" to
+                    mapOf(
+                      "text" to "Ahoj!",
+                      "resolution" to "NEW",
+                    ),
+                ),
+            ),
+            mapOf(
+              "name" to "existing_non_plural",
+              "translations" to
+                mapOf(
+                  "cs" to
+                    mapOf(
+                      "text" to "{hello, plural, one {# pes} other {# psů}}",
+                      "resolution" to "NEW",
+                    ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val pluralKey = keyService.find(testData.project.id, "plural_key", null)
+      pluralKey!!.isPlural.assert.isTrue()
+      pluralKey.translations.find { it.language.tag == "en" }!!
+        .text.assert.isEqualTo("{count, plural, other {Hello! I have {count} dogs.}}")
+      pluralKey.translations.find { it.language.tag == "cs" }!!
+        .text.assert.isEqualTo(
+          "{count, plural,\n" +
+            "one {Ahoj! Já mám jednoho psa}\n" +
+            "few {Ahoj! Já mám # psi}\n" +
+            "other {Ahoj! Já mám # psů}\n" +
+            "}",
+        )
+
+      val notPluralKey = keyService.find(testData.project.id, "not_plural_key", null)
+      notPluralKey!!.isPlural.assert.isFalse()
+      notPluralKey.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("Hello!")
+      notPluralKey.translations.find { it.language.tag == "cs" }!!.text.assert.isEqualTo("Ahoj!")
+
+      val existingNonPluralKey = keyService.find(testData.project.id, "existing_non_plural", null)
+      existingNonPluralKey!!.isPlural.assert.isTrue()
+      existingNonPluralKey.translations.find { it.language.tag == "en" }!!
+        .text.assert.isEqualTo("{value, plural, other {Hello!}}")
+      existingNonPluralKey.translations.find { it.language.tag == "cs" }!!
+        .text.assert.isEqualTo("{hello, plural,\none {# pes}\nother {# psů}\n}")
+    }
   }
 }

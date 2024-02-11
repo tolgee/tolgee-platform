@@ -143,6 +143,12 @@ class BaseIcuMessageConvertor(
       }
 
       MessagePattern.ArgType.PLURAL -> {
+        if (!pluralFormsResult.isNullOrEmpty())
+          {
+            warnings.add(Message.MULTIPLE_PLURALS_NOT_SUPPORTED to listOf(node.patternString))
+            addToResult(node.patternString, form)
+            return
+          }
         if (form != null) {
           warnings.add(Message.NESTED_PLURALS_NOT_SUPPORTED to listOf(node.patternString))
           addToResult(node.patternString, form)
