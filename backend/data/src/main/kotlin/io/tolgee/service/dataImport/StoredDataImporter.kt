@@ -34,7 +34,7 @@ class StoredDataImporter(
 
   private val securityService = applicationContext.getBean(SecurityService::class.java)
 
-  private val translationsToSave = mutableListOf<Translation>()
+  val translationsToSave = mutableListOf<Pair<ImportTranslation, Translation>>()
 
   /**
    * We need to persist data after everything is checked for resolved conflicts since
@@ -90,6 +90,8 @@ class StoredDataImporter(
 
     namespaceService.saveAll(namespacesToSave.values)
 
+    handlePluralization()
+
     val keyEntitiesToSave = saveKeys()
 
     saveMetaData(keyEntitiesToSave)
@@ -107,6 +109,10 @@ class StoredDataImporter(
     entityManager.flushAndClear()
   }
 
+  private fun handlePluralization() {
+    PluralizationHandler(importDataManager, this, translationService).handlePluralization()
+  }
+
   private fun saveMetaData(keyEntitiesToSave: MutableCollection<Key>) {
     keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
@@ -118,7 +124,7 @@ class StoredDataImporter(
 
   private fun saveTranslations() {
     checkTranslationPermissions()
-    translationService.saveAll(translationsToSave)
+    translationService.saveAll(translationsToSave.map { it.second })
   }
 
   private fun saveKeys(): MutableCollection<Key> {
@@ -133,7 +139,7 @@ class StoredDataImporter(
   }
 
   private fun checkTranslationPermissions() {
-    val langs = translationsToSave.map { it.language }.toSet().map { it.id }
+    val langs = translationsToSave.map { it.second.language }.toSet().map { it.id }
     securityService.checkLanguageTranslatePermission(import.project.id, langs)
   }
 
@@ -199,7 +205,7 @@ class StoredDataImporter(
       }
       translation.text = this@doImport.text
       translation.resetFlags()
-      translationsToSave.add(translation)
+      translationsToSave.add(this to translation)
     }
   }
 

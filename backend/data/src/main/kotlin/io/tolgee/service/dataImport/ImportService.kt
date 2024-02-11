@@ -344,10 +344,19 @@ class ImportService(
     return importTranslationRepository.findById(translationId).orElse(null)
   }
 
+  fun findTranslation(
+    translationId: Long,
+    languageId: Long,
+  ): ImportTranslation? {
+    return importTranslationRepository.findByIdAndLanguageId(translationId, languageId)
+  }
+
   fun resolveTranslationConflict(
-    translation: ImportTranslation,
+    translationId: Long,
+    languageId: Long,
     override: Boolean,
   ) {
+    val translation = findTranslation(translationId, languageId) ?: throw NotFoundException()
     translation.override = override
     translation.resolve()
     importTranslationRepository.save(translation)

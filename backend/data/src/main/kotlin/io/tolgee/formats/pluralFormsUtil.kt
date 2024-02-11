@@ -37,7 +37,8 @@ fun optimizePossiblePlural(string: String): String {
  * Returns all plural forms from the given ICU string
  * Returns null if the string is not a plural
  */
-fun getPluralForms(string: String): PluralForms? {
+fun getPluralForms(string: String?): PluralForms? {
+  string ?: return null
   val converted =
     BaseIcuMessageConvertor(
       string,

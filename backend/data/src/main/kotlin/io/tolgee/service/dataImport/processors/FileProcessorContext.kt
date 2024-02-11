@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport.processors
 
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.formats.getPluralForms
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -17,7 +18,8 @@ data class FileProcessorContext(
   val params: ImportAddFilesParams = ImportAddFilesParams(),
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
-  var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
+  private var _translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
+  val translations: Map<String, List<ImportTranslation>> get() = _translations
   val keys: MutableMap<String, ImportKey> = mutableMapOf()
   var namespace: String? = null
   lateinit var languageNameGuesses: List<String>
@@ -27,7 +29,7 @@ data class FileProcessorContext(
     languageName: String,
     value: Any?,
     idx: Int = 0,
-    isPlural: Boolean = false,
+    replaceNonPlurals: Boolean = false,
   ) {
     val stringValue = value as? String
 
@@ -35,36 +37,18 @@ data class FileProcessorContext(
 
     val language = getOrCreateLanguage(languageName)
 
-    if (translations[keyName] == null) {
-      translations[keyName] = mutableListOf()
+    if (_translations[keyName] == null) {
+      _translations[keyName] = mutableListOf()
     }
+
+    val isPlural = getPluralForms(stringValue) != null
 
     if (value != null) {
-      val entity = ImportTranslation(stringValue, language).also { it._isPlural = isPlural }
-      translations[keyName]!!.add(entity)
-    }
-  }
-
-  fun addPluralTranslationReplacingNonPlurals(
-    keyName: String,
-    languageName: String,
-    value: Any?,
-    idx: Int = 0,
-  ) {
-    val stringValue = value as? String
-
-    if (!validateAndSaveIssues(keyName, idx, value, stringValue)) return
-
-    val language = getOrCreateLanguage(languageName)
-
-    if (translations[keyName] == null) {
-      translations[keyName] = mutableListOf()
-    }
-
-    if (value != null) {
-      val entity = ImportTranslation(stringValue, language).also { it._isPlural = true }
-      translations[keyName]!!.removeIf { it.language == language && !it._isPlural }
-      translations[keyName]!!.add(entity)
+      val entity = ImportTranslation(stringValue, language).also { it.isPlural = isPlural }
+      if (isPlural && replaceNonPlurals) {
+        _translations[keyName]!!.removeIf { it.language == language && !it.isPlural }
+      }
+      _translations[keyName]!!.add(entity)
     }
   }
 

@@ -118,6 +118,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     importService.find(base.project.id, base.userAccount.id)?.let {
       assertThat(it.files).hasSize(1)
       assertThat(it.files[0].languages[0].translations).hasSize(8)
+      // correctly assigns isPlural
+      assertThat(it.files[0].keys[4].translations[0].isPlural).isTrue()
+      assertThat(it.files[0].keys[3].translations[0].isPlural).isFalse()
     }
   }
 

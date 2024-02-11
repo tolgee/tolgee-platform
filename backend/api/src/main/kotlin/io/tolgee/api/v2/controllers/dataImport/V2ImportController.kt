@@ -26,7 +26,6 @@ import io.tolgee.hateoas.dataImport.ImportTranslationModelAssembler
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
-import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
@@ -410,8 +409,7 @@ class V2ImportController(
     override: Boolean,
   ) {
     checkImportLanguageInProject(languageId)
-    val translation = checkTranslationOfLanguage(translationId, languageId)
-    return importService.resolveTranslationConflict(translation, override)
+    return importService.resolveTranslationConflict(translationId, languageId, override)
   }
 
   private fun checkFileFromProject(fileId: Long): ImportFile {
@@ -437,17 +435,5 @@ class V2ImportController(
       throw BadRequestException(io.tolgee.constants.Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
     }
     return language
-  }
-
-  private fun checkTranslationOfLanguage(
-    translationId: Long,
-    languageId: Long,
-  ): ImportTranslation {
-    val translation = importService.findTranslation(translationId) ?: throw NotFoundException()
-
-    if (translation.language.id != languageId) {
-      throw BadRequestException(io.tolgee.constants.Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
-    }
-    return translation
   }
 }

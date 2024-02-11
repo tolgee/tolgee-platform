@@ -5,6 +5,10 @@ import com.ibm.icu.text.MessagePatternUtil
 import java.util.*
 import kotlin.concurrent.Volatile
 
+/**
+ *
+ */
+// Original license:
 // © 2016 and later: Unicode, Inc. and others.
 // License & terms of use: http://www.unicode.org/copyright.html
 /*
@@ -17,6 +21,13 @@ import kotlin.concurrent.Volatile
 */
 
 /**
+ * Tolgee docs:
+ *
+ * We took this file from ICU4J and added tools to propertly get part of original message from ICU message pattern.
+ * We need this to reliable convert ICU message to plural forms.
+ *
+ * Original docs:
+ *
  * Utilities for working with a MessagePattern.
  * Intended for use in tools when convenience is more important than
  * minimizing runtime and object creations.
@@ -81,6 +92,7 @@ object MessagePatternUtil {
           )
         val isSkipSyntax = part.type == MessagePattern.Part.Type.SKIP_SYNTAX
         val patternString =
+          // this part was added by Tolgee (Jan Cizmar) to add the escape characters back
           when {
             !isEscaping && isPreviousSkipSyntax && isSkipSyntax -> "'$text'"
             !isEscaping && isSkipSyntax -> "$text'"

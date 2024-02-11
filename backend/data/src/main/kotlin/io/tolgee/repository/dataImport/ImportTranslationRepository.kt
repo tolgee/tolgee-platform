@@ -64,4 +64,9 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
   )
   @Modifying
   fun deleteAllByImport(import: Import)
+
+  fun findByIdAndLanguageId(
+    translationId: Long,
+    languageId: Long,
+  ): ImportTranslation?
 }

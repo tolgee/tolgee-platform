@@ -531,8 +531,11 @@ class TranslationService(
   fun onKeyIsPluralChanged(
     keyIds: List<Long>,
     newIsPlural: Boolean,
+    ignoreTranslationsForMigration: MutableList<Long> = mutableListOf(),
   ) {
-    val translations = translationRepository.getAllByKeyIdIn(keyIds)
+    val translations =
+      translationRepository
+        .getAllByKeyIdInExcluding(keyIds, ignoreTranslationsForMigration)
     translations.forEach { handleIsPluralChanged(it, newIsPlural) }
     saveAll(translations)
   }

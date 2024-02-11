@@ -3111,4 +3111,11 @@
     <changeSet author="jenik (generated)" id="1707480981173-6">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="import_settings" constraintName="FKh3y42gacmr9fm5emmte5oa8hc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1707643023313-1">
+        <addColumn tableName="import_translation">
+            <column defaultValueBoolean="false" name="is_plural" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

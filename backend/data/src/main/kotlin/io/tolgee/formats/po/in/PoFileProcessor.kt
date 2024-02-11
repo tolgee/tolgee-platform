@@ -69,7 +69,7 @@ class PoFileProcessor(
       val icuMessage =
         PoToICUConverter(uLocale, getMessageFormat(poTranslation))
           .convertPoPlural(plurals)
-      context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage, idx, isPlural = true)
+      context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage, idx)
     }
   }
 

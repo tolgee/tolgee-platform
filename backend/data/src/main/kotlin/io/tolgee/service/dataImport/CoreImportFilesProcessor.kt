@@ -152,23 +152,30 @@ class CoreImportFilesProcessor(
     this.translations.forEach { entry ->
       val keyEntity = getOrCreateKey(entry.key)
       entry.value.forEach translationForeach@{ newTranslation ->
-        newTranslation.key = keyEntity
-        val (isCollision, fileCollisions) = checkForInFileCollisions(newTranslation)
-        if (isCollision) {
-          fileEntity.addIssues(fileCollisions)
-          return@translationForeach
-        }
-        val otherFilesCollisions =
-          importDataManager.checkForOtherFilesCollisions(newTranslation)
-        if (otherFilesCollisions.isNotEmpty()) {
-          fileEntity.addIssues(otherFilesCollisions)
-          newTranslation.isSelectedToImport = false
-        }
-        this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
+        processTranslation(newTranslation, keyEntity)
       }
     }
     importDataManager.saveAllStoredKeys()
     importDataManager.saveAllStoredTranslations()
+  }
+
+  private fun FileProcessorContext.processTranslation(
+    newTranslation: ImportTranslation,
+    keyEntity: ImportKey,
+  ) {
+    newTranslation.key = keyEntity
+    val (isCollision, fileCollisions) = checkForInFileCollisions(newTranslation)
+    if (isCollision) {
+      fileEntity.addIssues(fileCollisions)
+      return
+    }
+    val otherFilesCollisions =
+      importDataManager.checkForOtherFilesCollisions(newTranslation)
+    if (otherFilesCollisions.isNotEmpty()) {
+      fileEntity.addIssues(otherFilesCollisions)
+      newTranslation.isSelectedToImport = false
+    }
+    this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
   }
 
   private fun checkForInFileCollisions(

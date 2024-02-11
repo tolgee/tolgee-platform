@@ -21,7 +21,6 @@ import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.getSafeNamespace
-import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
 class ImportDataManager(
@@ -35,8 +34,6 @@ class ImportDataManager(
   private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
 
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
-
-  private val entityManager: EntityManager by lazy { applicationContext.getBean(EntityManager::class.java) }
 
   private val collisionHandlers by lazy {
     applicationContext.getBeansOfType(CollisionHandler::class.java).values
