@@ -1,8 +1,9 @@
 package io.tolgee.service.slackIntegration
 
-import io.tolgee.dtos.request.SlackCommandDto
+import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.service.automations.AutomationService
@@ -29,18 +30,6 @@ class SlackConfigService(
     return slackConfigRepository.findById(configId).orElseThrow { NotFoundException() }
   }
 
-  fun create(
-    project: Project,
-    payload: SlackCommandDto,
-  ): SlackConfig {
-    val slackConfig = SlackConfig(project)
-    slackConfig.channelId = payload.channel_id
-
-    slackConfigRepository.save(slackConfig)
-    automationService.createForSlackIntegration(slackConfig)
-    return slackConfig
-
-  }
   @Transactional
   fun delete(
     projectId: Long,
@@ -49,6 +38,15 @@ class SlackConfigService(
     val config = get(projectId, channelId)
     automationService.deleteForSlackIntegration(config)
     slackConfigRepository.delete(config)
+  }
+
+  fun create(project: Project, payload: SlackCommandDto, user: UserAccount): SlackConfig {
+    val slackConfig = SlackConfig(project, user)
+    slackConfig.channelId = payload.channel_id
+
+    slackConfigRepository.save(slackConfig)
+    automationService.createForSlackIntegration(slackConfig)
+    return slackConfig
   }
 
 }

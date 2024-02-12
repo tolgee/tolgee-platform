@@ -66,6 +66,7 @@ class AutomationService(
     return cacheManager.getCache(Caches.AUTOMATIONS)!!
   }
 
+  //fix exception
   @Transactional
   fun getAction(actionId: Long): AutomationAction {
     return entityManager.createQuery(

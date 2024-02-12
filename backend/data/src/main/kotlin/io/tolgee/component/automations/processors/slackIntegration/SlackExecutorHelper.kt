@@ -1,28 +1,52 @@
 package io.tolgee.component.automations.processors.slackIntegration
 
+import com.slack.api.model.kotlin_extension.block.InputBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
-import io.tolgee.api.IProjectActivityModel
+import com.slack.api.model.kotlin_extension.view.blocks
+import com.slack.api.model.view.View
+import com.slack.api.model.view.Views.view
+import com.slack.api.model.view.Views.viewTitle
+import io.tolgee.constants.SlackEventActions
+import io.tolgee.model.Language
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.service.key.KeyService
 
 class SlackExecutorHelper(
   val slackConfig: SlackConfig,
-  val data: SlackRequest
+  val data: SlackRequest,
+  val keyService: KeyService
 ) {
 
-  fun createKeyChangeMessage(activities: IProjectActivityModel) = withBlocks {
+  fun createKeyChangeMessage() = withBlocks {
+    val activities = data.activityData ?: return@withBlocks
+
     section {
       markdownText("Project was modified :exclamation:")
     }
 
     val modifiedEntities = activities.modifiedEntities ?: return@withBlocks
-
-    modifiedEntities.forEach { (entityId, modifiedEntityList) ->
+    // Extracting Key and Translation Information
+    modifiedEntities.forEach { (entityType, modifiedEntityList) ->
       modifiedEntityList.forEach { modifiedEntity ->
         modifiedEntity.modifications?.forEach { (property, modification) ->
           val oldValue = modification.old?.toString() ?: "None"
           val newValue = modification.new?.toString() ?: "None"
           section {
-            markdownText("*$entityId $property*\n  ~$oldValue~ -> $newValue")
+            markdownText("*$entityType $property*\n  ~$oldValue~ -> $newValue")
+          }
+        }
+
+        val keyId = modifiedEntity.entityId
+        val key = keyService.get(keyId)
+        key.translations.forEach { translation ->
+          divider()
+          section {
+            val currentTranslate = translation.text ?: "None"
+            markdownText("*Current translate:* $currentTranslate")
+          }
+
+          input {
+            translateInput(keyId, translation.language)
           }
         }
       }
@@ -36,23 +60,24 @@ class SlackExecutorHelper(
         plainText("Author: $author")
       }
     }
+  }
 
-    input {
-      plainTextInput {
-        actionId("translate_text_input")
-      }
-      label(text = "Translate me", emoji = true)
-    }
-    actions {
-      button {
-        text("Submit", emoji = true)
-        value("your translation")
-        actionId("submit_translation")
+  fun buildSuccessView(): View {
+    return view { thisView -> thisView
+      .callbackId("callback")
+      .type("modal")
+      .title(viewTitle { it.type("plain_text").text("Result").emoji(true) })
+      .blocks {
+        section {
+          markdownText("*New translation was added!*")
+        }
       }
     }
   }
 
-  fun createKeyAddMessage(activities: IProjectActivityModel) = withBlocks {
+  fun createKeyAddMessage() = withBlocks {
+    val activities = data.activityData ?: return@withBlocks
+
     // Header Section
     section {
       markdownText("New Translation Key Added :exclamation:")
@@ -64,19 +89,33 @@ class SlackExecutorHelper(
       modifiedEntityList.forEach { modifiedEntity ->
         when (entityType) {
           "Key" -> {
-            val keyName = modifiedEntity.modifications?.get("name")?.new?.toString() ?: "Unknown Key"
+            val keyId = modifiedEntity.entityId
+            val key = keyService.get(keyId)
+
+            val keyName = key.name
             section {
               markdownText("*Key:* $keyName")
             }
-          }
 
-          "Translation" -> {
-            val stateModification = modifiedEntity.modifications?.get("state")?.new?.toString() ?: "UNTRANSLATED"
-            val languageRelation = modifiedEntity.relations?.get("language")?.data as? Map<String, Any>
-            val languageName = languageRelation?.get("name")?.toString() ?: "Unknown Language"
-            val flagEmoji = languageRelation?.get("flagEmoji")?.toString() ?: ":world_map:"
-            section {
-              markdownText("*Translation State:* $stateModification\n*Language:* $languageName $flagEmoji")
+            key.translations.forEach { translation ->
+              val language = translation.language
+
+              val languageName = language.name
+              val flagEmoji = language.flagEmoji
+              val stateModification = translation.state.name
+              divider()
+              section {
+                markdownText("*Translation State:* $stateModification\n*Language:* $languageName $flagEmoji")
+              }
+
+              section {
+                val currentTranslate = translation.text ?: "None"
+                markdownText("*Current translate:* $currentTranslate")
+              }
+
+              input {
+                translateInput(keyId, language)
+              }
             }
           }
         }
@@ -90,6 +129,17 @@ class SlackExecutorHelper(
       elements {
         val author = activities.author?.username ?: "Unknown Author"
         plainText("Author: $author")
+      }
+    }
+  }
+
+  private fun InputBlockBuilder.translateInput(keyId: Long, language: Language) {
+    dispatchAction(true)
+    label(text = "Translate me ${language.flagEmoji}", emoji = true)
+    plainTextInput {
+      actionId(SlackEventActions.TRANSLATE_VALUE.name + "/$keyId" + "/${language.tag}")
+      dispatchActionConfig {
+        triggerActionsOn("on_enter_pressed")
       }
     }
   }

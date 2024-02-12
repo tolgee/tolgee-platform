@@ -2,16 +2,17 @@ package io.tolgee.model.slackIntegration
 
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
 import io.tolgee.model.automations.AutomationAction
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
+import jakarta.persistence.*
 
 @Entity
 class SlackConfig(
   @ManyToOne(fetch = FetchType.LAZY)
-  var project: Project
+  var project: Project,
+
+  @OneToOne(fetch = FetchType.LAZY)
+  var userAccount: UserAccount
 ): StandardAuditModel() {
 
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true)

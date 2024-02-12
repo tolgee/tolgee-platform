@@ -18,12 +18,11 @@ class SlackSubscriptionService(
 
   fun getBySlackId(
     slackId: String,
-    channelId: String
   ): SlackSubscription? {
     return slackSubscriptionRepository.findBySlackUserId(slackId)
   }
 
-  fun checkIfSlackConnected(slackId: String, channelId: String) = getBySlackId(slackId, channelId) == null
+  fun ifSlackConnected(slackId: String) = getBySlackId(slackId) != null
 
   fun create(userAccount: UserAccount, slackId: String): SlackSubscription {
     val slackSubscription = SlackSubscription()

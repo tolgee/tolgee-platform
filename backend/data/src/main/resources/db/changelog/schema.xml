@@ -3097,4 +3097,15 @@
             <column name="channel_id" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1707500127080-1">
+        <addColumn tableName="slack_config">
+            <column name="user_account_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1707500127080-2">
+        <addUniqueConstraint columnNames="user_account_id" constraintName="UC_SLACK_CONFIGUSER_ACCOUNT_ID_COL" tableName="slack_config"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1707500127080-3">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="slack_config" constraintName="FKdbwg4eia723x05dxak8kpbor4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
