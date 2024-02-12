@@ -26,7 +26,6 @@ class XliffParser(
   private var currentTransUnit: XliffTransUnit? = null
 
   fun parse(): XliffModel {
-    var currentTextValue: String? = null
     parseVersion()
     while (xmlEventReader.hasNext()) {
       val event = xmlEventReader.nextEvent()
@@ -68,16 +67,6 @@ class XliffParser(
           }
         }
 
-        event.isCharacters -> {
-          if (currentOpenElement != null) {
-            when (currentOpenElement!!) {
-              in "source", "target", "note" -> {
-                currentTextValue = (currentTextValue ?: "") + event.asCharacters().data
-              }
-            }
-          }
-        }
-
         event.isEndElement ->
           if (event.isEndElement) {
             when (currentOpenElement) {
@@ -107,7 +96,6 @@ class XliffParser(
                 }
               }
             }
-            currentTextValue = null
             openElements.removeLast()
           }
       }

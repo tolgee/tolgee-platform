@@ -3,6 +3,7 @@ package io.tolgee.service.dataImport.processors
 import StringsdictFileProcessor
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
+import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
@@ -30,6 +31,7 @@ class ProcessorFactory {
       "xliff" -> XliffFileProcessor(context)
       "xlf" -> XliffFileProcessor(context)
       "properties" -> PropertyFileProcessor(context)
+      "xml" -> AndroidStringsXmlProcessor(context)
       else -> throw ImportCannotParseFileException(file.name, "No matching processor")
     }
   }
