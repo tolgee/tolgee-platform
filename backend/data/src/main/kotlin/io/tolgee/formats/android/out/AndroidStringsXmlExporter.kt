@@ -84,7 +84,7 @@ class AndroidStringsXmlExporter(
     val isExactKeyName = normalizedKeyName == keyNameWithoutIndex
     val units = getFileUnits(translation.languageTag)
     val text = getConvertedMessage(translation, false).singleResult!!
-    units.compute(keyNameWithoutIndex) { _, stringsArrayWrapper ->
+    units.compute(normalizedKeyName) { _, stringsArrayWrapper ->
       when {
         // it does not exist yer, or was created from key which have been normalized to different value
         // in that case key without normalizing takes precedence

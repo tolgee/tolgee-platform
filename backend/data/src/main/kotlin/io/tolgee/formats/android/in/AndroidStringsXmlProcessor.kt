@@ -73,7 +73,8 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     val matchResult = LANGUAGE_GUESS_REGEX.find(context.file.name) ?: return@lazy "unknown"
     val language = matchResult.groups["language"]!!.value
     val region = matchResult.groups["region"]?.value
-    "$language-$region"
+    val regionString = region?.let { "-$it" } ?: ""
+    "$language$regionString"
   }
 
   private val xmlEventReader: XMLEventReader by lazy {

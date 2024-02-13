@@ -30,6 +30,7 @@ fun List<ImportTranslationInContextAssertions>.assertSinglePlural(
 ): ImportTranslationInContextAssertions {
   val filtered = this.filter { it.getPossiblePlural().isPlural() }
   filtered.assertSize(1)
+  filtered[0].isPlural(true)
   fn(filtered[0])
   return filtered[0]
 }
@@ -54,6 +55,10 @@ fun ImportTranslationInContextAssertions.hasKeyDescription(description: String) 
   keyMeta.description.assert.isEqualTo(description)
 }
 
+fun ImportTranslationInContextAssertions.isPlural(isPlural: Boolean = true) {
+  this.translation.isPlural.assert.isEqualTo(isPlural)
+}
+
 data class ImportTranslationInContextAssertions(
   val fileProcessorContext: FileProcessorContext,
   val translation: ImportTranslation,
@@ -61,12 +66,6 @@ data class ImportTranslationInContextAssertions(
 ) {
   fun hasText(text: String): ImportTranslationInContextAssertions {
     this.translation.text.assert.isEqualTo(text)
-    return this
-  }
-
-  fun assertIsPlural(): ImportTranslationInContextAssertions {
-    this.assertTextNotNull()
-    this.getPossiblePlural().isPlural()
     return this
   }
 

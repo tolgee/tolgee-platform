@@ -13,11 +13,10 @@ import org.w3c.dom.Element
 import java.io.InputStream
 
 class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel, private val enableXmlContent: Boolean) {
-  private lateinit var resourcesElement: Element
-
   fun produceFiles(): InputStream {
     return buildDom {
       element("resources") {
+        attr("xmlns:xliff", "urn:oasis:names:tc:xliff:document:1.2")
         model.items.forEach { this.addToElement(it) }
       }
     }.write().toByteArray().inputStream()
@@ -35,7 +34,7 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel, pri
       is StringArrayUnit -> {
         element("string-array") {
           attr("name", unit.key)
-          node.items.forEach {
+          node.items.sortedBy { it.index }.forEach {
             element("item") {
               appendXmlIfEnabledOrText(it.value)
             }
