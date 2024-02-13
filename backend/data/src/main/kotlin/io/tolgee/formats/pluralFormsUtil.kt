@@ -10,6 +10,23 @@ fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
   }.toMutableSet()
 }
 
+fun populateForms(
+  languageTag: String,
+  icuPlural: String,
+): Map<String, String> {
+  val forms = getPluralForms(icuPlural)?.forms ?: return mapOf()
+  return populateForms(languageTag, forms)
+}
+
+fun populateForms(
+  languageTag: String,
+  forms: Map<String, String>,
+): Map<String, String> {
+  val otherForm = forms["other"] ?: ""
+  val allForms = getPluralFormsForLocale(languageTag)
+  return allForms.associateWith { (forms[it] ?: otherForm) }
+}
+
 fun orderPluralForms(pluralForms: Map<String, String>): Map<String, String> {
   return pluralForms.entries.sortedBy {
     val formIndex = formKeywords.indexOf(it.key)
@@ -49,14 +66,12 @@ fun getPluralForms(string: String?): PluralForms? {
   return PluralForms(
     converted.formsResult ?: return null,
     converted.argName ?: throw IllegalStateException("Plural argument name not found"),
-    converted.isWholeStringWrappedInPlural,
   )
 }
 
 data class PluralForms(
   val forms: Map<String, String>,
   val argName: String,
-  val isWholeStringWrappedInPlural: Boolean,
 )
 
 fun optimizePluralForms(forms: Map<String, String>): Map<String, String> {

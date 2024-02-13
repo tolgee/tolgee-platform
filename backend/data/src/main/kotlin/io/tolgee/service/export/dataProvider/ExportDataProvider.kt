@@ -71,6 +71,7 @@ class ExportDataProvider(
       keyMetaJoin.get(KeyMeta_.custom),
       keyMetaJoin.get(KeyMeta_.description),
       namespaceJoin.get(Namespace_.name),
+      key.get(Key_.isPlural),
       languageJoin.get(Language_.id),
       languageJoin.get(Language_.tag),
       translationJoin.get(Translation_.id),
@@ -186,6 +187,7 @@ class ExportDataProvider(
             dataView.keyCustom as? Map<String, Any?>?,
             dataView.keyDescription,
             dataView.namespace,
+            dataView.keyIsPlural,
           )
         }
 

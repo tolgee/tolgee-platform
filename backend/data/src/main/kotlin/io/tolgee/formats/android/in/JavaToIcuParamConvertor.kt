@@ -41,8 +41,8 @@ class JavaToIcuParamConvertor() : ToIcuParamConvertor {
 
     when (parsed.specifier) {
       "s" -> return "{$name}"
-      "d" -> return "{$name, number, scientific}"
-      "e" -> return "{$name, number}"
+      "e" -> return "{$name, number, scientific}"
+      "d" -> return "{$name, number}"
       "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(parsed.fullMatch, isInPlural)
     }
 

@@ -12,22 +12,40 @@ import io.tolgee.formats.po.out.python.ToPythonPoMessageConverter
 enum class SupportedFormat(
   val poFlag: String,
   val paramConvertorFactory: () -> ToIcuParamConvertor,
-  val exportMessageConverter: (message: String, languageTag: String) -> ToPoMessageConverter,
+  val exportMessageConverter: (message: String, languageTag: String, forceIsPlural: Boolean?) -> ToPoMessageConverter,
 ) {
   PHP(
     poFlag = "php-format",
     paramConvertorFactory = { PhpToIcuParamConvertor() },
-    exportMessageConverter = { message, languageTag -> ToPhpPoMessageConverter(message, languageTag) },
+    exportMessageConverter = { message, languageTag, forceIsPlural ->
+      ToPhpPoMessageConverter(
+        message,
+        languageTag,
+        forceIsPlural,
+      )
+    },
   ),
   C(
     poFlag = "c-format",
     paramConvertorFactory = { CToIcuParamConvertor() },
-    exportMessageConverter = { message, languageTag -> ToCPoMessageConverter(message, languageTag) },
+    exportMessageConverter = { message, languageTag, forceIsPlural ->
+      ToCPoMessageConverter(
+        message,
+        languageTag,
+        forceIsPlural,
+      )
+    },
   ),
   PYTHON(
     poFlag = "python-format",
     paramConvertorFactory = { PythonToIcuParamConvertor() },
-    exportMessageConverter = { message, languageTag -> ToPythonPoMessageConverter(message, languageTag) },
+    exportMessageConverter = { message, languageTag, forceIsPlural ->
+      ToPythonPoMessageConverter(
+        message,
+        languageTag,
+        forceIsPlural,
+      )
+    },
   ),
 
   ;

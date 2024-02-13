@@ -8,6 +8,7 @@ data class ExportDataView(
   val keyCustom: Any?,
   val keyDescription: String?,
   val namespace: String?,
+  val keyIsPlural: Boolean,
   val languageId: Long,
   val languageTag: String,
   val translationId: Long?,

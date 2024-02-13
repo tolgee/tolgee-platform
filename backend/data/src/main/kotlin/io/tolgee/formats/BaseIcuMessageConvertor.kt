@@ -7,6 +7,7 @@ class BaseIcuMessageConvertor(
   private val message: String,
   private val argumentConverter: FromIcuParamConvertor,
   private val keepEscaping: Boolean = false,
+  private val forceIsPlural: Boolean? = null,
 ) {
   companion object {
     const val OTHER_KEYWORD = "other"
@@ -20,11 +21,6 @@ class BaseIcuMessageConvertor(
     value: String,
     keyword: String? = null,
   ) {
-    // we have added something to the result and it wasn't plural
-    if (value.isNotEmpty() && keyword == null) {
-      isWholeStringWrappedInPlural = false
-    }
-
     if (keyword == null) {
       singleResult.append(value)
       pluralFormsResult?.values?.forEach { it.append(value) }
@@ -57,18 +53,16 @@ class BaseIcuMessageConvertor(
   private var singleResult = StringBuilder()
 
   private val warnings = mutableListOf<Pair<Message, List<String>>>()
-  private var isWholeStringWrappedInPlural = message.startsWith("{")
 
   fun convert(): PossiblePluralConversionResult {
     tree = MessagePatternUtil.buildMessageNode(message)
     handleNode(tree)
 
-    if (pluralFormsResult == null) {
+    if ((pluralFormsResult == null && forceIsPlural != true) || forceIsPlural == false) {
       return PossiblePluralConversionResult(
         singleResult.toString(),
         null,
         null,
-        isWholeStringWrappedInPlural = false,
         warnings,
       )
     }
@@ -81,12 +75,19 @@ class BaseIcuMessageConvertor(
       pluralFormsResult
         ?.mapValues { it.value.toString() }
         ?.toMutableMap() ?: mutableMapOf()
+
+    val otherResult =
+      if (forceIsPlural == true && otherResult == null) {
+        singleResult
+      } else {
+        otherResult
+      }
+
     result.computeIfAbsent(OTHER_KEYWORD) { otherResult.toString() }
     return PossiblePluralConversionResult(
       null,
       result,
       pluralArgName,
-      isWholeStringWrappedInPlural,
       warnings,
     )
   }
@@ -143,6 +144,11 @@ class BaseIcuMessageConvertor(
       }
 
       MessagePattern.ArgType.PLURAL -> {
+        if (forceIsPlural == false) {
+          addToResult(node.patternString)
+          return
+        }
+
         if (!pluralFormsResult.isNullOrEmpty()) {
           warnings.add(Message.MULTIPLE_PLURALS_NOT_SUPPORTED to listOf(node.patternString))
           addToResult(node.patternString, form)

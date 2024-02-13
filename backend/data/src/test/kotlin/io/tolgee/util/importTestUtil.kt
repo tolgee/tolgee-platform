@@ -76,7 +76,12 @@ data class ImportTranslationInContextAssertions(
   }
 
   fun getPossiblePlural() =
-    this.translation.text!!.let { BaseIcuMessageConvertor(it, NoOpFromIcuParamConvertor()).convert() }
+    this.translation.text!!.let {
+      BaseIcuMessageConvertor(
+        it,
+        NoOpFromIcuParamConvertor(),
+      ).convert()
+    }
 
   fun assertHasExactPluralForms(forms: Set<String>): ImportTranslationInContextAssertions {
     this.getPossiblePlural().formsResult!!.keys.assert.isEqualTo(forms)

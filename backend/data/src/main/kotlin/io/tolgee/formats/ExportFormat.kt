@@ -6,4 +6,5 @@ enum class ExportFormat(val extension: String, val mediaType: String) {
   PO("po", "text/x-gettext-translation"),
   IOS_STRINGS_STRINGSDICT("", ""),
   APPLE_XLIFF("xliff", "application/x-xliff+xml"),
+  ANDROID_XML("xml", "application/xml"),
 }

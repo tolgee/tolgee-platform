@@ -13,8 +13,9 @@ class BaseIcuMessageToPoConvertor(
   val message: String,
   val argumentConverter: FromIcuParamConvertor,
   val languageTag: String = "en",
+  forceIsPlural: Boolean?,
 ) {
-  private val cLikeConvertor = BaseIcuMessageConvertor(message, argumentConverter)
+  private val cLikeConvertor = BaseIcuMessageConvertor(message, argumentConverter, forceIsPlural = forceIsPlural)
 
   companion object {
     const val OTHER_KEYWORD = "other"

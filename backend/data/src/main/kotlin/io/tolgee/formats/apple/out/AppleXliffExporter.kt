@@ -6,7 +6,6 @@ import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.APPLE_PLURAL_PROPERTY_CUSTOM_KEY
-import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -93,7 +92,8 @@ class AppleXliffExporter(
   }
 
   private fun addTargetTranslation(translation: ExportTranslationView) {
-    val converted = translation.text?.let { IcuToAppleMessageConvertor(message = it).convert() }
+    val converted =
+      translation.text?.let { IcuToAppleMessageConvertor(message = it, translation.key.isPlural).convert() }
 
     if (converted?.isPlural() == true) {
       handlePlural(translation, converted)
@@ -108,7 +108,12 @@ class AppleXliffExporter(
   ) {
     val converted =
       convertedSources.computeIfAbsent(translation.key.name) {
-        translation.text?.let { IcuToAppleMessageConvertor(message = it).convert() }
+        translation.text?.let {
+          IcuToAppleMessageConvertor(
+            message = it,
+            forceIsPlural = translation.key.isPlural,
+          ).convert()
+        }
       }
 
     if (converted?.isPlural() == true) {
@@ -213,12 +218,10 @@ class AppleXliffExporter(
     languageTag: String,
     conversionResult: PossiblePluralConversionResult?,
   ): Map<String, String> {
-    if (conversionResult == null) {
+    if (conversionResult?.formsResult == null) {
       return emptyMap()
     }
-    val otherForm = conversionResult.formsResult?.get("other") ?: conversionResult.singleResult ?: ""
-    val allForms = getPluralFormsForLocale(languageTag)
-    return allForms.associateWith { (conversionResult.formsResult?.get(it) ?: otherForm) }
+    return io.tolgee.formats.populateForms(languageTag, conversionResult.formsResult)
   }
 
   private fun getResultXliffFile(

@@ -13,7 +13,7 @@ class IcuToAppleMessageConvertorTest {
   }
 
   private fun String.getConversionResult(): PossiblePluralConversionResult {
-    val result = IcuToAppleMessageConvertor(this).convert()
+    val result = IcuToAppleMessageConvertor(this, null).convert()
     return result
   }
 
@@ -45,7 +45,7 @@ class IcuToAppleMessageConvertorTest {
   }
 
   private fun String.assertSingleConverted(expected: String) {
-    val result = IcuToAppleMessageConvertor(this).convert()
+    val result = IcuToAppleMessageConvertor(this, false).convert()
     result.singleResult.assert.isEqualTo(expected)
   }
 }

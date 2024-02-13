@@ -44,7 +44,7 @@ class AppleStringsStringsdictExporter(
       return
     }
 
-    val converted = IcuToAppleMessageConvertor(message = text).convert()
+    val converted = IcuToAppleMessageConvertor(message = text, it.key.isPlural).convert()
 
     if (converted.isPlural()) {
       handlePlural(it, converted.formsResult ?: return)

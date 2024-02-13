@@ -24,11 +24,16 @@ data class FileProcessorContext(
   var namespace: String? = null
   lateinit var languageNameGuesses: List<String>
 
+  /**
+   * @param forceIsPlural when is set to true, it will force the translation to be plurar, when set to false,
+   * it will force the translation not to be plural
+   */
   fun addTranslation(
     keyName: String,
     languageName: String,
     value: Any?,
     idx: Int = 0,
+    forceIsPlural: Boolean? = null,
     replaceNonPlurals: Boolean = false,
   ) {
     val stringValue = value as? String
@@ -41,7 +46,7 @@ data class FileProcessorContext(
       _translations[keyName] = mutableListOf()
     }
 
-    val isPlural = getPluralForms(stringValue) != null
+    val isPlural = forceIsPlural ?: (getPluralForms(stringValue) != null)
 
     if (value != null) {
       val entity = ImportTranslation(stringValue, language).also { it.isPlural = isPlural }

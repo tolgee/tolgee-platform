@@ -8,6 +8,7 @@ export const FORMATS = [
   'PO',
   'IOS_STRINGS_STRINGSDICT',
   'APPLE_XLIFF',
+  'ANDROID_XML',
 ] as const;
 
 type Props = {

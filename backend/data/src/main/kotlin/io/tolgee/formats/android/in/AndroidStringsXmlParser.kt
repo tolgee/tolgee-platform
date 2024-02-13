@@ -1,7 +1,8 @@
-import io.tolgee.formats.android.PluralsUnit
+import io.tolgee.formats.android.AndroidStringsXmlModel
+import io.tolgee.formats.android.PluralUnit
+import io.tolgee.formats.android.StringArrayItem
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
-import io.tolgee.formats.android.StringsModel
 import java.io.StringWriter
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
@@ -12,17 +13,17 @@ import javax.xml.stream.events.StartElement
 class AndroidStringsXmlParser(
   private val xmlEventReader: XMLEventReader,
 ) {
-  private val result = StringsModel()
+  private val result = AndroidStringsXmlModel()
   private var currentStringEntry: StringUnit? = null
   private var currentArrayEntry: StringArrayUnit? = null
-  private var currentPluralEntry: PluralsUnit? = null
+  private var currentPluralEntry: PluralUnit? = null
   private var currentPluralQuantity: String? = null
   private var sw = StringWriter()
   private var xw: XMLEventWriter? = null
   private val of: XMLOutputFactory = XMLOutputFactory.newDefaultFactory()
   private var isArrayItemOpen = false
 
-  fun parse(): StringsModel {
+  fun parse(): AndroidStringsXmlModel {
     while (xmlEventReader.hasNext()) {
       val event = xmlEventReader.nextEvent()
       val wasAnyToContentSaveOpenBefore = isAnyToContentSaveOpen
@@ -36,16 +37,18 @@ class AndroidStringsXmlParser(
           when (startElement.name.localPart.lowercase()) {
             "string" -> {
               val stringEntry = StringUnit()
-              currentStringEntry = stringEntry
-              result.strings.add(stringEntry)
-              stringEntry.name = startElement.getAttributeByName(QName(null, "name"))?.value
+              getKeyName(startElement)?.let { keyName ->
+                currentStringEntry = stringEntry
+                result.items[keyName] = stringEntry
+              }
             }
 
             "string-array" -> {
               val arrayEntry = StringArrayUnit()
-              currentArrayEntry = arrayEntry
-              result.stringArrays.add(arrayEntry)
-              arrayEntry.name = startElement.getAttributeByName(QName(null, "name"))?.value
+              getKeyName(startElement)?.let { keyName ->
+                currentArrayEntry = arrayEntry
+                result.items[keyName] = arrayEntry
+              }
             }
 
             "item" -> {
@@ -57,10 +60,11 @@ class AndroidStringsXmlParser(
             }
 
             "plurals" -> {
-              val pluralEntry = PluralsUnit()
-              currentPluralEntry = pluralEntry
-              result.plurals.add(pluralEntry)
-              pluralEntry.name = startElement.getAttributeByName(QName(null, "name"))?.value
+              val pluralEntry = PluralUnit()
+              getKeyName(startElement)?.let { keyName ->
+                currentPluralEntry = pluralEntry
+                result.items[keyName] = pluralEntry
+              }
             }
           }
         }
@@ -79,7 +83,8 @@ class AndroidStringsXmlParser(
                   currentPluralQuantity = null
                 }
               } else if (isArrayItemOpen) {
-                currentArrayEntry?.items?.add(getCurrentTextOrXml())
+                val index = currentArrayEntry?.items?.size ?: 0
+                currentArrayEntry?.items?.add(StringArrayItem(getCurrentTextOrXml(), index))
                 isArrayItemOpen = false
               }
             }
@@ -106,6 +111,8 @@ class AndroidStringsXmlParser(
 
     return result
   }
+
+  private fun getKeyName(startElement: StartElement) = startElement.getAttributeByName(QName(null, "name"))?.value
 
   private fun getCurrentTextOrXml(): String {
     return sw.toString()

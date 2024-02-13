@@ -6,5 +6,6 @@ class ExportKeyView(
   var custom: Map<String, Any?>? = null,
   var description: String? = null,
   var namespace: String? = null,
+  var isPlural: Boolean = false,
   val translations: MutableMap<String, ExportTranslationView> = mutableMapOf(),
 )

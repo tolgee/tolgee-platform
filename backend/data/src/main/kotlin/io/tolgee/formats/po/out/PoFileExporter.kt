@@ -33,6 +33,7 @@ class PoFileExporter(
         supportedFormat.exportMessageConverter(
           translation.text!!,
           translation.languageTag,
+          translation.key.isPlural,
         ).convert()
 
       resultBuilder.appendLine()

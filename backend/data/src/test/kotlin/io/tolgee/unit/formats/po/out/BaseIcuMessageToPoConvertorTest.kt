@@ -11,13 +11,18 @@ class BaseIcuMessageToPoConvertorTest {
     BaseIcuMessageToPoConvertor(
       "Hello {hello} {hello, number} {hello, number, .00}",
       PhpFromIcuParamConvertor(),
+      forceIsPlural = false,
     ).convert().singleResult.assert.isEqualTo("Hello %s %d %.2f")
   }
 
   @Test
   fun `converts with plurals`() {
     val forms =
-      BaseIcuMessageToPoConvertor("{0, plural, one {# dog} other {# dogs}}", PhpFromIcuParamConvertor())
+      BaseIcuMessageToPoConvertor(
+        "{0, plural, one {# dog} other {# dogs}}",
+        PhpFromIcuParamConvertor(),
+        forceIsPlural = true,
+      )
         .convert().formsResult
 
     forms!![0].assert.isEqualTo("%d dog")
@@ -31,6 +36,7 @@ class BaseIcuMessageToPoConvertorTest {
         message = "{0, plural, one {# pes} few {# psi} other {# psů}}",
         languageTag = "cs",
         argumentConverter = PhpFromIcuParamConvertor(),
+        forceIsPlural = true,
       ).convert().formsResult
 
     forms!![0].assert.isEqualTo("%d pes")
@@ -45,6 +51,7 @@ class BaseIcuMessageToPoConvertorTest {
         message = "{0, plural, one {# pes} other {# psů}}",
         languageTag = "cs",
         argumentConverter = PhpFromIcuParamConvertor(),
+        forceIsPlural = true,
       ).convert().formsResult
 
     forms!![0].assert.isEqualTo("%d pes")
@@ -59,6 +66,7 @@ class BaseIcuMessageToPoConvertorTest {
         message = "{0, plural, one {# pes} many {# pesos} other {# psů}}",
         languageTag = "cs",
         argumentConverter = PhpFromIcuParamConvertor(),
+        forceIsPlural = true,
       ).convert().formsResult
 
     forms!![0].assert.isEqualTo("%d pes")

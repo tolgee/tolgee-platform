@@ -1,22 +1,24 @@
 package io.tolgee.formats.android
 
-class StringsModel {
-  val strings = mutableListOf<StringUnit>()
-  val stringArrays = mutableListOf<StringArrayUnit>()
-  val plurals = mutableListOf<PluralsUnit>()
+class AndroidStringsXmlModel {
+  val items: MutableMap<String, AndroidXmlNode> = mutableMapOf()
 }
 
-class StringUnit {
-  var name: String? = null
+class StringUnit : AndroidXmlNode {
   var value: String? = null
 }
 
-class StringArrayUnit {
-  var name: String? = null
-  val items = mutableListOf<String>()
+class StringArrayUnit : AndroidXmlNode {
+  val items = mutableListOf<StringArrayItem>()
 }
 
-class PluralsUnit {
-  var name: String? = null
+class StringArrayItem(
+  var value: String? = null,
+  var index: Int? = null,
+) : AndroidXmlNode
+
+class PluralUnit : AndroidXmlNode {
   val items = mutableMapOf<String, String>()
 }
+
+interface AndroidXmlNode

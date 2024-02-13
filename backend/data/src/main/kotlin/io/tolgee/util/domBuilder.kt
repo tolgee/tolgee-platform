@@ -39,7 +39,7 @@ class DomBuilder(val document: Document) {
 
 inline fun Document.element(
   name: String,
-  builder: Element.() -> Unit,
+  builder: Element.() -> Unit = {},
 ): Element {
   val element = this.createElement(name)
   this.appendChild(element)
