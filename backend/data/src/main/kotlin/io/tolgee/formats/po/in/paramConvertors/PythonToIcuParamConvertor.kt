@@ -1,6 +1,7 @@
 package io.tolgee.formats.po.`in`
 
 import io.tolgee.formats.convertFloatToIcu
+import io.tolgee.formats.escapeIcu
 
 class PythonToIcuParamConvertor : ToIcuParamConvertor {
   private val parser = CLikeParameterParser()
@@ -12,7 +13,7 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
     matchResult: MatchResult,
     isInPlural: Boolean,
   ): String {
-    val parsed = parser.parse(matchResult) ?: return escapeIcu(matchResult.value, isInPlural)
+    val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
     if (parsed.specifier == "%") {
       return "%"
     }
@@ -21,7 +22,7 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
 
     when (parsed.specifier) {
       "d" -> return "{$argName, number}"
-      "f" -> return convertFloatToIcu(parsed, argName) ?: return escapeIcu(matchResult.value, isInPlural)
+      "f" -> return convertFloatToIcu(parsed, argName) ?: return matchResult.value.escapeIcu(isInPlural)
       "e" -> return "{$argName, number, scientific}"
     }
 

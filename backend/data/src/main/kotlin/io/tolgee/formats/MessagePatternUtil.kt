@@ -463,7 +463,8 @@ object MessagePatternUtil {
      * or null if no style is specified and for other argument types
      * @stable ICU 49
      */
-    var simpleStyle: String? = null
+    val simpleStyle: String
+      get() = style ?: ""
 
     /**
      * @return the complex-argument-style object,

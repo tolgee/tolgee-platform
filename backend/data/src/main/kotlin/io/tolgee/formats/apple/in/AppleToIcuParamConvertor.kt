@@ -1,6 +1,7 @@
 package io.tolgee.formats.apple.`in`
 
 import io.tolgee.formats.convertFloatToIcu
+import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.po.`in`.ToIcuParamConvertor
 import io.tolgee.formats.usesUnsupportedFeature
@@ -16,7 +17,7 @@ class AppleToIcuParamConvertor() : ToIcuParamConvertor {
     matchResult: MatchResult,
     isInPlural: Boolean,
   ): String {
-    val parsed = parser.parse(matchResult) ?: return escapeIcu(matchResult.value, isInPlural)
+    val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
     if (parsed.specifier == "%") {
       return "%"
     }
@@ -38,16 +39,16 @@ class AppleToIcuParamConvertor() : ToIcuParamConvertor {
     }
 
     if (usesUnsupportedFeature(parsed)) {
-      return escapeIcu(parsed.fullMatch, isInPlural)
+      return parsed.fullMatch.escapeIcu(isInPlural)
     }
 
     when (parsed.specifier) {
       "@" -> return "{$name}"
       "e" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(parsed.fullMatch, isInPlural)
+      "f" -> return convertFloatToIcu(parsed, name) ?: parsed.fullMatch.escapeIcu(isInPlural)
     }
 
-    return escapeIcu(parsed.fullMatch, isInPlural)
+    return parsed.fullMatch.escapeIcu(isInPlural)
   }
 
   companion object {

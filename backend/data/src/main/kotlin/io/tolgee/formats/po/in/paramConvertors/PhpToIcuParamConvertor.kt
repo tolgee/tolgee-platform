@@ -1,6 +1,7 @@
 package io.tolgee.formats.po.`in`.paramConvertors
 
 import io.tolgee.formats.convertFloatToIcu
+import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.po.`in`.ToIcuParamConvertor
 
@@ -28,10 +29,10 @@ class PhpToIcuParamConvertor : ToIcuParamConvertor {
       "s" -> return "{$name}"
       "d" -> return "{$name, number}"
       "e" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name) ?: escapeIcu(matchResult.value, isInPlural)
+      "f" -> return convertFloatToIcu(parsed, name) ?: matchResult.value.escapeIcu(isInPlural)
     }
 
-    return escapeIcu(matchResult.value, isInPlural)
+    return matchResult.value.escapeIcu(isInPlural)
   }
 
   companion object {

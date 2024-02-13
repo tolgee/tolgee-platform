@@ -57,8 +57,7 @@ class Xliff12FileProcessorTest {
     assertThat(fileProcessorContext.translations["vpn.devices.removeA11Y"]!![1].language.name).isEqualTo("es-MX")
 
     val keyMeta = fileProcessorContext.keys["vpn.aboutUs.releaseVersion"]!!.keyMeta!!
-    assertThat(keyMeta.comments).hasSize(1)
-    assertThat(keyMeta.comments[0].text).isEqualTo(
+    assertThat(keyMeta.description).isEqualTo(
       "Refers to the installed version." +
         " For example: \"Release Version: 1.23\"",
     )

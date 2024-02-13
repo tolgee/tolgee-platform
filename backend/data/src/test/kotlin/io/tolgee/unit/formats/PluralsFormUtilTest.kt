@@ -45,9 +45,10 @@ class PluralsFormUtilTest {
   fun `returns correct plural forms`() {
     getPluralForms("Hello!").assert.isNull()
     getPluralForms("{hi, number, .00}").assert.isNull()
-    getPluralForms("{count, plural, other {Hello! {hi, number, .00}}}").assert.isEqualTo(
-      mapOf("other" to "Hello! {hi, number, .00}"),
-    )
+    getPluralForms("{count, plural, other {Hello! {hi, number, .00}}}")!!.forms
+      .assert.isEqualTo(
+        mapOf("other" to "Hello! {hi, number, .00}"),
+      )
   }
 
   @Test
@@ -57,12 +58,13 @@ class PluralsFormUtilTest {
         "one {{tireCount, plural, one {# car has one tire} other {# car has # tires}}} " +
         "other {{tireCount, plural, one {# cars each have one tire} other {# cars each have # tires}}}" +
         "}",
-    ).assert.isEqualTo(
-      mapOf(
-        "one" to "{tireCount, plural, one {# car has one tire} other {# car has # tires}}",
-        "other" to "{tireCount, plural, one {# cars each have one tire} other {# cars each have # tires}}",
-      ),
-    )
+    )!!
+      .forms.assert.isEqualTo(
+        mapOf(
+          "one" to "{tireCount, plural, one {# car has one tire} other {# car has # tires}}",
+          "other" to "{tireCount, plural, one {# cars each have one tire} other {# cars each have # tires}}",
+        ),
+      )
   }
 
   @Test
@@ -73,7 +75,7 @@ class PluralsFormUtilTest {
         "one {$nested}" +
         "other {$nested}" +
         "}",
-    ).assert.isEqualTo(
+    )!!.forms.assert.isEqualTo(
       mapOf(
         "one" to nested,
         "other" to nested,
@@ -89,7 +91,7 @@ class PluralsFormUtilTest {
         "one {$nested}" +
         "other {$nested}" +
         "}",
-    ).assert.isEqualTo(
+    )!!.forms.assert.isEqualTo(
       mapOf(
         "one" to nested,
         "other" to nested,
@@ -99,9 +101,10 @@ class PluralsFormUtilTest {
 
   @Test
   fun `works with escaping correct plural forms`() {
-    getPluralForms("{count, plural, other {Hello! {hi, number, .00} '{escaped}'}}").assert.isEqualTo(
-      mapOf("other" to "Hello! {hi, number, .00} '{escaped}'"),
-    )
+    getPluralForms("{count, plural, other {Hello! {hi, number, .00} '{escaped}'}}")!!
+      .forms.assert.isEqualTo(
+        mapOf("other" to "Hello! {hi, number, .00} '{escaped}'"),
+      )
   }
 
   @Test

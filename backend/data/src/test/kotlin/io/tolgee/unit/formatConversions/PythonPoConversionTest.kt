@@ -21,9 +21,9 @@ class PythonPoConversionTest {
   }
 
   @Test
-  fun `it limits precision`() {
-    val precisionString = (1..50).joinToString("") { "0" }
-    convertToIcu("Hello %(a).51f").assert.isEqualTo("Hello {a, number, .$precisionString}")
+  fun `doesn't limit precision`() {
+    convertToIcu("Hello %(a).51f")
+      .assert.isEqualTo("Hello %(a).51f")
   }
 
   private fun testString(string: String) {

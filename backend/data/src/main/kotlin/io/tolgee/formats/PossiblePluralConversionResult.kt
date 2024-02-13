@@ -3,10 +3,10 @@ package io.tolgee.formats
 import io.tolgee.constants.Message
 
 class PossiblePluralConversionResult(
-  val singleResult: String?,
-  val formsResult: Map<String, String>?,
-  val argName: String?,
-  val warnings: List<Pair<Message, List<Any>>>,
+  val singleResult: String? = null,
+  val formsResult: Map<String, String>? = null,
+  val argName: String? = null,
+  val warnings: List<Pair<Message, List<Any>>> = emptyList(),
 ) {
   init {
     if (singleResult == null && formsResult == null) {

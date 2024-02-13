@@ -193,6 +193,7 @@ class AppleXliffFileExporterTest {
         ) {
           key.namespace = "homepage"
           key.description = "This is a description\n With some  spaces \n\n to preserve."
+          key.isPlural = true
         }
         add(
           languageTag = "cs",
@@ -208,13 +209,16 @@ class AppleXliffFileExporterTest {
           keyName = "key5",
           text = "{count, plural, one {# den} other {# dnů}}",
           baseText = "{count, plural, one {# day} other {# days}}",
-        )
+        ) {
+          key.isPlural = true
+        }
         add(
           languageTag = "cs",
           keyName = "key <omg>",
           text = "{count, plural, one {# day} other {# days}}",
           baseText = "{count, plural, one {# day} other {# days}}",
         ) {
+          key.isPlural = true
           key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.xcstrings")
         }
         add(
@@ -223,6 +227,7 @@ class AppleXliffFileExporterTest {
           text = "{count, plural, one {# den} few {dny} other {# dnů}}",
           baseText = "{count, plural, one {# day} other {# days}}",
         ) {
+          key.isPlural = true
           key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.stringsdict")
         }
       }

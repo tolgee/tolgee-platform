@@ -143,7 +143,7 @@ class CoreImportFileProcessorUnitTest {
     processor.processFiles(listOf(importFileDto))
     verify(keyMetaServiceMock).save(
       argThat {
-        this.comments.any { it.text == "test comment" }
+        this.description == "test comment"
       },
     )
     verify(keyMetaServiceMock).save(
@@ -155,7 +155,7 @@ class CoreImportFileProcessorUnitTest {
       argThat {
         assertThat(this[0].key.keyMeta).isNotNull
         assertThat(this[0].key.keyMeta?.codeReferences).hasSize(2)
-        assertThat(this[0].key.keyMeta?.comments).hasSize(1)
+        assertThat(this[0].key.keyMeta?.description).isNotBlank()
         true
       },
     )

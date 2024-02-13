@@ -90,7 +90,7 @@ class PoToICUConverterTest {
         .convert("%s %d %c %+- #0f %+- #0llf %+-hhs %0hs {hey} %jd")
     assertThat(
       result,
-    ).isEqualTo("{0} {1, number} {2} {3, number, .000000} {4, number, .000000} {5} {6} '{hey} '{7, number}")
+    ).isEqualTo("%s {1, number} %c %+- #0f %+- #0llf %+-hhs %0hs '{hey}' {7, number}")
   }
 
   @Test
@@ -101,8 +101,7 @@ class PoToICUConverterTest {
     assertThat(
       result,
     ).isEqualTo(
-      "{one} {two, number} {three, number, .000000} {four, number, .000000} {five} {six} " +
-        "{seven, number} '{hey}'",
+      "{one} {two, number} %(three)+- #0f %(four)+- #0lf {five} {six} {seven, number} '{hey}'",
     )
   }
 

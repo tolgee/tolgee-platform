@@ -21,9 +21,8 @@ class PhpPoConversionTest {
   }
 
   @Test
-  fun `it limits precision`() {
-    val precisionString = (1..50).joinToString("") { "0" }
-    convertToIcu("Hello %.51f").assert.isEqualTo("Hello {0, number, .$precisionString}")
+  fun `doesn't limit precision`() {
+    convertToIcu("Hello %.51f").assert.isEqualTo("Hello %.51f")
   }
 
   private fun testString(string: String) {

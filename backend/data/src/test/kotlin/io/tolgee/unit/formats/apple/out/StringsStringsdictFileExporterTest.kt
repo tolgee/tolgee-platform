@@ -24,7 +24,8 @@ class StringsStringsdictFileExporterTest {
     data.assertFile(
       "en.lproj/Localizable.strings",
       """
-    |"key" = "Hello! I am great today! There you have some params %d, %@, %e, %f";
+    |"key" = "Hello! I am great today! There you have some params %lld, %@, %e, %f";
+    |
     |
       """.trimMargin(),
     )
@@ -32,19 +33,20 @@ class StringsStringsdictFileExporterTest {
       "en.lproj/Localizable.stringsdict",
       """
     |<?xml version="1.0" encoding="UTF-8"?>
+    |<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     |
     |<plist version="1.0">
     |  <dict>
     |    <key>key</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@key@}</string>
-    |      <key>key</key>
+    |      <string>%#${'$'}{#@format@}</string>
+    |      <key>format</key>
     |      <dict>
     |        <key>one</key>
-    |        <string>%li day</string>
+    |        <string>%lld day</string>
     |        <key>other</key>
-    |        <string>%li days</string>
+    |        <string>%lld days</string>
     |      </dict>
     |    </dict>
     |  </dict>
@@ -57,25 +59,27 @@ class StringsStringsdictFileExporterTest {
       """
     |"key" = "Namespaced";
     |
+    |
       """.trimMargin(),
     )
     data.assertFile(
       "homepage/en.lproj/Localizable.stringsdict",
       """
     |<?xml version="1.0" encoding="UTF-8"?>
+    |<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     |
     |<plist version="1.0">
     |  <dict>
     |    <key>key</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@key@}</string>
-    |      <key>key</key>
+    |      <string>%#${'$'}{#@format@}</string>
+    |      <key>format</key>
     |      <dict>
     |        <key>one</key>
-    |        <string>%li day</string>
+    |        <string>%lld day</string>
     |        <key>other</key>
-    |        <string>%li days</string>
+    |        <string>%lld days</string>
     |      </dict>
     |    </dict>
     |  </dict>
@@ -87,6 +91,7 @@ class StringsStringsdictFileExporterTest {
       "homepage/cs.lproj/Localizable.strings",
       """
     |"key" = "Namespaced";
+    |
     |
       """.trimMargin(),
     )
@@ -100,15 +105,15 @@ class StringsStringsdictFileExporterTest {
     |    <key>key</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@key@}</string>
-    |      <key>key</key>
+    |      <string>%#${'$'}{#@format@}</string>
+    |      <key>format</key>
     |      <dict>
     |        <key>one</key>
-    |        <string>%li den</string>
+    |        <string>%lld den</string>
     |        <key>few</key>
     |        <string>dny</string>
     |        <key>other</key>
-    |        <string>%li dnů</string>
+    |        <string>%lld dnů</string>
     |      </dict>
     |    </dict>
     |  </dict>
@@ -148,7 +153,7 @@ class StringsStringsdictFileExporterTest {
           1,
           "{count, plural, one {# day} other {# days}}",
           TranslationState.TRANSLATED,
-          ExportKeyView(1, "key", namespace = "homepage"),
+          ExportKeyView(1, "key", namespace = "homepage", isPlural = true),
           "en",
         ),
         ExportTranslationView(
@@ -162,14 +167,14 @@ class StringsStringsdictFileExporterTest {
           1,
           "{count, plural, one {# day} other {# days}}",
           TranslationState.TRANSLATED,
-          ExportKeyView(1, "key"),
+          ExportKeyView(1, "key", isPlural = true),
           "en",
         ),
         ExportTranslationView(
           1,
           "{count, plural, one {# den} few {dny} other {# dnů}}",
           TranslationState.TRANSLATED,
-          ExportKeyView(1, "key"),
+          ExportKeyView(1, "key", isPlural = true),
           "cs",
         ),
       ),

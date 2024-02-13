@@ -55,19 +55,37 @@ class BaseIcuMessageConvertor(
   private val warnings = mutableListOf<Pair<Message, List<String>>>()
 
   fun convert(): PossiblePluralConversionResult {
-    tree = MessagePatternUtil.buildMessageNode(message)
-    handleNode(tree)
+    return catchingCannotParse {
+      tree = MessagePatternUtil.buildMessageNode(message)
+      handleNode(tree)
 
-    if ((pluralFormsResult == null && forceIsPlural != true) || forceIsPlural == false) {
+      if ((pluralFormsResult == null && forceIsPlural != true) || forceIsPlural == false) {
+        return@catchingCannotParse PossiblePluralConversionResult(
+          singleResult.toString(),
+          null,
+          null,
+          warnings,
+        )
+      }
+      getPluralResult()
+    }
+  }
+
+  private fun catchingCannotParse(fn: () -> PossiblePluralConversionResult): PossiblePluralConversionResult {
+    try {
+      return fn()
+    } catch (e: Exception) {
+      if (forceIsPlural == true) {
+        val escaped = message.escapeIcu(true)
+
+        return PossiblePluralConversionResult(
+          formsResult = mapOf("other" to escaped),
+        )
+      }
       return PossiblePluralConversionResult(
-        singleResult.toString(),
-        null,
-        null,
-        warnings,
+        singleResult = message,
       )
     }
-
-    return getPluralResult()
   }
 
   private fun getPluralResult(): PossiblePluralConversionResult {

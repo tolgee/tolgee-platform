@@ -24,7 +24,7 @@ class IcuToAppleMessageConvertorTest {
 
   @Test
   fun `converts number to lld`() {
-    "hello {name, number}".assertSingleConverted("hello %lls")
+    "hello {name, number}".assertSingleConverted("hello %lld")
   }
 
   @Test
@@ -39,13 +39,13 @@ class IcuToAppleMessageConvertorTest {
 
   @Test
   fun `numbers correctly in plurals`() {
-    val forms = "{number, plural, other {# {2} {1}, one {{1} # {2}}".getConversionResult().formsResult!!
-    forms["other"].assert.isEqualTo("%lld %3${'$'}lld %2${'$'}lld")
-    forms["one"].assert.isEqualTo("%2${'$'}lld %lld %3${'$'}lld")
+    val forms = "{number, plural, other {# {2} {1}} one {{1} # {2}}}".getConversionResult().formsResult!!
+    forms["other"].assert.isEqualTo("%lld %3${'$'}@ %2${'$'}@")
+    forms["one"].assert.isEqualTo("%2${'$'}@ %lld %3${'$'}@")
   }
 
   private fun String.assertSingleConverted(expected: String) {
-    val result = IcuToAppleMessageConvertor(this, false).convert()
+    val result = IcuToAppleMessageConvertor(this, null).convert()
     result.singleResult.assert.isEqualTo(expected)
   }
 }

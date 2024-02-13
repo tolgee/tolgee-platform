@@ -44,14 +44,11 @@ class PoFileProcessor(
               context.addKeyCodeReference(keyName, it, line?.toLong())
             }
           }
+
+          // we use only extracted comments. Translator comments should stay in tolgee and are useless for export
           if (poTranslation.meta.extractedComments.isNotEmpty()) {
             val extractedComments = poTranslation.meta.extractedComments.joinToString(" ")
             context.addKeyDescription(keyName, extractedComments)
-          }
-
-          if (poTranslation.meta.translatorComments.isNotEmpty()) {
-            val translatorComments = poTranslation.meta.translatorComments.joinToString(" ")
-            context.addKeyDescription(keyName, translatorComments)
           }
         }
       }

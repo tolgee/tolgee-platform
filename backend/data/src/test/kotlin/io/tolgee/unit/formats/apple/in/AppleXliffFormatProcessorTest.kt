@@ -67,7 +67,7 @@ class AppleXliffFormatProcessorTest {
         hasKeyDescription("The count of dogs in the app")
       }
 
-    fileProcessorContext.assertTranslations("en", "Order #")
+    fileProcessorContext.assertTranslations("en", "Order %lld")
       .assertSinglePlural {
         isPluralOptimized()
       }

@@ -47,13 +47,11 @@ class PoFileProcessorTest {
         "We connect developers and translators around the globe " +
           "in Tolgee for a fantastic localization experience.",
       ]!!.keyMeta!!
-    assertThat(keyMeta.comments).hasSize(2)
-    assertThat(keyMeta.comments[0].text).isEqualTo(
-      "This is the text that should appear next to menu accelerators" +
-        " * that use the super key. If the text on this key isn't typically" +
-        " * translated on keyboards used for your language, don't translate * this.",
+    assertThat(keyMeta.description).isEqualTo(
+      "This is the text that should appear next to menu accelerators * " +
+        "that use the super key. If the text on this key isn't typically * " +
+        "translated on keyboards used for your language, don't translate * this.",
     )
-    assertThat(keyMeta.comments[1].text).isEqualTo("some other comment and other")
     assertThat(keyMeta.codeReferences).hasSize(6)
     assertThat(keyMeta.codeReferences[0].path).isEqualTo("light_interface.c")
     assertThat(keyMeta.codeReferences[0].line).isEqualTo(196)

@@ -7,7 +7,7 @@ import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 
-class AppleXliffFileExporterTest {
+class AdnroidXmlFileExporterTest {
   @Test
   fun exports() {
     val exporter = getExporter()
@@ -22,7 +22,7 @@ class AppleXliffFileExporterTest {
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    |  <string name="key1">Ahoj! I%d, %s, %d, %d</string>
+    |  <string name="key1">Ahoj! I%d, %s, %e, %f</string>
     |  <plurals name="Empty_plural">
     |    <item quantity="one"/>
     |    <item quantity="few"/>
