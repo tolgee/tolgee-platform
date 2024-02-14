@@ -4,6 +4,7 @@ import {
   Activity,
   BillingProgress,
   Cell,
+  colors,
   Editor,
   Emphasis,
   ExampleBanner,
@@ -19,7 +20,6 @@ declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
-import { colors } from './colors';
 
 const all = { ...colors.light, ...colors.dark };
 
