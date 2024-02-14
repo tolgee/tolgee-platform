@@ -109,7 +109,7 @@ fun FileProcessorContext.assertKey(
 val ImportKey.custom: Map<String, Any?>?
   get() = this.keyMeta?.custom
 
-fun ImportKey.customEquals(expected: String)  {
+fun ImportKey.customEquals(expected: String) {
   val mapper = jacksonObjectMapper()
   val writer = mapper.writerWithDefaultPrettyPrinter()
   val expectedObject = mapper.readValue<Any?>(expected)
