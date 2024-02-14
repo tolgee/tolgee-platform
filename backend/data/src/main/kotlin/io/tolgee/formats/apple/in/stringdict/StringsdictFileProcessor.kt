@@ -151,7 +151,7 @@ open class StringsdictFileProcessor(
   }
 
   private fun addTranslation() {
-    val translation = FormsToIcuPluralConvertor(forms, escape = false).convert()
+    val translation = FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true).convert()
     context.addTranslation(translationKey, languageName, translation)
   }
 }

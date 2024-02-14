@@ -1,8 +1,11 @@
 package io.tolgee.util
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.NoOpFromIcuParamConvertor
 import io.tolgee.formats.optimizePossiblePlural
+import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.testing.assert
@@ -93,3 +96,27 @@ data class ImportTranslationInContextAssertions(
     return this
   }
 }
+
+fun FileProcessorContext.assertKey(
+  keyName: String,
+  fn: ImportKey.() -> Unit,
+): ImportKey {
+  val key = this.keys[keyName] ?: throw AssertionError("Key $keyName not found")
+  fn(key)
+  return key
+}
+
+val ImportKey.custom: Map<String, Any?>?
+  get() = this.keyMeta?.custom
+
+fun ImportKey.customEquals(expected: String)  {
+  val mapper = jacksonObjectMapper()
+  val writer = mapper.writerWithDefaultPrettyPrinter()
+  val expectedObject = mapper.readValue<Any?>(expected)
+  val expectedString = writer.writeValueAsString(expectedObject)
+  val actual = writer.writeValueAsString(custom)
+  actual.assert.isEqualTo(expectedString)
+}
+
+val ImportKey.description: String?
+  get() = this.keyMeta?.description

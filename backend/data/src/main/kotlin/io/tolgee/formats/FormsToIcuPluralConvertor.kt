@@ -5,17 +5,29 @@ class FormsToIcuPluralConvertor(
   val argName: String = "0",
   val escape: Boolean = true,
   val optimize: Boolean = false,
+  val addNewLines: Boolean,
 ) {
   fun convert(): String {
-    val icuMsg = StringBuffer("{$argName, plural,\n")
+    val newLineStringInit = if (addNewLines) "\n" else " "
+    val icuMsg = StringBuffer("{$argName, plural,$newLineStringInit")
     forms.let {
       if (optimize) {
         return@let optimizePluralForms(it)
       }
       return@let it
-    }.entries.forEach { (keyword, message) ->
+    }.entries.forEachIndexed { index, (keyword, message) ->
       val escaped = if (escape) IcuMessageEscaper(message, true).escaped else message
-      icuMsg.append("$keyword {$escaped}\n")
+      val isLast = index == forms.size - 1
+      val newLineStringForm =
+        if (addNewLines) {
+          "\n"
+        } else if (isLast) {
+          ""
+        } else {
+          " "
+        }
+
+      icuMsg.append("$keyword {$escaped}$newLineStringForm")
     }
     icuMsg.append("}")
     return icuMsg.toString()

@@ -12,7 +12,7 @@ import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
 import java.io.InputStream
 
-class FlutterArbFileExporterTest {
+class NativeJsonFileExporterTest {
   @Suppress("UNCHECKED_CAST")
   @Test
   fun `it scopes and handles collisions`() {

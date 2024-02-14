@@ -28,7 +28,7 @@ class PoToICUConverter(
         val keyword = PluralRules.forLocale(locale).select(example.toDouble())
         keyword to convert(value, true)
       }
-    return FormsToIcuPluralConvertor(forms, escape = false).convert()
+    return FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true).convert()
   }
 
   private fun findSuitableExample(key: Int): Int {

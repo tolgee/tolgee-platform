@@ -89,7 +89,7 @@ class FlutterArbFileExporter(
       ).convert()
 
     if (converted.isPlural()) {
-      return converted.formsResult!!.toIcuPluralString()
+      return converted.formsResult!!.toIcuPluralString(addNewLines = false)
     }
 
     return converted.singleResult!!

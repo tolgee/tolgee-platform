@@ -163,7 +163,13 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
           val value = it.value ?: return@mapNotNull null
           it.key to convertMessage(value, true)
         }.toMap()
-      val converted = FormsToIcuPluralConvertor(formsNotNull, optimize = true, escape = false).convert()
+      val converted =
+        FormsToIcuPluralConvertor(
+          formsNotNull,
+          escape = false,
+          optimize = true,
+          addNewLines = true,
+        ).convert()
       context.addTranslation(keyName, language, converted, replaceNonPlurals = true)
     }
   }

@@ -39,7 +39,7 @@ val formKeywords = listOf("zero", "one", "two", "few", "many", "other")
 fun optimizePossiblePlural(string: String): String {
   val forms = getPluralForms(string) ?: return string
   val optimizedForms = optimizePluralForms(forms.forms)
-  return FormsToIcuPluralConvertor(optimizedForms, escape = false).convert()
+  return FormsToIcuPluralConvertor(optimizedForms, escape = false, addNewLines = true).convert()
 }
 
 /**
@@ -104,14 +104,15 @@ fun String.normalizePlural(): String {
       null
     } ?: throw StringIsNotPluralException()
   val preparedForms = forms.forms.mapValues { it.value.preparePluralForm(escapeHash = false).prepared }
-  return FormsToIcuPluralConvertor(preparedForms, forms.argName, escape = false).convert()
+  return FormsToIcuPluralConvertor(preparedForms, forms.argName, escape = false, addNewLines = true).convert()
 }
 
 fun Map<String, String>.toIcuPluralString(
   escape: Boolean = false,
   optimize: Boolean = true,
+  addNewLines: Boolean = true,
 ): String {
-  return FormsToIcuPluralConvertor(this, escape = escape, optimize = optimize).convert()
+  return FormsToIcuPluralConvertor(this, escape = escape, optimize = optimize, addNewLines = addNewLines).convert()
 }
 
 class StringIsNotPluralException : RuntimeException("String is not a plural")
