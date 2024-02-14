@@ -14,15 +14,51 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { Switch } from 'react-router-dom'
-import { DashboardPage } from 'tg.component/layout/DashboardPage'
+import React from 'react';
+import { Switch } from 'react-router-dom';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
+import { PrivateRoute } from 'tg.component/common/PrivateRoute';
+import { LINKS } from 'tg.constants/links';
+import { NotificationsView } from 'tg.views/notifications/NotificationsView';
+import { useTranslate } from '@tolgee/react';
 
 export const NotificationsRouter: React.FC = () => {
-	return (
-		<DashboardPage>
-			<Switch>
-			</Switch>
-		</DashboardPage>
-	)
-}
+  const { t } = useTranslate();
+
+  return (
+    <DashboardPage>
+      <Switch>
+        <PrivateRoute exact path={LINKS.NOTIFICATIONS_INBOX.template}>
+          <NotificationsView
+            unread
+            read
+            navigation={[
+              t('notifications-inbox'),
+              LINKS.NOTIFICATIONS_INBOX.build(),
+            ]}
+          />
+        </PrivateRoute>
+
+        <PrivateRoute exact path={LINKS.NOTIFICATIONS_UNREAD.template}>
+          <NotificationsView
+            unread
+            navigation={[
+              t('notifications-unread'),
+              LINKS.NOTIFICATIONS_UNREAD.build(),
+            ]}
+          />
+        </PrivateRoute>
+
+        <PrivateRoute exact path={LINKS.NOTIFICATIONS_DONE.template}>
+          <NotificationsView
+            done
+            navigation={[
+              t('notifications-done'),
+              LINKS.NOTIFICATIONS_DONE.build(),
+            ]}
+          />
+        </PrivateRoute>
+      </Switch>
+    </DashboardPage>
+  );
+};

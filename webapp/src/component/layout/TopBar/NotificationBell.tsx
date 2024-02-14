@@ -48,7 +48,7 @@ export const NotificationBell: React.FC = () => {
   return (
     <StyledIconButton
       component={Link}
-      to={LINKS.NOTIFICATIONS.build()}
+      to={LINKS.NOTIFICATIONS_INBOX.build()}
       color="inherit"
       size="large"
       data-cy="global-notifications-button"

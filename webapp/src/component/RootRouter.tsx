@@ -82,12 +82,12 @@ export const RootRouter = () => (
     <PrivateRoute path={LINKS.GO_TO_SELF_HOSTED_BILLING.template}>
       <OrganizationBillingRedirect selfHosted={true} />
     </PrivateRoute>
-      <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-          <UserSettingsRouter />
-      </PrivateRoute>
-      <PrivateRoute path={LINKS.NOTIFICATIONS.template}>
-          <NotificationsRouter />
-      </PrivateRoute>
+    <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+      <UserSettingsRouter />
+    </PrivateRoute>
+    <PrivateRoute path={LINKS.NOTIFICATIONS.template}>
+      <NotificationsRouter />
+    </PrivateRoute>
     <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
       <AdministrationView />
     </PrivateRoute>
