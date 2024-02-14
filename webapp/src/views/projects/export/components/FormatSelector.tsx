@@ -9,6 +9,7 @@ export const FORMATS = [
   'IOS_STRINGS_STRINGSDICT',
   'APPLE_XLIFF',
   'ANDROID_XML',
+  'FLUTTER_ARB',
 ] as const;
 
 type Props = {

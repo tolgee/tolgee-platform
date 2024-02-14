@@ -90,9 +90,9 @@ class StoredDataImporter(
 
     namespaceService.saveAll(namespacesToSave.values)
 
-    handlePluralization()
-
     val keyEntitiesToSave = saveKeys()
+
+    handlePluralization()
 
     saveMetaData(keyEntitiesToSave)
 

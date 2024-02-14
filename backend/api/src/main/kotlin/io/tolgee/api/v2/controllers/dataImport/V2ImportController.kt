@@ -4,6 +4,7 @@
 
 package io.tolgee.api.v2.controllers.dataImport
 
+import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -13,6 +14,7 @@ import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.SetFileNamespaceRequest
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.dataImport.ImportAddFilesResultModel
@@ -40,8 +42,10 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.filterFiles
+import io.tolgee.util.logger
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -90,7 +94,7 @@ class V2ImportController(
   private val namespaceService: NamespaceService,
   private val importFileIssueModelAssembler: ImportFileIssueModelAssembler,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
-) {
+) : Logging {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
@@ -154,8 +158,32 @@ class V2ImportController(
       val writeStatus = { status: ImportApplicationStatus ->
         write(ImportApplicationStatusItem(status))
       }
+      try {
+        this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode, writeStatus)
+      } catch (e: Exception) {
+        if (e !is BadRequestException) {
+          Sentry.captureException(e)
+          logger.error("Unexpected error while importing", e)
+        }
+        when (e) {
+          is ErrorException ->
+            write(
+              ImportApplicationStatusItem(
+                ImportApplicationStatus.ERROR,
+                errorStatusCode = e.httpStatus.value(),
+                errorResponseBody = ErrorResponseBody(e.code, e.params),
+              ),
+            )
 
-      this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode, writeStatus)
+          else ->
+            write(
+              ImportApplicationStatusItem(
+                ImportApplicationStatus.ERROR,
+                errorStatusCode = 500,
+              ),
+            )
+        }
+      }
     }
   }
 
@@ -213,7 +241,14 @@ class V2ImportController(
     pageable: Pageable,
   ): PagedModel<ImportTranslationModel> {
     checkImportLanguageInProject(languageId)
-    val translations = importService.getTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved, search)
+    val translations =
+      importService.getTranslationsView(
+        languageId,
+        pageable,
+        onlyConflicts,
+        onlyUnresolved,
+        search,
+      )
     return pagedTranslationsResourcesAssembler.toModel(translations, importTranslationModelAssembler)
   }
 

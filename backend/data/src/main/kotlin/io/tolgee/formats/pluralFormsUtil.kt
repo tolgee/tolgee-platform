@@ -12,14 +12,6 @@ fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
 
 fun populateForms(
   languageTag: String,
-  icuPlural: String,
-): Map<String, String> {
-  val forms = getPluralForms(icuPlural)?.forms ?: return mapOf()
-  return populateForms(languageTag, forms)
-}
-
-fun populateForms(
-  languageTag: String,
   forms: Map<String, String>,
 ): Map<String, String> {
   val otherForm = forms["other"] ?: ""
@@ -113,6 +105,13 @@ fun String.normalizePlural(): String {
     } ?: throw StringIsNotPluralException()
   val preparedForms = forms.forms.mapValues { it.value.preparePluralForm(escapeHash = false).prepared }
   return FormsToIcuPluralConvertor(preparedForms, forms.argName, escape = false).convert()
+}
+
+fun Map<String, String>.toIcuPluralString(
+  escape: Boolean = false,
+  optimize: Boolean = true,
+): String {
+  return FormsToIcuPluralConvertor(this, escape = escape, optimize = optimize).convert()
 }
 
 class StringIsNotPluralException : RuntimeException("String is not a plural")

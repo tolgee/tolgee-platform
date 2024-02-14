@@ -1,17 +1,21 @@
 package io.tolgee.service.dataImport.processors
 
 import StringsdictFileProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
+import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
 import org.springframework.stereotype.Component
 
 @Component
-class ProcessorFactory {
+class ProcessorFactory(
+  private val objectMapper: ObjectMapper,
+) {
   fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {
     return when (file.name.fileNameExtension) {
       "zip" -> ZipTypeProcessor()
@@ -32,6 +36,7 @@ class ProcessorFactory {
       "xlf" -> XliffFileProcessor(context)
       "properties" -> PropertyFileProcessor(context)
       "xml" -> AndroidStringsXmlProcessor(context)
+      "arb" -> FlutterArbFileProcessor(context, objectMapper)
       else -> throw ImportCannotParseFileException(file.name, "No matching processor")
     }
   }

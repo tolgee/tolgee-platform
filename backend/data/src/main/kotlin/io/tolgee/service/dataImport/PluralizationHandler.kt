@@ -21,6 +21,14 @@ class PluralizationHandler(
       handleKeyPluralization(it)
     }
 
+    migrateExistingKeys()
+  }
+
+  private fun migrateExistingKeys() {
+    if (existingKeysToMigrate.isEmpty()) {
+      return
+    }
+
     translationService.onKeyIsPluralChanged(existingKeysToMigrate, true, ignoreTranslationsForMigration)
   }
 

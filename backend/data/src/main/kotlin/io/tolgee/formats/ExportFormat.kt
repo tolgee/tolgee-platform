@@ -7,4 +7,5 @@ enum class ExportFormat(val extension: String, val mediaType: String) {
   IOS_STRINGS_STRINGSDICT("", ""),
   APPLE_XLIFF("xliff", "application/x-xliff+xml"),
   ANDROID_XML("xml", "application/xml"),
+  FLUTTER_ARB("arb", "application/json"),
 }
