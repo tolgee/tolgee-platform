@@ -1,3 +1,10 @@
+## [3.48.2](https://github.com/tolgee/tolgee-platform/compare/v3.48.1...v3.48.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* Custom Content Storage secret updating ([#2135](https://github.com/tolgee/tolgee-platform/issues/2135)) ([8a5421c](https://github.com/tolgee/tolgee-platform/commit/8a5421c4d4a25ff0e41a25cfdfd2e8c9e679c5a0))
+
 ## [3.48.1](https://github.com/tolgee/tolgee-platform/compare/v3.48.0...v3.48.1) (2024-02-09)
 
 
