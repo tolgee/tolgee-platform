@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ImportSettingsService(
   private val entityManager: EntityManager,
+  private val importService: ImportService,
 ) {
   @Transactional
   fun store(
@@ -20,8 +21,10 @@ class ImportSettingsService(
     settings: IImportSettings,
   ): ImportSettings {
     val existing = getOrCreateSettings(userAccount, projectId)
+    val oldSettings = existing.clone()
     existing.assignFrom(settings)
     entityManager.persist(existing)
+    importService.applySettings(userAccount, projectId, oldSettings, settings)
     return existing
   }
 

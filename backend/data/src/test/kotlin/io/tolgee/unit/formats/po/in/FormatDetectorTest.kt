@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.po.`in`
 
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.FormatDetector
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
@@ -34,12 +34,12 @@ class FormatDetectorTest {
   @Test
   fun `returns C format`() {
     val detector = FormatDetector(listOf("%jd %hhd", "%d %s", "d %s"))
-    assertThat(detector()).isEqualTo(SupportedFormat.C)
+    assertThat(detector()).isEqualTo(PoSupportedMessageFormat.C)
   }
 
   @Test
   fun `returns PHP format`() {
     val detector = FormatDetector(listOf("%b %d", "%d %s", "d %s"))
-    assertThat(detector()).isEqualTo(SupportedFormat.PHP)
+    assertThat(detector()).isEqualTo(PoSupportedMessageFormat.PHP)
   }
 }

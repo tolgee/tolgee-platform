@@ -1,13 +1,18 @@
 package io.tolgee.model.dataImport
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
+import io.tolgee.formats.MessageConvertorType
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.ManyToOne
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.codec.digest.MurmurHash3
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Type
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -56,6 +61,17 @@ class ImportTranslation(
 
   @ColumnDefault("false")
   var isPlural = false
+
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  var rawData: Any? = null
+
+  /**
+   * This is the converted used or to be used to convert the message.
+   * When user enabled the conversion to TUICUP this field tells you what convertor to use
+   */
+  @Enumerated(EnumType.STRING)
+  var convertor: MessageConvertorType? = null
 
   private fun String?.computeMurmur(): String? {
     if (this == null) {

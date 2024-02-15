@@ -1,10 +1,13 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
+import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
@@ -13,8 +16,6 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
-import io.tolgee.service.dataImport.processors.ProcessorFactory
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
 import io.tolgee.util.getSafeNamespace
@@ -24,9 +25,14 @@ class CoreImportFilesProcessor(
   val applicationContext: ApplicationContext,
   val import: Import,
   val params: ImportAddFilesParams = ImportAddFilesParams(),
+  val importSettings: IImportSettings,
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
-  private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
+  private val importFileProcessorFactory: ImportFileProcessorFactory by lazy {
+    applicationContext.getBean(
+      ImportFileProcessorFactory::class.java,
+    )
+  }
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
@@ -71,17 +77,26 @@ class CoreImportFilesProcessor(
         fileEntity = savedFileEntity,
         maxTranslationTextLength = tolgeeProperties.maxTranslationTextLength,
         params = params,
+        importSettings,
       )
-    val processor = processorFactory.getProcessor(file, fileProcessorContext)
+    val processor = importFileProcessorFactory.getProcessor(file, fileProcessorContext)
     processor.process()
     processor.processResult()
+    savedFileEntity.updateFileEntity(fileProcessorContext)
+  }
+
+  private fun ImportFile.updateFileEntity(fileProcessorContext: FileProcessorContext) {
+    if (fileProcessorContext.needsParamConversion) {
+      this.needsParamConversion = fileProcessorContext.needsParamConversion
+      importService.saveFile(this)
+    }
   }
 
   private fun processArchive(
     archive: ImportFileDto,
     errors: MutableList<ErrorResponseBody>,
   ): MutableList<ErrorResponseBody> {
-    val processor = processorFactory.getArchiveProcessor(archive)
+    val processor = importFileProcessorFactory.getArchiveProcessor(archive)
     val files = processor.process(archive)
     val filtered = filterFiles(files.map { it.name to it })
     errors.addAll(processFiles(filtered))

@@ -1,7 +1,9 @@
 package io.tolgee.service.dataImport.processors
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.formats.MessageConvertorType
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
@@ -16,6 +18,11 @@ data class FileProcessorContext(
   val fileEntity: ImportFile,
   val maxTranslationTextLength: Long = 200L,
   val params: ImportAddFilesParams = ImportAddFilesParams(),
+  val importSettings: IImportSettings =
+    object : IImportSettings {
+      override var overrideKeyDescriptions: Boolean = false
+      override var convertPlaceholdersToIcu: Boolean = true
+    },
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
   private var _translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
@@ -23,6 +30,7 @@ data class FileProcessorContext(
   val keys: MutableMap<String, ImportKey> = mutableMapOf()
   var namespace: String? = null
   lateinit var languageNameGuesses: List<String>
+  var needsParamConversion = false
 
   /**
    * @param forceIsPlural when is set to true, it will force the translation to be plurar, when set to false,
@@ -35,6 +43,8 @@ data class FileProcessorContext(
     idx: Int = 0,
     forceIsPlural: Boolean? = null,
     replaceNonPlurals: Boolean = false,
+    rawData: Any? = null,
+    convertedBy: MessageConvertorType? = null,
   ) {
     val stringValue = value as? String
 
@@ -48,8 +58,17 @@ data class FileProcessorContext(
 
     val isPlural = forceIsPlural ?: (getPluralForms(stringValue) != null)
 
+    if (convertedBy != null) {
+      needsParamConversion = true
+    }
+
     if (value != null) {
-      val entity = ImportTranslation(stringValue, language).also { it.isPlural = isPlural }
+      val entity =
+        ImportTranslation(stringValue, language).also {
+          it.isPlural = isPlural
+          it.rawData = rawData
+          it.convertor = convertedBy
+        }
       if (isPlural && replaceNonPlurals) {
         _translations[keyName]!!.removeIf { it.language == language && !it.isPlural }
       }

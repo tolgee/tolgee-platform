@@ -17,4 +17,11 @@ interface IImportSettings {
     this.overrideKeyDescriptions = other.overrideKeyDescriptions
     this.convertPlaceholdersToIcu = other.convertPlaceholdersToIcu
   }
+
+  fun clone(): IImportSettings {
+    return object : IImportSettings {
+      override var overrideKeyDescriptions: Boolean = this@IImportSettings.overrideKeyDescriptions
+      override var convertPlaceholdersToIcu: Boolean = this@IImportSettings.convertPlaceholdersToIcu
+    }
+  }
 }

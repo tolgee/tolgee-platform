@@ -1,11 +1,11 @@
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.FormsToIcuPluralConvertor
+import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.apple.`in`.AppleToIcuParamConvertor
 import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
 import io.tolgee.formats.convertMessage
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.StartElement
 

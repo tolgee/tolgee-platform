@@ -1,9 +1,10 @@
 package io.tolgee.formats.po.`in`.paramConvertors
 
+import io.tolgee.formats.ToIcuParamConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
-import io.tolgee.formats.po.`in`.ToIcuParamConvertor
+import io.tolgee.formats.usesUnsupportedFeature
 
 class CToIcuParamConvertor : ToIcuParamConvertor {
   private val parser = CLikeParameterParser()
@@ -16,15 +17,22 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
     matchResult: MatchResult,
     isInPlural: Boolean,
   ): String {
-    val parsed = parser.parse(matchResult)
-    if (parsed?.specifier == "%") {
+    val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
+
+    if (usesUnsupportedFeature(parsed))
+      {
+        return matchResult.value.escapeIcu(isInPlural)
+      }
+
+    if (parsed.specifier == "%") {
       return "%"
     }
 
     index++
     val name = ((index - 1).toString())
 
-    when (parsed?.specifier) {
+    when (parsed.specifier) {
+      "s" -> return "{$name}"
       "d" -> return "{$name, number}"
       "e" -> return "{$name, number, scientific}"
       "f" -> return convertFloatToIcu(parsed, name) ?: parsed.fullMatch.escapeIcu(isInPlural)

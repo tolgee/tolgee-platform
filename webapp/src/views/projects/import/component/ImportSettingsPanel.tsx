@@ -1,32 +1,100 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { Box } from '@mui/material';
-import { useImportDataHelper } from '../hooks/useImportDataHelper';
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingCheckboxWithSkeleton';
 
 type ImportSettingRequest = components['schemas']['ImportSettingsRequest'];
+type ImportSettingModel = components['schemas']['ImportSettingsModel'];
 
 export const ImportSettingsPanel: FC = (props) => {
-  const { result } = useImportDataHelper();
   const project = useProject();
   const { t } = useTranslate();
 
-  const settings = useApiQuery({
+  const [state, setState] = useState<ImportSettingRequest | undefined>(
+    undefined
+  );
+
+  const [loadingItems, setLoadingItems] = useState<
+    Set<keyof ImportSettingRequest>
+  >(new Set());
+
+  useApiQuery({
     url: '/v2/projects/{projectId}/import-settings',
     method: 'get',
     path: { projectId: project.id },
+    options: {
+      onSuccess: (data) => {
+        setState(data);
+      },
+    },
   });
+
+  const updateSettings = useApiMutation({
+    url: '/v2/projects/{projectId}/import-settings',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/import',
+  });
+
+  function onChange<T extends keyof ImportSettingRequest>(
+    item: T,
+    value: ImportSettingRequest[T]
+  ) {
+    if (state == undefined) {
+      return;
+    }
+    const onSuccess = (data: ImportSettingModel) => {
+      setState(data);
+    };
+
+    const onSettled = () => {
+      setLoadingItems((loadingItems) => {
+        const copy = new Set([...loadingItems]);
+        copy.delete(item);
+        return copy;
+      });
+    };
+
+    const newValue = { ...state, [item]: value };
+    setLoadingItems((loadingItems) => {
+      const copy = new Set([...loadingItems]);
+      copy.add(item);
+      return copy;
+    });
+    updateSettings.mutate(
+      {
+        path: { projectId: project.id },
+        content: { 'application/json': newValue },
+      },
+      {
+        onSuccess,
+        onSettled,
+      }
+    );
+    return;
+  }
 
   return (
     <Box>
       <LoadingCheckboxWithSkeleton
-        loading={true}
+        loading={loadingItems.has('convertPlaceholdersToIcu')}
+        onChange={(e) => {
+          onChange('convertPlaceholdersToIcu', e.target.checked);
+        }}
         hint={t('import_convert_placeholders_to_icu_checkbox_label_hint')}
         label={t('import_convert_placeholders_to_icu_checkbox_label')}
-        checked={settings?.data?.convertPlaceholdersToIcu}
+        checked={state?.convertPlaceholdersToIcu}
+      />
+      <LoadingCheckboxWithSkeleton
+        loading={loadingItems.has('overrideKeyDescriptions')}
+        onChange={(e) => {
+          onChange('overrideKeyDescriptions', e.target.checked);
+        }}
+        hint={t('import_override_key_descriptions_label_hint')}
+        label={t('import_override_key_descriptions_label')}
+        checked={state?.overrideKeyDescriptions}
       />
     </Box>
   );

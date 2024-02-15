@@ -1,6 +1,7 @@
 package io.tolgee.formats.apple.`in`
 
 import io.tolgee.formats.FormsToIcuPluralConvertor
+import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.APPLE_PLURAL_PROPERTY_CUSTOM_KEY
@@ -10,7 +11,6 @@ import io.tolgee.formats.xliff.model.XliffTransUnit
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
 
 class AppleXliffFileProcessor(override val context: FileProcessorContext, private val parsed: XliffModel) :
   ImportFileProcessor() {

@@ -1,9 +1,9 @@
 package io.tolgee.formats.apple.`in`
 
+import io.tolgee.formats.ToIcuParamConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
-import io.tolgee.formats.po.`in`.ToIcuParamConvertor
 import io.tolgee.formats.usesUnsupportedFeature
 
 class AppleToIcuParamConvertor() : ToIcuParamConvertor {

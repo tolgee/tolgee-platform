@@ -1,7 +1,10 @@
-package io.tolgee.formats.po.`in`
+package io.tolgee.formats.po.`in`.paramConvertors
 
+import io.tolgee.formats.ToIcuParamConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
+import io.tolgee.formats.po.`in`.CLikeParameterParser
+import io.tolgee.formats.usesUnsupportedFeature
 
 class PythonToIcuParamConvertor : ToIcuParamConvertor {
   private val parser = CLikeParameterParser()
@@ -14,6 +17,12 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
     isInPlural: Boolean,
   ): String {
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
+
+    if (usesUnsupportedFeature(parsed))
+      {
+        return matchResult.value.escapeIcu(isInPlural)
+      }
+
     if (parsed.specifier == "%") {
       return "%"
     }
@@ -21,6 +30,7 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
     val argName = parsed.argName ?: throw IllegalArgumentException("Python spec requires named arguments")
 
     when (parsed.specifier) {
+      "s" -> return "{$argName}"
       "d" -> return "{$argName, number}"
       "f" -> return convertFloatToIcu(parsed, argName) ?: return matchResult.value.escapeIcu(isInPlural)
       "e" -> return "{$argName, number, scientific}"

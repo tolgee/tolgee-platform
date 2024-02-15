@@ -30,6 +30,8 @@ class ImportFile(
 
   var namespace: String? = null
 
+  var needsParamConversion = false
+
   fun addIssue(
     type: FileIssueType,
     params: Map<FileIssueParamType, String>,

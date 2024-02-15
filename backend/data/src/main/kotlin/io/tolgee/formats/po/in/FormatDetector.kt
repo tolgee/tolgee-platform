@@ -1,16 +1,16 @@
 package io.tolgee.formats.po.`in`
 
-import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.PoSupportedMessageFormat
 
 class FormatDetector(private val messages: List<String>) {
   /**
    * Tries to detect message format by on all messages in file
    */
-  operator fun invoke(): SupportedFormat {
+  operator fun invoke(): PoSupportedMessageFormat {
     val regulars =
-      SupportedFormat.entries.associateWith { it.paramConvertorFactory().regex }
+      PoSupportedMessageFormat.entries.associateWith { it.paramRegex }
 
-    val hitsMap = mutableMapOf<SupportedFormat, Int>()
+    val hitsMap = mutableMapOf<PoSupportedMessageFormat, Int>()
     regulars.forEach { regularEntry ->
       val format = regularEntry.key
       val regex = regularEntry.value
@@ -19,7 +19,7 @@ class FormatDetector(private val messages: List<String>) {
       }
     }
 
-    var result = SupportedFormat.PHP
+    var result = PoSupportedMessageFormat.PHP
     var maxValue = 0
 
     hitsMap.forEach {

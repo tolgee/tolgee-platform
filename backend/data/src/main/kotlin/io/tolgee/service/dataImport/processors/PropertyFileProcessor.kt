@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport.processors
 
+import io.tolgee.formats.ImportFileProcessor
 import java.util.*
 
 class PropertyFileProcessor(

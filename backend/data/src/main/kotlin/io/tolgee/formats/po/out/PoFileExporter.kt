@@ -2,7 +2,7 @@ package io.tolgee.formats.po.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.getPluralData
-import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
@@ -13,7 +13,7 @@ class PoFileExporter(
   override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
-  private val supportedFormat: SupportedFormat,
+  private val poSupportedMessageFormat: PoSupportedMessageFormat,
 ) : FileExporter {
   override val fileExtension: String = "po"
 
@@ -30,7 +30,7 @@ class PoFileExporter(
     translations.forEach { translation ->
       val resultBuilder = getResultStringBuilder(translation)
       val converted =
-        supportedFormat.exportMessageConverter(
+        poSupportedMessageFormat.exportMessageConverter(
           translation.text!!,
           translation.languageTag,
           translation.key.isPlural,

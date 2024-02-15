@@ -10,7 +10,7 @@ import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
 import io.tolgee.formats.json.out.JsonFileExporter
-import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -48,19 +48,19 @@ class FileExporterFactory(
     baseTranslationsProvider: () -> List<ExportTranslationView>,
     baseLanguage: LanguageDto,
   ): PoFileExporter {
-    val supportedFormat =
+    val poSupportedMessageFormat =
       when (exportParams.messageFormat) {
-        null -> SupportedFormat.C
-        ExportMessageFormat.PO_PHP -> SupportedFormat.PHP
-        ExportMessageFormat.PO_C -> SupportedFormat.C
-        ExportMessageFormat.PO_PYTHON -> SupportedFormat.PYTHON
+        null -> PoSupportedMessageFormat.C
+        ExportMessageFormat.PO_PHP -> PoSupportedMessageFormat.PHP
+        ExportMessageFormat.PO_C -> PoSupportedMessageFormat.C
+        ExportMessageFormat.PO_PYTHON -> PoSupportedMessageFormat.PYTHON
       }
     return PoFileExporter(
       data,
       exportParams,
       baseTranslationsProvider,
       baseLanguage,
-      supportedFormat,
+      poSupportedMessageFormat,
     )
   }
 }

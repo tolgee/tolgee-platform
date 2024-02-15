@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
@@ -118,7 +119,7 @@ class ImportDataManager(
     return this.populateStoredTranslations(language).flatMap { it.value }
   }
 
-  fun getStoredTranslations(
+  private fun getStoredTranslations(
     keyName: String,
     keyNamespace: String?,
     otherLanguages: List<ImportLanguage>,
@@ -142,13 +143,23 @@ class ImportDataManager(
     val translations = importService.findTranslations(language.id)
     translations.forEach { importTranslation ->
       val keyTranslations =
-        languageData[importTranslation.key] ?: let {
-          languageData[importTranslation.key] = mutableListOf()
-          languageData[importTranslation.key]!!
-        }
+        languageData.computeIfAbsent(importTranslation.key) { mutableListOf() }
       keyTranslations.add(importTranslation)
     }
     return languageData
+  }
+
+  private fun populateStoredTranslationsToConvertPlaceholders() {
+    val translations = importService.findTranslationsForPlaceholderConversion(import.id)
+    translations.forEach {
+      getOrInitLanguageDataItem(it.language)[it.key] = mutableListOf(it)
+    }
+  }
+
+  private fun getOrInitLanguageDataItem(
+    language: ImportLanguage,
+  ): MutableMap<ImportKey, MutableList<ImportTranslation>> {
+    return this.storedTranslations.computeIfAbsent(language) { mutableMapOf() }
   }
 
   /**
@@ -353,5 +364,42 @@ class ImportDataManager(
     newTranslation: ImportTranslation,
   ): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
     return checkForOtherFilesCollisions(newTranslation, getLanguagesWithSameExisting(newTranslation.language))
+  }
+
+  fun applySettings(
+    oldSettings: IImportSettings,
+    newSettings: IImportSettings,
+  ) {
+    if (oldSettings.convertPlaceholdersToIcu != newSettings.convertPlaceholdersToIcu) {
+      applyConvertPlaceholdersChange(newSettings.convertPlaceholdersToIcu)
+    }
+  }
+
+  private fun applyConvertPlaceholdersChange(convertPlaceholdersToIcu: Boolean) {
+    this.populateStoredTranslationsToConvertPlaceholders()
+    val toSave = mutableListOf<ImportTranslation>()
+    storedTranslations.forEach { (language, keyTranslationsMap) ->
+      keyTranslationsMap.forEach { (key, translations) ->
+        translations.forEach {
+          val convertor = it.convertor?.messageConvertor
+          if (convertor != null) {
+            val converted =
+              convertor.convert(
+                it.rawData,
+                language.name,
+                convertPlaceholdersToIcu,
+              )
+            it.isPlural = converted.isPlural
+            it.text = converted.message
+            toSave.add(it)
+          }
+        }
+      }
+    }
+    toSave.map { it.language }.toSet().forEach {
+      resetConflicts(it)
+      handleConflicts(false)
+    }
+    importService.saveTranslations(toSave)
   }
 }

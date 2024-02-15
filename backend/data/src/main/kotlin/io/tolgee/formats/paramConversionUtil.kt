@@ -1,7 +1,6 @@
 package io.tolgee.formats
 
 import io.tolgee.formats.po.`in`.ParsedCLikeParam
-import io.tolgee.formats.po.`in`.ToIcuParamConvertor
 
 /**
  * Handles the float conversion to ICU format
@@ -26,7 +25,7 @@ fun usesUnsupportedFeature(parsed: ParsedCLikeParam) =
 
 fun convertMessage(
   message: String,
-  isPlural: Boolean,
+  isInPlural: Boolean,
   convertorFactory: () -> ToIcuParamConvertor,
 ): String {
   val convertor = convertorFactory()
@@ -34,10 +33,10 @@ fun convertMessage(
     string = message,
     regex = convertor.regex,
     matchedCallback = {
-      convertor.convert(it, isPlural)
+      convertor.convert(it, isInPlural)
     },
     unmatchedCallback = {
-      IcuMessageEscaper(it, isPlural).escaped
+      IcuMessageEscaper(it, isInPlural).escaped
     },
   )
 }

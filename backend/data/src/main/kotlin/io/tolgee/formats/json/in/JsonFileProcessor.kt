@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.exceptions.ImportCannotParseFileException
+import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
 
 class JsonFileProcessor(
   override val context: FileProcessorContext,

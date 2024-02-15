@@ -1,22 +1,24 @@
 package io.tolgee.formats.po
 
-import io.tolgee.formats.po.`in`.PythonToIcuParamConvertor
-import io.tolgee.formats.po.`in`.ToIcuParamConvertor
+import io.tolgee.formats.MessageConvertorType
 import io.tolgee.formats.po.`in`.paramConvertors.CToIcuParamConvertor
 import io.tolgee.formats.po.`in`.paramConvertors.PhpToIcuParamConvertor
+import io.tolgee.formats.po.`in`.paramConvertors.PythonToIcuParamConvertor
 import io.tolgee.formats.po.out.ToPoMessageConverter
 import io.tolgee.formats.po.out.c.ToCPoMessageConverter
 import io.tolgee.formats.po.out.php.ToPhpPoMessageConverter
 import io.tolgee.formats.po.out.python.ToPythonPoMessageConverter
 
-enum class SupportedFormat(
+enum class PoSupportedMessageFormat(
   val poFlag: String,
-  val paramConvertorFactory: () -> ToIcuParamConvertor,
+  val paramRegex: Regex,
+  val messageConvertorType: MessageConvertorType,
   val exportMessageConverter: (message: String, languageTag: String, forceIsPlural: Boolean?) -> ToPoMessageConverter,
 ) {
   PHP(
     poFlag = "php-format",
-    paramConvertorFactory = { PhpToIcuParamConvertor() },
+    messageConvertorType = MessageConvertorType.PO_PHP,
+    paramRegex = PhpToIcuParamConvertor.PHP_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural ->
       ToPhpPoMessageConverter(
         message,
@@ -27,7 +29,8 @@ enum class SupportedFormat(
   ),
   C(
     poFlag = "c-format",
-    paramConvertorFactory = { CToIcuParamConvertor() },
+    messageConvertorType = MessageConvertorType.PO_C,
+    paramRegex = CToIcuParamConvertor.C_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural ->
       ToCPoMessageConverter(
         message,
@@ -38,7 +41,8 @@ enum class SupportedFormat(
   ),
   PYTHON(
     poFlag = "python-format",
-    paramConvertorFactory = { PythonToIcuParamConvertor() },
+    messageConvertorType = MessageConvertorType.PO_PYTHON,
+    paramRegex = PythonToIcuParamConvertor.PYTHON_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural ->
       ToPythonPoMessageConverter(
         message,

@@ -4,6 +4,9 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.dtos.request.dataImport.ImportSettingsRequest
+import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -17,8 +20,6 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
-import io.tolgee.service.dataImport.processors.ProcessorFactory
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
@@ -36,7 +37,7 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var existingLanguageEntity: Language
   private lateinit var applicationContextMock: ApplicationContext
   private lateinit var importMock: Import
-  private lateinit var processorFactoryMock: ProcessorFactory
+  private lateinit var importFileProcessorFactoryMock: ImportFileProcessorFactory
   private lateinit var importServiceMock: ImportService
   private lateinit var languageServiceMock: LanguageService
   private lateinit var processor: CoreImportFilesProcessor
@@ -55,7 +56,7 @@ class CoreImportFileProcessorUnitTest {
   fun setup() {
     applicationContextMock = mock()
     importMock = mock()
-    processorFactoryMock = mock()
+    importFileProcessorFactoryMock = mock()
     importServiceMock = mock()
     languageServiceMock = mock()
     translationServiceMock = mock()
@@ -69,9 +70,19 @@ class CoreImportFileProcessorUnitTest {
     existingLanguage = LanguageDto(name = "lng")
     existingLanguageEntity = Language().apply { name = existingLanguage.name }
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
-    processor = CoreImportFilesProcessor(applicationContextMock, importMock)
+    processor =
+      CoreImportFilesProcessor(
+        applicationContextMock, importMock,
+        importSettings =
+          ImportSettingsRequest(
+            overrideKeyDescriptions = false,
+            convertPlaceholdersToIcu = true,
+          ),
+      )
 
-    whenever(applicationContextMock.getBean(ProcessorFactory::class.java)).thenReturn(processorFactoryMock)
+    whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java)).thenReturn(
+      importFileProcessorFactoryMock,
+    )
     whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)
     whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
     whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
@@ -80,7 +91,7 @@ class CoreImportFileProcessorUnitTest {
     whenever(applicationContextMock.getBean(TolgeeProperties::class.java)).thenReturn(tolgeePropertiesMock)
     whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
 
-    whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
+    whenever(importFileProcessorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
     fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
     whenever(typeProcessorMock.context).then { fileProcessorContext }

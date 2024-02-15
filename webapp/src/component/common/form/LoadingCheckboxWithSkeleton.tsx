@@ -13,6 +13,7 @@ import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 export type LoadingCheckboxWithSkeletonProps = {
   hint: React.ReactNode;
   label: React.ReactNode;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   checked?: boolean;
   loading: boolean;
 };
@@ -56,7 +57,6 @@ export const LoadingCheckboxWithSkeleton: FC<
               transition: 'opacity 0.3s',
               paddingLeft: '12px',
               paddingTop: '12px',
-              background: theme.palette.background.default,
               pointerEvents: 'none',
             })}
           >
@@ -75,8 +75,13 @@ export const LoadingCheckboxWithSkeleton: FC<
           </Box>
           {/*) : (*/}
           <Checkbox
+            sx={{
+              opacity: props.checked == undefined || props.loading ? 0 : 1,
+              transition: 'opacity 0.3s',
+            }}
             disabled={props.loading || props.checked == undefined}
-            checked={props.checked}
+            checked={!!props.checked}
+            onChange={props.onChange}
             data-cy="content-delivery-auto-publish-checkbox"
           />
           {/*)}*/}

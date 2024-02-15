@@ -2,13 +2,16 @@ package io.tolgee.formats.po.`in`
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.PoParserException
+import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.MessageConvertorType
+import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.getULocaleFromTag
-import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
 import io.tolgee.formats.po.`in`.data.PoParserResult
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
+import io.tolgee.util.nullIfEmpty
 
 class PoFileProcessor(
   override val context: FileProcessorContext,
@@ -31,10 +34,15 @@ class PoFileProcessor(
           return@forEachIndexed
         }
         if (poTranslation.msgid.isNotBlank()) {
-          val icuMessage =
-            getToIcuConverter(poTranslation)
-              .convert(poTranslation.msgstr.toString())
-          context.addTranslation(keyName, languageId, icuMessage, idx)
+          val converted = getConvertedMessage(poTranslation, poTranslation.msgstr.toString())
+          context.addTranslation(
+            keyName = keyName,
+            languageName = languageId,
+            value = converted.first,
+            idx = idx,
+            rawData = StringWrapper(poTranslation.msgstr.toString()),
+            convertedBy = converted.second,
+          )
 
           poTranslation.meta.references.forEach { reference ->
             val split = reference.split(":")
@@ -63,20 +71,26 @@ class PoFileProcessor(
   ) {
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
-      val icuMessage =
-        PoToICUConverter(uLocale, getMessageFormat(poTranslation))
-          .convertPoPlural(plurals)
-      context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage, idx)
+      val (message, convertedBy) = getConvertedMessage(poTranslation, plurals)
+      val keyName = poTranslation.msgidPlural.toString().nullIfEmpty ?: poTranslation.msgid.toString()
+      context.addTranslation(keyName, languageId, message, idx, rawData = plurals, convertedBy = convertedBy)
     }
   }
 
-  private fun getToIcuConverter(poTranslation: PoParsedTranslation): PoToICUConverter {
-    return PoToICUConverter(uLocale, getMessageFormat(poTranslation))
+  private fun getConvertedMessage(
+    poTranslation: PoParsedTranslation,
+    stringOrPluralForms: Any?,
+  ): Pair<String?, MessageConvertorType?> {
+    val messageFormat = getMessageFormat(poTranslation)
+    val convertor = messageFormat.messageConvertorType.messageConvertor ?: return (null to null)
+    val icuMessage =
+      convertor.convert(stringOrPluralForms, languageId, context.importSettings.convertPlaceholdersToIcu).message
+    return icuMessage to messageFormat.messageConvertorType
   }
 
-  private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): SupportedFormat {
+  private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): PoSupportedMessageFormat {
     poParsedTranslation.meta.flags.forEach {
-      SupportedFormat.findByFlag(it)
+      PoSupportedMessageFormat.findByFlag(it)
         ?.let { found -> return found }
     }
     return detectedFormat

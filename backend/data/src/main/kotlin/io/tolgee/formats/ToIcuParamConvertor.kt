@@ -1,4 +1,4 @@
-package io.tolgee.formats.po.`in`
+package io.tolgee.formats
 
 interface ToIcuParamConvertor {
   fun convert(

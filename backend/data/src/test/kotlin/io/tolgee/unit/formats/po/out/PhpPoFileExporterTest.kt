@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.po.out
 
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.formats.po.SupportedFormat
+import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
 import io.tolgee.model.enums.TranslationState
@@ -246,7 +246,7 @@ class PhpPoFileExporterTest {
       exportParams = ExportParams(),
       baseTranslationsProvider = { listOf() },
       baseLanguageMock,
-      SupportedFormat.PHP,
+      PoSupportedMessageFormat.PHP,
     )
   }
 }

@@ -1,4 +1,4 @@
-package io.tolgee.service.dataImport.processors
+package io.tolgee.formats
 
 import StringsdictFileProcessor
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -10,10 +10,14 @@ import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
+import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.dataImport.processors.ImportArchiveProcessor
+import io.tolgee.service.dataImport.processors.PropertyFileProcessor
+import io.tolgee.service.dataImport.processors.ZipTypeProcessor
 import org.springframework.stereotype.Component
 
 @Component
-class ProcessorFactory(
+class ImportFileProcessorFactory(
   private val objectMapper: ObjectMapper,
 ) {
   fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {

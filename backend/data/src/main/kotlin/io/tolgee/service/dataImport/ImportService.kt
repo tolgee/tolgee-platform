@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.sentry.Sentry
+import io.tolgee.api.IImportSettings
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.reporting.BusinessEventPublisher
@@ -68,6 +69,8 @@ class ImportService(
   private val fileStorage: FileStorage,
   private val tolgeeProperties: TolgeeProperties,
   private val jdbcTemplate: JdbcTemplate,
+  @Lazy
+  private val importSettingsService: ImportSettingsService,
 ) {
   @Transactional
   fun addFiles(
@@ -97,6 +100,7 @@ class ImportService(
         applicationContext = applicationContext,
         import = import,
         params = params,
+        importSettings = importSettingsService.get(userAccount, project.id),
       )
     val errors = fileProcessor.processFiles(files)
 
@@ -466,7 +470,27 @@ class ImportService(
     entityManager.clear()
   }
 
-  fun deleteTranslations(it: Collection<ImportTranslation>) {
-    importTranslationRepository.deleteAll(it)
+  fun applySettings(
+    userAccount: UserAccount,
+    projectId: Long,
+    oldSettings: IImportSettings,
+    newSettings: IImportSettings,
+  ) {
+    find(projectId, userAccount.id)?.let {
+      applySettings(it, oldSettings, newSettings)
+      save(it)
+    }
+  }
+
+  fun applySettings(
+    import: Import,
+    oldSettings: IImportSettings,
+    newSettings: IImportSettings,
+  ) {
+    ImportDataManager(applicationContext, import).applySettings(oldSettings, newSettings)
+  }
+
+  fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> {
+    return importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
   }
 }

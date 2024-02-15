@@ -1,4 +1,6 @@
-package io.tolgee.service.dataImport.processors
+package io.tolgee.formats
+
+import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 abstract class ImportFileProcessor {
   abstract val context: FileProcessorContext

@@ -1,9 +1,9 @@
 package io.tolgee.unit.formats.po.`in`
 
-import com.ibm.icu.util.ULocale
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.po.SupportedFormat
-import io.tolgee.formats.po.`in`.PoToICUConverter
+import io.tolgee.formats.po.`in`.messageConverters.PoCToIcuMessageConverter
+import io.tolgee.formats.po.`in`.messageConverters.PoPhpToIcuMessageConverter
+import io.tolgee.formats.po.`in`.messageConverters.PoPythonToIcuMessageConverter
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -35,13 +35,14 @@ class PoToICUConverterTest {
   @Test
   fun testPhpPlurals() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.PHP).convertPoPlural(
+      PoPhpToIcuMessageConverter().convert(
         mapOf(
           0 to "Petr má jednoho psa.",
           1 to "Petr má %d psi.",
           2 to "Petr má %d psů.",
         ),
-      )
+        "cs",
+      ).message
     assertThat(result).isEqualTo(
       "{0, plural,\n" +
         "one {Petr má jednoho psa.}\n" +
@@ -54,62 +55,61 @@ class PoToICUConverterTest {
   @Test
   fun testPhpMessage() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.PHP)
-        .convert("hello this is string %s, this is digit %d")
+      PoPhpToIcuMessageConverter().convert("hello this is string %s, this is digit %d", "en").message
     assertThat(result).isEqualTo("hello this is string {0}, this is digit {1, number}")
   }
 
   @Test
   fun testPhpMessageEscapes() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.PHP)
-        .convert("%%s %%s %%%s %%%%s")
+      PoPhpToIcuMessageConverter().convert("%%s %%s %%%s %%%%s", "cs").message
     assertThat(result).isEqualTo("%s %s %{0} %%s")
   }
 
   @Test
   fun testPhpMessageWithFlags() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.PHP)
-        .convert("%+- 'as %+- 10s %1$'a +-010s")
-    assertThat(result).isEqualTo("{0} {1} {0}")
+      PoPhpToIcuMessageConverter().convert("%+- 'as %+- 10s %1$'a +-010s", "cs").message
+    assertThat(result).isEqualTo("%+- 'as %+- 10s %1$'a +-010s")
   }
 
   @Test
   fun testPhpMessageMultiple() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.PHP)
-        .convert("%s %d %d %s")
+      PoPhpToIcuMessageConverter().convert("%s %d %d %s", "cs").message
     assertThat(result).isEqualTo("{0} {1, number} {2, number} {3}")
   }
 
   @Test
   fun testCMessage() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.C)
-        .convert("%s %d %c %+- #0f %+- #0llf %+-hhs %0hs {hey} %jd")
+      PoCToIcuMessageConverter().convert("%s %d %c %+- #0f %+- #0llf %+-hhs %0hs {hey} %jd", "cs").message
     assertThat(
       result,
-    ).isEqualTo("%s {1, number} %c %+- #0f %+- #0llf %+-hhs %0hs '{hey}' {7, number}")
+    ).isEqualTo("{0} {1, number} %c %+- #0f %+- #0llf %+-hhs %0hs '{hey}' %jd")
   }
 
   @Test
   fun testPythonMessage() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.PYTHON)
-        .convert("%(one)s %(two)d %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld {hey}")
+      PoPythonToIcuMessageConverter().convert(
+        "%(one)s %(two)d %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld {hey}",
+        "cs",
+      ).message
     assertThat(
       result,
     ).isEqualTo(
-      "{one} {two, number} %(three)+- #0f %(four)+- #0lf {five} {six} {seven, number} '{hey}'",
+      "{one} {two, number} %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld '{hey}'",
     )
   }
 
   @Test
   fun testPhpMessageKey() {
     val result =
-      PoToICUConverter(ULocale("cs"), SupportedFormat.PHP)
-        .convert("%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s")
+      PoPhpToIcuMessageConverter().convert(
+        "%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s",
+        "cs",
+      ).message
 
     assertThat(result)
       .isEqualTo("{2, number} hello this is string {1}, this is digit {0, number}, and another digit {3}")

@@ -1,10 +1,10 @@
 package io.tolgee.formats.xliff.`in`
 
+import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
 
 class Xliff12FileProcessor(
   override val context: FileProcessorContext,
@@ -26,11 +26,21 @@ class Xliff12FileProcessor(
           context.addKeyCodeReference(transUnitId, fileOriginal, null)
         }
         transUnit.source?.let { source ->
-          context.addTranslation(transUnitId, file.sourceLanguage ?: "unknown source", source)
+          context.addTranslation(
+            transUnitId,
+            file.sourceLanguage ?: "unknown source",
+            source,
+            rawData = null,
+          )
         }
 
         transUnit.target?.let { target ->
-          context.addTranslation(transUnitId, file.targetLanguage ?: "unknown target", target)
+          context.addTranslation(
+            transUnitId,
+            file.targetLanguage ?: "unknown target",
+            target,
+            rawData = null,
+          )
         } ?: let {
           context.fileEntity.addIssue(
             FileIssueType.TARGET_NOT_PROVIDED,
