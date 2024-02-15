@@ -48,6 +48,8 @@ class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureCo
   ) {
     val azureDto = dto.azureContentStorageConfig ?: return
     val entity = storageEntity.azureContentStorageConfig ?: return
-    azureDto.connectionString = entity.connectionString
+    if (azureDto.connectionString.isNullOrBlank()) {
+      azureDto.connectionString = entity.connectionString
+    }
   }
 }

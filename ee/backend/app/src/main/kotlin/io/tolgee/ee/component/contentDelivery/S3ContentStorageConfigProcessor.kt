@@ -50,7 +50,11 @@ class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentS
   ) {
     val s3dto = dto.s3ContentStorageConfig ?: return
     val entity = storageEntity.s3ContentStorageConfig ?: return
-    s3dto.accessKey = entity.accessKey
-    s3dto.secretKey = entity.secretKey
+    if (s3dto.accessKey.isNullOrBlank()) {
+      s3dto.accessKey = entity.accessKey
+    }
+    if (s3dto.secretKey.isNullOrBlank()) {
+      s3dto.secretKey = entity.secretKey
+    }
   }
 }

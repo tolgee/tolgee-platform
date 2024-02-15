@@ -100,11 +100,11 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
         "name" to "S3",
         "s3ContentStorageConfig" to
           mapOf(
-            "bucketName" to "bucketName",
-            "accessKey" to "accessKey",
-            "secretKey" to "secretKey",
-            "endpoint" to "endpoint",
-            "signingRegion" to "signingRegion",
+            "bucketName" to "new bucketName",
+            "accessKey" to "new accessKey",
+            "secretKey" to "new secretKey",
+            "endpoint" to "new endpoint",
+            "signingRegion" to "new signingRegion",
           ),
       ),
     ).andIsOk.andAssertThatJson {
@@ -113,7 +113,11 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
     executeInNewTransaction {
       val updatedStorage = contentStorageService.get(storage.id)
-      updatedStorage.s3ContentStorageConfig!!.bucketName.assert.isEqualTo("bucketName")
+      updatedStorage.s3ContentStorageConfig!!.bucketName.assert.isEqualTo("new bucketName")
+      updatedStorage.s3ContentStorageConfig!!.accessKey.assert.isEqualTo("new accessKey")
+      updatedStorage.s3ContentStorageConfig!!.secretKey.assert.isEqualTo("new secretKey")
+      updatedStorage.s3ContentStorageConfig!!.endpoint.assert.isEqualTo("new endpoint")
+      updatedStorage.s3ContentStorageConfig!!.signingRegion.assert.isEqualTo("new signingRegion")
       updatedStorage.azureContentStorageConfig.assert.isNull()
     }
   }
