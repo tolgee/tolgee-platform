@@ -34,14 +34,24 @@ class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentS
   ): S3ContentStorageConfig {
     val s3dto = dto.s3ContentStorageConfig ?: throw BadRequestException(Message.S3_CONFIG_REQUIRED)
     val entity = S3ContentStorageConfig(storageEntity)
-    entity.accessKey = s3dto.accessKey ?: throw BadRequestException(Message.S3_ACCESS_KEY_REQUIRED)
-    entity.secretKey = s3dto.secretKey ?: throw BadRequestException(Message.S3_SECRET_KEY_REQUIRED)
+    validateSecrets(s3dto)
+    entity.accessKey = s3dto.accessKey!!
+    entity.secretKey = s3dto.secretKey!!
     entity.bucketName = s3dto.bucketName
     entity.signingRegion = s3dto.signingRegion
     entity.endpoint = s3dto.endpoint
     storageEntity.s3ContentStorageConfig = entity
     em.persist(entity)
     return entity
+  }
+
+  private fun validateSecrets(dto: S3ContentStorageConfigDto) {
+    if (dto.accessKey.isNullOrBlank()) {
+      throw BadRequestException(Message.S3_ACCESS_KEY_REQUIRED)
+    }
+    if (dto.secretKey.isNullOrBlank()) {
+      throw BadRequestException(Message.S3_SECRET_KEY_REQUIRED)
+    }
   }
 
   override fun fillDtoSecrets(

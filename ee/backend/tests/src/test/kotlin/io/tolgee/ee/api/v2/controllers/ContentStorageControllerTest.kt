@@ -120,6 +120,29 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       updatedStorage.s3ContentStorageConfig!!.signingRegion.assert.isEqualTo("new signingRegion")
       updatedStorage.azureContentStorageConfig.assert.isNull()
     }
+
+    // test it keeps the old secrets when empty
+    performProjectAuthPut(
+      "content-storages/${storage.id}",
+      mapOf(
+        "name" to "S3",
+        "s3ContentStorageConfig" to
+          mapOf(
+            "bucketName" to "new bucketName",
+            "endpoint" to "new endpoint",
+            "signingRegion" to "new signingRegion",
+          ),
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("name").isEqualTo("S3")
+    }
+
+    executeInNewTransaction {
+      val updatedStorage = contentStorageService.get(storage.id)
+      updatedStorage.s3ContentStorageConfig!!.accessKey.assert.isEqualTo("new accessKey")
+      updatedStorage.s3ContentStorageConfig!!.secretKey.assert.isEqualTo("new secretKey")
+      updatedStorage.azureContentStorageConfig.assert.isNull()
+    }
   }
 
   @Test
