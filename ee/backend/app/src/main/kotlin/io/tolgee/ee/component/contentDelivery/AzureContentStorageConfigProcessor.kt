@@ -34,12 +34,19 @@ class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureCo
   ): AzureContentStorageConfig {
     val azureDto = dto.azureContentStorageConfig ?: throw BadRequestException(Message.AZURE_CONFIG_REQUIRED)
     val entity = AzureContentStorageConfig(storageEntity)
+    validateSecrets(azureDto)
     entity.connectionString =
-      azureDto.connectionString ?: throw BadRequestException(Message.AZURE_CONNECTION_STRING_REQUIRED)
+      azureDto.connectionString
     entity.containerName = azureDto.containerName
     storageEntity.azureContentStorageConfig = entity
     em.persist(entity)
     return entity
+  }
+
+  private fun validateSecrets(azureDto: AzureContentStorageConfigDto) {
+    if (azureDto.connectionString.isNullOrBlank()) {
+      throw BadRequestException(Message.AZURE_CONNECTION_STRING_REQUIRED)
+    }
   }
 
   override fun fillDtoSecrets(
@@ -48,6 +55,8 @@ class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureCo
   ) {
     val azureDto = dto.azureContentStorageConfig ?: return
     val entity = storageEntity.azureContentStorageConfig ?: return
-    azureDto.connectionString = entity.connectionString
+    if (azureDto.connectionString.isNullOrBlank()) {
+      azureDto.connectionString = entity.connectionString
+    }
   }
 }
