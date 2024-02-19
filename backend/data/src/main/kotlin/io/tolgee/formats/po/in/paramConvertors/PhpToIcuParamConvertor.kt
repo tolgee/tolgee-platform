@@ -19,10 +19,9 @@ class PhpToIcuParamConvertor : ToIcuParamConvertor {
   ): String {
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 
-    if (usesUnsupportedFeature(parsed))
-      {
-        return matchResult.value.escapeIcu(isInPlural)
-      }
+    if (usesUnsupportedFeature(parsed)) {
+      return matchResult.value.escapeIcu(isInPlural)
+    }
 
     if (parsed.specifier == "%") {
       return "%"
