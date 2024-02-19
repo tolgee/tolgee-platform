@@ -20,6 +20,8 @@ class CursorUtilUnitTest {
       KeyWithTranslationsView(
         keyId = 1,
         keyName = "Super key",
+        keyIsPlural = false,
+        keyPluralArgName = null,
         keyNamespaceId = null,
         keyNamespace = null,
         keyDescription = "Super key description",

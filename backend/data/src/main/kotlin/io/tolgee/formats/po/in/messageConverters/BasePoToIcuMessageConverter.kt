@@ -47,7 +47,7 @@ class BasePoToIcuMessageConverter(private val paramConvertorFactory: () -> ToIcu
         val keyword = PluralRules.forLocale(locale).select(example.toDouble())
         keyword to (convert(value, true, convertPlaceholders) ?: "")
       }
-    return FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true).convert()
+    return FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true, argName = "0").convert()
   }
 
   private fun findSuitableExample(

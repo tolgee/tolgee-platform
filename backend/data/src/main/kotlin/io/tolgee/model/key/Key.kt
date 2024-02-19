@@ -66,6 +66,9 @@ class Key(
   @ColumnDefault("false")
   var isPlural: Boolean = false
 
+  @ActivityLoggedProp
+  var pluralArgName: String? = null
+
   constructor(
     name: String,
     project: Project,

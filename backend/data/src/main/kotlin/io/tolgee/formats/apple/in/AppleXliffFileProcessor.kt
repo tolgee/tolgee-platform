@@ -169,6 +169,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
           escape = false,
           optimize = true,
           addNewLines = true,
+          argName = "0",
         ).convert()
       context.addTranslation(keyName, language, converted, replaceNonPlurals = true)
     }

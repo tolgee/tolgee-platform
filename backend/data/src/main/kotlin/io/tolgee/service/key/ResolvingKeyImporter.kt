@@ -9,7 +9,7 @@ import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslation
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.formats.convertToIcuPlural
+import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -52,7 +52,7 @@ class ResolvingKeyImporter(
   private val errors = mutableListOf<List<Serializable?>>()
   private var importedKeys: List<Key> = emptyList()
   private val updatedTranslationIds = mutableListOf<Long>()
-  private val isPluralChangedForKeys = mutableListOf<Long>()
+  private val isPluralChangedForKeys = mutableMapOf<Long, String>()
 
   operator fun invoke(): KeyImportResolvableResult {
     importedKeys = tryImport()
@@ -113,30 +113,30 @@ class ResolvingKeyImporter(
     translationsToModify: MutableList<TranslationToModify>,
     key: Key,
   ) {
+    val translationsToModifyMap = translationsToModify.associateWith { it.text }
+
     // when existing key is plural, we are converting all to plurals
     if (isExistingKeyPlural) {
-      translationsToModify.forEach {
-        it.text = it.text?.convertToIcuPlural()
+      translationsToModifyMap.convertToIcuPlurals(null).convertedStrings.forEach {
+        it.key.text = it.value
       }
       translationsToModify.save()
       return
     }
 
     val convertedToPlurals =
-      translationsToModify
-        .associateWith { it.text }.convertToPluralIfAnyIsPlural()
+      translationsToModifyMap.convertToPluralIfAnyIsPlural()
 
     // if anything from the new translations is plural, we are converting the key to plural
-    val anyNewIsPlural = convertedToPlurals != null
-    if (anyNewIsPlural) {
+    if (convertedToPlurals != null) {
       key.isPlural = true
       keyService.save(key)
       translationsToModify.forEach { translation ->
-        translation.text = convertedToPlurals!![translation]
+        translation.text = convertedToPlurals.convertedStrings[translation]
       }
       // now we have to also handle translations of keys,
       // which are already existing in the database
-      isPluralChangedForKeys.add(key.id)
+      isPluralChangedForKeys[key.id] = convertedToPlurals.argName
     }
 
     translationsToModify.save()

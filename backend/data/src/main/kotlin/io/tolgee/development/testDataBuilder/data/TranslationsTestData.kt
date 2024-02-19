@@ -392,6 +392,21 @@ class TranslationsTestData {
     }
   }
 
+  fun addPlural() {
+    projectBuilder.run {
+      addKey {
+        name = "i am plural"
+        isPlural = true
+        pluralArgName = "count"
+      }.build {
+        addTranslation {
+          text = "{count, plural, one {I am one} other {I am other}}"
+          language = englishLanguage
+        }
+      }
+    }
+  }
+
   fun addCommentStatesData() {
     projectBuilder.run {
       addKey {

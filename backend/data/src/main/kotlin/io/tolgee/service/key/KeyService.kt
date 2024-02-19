@@ -111,6 +111,10 @@ class KeyService(
   ): Key {
     val key = create(project, dto.name, dto.namespace)
     key.isPlural = dto.isPlural
+    if (key.isPlural)
+      {
+        key.pluralArgName = dto.pluralArgName
+      }
 
     val created = createTranslationsOnKeyCreate(dto, key)
 
@@ -140,21 +144,10 @@ class KeyService(
     dto: CreateKeyDto,
     key: Key,
   ): Map<String, Translation>? {
-    val withNormalizedPlurals =
-      dto.translations?.let {
-        if (!key.isPlural) {
-          return@let null
-        }
-        translationService.validateAndNormalizePlurals(it)
-      }
-    val created =
-      withNormalizedPlurals?.let {
-        if (it.isEmpty()) {
-          return@let null
-        }
-        translationService.setForKey(key, it)
-      }
-    return created
+    if (dto.translations.isNullOrEmpty()) {
+      return null
+    }
+    return translationService.setForKey(key, dto.translations!!)
   }
 
   private fun storeScreenshots(

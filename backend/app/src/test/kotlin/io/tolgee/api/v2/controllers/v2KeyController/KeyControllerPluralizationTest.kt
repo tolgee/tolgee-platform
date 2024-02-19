@@ -125,9 +125,46 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       ),
     ).andIsOk.andAssertThatJson {
       node("isPlural").isBoolean.isTrue
-      node("translations.en.text").isString.isEqualTo("{value, plural, other {Oh}}")
+      node("translations.en.text").isString.isEqualTo("{value, plural,\nother {Oh}\n}")
       node("translations.de.text").isString.isEqualTo(NORMALIZED_PLURAL)
       node("translations.cs.text").isString.isEqualTo(NORMALIZED_PLURAL)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_EDIT,
+      Scope.TRANSLATIONS_EDIT,
+    ],
+  )
+  @Test
+  fun `change to argName works`() {
+    val key =
+      testData.projectBuilder
+        .addKey {
+          name = "plural_test_key"
+          isPlural = true
+          pluralArgName = "dogsCount"
+        }.build {
+          addTranslation("en", RAW_PLURAL)
+          addTranslation("de", RAW_PLURAL)
+        }
+    testData.projectBuilder.addCzech()
+
+    saveAndPrepare()
+
+    val keyName = "plural_test_key"
+    performProjectAuthPut(
+      "keys/${key.self.id}/complex-update",
+      ComplexEditKeyDto(
+        name = keyName,
+        isPlural = true,
+        pluralArgName = "catsCount",
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("isPlural").isBoolean.isTrue
+      node("translations.de.text").isString
+        .isEqualTo(NORMALIZED_PLURAL.replace("dogsCount", "catsCount"))
     }
   }
 
@@ -169,6 +206,27 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `respects pluralArgName on create`() {
+    saveAndPrepare()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "new_key",
+        pluralArgName = "dogsCount",
+        translations =
+          mapOf(
+            "en" to "{count, plural, one {# dog} other {# dogs}}",
+          ),
+        isPlural = true,
+      ),
+    ).andIsCreated.andAssertThatJson {
+      node("pluralArgName").isEqualTo("dogsCount")
+      node("translations.en.text").isString.isEqualTo("{dogsCount, plural,\none {# dog}\nother {# dogs}\n}")
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `correctly imports with non-resolvable endpoint`() {
     testData.projectBuilder.addCzech()
     saveAndPrepare()
@@ -201,7 +259,7 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       val pluralKey = keyService.find(testData.project.id, "plural_key", null)
       pluralKey!!.isPlural.assert.isTrue()
       pluralKey.translations.find { it.language.tag == "en" }!!
-        .text.assert.isEqualTo("{count, plural, other {Hello! I have {count} dogs.}}")
+        .text.assert.isEqualTo("{count, plural,\nother {Hello! I have {count} dogs.}\n}")
       pluralKey.translations.find { it.language.tag == "cs" }!!
         .text.assert.isEqualTo(
           "{count, plural,\n" +
@@ -284,7 +342,7 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       val pluralKey = keyService.find(testData.project.id, "plural_key", null)
       pluralKey!!.isPlural.assert.isTrue()
       pluralKey.translations.find { it.language.tag == "en" }!!
-        .text.assert.isEqualTo("{count, plural, other {Hello! I have {count} dogs.}}")
+        .text.assert.isEqualTo("{count, plural,\nother {Hello! I have {count} dogs.}\n}")
       pluralKey.translations.find { it.language.tag == "cs" }!!
         .text.assert.isEqualTo(
           "{count, plural,\n" +
@@ -302,7 +360,7 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       val existingNonPluralKey = keyService.find(testData.project.id, "existing_non_plural", null)
       existingNonPluralKey!!.isPlural.assert.isTrue()
       existingNonPluralKey.translations.find { it.language.tag == "en" }!!
-        .text.assert.isEqualTo("{value, plural, other {Hello!}}")
+        .text.assert.isEqualTo("{hello, plural,\nother {Hello!}\n}")
       existingNonPluralKey.translations.find { it.language.tag == "cs" }!!
         .text.assert.isEqualTo("{hello, plural,\none {# pes}\nother {# psů}\n}")
     }

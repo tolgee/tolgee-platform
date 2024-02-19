@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats
 
 import io.tolgee.formats.convertToIcuPlural
+import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.isSamePossiblePlural
@@ -127,18 +128,20 @@ class PluralsFormUtilTest {
 
   @Test
   fun `converts text to plural`() {
-    "Simple one".convertToIcuPlural().assert.isEqualTo("{value, plural, other {Simple one}}")
+    "Simple one".convertToIcuPlural(null).assert.isEqualTo("{value, plural,\nother {Simple one}\n}")
 
-    "Simple one with # hash".convertToIcuPlural().assert.isEqualTo("{value, plural, other {Simple one with '#' hash}}")
+    "Simple one with # hash".convertToIcuPlural(
+      null,
+    ).assert.isEqualTo("{value, plural,\nother {Simple one with '#' hash}\n}")
 
     "This one would break stuff }"
-      .convertToIcuPlural().assert.isEqualTo("{value, plural, other {This one would break stuff '}'}}")
+      .convertToIcuPlural(null).assert.isEqualTo("{value, plural,\nother {This one would break stuff '}'}\n}")
 
     "This one has valid param: {name} and would break stuff }"
-      .convertToIcuPlural().assert
-      .isEqualTo("{name, plural, other {This one has valid param: {name} and would break stuff '}'}}")
+      .convertToIcuPlural(null).assert
+      .isEqualTo("{name, plural,\nother {This one has valid param: {name} and would break stuff '}'}\n}")
 
-    "{0, plural, one {# dog} other {# dogs}} This will break it too }".convertToIcuPlural()
+    "{0, plural, one {# dog} other {# dogs}} This will break it too }".convertToIcuPlural(null)
       .assert.isEqualTo(
         "{0, plural,\n" +
           "one {# dog This will break it too '}'}\n" +
@@ -146,13 +149,15 @@ class PluralsFormUtilTest {
           "}",
       )
 
-    "This } is invalid".convertToIcuPlural()
-      .assert.isEqualTo("{value, plural, other {This '}' is invalid}}")
+    "This } is invalid".convertToIcuPlural(null)
+      .assert.isEqualTo("{value, plural,\nother {This '}' is invalid}\n}")
   }
 
   @Test
   fun `works with multiple first leve plurals`() {
-    "{0, plural, one {# dog} other {# dogs}} {0, plural, one {# dog} other {# dogs}}".convertToIcuPlural()
+    "{0, plural, one {# dog} other {# dogs}} {0, plural, one {# dog} other {# dogs}}".convertToIcuPlural(
+      null,
+    )
       .assert.isEqualTo(
         "{0, plural,\n" +
           "one {# dog {0, plural, one {# dog} other {# dogs}}}\n" +
@@ -163,9 +168,32 @@ class PluralsFormUtilTest {
 
   @Test
   fun `uses first param when converting to plural`() {
-    "Use {me} not {notme}".convertToIcuPlural()
+    "Use {me} not {notme}".convertToIcuPlural(null)
       .assert.isEqualTo(
-        "{me, plural, other {Use {me} not {notme}}}",
+        "{me, plural,\nother {Use {me} not {notme}}\n}",
+      )
+  }
+
+  @Test
+  fun `respects the provided arg name`() {
+    mapOf(1 to "Oh my god").convertToIcuPlurals("myArgName").convertedStrings
+      .assert.isEqualTo(
+        mapOf(
+          1 to
+            "{myArgName, plural,\nother {Oh my god}\n}",
+        ),
+      )
+  }
+
+  @Test
+  fun `uses the most common arg name`() {
+    mapOf(
+      1 to "{first, plural, other {a}}",
+      2 to "{second, plural, other {a}}",
+      3 to "{first, plural, other {a}}",
+    ).convertToIcuPlurals(null).convertedStrings[2]
+      .assert.isEqualTo(
+        "{first, plural,\nother {a}\n}",
       )
   }
 }

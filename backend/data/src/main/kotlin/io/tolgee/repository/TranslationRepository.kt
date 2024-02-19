@@ -78,12 +78,12 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     left join fetch k.keyMeta 
     left join fetch t.comments
     where t.key.id in :keyIds
-    and t.id not in :excludeTranslationIds
+    and (:excludeTranslationIds is null or t.id not in :excludeTranslationIds)
     """,
   )
   fun getAllByKeyIdInExcluding(
     keyIds: Collection<Long>,
-    excludeTranslationIds: List<Long>,
+    excludeTranslationIds: List<Long>? = null,
   ): Collection<Translation>
 
   @Query(

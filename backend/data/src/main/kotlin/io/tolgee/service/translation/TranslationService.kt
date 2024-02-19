@@ -11,7 +11,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.StringIsNotPluralException
 import io.tolgee.formats.convertToIcuPlural
 import io.tolgee.formats.getPluralForms
-import io.tolgee.formats.normalizePlural
+import io.tolgee.formats.normalizePlurals
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
@@ -30,6 +30,7 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -210,7 +211,8 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
-    val normalized = validateAndNormalizePlurals(translations, key.isPlural)
+    val normalized =
+      validateAndNormalizePlurals(translations, key.isPlural, key.pluralArgName)
     val languages = languageService.findEntitiesByTags(translations.keys, key.project.id)
     val oldTranslations =
       getKeyTranslations(languages, key.project, key).associate {
@@ -254,7 +256,7 @@ class TranslationService(
     val result =
       translations.entries.associate { (language, value) ->
         language to setTranslation(key, language, value)
-      }.filterValues { it != null }.mapValues { it.value }
+      }.mapValues { it.value }
 
     applicationEventPublisher.publishEvent(
       OnTranslationsSet(
@@ -334,10 +336,9 @@ class TranslationService(
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.getOrAssignBaseLanguage(key.project.id)?.let {
+    projectService.getOrAssignBaseLanguage(key.project.id).let {
       return find(key, it).orElse(null)
     }
-    return null
   }
 
   fun getTranslationMemoryValue(
@@ -530,22 +531,23 @@ class TranslationService(
   }
 
   fun onKeyIsPluralChanged(
-    keyIds: List<Long>,
+    keyIdToArgNameMap: Map<Long, String?>,
     newIsPlural: Boolean,
     ignoreTranslationsForMigration: MutableList<Long> = mutableListOf(),
   ) {
     val translations =
       translationRepository
-        .getAllByKeyIdInExcluding(keyIds, ignoreTranslationsForMigration)
-    translations.forEach { handleIsPluralChanged(it, newIsPlural) }
+        .getAllByKeyIdInExcluding(keyIdToArgNameMap.keys, ignoreTranslationsForMigration.nullIfEmpty())
+    translations.forEach { handleIsPluralChanged(it, newIsPlural, keyIdToArgNameMap[it.key.id]) }
     saveAll(translations)
   }
 
   private fun handleIsPluralChanged(
     it: Translation,
     newIsPlural: Boolean,
+    newPluralArgName: String?,
   ) {
-    it.text = it.text?.let { text -> getNewText(text, newIsPlural) }
+    it.text = getNewText(it.text, newIsPlural, newPluralArgName)
   }
 
   /**
@@ -553,54 +555,38 @@ class TranslationService(
    * if not, we are converting it from plural
    */
   private fun getNewText(
-    text: String,
+    text: String?,
     newIsPlural: Boolean,
-  ): String {
+    newPluralArgName: String?,
+  ): String? {
     if (newIsPlural) {
-      return text.convertToIcuPlural()
+      return text.convertToIcuPlural(newPluralArgName)
     }
     val forms = getPluralForms(text)
     return forms?.forms?.get("other") ?: text
   }
 
-  fun validateAndNormalizePlural(text: String): String {
-    try {
-      return text.normalizePlural()
-    } catch (e: StringIsNotPluralException) {
-      throw BadRequestException(Message.MESSAGE_IS_NOT_PLURAL)
-    }
-  }
-
   fun <T> validateAndNormalizePlurals(
     texts: Map<T, String?>,
     isKeyPlural: Boolean,
+    pluralArgName: String?,
   ): Map<T, String?> {
     if (isKeyPlural) {
-      return validateAndNormalizePlurals(texts)
+      return validateAndNormalizePlurals(texts, pluralArgName)
     }
 
     return texts
   }
 
-  fun <T> validateAndNormalizePlurals(texts: Map<T, String?>): Map<T, String?> {
-    val invalidMessages = mutableListOf<String>()
-    val result =
-      texts.map { (languageTag, text) ->
-        val normalized =
-          text?.let {
-            try {
-              validateAndNormalizePlural(it)
-            } catch (e: BadRequestException) {
-              invalidMessages.add(text)
-              null
-            }
-          }
-        languageTag to normalized
-      }.toMap()
-    if (invalidMessages.isNotEmpty()) {
-      @Suppress("UNCHECKED_CAST")
-      throw BadRequestException(Message.INVALID_PLURAL_FORM, listOf(invalidMessages) as List<Serializable>)
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    pluralArgName: String?,
+  ): Map<T, String?> {
+    @Suppress("UNCHECKED_CAST")
+    return try {
+      normalizePlurals(texts, pluralArgName)
+    } catch (e: StringIsNotPluralException) {
+      throw BadRequestException(Message.INVALID_PLURAL_FORM, listOf(e.invalidStrings) as List<Serializable?>)
     }
-    return result
   }
 }

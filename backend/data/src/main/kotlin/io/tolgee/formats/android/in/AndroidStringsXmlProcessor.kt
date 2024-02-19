@@ -53,7 +53,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
         it.key to (converted ?: return@mapNotNull null)
       }.toMap()
 
-    val pluralString = FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true).convert()
+    val pluralString = FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true, argName = "0").convert()
     context.addTranslation(keyName, guessedLanguage, pluralString, forceIsPlural = true, rawData = it.items)
   }
 

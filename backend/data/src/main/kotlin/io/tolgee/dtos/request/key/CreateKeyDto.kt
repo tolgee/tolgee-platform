@@ -42,6 +42,12 @@ class CreateKeyDto(
   val description: String? = null,
   @Schema(description = "If key is pluralized. If it will be reflected in the editor")
   val isPlural: Boolean = false,
+  @Schema(
+    description =
+      "The argument name for the plural. " +
+        "If null, value will be guessed from the values provided in translations.",
+  )
+  val pluralArgName: String? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

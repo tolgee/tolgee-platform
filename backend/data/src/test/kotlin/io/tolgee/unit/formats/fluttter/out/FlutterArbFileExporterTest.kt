@@ -24,7 +24,7 @@ class FlutterArbFileExporterTest {
     |{
     |  "@@locale" : "cs",
     |  "key1" : "Ahoj! I{number}, {name}, {number}, {number}",
-    |  "key3" : "{0, plural, one {{count} den} few {{count} dny} other {{count} dní}}"
+    |  "key3" : "{count, plural, one {{count} den} few {{count} dny} other {{count} dní}}"
     |}
       """.trimMargin(),
     )
@@ -33,7 +33,7 @@ class FlutterArbFileExporterTest {
       """
     |{
     |  "@@locale" : "en",
-    |  "key3" : "{0, plural, other {{count}}}",
+    |  "key3" : "{count, plural, other {{count}}}",
     |  "@key3" : {
     |    "description" : "What a count",
     |    "placeholders" : {

@@ -2,6 +2,7 @@ package io.tolgee.formats.flutter.out
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
+import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.formats.flutter.FLUTTER_ARB_FILE_PLACEHOLDERS_CUSTOM_KEY
 import io.tolgee.formats.flutter.FlutterArbModel
 import io.tolgee.formats.flutter.FlutterArbTranslationModel
@@ -89,7 +90,10 @@ class FlutterArbFileExporter(
       ).convert()
 
     if (converted.isPlural()) {
-      return converted.formsResult!!.toIcuPluralString(addNewLines = false)
+      return converted.formsResult!!.toIcuPluralString(
+        addNewLines = false,
+        argName = converted.argName ?: DEFAULT_PLURAL_ARGUMENT_NAME,
+      )
     }
 
     return converted.singleResult!!

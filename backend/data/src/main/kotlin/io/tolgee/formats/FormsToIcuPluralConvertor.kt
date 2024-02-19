@@ -2,7 +2,7 @@ package io.tolgee.formats
 
 class FormsToIcuPluralConvertor(
   val forms: Map<String, String>,
-  val argName: String = "0",
+  val argName: String = DEFAULT_PLURAL_ARGUMENT_NAME,
   val escape: Boolean = true,
   val optimize: Boolean = false,
   val addNewLines: Boolean,

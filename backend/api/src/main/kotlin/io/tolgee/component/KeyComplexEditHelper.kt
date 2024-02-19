@@ -125,7 +125,7 @@ class KeyComplexEditHelper(
 
     if (isIsPluralChanged) {
       key.isPlural = dto.isPlural!!
-      translationService.onKeyIsPluralChanged(listOf(key.id), dto.isPlural!!)
+      translationService.onKeyIsPluralChanged(mapOf(key.id to newPluralArgName), dto.isPlural!!)
     }
 
     if (isKeyNameModified || isNamespaceChanged) {
@@ -199,9 +199,13 @@ class KeyComplexEditHelper(
 
   private fun validateAndNormalizePlurals(modifiedTranslations: Map<Language, String?>): Map<Language, String?> {
     if (newIsPlural) {
-      return translationService.validateAndNormalizePlurals(modifiedTranslations)
+      return translationService.validateAndNormalizePlurals(modifiedTranslations, newPluralArgName)
     }
     return modifiedTranslations
+  }
+
+  private val newPluralArgName: String? by lazy {
+    dto.pluralArgName ?: key.pluralArgName
   }
 
   private fun getExistingTranslationsByTag() =
@@ -276,7 +280,8 @@ class KeyComplexEditHelper(
     isKeyNameModified = key.name != dto.name
     isNamespaceChanged = key.namespace?.name != dto.namespace
     isDescriptionChanged = key.keyMeta?.description != dto.description
-    isIsPluralChanged = dto.isPlural != null && key.isPlural != dto.isPlural
+    isIsPluralChanged =
+      dto.isPlural != null && key.isPlural != dto.isPlural || (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
     isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()

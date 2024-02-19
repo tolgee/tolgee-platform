@@ -3135,4 +3135,9 @@
             <column name="raw_data" type="jsonb"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1708343851872-1">
+        <addColumn tableName="key">
+            <column name="plural_arg_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

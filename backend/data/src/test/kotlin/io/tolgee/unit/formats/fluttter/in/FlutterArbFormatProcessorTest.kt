@@ -56,7 +56,7 @@ class FlutterArbFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {count, plural,
           one {I have one dog.}
           other {I have {count} dogs.}
           }

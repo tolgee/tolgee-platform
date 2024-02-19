@@ -23,7 +23,6 @@ import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
 import io.tolgee.hateoas.translations.SetTranslationsResponseModel
@@ -34,7 +33,6 @@ import io.tolgee.hateoas.translations.TranslationModelAssembler
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.security.ProjectHolder
@@ -104,6 +102,7 @@ class TranslationsController(
   private val activityHolder: ActivityHolder,
   private val activityService: ActivityService,
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
+  private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -184,20 +183,7 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
-    securityService.checkLanguageTranslatePermissionsByTag(dto.translations.keys, projectHolder.project.id)
-
-    val modifiedTranslations = translationService.setForKey(key, dto.translations)
-
-    val translations =
-      dto.languagesToReturn
-        ?.let { languagesToReturn ->
-          translationService.findForKeyByLanguages(key, languagesToReturn)
-            .associateBy { it.language.tag }
-        }
-        ?: modifiedTranslations
-
-    return getSetTranslationsResponse(key, translations)
+    return createOrUpdateTranslationsFacade.setTranslations(dto)
   }
 
   @PostMapping("")
@@ -210,22 +196,7 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    val convertedToPlurals = dto.translations.convertToPluralIfAnyIsPlural()
-    val isPlural = convertedToPlurals != null
-
-    val key =
-      keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
-        activityHolder.activity = ActivityType.SET_TRANSLATIONS
-      } ?: let {
-        checkKeyEditScope()
-        activityHolder.activity = ActivityType.CREATE_KEY
-        keyService.create(projectHolder.projectEntity, dto.key, dto.namespace, isPlural)
-      }
-
-    val translations =
-      translationService
-        .setForKey(key, convertedToPlurals ?: dto.translations)
-    return getSetTranslationsResponse(key, translations)
+    return createOrUpdateTranslationsFacade.createOrUpdateTranslations(dto)
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
@@ -370,22 +341,6 @@ Sorting is not supported for supported. It is automatically sorted from newest t
       return screenshotService.getScreenshotsForKeys(keyIds)
     }
     return null
-  }
-
-  private fun getSetTranslationsResponse(
-    key: Key,
-    translations: Map<String, Translation>,
-  ): SetTranslationsResponseModel {
-    return SetTranslationsResponseModel(
-      keyId = key.id,
-      keyName = key.name,
-      keyNamespace = key.namespace?.name,
-      keyIsPlural = key.isPlural,
-      translations =
-        translations.entries.associate { (languageTag, translation) ->
-          languageTag to translationModelAssembler.toModel(translation)
-        },
-    )
   }
 
   private fun checkKeyEditScope() {

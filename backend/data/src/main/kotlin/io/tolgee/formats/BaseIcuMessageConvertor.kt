@@ -15,6 +15,8 @@ class BaseIcuMessageConvertor(
 
   private var pluralArgName: String? = null
 
+  private var firstArgName: String? = null
+
   private lateinit var tree: MessagePatternUtil.MessageNode
 
   private fun addToResult(
@@ -65,6 +67,7 @@ class BaseIcuMessageConvertor(
           null,
           null,
           warnings,
+          firstArgName = firstArgName,
         )
       }
       getPluralResult()
@@ -107,6 +110,7 @@ class BaseIcuMessageConvertor(
       result,
       pluralArgName,
       warnings,
+      firstArgName = firstArgName,
     )
   }
 
@@ -155,6 +159,9 @@ class BaseIcuMessageConvertor(
     node: MessagePatternUtil.ArgNode,
     form: String?,
   ) {
+    if (firstArgName == null) {
+      firstArgName = node.name
+    }
     when (node.argType) {
       MessagePattern.ArgType.SIMPLE, MessagePattern.ArgType.NONE -> {
         val isInPlural = form != null

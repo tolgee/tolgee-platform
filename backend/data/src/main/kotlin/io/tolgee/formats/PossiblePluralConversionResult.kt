@@ -7,6 +7,7 @@ class PossiblePluralConversionResult(
   val formsResult: Map<String, String>? = null,
   val argName: String? = null,
   val warnings: List<Pair<Message, List<Any>>> = emptyList(),
+  val firstArgName: String? = null,
 ) {
   init {
     if (singleResult == null && formsResult == null) {

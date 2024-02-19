@@ -17,11 +17,11 @@ class V2ImportControllerPluralizationTest : ProjectAuthControllerTest("/v2/proje
     saveTestDataAndApplyImport()
     // new value is migrated
     getTranslation("cs", "existing plural key")
-      .text.assert.isEqualTo("{value, plural, other {No plural}}")
+      .text.assert.isEqualTo("{value, plural,\nother {No plural}\n}")
 
     // migrates old existing values
     getTranslation("en", "existing non plural key")
-      .text.assert.isEqualTo("{value, plural, other {I am not a plural!}}")
+      .text.assert.isEqualTo("{count, plural,\nother {I am not a plural!}\n}")
 
     // keeps non-plurals
     getTranslation("en", "existing non plural key 2")

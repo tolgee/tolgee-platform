@@ -331,6 +331,18 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     }
   }
 
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  @Test
+  fun `returns correct plural values`() {
+    testData.addPlural()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+      node("_embedded.keys[2].keyIsPlural").isEqualTo(true)
+      node("_embedded.keys[2].keyPluralArgName").isEqualTo("count")
+    }
+  }
+
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_VIEW])
   @Test
   fun `returns select all keys`() {

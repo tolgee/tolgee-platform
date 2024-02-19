@@ -30,5 +30,6 @@ class KeyWithDataModelAssembler(
       screenshots = entity.keyScreenshotReferences.map { it.screenshot }.map { screenshotModelAssembler.toModel(it) },
       description = entity.keyMeta?.description,
       isPlural = entity.isPlural,
+      pluralArgName = entity.pluralArgName,
     )
 }

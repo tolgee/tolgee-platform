@@ -61,7 +61,7 @@ class KeysImporter(
             this.namespace = namespaces[safeNamespace]
           }
 
-        val convertedToPlurals = keyDto.translations.convertToPluralIfAnyIsPlural()
+        val convertedToPlurals = keyDto.translations.convertToPluralIfAnyIsPlural()?.convertedStrings
         key.isPlural = convertedToPlurals != null
         keyService.save(key)
 

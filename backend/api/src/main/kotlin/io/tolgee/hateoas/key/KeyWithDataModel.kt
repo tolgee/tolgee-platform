@@ -33,4 +33,6 @@ open class KeyWithDataModel(
   val screenshots: List<ScreenshotModel>,
   @Schema(description = "If key is pluralized. If it will be reflected in the editor")
   val isPlural: Boolean,
+  @Schema(description = "The argument name for the plural")
+  val pluralArgName: String?,
 ) : RepresentationModel<KeyWithDataModel>(), Serializable
