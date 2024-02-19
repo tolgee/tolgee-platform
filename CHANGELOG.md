@@ -1,3 +1,29 @@
+## [3.48.2](https://github.com/tolgee/tolgee-platform/compare/v3.48.1...v3.48.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* Custom Content Storage secret updating ([#2135](https://github.com/tolgee/tolgee-platform/issues/2135)) ([8a5421c](https://github.com/tolgee/tolgee-platform/commit/8a5421c4d4a25ff0e41a25cfdfd2e8c9e679c5a0))
+
+## [3.48.1](https://github.com/tolgee/tolgee-platform/compare/v3.48.0...v3.48.1) (2024-02-09)
+
+
+### Bug Fixes
+
+* Upgrade redisson (fixes writing to read-only replicas) ([#2121](https://github.com/tolgee/tolgee-platform/issues/2121)) ([bfafd7e](https://github.com/tolgee/tolgee-platform/commit/bfafd7ea5413df97b5bf17ff419d197496c3a50b))
+
+# [3.48.0](https://github.com/tolgee/tolgee-platform/compare/v3.47.1...v3.48.0) (2024-02-02)
+
+
+### Bug Fixes
+
+* Fix wrong pricing plan description ([#2119](https://github.com/tolgee/tolgee-platform/issues/2119)) ([69e4043](https://github.com/tolgee/tolgee-platform/commit/69e40437b1a1044c9f349374dad1bf50841525ca))
+
+
+### Features
+
+* Enable free self-hosted licenses for open-source and schools ([#2117](https://github.com/tolgee/tolgee-platform/issues/2117)) ([8bff206](https://github.com/tolgee/tolgee-platform/commit/8bff2062d1285ee4c58649af8db71342947b1398))
+
 ## [3.47.1](https://github.com/tolgee/tolgee-platform/compare/v3.47.0...v3.47.1) (2024-01-29)
 
 
