@@ -111,10 +111,9 @@ class KeyService(
   ): Key {
     val key = create(project, dto.name, dto.namespace)
     key.isPlural = dto.isPlural
-    if (key.isPlural)
-      {
-        key.pluralArgName = dto.pluralArgName
-      }
+    if (key.isPlural) {
+      key.pluralArgName = dto.pluralArgName
+    }
 
     val created = createTranslationsOnKeyCreate(dto, key)
 
