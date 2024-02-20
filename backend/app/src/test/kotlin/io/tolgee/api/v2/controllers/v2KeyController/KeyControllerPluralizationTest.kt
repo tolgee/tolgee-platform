@@ -129,6 +129,8 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       node("translations.de.text").isString.isEqualTo(NORMALIZED_PLURAL)
       node("translations.cs.text").isString.isEqualTo(NORMALIZED_PLURAL)
     }
+
+    keyService.get(key.self.id).isPlural.assert.isEqualTo(true)
   }
 
   @ProjectApiKeyAuthTestMethod(
@@ -166,6 +168,8 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
       node("translations.de.text").isString
         .isEqualTo(NORMALIZED_PLURAL.replace("dogsCount", "catsCount"))
     }
+
+    keyService.get(key.self.id).pluralArgName.assert.isEqualTo("catsCount")
   }
 
   @ProjectJWTAuthTestMethod

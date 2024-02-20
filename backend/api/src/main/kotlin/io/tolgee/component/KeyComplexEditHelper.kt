@@ -125,7 +125,9 @@ class KeyComplexEditHelper(
 
     if (isIsPluralChanged) {
       key.isPlural = dto.isPlural!!
+      key.pluralArgName = dto.pluralArgName ?: key.pluralArgName
       translationService.onKeyIsPluralChanged(mapOf(key.id to newPluralArgName), dto.isPlural!!)
+      keyService.save(key)
     }
 
     if (isKeyNameModified || isNamespaceChanged) {
