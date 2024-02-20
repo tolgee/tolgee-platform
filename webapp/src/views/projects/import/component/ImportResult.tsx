@@ -17,7 +17,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ImportFileIssuesDialog } from './ImportFileIssuesDialog';
 import { ImportResultRow } from './ImportResultRow';
 import { ImportTranslationsDialog } from './ImportTranslationsDialog';
-import { ImportSettingsPanel } from './ImportSettingsPanel';
 
 type ImportResultProps = {
   result?: components['schemas']['PagedModelImportLanguageModel'];

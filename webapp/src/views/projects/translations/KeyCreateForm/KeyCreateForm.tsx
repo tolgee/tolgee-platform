@@ -18,12 +18,7 @@ import { redirectionActions } from 'tg.store/global/RedirectionActions';
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
-export type ValuesCreateType = {
-  name: string;
-  translations: Record<string, string>;
-  tags: string[];
-  description: string | undefined;
-};
+export type ValuesCreateType = components['schemas']['CreateKeyDto'];
 
 type Props = {
   languages: LanguageModel[];
@@ -93,6 +88,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         tags: [],
         description: '',
         namespace,
+        isPlural: false,
       }}
       onSubmit={handleSubmit}
       validationSchema={Yup.object().shape({

@@ -281,7 +281,8 @@ class KeyComplexEditHelper(
     isNamespaceChanged = key.namespace?.name != dto.namespace
     isDescriptionChanged = key.keyMeta?.description != dto.description
     isIsPluralChanged =
-      dto.isPlural != null && key.isPlural != dto.isPlural || (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
+      dto.isPlural != null && key.isPlural != dto.isPlural ||
+      (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
     isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()
@@ -298,7 +299,12 @@ class KeyComplexEditHelper(
     return !currentTagsContainAllNewTags || !newTagsContainAllCurrentTags
   }
 
-  val requireKeyEditPermission get() = isKeyNameModified || isNamespaceChanged || isDescriptionChanged || isIsPluralChanged
+  val requireKeyEditPermission
+    get() =
+      isKeyNameModified ||
+        isNamespaceChanged ||
+        isDescriptionChanged ||
+        isIsPluralChanged
 
   private fun prepareModifiedTranslations() {
     modifiedTranslations =

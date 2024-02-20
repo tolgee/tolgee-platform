@@ -19,7 +19,8 @@ import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
-export type CreateProjectValueType = components['schemas']['CreateProjectDTO'];
+export type CreateProjectValueType =
+  components['schemas']['CreateProjectRequest'];
 
 export const ProjectCreateView: FunctionComponent = () => {
   const history = useHistory();
@@ -73,6 +74,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     ],
     organizationId: preferredOrganization.id,
     baseLanguageTag: 'en',
+    disableIcuPlaceholders: false,
   };
 
   return (
