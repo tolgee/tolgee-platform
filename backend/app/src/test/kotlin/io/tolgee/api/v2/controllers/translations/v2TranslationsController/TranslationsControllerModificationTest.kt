@@ -106,7 +106,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
       ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("translations.en.text").isString.isEqualTo("{count, plural,\nother {Hi! test}\n}")
-      node("translations.de.text").isString.isEqualTo("{value, plural,\nother {Nicht ein Plural}\n}")
+      node("translations.de.text").isString.isEqualTo("{count, plural,\nother {Nicht ein Plural}\n}")
       node("keyIsPlural").isBoolean.isTrue
     }
   }

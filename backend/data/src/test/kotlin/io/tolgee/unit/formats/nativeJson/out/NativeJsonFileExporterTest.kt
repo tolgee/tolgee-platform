@@ -112,7 +112,7 @@ class NativeJsonFileExporterTest {
       val split = keyDef.split(":").toMutableList()
       val keyName = split.removeLast()
       val namespace = split.removeLastOrNull()
-      val key = ExportKeyView(1, keyName, null, namespace)
+      val key = ExportKeyView(1, keyName, namespace = namespace)
       val trans = ExportTranslationView(1, "text", TranslationState.TRANSLATED, key, "en")
       key.translations["en"] = trans
       trans

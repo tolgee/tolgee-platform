@@ -92,7 +92,7 @@ class FlutterArbFileExporter(
     if (converted.isPlural()) {
       return converted.formsResult!!.toIcuPluralString(
         addNewLines = false,
-        argName = converted.argName ?: DEFAULT_PLURAL_ARGUMENT_NAME,
+        argName = converted.argName ?: converted.firstArgName ?: DEFAULT_PLURAL_ARGUMENT_NAME,
       )
     }
 
