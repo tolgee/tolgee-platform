@@ -1,3 +1,10 @@
+## [3.48.3](https://github.com/tolgee/tolgee-platform/compare/v3.48.2...v3.48.3) (2024-02-20)
+
+
+### Bug Fixes
+
+* switch to brasil flag for portuguese (translator is Brasilian) ([#2137](https://github.com/tolgee/tolgee-platform/issues/2137)) ([77628a8](https://github.com/tolgee/tolgee-platform/commit/77628a82a11d6bc01165ae47183572886c23eb37))
+
 ## [3.48.2](https://github.com/tolgee/tolgee-platform/compare/v3.48.1...v3.48.2) (2024-02-15)
 
 
