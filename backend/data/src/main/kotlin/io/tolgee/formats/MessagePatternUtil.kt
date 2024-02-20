@@ -6,25 +6,24 @@ import java.util.*
 import kotlin.concurrent.Volatile
 
 /**
+ * Original license:
+ * © 2016 and later: Unicode, Inc. and others.
+ * License & terms of use: http://www.unicode.org/copyright.html
+ *******************************************************************************
+ *   Copyright (C) 2011-2014, International Business Machines
+ *   Corporation and others.  All Rights Reserved.
+ *******************************************************************************
+ *   created on: 2011jul14
+ *   created by: Markus W. Scherer
  *
- */
-// Original license:
-// © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html
-/*
-*******************************************************************************
-*   Copyright (C) 2011-2014, International Business Machines
-*   Corporation and others.  All Rights Reserved.
-*******************************************************************************
-*   created on: 2011jul14
-*   created by: Markus W. Scherer
-*/
-
-/**
+ *******************************************
+ *
  * Tolgee docs:
  *
  * We took this file from ICU4J and added tools to propertly get part of original message from ICU message pattern.
  * We need this to reliable convert ICU message to plural forms.
+ *
+ ********************************************
  *
  * Original docs:
  *

@@ -79,7 +79,10 @@ class AndroidXmlFormatProcessorTest {
     fileProcessorContext.assertTranslations("en", "with_xliff_gs")
       .assertSingle {
         hasText(
-          "<b>Hello!\n            <xliff:g id=\"number\">{0, number}</xliff:g>\n        </b>\n        <xliff:g id=\"number\">Dont'translate this</xliff:g>",
+          "<b>Hello!\n" +
+            "            <xliff:g id=\"number\">{0, number}</xliff:g>\n" +
+            "        </b>\n" +
+            "        <xliff:g id=\"number\">Dont'translate this</xliff:g>",
         )
       }
     fileProcessorContext.assertLanguagesCount(1)
