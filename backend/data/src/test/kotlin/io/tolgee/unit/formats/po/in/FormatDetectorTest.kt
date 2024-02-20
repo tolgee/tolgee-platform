@@ -1,34 +1,19 @@
 package io.tolgee.unit.formats.po.`in`
 
-import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.FormatDetector
-import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportFile
-import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.util.FileProcessorContextMockUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import java.io.File
 
 class FormatDetectorTest {
-  private lateinit var importMock: Import
-  private lateinit var importFile: ImportFile
-  private lateinit var importFileDto: ImportFileDto
-  private lateinit var fileProcessorContext: FileProcessorContext
+  lateinit var mockUtil: FileProcessorContextMockUtil
 
   @BeforeEach
   fun setup() {
-    importMock = mock()
-    importFile = ImportFile("exmample.po", importMock)
-    importFileDto =
-      ImportFileDto(
-        "exmample.po",
-        File("src/test/resources/import/po/example.po")
-          .readBytes(),
-      )
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
+    mockUtil = FileProcessorContextMockUtil()
+    mockUtil.mockIt("example.po", "src/test/resources/import/po/example.po")
   }
 
   @Test

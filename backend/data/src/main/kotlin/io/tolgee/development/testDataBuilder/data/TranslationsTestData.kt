@@ -441,10 +441,10 @@ class TranslationsTestData {
     }
   }
 
-  fun addPluralKey() {
-    projectBuilder.addKey {
+  fun addPluralKey(): Key {
+    return projectBuilder.addKey {
       name = "plural_key"
       isPlural = true
-    }
+    }.self
   }
 }

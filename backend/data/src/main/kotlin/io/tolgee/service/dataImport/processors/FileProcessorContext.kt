@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport.processors
 
 import io.tolgee.api.IImportSettings
+import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.MessageConvertorType
@@ -12,9 +13,10 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.model.key.KeyMeta
+import org.springframework.context.ApplicationContext
 
 data class FileProcessorContext(
-  val file: ImportFileDto,
+  var file: ImportFileDto,
   val fileEntity: ImportFile,
   val maxTranslationTextLength: Long = 200L,
   val params: ImportAddFilesParams = ImportAddFilesParams(),
@@ -23,6 +25,7 @@ data class FileProcessorContext(
       override var overrideKeyDescriptions: Boolean = false
       override var convertPlaceholdersToIcu: Boolean = true
     },
+  val applicationContext: ApplicationContext,
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
   private var _translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
@@ -139,6 +142,12 @@ data class FileProcessorContext(
   ) {
     val keyMeta = getOrCreateKeyMeta(translationKey)
     keyMeta.setCustom(customMapKey, value)
+    keyMeta.custom?.let {
+      if (!customValuesValidator.isValid(it)) {
+        keyMeta.custom?.remove(customMapKey)
+        fileEntity.addIssue(FileIssueType.INVALID_CUSTOM_VALUES, mapOf(FileIssueParamType.KEY_NAME to translationKey))
+      }
+    }
   }
 
   private fun getOrCreateKey(name: String): ImportKey {
@@ -151,5 +160,9 @@ data class FileProcessorContext(
       keyEntity.keyMeta = KeyMeta(importKey = keyEntity)
       keyEntity.keyMeta!!
     }
+  }
+
+  val customValuesValidator: KeyCustomValuesValidator by lazy {
+    applicationContext.getBean(KeyCustomValuesValidator::class.java)
   }
 }

@@ -32,6 +32,13 @@ When null, resulting file won't be structured.
   var structureDelimiter: Char?
 
   @get:Schema(
+    description = """
+      If true, JSON arrays are supported. e.g. Key hello[0] will be exported as {"hello": ["..."]}
+    """,
+  )
+  var supportJsonArrays: Boolean
+
+  @get:Schema(
     description = """Filter key IDs to be contained in export""",
   )
   var filterKeyId: List<Long>?
@@ -85,5 +92,6 @@ e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
     this.filterState = other.filterState
     this.filterNamespace = other.filterNamespace
     this.messageFormat = other.messageFormat
+    this.supportJsonArrays = other.supportJsonArrays
   }
 }

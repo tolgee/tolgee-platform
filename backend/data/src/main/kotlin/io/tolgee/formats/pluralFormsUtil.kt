@@ -1,6 +1,7 @@
 package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
+import io.tolgee.util.nullIfEmpty
 
 fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
   val uLocale = getULocaleFromTag(languageTag)
@@ -156,7 +157,7 @@ fun <T> normalizePlurals(
   val invalidStrings = mutableListOf<String>()
   val formResults =
     strings.map {
-      val text = it.value ?: return@map it.key to null
+      val text = it.value?.nullIfEmpty ?: return@map it.key to null
 
       val forms =
         try {

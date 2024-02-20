@@ -101,7 +101,7 @@ class BaseIcuMessageConvertor(
       if (forceIsPlural == true && otherResult == null) {
         singleResult
       } else {
-        otherResult
+        otherResult ?: ""
       }
 
     result.computeIfAbsent(OTHER_KEYWORD) { otherResult.toString() }

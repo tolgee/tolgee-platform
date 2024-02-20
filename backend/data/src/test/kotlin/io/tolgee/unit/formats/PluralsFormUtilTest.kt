@@ -85,6 +85,25 @@ class PluralsFormUtilTest {
   }
 
   @Test
+  fun `works with empty other`() {
+    getPluralForms(
+      "{count, plural, one {# dog} other {}}",
+    )!!.forms.assert.isEqualTo(
+      mapOf(
+        "one" to "# dog",
+        "other" to "",
+      ),
+    )
+  }
+
+  @Test
+  fun `no other leads to no plural forms`() {
+    getPluralForms(
+      "{count, plural, one {# dog}}",
+    ).assert.isNull()
+  }
+
+  @Test
   fun `nested choice work fine`() {
     val nested = "Hello, {count, choice, 0#There are no dogs|1#There is one dog|1<There are # dogs}!"
     getPluralForms(

@@ -35,4 +35,6 @@ open class KeyWithDataModel(
   val isPlural: Boolean,
   @Schema(description = "The argument name for the plural")
   val pluralArgName: String?,
+  @Schema(description = "Custom values of the key")
+  val custom: Map<String, Any?>,
 ) : RepresentationModel<KeyWithDataModel>(), Serializable

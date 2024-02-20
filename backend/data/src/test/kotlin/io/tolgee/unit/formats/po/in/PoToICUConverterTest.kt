@@ -1,35 +1,20 @@
 package io.tolgee.unit.formats.po.`in`
 
-import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.po.`in`.messageConverters.PoCToIcuMessageConverter
 import io.tolgee.formats.po.`in`.messageConverters.PoPhpToIcuMessageConverter
 import io.tolgee.formats.po.`in`.messageConverters.PoPythonToIcuMessageConverter
-import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportFile
-import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.util.FileProcessorContextMockUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import java.io.File
 
 class PoToICUConverterTest {
-  private lateinit var context: FileProcessorContext
-  private lateinit var importMock: Import
-  private lateinit var importFile: ImportFile
-  private lateinit var importFileDto: ImportFileDto
+  lateinit var mockUtil: FileProcessorContextMockUtil
 
   @BeforeEach
   fun setup() {
-    importMock = mock()
-    importFile = ImportFile("exmample.po", importMock)
-    importFileDto =
-      ImportFileDto(
-        "exmample.po",
-        File("src/test/resources/import/po/example.po")
-          .readBytes(),
-      )
-    context = FileProcessorContext(importFileDto, importFile)
+    mockUtil = FileProcessorContextMockUtil()
+    mockUtil.mockIt("example.po", "src/test/resources/import/po/example.po")
   }
 
   @Test

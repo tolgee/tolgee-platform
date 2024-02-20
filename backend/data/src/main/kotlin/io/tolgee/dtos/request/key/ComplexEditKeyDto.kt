@@ -51,6 +51,8 @@ data class ComplexEditKeyDto(
         "If isPlural is false, this value will be ignored.",
   )
   val pluralArgName: String? = null,
+  @Schema(description = "Custom values of the key. If not provided, custom values won't be modified")
+  val custom: Map<String, Any?>? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

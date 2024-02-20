@@ -1,5 +1,6 @@
 package io.tolgee.unit
 
+import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -51,6 +52,7 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var authenticationFacadeMock: AuthenticationFacade
   private lateinit var keyMetaServiceMock: KeyMetaService
   private lateinit var tolgeePropertiesMock: TolgeeProperties
+  private lateinit var keyCustomValuesValidatorMock: KeyCustomValuesValidator
 
   @BeforeEach
   fun setup() {
@@ -64,6 +66,7 @@ class CoreImportFileProcessorUnitTest {
     authenticationFacadeMock = mock()
     keyMetaServiceMock = mock()
     tolgeePropertiesMock = mock()
+    keyCustomValuesValidatorMock = mock()
 
     importFile = ImportFile("lgn.json", importMock)
     importFileDto = ImportFileDto("lng.json", "".toByteArray())
@@ -89,10 +92,12 @@ class CoreImportFileProcessorUnitTest {
     whenever(applicationContextMock.getBean(AuthenticationFacade::class.java)).thenReturn(authenticationFacadeMock)
     whenever(applicationContextMock.getBean(KeyMetaService::class.java)).thenReturn(keyMetaServiceMock)
     whenever(applicationContextMock.getBean(TolgeeProperties::class.java)).thenReturn(tolgeePropertiesMock)
+    whenever(applicationContextMock.getBean(KeyCustomValuesValidator::class.java))
+      .thenReturn(keyCustomValuesValidatorMock)
     whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
 
     whenever(importFileProcessorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile, applicationContext = applicationContextMock)
     fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
     whenever(typeProcessorMock.context).then { fileProcessorContext }
     whenever(importMock.project).thenReturn(Project(1, "test repo"))

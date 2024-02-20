@@ -69,4 +69,6 @@ e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
     """,
   )
   override var messageFormat: ExportMessageFormat? = null,
-) : IExportParams
+) : IExportParams {
+  override var supportJsonArrays: Boolean = false
+}

@@ -78,6 +78,7 @@ class CoreImportFilesProcessor(
         maxTranslationTextLength = tolgeeProperties.maxTranslationTextLength,
         params = params,
         importSettings,
+        applicationContext,
       )
     val processor = importFileProcessorFactory.getProcessor(file, fileProcessorContext)
     processor.process()

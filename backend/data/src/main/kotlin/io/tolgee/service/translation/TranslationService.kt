@@ -161,16 +161,6 @@ class TranslationService(
 
   fun setTranslation(
     key: Key,
-    languageTag: String?,
-    text: String?,
-  ): Translation? {
-    val language =
-      languageService.getByTag(languageTag!!, key.project)
-    return setTranslation(key, entityManager.getReference(Language::class.java, language.id), text)
-  }
-
-  fun setTranslation(
-    key: Key,
     language: Language,
     text: String?,
   ): Translation {

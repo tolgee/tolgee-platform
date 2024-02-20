@@ -5,5 +5,5 @@ data class ImportFileDto(
    * In case of zip file, this is the whole path
    */
   val name: String = "",
-  val data: ByteArray,
+  var data: ByteArray,
 )

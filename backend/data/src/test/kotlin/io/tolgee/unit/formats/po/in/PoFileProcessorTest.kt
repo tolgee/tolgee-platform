@@ -2,31 +2,20 @@ package io.tolgee.unit.formats.po.`in`
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.po.`in`.PoFileProcessor
-import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportFile
-import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.util.FileProcessorContextMockUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
 import java.io.File
-import java.io.InputStream
 
 class PoFileProcessorTest {
-  private lateinit var importMock: Import
-  private lateinit var importFile: ImportFile
-  private lateinit var importFileDto: ImportFileDto
-  private lateinit var fileProcessorContext: FileProcessorContext
-  private lateinit var file: File
-
   @Test
   fun `processes standard file correctly`() {
     mockImportFile("example.po")
-    PoFileProcessor(fileProcessorContext).process()
-    assertThat(fileProcessorContext.languages).hasSize(1)
-    assertThat(fileProcessorContext.translations).hasSize(8)
-    val text = fileProcessorContext.translations["%d pages read."]?.get(0)?.text
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
+    assertThat(mockUtil.fileProcessorContext.translations).hasSize(8)
+    val text = mockUtil.fileProcessorContext.translations["%d pages read."]?.get(0)?.text
     assertThat(text)
       .isEqualTo(
         "{0, plural,\n" +
@@ -34,16 +23,16 @@ class PoFileProcessorTest {
           "other {{0, number} Seiten gelesen wurden.}\n" +
           "}",
       )
-    assertThat(fileProcessorContext.translations.values.toList()[2][0].text)
+    assertThat(mockUtil.fileProcessorContext.translations.values.toList()[2][0].text)
       .isEqualTo("Willkommen zurück, {0}! Dein letzter Besuch war am {1}")
   }
 
   @Test
   fun `adds metadata`() {
     mockImportFile("example.po")
-    PoFileProcessor(fileProcessorContext).process()
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
     val keyMeta =
-      fileProcessorContext.keys[
+      mockUtil.fileProcessorContext.keys[
         "We connect developers and translators around the globe " +
           "in Tolgee for a fantastic localization experience.",
       ]!!.keyMeta!!
@@ -62,27 +51,19 @@ class PoFileProcessorTest {
     val string = jacksonObjectMapper().readValue<String>(File("src/test/resources/import/po/windows-newlines.po.json"))
     assertThat(string).contains("\r\n")
 
-    mockImportFile(string.byteInputStream())
-    PoFileProcessor(fileProcessorContext).process()
-    assertThat(fileProcessorContext.languages).hasSize(1)
-    assertThat(fileProcessorContext.translations).hasSize(1)
-    assertThat(fileProcessorContext.translations.values.toList()[0][0].text)
+    mockImportFile("windows-newlines.po.json")
+    mockUtil.fileProcessorContext.file.data = string.encodeToByteArray()
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
+    assertThat(mockUtil.fileProcessorContext.translations).hasSize(1)
+    assertThat(mockUtil.fileProcessorContext.translations.values.toList()[0][0].text)
       .isEqualTo("# Hex код (#fff)")
   }
 
   private fun mockImportFile(fileName: String) {
-    file = File("src/test/resources/import/po/$fileName")
-    mockImportFile(file.inputStream())
+    mockUtil = FileProcessorContextMockUtil()
+    mockUtil.mockIt("example.po", "src/test/resources/import/po/$fileName")
   }
 
-  private fun mockImportFile(inputStream: InputStream) {
-    importMock = mock()
-    importFile = ImportFile("exmample.po", importMock)
-    importFileDto =
-      ImportFileDto(
-        "exmample.po",
-        inputStream.readAllBytes(),
-      )
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
-  }
+  lateinit var mockUtil: FileProcessorContextMockUtil
 }

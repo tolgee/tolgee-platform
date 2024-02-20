@@ -17,6 +17,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.*
 
@@ -46,6 +47,9 @@ class ContentDeliveryConfig(
 
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
+
+  @ColumnDefault("false")
+  override var supportJsonArrays: Boolean = false
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")

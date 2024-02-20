@@ -15,6 +15,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -88,6 +89,36 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
         node("translations.en.text").isEqualTo("English")
         node("keyIsPlural").isBoolean.isFalse
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `works with no other`() {
+    testData.addPluralKey()
+    saveTestData()
+    performUpdatePluralKey(
+      "{count, plural,\n" +
+        "one {test}\n" +
+        "other{}}",
+    ).andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isString.isEqualTo("{count, plural,\none {test}\nother{}\n}")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `works with empty string`() {
+    val key = testData.addPluralKey()
+    saveTestData()
+    performUpdatePluralKey("").andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isEqualTo(null)
+      }
+
+    executeInNewTransaction {
+      keyService.get(key.id).translations.find { it.language.tag == "en" }!!.text.assert.isNull()
+    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -375,7 +406,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     this.projectSupplier = { testData.project }
   }
 
-  private fun performUpdatePluralKey(value: String) =
+  private fun performUpdatePluralKey(value: String?) =
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(

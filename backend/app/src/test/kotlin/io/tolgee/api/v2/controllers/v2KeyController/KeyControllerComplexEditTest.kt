@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
@@ -8,6 +9,7 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -449,6 +451,60 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
   @Test
   fun `checks for KEY_EDIT permissions when updating isPlural`() {
     performIsPluralModification().andIsForbidden
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.TRANSLATIONS_EDIT,
+    ],
+  )
+  @Test
+  fun `checks permissions on custom values change`() {
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        custom = mapOf("custom" to "value"),
+      ),
+    ).andIsForbidden
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_EDIT,
+    ],
+  )
+  @Test
+  fun `stores custom values change`() {
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        custom = mapOf("custom" to "value"),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      keyService.get(testData.firstKey.id).let {
+        assertThat(it.keyMeta!!.custom).isEqualTo(mapOf("custom" to "value"))
+      }
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_EDIT,
+    ],
+  )
+  @Test
+  fun `validates custom values`() {
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        custom = mapOf("custom" to (0..5000).joinToString("") { "a" }),
+      ),
+    ).andIsBadRequest.andHasErrorMessage(Message.CUSTOM_VALUES_JSON_TOO_LONG)
   }
 
   private fun performIsPluralModification(): ResultActions {

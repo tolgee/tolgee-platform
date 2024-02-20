@@ -31,5 +31,6 @@ class KeyWithDataModelAssembler(
       description = entity.keyMeta?.description,
       isPlural = entity.isPlural,
       pluralArgName = entity.pluralArgName,
+      custom = entity.keyMeta?.custom ?: mapOf(),
     )
 }

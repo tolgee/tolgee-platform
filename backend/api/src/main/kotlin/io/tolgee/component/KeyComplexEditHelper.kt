@@ -1,5 +1,6 @@
 package io.tolgee.component
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
@@ -41,12 +42,14 @@ class KeyComplexEditHelper(
   private val projectHolder: ProjectHolder = applicationContext.getBean(ProjectHolder::class.java)
   private val translationService: TranslationService = applicationContext.getBean(TranslationService::class.java)
   private val tagService: TagService = applicationContext.getBean(TagService::class.java)
+  private val objectMapper: ObjectMapper = applicationContext.getBean(ObjectMapper::class.java)
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val activityHolder: ActivityHolder = applicationContext.getBean(ActivityHolder::class.java)
   private val transactionManager: PlatformTransactionManager =
     applicationContext.getBean(PlatformTransactionManager::class.java)
   private val bigMetaService = applicationContext.getBean(BigMetaService::class.java)
   private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
+  private val keyCustomValuesValidator = applicationContext.getBean(KeyCustomValuesValidator::class.java)
 
   private lateinit var key: Key
   private var modifiedTranslations: Map<Long, String?>? = null
@@ -61,6 +64,7 @@ class KeyComplexEditHelper(
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
   private var isBigMetaProvided by Delegates.notNull<Boolean>()
   private var isNamespaceChanged: Boolean = false
+  private var isCustomDataChanged: Boolean = false
   private var isDescriptionChanged: Boolean = false
   private var isIsPluralChanged: Boolean = false
   private var newIsPlural by Delegates.notNull<Boolean>()
@@ -128,6 +132,15 @@ class KeyComplexEditHelper(
       key.pluralArgName = dto.pluralArgName ?: key.pluralArgName
       translationService.onKeyIsPluralChanged(mapOf(key.id to newPluralArgName), dto.isPlural!!)
       keyService.save(key)
+    }
+
+    if (isCustomDataChanged) {
+      dto.custom?.let { newCustomValues ->
+        keyCustomValuesValidator.validate(newCustomValues)
+        val keyMeta = keyMetaService.getOrCreateForKey(key)
+        keyMeta.custom = newCustomValues.toMutableMap()
+        keyMetaService.save(keyMeta)
+      }
     }
 
     if (isKeyNameModified || isNamespaceChanged) {
@@ -285,6 +298,8 @@ class KeyComplexEditHelper(
     isIsPluralChanged =
       dto.isPlural != null && key.isPlural != dto.isPlural ||
       (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
+    isCustomDataChanged = dto.custom != null &&
+      objectMapper.writeValueAsString(key.keyMeta?.custom) != objectMapper.writeValueAsString(dto.custom)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
     isBigMetaProvided = !dto.relatedKeysInOrder.isNullOrEmpty()
@@ -306,7 +321,8 @@ class KeyComplexEditHelper(
       isKeyNameModified ||
         isNamespaceChanged ||
         isDescriptionChanged ||
-        isIsPluralChanged
+        isIsPluralChanged ||
+        isCustomDataChanged
 
   private fun prepareModifiedTranslations() {
     modifiedTranslations =

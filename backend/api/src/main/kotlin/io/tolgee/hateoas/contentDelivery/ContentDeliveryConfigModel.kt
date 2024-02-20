@@ -30,4 +30,5 @@ class ContentDeliveryConfigModel(
   override var filterState: List<TranslationState>? = null
   override var filterNamespace: List<String?>? = null
   override var messageFormat: ExportMessageFormat? = null
+  override var supportJsonArrays: Boolean = false
 }
