@@ -223,4 +223,12 @@ class PluralsFormUtilTest {
       "{0, plural,\none {dog}\nother {'}'}\n}",
     )
   }
+
+  @Test
+  fun `works with massive escaping`() {
+    normalizePlurals(mapOf(0 to "{value, plural, one {'{'} few {'''{'''} many {'''{'''} other {}}"))[0]
+      .assert.isEqualTo(
+        "{value, plural,\none {'{'}\nfew {'''{'''}\nmany {'''{'''}\nother {}\n}",
+      )
+  }
 }

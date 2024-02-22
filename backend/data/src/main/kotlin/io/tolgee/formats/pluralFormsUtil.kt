@@ -223,23 +223,20 @@ fun Map<String, String>.toIcuPluralString(
 
 class StringIsNotPluralException(val invalidStrings: List<String>) : RuntimeException("String is not a plural")
 
-private fun allToOtherForm(
-  text: String,
-  argName: String?,
-): String {
-  return "{${argName ?: DEFAULT_PLURAL_ARGUMENT_NAME}, plural, other {$text}}"
-}
-
 private fun String.preparePluralForm(escapeHash: Boolean = true): String {
-  val result = StringBuilder()
-  MessagePatternUtil.buildMessageNode(this).contents.forEach {
-    if (it !is MessagePatternUtil.TextNode) {
-      result.append(it.patternString)
-      return@forEach
+  return try {
+    val result = StringBuilder()
+    MessagePatternUtil.buildMessageNode(this).contents.forEach {
+      if (it !is MessagePatternUtil.TextNode) {
+        result.append(it.patternString)
+        return@forEach
+      }
+      result.append(IcuMessageEscaper(it.patternString, escapeHash).escaped)
     }
-    result.append(IcuMessageEscaper(it.patternString, escapeHash).escaped)
+    result.toString()
+  } catch (e: Exception) {
+    IcuMessageEscaper(this, escapeHash).escaped
   }
-  return result.toString()
 }
 
 fun String.isPluralString(): Boolean {
