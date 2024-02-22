@@ -33,10 +33,11 @@ When null, resulting file won't be structured.
 
   @get:Schema(
     description = """
-      If true, JSON arrays are supported. e.g. Key hello[0] will be exported as {"hello": ["..."]}
+      If true, for structured formats (like JSON) arrays are supported. 
+      e.g. Key hello[0] will be exported as {"hello": ["..."]}
     """,
   )
-  var supportJsonArrays: Boolean
+  var supportArrays: Boolean
 
   @get:Schema(
     description = """Filter key IDs to be contained in export""",
@@ -92,6 +93,6 @@ e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
     this.filterState = other.filterState
     this.filterNamespace = other.filterNamespace
     this.messageFormat = other.messageFormat
-    this.supportJsonArrays = other.supportJsonArrays
+    this.supportArrays = other.supportArrays
   }
 }

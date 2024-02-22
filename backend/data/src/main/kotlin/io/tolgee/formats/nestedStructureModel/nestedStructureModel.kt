@@ -1,11 +1,28 @@
 package io.tolgee.formats.nestedStructureModel
 
-interface Item
+interface StructuredModelItem {
+  val parent: ContainerNode<*>?
+  val key: Any?
+}
 
-class ValueItem(val value: String?) : Item
+interface ContainerNode<T : Any> : MutableMap<T, StructuredModelItem>, StructuredModelItem
 
-class RootItem(var value: Item? = null) : Item
+class ValueStructuredModelItem(
+  val value: String?,
+  override val parent: ContainerNode<*>?,
+  override val key: Any?,
+) :
+  StructuredModelItem
 
-class Object : LinkedHashMap<String, Item>(), Item
+class ObjectStructuredModelItem(
+  override val parent: ContainerNode<*>?,
+  override val key: Any?,
+) :
+  LinkedHashMap<String, StructuredModelItem>(), ContainerNode<String>
 
-class Array : LinkedHashMap<Int, Item>(), Item
+class ArrayStructuredModelItem(
+  override val parent: ContainerNode<*>?,
+  override val key: Any?,
+) : LinkedHashMap<Int, StructuredModelItem>(),
+  StructuredModelItem,
+  ContainerNode<Int>

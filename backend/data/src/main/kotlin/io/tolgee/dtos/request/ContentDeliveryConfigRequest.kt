@@ -26,7 +26,7 @@ class ContentDeliveryConfigRequest : IExportParams {
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
-  override var supportJsonArrays: Boolean = false
+  override var supportArrays: Boolean = false
   override var filterKeyId: List<Long>? = null
 
   override var filterKeyIdNot: List<Long>? = null

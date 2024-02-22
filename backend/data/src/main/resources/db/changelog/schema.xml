@@ -3140,4 +3140,11 @@
             <column name="plural_arg_name" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1708609189470-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="support_arrays" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

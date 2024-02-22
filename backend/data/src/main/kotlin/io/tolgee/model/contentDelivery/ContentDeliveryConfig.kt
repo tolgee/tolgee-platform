@@ -49,7 +49,7 @@ class ContentDeliveryConfig(
   override var structureDelimiter: Char? = '.'
 
   @ColumnDefault("false")
-  override var supportJsonArrays: Boolean = false
+  override var supportArrays: Boolean = false
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
