@@ -5,6 +5,7 @@ import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.isSamePossiblePlural
+import io.tolgee.formats.normalizePlurals
 import io.tolgee.formats.optimizePluralForms
 import io.tolgee.formats.optimizePossiblePlural
 import io.tolgee.formats.orderPluralForms
@@ -214,5 +215,12 @@ class PluralsFormUtilTest {
       .assert.isEqualTo(
         "{first, plural,\nother {a}\n}",
       )
+  }
+
+  @Test
+  fun `plural normalization does not escape escape characters`() {
+    normalizePlurals(mapOf(0 to "{0, plural, one {dog} other {'}'}}"))[0].assert.isEqualTo(
+      "{0, plural,\none {dog}\nother {'}'}\n}",
+    )
   }
 }

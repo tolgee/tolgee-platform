@@ -58,7 +58,7 @@ fun getPluralForms(string: String?): PluralForms? {
     BaseIcuMessageConvertor(
       string,
       NoOpFromIcuParamConvertor(),
-      keepEscaping = true,
+      keepEscaping = false,
     ).convert()
 
   return PluralForms(
