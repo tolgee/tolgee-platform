@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.apple.`in`
 
-import io.tolgee.formats.apple.`in`.AppleXliffFileProcessor
+import io.tolgee.formats.apple.`in`.xliff.AppleXliffFileProcessor
 import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil

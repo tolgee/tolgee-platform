@@ -30,7 +30,6 @@ class Xliff12FileProcessor(
             transUnitId,
             file.sourceLanguage ?: "unknown source",
             source,
-            rawData = null,
           )
         }
 
@@ -39,7 +38,6 @@ class Xliff12FileProcessor(
             transUnitId,
             file.targetLanguage ?: "unknown target",
             target,
-            rawData = null,
           )
         } ?: let {
           context.fileEntity.addIssue(

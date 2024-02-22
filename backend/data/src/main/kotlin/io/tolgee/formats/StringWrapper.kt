@@ -1,5 +1,5 @@
 package io.tolgee.formats
 
 data class StringWrapper(
-  val _stringValue: String,
+  val _stringValue: String?,
 )

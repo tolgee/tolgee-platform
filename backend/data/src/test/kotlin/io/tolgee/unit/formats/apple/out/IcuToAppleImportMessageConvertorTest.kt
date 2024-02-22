@@ -5,7 +5,7 @@ import io.tolgee.formats.apple.out.IcuToAppleMessageConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
-class IcuToAppleMessageConvertorTest {
+class IcuToAppleImportMessageConvertorTest {
   @Test
   fun `converts # to li when plural`() {
     val result = "{param, plural, other {# dogs}}".getConversionResult()

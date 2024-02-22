@@ -10,7 +10,7 @@ class IcuToFlutterArbMessageConvertor(
   fun convert(): PossiblePluralConversionResult {
     return BaseIcuMessageConvertor(
       message = message,
-      argumentConverter = FlutterArbFromIcuParamConvertor(),
+      argumentConvertor = FlutterArbFromIcuParamConvertor(),
       forceIsPlural = forceIsPlural,
     ).convert()
   }

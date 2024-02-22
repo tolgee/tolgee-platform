@@ -1,8 +1,8 @@
 package io.tolgee.unit.formats.po.`in`
 
-import io.tolgee.formats.po.`in`.messageConverters.PoCToIcuMessageConverter
-import io.tolgee.formats.po.`in`.messageConverters.PoPhpToIcuMessageConverter
-import io.tolgee.formats.po.`in`.messageConverters.PoPythonToIcuMessageConverter
+import io.tolgee.formats.po.`in`.messageConvertors.PoCToIcuImportMessageConvertor
+import io.tolgee.formats.po.`in`.messageConvertors.PoPhpToIcuImportMessageConvertor
+import io.tolgee.formats.po.`in`.messageConvertors.PoPythonToIcuImportMessageConvertor
 import io.tolgee.util.FileProcessorContextMockUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +20,7 @@ class PoToICUConverterTest {
   @Test
   fun testPhpPlurals() {
     val result =
-      PoPhpToIcuMessageConverter().convert(
+      PoPhpToIcuImportMessageConvertor().convert(
         mapOf(
           0 to "Petr má jednoho psa.",
           1 to "Petr má %d psi.",
@@ -40,35 +40,35 @@ class PoToICUConverterTest {
   @Test
   fun testPhpMessage() {
     val result =
-      PoPhpToIcuMessageConverter().convert("hello this is string %s, this is digit %d", "en").message
+      PoPhpToIcuImportMessageConvertor().convert("hello this is string %s, this is digit %d", "en").message
     assertThat(result).isEqualTo("hello this is string {0}, this is digit {1, number}")
   }
 
   @Test
   fun testPhpMessageEscapes() {
     val result =
-      PoPhpToIcuMessageConverter().convert("%%s %%s %%%s %%%%s", "cs").message
+      PoPhpToIcuImportMessageConvertor().convert("%%s %%s %%%s %%%%s", "cs").message
     assertThat(result).isEqualTo("%s %s %{0} %%s")
   }
 
   @Test
   fun testPhpMessageWithFlags() {
     val result =
-      PoPhpToIcuMessageConverter().convert("%+- 'as %+- 10s %1$'a +-010s", "cs").message
+      PoPhpToIcuImportMessageConvertor().convert("%+- 'as %+- 10s %1$'a +-010s", "cs").message
     assertThat(result).isEqualTo("%+- 'as %+- 10s %1$'a +-010s")
   }
 
   @Test
   fun testPhpMessageMultiple() {
     val result =
-      PoPhpToIcuMessageConverter().convert("%s %d %d %s", "cs").message
+      PoPhpToIcuImportMessageConvertor().convert("%s %d %d %s", "cs").message
     assertThat(result).isEqualTo("{0} {1, number} {2, number} {3}")
   }
 
   @Test
   fun testCMessage() {
     val result =
-      PoCToIcuMessageConverter().convert("%s %d %c %+- #0f %+- #0llf %+-hhs %0hs {hey} %jd", "cs").message
+      PoCToIcuImportMessageConvertor().convert("%s %d %c %+- #0f %+- #0llf %+-hhs %0hs {hey} %jd", "cs").message
     assertThat(
       result,
     ).isEqualTo("{0} {1, number} %c %+- #0f %+- #0llf %+-hhs %0hs '{hey}' %jd")
@@ -77,7 +77,7 @@ class PoToICUConverterTest {
   @Test
   fun testPythonMessage() {
     val result =
-      PoPythonToIcuMessageConverter().convert(
+      PoPythonToIcuImportMessageConvertor().convert(
         "%(one)s %(two)d %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld {hey}",
         "cs",
       ).message
@@ -91,7 +91,7 @@ class PoToICUConverterTest {
   @Test
   fun testPhpMessageKey() {
     val result =
-      PoPhpToIcuMessageConverter().convert(
+      PoPhpToIcuImportMessageConvertor().convert(
         "%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s",
         "cs",
       ).message

@@ -1,5 +1,5 @@
 package io.tolgee.formats.po.out
 
-interface ToPoMessageConverter {
+interface ToPoMessageConvertor {
   fun convert(): ToPoConversionResult
 }

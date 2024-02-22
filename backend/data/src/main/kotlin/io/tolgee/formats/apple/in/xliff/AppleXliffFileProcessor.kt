@@ -1,7 +1,8 @@
-package io.tolgee.formats.apple.`in`
+package io.tolgee.formats.apple.`in`.xliff
 
-import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.ImportMessageConvertorType
+import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.APPLE_PLURAL_PROPERTY_CUSTOM_KEY
@@ -158,20 +159,20 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     language: String,
   ) {
     if (forms.containsKey("other") && forms["other"] != null) {
-      val formsNotNull =
-        forms.mapNotNull {
-          val value = it.value ?: return@mapNotNull null
-          it.key to convertMessage(value, true)
-        }.toMap()
       val converted =
-        FormsToIcuPluralConvertor(
-          formsNotNull,
-          escape = false,
-          optimize = true,
-          addNewLines = true,
-          argName = "0",
-        ).convert()
-      context.addTranslation(keyName, language, converted, replaceNonPlurals = true)
+        ImportMessageConvertorType.APPLE_XLIFF.importMessageConvertor!!.convert(
+          forms,
+          language,
+          context.importSettings.convertPlaceholdersToIcu,
+        ).message
+      context.addTranslation(
+        keyName,
+        language,
+        converted,
+        replaceNonPlurals = true,
+        convertedBy = ImportMessageConvertorType.APPLE_XLIFF,
+        rawData = forms,
+      )
     }
   }
 
@@ -181,21 +182,32 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     file: XliffFile,
   ) {
     transUnit.source?.let { source ->
-      context.addTranslation(transUnitId, file.sourceLanguage ?: "unknown source", convertMessage(source, false))
+      context.addTranslation(
+        transUnitId,
+        file.sourceLanguage ?: "unknown source",
+        convertMessage(source),
+        rawData = StringWrapper(source),
+        convertedBy = ImportMessageConvertorType.APPLE_XLIFF,
+      )
     }
 
     transUnit.target?.let { target ->
-      context.addTranslation(transUnitId, file.targetLanguage ?: "unknown target", convertMessage(target, false))
+      context.addTranslation(
+        transUnitId,
+        file.targetLanguage ?: "unknown target",
+        convertMessage(target),
+        rawData = StringWrapper(target),
+        convertedBy = ImportMessageConvertorType.APPLE_XLIFF,
+      )
     }
   }
 
-  private fun convertMessage(
-    message: String,
-    isPlural: Boolean,
-  ): String {
-    return io.tolgee.formats.convertMessage(message, isPlural) {
-      AppleToIcuParamConvertor()
-    }
+  private fun convertMessage(message: String): String? {
+    return ImportMessageConvertorType.APPLE_XLIFF.importMessageConvertor!!.convert(
+      message,
+      "who-knows",
+      context.importSettings.convertPlaceholdersToIcu,
+    ).message
   }
 
   companion object {

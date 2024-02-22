@@ -127,7 +127,8 @@ class ImportService(
     reportStatus: (ImportApplicationStatus) -> Unit = {},
   ) {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
-    StoredDataImporter(applicationContext, import, forceMode, reportStatus).doImport()
+    val settings = importSettingsService.get(import.author, import.project.id)
+    StoredDataImporter(applicationContext, import, forceMode, reportStatus, settings).doImport()
     deleteImport(import)
     businessEventPublisher.publish(
       OnBusinessEventToCaptureEvent(

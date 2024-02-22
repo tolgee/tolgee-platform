@@ -4,7 +4,7 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.MessageConvertorType
+import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
@@ -47,7 +47,7 @@ data class FileProcessorContext(
     forceIsPlural: Boolean? = null,
     replaceNonPlurals: Boolean = false,
     rawData: Any? = null,
-    convertedBy: MessageConvertorType? = null,
+    convertedBy: ImportMessageConvertorType? = null,
   ) {
     val stringValue = value as? String
 

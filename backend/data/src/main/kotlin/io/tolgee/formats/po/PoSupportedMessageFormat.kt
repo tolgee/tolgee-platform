@@ -1,26 +1,26 @@
 package io.tolgee.formats.po
 
-import io.tolgee.formats.MessageConvertorType
+import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.po.`in`.paramConvertors.CToIcuParamConvertor
 import io.tolgee.formats.po.`in`.paramConvertors.PhpToIcuParamConvertor
 import io.tolgee.formats.po.`in`.paramConvertors.PythonToIcuParamConvertor
-import io.tolgee.formats.po.out.ToPoMessageConverter
-import io.tolgee.formats.po.out.c.ToCPoMessageConverter
-import io.tolgee.formats.po.out.php.ToPhpPoMessageConverter
-import io.tolgee.formats.po.out.python.ToPythonPoMessageConverter
+import io.tolgee.formats.po.out.ToPoMessageConvertor
+import io.tolgee.formats.po.out.c.ToCPoMessageConvertor
+import io.tolgee.formats.po.out.php.ToPhpPoMessageConvertor
+import io.tolgee.formats.po.out.python.ToPythonPoMessageConvertor
 
 enum class PoSupportedMessageFormat(
   val poFlag: String,
   val paramRegex: Regex,
-  val messageConvertorType: MessageConvertorType,
-  val exportMessageConverter: (message: String, languageTag: String, forceIsPlural: Boolean?) -> ToPoMessageConverter,
+  val importMessageConvertorType: ImportMessageConvertorType,
+  val exportMessageConverter: (message: String, languageTag: String, forceIsPlural: Boolean?) -> ToPoMessageConvertor,
 ) {
   PHP(
     poFlag = "php-format",
-    messageConvertorType = MessageConvertorType.PO_PHP,
+    importMessageConvertorType = ImportMessageConvertorType.PO_PHP,
     paramRegex = PhpToIcuParamConvertor.PHP_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural ->
-      ToPhpPoMessageConverter(
+      ToPhpPoMessageConvertor(
         message,
         languageTag,
         forceIsPlural,
@@ -29,10 +29,10 @@ enum class PoSupportedMessageFormat(
   ),
   C(
     poFlag = "c-format",
-    messageConvertorType = MessageConvertorType.PO_C,
+    importMessageConvertorType = ImportMessageConvertorType.PO_C,
     paramRegex = CToIcuParamConvertor.C_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural ->
-      ToCPoMessageConverter(
+      ToCPoMessageConvertor(
         message,
         languageTag,
         forceIsPlural,
@@ -41,10 +41,10 @@ enum class PoSupportedMessageFormat(
   ),
   PYTHON(
     poFlag = "python-format",
-    messageConvertorType = MessageConvertorType.PO_PYTHON,
+    importMessageConvertorType = ImportMessageConvertorType.PO_PYTHON,
     paramRegex = PythonToIcuParamConvertor.PYTHON_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural ->
-      ToPythonPoMessageConverter(
+      ToPythonPoMessageConvertor(
         message,
         languageTag,
         forceIsPlural,

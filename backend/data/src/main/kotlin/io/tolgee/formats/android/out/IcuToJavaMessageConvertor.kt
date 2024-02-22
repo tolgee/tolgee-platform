@@ -10,7 +10,7 @@ class IcuToJavaMessageConvertor(
   fun convert(): PossiblePluralConversionResult {
     return BaseIcuMessageConvertor(
       message = message,
-      argumentConverter = JavaFromIcuParamConvertor(),
+      argumentConvertor = JavaFromIcuParamConvertor(),
       forceIsPlural = forceIsPlural,
     ).convert()
   }

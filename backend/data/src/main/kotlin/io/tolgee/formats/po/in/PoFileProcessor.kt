@@ -3,9 +3,8 @@ package io.tolgee.formats.po.`in`
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.PoParserException
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.MessageConvertorType
+import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.StringWrapper
-import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
 import io.tolgee.formats.po.`in`.data.PoParserResult
@@ -80,12 +79,12 @@ class PoFileProcessor(
   private fun getConvertedMessage(
     poTranslation: PoParsedTranslation,
     stringOrPluralForms: Any?,
-  ): Pair<String?, MessageConvertorType?> {
+  ): Pair<String?, ImportMessageConvertorType?> {
     val messageFormat = getMessageFormat(poTranslation)
-    val convertor = messageFormat.messageConvertorType.messageConvertor ?: return (null to null)
+    val convertor = messageFormat.importMessageConvertorType.importMessageConvertor ?: return (null to null)
     val icuMessage =
       convertor.convert(stringOrPluralForms, languageId, context.importSettings.convertPlaceholdersToIcu).message
-    return icuMessage to messageFormat.messageConvertorType
+    return icuMessage to messageFormat.importMessageConvertorType
   }
 
   private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): PoSupportedMessageFormat {
@@ -109,9 +108,5 @@ class PoFileProcessor(
       }
 
     FormatDetector(messages.toList())()
-  }
-
-  private val uLocale by lazy {
-    getULocaleFromTag(languageId)
   }
 }

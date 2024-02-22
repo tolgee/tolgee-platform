@@ -2,10 +2,9 @@ package io.tolgee.formats.apple.`in`.strings
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.apple.`in`.AppleToIcuParamConvertor
+import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
-import io.tolgee.formats.convertMessage
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class StringsFileProcessor(
@@ -106,12 +105,15 @@ class StringsFileProcessor(
   }
 
   private fun onPairParsed() {
-    val convertedMessage =
-      convertMessage(value ?: return, false) {
-        AppleToIcuParamConvertor()
-      }
+    val converted = ImportMessageConvertorType.STRINGS.importMessageConvertor!!.convert(value, languageName).message
     context.addKeyDescription(key ?: return, currentComment?.toString())
-    context.addTranslation(key ?: return, languageName, convertedMessage)
+    context.addTranslation(
+      key ?: return,
+      languageName,
+      converted,
+      rawData = value,
+      convertedBy = ImportMessageConvertorType.STRINGS,
+    )
     currentComment = null
   }
 

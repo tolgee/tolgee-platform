@@ -1,7 +1,7 @@
 package io.tolgee.unit.formatConversions
 
-import io.tolgee.formats.po.`in`.messageConverters.PoPythonToIcuMessageConverter
-import io.tolgee.formats.po.out.python.ToPythonPoMessageConverter
+import io.tolgee.formats.po.`in`.messageConvertors.PoPythonToIcuImportMessageConvertor
+import io.tolgee.formats.po.out.python.ToPythonPoMessageConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -26,11 +26,11 @@ class PythonPoConversionTest {
 
   private fun testString(string: String) {
     val icuString = convertToIcu(string)
-    val pythonString = ToPythonPoMessageConverter(icuString!!, forceIsPlural = false).convert().singleResult
+    val pythonString = ToPythonPoMessageConvertor(icuString!!, forceIsPlural = false).convert().singleResult
     pythonString.assert
       .describedAs("Input:\n${string}\nICU:\n$icuString\nPython String:\n$pythonString")
       .isEqualTo(string)
   }
 
-  private fun convertToIcu(string: String) = PoPythonToIcuMessageConverter().convert(string, "en").message
+  private fun convertToIcu(string: String) = PoPythonToIcuImportMessageConvertor().convert(string, "en").message
 }

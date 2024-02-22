@@ -37,6 +37,7 @@ class KeyMetaService(
   fun import(
     target: KeyMeta,
     source: KeyMeta,
+    overrideDescriptions: Boolean = true,
   ) {
     target.comments.import(target, source.comments.toList()) { a, b ->
       a.text == b.text && a.fromImport == b.fromImport
@@ -50,6 +51,10 @@ class KeyMetaService(
           .also {
             target.custom = it
           }
+
+      if (overrideDescriptions || target.description.isNullOrEmpty()) {
+        target.description = source.description
+      }
       targetCustom.putAll(sourceCustom)
     }
   }

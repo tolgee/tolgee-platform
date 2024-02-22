@@ -1,19 +1,19 @@
-package io.tolgee.formats.po.out.python
+package io.tolgee.formats.po.out.c
 
 import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
 import io.tolgee.formats.po.out.ToPoConversionResult
-import io.tolgee.formats.po.out.ToPoMessageConverter
+import io.tolgee.formats.po.out.ToPoMessageConvertor
 
-class ToPythonPoMessageConverter(
+class ToCPoMessageConvertor(
   val message: String,
   val languageTag: String = "en",
   forceIsPlural: Boolean?,
-) : ToPoMessageConverter {
+) : ToPoMessageConvertor {
   private val baseIcuMessageToClikeConvertor =
     BaseIcuMessageToPoConvertor(
       message = message,
       languageTag = languageTag,
-      argumentConverter = PythonFromIcuParamConvertor(),
+      argumentConverter = CFromIcuParamConvertor(),
       forceIsPlural = forceIsPlural,
     )
 

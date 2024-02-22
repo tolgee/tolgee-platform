@@ -1,7 +1,7 @@
 package io.tolgee.formats
 
 enum class ExportMessageFormat {
-  PO_C,
-  PO_PHP,
-  PO_PYTHON,
+  C_SPRINTF,
+  PHP_SPRINTF,
+  PYTHON_SPRINTF,
 }

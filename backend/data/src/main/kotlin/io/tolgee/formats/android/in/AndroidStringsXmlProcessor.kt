@@ -1,8 +1,9 @@
 package io.tolgee.formats.android.`in`
 
 import AndroidStringsXmlParser
-import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.ImportMessageConvertorType
+import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.android.PluralUnit
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
@@ -34,9 +35,10 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     context.addTranslation(
       keyName,
       guessedLanguage,
-      convertMessage(it.value, false),
+      convertMessage(it.value),
       forceIsPlural = false,
-      rawData = it.value,
+      rawData = StringWrapper(it.value),
+      convertedBy = ImportMessageConvertorType.ANDROID_XML,
     )
   }
 
@@ -47,14 +49,18 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     if (keyName.isBlank()) {
       return
     }
-    val forms =
-      it.items.mapNotNull {
-        val converted = convertMessage(it.value, true)
-        it.key to (converted ?: return@mapNotNull null)
-      }.toMap()
 
-    val pluralString = FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true, argName = "0").convert()
-    context.addTranslation(keyName, guessedLanguage, pluralString, forceIsPlural = true, rawData = it.items)
+    val converted =
+      AndroidToIcuMessageConvertor().convert(it.items, guessedLanguage, context.importSettings.convertPlaceholdersToIcu)
+
+    context.addTranslation(
+      keyName,
+      guessedLanguage,
+      converted.message,
+      forceIsPlural = true,
+      rawData = it.items,
+      convertedBy = ImportMessageConvertorType.ANDROID_XML,
+    )
   }
 
   private fun handleStringsArray(
@@ -69,9 +75,10 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       context.addTranslation(
         keyNameWithIndex,
         guessedLanguage,
-        convertMessage(item.value, false),
+        convertMessage(item.value),
         forceIsPlural = false,
-        rawData = item.value,
+        rawData = StringWrapper(item.value),
+        convertedBy = ImportMessageConvertorType.ANDROID_XML,
       )
     }
   }
@@ -89,14 +96,15 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     inputFactory.createXMLEventReader(context.file.data.inputStream())
   }
 
-  private fun convertMessage(
-    message: String?,
-    isPlural: Boolean,
-  ): String? {
-    message ?: return null
-    return io.tolgee.formats.convertMessage(message, isPlural) {
-      JavaToIcuParamConvertor()
+  private fun convertMessage(message: String?): String? {
+    if (message == null) {
+      return null
     }
+    return AndroidToIcuMessageConvertor().convert(
+      message,
+      guessedLanguage,
+      context.importSettings.convertPlaceholdersToIcu,
+    ).message
   }
 
   companion object {

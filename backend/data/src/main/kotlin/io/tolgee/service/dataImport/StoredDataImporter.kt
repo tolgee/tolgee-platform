@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
@@ -25,6 +26,7 @@ class StoredDataImporter(
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
   private val reportStatus: (ImportApplicationStatus) -> Unit = {},
+  private val importSettings: IImportSettings,
 ) {
   private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)
@@ -160,7 +162,7 @@ class StoredDataImporter(
           // persist is cascaded on key, so it should be fine
           val keyMeta =
             importDataManager.existingMetas[fileNamePair.first.namespace to importKey.name]?.also {
-              keyMetaService.import(it, importedKeyMeta)
+              keyMetaService.import(it, importedKeyMeta, importSettings.overrideKeyDescriptions)
             } ?: importedKeyMeta
           // also set key and remove import key
           keyMeta.also {

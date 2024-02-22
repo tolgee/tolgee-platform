@@ -5,7 +5,7 @@ import io.tolgee.formats.NoOpFromIcuParamConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
-class BaseIcuMessageConvertorTest {
+class BaseIcuImportMessageConvertorTest {
   @Test
   fun `converts plural`() {
     val forms =

@@ -1,8 +1,10 @@
 package io.tolgee.service.export
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.constants.Message
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.android.out.AndroidStringsXmlExporter
@@ -51,9 +53,10 @@ class FileExporterFactory(
     val poSupportedMessageFormat =
       when (exportParams.messageFormat) {
         null -> PoSupportedMessageFormat.C
-        ExportMessageFormat.PO_PHP -> PoSupportedMessageFormat.PHP
-        ExportMessageFormat.PO_C -> PoSupportedMessageFormat.C
-        ExportMessageFormat.PO_PYTHON -> PoSupportedMessageFormat.PYTHON
+        ExportMessageFormat.PHP_SPRINTF -> PoSupportedMessageFormat.PHP
+        ExportMessageFormat.C_SPRINTF -> PoSupportedMessageFormat.C
+        ExportMessageFormat.PYTHON_SPRINTF -> PoSupportedMessageFormat.PYTHON
+        else -> throw BadRequestException(Message.UNSUPPORTED_PO_MESSAGE_FORMAT)
       }
     return PoFileExporter(
       data,

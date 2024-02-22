@@ -10,7 +10,7 @@ class IcuToAppleMessageConvertor(
   fun convert(): PossiblePluralConversionResult {
     return BaseIcuMessageConvertor(
       message = message,
-      argumentConverter = AppleFromIcuParamConvertor(),
+      argumentConvertor = AppleFromIcuParamConvertor(),
       forceIsPlural = forceIsPlural,
     ).convert()
   }
