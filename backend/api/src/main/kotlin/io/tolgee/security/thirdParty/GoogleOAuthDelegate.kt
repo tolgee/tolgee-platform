@@ -65,13 +65,13 @@ class GoogleOAuthDelegate(
         }
 
         // Split the comma-separated list of domains into a List
-        val allowedDomains = googleConfigurationProperties.workspaceDomain.split(",").map { it.trim() }
+        val allowedDomains = googleConfigurationProperties.workspaceDomain?.split(",")?.map { it.trim() } ?: listOf()
 
         // ensure that only Google Workspace users from allowed domains can log in
         if (allowedDomains.isNotEmpty()) {
-            if (!allowedDomains.contains(userResponse.hd)) {
-                throw AuthenticationException(Message.THIRD_PARTY_GOOGLE_WORKSPACE_MISMATCH)
-            }
+          if (!allowedDomains.contains(userResponse.hd)) {
+            throw AuthenticationException(Message.THIRD_PARTY_GOOGLE_WORKSPACE_MISMATCH)
+          }
         }
 
         val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
