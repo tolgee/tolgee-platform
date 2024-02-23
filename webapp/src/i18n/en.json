@@ -1237,6 +1237,7 @@
   "validation_cannot_contain_coma" : "Cannot contain comma",
   "validation_email_is_not_valid" : "The email format is not valid",
   "validation_email_not_unique" : "User with this email already exists",
+  "validation_invalid_custom_values" : "Content must be a valid JSON Object",
   "validation_invalid_plural_parameter" : "Value is not valid ICU parameter variable",
   "Validation - required field" : "This field is required",
   "validation_slug_not_unique" : "Address is not unique",

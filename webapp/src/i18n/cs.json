@@ -1237,6 +1237,7 @@
   "validation_cannot_contain_coma" : "Nesmí obsahovat čárku",
   "validation_email_is_not_valid" : "Toto není správný formát e-mailové adresy",
   "validation_email_not_unique" : "Uživatel s tímto e-mailem již existuje",
+  "validation_invalid_custom_values" : "Obsah musí být platný JSON objekt",
   "validation_invalid_plural_parameter" : "Hodnota není platnou proměnnou ICU parametru",
   "Validation - required field" : "Položka je povinná",
   "validation_slug_not_unique" : "Adresa není unikátní",
