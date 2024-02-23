@@ -82,8 +82,8 @@ data class UserAccount(
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackSubscription: MutableList<SlackSubscription>? = mutableListOf()
 
-  @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY)
-  var slackConfig: SlackConfig? = null
+  @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
+  var slackConfig: MutableSet<SlackConfig>? = null
 
   constructor(
     id: Long?,

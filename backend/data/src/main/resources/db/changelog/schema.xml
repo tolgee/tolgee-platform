@@ -3108,4 +3108,37 @@
     <changeSet author="huglx (generated)" id="1707500127080-3">
         <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="slack_config" constraintName="FKdbwg4eia723x05dxak8kpbor4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1707749749085-1">
+        <addColumn tableName="slack_config">
+            <column name="is_ephemeral" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1707749749085-2">
+        <addColumn tableName="slack_config">
+            <column name="slack_id" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1707764055459-1">
+        <addColumn tableName="slack_config">
+            <column name="language_tag" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1707765036041-1">
+        <dropUniqueConstraint constraintName="uc_slack_configuser_account_id_col" tableName="slack_config"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1708106776705-1">
+        <addColumn tableName="slack_config">
+            <column defaultValueNumeric="2" name="visibility_options" type="smallint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1708424164672-1">
+        <addColumn tableName="slack_config">
+            <column defaultValueNumeric="0" name="on_event" type="smallint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1708709707358-1">
+        <dropColumn columnName="is_ephemeral" tableName="slack_config"/>
+    </changeSet>
 </databaseChangeLog>

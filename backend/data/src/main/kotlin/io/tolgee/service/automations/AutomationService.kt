@@ -66,7 +66,6 @@ class AutomationService(
     return cacheManager.getCache(Caches.AUTOMATIONS)!!
   }
 
-  //fix exception
   @Transactional
   fun getAction(actionId: Long): AutomationAction {
     return entityManager.createQuery(
@@ -103,18 +102,38 @@ class AutomationService(
   }
 
   @Transactional
-  fun createForWebhookConfig(webhookConfig: WebhookConfig): Automation {
-    val automation = Automation(webhookConfig.project)
-    addWebhookTriggersAndActions(webhookConfig, automation)
-    webhookConfig.automationActions.addAll(automation.actions)
-    return save(automation)
-  }
-
-  @Transactional
   fun createForSlackIntegration(slackConfig: SlackConfig): Automation {
     val automation = Automation(slackConfig.project)
     addSlackSubscriptionTriggersAndActions(slackConfig, automation)
     slackConfig.automationActions.addAll(automation.actions)
+    return save(automation)
+  }
+
+  @Transactional
+  fun updateForSlackConfig(slackConfig: SlackConfig): Automation {
+    val automation = getAutomationForExistingSlackConfig(slackConfig)
+    updateSlackTriggersAndActions(slackConfig, automation)
+    slackConfig.automationActions.clear()
+    slackConfig.automationActions.addAll(automation.actions)
+    return save(automation)
+  }
+
+  private fun getAutomationForExistingSlackConfig(slackConfig: SlackConfig): Automation {
+    val automations = slackConfig.automationActions.map { it.automation }
+    if (automations.size == 1) {
+      return automations[0]
+    }
+    automations.forEach {
+      delete(it)
+    }
+    return createForSlackIntegration(slackConfig)
+  }
+
+  @Transactional
+  fun createForWebhookConfig(webhookConfig: WebhookConfig): Automation {
+    val automation = Automation(webhookConfig.project)
+    addWebhookTriggersAndActions(webhookConfig, automation)
+    webhookConfig.automationActions.addAll(automation.actions)
     return save(automation)
   }
 
@@ -186,6 +205,14 @@ class AutomationService(
     addWebhookTriggersAndActions(webhookConfig, automation)
   }
 
+  private fun updateSlackTriggersAndActions(
+    slackConfig: SlackConfig,
+    automation: Automation,
+  ) {
+    deleteTriggersAndActions(automation)
+    addSlackSubscriptionTriggersAndActions(slackConfig, automation)
+  }
+
   @Transactional
   fun removeForContentDelivery(contentDeliveryConfig: ContentDeliveryConfig) {
     contentDeliveryConfig.automationActions.forEach {
@@ -222,6 +249,7 @@ class AutomationService(
     webhookConfig.automationActions.clear()
   }
 
+  @Transactional
   fun deleteForSlackIntegration(slackConfig: SlackConfig) {
     slackConfig.automationActions.forEach {
       delete(it.automation)

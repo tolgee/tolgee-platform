@@ -2,18 +2,23 @@ package io.tolgee.component.automations.processors.slackIntegration
 
 import com.slack.api.Slack
 import com.slack.api.methods.kotlin_extension.request.chat.blocks
+import com.slack.api.model.Attachment
+import com.slack.api.model.block.LayoutBlock
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.VisibilityOptions
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.security.PermissionService
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
 @Lazy
 @Component
 class SlackExecutor(
-  val properties: TolgeeProperties,
-  val keyService: KeyService
+  private val properties: TolgeeProperties,
+  private val keyService: KeyService,
+  private val permissionService: PermissionService,
 ) {
 
   private val slackToken = properties.slackProperties.slackToken
@@ -21,17 +26,34 @@ class SlackExecutor(
   private lateinit var slackExecutorHelper: SlackExecutorHelper
 
   fun sendMessageOnKeyChange() {
-    val response = slackClient.methods(slackToken).chatPostMessage {
-      it.channel(slackExecutorHelper.slackConfig.channelId)
-        .blocks (slackExecutorHelper.createKeyChangeMessage())
-    }
+    val messageBlocks = slackExecutorHelper.createKeyChangeMessage()
+    val config = slackExecutorHelper.slackConfig
 
+    if (config.visibilityOptions == VisibilityOptions.ONLY_ME) {
+      sendEphemeralMessage(config.channelId, config.slackId, messageBlocks)
+    } else {
+      sendRegularMessage(config.channelId, messageBlocks)
+    }
+  }
+
+  fun sendMessageOnTranslationSet() {
+    val config = slackExecutorHelper.slackConfig
+    val (attachments, blocks) = slackExecutorHelper.createTranslationChangeMessage() ?: return
+
+    if (config.visibilityOptions == VisibilityOptions.ONLY_ME) {
+      sendEphemeralMessage(config.channelId, config.slackId, blocks, attachments)
+    } else {
+     sendRegularMessage(config.channelId, blocks, attachments)
+    }
   }
 
   fun sendMessageOnKeyAdded() {
-    slackClient.methods(slackToken).chatPostMessage {
-      it.channel(slackExecutorHelper.slackConfig.channelId)
-        .blocks(slackExecutorHelper.createKeyAddMessage())
+    val config = slackExecutorHelper.slackConfig
+    val (attachments, blocks) = slackExecutorHelper.createKeyAddMessage() ?: return
+    if (config.visibilityOptions == VisibilityOptions.ONLY_ME) {
+      sendEphemeralMessage(config.channelId, config.slackId, blocks, attachments)
+    } else {
+      sendRegularMessage(config.channelId, blocks, attachments)
     }
   }
 
@@ -64,7 +86,7 @@ class SlackExecutor(
   }
 
   fun sendRedirectUrl(slackChannelId: String, slackId: String) {
-    val response = slackClient.methods(slackToken).chatPostMessage {
+    slackClient.methods(slackToken).chatPostMessage {
       it.channel(slackChannelId)
         .blocks {
           section {
@@ -99,11 +121,39 @@ class SlackExecutor(
     }
   }
 
+  private fun sendEphemeralMessage(
+    channelId: String,
+    userId: String,
+    blocks: List<LayoutBlock>,
+    attachments: List<Attachment>? = null
+    ) {
+    slackClient.methods(slackToken).chatPostEphemeral { request ->
+      request.channel(channelId)
+        .user(userId)
+        .blocks(blocks)
+        .attachments(attachments)
+
+    }
+  }
+
+  fun sendRegularMessage(
+    channelId: String,
+    blocks: List<LayoutBlock>,
+    attachments: List<Attachment>? = null
+    ) {
+    slackClient.methods(slackToken).chatPostMessage { request ->
+      request.channel(channelId)
+        .blocks(blocks)
+        .attachments(attachments)
+    }
+
+  }
+
   fun setHelper(
     slackConfig: SlackConfig,
     data: SlackRequest
   ) {
-    slackExecutorHelper = SlackExecutorHelper(slackConfig, data, keyService)
+    slackExecutorHelper = SlackExecutorHelper(slackConfig, data, keyService, permissionService)
   }
 
 }

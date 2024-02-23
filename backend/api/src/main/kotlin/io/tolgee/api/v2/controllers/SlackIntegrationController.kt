@@ -2,6 +2,9 @@ package io.tolgee.api.v2.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.constants.Message
 import io.tolgee.constants.SlackEventActions
@@ -9,9 +12,12 @@ import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackConnectionDto
 import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.dtos.response.SlackMessageDto
+import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.VisibilityOptions
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeyService
@@ -21,6 +27,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.service.translation.TranslationService
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 
@@ -36,20 +43,67 @@ class SlackIntegrationController(
   private val userAccountService: UserAccountService,
   private val translationService: TranslationService,
   private val keyService: KeyService,
+  private val activityHolder: ActivityHolder,
 ) {
-
-  @PostMapping("/login")
+  @PostMapping("/tolgee")
   @UseDefaultPermissions
   @AllowApiAccess
-  fun login(
+  fun slackCommand(
     @ModelAttribute payload: SlackCommandDto
   ): SlackMessageDto? {
-    if(slackSubscriptionService.ifSlackConnected(payload.user_id)) {
-      return SlackMessageDto(text = "You are already logged in.")
+    val regex = """^(\w+)\s+(\d+)(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
+    val matchResult = regex.matchEntire(payload.text) ?: return SlackMessageDto("Invalid command")
+
+    val (command, projectId, languageTag, optionsString) = matchResult.destructured
+    //retrieving map of options
+    val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
+    val optionsMap = mutableMapOf<String, String>()
+
+    optionsRegex.findAll(optionsString).forEach { match ->
+      val (key, value) = match.destructured
+      optionsMap[key] = value
     }
 
-    slackExecutor.sendRedirectUrl(payload.channel_id, payload.user_id)
-    return null
+    when (command) {
+      "login" -> {
+        return login(payload.user_id, payload.channel_id)
+      }
+
+      "subscribe" -> {
+        if (projectId.isEmpty()) return SlackMessageDto("Invalid command")
+        var visibilityOptions: VisibilityOptions? = null
+        var onEvent: EventName? = null
+
+        optionsMap.forEach { (option, value) ->
+          when(option) {
+            "--visibility-option" -> {
+              try {
+                visibilityOptions = VisibilityOptions.valueOf(value.uppercase())
+              }catch (e: IllegalArgumentException) {
+                return SlackMessageDto("Invalid command")
+              }
+            }
+            "--on" -> {
+              try {
+                onEvent = EventName.valueOf(value.uppercase())
+              }catch (e: IllegalArgumentException) {
+                return SlackMessageDto("Invalid command")
+              }
+            }
+            else -> return SlackMessageDto("Invalid command")
+          }
+        }
+
+        return subscribe(payload, projectId, visibilityOptions, languageTag, onEvent)
+      }
+
+      "unsubscribe" -> {
+        return unsubscribe(payload, projectId)
+      }
+
+      else -> return SlackMessageDto("Invalid command")
+    }
+
   }
 
   @PostMapping("/connect")
@@ -63,31 +117,56 @@ class SlackIntegrationController(
     slackExecutor.sendSuccessMessage(payload.channelId)
   }
 
-  @PostMapping("/subscribe")
-  @UseDefaultPermissions
-  @AllowApiAccess
-  fun subscribe(
-    @ModelAttribute payload: SlackCommandDto
+  private fun login(
+    userId: String,
+    channelId: String
   ): SlackMessageDto? {
-    val validationResult = validateRequest(payload)
+    if(slackSubscriptionService.ifSlackConnected(userId)) {
+      return SlackMessageDto(text = "You are already logged in.")
+    }
+
+    slackExecutor.sendRedirectUrl(channelId, userId)
+    return null
+  }
+
+  private fun subscribe(
+    payload: SlackCommandDto,
+    projectId: String,
+    visibilityOptions: VisibilityOptions?,
+    languageTag: String?,
+    onEventName: EventName?
+  ): SlackMessageDto? {
+    val validationResult = validateRequest(payload, projectId)
     if(!validationResult.success)
       return null
 
-    slackConfigService.create(project = validationResult.project, payload, validationResult.user)
+    val slackConfigDto = SlackConfigDto(
+      project = validationResult.project,
+      slackId = payload.user_id,
+      channelId = payload.channel_id,
+      userAccount = validationResult.user,
+      languageTag = languageTag,
+      visibilityOptions = visibilityOptions,
+      onEvent = onEventName
+    )
+
+    if (slackConfigService.ifExist(slackConfigDto.project.id, slackConfigDto.channelId)) {
+      slackConfigService.update(slackConfigDto)
+    } else {
+      slackConfigService.create(slackConfigDto)
+    }
 
     return SlackMessageDto(
       text = "subscribed"
     )
   }
 
-  @PostMapping("/unsubscribe")
-  @UseDefaultPermissions
-  @AllowApiAccess
-  fun unsubscribe(
-    @ModelAttribute payload: SlackCommandDto
+  private fun unsubscribe(
+    payload: SlackCommandDto,
+    projectId: String
   ): SlackMessageDto? {
 
-    val validationResult = validateRequest(payload)
+    val validationResult = validateRequest(payload, projectId)
     if(!validationResult.success)
       return null
 
@@ -99,7 +178,9 @@ class SlackIntegrationController(
   }
 
   @PostMapping("/event")
+  @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @UseDefaultPermissions
+  @Transactional
   fun fetchEvent(
     @RequestBody payload: String
   ): SlackMessageDto? {
@@ -122,13 +203,12 @@ class SlackIntegrationController(
 
       translationService.setForKey(key, translation)
       slackExecutor.sendSuccessModal(event.triggerId)
-
     }
 
     return null
   }
 
-  private fun validateRequest(payload: SlackCommandDto): ValidationResult {
+  private fun validateRequest(payload: SlackCommandDto, projectId: String): ValidationResult {
     val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
 
     if (slackSubscription == null) {
@@ -136,7 +216,7 @@ class SlackIntegrationController(
       return ValidationResult(false)
     }
 
-    val project = projectService.find(payload.text.toLong()) ?: return ValidationResult(false)
+    val project = projectService.find(projectId.toLong()) ?: return ValidationResult(false)
     val userAccount = slackSubscription.userAccount ?: return ValidationResult(false)
 
     return if(permissionService.getProjectPermissionScopes(project.id, userAccount.id)

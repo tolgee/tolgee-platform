@@ -98,7 +98,7 @@ class Project(
   @OneToMany(orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
   override var deletedAt: Date? = null

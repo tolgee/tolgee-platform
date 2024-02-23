@@ -1,9 +1,8 @@
 package io.tolgee.service.slackIntegration
 
-import io.tolgee.dtos.request.slack.SlackCommandDto
+import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
+import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.service.automations.AutomationService
@@ -19,9 +18,8 @@ class SlackConfigService(
   fun get(
     projectId: Long,
     channelId: String,
-  ): SlackConfig {
+  ): SlackConfig? {
     return slackConfigRepository.findByProjectIdAndChannelId(projectId, channelId)
-      ?: throw NotFoundException()
   }
 
   fun get(
@@ -35,18 +33,52 @@ class SlackConfigService(
     projectId: Long,
     channelId: String
   ) {
-    val config = get(projectId, channelId)
+    val config = get(projectId, channelId) ?: return
     automationService.deleteForSlackIntegration(config)
     slackConfigRepository.delete(config)
   }
 
-  fun create(project: Project, payload: SlackCommandDto, user: UserAccount): SlackConfig {
-    val slackConfig = SlackConfig(project, user)
-    slackConfig.channelId = payload.channel_id
+  fun create(
+    slackConfigDto: SlackConfigDto
+  ): SlackConfig {
+    val slackConfig = SlackConfig(
+      project = slackConfigDto.project,
+      userAccount = slackConfigDto.userAccount,
+      channelId = slackConfigDto.channelId,
+    ).apply {
+      languageTag = slackConfigDto.languageTag
+      visibilityOptions = visibilityOptions
+      slackId = slackConfigDto.slackId
+      onEvent = slackConfigDto.onEvent ?: EventName.ALL
+    }
 
     slackConfigRepository.save(slackConfig)
     automationService.createForSlackIntegration(slackConfig)
     return slackConfig
   }
+
+  fun update(
+    slackConfigDto: SlackConfigDto
+  ): SlackConfig {
+    val slackConfig = get(slackConfigDto.project.id, slackConfigDto.channelId)!!
+
+    slackConfigDto.languageTag?.let { tag ->
+      slackConfig.languageTag = tag
+    }
+
+    slackConfigDto.visibilityOptions?.let { visibilityOptions ->
+      slackConfig.visibilityOptions = visibilityOptions
+    }
+
+    slackConfigDto.onEvent?.let { eventName ->
+      slackConfig.onEvent = eventName
+    }
+
+    automationService.updateForSlackConfig(slackConfig)
+    slackConfigRepository.save(slackConfig)
+    return slackConfig
+  }
+
+  fun ifExist(projectId: Long, channelId: String) = get(projectId, channelId) != null
 
 }
