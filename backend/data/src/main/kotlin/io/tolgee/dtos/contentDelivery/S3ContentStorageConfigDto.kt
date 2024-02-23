@@ -9,11 +9,9 @@ class S3ContentStorageConfigDto : S3Config {
   @field:Size(max = 255)
   override var bucketName: String = ""
 
-  @field:NotBlank
   @field:Size(max = 255)
   override var accessKey: String? = ""
 
-  @field:NotBlank
   @field:Size(max = 255)
   override var secretKey: String? = ""
 
