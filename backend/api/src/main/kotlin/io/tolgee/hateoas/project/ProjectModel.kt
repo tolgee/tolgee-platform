@@ -25,5 +25,5 @@ open class ProjectModel(
   val directPermission: PermissionModel?,
   val computedPermission: ComputedPermissionModel,
   @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
-  var disableIcuPlaceholders: Boolean,
+  var icuPlaceholders: Boolean,
 ) : RepresentationModel<ProjectModel>()

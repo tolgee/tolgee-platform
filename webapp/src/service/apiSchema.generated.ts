@@ -742,7 +742,7 @@ export interface components {
       baseLanguageId?: number;
       description?: string;
       /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
-      disableIcuPlaceholders: boolean;
+      icuPlaceholders: boolean;
     };
     ComputedPermissionModel: {
       permissionModel?: components["schemas"]["PermissionModel"];
@@ -912,7 +912,7 @@ export interface components {
       directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
       /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
-      disableIcuPlaceholders: boolean;
+      icuPlaceholders: boolean;
     };
     SimpleOrganizationModel: {
       /** Format: int64 */
@@ -1992,7 +1992,7 @@ export interface components {
       /** @description Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
       /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
-      disableIcuPlaceholders: boolean;
+      icuPlaceholders: boolean;
     };
     WebhookTestResponse: {
       success: boolean;
@@ -3357,7 +3357,7 @@ export interface components {
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
       /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
-      disableIcuPlaceholders: boolean;
+      icuPlaceholders: boolean;
     };
     CollectionModelScreenshotModel: {
       _embedded?: {

@@ -74,7 +74,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     ],
     organizationId: preferredOrganization.id,
     baseLanguageTag: 'en',
-    disableIcuPlaceholders: false,
+    icuPlaceholders: true,
   };
 
   return (

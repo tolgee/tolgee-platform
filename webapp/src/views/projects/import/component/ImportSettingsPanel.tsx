@@ -78,15 +78,17 @@ export const ImportSettingsPanel: FC = (props) => {
 
   return (
     <Box>
-      <LoadingCheckboxWithSkeleton
-        loading={loadingItems.has('convertPlaceholdersToIcu')}
-        onChange={(e) => {
-          onChange('convertPlaceholdersToIcu', e.target.checked);
-        }}
-        hint={t('import_convert_placeholders_to_icu_checkbox_label_hint')}
-        label={t('import_convert_placeholders_to_icu_checkbox_label')}
-        checked={state?.convertPlaceholdersToIcu}
-      />
+      {project.icuPlaceholders && (
+        <LoadingCheckboxWithSkeleton
+          loading={loadingItems.has('convertPlaceholdersToIcu')}
+          onChange={(e) => {
+            onChange('convertPlaceholdersToIcu', e.target.checked);
+          }}
+          hint={t('import_convert_placeholders_to_icu_checkbox_label_hint')}
+          label={t('import_convert_placeholders_to_icu_checkbox_label')}
+          checked={state?.convertPlaceholdersToIcu}
+        />
+      )}
       <LoadingCheckboxWithSkeleton
         loading={loadingItems.has('overrideKeyDescriptions')}
         onChange={(e) => {

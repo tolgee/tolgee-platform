@@ -5,6 +5,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportSettings
 import io.tolgee.model.dataImport.ImportSettingsId
+import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class ImportSettingsService(
   private val entityManager: EntityManager,
   private val importService: ImportService,
+  private val projectService: ProjectService,
 ) {
   @Transactional
   fun store(
@@ -28,23 +30,31 @@ class ImportSettingsService(
     return existing
   }
 
+  @Transactional
   fun get(
     userAccount: UserAccount,
     projectId: Long,
   ): IImportSettings {
-    return getOrCreateSettings(userAccount, projectId)
+    val icuPlaceholders = projectService.get(projectId).icuPlaceholders
+    return getOrCreateSettings(userAccount, projectId).also {
+      if (!icuPlaceholders) {
+        it.convertPlaceholdersToIcu = false
+      }
+    }
   }
 
   private fun getOrCreateSettings(
     userAccount: UserAccount,
     projectId: Long,
-  ) = (
-    entityManager
-      .find(ImportSettings::class.java, ImportSettingsId(userAccount.id, projectId))
-      ?: ImportSettings(
-        entityManager.getReference(Project::class.java, projectId),
-      ).apply {
-        this.userAccount = userAccount
-      }
-  )
+  ): ImportSettings {
+    return (
+      entityManager
+        .find(ImportSettings::class.java, ImportSettingsId(userAccount.id, projectId))
+        ?: ImportSettings(
+          entityManager.getReference(Project::class.java, projectId),
+        ).apply {
+          this.userAccount = userAccount
+        }
+    )
+  }
 }

@@ -229,10 +229,10 @@ class ImportDataManager(
     this.saveAllStoredTranslations()
   }
 
-  fun findMatchingExistingLanguage(importLanguage: ImportLanguage): LanguageDto? {
+  fun findMatchingExistingLanguage(importLanguageName: String): LanguageDto? {
     val possibleTag =
       """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
-        .matchEntire(importLanguage.name)?.groups?.get(1)?.value
+        .matchEntire(importLanguageName)?.groups?.get(1)?.value
         ?: return null
 
     val candidate = languageService.findByTag(possibleTag, import.project.id)

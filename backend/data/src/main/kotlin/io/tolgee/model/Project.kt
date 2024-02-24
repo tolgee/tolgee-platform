@@ -113,8 +113,8 @@ class Project(
   @OneToMany(orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
-  @ColumnDefault("false")
-  var disableIcuPlaceholders: Boolean = false
+  @ColumnDefault("true")
+  var icuPlaceholders: Boolean = true
 
   override var deletedAt: Date? = null
 

@@ -143,7 +143,7 @@ class CoreImportFilesProcessor(
     this.languages.forEach { entry ->
       val languageEntity = entry.value
       importDataManager.storedLanguages.add(languageEntity)
-      val existingLanguageDto = importDataManager.findMatchingExistingLanguage(languageEntity)
+      val existingLanguageDto = importDataManager.findMatchingExistingLanguage(languageEntity.name)
       languageEntity.existingLanguage = existingLanguageDto?.id?.let { languageService.getEntity(it) }
       importService.saveLanguages(this.languages.values)
       importDataManager.populateStoredTranslations(entry.value)

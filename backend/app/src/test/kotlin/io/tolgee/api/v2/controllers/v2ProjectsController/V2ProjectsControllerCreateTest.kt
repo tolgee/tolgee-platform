@@ -74,9 +74,9 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
     val organization = dbPopulator.createOrganization("Test Organization", userAccount)
     loginAsUser("testuser")
     val request =
-      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, disableIcuPlaceholders = true)
+      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
-      node("disableIcuPlaceholders").isBoolean.isTrue
+      node("icuPlaceholders").isBoolean.isTrue
       node("id").asNumber().satisfies {
         projectService.get(it.toLong()).let {
           assertThat(it.organizationOwner.id).isEqualTo(organization.id)

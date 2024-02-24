@@ -3090,7 +3090,7 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1707480981173-2">
         <addColumn tableName="project">
-            <column defaultValueBoolean="false" name="disable_icu_placeholders" type="boolean">
+            <column defaultValueBoolean="false" name="icu_placeholders" type="boolean">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

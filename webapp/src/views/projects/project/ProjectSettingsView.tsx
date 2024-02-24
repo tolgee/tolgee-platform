@@ -95,7 +95,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
     description: project.description,
-    disableIcuPlaceholders: project.disableIcuPlaceholders,
+    icuPlaceholders: project.icuPlaceholders,
   };
 
   const [cancelled, setCancelled] = useState(false);

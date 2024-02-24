@@ -15,6 +15,6 @@ data class EditProjectRequest(
   var baseLanguageId: Long? = null,
   @field:Size(min = 3, max = 2000)
   var description: String? = null,
-  @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
-  var disableIcuPlaceholders: Boolean = false,
+  @Schema(description = "Whether to use ICU placeholder visualization in the editor and it's support.")
+  var icuPlaceholders: Boolean = true,
 )

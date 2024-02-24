@@ -21,13 +21,13 @@ class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
         name = "new name",
         baseLanguageId = base.project.languages.toList()[1].id,
         slug = "new-slug",
-        disableIcuPlaceholders = true,
+        icuPlaceholders = true,
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
       node("slug").isEqualTo(content.slug)
       node("baseLanguage.id").isEqualTo(content.baseLanguageId)
-      node("disableIcuPlaceholders").isEqualTo(content.disableIcuPlaceholders)
+      node("icuPlaceholders").isEqualTo(content.icuPlaceholders)
     }
   }
 

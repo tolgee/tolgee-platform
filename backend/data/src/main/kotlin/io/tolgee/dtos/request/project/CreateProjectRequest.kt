@@ -33,6 +33,6 @@ data class CreateProjectRequest(
         "first language will be selected as base.",
   )
   var baseLanguageTag: String? = null,
-  @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
-  var disableIcuPlaceholders: Boolean = false,
+  @Schema(description = "Whether to use ICU placeholder visualization in the editor and it's support.")
+  var icuPlaceholders: Boolean = true,
 )

@@ -146,7 +146,7 @@ class ProjectService(
   fun createProject(dto: CreateProjectRequest): Project {
     val project = Project()
     project.name = dto.name
-    project.disableIcuPlaceholders = dto.disableIcuPlaceholders
+    project.icuPlaceholders = dto.icuPlaceholders
 
     project.organizationOwner = organizationService.get(dto.organizationId)
 
@@ -173,7 +173,7 @@ class ProjectService(
         .orElseThrow { NotFoundException() }!!
     project.name = dto.name
     project.description = dto.description
-    project.disableIcuPlaceholders = dto.disableIcuPlaceholders
+    project.icuPlaceholders = dto.icuPlaceholders
 
     dto.baseLanguageId?.let {
       val language =
