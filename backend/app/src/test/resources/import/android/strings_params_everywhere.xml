@@ -1,0 +1,13 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="dogs_count">
+        <item quantity="one">%d dog %s</item>
+        <item quantity="other">%d dogs %s</item>
+    </plurals>
+    <string-array name="string_array">
+        <item>First item %d</item>
+        <item>Second item %d</item>
+    </string-array>
+    <string name="with_params">
+        %d %4$s %.2f %e %+d
+    </string>
+</resources>

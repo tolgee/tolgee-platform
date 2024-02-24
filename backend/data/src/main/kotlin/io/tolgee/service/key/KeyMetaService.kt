@@ -51,11 +51,10 @@ class KeyMetaService(
           .also {
             target.custom = it
           }
-
-      if (overrideDescriptions || target.description.isNullOrEmpty()) {
-        target.description = source.description
-      }
       targetCustom.putAll(sourceCustom)
+    }
+    if (overrideDescriptions || target.description.isNullOrEmpty()) {
+      target.description = source.description
     }
   }
 

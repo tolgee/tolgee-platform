@@ -5,6 +5,7 @@ import io.tolgee.exceptions.PoParserException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.StringWrapper
+import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
 import io.tolgee.formats.po.`in`.data.PoParserResult
@@ -71,7 +72,10 @@ class PoFileProcessor(
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
       val (message, convertedBy) = getConvertedMessage(poTranslation, plurals)
-      val keyName = poTranslation.msgidPlural.toString().nullIfEmpty ?: poTranslation.msgid.toString()
+      val keyName = poTranslation.msgid.toString()
+      poTranslation.msgidPlural.toString().nullIfEmpty?.let {
+        context.setCustom(keyName, PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY, it)
+      }
       context.addTranslation(keyName, languageId, message, idx, rawData = plurals, convertedBy = convertedBy)
     }
   }

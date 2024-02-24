@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportCleanTestData
-import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -15,13 +14,12 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.InMemoryFileStorage
+import io.tolgee.util.performImport
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
-import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
@@ -170,6 +168,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     importService.find(base.project.id, base.userAccount.id)?.let {
       assertThat(it.files[0].keys).hasSize(1)
     }
+
+    val path = "import/apply?forceMode=OVERRIDE"
+    performAuthPut(path, null).andIsOk
   }
 
   @Test
@@ -351,26 +352,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     files: List<Pair<String, Resource>>?,
     params: Map<String, Any?> = mapOf(),
   ): ResultActions {
-    val builder =
-      MockMvcRequestBuilders
-        .multipart("/v2/projects/$projectId/import?${mapToQueryString(params)}")
-
-    files?.forEach {
-      builder.file(
-        MockMultipartFile(
-          "files",
-          it.first,
-          "application/zip",
-          it.second.file.readBytes(),
-        ),
-      )
-    }
-
     loginAsAdminIfNotLogged()
-    return mvc.perform(AuthorizedRequestFactory.addToken(builder))
-  }
-
-  fun mapToQueryString(map: Map<String, Any?>): String {
-    return map.entries.joinToString("&") { "${it.key}=${it.value}" }
+    return performImport(mvc, projectId, files, params)
   }
 }

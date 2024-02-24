@@ -2,6 +2,7 @@ package io.tolgee.formats.po.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.getPluralData
+import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -38,6 +39,7 @@ class PoFileExporter(
 
       resultBuilder.appendLine()
       resultBuilder.writeMsgId(translation.key.name)
+      resultBuilder.writeMsgIdPlural(translation, converted)
       resultBuilder.writeMsgStr(converted)
     }
   }
@@ -84,5 +86,20 @@ class PoFileExporter(
 
   private fun StringBuilder.writeSingle(result: String?) {
     this.append(convertToPoMultilineString("msgstr", result ?: ""))
+  }
+
+  private fun StringBuilder.writeMsgIdPlural(
+    translation: ExportTranslationView,
+    converted: ToPoConversionResult,
+  ) {
+    val msgIdPlural = translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: return
+    if (converted.isPlural()) {
+      this.append(
+        convertToPoMultilineString(
+          "msgid_plural",
+          msgIdPlural,
+        ),
+      )
+    }
   }
 }
