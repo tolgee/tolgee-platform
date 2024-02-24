@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 @org.springframework.context.annotation.Scope("prototype")
 class ProjectApiKeyAuthRequestPerformer(

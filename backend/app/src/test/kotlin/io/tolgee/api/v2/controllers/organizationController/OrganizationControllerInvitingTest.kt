@@ -17,6 +17,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
+import io.tolgee.testing.satisfies
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

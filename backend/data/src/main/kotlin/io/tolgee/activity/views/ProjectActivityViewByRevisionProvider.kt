@@ -1,4 +1,4 @@
-package io.tolgee.activity.projectActivityView
+package io.tolgee.activity.views
 
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ProjectActivityView

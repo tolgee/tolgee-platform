@@ -49,7 +49,7 @@ class ProjectModelAssembler(
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationRole = view.organizationRole,
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
-      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
+      baseLanguage = baseLanguage.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
     ).add(link).also { model ->

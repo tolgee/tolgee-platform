@@ -3,12 +3,22 @@ package io.tolgee.api.v2.controllers.organizationController
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertError
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isPermissionScopes
+import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfiesIf
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -171,7 +181,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       node("name").isEqualTo("Test org")
       node("slug").isEqualTo("test-org")
       node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
-      node("id").isNumber.satisfies {
+      node("id").isNumber.satisfiesIf {
         organizationService.find(it.toLong()) is Organization
       }
     }

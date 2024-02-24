@@ -1,10 +1,10 @@
-import API from '@openreplay/tracker';
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
 import {
   Activity,
   BillingProgress,
   Cell,
+  colors,
   Editor,
   Emphasis,
   ExampleBanner,
@@ -20,7 +20,6 @@ declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
-import { colors } from './colors';
 
 const all = { ...colors.light, ...colors.dark };
 
@@ -74,8 +73,9 @@ declare module '@mui/material/Button' {
   }
 }
 
-declare global {
-  interface Window {
-    openReplayTracker?: API;
+declare module '@mui/material/ButtonBase' {
+  interface ButtonBaseOwnProps<TProps, T extends React.ElementType<TProps>>
+    extends TProps {
+    component?: T;
   }
 }

@@ -76,8 +76,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation('org.springframework.boot:spring-boot-starter-test') {
-    }
+    implementation('org.springframework.boot:spring-boot-starter-test')
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     api "org.springframework.boot:spring-boot-starter-actuator"

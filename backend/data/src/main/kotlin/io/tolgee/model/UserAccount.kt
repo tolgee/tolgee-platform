@@ -2,6 +2,8 @@ package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
+import io.tolgee.model.notifications.NotificationPreferences
+import io.tolgee.model.notifications.UserNotification
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -17,6 +19,7 @@ import jakarta.persistence.OrderBy
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
+import org.hibernate.annotations.Where
 import java.util.*
 
 @Entity
@@ -88,25 +91,19 @@ data class UserAccount(
   @ColumnDefault("true")
   var passwordChanged: Boolean = true
 
-  constructor(
-    id: Long?,
-    username: String?,
-    password: String?,
-    name: String?,
-    permissions: MutableSet<Permission>,
-    role: Role = Role.USER,
-    accountType: AccountType = AccountType.LOCAL,
-    thirdPartyAuthType: String?,
-    thirdPartyAuthId: String?,
-    resetPasswordCode: String?,
-  ) : this(id = 0L, username = "", password, name = "") {
-    this.permissions = permissions
-    this.role = role
-    this.accountType = accountType
-    this.thirdPartyAuthType = thirdPartyAuthType
-    this.thirdPartyAuthId = thirdPartyAuthId
-    this.resetPasswordCode = resetPasswordCode
-  }
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "recipient")
+  var userNotifications: MutableList<UserNotification> = mutableListOf()
+
+  @Where(clause = "project_id IS NOT NULL")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
+  var projectNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
+  @Where(clause = "project_id IS NULL")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
+  private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
+  val globalNotificationPreferences: NotificationPreferences?
+    get() = _globalNotificationPreferences.firstOrNull()
 
   enum class Role {
     USER,

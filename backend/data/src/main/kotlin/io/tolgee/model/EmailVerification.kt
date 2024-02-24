@@ -20,7 +20,6 @@ data class EmailVerification(
   @Email
   var newEmail: String? = null,
 ) : AuditModel() {
-  @Suppress("JoinDeclarationAndAssignment")
   @OneToOne(optional = false)
   lateinit var userAccount: UserAccount
 

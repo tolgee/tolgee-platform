@@ -16,7 +16,8 @@ spring:
         order_by:
           default_null_ordering: first
         jdbc:
-          batch_size: 1000
+          batch_size: 50
+          batch_versioned_data: true
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
@@ -31,6 +32,8 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
+  datasource:
+    auto-commit: false
 tolgee:
   authentication:
     enabled: false

@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.ErrorResponseAssert
 import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -57,7 +58,18 @@ val ResultActions.andAssertThatJson: JsonAssert.ConfigurableJsonAssert
 
 fun ResultActions.andAssertThatJson(jsonAssert: JsonAssert.ConfigurableJsonAssert.() -> Unit): ResultActions {
   tryPrettyPrinting {
-    jsonAssert(assertThatJson(this.andGetContentAsString))
+    jsonAssert(
+      assertThatJson(this.andGetContentAsString)
+        // https://github.com/lukas-krecan/JsonUnit?tab=readme-ov-file#numerical-comparison
+        // We only care about the numeric value, not the precision. Not the business of doing physics (...yet)! :p
+        .withConfiguration {
+          it.withNumberComparator { a, b, tolerance ->
+            val diff = if (a > b) a - b else b - a
+            diff <= (tolerance ?: BigDecimal.ZERO)
+          }
+        },
+    )
+
     this
   }
   return this
@@ -77,16 +89,20 @@ fun ResultActions.tryPrettyPrinting(fn: ResultActions.() -> ResultActions): Resu
   }
 }
 
-val ResultActions.andGetContentAsString
+val ResultActions.andGetContentAsString: String
   get() = this.andReturn().response.getContentAsString(StandardCharsets.UTF_8)
 
-val ResultActions.andAssertError
+val ResultActions.andGetContentAsJsonMap
+  @Suppress("UNCHECKED_CAST")
+  get() = jacksonObjectMapper().readValue(andGetContentAsString, MutableMap::class.java) as MutableMap<String, Any?>
+
+val ResultActions.andAssertError: ErrorResponseAssert
   get() = assertThat(this.andReturn()).error()
 
 val ResultActions.andPrettyPrint: ResultActions
   get() =
     jacksonObjectMapper().let { mapper ->
-      val parsed = mapper.readValue<Any>(this.andGetContentAsString)
+      val parsed = mapper.readValue<Any>(andGetContentAsString)
       println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed))
       return this
     }

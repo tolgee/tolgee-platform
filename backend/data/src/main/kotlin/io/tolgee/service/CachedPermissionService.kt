@@ -51,7 +51,7 @@ class CachedPermissionService(
       projectId = projectId,
       userId = userId,
       organizationId = organizationId,
-    )?.let { permission ->
+    )?.permission?.let { permission ->
       PermissionDto(
         id = permission.id,
         userId = permission.user?.id,
