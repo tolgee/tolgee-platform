@@ -1,10 +1,5 @@
 import { grey } from '@mui/material/colors';
-import {
-  ALL_TOKENS,
-  LINE_BORDER_BORDER_INPUT,
-  LINE_BORDER_BORDER_PRIMARY,
-  LINE_BORDER_LINE_PRIMARY,
-} from './tokens';
+import { ALL_TOKENS } from './tokens';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',

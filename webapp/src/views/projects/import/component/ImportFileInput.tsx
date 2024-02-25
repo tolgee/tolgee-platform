@@ -1,6 +1,6 @@
 import React, { FunctionComponent, ReactNode, useState } from 'react';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { Box, Button, styled, Typography } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { useConfig } from 'tg.globalContext/helpers';
