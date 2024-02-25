@@ -83,27 +83,36 @@ object MessagePatternUtil {
       var part = pattern.getPart(i)
       val patternIndex = part.index
       val isPreviousSkipSyntax = pattern.getPart(i - 1).type == MessagePattern.Part.Type.SKIP_SYNTAX
+      val isSkipSyntax = part.type == MessagePattern.Part.Type.SKIP_SYNTAX
       if (prevPatternIndex < patternIndex) {
         val text =
           pattern.patternString.substring(
             prevPatternIndex,
             patternIndex,
           )
-        val isSkipSyntax = part.type == MessagePattern.Part.Type.SKIP_SYNTAX
-        val patternString =
+        var patternString =
           // this part was added by Tolgee (Jan Cizmar) to add the escape characters back
           when {
             !isEscaping && isPreviousSkipSyntax && isSkipSyntax -> "'$text'"
             !isEscaping && isSkipSyntax -> "$text'"
             !isSkipSyntax && !isEscaping && isPreviousSkipSyntax -> "'$text"
+            isEscaping && isSkipSyntax && isNextEndMessage(pattern, i) -> "$text'"
             else -> text
           }
-        isEscaping = !isEscaping
+        isEscaping = !isEscaping && text != "'"
 
         node.addContentsNode(
           TextNode(pattern, text, patternString, start = i - 1, limit = i),
         )
-      }
+      } else
+        {
+          if (isEscaping && isSkipSyntax)
+            {
+              node.addContentsNode(
+                TextNode(pattern, "", "'", start = i - 1, limit = i),
+              )
+            }
+        }
       if (i == limit) {
         break
       }
@@ -121,6 +130,35 @@ object MessagePatternUtil {
       ++i
     }
     return node.freeze()
+  }
+
+  private fun isNextSkipSyntaxAndEndMessage(
+    pattern: MessagePattern,
+    i: Int,
+  ): Boolean {
+    return isNextSkipSyntax(pattern, i) && isNextEndMessage(pattern, i + 1)
+  }
+
+  private fun isNextSkipSyntax(
+    pattern: MessagePattern,
+    i: Int,
+  ): Boolean {
+    return try {
+      pattern.getPart(i + 1).type == MessagePattern.Part.Type.SKIP_SYNTAX
+    } catch (e: IndexOutOfBoundsException) {
+      false
+    }
+  }
+
+  private fun isNextEndMessage(
+    pattern: MessagePattern,
+    i: Int,
+  ): Boolean {
+    return try {
+      pattern.getPart(i + 1).type == MessagePattern.Part.Type.MSG_LIMIT
+    } catch (e: IndexOutOfBoundsException) {
+      false
+    }
   }
 
   private fun buildArgNode(

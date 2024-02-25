@@ -133,20 +133,31 @@ class MessagePatternUtilTest {
     comlpex.contents[1].patternString.assert.isEqualTo("{name}")
     comlpex.contents[2].patternString.assert.isEqualTo(" '{'Lala'}' '{Lala ' '")
 
-    val textEnd =
-      MessagePatternUtil.buildMessageNode(
-        "'{ ' ",
-      ).contents[0].patternString.assert.isEqualTo("'{ ' ")
+    MessagePatternUtil.buildMessageNode(
+      "'{ ' ",
+    ).contents[0].patternString.assert.isEqualTo("'{ ' ")
 
-    val stopEscapingEnd =
-      MessagePatternUtil.buildMessageNode(
-        "'{ '",
-      ).contents[0].patternString.assert.isEqualTo("'{ '")
+    MessagePatternUtil.buildMessageNode(
+      "'{ '",
+    ).contents[0].patternString.assert.isEqualTo("'{ '")
 
-    val justApos =
-      MessagePatternUtil.buildMessageNode(
-        " ' ",
-      ).contents[0].patternString.assert.isEqualTo(" ' ")
+    MessagePatternUtil.buildMessageNode(
+      " ' ",
+    ).contents[0].patternString.assert.isEqualTo(" ' ")
+  }
+
+  @Test
+  fun `returns correct pattern string when string ends with escape char`()  {
+    MessagePatternUtil.buildMessageNode(
+      " '{hello}'",
+    ).contents[0].patternString.assert.isEqualTo(" '{hello}'")
+  }
+
+  @Test
+  fun `returns correct pattern when multiplied escape chars`()  {
+    MessagePatternUtil.buildMessageNode(
+      "'''{'''",
+    ).contents[0].patternString.assert.isEqualTo("'''{'''")
   }
 
   @Test

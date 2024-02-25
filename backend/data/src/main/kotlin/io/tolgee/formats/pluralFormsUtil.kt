@@ -58,7 +58,7 @@ fun getPluralForms(string: String?): PluralForms? {
     BaseIcuMessageConvertor(
       string,
       NoOpFromIcuParamConvertor(),
-      keepEscaping = false,
+      keepEscaping = true,
     ).convert()
 
   return PluralForms(
@@ -190,13 +190,13 @@ private fun <T> pluralFormsToSameArgName(
   val argName = getArgName(formResults.values, pluralArgName)
   val convertedStrings =
     formResults.map { (key, forms) ->
-      val preparedForms = forms?.forms?.preparePluralForms(escapeHash = false)
+      val preparedForms = forms?.forms?.preparePluralForms()
       key to preparedForms.preparedFormsToIcuPlural(argName)
     }.toMap()
   return ConvertToIcuPluralResult(convertedStrings, argName)
 }
 
-private fun Map<String, String>.preparePluralForms(escapeHash: Boolean = true): Map<String, String> {
+private fun Map<String, String>.preparePluralForms(escapeHash: Boolean = false): Map<String, String> {
   return this.mapValues {
     it.value.preparePluralForm(escapeHash)
   }
@@ -223,7 +223,7 @@ fun Map<String, String>.toIcuPluralString(
 
 class StringIsNotPluralException(val invalidStrings: List<String>) : RuntimeException("String is not a plural")
 
-private fun String.preparePluralForm(escapeHash: Boolean = true): String {
+private fun String.preparePluralForm(escapeHash: Boolean = false): String {
   return try {
     val result = StringBuilder()
     MessagePatternUtil.buildMessageNode(this).contents.forEach {
@@ -231,7 +231,7 @@ private fun String.preparePluralForm(escapeHash: Boolean = true): String {
         result.append(it.patternString)
         return@forEach
       }
-      result.append(IcuMessageEscaper(it.patternString, escapeHash).escaped)
+      result.append(IcuMessageEscaper(it.patternString, escapeHash = escapeHash, onlyPluralBreaking = true).escaped)
     }
     result.toString()
   } catch (e: Exception) {

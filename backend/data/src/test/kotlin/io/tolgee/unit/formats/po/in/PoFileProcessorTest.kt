@@ -15,7 +15,7 @@ class PoFileProcessorTest {
     PoFileProcessor(mockUtil.fileProcessorContext).process()
     assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
     assertThat(mockUtil.fileProcessorContext.translations).hasSize(8)
-    val text = mockUtil.fileProcessorContext.translations["%d pages read."]?.get(0)?.text
+    val text = mockUtil.fileProcessorContext.translations["%d page read."]?.get(0)?.text
     assertThat(text)
       .isEqualTo(
         "{0, plural,\n" +

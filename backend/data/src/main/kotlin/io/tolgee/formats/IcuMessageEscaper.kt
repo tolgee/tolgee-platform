@@ -6,6 +6,7 @@ package io.tolgee.formats
 class IcuMessageEscaper(
   private val input: String,
   private val escapeHash: Boolean = false,
+  private val onlyPluralBreaking: Boolean = false,
 ) {
   companion object {
     private const val ESCAPE_CHAR = '\''
@@ -48,12 +49,16 @@ class IcuMessageEscaper(
           State.StateEscapedMaybe -> {
             if (char == ESCAPE_CHAR) {
               state = State.StateText
-              result.append(ESCAPE_CHAR)
-              result.append(ESCAPE_CHAR)
+              if (!onlyPluralBreaking) {
+                result.append(ESCAPE_CHAR)
+                result.append(ESCAPE_CHAR)
+              }
             } else if (escapableChars.contains(char)) {
               state = State.StateEscaped
-              result.append(ESCAPE_CHAR)
-              result.append(ESCAPE_CHAR)
+              if (!onlyPluralBreaking) {
+                result.append(ESCAPE_CHAR)
+                result.append(ESCAPE_CHAR)
+              }
               lastNeedsEscapeIndex = result.length
             } else {
               state = State.StateText
@@ -64,8 +69,10 @@ class IcuMessageEscaper(
           State.StateEscaped -> {
             if (char == ESCAPE_CHAR) {
               state = State.StateText
-              result.append(ESCAPE_CHAR)
-              result.append(ESCAPE_CHAR)
+              if (!onlyPluralBreaking) {
+                result.append(ESCAPE_CHAR)
+                result.append(ESCAPE_CHAR)
+              }
             } else {
               if (escapableChars.contains(char)) {
                 lastNeedsEscapeIndex = result.length
