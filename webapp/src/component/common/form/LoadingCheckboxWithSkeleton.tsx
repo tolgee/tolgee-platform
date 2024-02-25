@@ -7,7 +7,7 @@ import {
   styled,
   Tooltip,
 } from '@mui/material';
-import { Help } from '@mui/icons-material';
+import { Help, HelpOutline, HelpOutlined } from '@mui/icons-material';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 export type LoadingCheckboxWithSkeletonProps = {
@@ -16,6 +16,8 @@ export type LoadingCheckboxWithSkeletonProps = {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   checked?: boolean;
   loading: boolean;
+  labelProps?: Partial<React.ComponentProps<typeof FormControlLabel>>;
+  labelInnerProps?: Partial<React.ComponentProps<typeof StyledLabel>>;
 };
 
 const StyledLabel = styled('div')`
@@ -24,8 +26,9 @@ const StyledLabel = styled('div')`
   align-items: center;
 `;
 
-const StyledHelpIcon = styled(Help)`
-  font-size: 17px;
+const StyledHelpIcon = styled(HelpOutline)`
+  color: ${({ theme }) => theme.palette.tokens.ICON_ICON_PRIMARY};
+  font-size: 16px;
 `;
 
 export const LoadingCheckboxWithSkeleton: FC<
@@ -34,7 +37,7 @@ export const LoadingCheckboxWithSkeleton: FC<
   return (
     <FormControlLabel
       label={
-        <StyledLabel>
+        <StyledLabel {...props.labelInnerProps}>
           <div>{props.label}</div>
           {props.hint && (
             <Tooltip title={props.hint}>
@@ -73,7 +76,6 @@ export const LoadingCheckboxWithSkeleton: FC<
               />
             )}
           </Box>
-          {/*) : (*/}
           <Checkbox
             sx={{
               opacity: props.checked == undefined || props.loading ? 0 : 1,
@@ -84,9 +86,9 @@ export const LoadingCheckboxWithSkeleton: FC<
             onChange={props.onChange}
             data-cy="content-delivery-auto-publish-checkbox"
           />
-          {/*)}*/}
         </Box>
       }
+      {...props.labelProps}
     />
   );
 };

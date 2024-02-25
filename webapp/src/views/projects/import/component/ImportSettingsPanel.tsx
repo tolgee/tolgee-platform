@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -8,6 +8,20 @@ import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingChe
 
 type ImportSettingRequest = components['schemas']['ImportSettingsRequest'];
 type ImportSettingModel = components['schemas']['ImportSettingsModel'];
+
+const StyledPanelBox = styled(Box)`
+  margin-top: 24px;
+  border: 1px solid
+    ${({ theme }) => theme.palette.tokens.LINE_BORDER_LINE_PRIMARY};
+  display: flex;
+  width: 1200px;
+  padding: 6px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  border-radius: 4px;
+  background-color: ${({ theme }) => theme.palette.background.paper};
+`;
 
 export const ImportSettingsPanel: FC = (props) => {
   const project = useProject();
@@ -77,7 +91,7 @@ export const ImportSettingsPanel: FC = (props) => {
   }
 
   return (
-    <Box>
+    <StyledPanelBox>
       {project.icuPlaceholders && (
         <LoadingCheckboxWithSkeleton
           loading={loadingItems.has('convertPlaceholdersToIcu')}
@@ -87,6 +101,7 @@ export const ImportSettingsPanel: FC = (props) => {
           hint={t('import_convert_placeholders_to_icu_checkbox_label_hint')}
           label={t('import_convert_placeholders_to_icu_checkbox_label')}
           checked={state?.convertPlaceholdersToIcu}
+          {...additionalCheckboxProps}
         />
       )}
       <LoadingCheckboxWithSkeleton
@@ -97,7 +112,13 @@ export const ImportSettingsPanel: FC = (props) => {
         hint={t('import_override_key_descriptions_label_hint')}
         label={t('import_override_key_descriptions_label')}
         checked={state?.overrideKeyDescriptions}
+        {...additionalCheckboxProps}
       />
-    </Box>
+    </StyledPanelBox>
   );
+};
+
+const additionalCheckboxProps = {
+  labelInnerProps: { sx: { fontSize: '15px' } },
+  labelProps: { sx: { marginRight: 0 } },
 };

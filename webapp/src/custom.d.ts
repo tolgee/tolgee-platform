@@ -44,6 +44,7 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
+    tokens: typeof all.tokens;
   }
 
   interface PaletteOptions {
@@ -65,6 +66,7 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
+    tokens: typeof all.tokens;
   }
 }
 

@@ -47,7 +47,7 @@ export type ValidationResult = {
 
 const StyledRoot = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  border: `1px dashed ${theme.palette.emphasis[100]}`,
+  border: `1px dashed ${theme.palette.tokens.LINE_BORDER_BORDER_PRIMARY}`,
   margin: '0px auto',
   width: '100%',
   position: 'relative',
