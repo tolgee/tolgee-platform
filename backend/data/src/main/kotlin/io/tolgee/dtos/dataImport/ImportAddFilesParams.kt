@@ -1,5 +1,6 @@
 package io.tolgee.dtos.dataImport
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
 
 class ImportAddFilesParams(
@@ -8,9 +9,9 @@ class ImportAddFilesParams(
       "When importing structured JSONs, you can set " +
         "the delimiter which will be used in names of improted keys.",
   )
-  var structureDelimiter: Char? = '.',
-  @field:Parameter(hidden = true, description = "Only for internal use")
-  var storeFilesToFileStorage: Boolean = true,
+  override var structureDelimiter: Char? = '.',
+  @field:Hidden
+  override var storeFilesToFileStorage: Boolean = true,
   @field:Parameter(
     description =
       "If true, for structured formats (like JSON) arrays are supported. " +
@@ -18,4 +19,4 @@ class ImportAddFilesParams(
         "hello[0] = \"item1\" and hello[1] = \"item2\".",
   )
   var supportArrays: Boolean = true,
-)
+) : IImportAddFilesParams

@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport.processors
 
 import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
+import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.importCommon.ImportFormat
@@ -19,7 +20,7 @@ data class FileProcessorContext(
   var file: ImportFileDto,
   val fileEntity: ImportFile,
   val maxTranslationTextLength: Long = 2000L,
-  val params: ImportAddFilesParams = ImportAddFilesParams(),
+  val params: IImportAddFilesParams = ImportAddFilesParams(),
   val importSettings: IImportSettings =
     object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = false
