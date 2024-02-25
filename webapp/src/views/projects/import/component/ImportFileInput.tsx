@@ -17,6 +17,7 @@ import {
   ImportInputAreaLayoutTop,
 } from './ImportInputAreaLayout';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
+import { ImportSupportedFormats } from './ImportSupportedFormats';
 
 export const MAX_FILE_COUNT = 20;
 
@@ -199,9 +200,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
               </Button>
             </ImportInputAreaLayoutCenter>
             <ImportInputAreaLayoutBottom>
-              <Typography variant="body1">
-                <T keyName="import_file_supported_formats" />
-              </Typography>
+              <ImportSupportedFormats />
             </ImportInputAreaLayoutBottom>
           </ImportInputAreaLayout>
         </StyledRoot>
