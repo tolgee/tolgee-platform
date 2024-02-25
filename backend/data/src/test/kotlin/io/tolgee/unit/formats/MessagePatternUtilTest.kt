@@ -147,14 +147,14 @@ class MessagePatternUtilTest {
   }
 
   @Test
-  fun `returns correct pattern string when string ends with escape char`()  {
+  fun `returns correct pattern string when string ends with escape char`() {
     MessagePatternUtil.buildMessageNode(
       " '{hello}'",
     ).contents[0].patternString.assert.isEqualTo(" '{hello}'")
   }
 
   @Test
-  fun `returns correct pattern when multiplied escape chars`()  {
+  fun `returns correct pattern when multiplied escape chars`() {
     MessagePatternUtil.buildMessageNode(
       "'''{'''",
     ).contents[0].patternString.assert.isEqualTo("'''{'''")

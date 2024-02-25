@@ -104,15 +104,11 @@ object MessagePatternUtil {
         node.addContentsNode(
           TextNode(pattern, text, patternString, start = i - 1, limit = i),
         )
-      } else
-        {
-          if (isEscaping && isSkipSyntax)
-            {
-              node.addContentsNode(
-                TextNode(pattern, "", "'", start = i - 1, limit = i),
-              )
-            }
-        }
+      } else if (isEscaping && isSkipSyntax) {
+        node.addContentsNode(
+          TextNode(pattern, "", "'", start = i - 1, limit = i),
+        )
+      }
       if (i == limit) {
         break
       }
