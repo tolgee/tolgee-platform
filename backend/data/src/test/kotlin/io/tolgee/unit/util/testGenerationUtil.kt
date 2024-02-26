@@ -1,6 +1,7 @@
 package io.tolgee.unit.util
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 /**
@@ -30,20 +31,28 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
   code.appendLine("${i(2)}mockUtil.fileProcessorContext.assertLanguagesCount($languageCount)")
   fileProcessorContext.translations.forEach { (keyName, translations) ->
     val byLanguage = translations.groupBy { it.language.name }
-    byLanguage.forEach { (language, translations) ->
+    byLanguage.forEach byLang@{ (language, translations) ->
       code.appendLine("""${i(2)}mockUtil.fileProcessorContext.assertTranslations("$language", "$keyName")""")
-      val translation = translations.singleOrNull() ?: return@forEach
-      if (translation.isPlural) {
-        code.appendLine("""${i(3)}.assertSinglePlural {""")
-        code.appendLine("""${i(4)}hasText(""")
-        writeMutlilineString(escape(translation.text, false), 5)
-        code.appendLine("""${i(4)})""")
-        code.appendLine("""${i(4)}isPluralOptimized()""")
-        code.appendLine("""${i(3)}}""")
-      } else {
+      translations.singleOrNull()?.let { translation ->
+        if (translation.isPlural) {
+          code.appendLine("""${i(3)}.assertSinglePlural {""")
+          code.appendLine("""${i(4)}hasText(""")
+          writeMutlilineString(escape(translation.text, false), 5)
+          code.appendLine("""${i(4)})""")
+          code.appendLine("""${i(4)}isPluralOptimized()""")
+          code.appendLine("""${i(3)}}""")
+          return@byLang
+        }
         code.appendLine("""${i(3)}.assertSingle {""")
         code.appendLine("""${i(4)}hasText("${escape(translation.text, true)}")""")
         code.appendLine("""${i(3)}}""")
+        return@byLang
+      }
+      translations.firstIfAllSameOrNull()?.let { translation ->
+        code.appendLine("""${i(3)}.assertAllSame {""")
+        code.appendLine("""${i(4)}hasText("${escape(translation.text, true)}")""")
+        code.appendLine("""${i(3)}}""")
+        return@byLang
       }
     }
   }
@@ -69,6 +78,13 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
   }
 
   return code.toString()
+}
+
+private fun List<ImportTranslation>.firstIfAllSameOrNull(): ImportTranslation? {
+  if (this.map { it.text }.toSet().size == 1) {
+    return this.first()
+  }
+  return null
 }
 
 /**

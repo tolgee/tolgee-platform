@@ -46,6 +46,16 @@ fun List<ImportTranslationInContextAssertions>.assertSingle(
   return this[0]
 }
 
+fun List<ImportTranslationInContextAssertions>.assertAllSame(
+  fn: ImportTranslationInContextAssertions.() -> Unit,
+): ImportTranslationInContextAssertions {
+  if (this.map { it.translation.text }.toSet().size == 1) {
+    fn(this[0])
+    return this[0]
+  }
+  throw AssertionError("Not all translations are the same")
+}
+
 fun List<ImportTranslationInContextAssertions>.assertMultiple(
   fn: List<ImportTranslationInContextAssertions>.() -> Unit = {},
 ): List<ImportTranslationInContextAssertions> {
