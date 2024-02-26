@@ -158,8 +158,6 @@ class CoreImportFilesProcessor(
     return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
       this.keys.computeIfAbsent(name) {
         ImportKey(name = name, this.fileEntity)
-      }.also {
-        importService.saveKey(it)
       }
     }
   }
