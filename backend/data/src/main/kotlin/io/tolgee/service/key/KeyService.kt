@@ -87,6 +87,13 @@ class KeyService(
     return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
   }
 
+  fun getView(
+    projectId: Long,
+    id: Long,
+  ): KeyView {
+    return keyRepository.findView(projectId, id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+  }
+
   fun find(id: Long): Key? {
     return keyRepository.findById(id).orElse(null)
   }
