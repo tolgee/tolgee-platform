@@ -10,6 +10,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
@@ -47,6 +48,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
+import java.io.Serializable
 
 @Service
 @Transactional
@@ -93,7 +95,7 @@ class ImportService(
     importRepository.save(import)
     Sentry.addBreadcrumb("Import ID: ${import.id}")
 
-    self.saveFilesToFileStorage(import.id, files)
+    self.saveFilesToFileStorage(import.id.toString(), files)
 
     val fileProcessor =
       CoreImportFilesProcessor(
@@ -108,6 +110,57 @@ class ImportService(
       TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
     }
     return errors
+  }
+
+  @Transactional
+  fun singleStepImport(
+    files: List<ImportFileDto>,
+    project: Project,
+    userAccount: UserAccount,
+    params: SingleStepImportRequest,
+    reportStatus: (ImportApplicationStatus) -> Unit,
+  ) {
+    reportStatus(ImportApplicationStatus.ANALYZING_FILES)
+    val import = Import(project).also { it.author = userAccount }
+
+    publishImportBusinessEvent(project.id, userAccount.id)
+
+    val importId = "single-step-p${project.id}-a$userAccount-${currentDateProvider.date.time}"
+    Sentry.addBreadcrumb("Import ID: $importId")
+    self.saveFilesToFileStorage(importId, files)
+
+    val fileProcessor =
+      CoreImportFilesProcessor(
+        applicationContext = applicationContext,
+        // for single step import the import entity is passed only as a holder for the import data like
+        // author, project, file issues, etc
+        import = import,
+        params = params,
+        importSettings = params,
+        saveData = false,
+      )
+    val errors = fileProcessor.processFiles(files)
+
+    if (errors.isNotEmpty()) {
+      @Suppress("UNCHECKED_CAST")
+      throw BadRequestException(Message.IMPORT_FAILED, errors as List<Serializable>)
+    }
+
+    if (fileProcessor.importDataManager.storedLanguages.isEmpty()) {
+      throw BadRequestException(Message.NO_DATA_TO_IMPORT)
+    }
+
+    entityManager.clear()
+
+    StoredDataImporter(
+      applicationContext,
+      import,
+      params.forceMode,
+      reportStatus,
+      importSettings = params,
+      _importDataManager = fileProcessor.importDataManager,
+      isSingleStepImport = true,
+    ).doImport()
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
@@ -127,14 +180,21 @@ class ImportService(
     reportStatus: (ImportApplicationStatus) -> Unit = {},
   ) {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
-    val settings = importSettingsService.get(import.author, import.project.id)
-    StoredDataImporter(applicationContext, import, forceMode, reportStatus, settings).doImport()
+    val providedSettingsOrFromDb = importSettingsService.get(import.author, import.project.id)
+    StoredDataImporter(applicationContext, import, forceMode, reportStatus, providedSettingsOrFromDb).doImport()
     deleteImport(import)
+    publishImportBusinessEvent(import.project.id, import.author.id)
+  }
+
+  private fun publishImportBusinessEvent(
+    projectId: Long,
+    authorId: Long,
+  ) {
     businessEventPublisher.publish(
       OnBusinessEventToCaptureEvent(
         eventName = "IMPORT",
-        projectId = import.project.id,
-        userAccountId = import.author.id,
+        projectId = projectId,
+        userAccountId = authorId,
       ),
     )
   }
@@ -412,7 +472,7 @@ class ImportService(
    */
   @Async
   fun saveFilesToFileStorage(
-    importId: Long,
+    importId: String,
     files: List<ImportFileDto>,
   ) {
     if (tolgeeProperties.import.storeFilesForDebugging) {
@@ -423,14 +483,14 @@ class ImportService(
   }
 
   fun getFileStoragePath(
-    importId: Long,
+    importId: String,
     fileName: String,
   ): String {
     val notBlankFilename = fileName.ifBlank { "blank_name" }
     return "${getFileStorageImportRoot(importId)}/$notBlankFilename"
   }
 
-  private fun getFileStorageImportRoot(importId: Long) = "importFiles/$importId"
+  private fun getFileStorageImportRoot(importId: String) = "importFiles/$importId"
 
   fun deleteAllBetweenFileCollisionsForFiles(
     ids: List<Long>,

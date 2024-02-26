@@ -27,8 +27,17 @@ class StoredDataImporter(
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
   private val reportStatus: (ImportApplicationStatus) -> Unit = {},
   private val importSettings: IImportSettings,
+  // for single step import, we provide import data manager
+  private val _importDataManager: ImportDataManager? = null,
+  private val isSingleStepImport: Boolean = false,
 ) {
-  private val importDataManager = ImportDataManager(applicationContext, import)
+  private val importDataManager by lazy {
+    if (_importDataManager != null) {
+      return@lazy _importDataManager
+    }
+    ImportDataManager(applicationContext, import)
+  }
+
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
 
@@ -44,6 +53,8 @@ class StoredDataImporter(
    * looking for key in this map is also faster than querying database
    */
   private val keysToSave = mutableMapOf<Pair<String?, String>, Key>()
+
+  private val keyMetasToSave: MutableList<KeyMeta> = mutableListOf()
 
   /**
    * We need to persist data after everything is checked for resolved conflicts since
@@ -61,14 +72,21 @@ class StoredDataImporter(
   val outdatedFlagKeys: MutableList<Long> = mutableListOf()
 
   /**
-   * This metas are merged, so there is only one meta for one key!!!
+   * These are all keyMetas from all the keys to import. If multiple keys have same name and
+   * namespace, the meta is merged to one, so there is only one meta for one key!!!
    *
-   * It can be used only when we are finally importing the data, before that we cannot merge it,
-   * since namespace can be changed
+   * It can be used only when we are finally importing the data. Before that, we cannot merge it.
    */
   private val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
     val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
-    keyMetaService.getWithFetchedData(this.import).forEach { currentKeyMeta ->
+    val metasToMerge =
+      if (isSingleStepImport) {
+        importDataManager.storedKeys.map { it.value.keyMeta }.filterNotNull()
+      } else {
+        keyMetaService.getWithFetchedData(this.import)
+      }
+
+    metasToMerge.forEach { currentKeyMeta ->
       val mapKey = currentKeyMeta.importKey!!.file.namespace to currentKeyMeta.importKey!!.name
       result[mapKey] = result[mapKey]?.let { existingKeyMeta ->
         keyMetaService.import(existingKeyMeta, currentKeyMeta)
@@ -96,7 +114,7 @@ class StoredDataImporter(
 
     handlePluralization()
 
-    saveMetaData(keyEntitiesToSave)
+    saveKeyMetaData(keyEntitiesToSave)
 
     reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
 
@@ -115,7 +133,8 @@ class StoredDataImporter(
     PluralizationHandler(importDataManager, this, translationService).handlePluralization()
   }
 
-  private fun saveMetaData(keyEntitiesToSave: MutableCollection<Key>) {
+  private fun saveKeyMetaData(keyEntitiesToSave: MutableCollection<Key>) {
+    keyMetaService.saveAll(keyMetasToSave)
     keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
     }.also { keyMetaService.saveAllComments(it) }
@@ -171,6 +190,7 @@ class StoredDataImporter(
           }
           // assign new meta
           newKey.keyMeta = keyMeta
+          keyMetasToSave.add(keyMeta)
         }
       }
     }

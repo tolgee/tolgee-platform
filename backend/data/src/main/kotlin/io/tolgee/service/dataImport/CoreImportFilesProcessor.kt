@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ErrorResponseBody
@@ -24,8 +25,10 @@ import org.springframework.context.ApplicationContext
 class CoreImportFilesProcessor(
   val applicationContext: ApplicationContext,
   val import: Import,
-  val params: ImportAddFilesParams = ImportAddFilesParams(),
+  val params: IImportAddFilesParams = ImportAddFilesParams(),
   val importSettings: IImportSettings,
+  // single step import doesn't save data
+  val saveData: Boolean = true,
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
   private val importFileProcessorFactory: ImportFileProcessorFactory by lazy {
@@ -36,10 +39,11 @@ class CoreImportFilesProcessor(
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
-  private val importDataManager by lazy {
+  val importDataManager by lazy {
     ImportDataManager(
       applicationContext = applicationContext,
       import = import,
+      saveData = false,
     )
   }
 
@@ -89,7 +93,9 @@ class CoreImportFilesProcessor(
   private fun ImportFile.updateFileEntity(fileProcessorContext: FileProcessorContext) {
     if (fileProcessorContext.needsParamConversion) {
       this.needsParamConversion = fileProcessorContext.needsParamConversion
-      importService.saveFile(this)
+      if (saveData) {
+        importService.saveFile(this)
+      }
     }
   }
 
@@ -116,14 +122,19 @@ class CoreImportFilesProcessor(
         import,
       )
     import.files.add(entity)
-    return importService.saveFile(entity)
+    if (saveData) {
+      importService.saveFile(entity)
+    }
+    return entity
   }
 
   private fun ImportFileProcessor.processResult() {
     context.preselectNamespace()
     context.processLanguages()
     context.processTranslations()
-    importService.saveAllFileIssues(this.context.fileEntity.issues)
+    if (saveData) {
+      importService.saveAllFileIssues(this.context.fileEntity.issues)
+    }
   }
 
   private fun FileProcessorContext.preselectNamespace() {
@@ -145,7 +156,9 @@ class CoreImportFilesProcessor(
       importDataManager.storedLanguages.add(languageEntity)
       val existingLanguageDto = importDataManager.findMatchingExistingLanguage(languageEntity.name)
       languageEntity.existingLanguage = existingLanguageDto?.id?.let { languageService.getEntity(it) }
-      importService.saveLanguages(this.languages.values)
+      if (saveData) {
+        importService.saveLanguages(this.languages.values)
+      }
       importDataManager.populateStoredTranslations(entry.value)
     }
   }
@@ -159,7 +172,9 @@ class CoreImportFilesProcessor(
       this.keys.computeIfAbsent(name) {
         ImportKey(name = name, this.fileEntity)
       }.also {
-        importService.saveKey(it)
+        if (saveData) {
+          importService.saveKey(it)
+        }
       }
     }
   }
@@ -171,8 +186,12 @@ class CoreImportFilesProcessor(
         processTranslation(newTranslation, keyEntity)
       }
     }
-    importDataManager.saveAllStoredKeys()
-    importDataManager.saveAllStoredTranslations()
+    importDataManager.prepareKeyMetas()
+    if (saveData) {
+      importDataManager.saveAllStoredKeys()
+      importDataManager.saveAllKeyMetas()
+      importDataManager.saveAllStoredTranslations()
+    }
   }
 
   private fun FileProcessorContext.processTranslation(
