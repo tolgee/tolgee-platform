@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportCleanTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -10,7 +11,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
-import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.InMemoryFileStorage
@@ -23,7 +24,7 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
-class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
+class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:import/zipOfJsons.zip")
   lateinit var zipOfJsons: Resource
 
@@ -157,20 +158,19 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @ProjectJWTAuthTestMethod
   fun `it imports empty keys`() {
-    val base = dbPopulator.createBase(generateUniqueString())
-
-    performImport(projectId = base.project.id, listOf("empty-keys.json" to emptyKeys))
+    performImport(projectId = project.id, listOf("empty-keys.json" to emptyKeys))
       .andIsOk.andPrettyPrint
 
     entityManager.clear()
 
-    importService.find(base.project.id, base.userAccount.id)?.let {
+    importService.find(project.id, userAccount!!.id)?.let {
       assertThat(it.files[0].keys).hasSize(1)
     }
 
     val path = "import/apply?forceMode=OVERRIDE"
-    performAuthPut(path, null).andIsOk
+    performProjectAuthPut(path, null).andIsOk
   }
 
   @Test

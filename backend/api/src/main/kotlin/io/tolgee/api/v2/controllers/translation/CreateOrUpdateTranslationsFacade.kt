@@ -40,10 +40,16 @@ class CreateOrUpdateTranslationsFacade(
     securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_EDIT)
     activityHolder.activity = ActivityType.CREATE_KEY
     val key = keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
-    val convertedToPlurals = dto.translations.convertToPluralIfAnyIsPlural()?.convertedStrings
+    val convertedToPlurals = dto.translations.convertToPluralIfAnyIsPlural()
+    if (convertedToPlurals != null) {
+      key.isPlural = true
+      key.pluralArgName = convertedToPlurals.argName
+      keyService.save(key)
+    }
+
     val translations =
       translationService
-        .setForKey(key, convertedToPlurals ?: dto.translations)
+        .setForKey(key, convertedToPlurals?.convertedStrings ?: dto.translations)
     return getSetTranslationsResponse(key, translations)
   }
 

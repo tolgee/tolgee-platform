@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
-import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
@@ -41,7 +40,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.LanguageService
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
@@ -90,7 +88,6 @@ import java.util.concurrent.TimeUnit
 class TranslationsController(
   private val projectHolder: ProjectHolder,
   private val translationService: TranslationService,
-  private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
   private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
   private val historyModelAssembler: TranslationHistoryModelAssembler,
@@ -99,7 +96,6 @@ class TranslationsController(
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
   private val screenshotService: ScreenshotService,
-  private val activityHolder: ActivityHolder,
   private val activityService: ActivityService,
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,

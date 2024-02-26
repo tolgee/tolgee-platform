@@ -7,7 +7,7 @@ import {
   styled,
   Tooltip,
 } from '@mui/material';
-import { Help, HelpOutline, HelpOutlined } from '@mui/icons-material';
+import { HelpOutline } from '@mui/icons-material';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 export type LoadingCheckboxWithSkeletonProps = {

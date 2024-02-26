@@ -102,7 +102,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
         "other{}}",
     ).andIsOk
       .andAssertThatJson {
-        node("translations.en.text").isString.isEqualTo("{count, plural,\none {test}\nother{}\n}")
+        node("translations.en.text").isString.isEqualTo("{count, plural,\none {test}\nother {}\n}")
       }
   }
 
