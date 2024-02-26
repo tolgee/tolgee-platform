@@ -4,6 +4,8 @@ val IGNORED_REGEXES by lazy {
   arrayOf(
     // contents.json from Apple's xcloc
     "^[\\w-_]+\\.xcloc/contents.json$".toRegex(),
+    "^.+\\.xcloc/Source Contents/Localizable.xcstrings$".toRegex(),
+    "^.+\\.xcloc/Source Contents/.*InfoPlist.xcstrings$".toRegex(),
   )
 }
 
