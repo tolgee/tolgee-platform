@@ -11,7 +11,6 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): String {
   val translations = fileProcessorContext.translations
   val languageCount = fileProcessorContext.languages.size
-  val size = translations.size
   val code = StringBuilder()
   val i = { i: Int -> (1..i).joinToString("") { "  " } }
   val writeMutlilineString = ms@{ string: String?, indent: Int ->
@@ -28,11 +27,11 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
       it
     }
   }
-  code.appendLine("${i(2)}fileProcessorContext.assertLanguagesCount($languageCount)")
+  code.appendLine("${i(2)}mockUtil.fileProcessorContext.assertLanguagesCount($languageCount)")
   fileProcessorContext.translations.forEach { (keyName, translations) ->
     val byLanguage = translations.groupBy { it.language.name }
     byLanguage.forEach { (language, translations) ->
-      code.appendLine("""${i(2)}fileProcessorContext.assertTranslations("$language", "$keyName")""")
+      code.appendLine("""${i(2)}mockUtil.fileProcessorContext.assertTranslations("$language", "$keyName")""")
       val translation = translations.singleOrNull() ?: return@forEach
       if (translation.isPlural) {
         code.appendLine("""${i(3)}.assertSinglePlural {""")
@@ -46,11 +45,10 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
         code.appendLine("""${i(4)}hasText("${escape(translation.text, true)}")""")
         code.appendLine("""${i(3)}}""")
       }
-      code.appendLine("${i(2)}fileProcessorContext.assertLanguagesCount($languageCount)")
     }
   }
   fileProcessorContext.keys.forEach { keyName, importKey ->
-    code.appendLine("""${i(2)}fileProcessorContext.assertKey("$keyName"){""")
+    code.appendLine("""${i(2)}mockUtil.fileProcessorContext.assertKey("$keyName"){""")
     val keyMeta = fileProcessorContext.keys[keyName]?.keyMeta
     val custom = keyMeta?.custom
     if (custom == null) {

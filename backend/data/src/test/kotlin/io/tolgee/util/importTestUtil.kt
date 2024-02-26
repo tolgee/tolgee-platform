@@ -46,6 +46,14 @@ fun List<ImportTranslationInContextAssertions>.assertSingle(
   return this[0]
 }
 
+fun List<ImportTranslationInContextAssertions>.assertMultiple(
+  fn: List<ImportTranslationInContextAssertions>.() -> Unit = {},
+): List<ImportTranslationInContextAssertions> {
+  this.assert.hasSizeGreaterThan(1)
+  fn(this)
+  return this
+}
+
 fun FileProcessorContext.assertLanguagesCount(languagesCount: Int): FileProcessorContext {
   this.languages.size.assert.isEqualTo(languagesCount)
   return this

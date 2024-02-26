@@ -76,7 +76,10 @@ data class FileProcessorContext(
         _translations[keyName]!!.removeIf { it.language == language && !it.isPlural }
       }
       _translations[keyName]!!.add(entity)
+      return
     }
+
+    createKey(keyName)
   }
 
   private fun validateAndSaveIssues(
@@ -151,7 +154,11 @@ data class FileProcessorContext(
   }
 
   private fun getOrCreateKey(name: String): ImportKey {
-    return keys[name] ?: let { ImportKey(name, this.fileEntity).also { keys[name] = it } }
+    return keys[name] ?: createKey(name)
+  }
+
+  private fun createKey(name: String): ImportKey {
+    return ImportKey(name, this.fileEntity).also { keys[name] = it }
   }
 
   private fun getOrCreateKeyMeta(key: String): KeyMeta {

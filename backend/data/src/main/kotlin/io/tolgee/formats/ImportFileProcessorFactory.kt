@@ -7,7 +7,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
-import io.tolgee.formats.json.`in`.JsonFileProcessor
+import io.tolgee.formats.json.`in`.NativeJsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -32,7 +32,7 @@ class ImportFileProcessorFactory(
     context: FileProcessorContext,
   ): ImportFileProcessor {
     return when (file.name.fileNameExtension) {
-      "json" -> JsonFileProcessor(context)
+      "json" -> NativeJsonFileProcessor(context)
       "po" -> PoFileProcessor(context)
       "strings" -> StringsFileProcessor(context)
       "stringsdict" -> StringsdictFileProcessor(context)
