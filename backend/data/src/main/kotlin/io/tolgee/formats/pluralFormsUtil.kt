@@ -54,13 +54,45 @@ fun optimizePossiblePlural(string: String): String {
  */
 fun getPluralForms(string: String?): PluralForms? {
   string ?: return null
+  val converted = convertIcuStringNoOp(string)
+  return getPluralFormsFromConversionResult(converted)
+}
+
+/**
+ * Returns all plural forms from the given ICU string
+ * Returns null if the string is not a plural
+ */
+fun getPluralFormsReplacingReplaceParam(
+  string: String,
+  replacement: String,
+): PluralForms? {
+  val noOpConvertor = NoOpFromIcuParamConvertor()
+  val convertor =
+    object : FromIcuParamConvertor {
+      override fun convert(
+        node: MessagePatternUtil.ArgNode,
+        isInPlural: Boolean,
+      ): String {
+        return noOpConvertor.convert(node, isInPlural)
+      }
+
+      override fun convertReplaceNumber(
+        node: MessagePatternUtil.MessageContentsNode,
+        argName: String?,
+      ): String {
+        return replacement
+      }
+    }
   val converted =
     BaseIcuMessageConvertor(
       string,
-      NoOpFromIcuParamConvertor(),
+      convertor,
       keepEscaping = true,
     ).convert()
+  return getPluralFormsFromConversionResult(converted)
+}
 
+private fun getPluralFormsFromConversionResult(converted: PossiblePluralConversionResult): PluralForms? {
   return PluralForms(
     converted.formsResult ?: return null,
     converted.argName ?: throw IllegalStateException("Plural argument name not found"),
@@ -113,11 +145,7 @@ fun <T> Map<T, String?>.convertToIcuPlurals(newPluralArgName: String?): ConvertT
         try {
           val value = entry.value ?: return@map entry.key to null
           val converted =
-            BaseIcuMessageConvertor(
-              value,
-              NoOpFromIcuParamConvertor(),
-              keepEscaping = true,
-            ).convert()
+            convertIcuStringNoOp(value)
 
           (converted.argName ?: converted.firstArgName)?.let {
             possibleArgNames.add(it)
@@ -141,6 +169,13 @@ fun <T> Map<T, String?>.convertToIcuPlurals(newPluralArgName: String?): ConvertT
     }.toMap()
   return ConvertToIcuPluralResult(convertedStrings, argName)
 }
+
+private fun convertIcuStringNoOp(string: String) =
+  BaseIcuMessageConvertor(
+    string,
+    NoOpFromIcuParamConvertor(),
+    keepEscaping = true,
+  ).convert()
 
 data class ConvertToIcuPluralResult<T>(
   val convertedStrings: Map<T, String?>,

@@ -5,7 +5,9 @@ import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.formats.PluralForms
 import io.tolgee.service.LanguageService
+import io.tolgee.service.machineTranslation.PluralTranslationUtil.Companion.REPLACE_NUMBER_PLACEHOLDER
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -39,14 +41,13 @@ class MtTranslatorContext(
    */
   private val primaryServices = mutableMapOf<Long, MtServiceInfo?>()
 
-  private fun getEnabledServices(languageId: Long): Set<MtServiceInfo> {
-    return enabledServices.computeIfAbsent(languageId) {
-      val language =
-        languages[it]
-          ?: throw IllegalStateException("Language $it not found")
-      mtServiceConfigService.getEnabledServiceInfos(language).toSet()
-    }
-  }
+  private val pluralFormsCache: MutableMap<String, PluralForms?> = mutableMapOf()
+
+  /**
+   * Whan translating plurals, we need to replace the "REPLACE_NUMBER" (#) ICU tokens with some placeholder
+   * and we want to cache it
+   */
+  private val pluralFormsWithReplacedReplaceNumberCache: MutableMap<String, PluralForms?> = mutableMapOf()
 
   fun getServicesToUse(
     targetLanguageId: Long,
@@ -80,6 +81,23 @@ class MtTranslatorContext(
       .toSet()
   }
 
+  fun preparePossibleTargetLanguages(paramsList: List<MachineTranslationParams>) {
+    val all = paramsList.flatMap { it.targetLanguageIds + listOfNotNull(it.targetLanguageId) }
+    possibleTargetLanguages.addAll(all)
+  }
+
+  fun getPluralForms(string: String): PluralForms? {
+    return pluralFormsCache.computeIfAbsentSupportNull(string) {
+      io.tolgee.formats.getPluralForms(string)
+    }
+  }
+
+  fun getPluralFormsReplacingReplaceParam(string: String): PluralForms? {
+    return pluralFormsCache.computeIfAbsentSupportNull(string) {
+      io.tolgee.formats.getPluralFormsReplacingReplaceParam(string, REPLACE_NUMBER_PLACEHOLDER)
+    }
+  }
+
   /**
    * If some primary service is not found, we fetch all missing at once,
    * so it's fetched in one query, but only when required
@@ -94,15 +112,6 @@ class MtTranslatorContext(
     }
   }
 
-  private fun checkServices(
-    desired: Set<MtServiceType>?,
-    enabled: List<MtServiceType>,
-  ) {
-    if (desired != null && desired.any { !enabled.contains(it) }) {
-      throw BadRequestException(Message.MT_SERVICE_NOT_ENABLED)
-    }
-  }
-
   fun prepareKeys(params: List<MtBatchItemParams>) {
     val keyIds = params.mapNotNull { it.keyId }.filter { !keys.containsKey(it) }
     prepareKeysByIds(keyIds)
@@ -112,7 +121,7 @@ class MtTranslatorContext(
     val result =
       entityManger.createQuery(
         """
-        select new io.tolgee.service.machineTranslation.KeyForMt(k.id, k.name, ns.name, km.description, t.text)
+        select new io.tolgee.service.machineTranslation.KeyForMt(k.id, k.name, ns.name, km.description, t.text, k.isPlural )
         from Key k
         left join k.project.baseLanguage bl
         left join k.translations t on t.language.id = bl.id
@@ -132,6 +141,15 @@ class MtTranslatorContext(
 
     result.forEach {
       keys[it.id] = it
+    }
+  }
+
+  private fun checkServices(
+    desired: Set<MtServiceType>?,
+    enabled: List<MtServiceType>,
+  ) {
+    if (desired != null && desired.any { !enabled.contains(it) }) {
+      throw BadRequestException(Message.MT_SERVICE_NOT_ENABLED)
     }
   }
 
@@ -179,9 +197,25 @@ class MtTranslatorContext(
     return service.serviceType.usesMetadata
   }
 
-  fun preparePossibleTargetLanguages(paramsList: List<MachineTranslationParams>) {
-    val all = paramsList.flatMap { it.targetLanguageIds + listOfNotNull(it.targetLanguageId) }
-    possibleTargetLanguages.addAll(all)
+  private fun getEnabledServices(languageId: Long): Set<MtServiceInfo> {
+    return enabledServices.computeIfAbsent(languageId) {
+      val language =
+        languages[it]
+          ?: throw IllegalStateException("Language $it not found")
+      mtServiceConfigService.getEnabledServiceInfos(language).toSet()
+    }
+  }
+
+  @Synchronized
+  private fun <K, V> MutableMap<K, V>.computeIfAbsentSupportNull(
+    key: K,
+    mappingFunction: (K) -> V,
+  ): V? {
+    if (!containsKey(key)) {
+      val value = mappingFunction(key)
+      put(key, value)
+    }
+    return get(key)
   }
 
   private val languageService: LanguageService by lazy {

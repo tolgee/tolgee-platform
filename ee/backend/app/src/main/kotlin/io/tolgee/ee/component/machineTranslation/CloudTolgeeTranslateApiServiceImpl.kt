@@ -132,6 +132,8 @@ class CloudTolgeeTranslateApiServiceImpl(
       val formality: Formality? = null,
       val projectDescription: String? = null,
       val languageNote: String? = null,
+      val pluralForms: Map<String, String>? = null,
+      val expectedPluralForms: Set<String>? = null,
     )
 
     class TolgeeTranslateExample(
