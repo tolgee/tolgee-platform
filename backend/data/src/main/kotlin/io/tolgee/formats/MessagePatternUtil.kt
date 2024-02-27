@@ -90,16 +90,17 @@ object MessagePatternUtil {
             prevPatternIndex,
             patternIndex,
           )
-        var patternString =
+        val isTextEscapeChar = text == "'"
+        val patternString =
           // this part was added by Tolgee (Jan Cizmar) to add the escape characters back
           when {
-            !isEscaping && isPreviousSkipSyntax && isSkipSyntax -> "'$text'"
+            !isEscaping && isPreviousSkipSyntax && isSkipSyntax && !isTextEscapeChar -> "'$text'"
             !isEscaping && isSkipSyntax -> "$text'"
             !isSkipSyntax && !isEscaping && isPreviousSkipSyntax -> "'$text"
             isEscaping && isSkipSyntax && isNextEndMessage(pattern, i) -> "$text'"
             else -> text
           }
-        isEscaping = !isEscaping && text != "'"
+        isEscaping = !isEscaping && !isTextEscapeChar
 
         node.addContentsNode(
           TextNode(pattern, text, patternString, start = i - 1, limit = i),
