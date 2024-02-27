@@ -5,7 +5,7 @@ import io.tolgee.model.enums.TranslationState
 class ExportTranslationView(
   val id: Long?,
   val text: String?,
-  val state: TranslationState,
+  val state: TranslationState = TranslationState.TRANSLATED,
   val key: ExportKeyView,
-  val languageTag: String,
+  val languageTag: String = "en",
 )

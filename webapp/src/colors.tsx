@@ -1,4 +1,5 @@
 import { grey } from '@mui/material/colors';
+import { ALL_TOKENS } from './tokens';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',
@@ -104,6 +105,18 @@ export type QuickStart = {
   finishCircle: string;
 };
 
+const getTokensByMode = (mode: 'light' | 'dark') => {
+  const result = {} as Record<keyof typeof ALL_TOKENS, string>;
+  Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
+    if (typeof value === 'string') {
+      result[tokenName] = value;
+    } else {
+      result[tokenName] = value[mode];
+    }
+  });
+  return result;
+};
+
 export const colors = {
   light: {
     white: '#fff',
@@ -188,6 +201,7 @@ export const colors = {
     tipsBanner: {
       background: '#FDECF280',
     },
+    tokens: getTokensByMode('light'),
   },
   dark: {
     white: '#dddddd',
@@ -286,5 +300,6 @@ export const colors = {
     tipsBanner: {
       background: '#29242580',
     },
+    tokens: getTokensByMode('light'),
   },
 } as const;

@@ -25,7 +25,7 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 import { messageService } from 'tg.service/MessageService';
 
-type ValueType = components['schemas']['EditProjectDTO'];
+type ValueType = components['schemas']['EditProjectRequest'];
 
 export const ProjectSettingsView: FunctionComponent = () => {
   const project = useProject();
@@ -95,6 +95,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
     description: project.description,
+    icuPlaceholders: project.icuPlaceholders,
   };
 
   const [cancelled, setCancelled] = useState(false);

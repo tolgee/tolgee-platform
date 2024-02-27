@@ -5,4 +5,5 @@ data class KeyView(
   val name: String,
   val namespace: String?,
   val description: String?,
+  val custom: Any?,
 )

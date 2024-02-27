@@ -9,12 +9,16 @@ import org.assertj.core.api.AbstractIntegerAssert
 import org.assertj.core.api.AbstractLongAssert
 import org.assertj.core.api.AbstractStringAssert
 import org.assertj.core.api.IterableAssert
+import org.assertj.core.api.MapAssert
 import org.assertj.core.api.ObjectArrayAssert
 import org.assertj.core.api.ObjectAssert
 import java.math.BigDecimal
 import java.util.*
 
 inline val <reified T> T.assert: ObjectAssert<T>
+  get() = Assertions.assertThat(this)
+
+inline val <reified K, reified V> Map<K, V>.assert: MapAssert<K, V>
   get() = Assertions.assertThat(this)
 
 inline val Int?.assert: AbstractIntegerAssert<*>

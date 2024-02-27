@@ -8,7 +8,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.constants.Caches
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.request.LanguageRequest
-import io.tolgee.dtos.request.project.EditProjectDTO
+import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.model.Language
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.testing.assert
@@ -92,7 +92,7 @@ class LanguageCachingTest : AbstractSpringTest() {
     executeInNewTransaction {
       projectService.editProject(
         testData.project.id,
-        EditProjectDTO(
+        EditProjectRequest(
           name = "test",
           baseLanguageId = germanLanguage.id,
         ),

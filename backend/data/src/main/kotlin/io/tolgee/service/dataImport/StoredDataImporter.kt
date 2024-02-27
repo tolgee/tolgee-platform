@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
@@ -25,6 +26,7 @@ class StoredDataImporter(
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
   private val reportStatus: (ImportApplicationStatus) -> Unit = {},
+  private val importSettings: IImportSettings,
 ) {
   private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)
@@ -34,7 +36,7 @@ class StoredDataImporter(
 
   private val securityService = applicationContext.getBean(SecurityService::class.java)
 
-  private val translationsToSave = mutableListOf<Translation>()
+  val translationsToSave = mutableListOf<Pair<ImportTranslation, Translation>>()
 
   /**
    * We need to persist data after everything is checked for resolved conflicts since
@@ -92,6 +94,8 @@ class StoredDataImporter(
 
     val keyEntitiesToSave = saveKeys()
 
+    handlePluralization()
+
     saveMetaData(keyEntitiesToSave)
 
     reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
@@ -107,6 +111,10 @@ class StoredDataImporter(
     entityManager.flushAndClear()
   }
 
+  private fun handlePluralization() {
+    PluralizationHandler(importDataManager, this, translationService).handlePluralization()
+  }
+
   private fun saveMetaData(keyEntitiesToSave: MutableCollection<Key>) {
     keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
@@ -118,7 +126,7 @@ class StoredDataImporter(
 
   private fun saveTranslations() {
     checkTranslationPermissions()
-    translationService.saveAll(translationsToSave)
+    translationService.saveAll(translationsToSave.map { it.second })
   }
 
   private fun saveKeys(): MutableCollection<Key> {
@@ -133,7 +141,7 @@ class StoredDataImporter(
   }
 
   private fun checkTranslationPermissions() {
-    val langs = translationsToSave.map { it.language }.toSet().map { it.id }
+    val langs = translationsToSave.map { it.second.language }.toSet().map { it.id }
     securityService.checkLanguageTranslatePermission(import.project.id, langs)
   }
 
@@ -154,7 +162,7 @@ class StoredDataImporter(
           // persist is cascaded on key, so it should be fine
           val keyMeta =
             importDataManager.existingMetas[fileNamePair.first.namespace to importKey.name]?.also {
-              keyMetaService.import(it, importedKeyMeta)
+              keyMetaService.import(it, importedKeyMeta, importSettings.overrideKeyDescriptions)
             } ?: importedKeyMeta
           // also set key and remove import key
           keyMeta.also {
@@ -181,6 +189,9 @@ class StoredDataImporter(
   }
 
   private fun ImportTranslation.doImport() {
+    if (!this.isSelectedToImport) {
+      return
+    }
     this.checkConflictResolved()
     if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
       val language =
@@ -196,7 +207,7 @@ class StoredDataImporter(
       }
       translation.text = this@doImport.text
       translation.resetFlags()
-      translationsToSave.add(translation)
+      translationsToSave.add(this to translation)
     }
   }
 

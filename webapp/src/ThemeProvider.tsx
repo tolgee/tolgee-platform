@@ -153,6 +153,7 @@ const getTheme = (mode: PaletteMode) => {
       import: c.import,
       exampleBanner: c.exampleBanner,
       tipsBanner: c.tipsBanner,
+      tokens: c.tokens,
     },
     mixins: {
       toolbar: {

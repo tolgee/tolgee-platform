@@ -13,6 +13,10 @@ open class KeyWithTranslationsModel(
   val keyId: Long,
   @Schema(description = "Name of key", example = "this_is_super_key")
   val keyName: String,
+  @Schema(description = "Is this key a plural?", example = "true")
+  val keyIsPlural: Boolean,
+  @Schema(description = "The placeholder name for plural parameter", example = "value")
+  val keyPluralArgName: String?,
   @Schema(description = "The namespace id of the key", example = "100000282")
   val keyNamespaceId: Long?,
   @Schema(description = "The namespace of the key", example = "homepage")

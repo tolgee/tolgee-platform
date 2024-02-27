@@ -149,6 +149,12 @@ export interface paths {
     /** Imports the data prepared in previous step */
     put: operations["applyImport"];
   };
+  "/v2/projects/{projectId}/import-settings": {
+    /** Returns import settings for the authenticated user and the project. */
+    get: operations["get_7"];
+    /** Stores import settings for the authenticated user and the project. */
+    put: operations["store"];
+  };
   "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
     put: operations["cancel"];
   };
@@ -159,7 +165,7 @@ export interface paths {
     put: operations["setState"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_9"];
+    get: operations["get_11"];
     put: operations["update_5"];
     delete: operations["delete_8"];
   };
@@ -181,7 +187,7 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_11"];
+    get: operations["get_13"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
@@ -206,7 +212,7 @@ export interface paths {
     put: operations["setPromptProjectCustomization"];
   };
   "/v2/pats/{id}": {
-    get: operations["get_13"];
+    get: operations["get_15"];
     put: operations["update_7"];
     delete: operations["delete_10"];
   };
@@ -223,7 +229,7 @@ export interface paths {
     put: operations["setBasePermissions_1"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_15"];
+    get: operations["get_17"];
     put: operations["update_8"];
     delete: operations["delete_11"];
   };
@@ -394,7 +400,7 @@ export interface paths {
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/big-meta": {
-    post: operations["store"];
+    post: operations["store_2"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     get: operations["getAll_5"];
@@ -546,7 +552,7 @@ export interface paths {
     get: operations["currentJobs"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
-    get: operations["get_7"];
+    get: operations["get_9"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
     get: operations["list_3"];
@@ -588,7 +594,7 @@ export interface paths {
     get: operations["getCurrent"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_14"];
+    get: operations["get_16"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
@@ -622,7 +628,7 @@ export interface paths {
     get: operations["getInfo_3"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_16"];
+    get: operations["get_18"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent_1"];
@@ -729,12 +735,14 @@ export interface components {
       completedSteps: string[];
       open: boolean;
     };
-    EditProjectDTO: {
+    EditProjectRequest: {
       name: string;
       slug?: string;
       /** Format: int64 */
       baseLanguageId?: number;
       description?: string;
+      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
     };
     ComputedPermissionModel: {
       permissionModel?: components["schemas"]["PermissionModel"];
@@ -903,6 +911,8 @@ export interface components {
       organizationRole?: "MEMBER" | "OWNER";
       directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
+      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
     };
     SimpleOrganizationModel: {
       /** Format: int64 */
@@ -1089,6 +1099,8 @@ export interface components {
       relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
       /** @description Description of the key. It's also used as a context for Tolgee AI translator */
       description?: string;
+      /** @description If key is pluralized. If it will be reflected in the editor. If null, value won't be modified. */
+      isPlural?: boolean;
     };
     KeyInScreenshotPositionDto: {
       /** Format: int32 */
@@ -1164,6 +1176,8 @@ export interface components {
       tags: components["schemas"]["TagModel"][];
       /** @description Screenshots of the key */
       screenshots: components["schemas"]["ScreenshotModel"][];
+      /** @description If key is pluralized. If it will be reflected in the editor */
+      isPlural: boolean;
     };
     /** @description Screenshots of the key */
     ScreenshotModel: {
@@ -1346,7 +1360,14 @@ export interface components {
        */
       languages?: string[];
       /** @description Format to export to */
-      format: "JSON" | "XLIFF";
+      format:
+        | "JSON"
+        | "XLIFF"
+        | "PO"
+        | "IOS_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "FLUTTER_ARB";
       /**
        * @description Delimiter to structure file content.
        *
@@ -1367,6 +1388,12 @@ export interface components {
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
       /** @description Select one ore multiple namespaces to export */
       filterNamespace?: string[];
+      /**
+       * @description Message format to be used for export. (applicable for .po)
+       *
+       * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+       */
+      messageFormat?: "PO_C" | "PO_PHP" | "PO_PYTHON";
     };
     ContentDeliveryConfigModel: {
       /** Format: int64 */
@@ -1386,7 +1413,14 @@ export interface components {
        */
       languages?: string[];
       /** @description Format to export to */
-      format: "JSON" | "XLIFF";
+      format:
+        | "JSON"
+        | "XLIFF"
+        | "PO"
+        | "IOS_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "FLUTTER_ARB";
       /**
        * @description Delimiter to structure file content.
        *
@@ -1407,6 +1441,12 @@ export interface components {
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
       /** @description Select one ore multiple namespaces to export */
       filterNamespace?: string[];
+      /**
+       * @description Message format to be used for export. (applicable for .po)
+       *
+       * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+       */
+      messageFormat?: "PO_C" | "PO_PHP" | "PO_PYTHON";
     };
     TagKeyDto: {
       name: string;
@@ -1415,6 +1455,25 @@ export interface components {
       namespace?: string;
     };
     StreamingResponseBody: { [key: string]: unknown };
+    ImportSettingsRequest: {
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+    };
+    IImportSettings: {
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+    };
+    ImportSettingsModel: {
+      settings?: components["schemas"]["IImportSettings"];
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+    };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
       /** Format: int64 */
@@ -1488,6 +1547,7 @@ export interface components {
        * @example homepage
        */
       keyNamespace?: string;
+      keyIsPlural: boolean;
       /**
        * @description Translations object containing values updated in this request
        * @example [object Object]
@@ -1582,13 +1642,13 @@ export interface components {
       id: number;
       description: string;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1727,15 +1787,15 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      username?: string;
       description: string;
+      username?: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      projectId: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1751,6 +1811,7 @@ export interface components {
       source: string;
       target: string;
       key: string;
+      keyNamespace?: string;
     };
     Metadata: {
       examples: components["schemas"]["ExampleItem"][];
@@ -1832,6 +1893,7 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
+      free: boolean;
     };
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
@@ -1917,7 +1979,7 @@ export interface components {
     IdentifyRequest: {
       anonymousUserId: string;
     };
-    CreateProjectDTO: {
+    CreateProjectRequest: {
       name: string;
       languages: components["schemas"]["LanguageRequest"][];
       /** @description Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
@@ -1929,6 +1991,8 @@ export interface components {
       organizationId: number;
       /** @description Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
+      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
     };
     WebhookTestResponse: {
       success: boolean;
@@ -2033,6 +2097,8 @@ export interface components {
        * @example This key is used on homepage. It's a label of sign up button.
        */
       description?: string;
+      /** @description If key is pluralized. If it will be reflected in the editor */
+      isPlural: boolean;
     };
     StorageTestResult: {
       success: boolean;
@@ -2124,7 +2190,6 @@ export interface components {
         | "CANNOT_FIND_BASE_LANGUAGE"
         | "BASE_LANGUAGE_NOT_FOUND"
         | "NO_EXPORTED_RESULT"
-        | "MULTIPLE_FILES_MUST_BE_ZIPPED"
         | "CANNOT_SET_YOUR_OWN_ROLE"
         | "ONLY_TRANSLATE_REVIEW_OR_VIEW_PERMISSION_ACCEPTS_VIEW_LANGUAGES"
         | "OAUTH2_TOKEN_URL_NOT_SET"
@@ -2223,7 +2288,15 @@ export interface components {
         | "USER_IS_SUBSCRIBED_TO_PAID_PLAN"
         | "CANNOT_CREATE_FREE_PLAN_WITHOUT_FIXED_TYPE"
         | "CANNOT_MODIFY_PLAN_FREE_STATUS"
-        | "KEY_ID_NOT_PROVIDED";
+        | "KEY_ID_NOT_PROVIDED"
+        | "FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED"
+        | "ADVANCED_PARAMS_NOT_SUPPORTED"
+        | "PLURAL_FORMS_NOT_FOUND_FOR_LANGUAGE"
+        | "NESTED_PLURALS_NOT_SUPPORTED"
+        | "MESSAGE_IS_NOT_PLURAL"
+        | "CONTENT_OUTSIDE_PLURAL_FORMS"
+        | "INVALID_PLURAL_FORM"
+        | "MULTIPLE_PLURALS_NOT_SUPPORTED";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2375,7 +2448,14 @@ export interface components {
        */
       languages?: string[];
       /** @description Format to export to */
-      format: "JSON" | "XLIFF";
+      format:
+        | "JSON"
+        | "XLIFF"
+        | "PO"
+        | "IOS_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "FLUTTER_ARB";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2397,6 +2477,12 @@ export interface components {
       /** @description Select one ore multiple namespaces to export */
       filterNamespace?: string[];
       zip: boolean;
+      /**
+       * @description Message format to be used for export. (applicable for .po)
+       *
+       * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+       */
+      messageFormat?: "PO_C" | "PO_PHP" | "PO_PYTHON";
     };
     BigMetaDto: {
       /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
@@ -2641,18 +2727,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
-      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2762,8 +2848,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       description?: string;
+      namespace?: string;
       translation?: string;
     };
     KeySearchSearchResultModel: {
@@ -2772,8 +2858,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       description?: string;
+      namespace?: string;
       translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -2977,7 +3063,8 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG"
-        | "KEY_IS_BLANK";
+        | "KEY_IS_BLANK"
+        | "TRANSLATION_DEFINED_IN_ANOTHER_FILE";
       params: components["schemas"]["ImportFileIssueParamModel"][];
     };
     ImportFileIssueParamModel: {
@@ -2988,7 +3075,8 @@ export interface components {
         | "KEY_INDEX"
         | "VALUE"
         | "LINE"
-        | "FILE_NODE_ORIGINAL";
+        | "FILE_NODE_ORIGINAL"
+        | "LANGUAGE_NAME";
       value?: string;
     };
     PagedModelImportFileIssueModel: {
@@ -3268,6 +3356,8 @@ export interface components {
       computedPermission: components["schemas"]["ComputedPermissionModel"];
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
+      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
     };
     CollectionModelScreenshotModel: {
       _embedded?: {
@@ -3286,13 +3376,13 @@ export interface components {
       id: number;
       description: string;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3412,15 +3502,15 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      username?: string;
       description: string;
+      username?: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      projectId: number;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -3953,7 +4043,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["EditProjectDTO"];
+        "application/json": components["schemas"]["EditProjectRequest"];
       };
     };
   };
@@ -5031,6 +5121,67 @@ export interface operations {
       };
     };
   };
+  /** Returns import settings for the authenticated user and the project. */
+  get_7: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ImportSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Stores import settings for the authenticated user and the project. */
+  store: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ImportSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportSettingsRequest"];
+      };
+    };
+  };
   cancel: {
     parameters: {
       path: {
@@ -5113,7 +5264,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_11: {
     parameters: {
       path: {
         translationId: number;
@@ -5448,7 +5599,7 @@ export interface operations {
       };
     };
   };
-  get_11: {
+  get_13: {
     parameters: {
       path: {
         languageId: number;
@@ -5726,7 +5877,7 @@ export interface operations {
       };
     };
   };
-  get_13: {
+  get_15: {
     parameters: {
       path: {
         id: number;
@@ -5926,7 +6077,7 @@ export interface operations {
       };
     };
   };
-  get_15: {
+  get_17: {
     parameters: {
       path: {
         id: number;
@@ -6733,7 +6884,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateProjectDTO"];
+        "application/json": components["schemas"]["CreateProjectRequest"];
       };
     };
   };
@@ -7625,7 +7776,14 @@ export interface operations {
          */
         languages?: string[];
         /** Format to export to */
-        format?: "JSON" | "XLIFF";
+        format?:
+          | "JSON"
+          | "XLIFF"
+          | "PO"
+          | "IOS_STRINGS_STRINGSDICT"
+          | "APPLE_XLIFF"
+          | "ANDROID_XML"
+          | "FLUTTER_ARB";
         /**
          * Delimiter to structure file content.
          *
@@ -7657,6 +7815,12 @@ export interface operations {
          * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
          */
         zip?: boolean;
+        /**
+         * Message format to be used for export. (applicable for .po)
+         *
+         * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+         */
+        messageFormat?: "PO_C" | "PO_PHP" | "PO_PYTHON";
       };
       path: {
         projectId: number;
@@ -7715,7 +7879,7 @@ export interface operations {
       };
     };
   };
-  store: {
+  store_2: {
     parameters: {
       path: {
         projectId: number;
@@ -9288,7 +9452,7 @@ export interface operations {
       };
     };
   };
-  get_7: {
+  get_9: {
     parameters: {
       path: {
         id: number;
@@ -9747,7 +9911,7 @@ export interface operations {
       };
     };
   };
-  get_14: {
+  get_16: {
     parameters: {
       path: {
         slug: string;
@@ -10081,7 +10245,7 @@ export interface operations {
       };
     };
   };
-  get_16: {
+  get_18: {
     parameters: {
       path: {
         keyId: number;

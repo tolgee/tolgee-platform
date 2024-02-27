@@ -8,6 +8,10 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.StringIsNotPluralException
+import io.tolgee.formats.convertToIcuPlural
+import io.tolgee.formats.getPluralForms
+import io.tolgee.formats.normalizePlurals
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
@@ -26,6 +30,7 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -34,6 +39,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.Serializable
 import java.util.*
 
 @Service
@@ -155,16 +161,6 @@ class TranslationService(
 
   fun setTranslation(
     key: Key,
-    languageTag: String?,
-    text: String?,
-  ): Translation? {
-    val language =
-      languageService.getByTag(languageTag!!, key.project)
-    return setTranslation(key, entityManager.getReference(Language::class.java, language.id), text)
-  }
-
-  fun setTranslation(
-    key: Key,
     language: Language,
     text: String?,
   ): Translation {
@@ -205,6 +201,8 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
+    val normalized =
+      validateAndNormalizePlurals(translations, key.isPlural, key.pluralArgName)
     val languages = languageService.findEntitiesByTags(translations.keys, key.project.id)
     val oldTranslations =
       getKeyTranslations(languages, key.project, key).associate {
@@ -216,7 +214,7 @@ class TranslationService(
 
     return setForKey(
       key,
-      translations.map { languageByTagFromLanguages(it.key, languages) to it.value }
+      normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
       oldTranslations,
     ).mapKeys { it.key.tag }
@@ -248,7 +246,7 @@ class TranslationService(
     val result =
       translations.entries.associate { (language, value) ->
         language to setTranslation(key, language, value)
-      }.filterValues { it != null }.mapValues { it.value }
+      }.mapValues { it.value }
 
     applicationEventPublisher.publishEvent(
       OnTranslationsSet(
@@ -328,10 +326,9 @@ class TranslationService(
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.getOrAssignBaseLanguage(key.project.id)?.let {
+    projectService.getOrAssignBaseLanguage(key.project.id).let {
       return find(key, it).orElse(null)
     }
-    return null
   }
 
   fun getTranslationMemoryValue(
@@ -521,5 +518,65 @@ class TranslationService(
         "key_id IN (SELECT id FROM key WHERE project_id = :projectId) or " +
         "language_id IN (SELECT id FROM language WHERE project_id = :projectId)",
     ).setParameter("projectId", projectId).executeUpdate()
+  }
+
+  fun onKeyIsPluralChanged(
+    keyIdToArgNameMap: Map<Long, String?>,
+    newIsPlural: Boolean,
+    ignoreTranslationsForMigration: MutableList<Long> = mutableListOf(),
+  ) {
+    val translations =
+      translationRepository
+        .getAllByKeyIdInExcluding(keyIdToArgNameMap.keys, ignoreTranslationsForMigration.nullIfEmpty())
+    translations.forEach { handleIsPluralChanged(it, newIsPlural, keyIdToArgNameMap[it.key.id]) }
+    saveAll(translations)
+  }
+
+  private fun handleIsPluralChanged(
+    it: Translation,
+    newIsPlural: Boolean,
+    newPluralArgName: String?,
+  ) {
+    it.text = getNewText(it.text, newIsPlural, newPluralArgName)
+  }
+
+  /**
+   * @param newIsPlural - if true, we are converting value to plural,
+   * if not, we are converting it from plural
+   */
+  private fun getNewText(
+    text: String?,
+    newIsPlural: Boolean,
+    newPluralArgName: String?,
+  ): String? {
+    if (newIsPlural) {
+      return text.convertToIcuPlural(newPluralArgName)
+    }
+    val forms = getPluralForms(text)
+    return forms?.forms?.get("other") ?: text
+  }
+
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    isKeyPlural: Boolean,
+    pluralArgName: String?,
+  ): Map<T, String?> {
+    if (isKeyPlural) {
+      return validateAndNormalizePlurals(texts, pluralArgName)
+    }
+
+    return texts
+  }
+
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    pluralArgName: String?,
+  ): Map<T, String?> {
+    @Suppress("UNCHECKED_CAST")
+    return try {
+      normalizePlurals(texts, pluralArgName)
+    } catch (e: StringIsNotPluralException) {
+      throw BadRequestException(Message.INVALID_PLURAL_FORM, listOf(e.invalidStrings) as List<Serializable?>)
+    }
   }
 }

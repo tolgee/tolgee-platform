@@ -38,6 +38,21 @@ data class ComplexEditKeyDto(
   @field:Size(max = 2000)
   @Schema(description = "Description of the key. It's also used as a context for Tolgee AI translator")
   val description: String? = null,
+  @Schema(
+    description =
+      "If key is pluralized. If it will be reflected in the editor. " +
+        "If null, value won't be modified.",
+  )
+  val isPlural: Boolean? = null,
+  @Schema(
+    description =
+      "The argument name for the plural. " +
+        "If null, value won't be modified. " +
+        "If isPlural is false, this value will be ignored.",
+  )
+  val pluralArgName: String? = null,
+  @Schema(description = "Custom values of the key. If not provided, custom values won't be modified")
+  val custom: Map<String, Any?>? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

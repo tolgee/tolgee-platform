@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.dtos.request.project.EditProjectDTO
+import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -17,15 +17,17 @@ class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
   fun `edits project`() {
     val base = dbPopulator.createBase("What a project")
     val content =
-      EditProjectDTO(
+      EditProjectRequest(
         name = "new name",
         baseLanguageId = base.project.languages.toList()[1].id,
         slug = "new-slug",
+        icuPlaceholders = true,
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
       node("slug").isEqualTo(content.slug)
       node("baseLanguage.id").isEqualTo(content.baseLanguageId)
+      node("icuPlaceholders").isEqualTo(content.icuPlaceholders)
     }
   }
 
@@ -33,7 +35,7 @@ class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
   fun `validates project on edit`() {
     val base = dbPopulator.createBase("What a project")
     val content =
-      EditProjectDTO(
+      EditProjectRequest(
         name = "",
         baseLanguageId = base.project.languages.toList()[0].id,
       )
@@ -46,7 +48,7 @@ class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
   fun `automatically chooses base language`() {
     val base = dbPopulator.createBase("What a project")
     val content =
-      EditProjectDTO(
+      EditProjectRequest(
         name = "test",
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {

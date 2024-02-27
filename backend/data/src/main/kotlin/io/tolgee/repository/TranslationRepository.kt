@@ -73,6 +73,20 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getAllByKeyIdIn(keyIds: Collection<Long>): Collection<Translation>
 
   @Query(
+    """from Translation t 
+    join fetch t.key k 
+    left join fetch k.keyMeta 
+    left join fetch t.comments
+    where t.key.id in :keyIds
+    and (:excludeTranslationIds is null or t.id not in :excludeTranslationIds)
+    """,
+  )
+  fun getAllByKeyIdInExcluding(
+    keyIds: Collection<Long>,
+    excludeTranslationIds: List<Long>? = null,
+  ): Collection<Translation>
+
+  @Query(
     """select t.id from Translation t where t.key.id in 
         (select k.id from t.key k where k.project.id = :projectId)""",
   )

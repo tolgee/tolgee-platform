@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -20,6 +20,7 @@ import { useApplyImportHelper } from './hooks/useApplyImportHelper';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { BaseProjectView } from '../BaseProjectView';
 import { ImportResultLoadingOverlay } from './component/ImportResultLoadingOverlay';
+import { ImportSettingsPanel } from './component/ImportSettingsPanel';
 
 export const ImportView: FunctionComponent = () => {
   const dataHelper = useImportDataHelper();
@@ -124,6 +125,8 @@ export const ImportView: FunctionComponent = () => {
         ))}
         <Box position="relative">
           <ImportResultLoadingOverlay loading={isProgressOverlayActive} />
+          <ImportSettingsPanel />
+
           <ImportResult
             onResolveRow={setResolveRow}
             onLoadData={dataHelper.refetchData}
