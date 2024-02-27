@@ -161,6 +161,13 @@ class MessagePatternUtilTest {
   }
 
   @Test
+  fun `returns correct pattern for four escape chars`() {
+    MessagePatternUtil.buildMessageNode(
+      "''''",
+    ).contents[0].patternString.assert.isEqualTo("''''")
+  }
+
+  @Test
   fun `returns correct pattern string for complex plurals`() {
     val root =
       MessagePatternUtil.buildMessageNode(
