@@ -90,18 +90,21 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
       ]}
     >
       <StyledContainer style={{ marginBottom: bottomPanelHeight + 20 }}>
-        <StyledLanguagesMenu>
-          <LanguagesSelect
-            languages={languages}
-            onChange={selectLanguages}
-            value={selectedLanguagesMapped.map((l) => l.tag)}
-            context="languages"
-          />
-        </StyledLanguagesMenu>
         {keyExists ? (
-          <KeyEditForm />
+          <>
+            <StyledLanguagesMenu>
+              <LanguagesSelect
+                languages={languages}
+                onChange={selectLanguages}
+                value={selectedLanguagesMapped.map((l) => l.tag)}
+                context="languages"
+              />
+            </StyledLanguagesMenu>
+            <KeyEditForm />
+          </>
         ) : (
           <KeyCreateForm
+            baseLanguage={project.baseLanguage!.tag}
             onSuccess={(data) => {
               // reload translations as new one was created
               invalidateUrlPrefix(
@@ -118,7 +121,6 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
                   })
               );
             }}
-            languages={selectedLanguagesMapped}
             onCancel={() =>
               history.push(
                 LINKS.PROJECT_TRANSLATIONS.build({

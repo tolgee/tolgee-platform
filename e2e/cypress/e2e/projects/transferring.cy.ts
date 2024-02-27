@@ -45,6 +45,7 @@ describe('Projects Basics', () => {
 
 const openTransferDialog = (projectName: string, organization: string) => {
   enterProjectSettings(projectName, organization);
+  gcy('project-settings-menu-advanced').click();
   gcy('project-settings-transfer-button')
     .should('contain', 'Transfer')
     .wait(100)

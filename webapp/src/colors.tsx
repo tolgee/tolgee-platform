@@ -74,7 +74,6 @@ export type Tile = {
 export type Cell = {
   hover: string;
   selected: string;
-  inside: string;
 };
 
 export type Navbar = {
@@ -91,6 +90,18 @@ export type ExampleBanner = {
 
 export type TipsBanner = {
   background: string;
+};
+
+export type Placeholder = {
+  border: string;
+  background: string;
+  text: string;
+};
+
+export type Placeholders = {
+  variable: Placeholder;
+  tag: Placeholder;
+  variant: Placeholder;
 };
 
 export type QuickStart = {
@@ -135,10 +146,9 @@ export const colors = {
       backgroundHover: '#f4f4f6',
     },
     cell: {
-      hover: '#f7f7f7',
-      selected: '#EEEFF1',
-      inside: '#F9F9F9',
-    },
+      hover: '#f9f9f9',
+      selected: '#F6F6F8',
+    } satisfies Cell,
     navbar: {
       background: '#fff',
       text: '#2C3C52',
@@ -153,7 +163,7 @@ export const colors = {
       function: '#007300',
       other: '#002bff',
       main: '#2C3C52',
-    },
+    } satisfies Editor,
     billingProgress: {
       background: '#C4C4C4',
       low: '#E80000',
@@ -202,6 +212,23 @@ export const colors = {
       background: '#FDECF280',
     },
     tokens: getTokensByMode('light'),
+    placeholders: {
+      variable: {
+        border: '#7AD3C1',
+        background: '#BEF3E9',
+        text: '#008371',
+      },
+      tag: {
+        border: '#F27FA6',
+        background: '#F9C4D6',
+        text: '#822343',
+      },
+      variant: {
+        border: '#BBC2CB',
+        background: '#F0F2F4',
+        text: '#4D5B6E',
+      },
+    } satisfies Placeholders,
   },
   dark: {
     white: '#dddddd',
@@ -221,8 +248,7 @@ export const colors = {
     cell: {
       hover: '#233043',
       selected: '#243245',
-      inside: '#283a53',
-    },
+    } satisfies Cell,
     navbar: {
       background: '#182230',
       text: '#dddddd',
@@ -253,7 +279,7 @@ export const colors = {
       function: '#9ac99a',
       other: '#99aaff',
       main: '#eeeeee',
-    },
+    } satisfies Editor,
     billingProgress: {
       background: '#565656',
       low: '#ca0000',
@@ -301,5 +327,22 @@ export const colors = {
       background: '#29242580',
     },
     tokens: getTokensByMode('light'),
+    placeholders: {
+      variable: {
+        border: '#008371',
+        background: '#008371',
+        text: '#F0F2F4',
+      },
+      tag: {
+        border: '#824563',
+        background: '#824563',
+        text: '#F0F2F4',
+      },
+      variant: {
+        border: '#4D5B6E',
+        background: '#4D5B6E',
+        text: '#F0F2F4',
+      },
+    } satisfies Placeholders,
   },
 } as const;

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import ReactList from 'react-list';
 import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -12,32 +11,81 @@ import { CellLanguage } from './CellLanguage';
 import { RowTable } from './RowTable';
 import { NamespaceBanner } from '../Namespace/NamespaceBanner';
 import { useNsBanners } from '../context/useNsBanners';
-import {
-  useColumnsActions,
-  useColumnsContext,
-} from '../context/ColumnsContext';
 import { NAMESPACE_BANNER_SPACING } from '../cell/styles';
+import { ReactList } from 'tg.component/reactList/ReactList';
+import clsx from 'clsx';
+import { useScrollStatus } from './useScrollStatus';
+import { useColumns } from '../useColumns';
 
 const StyledContainer = styled('div')`
   position: relative;
-  margin: 10px 0px 100px 0px;
+  display: grid;
+  margin: 10px 0px 0px -0px;
   border-left: 0px;
   border-right: 0px;
   background: ${({ theme }) => theme.palette.background.default};
   flex-grow: 1;
+
+  &::before {
+    content: '';
+    height: 100%;
+    position: absolute;
+    width: 6px;
+    background-image: linear-gradient(90deg, #0000002c, transparent);
+    top: 0px;
+    left: 0px;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 100ms ease-in-out;
+  }
+
+  &::after {
+    content: '';
+    height: 100%;
+    position: absolute;
+    width: 6px;
+    background-image: linear-gradient(-90deg, #0000002c, transparent);
+    top: 0px;
+    right: 0px;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 100ms ease-in-out;
+  }
+
+  &.scrollLeft {
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &.scrollRight {
+    &::after {
+      opacity: 1;
+    }
+  }
+`;
+
+const StyledVerticalScroll = styled('div')`
+  overflow-x: scroll;
+  overflow-y: hidden;
+`;
+
+const StyledContent = styled('div')`
+  position: relative;
 `;
 
 const StyledHeaderRow = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-width: 1px 0px 1px 0px;
   position: sticky;
   background: ${({ theme }) => theme.palette.background.default};
   top: 0px;
   margin-bottom: -1px;
-  display: flex;
+  display: grid;
 `;
 
 const StyledHeaderCell = styled('div')`
+  border-top: 1px solid ${({ theme }) => theme.palette.divider1};
   box-sizing: border-box;
   display: flex;
   flex-grow: 0;
@@ -48,9 +96,14 @@ const StyledHeaderCell = styled('div')`
   }
 `;
 
-export const TranslationsTable = () => {
+type Props = {
+  toolsPanelOpen: boolean;
+};
+
+export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
+  const verticalScrollRef = useRef<HTMLDivElement>(null);
 
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -60,13 +113,6 @@ export const TranslationsTable = () => {
   const languages = useTranslationsSelector((v) => v.languages);
   const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
-  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
-
-  const columnSizes = useColumnsContext((c) => c.columnSizes);
-  const columnSizesPercent = useColumnsContext((c) => c.columnSizesPercent);
-
-  const { startResize, resizeColumn, addResizer, resetColumns } =
-    useColumnsActions();
 
   const languageCols = useMemo(() => {
     if (languages && translationsLanguages) {
@@ -85,12 +131,18 @@ export const TranslationsTable = () => {
     [translationsLanguages]
   );
 
-  useEffect(() => {
-    resetColumns(
-      columns.map(() => 1),
-      tableRef
-    );
-  }, [languageCols, tableRef]);
+  const {
+    columnSizes,
+    columnSizesPercent,
+    startResize,
+    resizeColumn,
+    addResizer,
+  } = useColumns({
+    tableRef,
+    initialRatios: columns.map(() => 1),
+    minSize: 300,
+    deps: [toolsPanelOpen],
+  });
 
   const handleFetchMore = useCallback(() => {
     fetchMore();
@@ -112,96 +164,108 @@ export const TranslationsTable = () => {
     return null;
   }
 
+  const fullWidth = columnSizes.reduce((a, b) => a + b, 0);
+
+  const [scrollLeft, scrollRight] = useScrollStatus(verticalScrollRef, [
+    fullWidth,
+  ]);
+
   return (
     <StyledContainer
-      style={{ marginBottom: cursorKeyId ? 500 : undefined }}
-      ref={tableRef}
       data-cy="translations-view-table"
+      className={clsx({ scrollLeft, scrollRight })}
+      ref={tableRef}
     >
-      <StyledHeaderRow>
-        {columns.map((tag, i) => {
-          const language = languages?.find((lang) => lang.tag === tag);
-          return tag ? (
-            language && (
-              <StyledHeaderCell
+      <StyledVerticalScroll ref={verticalScrollRef}>
+        <StyledContent>
+          <StyledHeaderRow
+            data-cy="this-is-the-element"
+            style={{
+              gridTemplateColumns: columnSizesPercent.join(' '),
+            }}
+          >
+            {columns.map((tag, i) => {
+              const language = languages?.find((lang) => lang.tag === tag);
+              return tag ? (
+                language && (
+                  <StyledHeaderCell key={i}>
+                    <CellLanguage
+                      colIndex={i - 1}
+                      onResize={startResize}
+                      language={language}
+                    />
+                  </StyledHeaderCell>
+                )
+              ) : (
+                <StyledHeaderCell
+                  key={i}
+                  style={{
+                    width: columnSizesPercent[i],
+                    height:
+                      39 + (isBannerOnFirstRow ? NAMESPACE_BANNER_SPACING : 0),
+                  }}
+                  className="keyCell"
+                >
+                  <T keyName="translation_grid_key_text" />
+                </StyledHeaderCell>
+              );
+            })}
+          </StyledHeaderRow>
+          {columnSizes.slice(0, -1).map((w, i) => {
+            const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
+            return (
+              <ColumnResizer
                 key={i}
-                style={{ width: columnSizesPercent[i] }}
-              >
-                <CellLanguage
-                  colIndex={i - 1}
-                  onResize={startResize}
-                  language={language}
-                />
-              </StyledHeaderCell>
-            )
-          ) : (
-            <StyledHeaderCell
-              key={i}
-              style={{
-                width: columnSizesPercent[i],
-                height:
-                  39 + (isBannerOnFirstRow ? NAMESPACE_BANNER_SPACING : 0),
-              }}
-              className="keyCell"
-            >
-              <T keyName="translation_grid_key_text" />
-            </StyledHeaderCell>
-          );
-        })}
-      </StyledHeaderRow>
-      {columnSizes.slice(0, -1).map((w, i) => {
-        const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
-        return (
-          <ColumnResizer
-            key={i}
-            size={w}
-            left={left}
-            onResize={(size) => resizeColumn(i, size)}
-            passResizeCallback={(callback) => addResizer(i, callback)}
-          />
-        );
-      })}
-
-      <ReactList
-        ref={reactListRef}
-        threshold={800}
-        type="variable"
-        itemSizeEstimator={(index, cache) => {
-          return cache[index] || 84;
-        }}
-        // @ts-ignore
-        scrollParentGetter={() => window}
-        length={translations.length}
-        useTranslate3d
-        itemRenderer={(index) => {
-          const row = translations[index];
-          const isLast = index === translations.length - 1;
-          if (isLast && !isFetchingMore && hasMoreToFetch) {
-            handleFetchMore();
-          }
-
-          const nsBannerAfter = nsBanners.find((b) => b.row === index + 1);
-          const nsBanner = nsBanners.find((b) => b.row === index);
-          return (
-            <div key={row.keyId}>
-              {nsBanner && (
-                <NamespaceBanner
-                  namespace={nsBanner}
-                  maxWidth={columnSizes[0]}
-                />
-              )}
-              <RowTable
-                bannerBefore={Boolean(nsBanner)}
-                bannerAfter={Boolean(nsBannerAfter)}
-                data={row}
-                languages={languageCols}
-                columnSizes={columnSizesPercent}
-                onResize={startResize}
+                size={w}
+                left={left}
+                onResize={(size) => resizeColumn(i, size)}
+                passResizeCallback={(callback) => addResizer(i, callback)}
               />
-            </div>
-          );
-        }}
-      />
+            );
+          })}
+
+          <ReactList
+            ref={reactListRef}
+            threshold={800}
+            type="variable"
+            itemSizeEstimator={(index, cache) => {
+              return cache[index] || 84;
+            }}
+            // @ts-ignore
+            scrollParentGetter={() => window}
+            length={translations.length}
+            useTranslate3d
+            itemRenderer={(index) => {
+              const row = translations[index];
+              const isLast = index === translations.length - 1;
+              if (isLast && !isFetchingMore && hasMoreToFetch) {
+                handleFetchMore();
+              }
+
+              const nsBannerAfter = nsBanners.find((b) => b.row === index + 1);
+              const nsBanner = nsBanners.find((b) => b.row === index);
+              return (
+                <div key={`${row.keyNamespace}.${row.keyId}`}>
+                  {nsBanner && (
+                    <NamespaceBanner
+                      namespace={nsBanner}
+                      maxWidth={columnSizes[0]}
+                    />
+                  )}
+                  <RowTable
+                    bannerBefore={Boolean(nsBanner)}
+                    bannerAfter={Boolean(nsBannerAfter)}
+                    data={row}
+                    languages={languageCols}
+                    columnSizes={columnSizesPercent}
+                    onResize={startResize}
+                  />
+                </div>
+              );
+            }}
+          />
+        </StyledContent>
+      </StyledVerticalScroll>
     </StyledContainer>
   );
 };

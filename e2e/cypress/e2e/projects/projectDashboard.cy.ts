@@ -30,7 +30,7 @@ describe('Project stats', () => {
     });
     createTag('new tag');
     setStateToReviewed('english translation');
-    createComment('new comment', 0, 'en');
+    createComment('new comment', 'new translation', 'en');
     resolveComment('new comment');
 
     selectInProjectMenu('Project Dashboard');

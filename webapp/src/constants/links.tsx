@@ -308,6 +308,7 @@ export class LINKS {
   static PROJECT_MANAGE = Link.ofParent(LINKS.PROJECT, 'manage');
 
   static PROJECT_EDIT = Link.ofParent(LINKS.PROJECT_MANAGE, 'edit');
+  static PROJECT_EDIT_ADVANCED = Link.ofParent(LINKS.PROJECT_EDIT, 'advanced');
 
   static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
 

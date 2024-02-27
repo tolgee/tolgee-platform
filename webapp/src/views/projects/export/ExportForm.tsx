@@ -191,6 +191,7 @@ export const ExportForm = () => {
                 filterNamespace: values.namespaces,
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
+                supportArrays: false,
               },
             },
           },

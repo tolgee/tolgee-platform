@@ -4,7 +4,7 @@ import {
   MachineTranslationIcon,
   TranslationMemoryIcon,
 } from 'tg.component/CustomIcons';
-import { useServiceImg } from 'tg.views/projects/translations/TranslationTools/useServiceImg';
+import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/MachineTranslation/useServiceImg';
 import { TranslationFlagIcon } from './TranslationFlagIcon';
 
 const StyledImgWrapper = styled('div')`

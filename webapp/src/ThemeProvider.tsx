@@ -154,6 +154,7 @@ const getTheme = (mode: PaletteMode) => {
       exampleBanner: c.exampleBanner,
       tipsBanner: c.tipsBanner,
       tokens: c.tokens,
+      placeholders: c.placeholders,
     },
     mixins: {
       toolbar: {
@@ -253,6 +254,13 @@ const getTheme = (mode: PaletteMode) => {
         styleOverrides: {
           root: {
             textDecoration: 'none',
+          },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            marginLeft: 0,
           },
         },
       },

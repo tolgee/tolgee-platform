@@ -10,6 +10,7 @@ import {
   ExampleBanner,
   Marker,
   Navbar,
+  Placeholders,
   QuickStart,
   Tile,
   TipsBanner,
@@ -45,6 +46,7 @@ declare module '@mui/material/styles/createPalette' {
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
     tokens: typeof all.tokens;
+    placeholders: Placeholders;
   }
 
   interface PaletteOptions {
@@ -67,6 +69,7 @@ declare module '@mui/material/styles/createPalette' {
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
     tokens: typeof all.tokens;
+    placeholders: Placeholders;
   }
 }
 

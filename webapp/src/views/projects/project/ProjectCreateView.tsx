@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { useHistory } from 'react-router-dom';
@@ -93,18 +93,18 @@ export const ProjectCreateView: FunctionComponent = () => {
         {(props: FormikProps<CreateProjectValueType>) => {
           return (
             <Box mb={8}>
-              <Grid container spacing={2}>
-                <Grid item lg md sm xs={12}>
-                  <TextField
-                    variant="standard"
-                    autoFocus
-                    data-cy="project-name-field"
-                    label={<T keyName="create_project_name_label" />}
-                    name="name"
-                    required={true}
-                  />
-                </Grid>
-              </Grid>
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="h6">
+                  <T keyName="create_project_name_label" />
+                </Typography>
+                <TextField
+                  size="small"
+                  autoFocus
+                  data-cy="project-name-field"
+                  name="name"
+                  required={true}
+                />
+              </Box>
               <Box mb={2}>
                 <Typography variant="h6">
                   <T keyName="project_create_languages_title" />
@@ -120,6 +120,22 @@ export const ProjectCreateView: FunctionComponent = () => {
                   name="baseLanguageTag"
                   languages={props.values.languages!}
                 />
+              </Box>
+              <Box mt={2} display="grid" justifyItems="start">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={props.values.icuPlaceholders}
+                      onChange={(_, val) =>
+                        props.setFieldValue('icuPlaceholders', val)
+                      }
+                    />
+                  }
+                  label={t('project_create_use_tolgee_placeholders_label')}
+                />
+                <Typography variant="caption">
+                  {t('project_create_tolgee_placeholders_hint')}
+                </Typography>
               </Box>
             </Box>
           );

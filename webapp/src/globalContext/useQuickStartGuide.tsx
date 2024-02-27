@@ -14,7 +14,9 @@ export const useQuickStartGuide = (
 ) => {
   const [active, setActive] = useState<HighlightItem[]>([]);
   const [activeStep, setActiveStep] = useState<ItemStep>();
-  const floating = useMediaQuery(`@media (max-width: ${1200}px)`);
+  const [floatingForced, setFloatingForced] = useState(false);
+  const floating =
+    useMediaQuery(`@media (max-width: ${1200}px)`) || floatingForced;
   const match = useRouteMatch(LINKS.PROJECT.template);
   const projectIdParam = match?.params[PARAMS.PROJECT_ID];
   const projectId = isNaN(projectIdParam) ? undefined : projectIdParam;
@@ -99,6 +101,7 @@ export const useQuickStartGuide = (
     quickStartVisited,
     quickStartCompleteStep,
     quickStartSkipTips: skipTips,
+    quickStartForceFloating: setFloatingForced,
   };
 
   return [state, actions] as const;

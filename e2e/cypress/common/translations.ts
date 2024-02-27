@@ -56,7 +56,7 @@ export function createTranslation({
     cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
   }
   if (translation) {
-    cy.gcy('translation-create-translation-input').first().type(translation);
+    cy.gcy('translation-editor').first().type(translation);
   }
 
   cy.gcy('global-form-save-button').click();
@@ -108,12 +108,11 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   if (newValue !== undefined) {
     // select all, delete and type new text
-    cy.get('.CodeMirror')
+    cy.gcy('global-editor')
       .first()
-      .then((editor) => {
-        // @ts-ignore
-        editor[0].CodeMirror.setValue(newValue);
-      });
+      .find('[contenteditable]')
+      .clear()
+      .type(newValue);
 
     if (save) {
       getCellSaveButton().click();
