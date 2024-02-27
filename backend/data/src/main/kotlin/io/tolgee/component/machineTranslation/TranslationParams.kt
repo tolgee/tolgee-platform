@@ -13,6 +13,8 @@ data class TranslationParams(
   val serviceInfo: MtServiceInfo,
   val metadata: Metadata?,
   val isBatch: Boolean,
+  var pluralForms: Map<String, String>? = null,
+  val expectedPluralForms: MutableSet<String>? = null,
 ) {
   val cacheKey: String
     get() =

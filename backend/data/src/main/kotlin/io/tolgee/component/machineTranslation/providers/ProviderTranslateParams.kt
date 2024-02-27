@@ -15,4 +15,12 @@ data class ProviderTranslateParams(
    * Whether translation is executed as a part of batch translation task
    */
   val isBatch: Boolean,
+  /**
+   * Only for translators supporting plurals
+   */
+  val pluralForms: Map<String, String>? = null,
+  /**
+   * Only for translators supporting plurals
+   */
+  val expectedPluralForms: Set<String>? = null,
 )

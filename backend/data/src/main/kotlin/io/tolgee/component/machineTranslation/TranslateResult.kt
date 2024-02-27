@@ -10,4 +10,5 @@ data class TranslateResult(
   val usedService: MtServiceType? = null,
   val baseBlank: Boolean,
   val exception: Exception? = null,
+  val translatedPluralForms: Map<String, String>? = null,
 ) : Serializable
