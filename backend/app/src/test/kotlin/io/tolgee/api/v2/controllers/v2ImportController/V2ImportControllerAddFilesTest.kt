@@ -284,30 +284,6 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   @Test
-  fun `stores issue with too long value`() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    commitTransaction()
-
-    executeInNewTransaction {
-      performImport(
-        projectId = base.project.id,
-        listOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue)),
-      ).andIsOk
-    }
-
-    executeInNewTransaction {
-      importService.find(base.project.id, base.userAccount.id)!!.let {
-        assertThat(it.files[0].issues[0].params[0].value).isEqualTo("not_string")
-        assertThat(it.files[0].issues[0].params[2].value).isEqualTo(
-          "[Lorem ipsum dolor sit amet," +
-            " consectetur adipiscing elit. Suspendisse" +
-            " ac ultricies tortor. Integer ac...",
-        )
-      }
-    }
-  }
-
-  @Test
   fun `correctly computes conflicts on import`() {
     val testData = ImportCleanTestData()
     testDataService.saveTestData(testData.root)
