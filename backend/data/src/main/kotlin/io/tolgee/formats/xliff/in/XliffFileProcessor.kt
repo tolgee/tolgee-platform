@@ -12,7 +12,12 @@ import javax.xml.stream.XMLInputFactory
 
 class XliffFileProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
   override fun process() {
-    val parsed = XliffParser(xmlEventReader).parse()
+    val parsed =
+      try {
+        XliffParser(xmlEventReader).parse()
+      } catch (e: ImportCannotParseFileException) {
+        throw ImportCannotParseFileException(context.file.name, e.message)
+      }
     if (isApple(parsed)) {
       return AppleXliffFileProcessor(context, parsed).process()
     }

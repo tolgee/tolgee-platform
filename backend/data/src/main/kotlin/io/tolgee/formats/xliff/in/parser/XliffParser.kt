@@ -1,5 +1,6 @@
 package io.tolgee.formats.xliff.`in`.parser
 
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -26,6 +27,16 @@ class XliffParser(
   private var currentTransUnit: XliffTransUnit? = null
 
   fun parse(): XliffModel {
+    try {
+      return doParse()
+    } catch (e: Exception) {
+      throw ImportCannotParseFileException("XLIFF", e.message)
+    } finally {
+      xmlEventReader.close()
+    }
+  }
+
+  private fun doParse(): XliffModel {
     parseVersion()
     while (xmlEventReader.hasNext()) {
       val event = xmlEventReader.nextEvent()
