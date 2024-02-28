@@ -353,11 +353,18 @@ class TranslationService(
 
     val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
 
-    return getTranslationMemorySuggestions(baseTranslationText, key, targetLanguage, pageable)
+    return getTranslationMemorySuggestions(
+      baseTranslationText,
+      isPlural = key.isPlural,
+      key,
+      targetLanguage,
+      pageable,
+    )
   }
 
   fun getTranslationMemorySuggestions(
     sourceTranslationText: String,
+    isPlural: Boolean,
     key: Key?,
     targetLanguage: LanguageDto,
     pageable: Pageable,
@@ -367,6 +374,7 @@ class TranslationService(
     }
     return translationRepository.getTranslateMemorySuggestions(
       baseTranslationText = sourceTranslationText,
+      isPlural = isPlural,
       key = key,
       targetLanguageId = targetLanguage.id,
       pageable = pageable,

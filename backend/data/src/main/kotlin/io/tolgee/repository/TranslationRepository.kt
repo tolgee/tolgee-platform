@@ -114,12 +114,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
             target.text is not null
       where baseTranslation.language.id = p.baseLanguage.id and
         cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
-        (:key is null or key <> :key) and (:key is null or key.isPlural = :#{ #key != null ? #key.isPlural : null } )
+        (:key is null or key <> :key) and target.key.isPlural = :isPlural
       order by similarity desc
       """,
   )
   fun getTranslateMemorySuggestions(
     baseTranslationText: String,
+    isPlural: Boolean,
     key: Key? = null,
     targetLanguageId: Long,
     pageable: Pageable,

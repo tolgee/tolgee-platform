@@ -219,6 +219,10 @@ class MtTranslatorContext(
     return get(key)
   }
 
+  fun getKey(keyId: Long?): KeyForMt? {
+    return keys[keyId]
+  }
+
   private val languageService: LanguageService by lazy {
     applicationContext.getBean(LanguageService::class.java)
   }

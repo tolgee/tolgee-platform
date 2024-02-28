@@ -51,10 +51,9 @@ import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import java.util.*
-import kotlin.system.measureTimeMillis
 import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
-class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 
   @Autowired
@@ -187,61 +186,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   private fun initTestData() {
     testData = SuggestionTestData()
     projectSupplier = { testData.projectBuilder.self }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it suggests from TM with keyId`() {
-    saveTestData()
-    performAuthPost(
-      "/v2/projects/${project.id}/suggest/translation-memory",
-      SuggestRequestDto(keyId = testData.thisIsBeautifulKey.id, targetLanguageId = testData.germanLanguage.id),
-    ).andIsOk.andPrettyPrint.andAssertThatJson {
-      node("_embedded.translationMemoryItems") {
-        node("[0]") {
-          node("targetText").isEqualTo("Das ist schön")
-          node("baseText").isEqualTo("This is beautiful")
-          node("keyName").isEqualTo("key 2")
-          node("similarity").isEqualTo("0.6296296")
-        }
-      }
-      node("page.totalElements").isEqualTo(1)
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it suggests from TM with baseText`() {
-    saveTestData()
-    performAuthPost(
-      "/v2/projects/${project.id}/suggest/translation-memory",
-      SuggestRequestDto(baseText = "This is beautiful", targetLanguageId = testData.germanLanguage.id),
-    ).andIsOk.andPrettyPrint.andAssertThatJson {
-      node("_embedded.translationMemoryItems") {
-        node("[0]") {
-          node("targetText").isEqualTo("Das ist schön")
-          node("baseText").isEqualTo("This is beautiful")
-          node("keyName").isEqualTo("key 2")
-          node("similarity").isEqualTo("1.0")
-        }
-      }
-      node("page.totalElements").isEqualTo(3)
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it suggests from TM fast enough`() {
-    testData.generateLotOfData()
-    saveTestData()
-    val time =
-      measureTimeMillis {
-        performAuthPost(
-          "/v2/projects/${project.id}/suggest/translation-memory",
-          SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id),
-        ).andIsOk
-      }
-    assertThat(time).isLessThan(1500)
   }
 
   @Test

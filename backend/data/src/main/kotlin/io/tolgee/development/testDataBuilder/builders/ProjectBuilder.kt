@@ -180,4 +180,11 @@ class ProjectBuilder(
   }
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
+
+  fun getTranslation(
+    key: Key,
+    languageTag: String,
+  ): Translation? {
+    return this.data.translations.find { it.self.key == key && it.self.language.tag == languageTag }?.self
+  }
 }

@@ -21,6 +21,7 @@ class MetadataProvider(
       examples =
         getExamples(
           targetLanguage,
+          context.getKey(metadataKey.keyId)?.isPlural ?: false,
           metadataKey.baseTranslationText,
           metadataKey.keyId,
         ),
@@ -72,11 +73,13 @@ class MetadataProvider(
 
   private fun getExamples(
     targetLanguage: LanguageDto,
+    isPlural: Boolean,
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
     return translationService.getTranslationMemorySuggestions(
       sourceTranslationText = text,
+      isPlural = isPlural,
       key = null,
       targetLanguage = targetLanguage,
       pageable = PageRequest.of(0, 5),

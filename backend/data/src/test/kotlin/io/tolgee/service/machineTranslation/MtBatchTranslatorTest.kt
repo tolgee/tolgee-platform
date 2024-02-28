@@ -183,6 +183,7 @@ class MtBatchTranslatorTest {
         translationServiceMock,
       ).getTranslationMemorySuggestions(
         any<String>(),
+        any<Boolean>(),
         eq(null),
         any<LanguageDto>(),
         any<Pageable>(),
