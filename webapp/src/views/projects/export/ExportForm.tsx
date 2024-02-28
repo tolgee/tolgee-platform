@@ -19,6 +19,7 @@ import { NestedSelector } from 'tg.views/projects/export/components/NestedSelect
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { SupportArraysSelector } from './components/SupportArraysSelector';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -44,19 +45,24 @@ const StyledForm = styled('form')`
     'langs   format'
     'ns      ns    '
     'options submit';
+
   & .states {
     grid-area: states;
   }
+
   & .langs {
     grid-area: langs;
   }
+
   & .format {
     grid-area: format;
   }
+
   & .submit {
     grid-area: submit;
     justify-self: end;
   }
+
   & .ns {
     grid-area: ns;
   }
@@ -157,6 +163,7 @@ export const ExportForm = () => {
         format: (format || EXPORT_DEFAULT_FORMAT) as (typeof FORMATS)[number],
         namespaces: allNamespaces || [],
         nested: nested === 'true',
+        supportArrays: false,
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -191,7 +198,7 @@ export const ExportForm = () => {
                 filterNamespace: values.namespaces,
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
-                supportArrays: false,
+                supportArrays: values.supportArrays,
               },
             },
           },
@@ -228,9 +235,14 @@ export const ExportForm = () => {
             <LanguageSelector className="langs" languages={allowedLanguages} />
             <FormatSelector className="format" />
             {values.format === 'JSON' && (
-              <StyledOptions className="options">
-                <NestedSelector />
-              </StyledOptions>
+              <>
+                <StyledOptions className="options">
+                  <NestedSelector />
+                </StyledOptions>
+                <StyledOptions className="options">
+                  <SupportArraysSelector />
+                </StyledOptions>
+              </>
             )}
             <NsSelector className="ns" namespaces={allNamespaces} />
             <div className="submit">

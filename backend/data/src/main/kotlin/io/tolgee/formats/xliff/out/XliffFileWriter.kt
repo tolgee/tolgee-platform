@@ -36,6 +36,12 @@ class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlC
 
   private fun createFileBody(file: XliffFile): Element {
     return xliffElement.element("file") {
+      element("header") {
+        element("tool") {
+          attr("tool-id", "tolgee.io")
+          attr("tool-name", "Tolgee")
+        }
+      }
       attr("original", file.original ?: "")
       attr("datatype", file.datatype)
       file.sourceLanguage?.let { attr("source-language", it) }

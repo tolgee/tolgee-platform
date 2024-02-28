@@ -24,6 +24,9 @@ class AppleXliffFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
     |  <file datatype="plaintext" original="Localizable.strings" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
     |    <body>
     |      <trans-unit id="key1">
     |        <source xml:space="preserve">Hello! I%lld, %@, %e, %f</source>
@@ -43,6 +46,9 @@ class AppleXliffFileExporterTest {
     |    </body>
     |  </file>
     |  <file datatype="plaintext" original="homepage.strings" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
     |    <body>
     |      <trans-unit id="key2">
     |        <source xml:space="preserve">Namespaced</source>
@@ -51,6 +57,9 @@ class AppleXliffFileExporterTest {
     |    </body>
     |  </file>
     |  <file datatype="plaintext" original="homepage.stringsdict" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
     |    <body>
     |      <trans-unit id="/key3:dict/NSStringLocalizedFormatKey:dict/:string">
     |        <source xml:space="preserve">%#@property@</source>
@@ -75,6 +84,9 @@ class AppleXliffFileExporterTest {
     |    </body>
     |  </file>
     |  <file datatype="plaintext" original="Localizable.stringsdict" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
     |    <body>
     |      <trans-unit id="/key5:dict/NSStringLocalizedFormatKey:dict/:string">
     |        <source xml:space="preserve">%#@property@</source>
@@ -119,6 +131,9 @@ class AppleXliffFileExporterTest {
     |    </body>
     |  </file>
     |  <file datatype="plaintext" original="Localizable.xcstrings" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
     |    <body>
     |      <trans-unit id="key &lt;omg&gt;|==|plural.one">
     |        <source xml:space="preserve">%lld day</source>
