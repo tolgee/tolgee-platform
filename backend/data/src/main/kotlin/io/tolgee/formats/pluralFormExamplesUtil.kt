@@ -6,6 +6,23 @@ private val POSSIBLE_MANY = arrayOf<Number>(6, 7, 8, 11, 20, 21, 1000000, 0.5, 0
 private val POSSIBLE_FEW = arrayOf(0, 2, 3, 4, 6)
 private val POSSIBLE_OTHER = arrayOf<Number>(10, 11, 20, 100, 0.0, 0, 0.1, 2, 3, 4)
 
+private val KEYWORD_ZERO = "zero"
+private val KEYWORD_ONE = "one"
+private val KEYWORD_TWO = "two"
+private val KEYWORD_FEW = "few"
+private val KEYWORD_MANY = "many"
+private val KEYWORD_OTHER = "other"
+
+private val ALL_KEYWORDS =
+  arrayOf(
+    KEYWORD_ZERO,
+    KEYWORD_ONE,
+    KEYWORD_TWO,
+    KEYWORD_FEW,
+    KEYWORD_MANY,
+    KEYWORD_OTHER,
+  )
+
 private fun findPluralFormExample(
   variant: String,
   rules: PluralRules,
@@ -24,10 +41,13 @@ fun getPluralFormExamples(languageTag: String): Map<String, Number> {
 }
 
 fun getPluralFormExamples(rules: PluralRules): Map<String, Number> {
-  return rules.keywords.associateWith {
+  return rules.orderedKeywords.associateWith {
     getVariantExample(rules, it)
   }
 }
+
+val PluralRules.orderedKeywords
+  get() = keywords.toSortedSet { a, b -> ALL_KEYWORDS.indexOf(a) - ALL_KEYWORDS.indexOf(b) }
 
 fun getVariantExample(
   rules: PluralRules,

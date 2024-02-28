@@ -1,5 +1,6 @@
 package io.tolgee.service.machineTranslation
 
+import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
@@ -14,7 +15,7 @@ import org.springframework.context.ApplicationContext
 
 class MtTranslatorContext(
   private val projectId: Long,
-  private val applicationContext: ApplicationContext,
+  val applicationContext: ApplicationContext,
   val isBatch: Boolean,
 ) {
   val languages by lazy {
@@ -34,7 +35,7 @@ class MtTranslatorContext(
   /**
    * LanguageId -> Set of services
    */
-  private val enabledServices = mutableMapOf<Long, Set<MtServiceInfo>>()
+  val enabledServices = mutableMapOf<Long, Set<MtServiceInfo>>()
 
   /**
    * LanguageId -> Primary Service
@@ -93,7 +94,7 @@ class MtTranslatorContext(
   }
 
   fun getPluralFormsReplacingReplaceParam(string: String): PluralForms? {
-    return pluralFormsCache.computeIfAbsentSupportNull(string) {
+    return pluralFormsWithReplacedReplaceNumberCache.computeIfAbsentSupportNull(string) {
       io.tolgee.formats.getPluralFormsReplacingReplaceParam(string, REPLACE_NUMBER_PLACEHOLDER)
     }
   }
@@ -235,6 +236,10 @@ class MtTranslatorContext(
   }
 
   private val metadataProvider by lazy {
-    MetadataProvider(this, applicationContext)
+    MetadataProvider(this)
+  }
+
+  val mtServiceManager: MtServiceManager by lazy {
+    applicationContext.getBean(MtServiceManager::class.java)
   }
 }

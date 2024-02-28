@@ -1,17 +1,14 @@
 package io.tolgee.service.machineTranslation
 
-import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.TranslationParams
 import io.tolgee.formats.PluralForms
 import io.tolgee.formats.getPluralFormsForLocale
 import io.tolgee.formats.toIcuPluralString
 import io.tolgee.helpers.TextHelper
-import org.springframework.context.ApplicationContext
 
 class MtBatchTranslator(
   private val context: MtTranslatorContext,
-  private val applicationContext: ApplicationContext,
 ) {
   fun translate(batch: List<MtBatchItemParams>): List<MtTranslatorResult> {
     val result = mutableListOf<MtTranslatorResult>()
@@ -77,7 +74,7 @@ class MtBatchTranslator(
     val withReplacedParams = TextHelper.replaceIcuParams(baseTranslationText)
 
     val managerResult =
-      mtServiceManager.translate(
+      context.mtServiceManager.translate(
         getTranslationParams(
           item = item,
           baseTranslationText = baseTranslationText,
@@ -166,9 +163,5 @@ class MtBatchTranslator(
       replaced = replaced.replace(placeholder, text)
     }
     return replaced
-  }
-
-  private val mtServiceManager: MtServiceManager by lazy {
-    applicationContext.getBean(MtServiceManager::class.java)
   }
 }

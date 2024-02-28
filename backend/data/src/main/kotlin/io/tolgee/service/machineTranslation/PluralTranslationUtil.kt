@@ -17,51 +17,57 @@ class PluralTranslationUtil(
   }
 
   fun translate(): MtTranslatorResult {
-    val prepared = this.prepareFormSourceStrings()
-    val translated =
-      prepared.map {
-        it.key to translateFn(it.value)
-      }.toMap()
-    return getResult(translated)
+    return result
   }
 
-  private fun prepareFormSourceStrings(): Map<String, String> {
-    val targetLanguageTag = context.getLanguage(item.targetLanguageId).tag
-    val sourceLanguageTag = context.getBaseLanguage().tag
-    val targetULocale = getULocaleFromTag(targetLanguageTag)
-    val sourceULocale = getULocaleFromTag(sourceLanguageTag)
-    val targetRules = PluralRules.forLocale(targetULocale)
-    val sourceRules = PluralRules.forLocale(sourceULocale)
-    val targetExamples = getPluralFormExamples(targetRules)
-
-    return targetExamples.map {
+  private val preparedFormSourceStrings: Sequence<Pair<String, String>> by lazy {
+    return@lazy targetExamples.asSequence().map {
       val form = sourceRules.select(it.value.toDouble())
       val formValue = forms.forms[form] ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
       it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value)
-    }.toMap()
+    }
   }
 
-  private fun getResult(translated: Map<String, MtTranslatorResult>): MtTranslatorResult {
+  private val translated by lazy {
+    preparedFormSourceStrings.map {
+      it.first to translateFn(it.second)
+    }
+  }
+
+  private val result: MtTranslatorResult by lazy {
     val result =
       translated.map { (form, result) ->
         result.translatedText = result.translatedText?.replaceNumberTags()
         form to result
-      }.toMap()
+      }
 
-    val resultForms = result.mapValues { it.value.translatedText ?: "" }
+    val resultForms = result.map { it.first to (it.second.translatedText ?: "") }.toMap()
 
-    return MtTranslatorResult(
+    return@lazy MtTranslatorResult(
       translatedText =
         resultForms.toIcuPluralString(
           argName = forms.argName,
         ),
-      actualPrice = result.values.sumOf { it.actualPrice },
-      contextDescription = result.values.firstOrNull { it.contextDescription != null }?.contextDescription,
+      actualPrice = result.sumOf { it.second.actualPrice },
+      contextDescription = result.firstOrNull { it.second.contextDescription != null }?.second?.contextDescription,
       service = item.service,
       targetLanguageId = item.targetLanguageId,
       baseBlank = false,
-      exception = result.values.firstOrNull { it.exception != null }?.exception,
+      exception = result.firstOrNull { it.second.exception != null }?.second?.exception,
     )
+  }
+
+  private val targetExamples by lazy {
+    val targetLanguageTag = context.getLanguage(item.targetLanguageId).tag
+    val targetULocale = getULocaleFromTag(targetLanguageTag)
+    val targetRules = PluralRules.forLocale(targetULocale)
+    getPluralFormExamples(targetRules)
+  }
+
+  private val sourceRules by lazy {
+    val sourceLanguageTag = context.getBaseLanguage().tag
+    val sourceULocale = getULocaleFromTag(sourceLanguageTag)
+    PluralRules.forLocale(sourceULocale)
   }
 
   private fun String.replaceNumberTags(): String {
