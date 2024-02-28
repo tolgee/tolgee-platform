@@ -5,6 +5,10 @@ import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.assertLanguagesCount
+import io.tolgee.util.assertSingle
+import io.tolgee.util.assertTranslations
+import io.tolgee.util.description
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,6 +73,27 @@ class Xliff12FileProcessorTest {
     val start = System.currentTimeMillis()
     Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
     assertThat(System.currentTimeMillis() - start).isLessThan(4000)
+  }
+
+  @Test
+  fun `preserving spaces works correctly`() {
+    mockUtil.mockIt("example.xliff", "src/test/resources/import/xliff/preserving-spaces.xliff")
+    xmlStreamReader = inputFactory.createXMLEventReader(mockUtil.importFileDto.data.inputStream())
+    Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
+    mockUtil
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "1")
+      .assertSingle {
+        hasText("  Back")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "2")
+      .assertSingle {
+        hasText("Back")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "3")
+      .assertSingle {
+        hasText("  Back")
+      }
   }
 
   @Test
