@@ -48,7 +48,7 @@ export const PluralEditor = ({
       render={({ content, variant, exampleValue }) => {
         const variantOrOther = variant || 'other';
         return (
-          <EditorWrapper data-cy="translation-editor">
+          <EditorWrapper data-cy="translation-editor" data-cy-variant={variant}>
             <Editor
               mode={editorMode}
               value={content}

@@ -85,7 +85,9 @@ export const TranslationPlurals = ({
   if (value.parameter) {
     return (
       <StyledContainer>
-        <StyledParameter>{value.parameter}</StyledParameter>
+        <StyledParameter data-cy="translation-plural-parameter">
+          {value.parameter}
+        </StyledParameter>
         <StyledVariants>
           {variants
             .filter(([variant]) => showEmpty || value.variants[variant])
@@ -99,7 +101,10 @@ export const TranslationPlurals = ({
                   >
                     <div>{variant}</div>
                   </StyledVariantLabel>
-                  <StyledVariantContent sx={{ opacity }}>
+                  <StyledVariantContent
+                    sx={{ opacity }}
+                    data-cy="translation-plural-variant"
+                  >
                     {render({
                       variant: variant,
                       content: value.variants[variant] || '',

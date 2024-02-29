@@ -7,7 +7,7 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
-import { assertMessage, dismissMenu } from './shared';
+import { assertMessage, dismissMenu, gcyAdvanced } from './shared';
 import Chainable = Cypress.Chainable;
 import { selectNamespace } from './namespace';
 
@@ -27,12 +27,17 @@ export const getCell = (value: string) => {
   return cy.gcy('translations-table-cell').contains(value);
 };
 
+export const getTranslationCell = (key: string, language: string) => {
+  return gcyAdvanced({ value: 'translations-table-cell', key, language });
+};
+
 type Props = {
   key: string;
-  translation?: string;
+  translation?: string | Record<string, string>;
   tag?: string;
   namespace?: string;
   description?: string;
+  variableName?: string;
 };
 
 export function createTranslation({
@@ -41,6 +46,7 @@ export function createTranslation({
   tag,
   namespace,
   description,
+  variableName,
 }: Props) {
   waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
@@ -55,8 +61,19 @@ export function createTranslation({
     cy.gcy('translations-tag-input').type(tag);
     cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
   }
-  if (translation) {
+  if (typeof translation === 'string') {
     cy.gcy('translation-editor').first().type(translation);
+  } else if (typeof translation === 'object') {
+    cy.gcy('key-plural-checkbox').click();
+    if (variableName) {
+      cy.gcy('key-plural-checkbox-expand').click();
+      cy.gcy('key-plural-variable-name').type(variableName);
+    }
+    Object.entries(translation).forEach(([key, value]) => {
+      gcyAdvanced({ value: 'translation-editor', variant: key })
+        .find('[contenteditable]')
+        .type(value);
+    });
   }
 
   cy.gcy('global-form-save-button').click();

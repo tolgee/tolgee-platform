@@ -36,6 +36,7 @@ export const PluralFormCheckbox = ({
         {({ field }) => (
           <Box justifyContent="start" display="flex" alignItems="center">
             <FormControlLabel
+              data-cy="key-plural-checkbox"
               control={<Checkbox checked={Boolean(field.value)} {...field} />}
               label={t('translation_single_label_is_plural')}
             />
@@ -43,6 +44,7 @@ export const PluralFormCheckbox = ({
               size="small"
               onClick={() => setExpanded((val) => !val)}
               disabled={!isPlural}
+              data-cy="key-plural-checkbox-expand"
             >
               {expanded ? (
                 <ExpandLess fontSize="small" />
@@ -68,6 +70,7 @@ export const PluralFormCheckbox = ({
                 size="small"
                 disabled={!isPlural}
                 sx={{ maxWidth: 300 }}
+                data-cy="key-plural-variable-name"
               />
               <FieldError error={meta.touched && meta.error} />
             </Box>
