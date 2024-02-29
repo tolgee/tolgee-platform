@@ -16,5 +16,8 @@ class PluralFormExamplesUtilTest {
     getPluralFormExamples("ar-weird-tag").assert.isEqualTo(
       mapOf("few" to 3, "many" to 11, "one" to 1, "other" to 100, "two" to 2, "zero" to 0),
     )
+    getPluralFormExamples("es").assert.isEqualTo(
+      mapOf("many" to 1000000, "one" to 1, "other" to 10),
+    )
   }
 }

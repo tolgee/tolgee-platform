@@ -74,6 +74,6 @@ class BaseIcuMessageToPoConvertor(
     languagePluralData.examples.filter {
       // This is probably only way how to do it, so we have to use internal API
       @Suppress("DEPRECATION")
-      PluralRules.forLocale(locale).matches(FixedDecimal(it.sample.toString()), keyword)
+      PluralRules.forLocale(locale).matches(FixedDecimal(it.sample.toLong()), keyword)
     }.map { it.plural }
 }

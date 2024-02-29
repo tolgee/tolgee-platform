@@ -55,7 +55,7 @@ dependencyResolutionManagement {
             library('springmockk', 'com.ninja-squad:springmockk:3.0.1')
             library('mockito', 'org.mockito.kotlin:mockito-kotlin:5.0.0')
             library('commonsCodec', 'commons-codec:commons-codec:1.15')
-            library('icu4j', 'com.ibm.icu:icu4j:69.1')
+            library('icu4j', 'com.ibm.icu:icu4j:74.2')
             library('jsonUnitAssert', 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0')
             library('amazonS3', "software.amazon.awssdk:s3:$amazonAwsSdkVersion")
             library('amazonSTS', "software.amazon.awssdk:sts:$amazonAwsSdkVersion")
