@@ -14,6 +14,7 @@ import {
   DeletableKeyWithTranslationsModelType,
   EditMode,
 } from './context/types';
+import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -30,6 +31,7 @@ export const useTranslationCell = ({
   onSaveSuccess,
   cellRef,
 }: Props) => {
+  const project = useProject();
   const {
     setEditValue,
     setEditValueString,
@@ -90,13 +92,15 @@ export const useTranslationCell = ({
     if (!baseLanguage?.tag) {
       return;
     }
+
     const baseText = keyData.translations[baseLanguage.tag].text;
 
     let baseVariant: string | undefined;
     if (cursor?.activeVariant) {
       const variants = getTolgeeFormat(
         baseText || '',
-        keyData.keyIsPlural
+        keyData.keyIsPlural,
+        !project.icuPlaceholders
       )?.variants;
       baseVariant = variants?.[cursor.activeVariant] ?? variants?.['other'];
     } else {

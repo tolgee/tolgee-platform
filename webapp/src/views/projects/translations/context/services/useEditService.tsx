@@ -66,7 +66,8 @@ type Props = {
 function generateCurrentValue(
   position: EditorProps,
   textValue: string | undefined,
-  key: DeletableKeyWithTranslationsModelType | undefined
+  key: DeletableKeyWithTranslationsModelType | undefined,
+  raw: boolean
 ): Edit {
   const result: Edit = {
     ...position,
@@ -74,7 +75,7 @@ function generateCurrentValue(
     value: { variants: { other: textValue } },
   };
   if (position.language && key?.keyIsPlural) {
-    const format = getTolgeeFormat(textValue ?? '', key.keyIsPlural);
+    const format = getTolgeeFormat(textValue ?? '', key.keyIsPlural, raw);
     const variants = getPluralVariants(position.language);
     if (!position.activeVariant) {
       result.activeVariant = variants[0];
@@ -85,9 +86,9 @@ function generateCurrentValue(
   return result;
 }
 
-function composeValue(position: Edit) {
+function composeValue(position: Edit, raw: boolean) {
   if (position.value) {
-    return tolgeeFormatGenerateIcu(position.value);
+    return tolgeeFormatGenerateIcu(position.value, raw);
   }
   return position.value;
 }
@@ -140,7 +141,11 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
       : key?.keyName;
 
     return serializeVariants(
-      getTolgeeFormat(value ?? '', Boolean(key?.keyIsPlural))?.variants
+      getTolgeeFormat(
+        value ?? '',
+        Boolean(key?.keyIsPlural),
+        !project.icuPlaceholders
+      )?.variants
     );
   }, [key, position?.language, Boolean(position?.value.parameter)]);
 
@@ -271,7 +276,9 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
         ? key?.translations[pos.language]?.text
         : key?.keyName;
 
-      setPosition(() => generateCurrentValue(pos, textValue, key));
+      setPosition(() =>
+        generateCurrentValue(pos, textValue, key, !project.icuPlaceholders)
+      );
     }
     // make it async if someone is stealing focus
     setTimeout(() => {
@@ -323,7 +330,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
       return;
     }
     const { keyId, language } = position;
-    const value = composeValue(position);
+    const value = composeValue(position, !project.icuPlaceholders);
     if (!language && !value) {
       // key can't be empty
       return messageService.error(<T keyName="global_empty_value" />);

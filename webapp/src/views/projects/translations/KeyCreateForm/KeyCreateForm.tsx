@@ -69,10 +69,13 @@ export const KeyCreateForm: React.FC<Props> = ({
             ...values,
             isPlural: Boolean(values.isPlural),
             translations: {
-              [baseLanguage]: tolgeeFormatGenerateIcu({
-                ...values.baseValue,
-                parameter: actualParameter,
-              }),
+              [baseLanguage]: tolgeeFormatGenerateIcu(
+                {
+                  ...values.baseValue,
+                  parameter: actualParameter,
+                },
+                !project.icuPlaceholders
+              ),
             },
           },
         },

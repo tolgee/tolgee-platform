@@ -1,13 +1,15 @@
 import { getTolgeePlurals, getVariantExample } from '@tginternal/editor';
 import { useMemo } from 'react';
+import { useProject } from 'tg.hooks/useProject';
 
 export const useExtractedPlural = (
   variant: string | undefined,
   text: string | undefined
 ) => {
+  const project = useProject();
   return useMemo(() => {
     if (variant && text) {
-      const plurals = getTolgeePlurals(text);
+      const plurals = getTolgeePlurals(text, !project.icuPlaceholders);
       if (plurals.parameter) {
         return plurals.variants[variant] || '';
       }

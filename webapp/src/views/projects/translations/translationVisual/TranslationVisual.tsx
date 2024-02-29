@@ -7,6 +7,7 @@ import { TranslationWithPlaceholders } from './TranslationWithPlaceholders';
 import { T } from '@tolgee/react';
 import { styled } from '@mui/material';
 import { DirectionLocaleWrapper } from '../DirectionLocaleWrapper';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledDisabled = styled(DirectionLocaleWrapper)`
   color: ${({ theme }) => theme.palette.text.disabled};
@@ -32,8 +33,9 @@ export const TranslationVisual = ({
   disabled,
   isPlural,
 }: Props) => {
+  const project = useProject();
   const value = useMemo(() => {
-    return getTolgeeFormat(text || '', isPlural);
+    return getTolgeeFormat(text || '', isPlural, !project.icuPlaceholders);
   }, [text, isPlural]);
 
   if (disabled) {
