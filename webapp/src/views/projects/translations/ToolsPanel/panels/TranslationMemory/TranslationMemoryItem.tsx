@@ -1,7 +1,5 @@
 import { styled } from '@mui/material';
 import { green, grey, orange } from '@mui/material/colors';
-import { getTolgeePlurals, getVariantExample } from '@tginternal/editor';
-import { useMemo } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationWithPlaceholders } from 'tg.views/projects/translations/translationVisual/TranslationWithPlaceholders';
 import {
@@ -9,6 +7,8 @@ import {
   useExtractedPlural,
   useVariantExample,
 } from '../../common/useExtractedPlural';
+import { T } from '@tolgee/react';
+import clsx from 'clsx';
 
 type TranslationMemoryItemModel =
   components['schemas']['TranslationMemoryItemModel'];
@@ -27,13 +27,15 @@ const StyledItem = styled('div')`
     'space space'
     'similarity source';
   font-size: 14px;
-  cursor: pointer;
   color: ${({ theme }) => theme.palette.text.primary};
   transition: all 0.1s ease-in-out;
   transition-property: background color;
   &:hover {
     background: ${({ theme }) => theme.palette.emphasis[100]};
     color: ${({ theme }) => theme.palette.primary.main};
+  }
+  &.clickable {
+    cursor: pointer;
   }
 `;
 
@@ -64,6 +66,16 @@ const StyledSource = styled('div')`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledBaseEmpty = styled(StyledBase)`
+  font-style: italic;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledTargetEmpty = styled(StyledTarget)`
+  font-style: italic;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -109,26 +121,43 @@ export const TranslationMemoryItem = ({
         e.preventDefault();
       }}
       onClick={() => {
-        setValue(item.targetText);
+        if (targetText) {
+          setValue(targetText);
+        }
       }}
+      className={clsx({
+        clickable: Boolean(targetText),
+      })}
       role="button"
       data-cy="translation-tools-translation-memory-item"
     >
       <StyledTarget>
-        <TranslationWithPlaceholders
-          content={targetText}
-          locale={languageTag}
-          nested={Boolean(pluralVariant)}
-          pluralExampleValue={variantExample}
-        />
+        {targetText === '' ? (
+          <StyledTargetEmpty>
+            <T keyName="translation_memory_empty" />
+          </StyledTargetEmpty>
+        ) : (
+          <TranslationWithPlaceholders
+            content={targetText}
+            locale={languageTag}
+            nested={Boolean(pluralVariant)}
+            pluralExampleValue={variantExample}
+          />
+        )}
       </StyledTarget>
       <StyledBase>
-        <TranslationWithPlaceholders
-          content={baseText}
-          locale={baseLanguageTag}
-          nested={Boolean(baseVariant)}
-          pluralExampleValue={baseVariantExample}
-        />
+        {baseText === '' ? (
+          <StyledBaseEmpty>
+            <T keyName="translation_memory_empty" />
+          </StyledBaseEmpty>
+        ) : (
+          <TranslationWithPlaceholders
+            content={baseText}
+            locale={baseLanguageTag}
+            nested={Boolean(baseVariant)}
+            pluralExampleValue={baseVariantExample}
+          />
+        )}
       </StyledBase>
       <StyledSimilarity style={{ background: similarityColor }}>
         {Math.round(100 * item.similarity)}%

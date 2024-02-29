@@ -7,12 +7,11 @@ import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { ProviderLogo } from './ProviderLogo';
 import { TranslationWithPlaceholders } from '../../../translationVisual/TranslationWithPlaceholders';
 import { CombinedMTResponse } from './useMTStreamed';
-import { useMemo } from 'react';
-import { getTolgeePlurals, getVariantExample } from '@tginternal/editor';
 import {
   useExtractedPlural,
   useVariantExample,
 } from '../../common/useExtractedPlural';
+import { T } from '@tolgee/react';
 
 const StyledItem = styled('div')`
   padding: ${({ theme }) => theme.spacing(0.5, 0.75)};
@@ -49,6 +48,11 @@ const StyledDescription = styled('div')`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
+const StyledEmpty = styled(StyledValue)`
+  font-style: italic;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
 type Props = {
   data: CombinedMTResponse['result'][number];
   provider: string;
@@ -71,7 +75,7 @@ export const MachineTranslationItem = ({
   const error = data?.errorMessage?.toLowerCase();
   const result = data?.result;
 
-  const text = useExtractedPlural(pluralVariant, data?.result?.output || '');
+  const text = useExtractedPlural(pluralVariant, data?.result?.output);
   const variantExample = useVariantExample(pluralVariant, languageTag);
 
   const clickable = Boolean(text);
@@ -97,12 +101,18 @@ export const MachineTranslationItem = ({
         <>
           <StyledValue>
             <div dir={getLanguageDirection(languageTag)}>
-              <TranslationWithPlaceholders
-                content={text || ''}
-                locale={languageTag}
-                nested={Boolean(pluralVariant)}
-                pluralExampleValue={variantExample}
-              />
+              {text === '' ? (
+                <StyledEmpty>
+                  <T keyName="machine_translation_empty" />
+                </StyledEmpty>
+              ) : (
+                <TranslationWithPlaceholders
+                  content={text}
+                  locale={languageTag}
+                  nested={Boolean(pluralVariant)}
+                  pluralExampleValue={variantExample}
+                />
+              )}
             </div>
             {result?.contextDescription && (
               <StyledDescription>{result.contextDescription}</StyledDescription>

@@ -3,13 +3,13 @@ import { useMemo } from 'react';
 
 export const useExtractedPlural = (
   variant: string | undefined,
-  text: string
+  text: string | undefined
 ) => {
   return useMemo(() => {
     if (variant && text) {
       const plurals = getTolgeePlurals(text);
       if (plurals.parameter) {
-        return plurals.variants[variant] || plurals.variants['other'] || '';
+        return plurals.variants[variant] || '';
       }
     }
     return text;

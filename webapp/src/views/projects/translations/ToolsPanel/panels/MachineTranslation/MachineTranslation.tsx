@@ -26,9 +26,7 @@ const StyledError = styled(StyledValue)`
 const OutOfCreditsWrapper = styled('div')`
   padding: 8px 12px 8px 12px;
   margin: 8px 8px 0px 8px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  display: grid;
   background: ${({ theme }) => theme.palette.cell.selected};
   border-radius: 8px;
 `;

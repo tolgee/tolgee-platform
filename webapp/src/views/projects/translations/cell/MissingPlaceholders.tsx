@@ -46,7 +46,10 @@ export const MissingPlaceholders = ({
   }, [locale, variant]);
 
   return (
-    <StyledPlaceholdersWrapper className={className}>
+    <StyledPlaceholdersWrapper
+      className={className}
+      onMouseDown={(e) => e.preventDefault()}
+    >
       {Boolean(placeholders.length) && (
         <>
           <StyledLabel>
