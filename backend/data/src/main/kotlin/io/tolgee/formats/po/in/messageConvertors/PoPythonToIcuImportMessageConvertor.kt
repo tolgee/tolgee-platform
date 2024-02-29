@@ -9,11 +9,13 @@ class PoPythonToIcuImportMessageConvertor : ImportMessageConvertor {
     rawData: Any?,
     languageTag: String,
     convertPlaceholders: Boolean,
+    forceEscapePluralForms: Boolean,
   ): MessageConvertorResult {
     return BasePoToIcuMessageConvertor { PythonToIcuParamConvertor() }.convert(
       rawData,
       languageTag,
       convertPlaceholders,
+      forceEscapePluralForms,
     )
   }
 }

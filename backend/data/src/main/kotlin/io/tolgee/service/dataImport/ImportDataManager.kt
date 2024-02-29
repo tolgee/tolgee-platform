@@ -385,9 +385,10 @@ class ImportDataManager(
           if (convertor != null) {
             val converted =
               convertor.convert(
-                it.rawData,
-                language.name,
-                convertPlaceholdersToIcu,
+                rawData = it.rawData,
+                languageTag = language.name,
+                convertPlaceholders = convertPlaceholdersToIcu,
+                forceEscapePluralForms = !import.project.icuPlaceholders,
               )
             it.isPlural = converted.isPlural
             it.text = converted.message

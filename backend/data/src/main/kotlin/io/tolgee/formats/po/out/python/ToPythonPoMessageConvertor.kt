@@ -7,7 +7,8 @@ import io.tolgee.formats.po.out.ToPoMessageConvertor
 class ToPythonPoMessageConvertor(
   val message: String,
   val languageTag: String = "en",
-  forceIsPlural: Boolean?,
+  forceIsPlural: Boolean,
+  projectIcuPlaceholdersSupport: Boolean = true,
 ) : ToPoMessageConvertor {
   private val baseIcuMessageToClikeConvertor =
     BaseIcuMessageToPoConvertor(
@@ -15,6 +16,7 @@ class ToPythonPoMessageConvertor(
       languageTag = languageTag,
       argumentConverter = PythonFromIcuParamConvertor(),
       forceIsPlural = forceIsPlural,
+      projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     )
 
   override fun convert(): ToPoConversionResult {

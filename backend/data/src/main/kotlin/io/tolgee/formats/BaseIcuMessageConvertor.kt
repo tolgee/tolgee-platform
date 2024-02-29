@@ -62,16 +62,20 @@ class BaseIcuMessageConvertor(
       handleNode(tree)
 
       if ((pluralFormsResult == null && forceIsPlural != true) || forceIsPlural == false) {
-        return@catchingCannotParse PossiblePluralConversionResult(
-          singleResult.toString(),
-          null,
-          null,
-          warnings,
-          firstArgName = firstArgName,
-        )
+        return@catchingCannotParse getSingularResult()
       }
       getPluralResult()
     }
+  }
+
+  private fun getSingularResult(): PossiblePluralConversionResult {
+    return PossiblePluralConversionResult(
+      singleResult.toString(),
+      null,
+      null,
+      warnings,
+      firstArgName = firstArgName,
+    )
   }
 
   private fun catchingCannotParse(fn: () -> PossiblePluralConversionResult): PossiblePluralConversionResult {

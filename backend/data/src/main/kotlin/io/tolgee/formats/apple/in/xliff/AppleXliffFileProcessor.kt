@@ -161,9 +161,10 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     if (forms.containsKey("other") && forms["other"] != null) {
       val converted =
         ImportMessageConvertorType.APPLE_XLIFF.importMessageConvertor!!.convert(
-          forms,
-          language,
-          context.importSettings.convertPlaceholdersToIcu,
+          rawData = forms,
+          languageTag = language,
+          convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+          forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
         ).message
       context.addTranslation(
         keyName,
@@ -207,6 +208,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
       message,
       "who-knows",
       context.importSettings.convertPlaceholdersToIcu,
+      forceEscapePluralForms = false,
     ).message
   }
 

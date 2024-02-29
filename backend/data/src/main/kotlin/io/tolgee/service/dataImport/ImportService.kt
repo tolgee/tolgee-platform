@@ -100,6 +100,7 @@ class ImportService(
         applicationContext = applicationContext,
         import = import,
         params = params,
+        projectIcuPlaceholdersEnabled = project.icuPlaceholders,
         importSettings = importSettingsService.get(userAccount, project.id),
       )
     val errors = fileProcessor.processFiles(files)

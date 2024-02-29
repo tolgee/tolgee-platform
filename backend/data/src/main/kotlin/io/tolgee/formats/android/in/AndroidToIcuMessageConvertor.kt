@@ -12,6 +12,7 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
     rawData: Any?,
     languageTag: String,
     convertPlaceholders: Boolean,
+    forceEscapePluralForms: Boolean,
   ): MessageConvertorResult {
     val stringValue = rawData as? String ?: (rawData as? Map<*, *>)?.get("_stringValue") as? String
 
@@ -22,7 +23,7 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
 
     if (rawData is Map<*, *>) {
       val rawDataMap = rawData as Map<String, String>
-      val converted = convertPlural(rawDataMap, convertPlaceholders)
+      val converted = convertPlural(rawDataMap, convertPlaceholders, forceEscapePluralForms)
       return MessageConvertorResult(converted, true)
     }
 
@@ -36,6 +37,7 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
   private fun convertPlural(
     rawData: Map<String, String>,
     convertPlaceholders: Boolean,
+    forceEscapePluralForms: Boolean,
   ): String {
     val forms =
       rawData.mapNotNull {
@@ -43,7 +45,12 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
         it.key to (converted ?: return@mapNotNull null)
       }.toMap()
 
-    return FormsToIcuPluralConvertor(forms, escape = false, addNewLines = true, argName = "0").convert()
+    return FormsToIcuPluralConvertor(
+      forms,
+      forceEscape = forceEscapePluralForms,
+      addNewLines = true,
+      argName = "0",
+    ).convert()
   }
 
   private fun convert(

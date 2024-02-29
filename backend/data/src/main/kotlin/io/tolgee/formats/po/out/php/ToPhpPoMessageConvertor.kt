@@ -7,7 +7,8 @@ import io.tolgee.formats.po.out.ToPoMessageConvertor
 class ToPhpPoMessageConvertor(
   val message: String,
   val languageTag: String = "en",
-  forceIsPlural: Boolean?,
+  forceIsPlural: Boolean,
+  projectIcuPlaceholdersSupport: Boolean = true,
 ) : ToPoMessageConvertor {
   private val baseIcuMessageToPoConvertor =
     BaseIcuMessageToPoConvertor(
@@ -15,6 +16,7 @@ class ToPhpPoMessageConvertor(
       languageTag = languageTag,
       argumentConverter = PhpFromIcuParamConvertor(),
       forceIsPlural = forceIsPlural,
+      projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     )
 
   override fun convert(): ToPoConversionResult {

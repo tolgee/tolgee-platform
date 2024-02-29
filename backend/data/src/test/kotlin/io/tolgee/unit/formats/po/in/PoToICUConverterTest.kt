@@ -21,12 +21,15 @@ class PoToICUConverterTest {
   fun testPhpPlurals() {
     val result =
       PoPhpToIcuImportMessageConvertor().convert(
-        mapOf(
-          0 to "Petr má jednoho psa.",
-          1 to "Petr má %d psi.",
-          2 to "Petr má %d psů.",
-        ),
-        "cs",
+        rawData =
+          mapOf(
+            0 to "Petr má jednoho psa.",
+            1 to "Petr má %d psi.",
+            2 to "Petr má %d psů.",
+          ),
+        languageTag = "cs",
+        convertPlaceholders = true,
+        forceEscapePluralForms = false,
       ).message
     assertThat(result).isEqualTo(
       "{0, plural,\n" +
@@ -80,6 +83,8 @@ class PoToICUConverterTest {
       PoPythonToIcuImportMessageConvertor().convert(
         "%(one)s %(two)d %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld {hey}",
         "cs",
+        true,
+        false,
       ).message
     assertThat(
       result,
@@ -94,6 +99,8 @@ class PoToICUConverterTest {
       PoPhpToIcuImportMessageConvertor().convert(
         "%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s",
         "cs",
+        true,
+        false,
       ).message
 
     assertThat(result)

@@ -13,17 +13,23 @@ enum class PoSupportedMessageFormat(
   val poFlag: String,
   val paramRegex: Regex,
   val importMessageConvertorType: ImportMessageConvertorType,
-  val exportMessageConverter: (message: String, languageTag: String, forceIsPlural: Boolean?) -> ToPoMessageConvertor,
+  val exportMessageConverter: (
+    message: String,
+    languageTag: String,
+    forceIsPlural: Boolean,
+    projectIcuPlaceholdersSupport: Boolean,
+  ) -> ToPoMessageConvertor,
 ) {
   PHP(
     poFlag = "php-format",
     importMessageConvertorType = ImportMessageConvertorType.PO_PHP,
     paramRegex = PhpToIcuParamConvertor.PHP_PARAM_REGEX,
-    exportMessageConverter = { message, languageTag, forceIsPlural ->
+    exportMessageConverter = { message, languageTag, forceIsPlural, projectIcuPlaceholdersSupport ->
       ToPhpPoMessageConvertor(
         message,
         languageTag,
         forceIsPlural,
+        projectIcuPlaceholdersSupport,
       )
     },
   ),
@@ -31,11 +37,12 @@ enum class PoSupportedMessageFormat(
     poFlag = "c-format",
     importMessageConvertorType = ImportMessageConvertorType.PO_C,
     paramRegex = CToIcuParamConvertor.C_PARAM_REGEX,
-    exportMessageConverter = { message, languageTag, forceIsPlural ->
+    exportMessageConverter = { message, languageTag, forceIsPlural, projectIcuPlaceholdersSupport ->
       ToCPoMessageConvertor(
         message,
         languageTag,
         forceIsPlural,
+        projectIcuPlaceholdersSupport,
       )
     },
   ),
@@ -43,11 +50,12 @@ enum class PoSupportedMessageFormat(
     poFlag = "python-format",
     importMessageConvertorType = ImportMessageConvertorType.PO_PYTHON,
     paramRegex = PythonToIcuParamConvertor.PYTHON_PARAM_REGEX,
-    exportMessageConverter = { message, languageTag, forceIsPlural ->
+    exportMessageConverter = { message, languageTag, forceIsPlural, projectIcuPlaceholdersSupport ->
       ToPythonPoMessageConvertor(
         message,
         languageTag,
         forceIsPlural,
+        projectIcuPlaceholdersSupport,
       )
     },
   ),

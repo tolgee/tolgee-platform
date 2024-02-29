@@ -9,7 +9,13 @@ class PoCToIcuImportMessageConvertor : ImportMessageConvertor {
     rawData: Any?,
     languageTag: String,
     convertPlaceholders: Boolean,
+    forceEscapePluralForms: Boolean,
   ): MessageConvertorResult {
-    return BasePoToIcuMessageConvertor { CToIcuParamConvertor() }.convert(rawData, languageTag, convertPlaceholders)
+    return BasePoToIcuMessageConvertor { CToIcuParamConvertor() }.convert(
+      rawData,
+      languageTag,
+      convertPlaceholders,
+      forceEscapePluralForms,
+    )
   }
 }

@@ -1,5 +1,6 @@
 package io.tolgee.formats
 
+import io.tolgee.formats.escaping.IcuMessageEscaper
 import io.tolgee.formats.po.`in`.ParsedCLikeParam
 
 /**

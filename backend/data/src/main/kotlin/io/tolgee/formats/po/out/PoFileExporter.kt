@@ -15,6 +15,7 @@ class PoFileExporter(
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
   private val poSupportedMessageFormat: PoSupportedMessageFormat,
+  private val projectIcuPlaceholdersSupport: Boolean = true,
 ) : FileExporter {
   override val fileExtension: String = "po"
 
@@ -35,6 +36,7 @@ class PoFileExporter(
           translation.text!!,
           translation.languageTag,
           translation.key.isPlural,
+          projectIcuPlaceholdersSupport,
         ).convert()
 
       resultBuilder.appendLine()

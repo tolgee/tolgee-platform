@@ -106,7 +106,13 @@ class StringsFileProcessor(
   }
 
   private fun onPairParsed() {
-    val converted = ImportMessageConvertorType.STRINGS.importMessageConvertor!!.convert(value, languageName).message
+    val converted =
+      ImportMessageConvertorType.STRINGS.importMessageConvertor!!.convert(
+        rawData = value,
+        languageTag = languageName,
+        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+        forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
+      ).message
     context.addKeyDescription(key ?: return, currentComment?.toString())
     context.addTranslation(
       key ?: return,

@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.escaping
 
-import io.tolgee.formats.IcuMessageEscaper
+import io.tolgee.formats.escaping.IcuMessageEscaper
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 

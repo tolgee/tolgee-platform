@@ -5,6 +5,7 @@ import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
 import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.FromIcuParamConvertor
+import io.tolgee.formats.escaping.ForceIcuUnescaper
 import io.tolgee.formats.getPluralDataOrNull
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
@@ -13,10 +14,9 @@ class BaseIcuMessageToPoConvertor(
   val message: String,
   val argumentConverter: FromIcuParamConvertor,
   val languageTag: String = "en",
-  forceIsPlural: Boolean?,
+  private val forceIsPlural: Boolean,
+  private val projectIcuPlaceholdersSupport: Boolean = false,
 ) {
-  private val cLikeConvertor = BaseIcuMessageConvertor(message, argumentConverter, forceIsPlural = forceIsPlural)
-
   companion object {
     const val OTHER_KEYWORD = "other"
   }
@@ -32,13 +32,35 @@ class BaseIcuMessageToPoConvertor(
   }
 
   fun convert(): ToPoConversionResult {
-    val possiblePluralResult = cLikeConvertor.convert()
-    if (!possiblePluralResult.isPlural()) {
-      return ToPoConversionResult(possiblePluralResult.singleResult, null, possiblePluralResult.warnings)
+    if (!forceIsPlural) {
+      return getSingularResult()
     }
 
-    val poPluralResult = getPluralResult(possiblePluralResult.formsResult ?: mutableMapOf())
-    return ToPoConversionResult(null, poPluralResult, possiblePluralResult.warnings)
+    return getPluralResult()
+  }
+
+  private fun getPluralResult(): ToPoConversionResult {
+    val result =
+      BaseIcuMessageConvertor(
+        message,
+        argumentConverter,
+        forceIsPlural = true,
+        // it's unescaped manually later, when forceUnescape
+        keepEscaping = !projectIcuPlaceholdersSupport,
+      ).convert()
+    val poPluralResult = getPluralResult(result.formsResult ?: mutableMapOf())
+    return ToPoConversionResult(null, poPluralResult)
+  }
+
+  private fun getSingularResult(): ToPoConversionResult {
+    val result =
+      BaseIcuMessageConvertor(
+        message,
+        argumentConverter,
+        forceIsPlural = false,
+        keepEscaping = false,
+      ).convert()
+    return ToPoConversionResult(result.singleResult, null)
   }
 
   private fun getPluralResult(formsResult: Map<String, String>): List<String> {
@@ -46,7 +68,7 @@ class BaseIcuMessageToPoConvertor(
     val plurals =
       languagePluralData.examples.map {
         val form = forms[it.plural] ?: OTHER_KEYWORD
-        it.plural to (formsResult[form] ?: formsResult[OTHER_KEYWORD] ?: "")
+        it.plural to ((formsResult[form] ?: formsResult[OTHER_KEYWORD])?.forceUnescape() ?: "")
       }.sortedBy { it.first }.map { it.second }.toList()
 
     return plurals
@@ -68,6 +90,13 @@ class BaseIcuMessageToPoConvertor(
           }?.key ?: return@mapNotNull null
       index to keyword
     }.toMap()
+  }
+
+  private fun String.forceUnescape(): String {
+    if (!projectIcuPlaceholdersSupport) {
+      return ForceIcuUnescaper(this).unescaped
+    }
+    return this
   }
 
   private fun getPluralIndexesForKeyword(keyword: String) =

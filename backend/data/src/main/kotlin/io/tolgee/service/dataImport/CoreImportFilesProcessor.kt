@@ -26,6 +26,7 @@ class CoreImportFilesProcessor(
   val import: Import,
   val params: ImportAddFilesParams = ImportAddFilesParams(),
   val importSettings: IImportSettings,
+  val projectIcuPlaceholdersEnabled: Boolean = true,
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
   private val importFileProcessorFactory: ImportFileProcessorFactory by lazy {
@@ -78,6 +79,7 @@ class CoreImportFilesProcessor(
         maxTranslationTextLength = tolgeeProperties.maxTranslationTextLength,
         params = params,
         importSettings,
+        projectIcuPlaceholdersEnabled,
         applicationContext,
       )
     val processor = importFileProcessorFactory.getProcessor(file, fileProcessorContext)

@@ -12,6 +12,7 @@ class AppleToIcuMessageConvertor : ImportMessageConvertor {
     rawData: Any?,
     languageTag: String,
     convertPlaceholders: Boolean,
+    forceEscapePluralForms: Boolean,
   ): MessageConvertorResult {
     val stringValue = rawData as? String ?: (rawData as? Map<*, *>)?.get("_stringValue") as? String
 

@@ -51,7 +51,12 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     }
 
     val converted =
-      AndroidToIcuMessageConvertor().convert(it.items, guessedLanguage, context.importSettings.convertPlaceholdersToIcu)
+      AndroidToIcuMessageConvertor().convert(
+        rawData = it.items,
+        languageTag = guessedLanguage,
+        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+        forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
+      )
 
     context.addTranslation(
       keyName,
@@ -104,6 +109,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       message,
       guessedLanguage,
       context.importSettings.convertPlaceholdersToIcu,
+      forceEscapePluralForms = false,
     ).message
   }
 

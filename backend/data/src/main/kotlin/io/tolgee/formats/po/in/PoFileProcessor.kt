@@ -87,7 +87,12 @@ class PoFileProcessor(
     val messageFormat = getMessageFormat(poTranslation)
     val convertor = messageFormat.importMessageConvertorType.importMessageConvertor ?: return (null to null)
     val icuMessage =
-      convertor.convert(stringOrPluralForms, languageId, context.importSettings.convertPlaceholdersToIcu).message
+      convertor.convert(
+        rawData = stringOrPluralForms,
+        languageTag = languageId,
+        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+        forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
+      ).message
     return icuMessage to messageFormat.importMessageConvertorType
   }
 

@@ -25,6 +25,7 @@ data class FileProcessorContext(
       override var overrideKeyDescriptions: Boolean = false
       override var convertPlaceholdersToIcu: Boolean = true
     },
+  val projectIcuPlaceholdersEnabled: Boolean = true,
   val applicationContext: ApplicationContext,
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()

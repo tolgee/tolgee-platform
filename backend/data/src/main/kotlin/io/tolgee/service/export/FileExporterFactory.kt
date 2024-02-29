@@ -28,6 +28,7 @@ class FileExporterFactory(
     exportParams: IExportParams,
     baseTranslationsProvider: () -> List<ExportTranslationView>,
     baseLanguage: LanguageDto,
+    projectIcuPlaceholdersSupport: Boolean,
   ): FileExporter {
     return when (exportParams.format) {
       ExportFormat.JSON -> JsonFileExporter(data, exportParams)
@@ -35,7 +36,7 @@ class FileExporterFactory(
       ExportFormat.APPLE_XLIFF -> AppleXliffExporter(data, exportParams, baseTranslationsProvider, baseLanguage.tag)
       ExportFormat.ANDROID_XML -> AndroidStringsXmlExporter(data, exportParams)
       ExportFormat.PO ->
-        getPoExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
+        getPoExporter(data, exportParams, baseTranslationsProvider, baseLanguage, projectIcuPlaceholdersSupport)
 
       ExportFormat.APPLE_STRINGS_STRINGSDICT ->
         AppleStringsStringsdictExporter(data, exportParams)
@@ -49,6 +50,7 @@ class FileExporterFactory(
     exportParams: IExportParams,
     baseTranslationsProvider: () -> List<ExportTranslationView>,
     baseLanguage: LanguageDto,
+    projectIcuPlaceholdersSupport: Boolean,
   ): PoFileExporter {
     val poSupportedMessageFormat =
       when (exportParams.messageFormat) {
@@ -64,6 +66,7 @@ class FileExporterFactory(
       baseTranslationsProvider,
       baseLanguage,
       poSupportedMessageFormat,
+      projectIcuPlaceholdersSupport,
     )
   }
 }

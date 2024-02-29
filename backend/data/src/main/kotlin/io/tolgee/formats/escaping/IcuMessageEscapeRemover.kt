@@ -1,4 +1,4 @@
-package io.tolgee.formats
+package io.tolgee.formats.escaping
 
 /**
  * It escapes controlling characters in ICU message, so it's not interpreted when in comes from other formats

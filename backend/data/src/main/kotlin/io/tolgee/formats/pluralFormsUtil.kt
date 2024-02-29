@@ -1,6 +1,7 @@
 package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
+import io.tolgee.formats.escaping.IcuMessageEscaper
 import io.tolgee.util.nullIfEmpty
 
 fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
@@ -42,7 +43,7 @@ fun optimizePossiblePlural(string: String): String {
   val optimizedForms = optimizePluralForms(forms.forms)
   return FormsToIcuPluralConvertor(
     optimizedForms,
-    escape = false,
+    forceEscape = false,
     addNewLines = true,
     argName = forms.argName,
   ).convert()
@@ -238,7 +239,14 @@ private fun Map<String, String>.preparePluralForms(escapeHash: Boolean = false):
 }
 
 private fun Map<String, String>?.preparedFormsToIcuPlural(argName: String): String? {
-  return this?.let { FormsToIcuPluralConvertor(it, escape = false, addNewLines = true, argName = argName).convert() }
+  return this?.let {
+    FormsToIcuPluralConvertor(
+      it,
+      forceEscape = false,
+      addNewLines = true,
+      argName = argName,
+    ).convert()
+  }
 }
 
 fun Map<String, String>.toIcuPluralString(
@@ -249,7 +257,7 @@ fun Map<String, String>.toIcuPluralString(
 ): String {
   return FormsToIcuPluralConvertor(
     this,
-    escape = escape,
+    forceEscape = escape,
     optimize = optimize,
     addNewLines = addNewLines,
     argName = argName,
