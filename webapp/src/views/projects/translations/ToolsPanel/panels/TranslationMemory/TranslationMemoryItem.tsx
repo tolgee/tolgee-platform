@@ -49,6 +49,16 @@ const StyledBase = styled('div')`
   font-style: italic;
   color: ${({ theme }) => theme.palette.text.secondary};
   font-size: 13px;
+
+  & .placeholder-widget {
+    font-size: 11px;
+    background: ${({ theme }) =>
+      theme.palette.placeholders.inactive.background};
+    border-color: ${({ theme }) => theme.palette.placeholders.inactive.border};
+    color: ${({ theme }) => theme.palette.placeholders.inactive.text};
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
 `;
 
 const StyledSimilarity = styled('div')`

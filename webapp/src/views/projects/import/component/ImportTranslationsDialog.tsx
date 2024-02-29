@@ -17,10 +17,20 @@ import { components } from 'tg.service/apiSchema.generated';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { StyledAppBar } from 'tg.component/layout/TopBar/TopBar';
+import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
 
 const StyledTitle = styled(Typography)`
   margin-left: ${({ theme }) => theme.spacing(2)};
   flex: 1;
+`;
+
+const StyledDescription = styled('div')`
+  grid-area: description;
+  font-size: 13px;
+  color: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[300]
+      : theme.palette.emphasis[500]};
 `;
 
 const Transition = React.forwardRef(function Transition(
@@ -93,26 +103,37 @@ export const ImportTranslationsDialog: FunctionComponent<{
             wrapperComponentProps={{ sx: { m: 2 } }}
             onPageChange={setPage}
             loadable={loadable}
-            renderItem={(i) => (
-              <Box
-                pt={1}
-                pl={2}
-                pr={2}
-                style={{
-                  borderBottom: `1px solid ${theme.palette.emphasis['100']}`,
-                  wordBreak: 'break-all',
-                }}
-              >
-                <Grid container spacing={2}>
-                  <Grid item lg={4} md={3} sm xs>
-                    <Box>{i.keyName}</Box>
+            renderItem={(i) => {
+              return (
+                <Box
+                  pt={1}
+                  pl={2}
+                  pr={2}
+                  style={{
+                    borderBottom: `1px solid ${theme.palette.emphasis['100']}`,
+                    wordBreak: 'break-all',
+                  }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid item lg={4} md={3} sm xs>
+                      <Box>{i.keyName}</Box>
+                      {i.importedKeyDescription && (
+                        <StyledDescription>
+                          {i.importedKeyDescription}
+                        </StyledDescription>
+                      )}
+                    </Grid>
+                    <Grid item lg md sm xs>
+                      <TranslationVisual
+                        text={i.text}
+                        locale={props.row?.existingLanguageTag ?? 'en'}
+                        isPlural={i.isPlural}
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item lg md sm xs>
-                    {i.text}
-                  </Grid>
-                </Grid>
-              </Box>
-            )}
+                </Box>
+              );
+            }}
           />
         )}
       </Dialog>

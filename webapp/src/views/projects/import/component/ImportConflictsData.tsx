@@ -63,7 +63,7 @@ export const ImportConflictsData: FunctionComponent<{
                 </Grid>
                 <ImportConflictTranslationsPair
                   translation={t}
-                  languageId={languageId}
+                  row={props.row}
                 />
               </Grid>
             </Box>

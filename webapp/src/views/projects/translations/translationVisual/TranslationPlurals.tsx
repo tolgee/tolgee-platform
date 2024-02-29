@@ -43,7 +43,7 @@ const StyledVariantLabel = styled('div')`
   user-select: none;
   margin: 0px 1px;
   text-transform: capitalize;
-
+  white-space: nowrap;
   & > * {
     margin-top: -1px;
   }

@@ -9,8 +9,8 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 export const ImportConflictTranslationsPair: FunctionComponent<{
   translation: components['schemas']['ImportTranslationModel'];
-  languageId: number;
-}> = ({ translation, languageId }) => {
+  row: components['schemas']['ImportLanguageModel'];
+}> = ({ translation, row }) => {
   const project = useProject();
   const [expanded, setExpanded] = useState(false);
   const [leftExpandable, setLeftExpandable] = useState(false);
@@ -36,7 +36,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
     setOverrideMutation.mutate({
       path: {
         projectId: project.id,
-        languageId: languageId,
+        languageId: row.id,
         translationId: translationId,
       },
     });
@@ -46,7 +46,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
     setKeepMutation.mutate({
       path: {
         projectId: project.id,
-        languageId: languageId,
+        languageId: row.id,
         translationId: translationId,
       },
     });
@@ -80,6 +80,8 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
           expanded={expanded}
           onDetectedExpandability={setLeftExpandable}
           expandable={leftExpandable || rightExpandable}
+          languageTag={row.existingLanguageTag || 'en'}
+          isPlural={translation.willBeConvertedToPlural}
         />
       </Grid>
       <Grid item lg md sm={12} xs={12} zeroMinWidth>
@@ -97,6 +99,8 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
           expanded={expanded}
           onDetectedExpandability={setRightExpandable}
           expandable={leftExpandable || rightExpandable}
+          languageTag={row.existingLanguageTag || 'en'}
+          isPlural={translation.willBeConvertedToPlural}
         />
       </Grid>
     </>
