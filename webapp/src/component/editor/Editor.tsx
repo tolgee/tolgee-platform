@@ -16,6 +16,7 @@ import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
+  display: grid;
 
   & .cm-editor {
     outline: none;

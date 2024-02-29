@@ -9,6 +9,7 @@ import { TolgeeHighlight } from '@tginternal/editor';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
+  display: grid;
 
   & .cm-editor {
     outline: none;
