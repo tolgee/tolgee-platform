@@ -19,7 +19,7 @@
     "@openreplay/tracker": "^3.5.4",
     "@sentry/browser": "^7.80.0",
     "@stomp/stompjs": "^6.1.2",
-    "@tginternal/editor": "^1.12.1",
+    "@tginternal/editor": "^1.13.2",
     "@tolgee/format-icu": "^5.16.0",
     "@tolgee/react": "^5.16.0",
     "@vitejs/plugin-react": "^4.2.1",
