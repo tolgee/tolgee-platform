@@ -150,7 +150,8 @@ export const Comments: React.FC<PanelContentProps> = ({
           data-cy="translations-comments-input"
           InputProps={{
             sx: {
-              padding: '2px 4px 2px 12px',
+              padding: '8px 4px 8px 12px',
+              borderRadius: '8px',
             },
             endAdornment: (
               <IconButton
@@ -158,6 +159,7 @@ export const Comments: React.FC<PanelContentProps> = ({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleAddComment}
                 disabled={isAddingComment}
+                sx={{ my: '-7px', alignSelf: 'end' }}
               >
                 <Send fontSize="small" color="inherit" />
               </IconButton>
