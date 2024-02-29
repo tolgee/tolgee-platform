@@ -37,7 +37,7 @@ class FileExporterFactory(
       ExportFormat.PO ->
         getPoExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
 
-      ExportFormat.IOS_STRINGS_STRINGSDICT ->
+      ExportFormat.APPLE_STRINGS_STRINGSDICT ->
         AppleStringsStringsdictExporter(data, exportParams)
 
       ExportFormat.FLUTTER_ARB -> FlutterArbFileExporter(data, exportParams, baseLanguage.tag, objectMapper)

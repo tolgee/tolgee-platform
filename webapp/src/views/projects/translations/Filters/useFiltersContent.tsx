@@ -6,10 +6,14 @@ import {
 } from '../context/TranslationsContext';
 import { SubmenuStates } from './SubmenuStates';
 import { SubmenuMulti } from './SubmenuMulti';
-import { CompactListSubheader, CompactMenuItem } from './FiltersComponents';
 import { useAvailableFilters } from './useAvailableFilters';
 import { toggleFilter } from './tools';
 import { useActiveFilters } from './useActiveFilters';
+import {
+  CompactListSubheader,
+  CompactMenuItem,
+} from 'tg.component/ListComponents';
+import React from 'react';
 
 export const useFiltersContent = () => {
   const options: any[] = [];

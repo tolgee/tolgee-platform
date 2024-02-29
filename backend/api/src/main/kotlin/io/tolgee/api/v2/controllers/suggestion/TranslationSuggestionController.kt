@@ -99,7 +99,7 @@ class TranslationSuggestionController(
       dto.baseText?.let { baseText ->
         translationMemoryService.suggest(
           baseText,
-          isPlural = dto.isPlural,
+          isPlural = dto.isPlural ?: false,
           targetLanguage,
           pageable,
         )

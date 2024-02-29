@@ -38,7 +38,7 @@ export const SupportArraysSelector: React.FC<Props> = ({ className }) => {
               <>
                 <Checkbox
                   {...field}
-                  checked={field.value}
+                  checked={field.value || false}
                   data-cy="export-support_arrays-selector"
                   variant="standard"
                 />
