@@ -11,8 +11,7 @@ type ImportSettingModel = components['schemas']['ImportSettingsModel'];
 
 const StyledPanelBox = styled(Box)`
   margin-top: 24px;
-  border: 1px solid
-    ${({ theme }) => theme.palette.tokens.LINE_BORDER_LINE_PRIMARY};
+  border: 1px solid ${({ theme }) => theme.palette.tokens.BORDER_SECONDARY};
   display: flex;
   width: 1200px;
   padding: 6px 16px;
@@ -20,7 +19,8 @@ const StyledPanelBox = styled(Box)`
   align-items: center;
   gap: 20px;
   border-radius: 4px;
-  background-color: ${({ theme }) => theme.palette.background.paper};
+  background-color: ${({ theme }) =>
+    theme.palette.tokens.SURFACE_BACKGROUND_SECONDARY};
 `;
 
 export const ImportSettingsPanel: FC = (props) => {
@@ -91,7 +91,11 @@ export const ImportSettingsPanel: FC = (props) => {
   }
 
   return (
-    <StyledPanelBox>
+    <StyledPanelBox
+      sx={(theme) => ({
+        color: theme.palette.tokens.TEXT_PRIMARY,
+      })}
+    >
       {project.icuPlaceholders && (
         <LoadingCheckboxWithSkeleton
           loading={loadingItems.has('convertPlaceholdersToIcu')}

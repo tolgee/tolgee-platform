@@ -22,7 +22,8 @@ const StyledWrapper = styled(Box)`
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s;
-  background-color: ${({ theme }) => theme.palette.background.paper};
+  background-color: ${({ theme }) =>
+    theme.palette.tokens.SURFACE_BACKGROUND_DRAG_DROP};
 
   &:before {
     content: '';

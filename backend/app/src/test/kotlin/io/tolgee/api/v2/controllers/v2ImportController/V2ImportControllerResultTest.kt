@@ -116,6 +116,10 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
             node("conflictId").isNotNull
             node("conflictText").isEqualTo("What a text")
             node("override").isEqualTo(false)
+            node("isPlural").isEqualTo(false)
+            node("willBeConvertedToPlural").isEqualTo(false)
+            node("importedKeyDescription").isEqualTo("This is a key")
+            node("existingKeyDescription").isEqualTo(null)
           }
         }
       }

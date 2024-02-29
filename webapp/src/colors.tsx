@@ -326,7 +326,7 @@ export const colors = {
     tipsBanner: {
       background: '#29242580',
     },
-    tokens: getTokensByMode('light'),
+    tokens: getTokensByMode('dark'),
     placeholders: {
       variable: {
         border: '#008371',

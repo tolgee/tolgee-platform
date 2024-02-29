@@ -48,11 +48,11 @@ export type ValidationResult = {
 
 const StyledRoot = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  border: `1px dashed ${theme.palette.tokens.BORDER_LINE_PRIMARY}`,
+  border: `1px dashed ${theme.palette.tokens.BORDER_SECONDARY_DASHED}`,
   margin: '0px auto',
   width: '100%',
   position: 'relative',
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: theme.palette.tokens.SURFACE_BACKGROUND_DRAG_DROP,
   marginTop: '16px',
 }));
 

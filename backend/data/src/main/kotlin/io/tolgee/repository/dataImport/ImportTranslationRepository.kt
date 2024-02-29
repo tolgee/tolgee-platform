@@ -35,8 +35,16 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
 
   @Query(
     """ select it.id as id, it.text as text, ik.name as keyName, ik.id as keyId,
-        itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolvedHash
-        from ImportTranslation it left join it.conflict itc join it.key ik
+        itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolvedHash,
+        it.isPlural as plural, ek.isPlural as existingKeyPlural, ikm.description as importedKeyDescription, 
+        ekm.description as existingKeyDescription
+        from ImportTranslation it
+        left join it.conflict itc 
+        join it.key ik
+        left join Namespace en on ik.file.namespace = en.name and en.project = ik.file.import.project 
+        left join Key ek on it.key.name = ek.name and ek.project = it.key.file.import.project and ek.namespace = en
+        left join ik.keyMeta ikm
+        left join ek.keyMeta ekm
         where (itc.id is not null or :onlyConflicts = false)
         and ((itc.id is not null and it.resolvedHash is null) or :onlyUnresolved = false)
         and it.language.id = :languageId

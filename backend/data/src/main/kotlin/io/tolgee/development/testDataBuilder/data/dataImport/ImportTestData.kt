@@ -139,6 +139,10 @@ class ImportTestData {
                 val addedKey =
                   addImportKey {
                     name = "what a key"
+                  }.build {
+                    addMeta {
+                      description = "This is a key"
+                    }
                   }
                 addImportKey {
                   name = "what a nice key"
