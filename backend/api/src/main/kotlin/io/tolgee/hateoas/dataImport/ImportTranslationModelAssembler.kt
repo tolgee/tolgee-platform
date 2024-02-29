@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.dataImport
 
 import io.tolgee.api.v2.controllers.dataImport.V2ImportController
+import io.tolgee.formats.convertToIcuPlural
 import io.tolgee.model.views.ImportTranslationView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -12,9 +13,11 @@ class ImportTranslationModelAssembler :
     ImportTranslationModel::class.java,
   ) {
   override fun toModel(view: ImportTranslationView): ImportTranslationModel {
+    val text = getText(view)
+
     return ImportTranslationModel(
       id = view.id,
-      text = view.text,
+      text = text,
       keyName = view.keyName,
       keyId = view.keyId,
       conflictId = view.conflictId,
@@ -26,5 +29,12 @@ class ImportTranslationModelAssembler :
       isPlural = view.plural,
       willBeConvertedToPlural = view.existingKeyPlural ?: false,
     )
+  }
+
+  fun getText(view: ImportTranslationView): String? {
+    if (view.plural || view.existingKeyPlural == true) {
+      return view.text?.convertToIcuPlural(null)
+    }
+    return view.text
   }
 }
