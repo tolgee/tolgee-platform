@@ -26,14 +26,12 @@ const StyledContainer = styled('div')`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  margin-top: 8px;
+  margin-top: 4px;
 `;
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
-  margin-left: 8px;
-  margin-right: 8px;
-  margin-top: 8px;
+  margin: 8px;
   opacity: 0.5;
   &:focus-within {
     opacity: 1;
