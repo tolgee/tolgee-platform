@@ -17,8 +17,8 @@ const StyledHeader = styled(Box)`
   gap: 8px;
   align-items: center;
   background: ${({ theme }) => theme.palette.background.default};
-  height: 40px;
   z-index: 3;
+  height: 39px;
 `;
 
 const StyledName = styled(Box)`
@@ -46,12 +46,13 @@ const StyledBadge = styled(Box)`
 
 const StyledContent = styled(Box)`
   min-height: 60px;
+  padding-top: 8px;
+  padding-bottom: 24px;
 `;
 
 const StyledToggle = styled(Box)`
   display: grid;
   cursor: pointer;
-  justify-self: end;
 `;
 
 type Props = PanelConfig & {

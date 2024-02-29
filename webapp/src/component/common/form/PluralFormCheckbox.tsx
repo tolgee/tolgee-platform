@@ -39,6 +39,7 @@ export const PluralFormCheckbox = ({
               data-cy="key-plural-checkbox"
               control={<Checkbox checked={Boolean(field.value)} {...field} />}
               label={t('translation_single_label_is_plural')}
+              sx={{ mr: 0.5 }}
             />
             <IconButton
               size="small"

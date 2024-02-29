@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { T } from '@tolgee/react';
-import { FormControlLabel, styled, Switch } from '@mui/material';
+import { Box, FormControlLabel, styled, Switch } from '@mui/material';
 
 import { StickyDateSeparator } from 'tg.views/projects/translations/ToolsPanel/common/StickyDateSeparator';
 import { HistoryItem } from './HistoryItem';
@@ -86,7 +86,7 @@ export const History: React.FC<PanelContentProps> = ({ keyData, language }) => {
         }
       />
       {dayGroups.map((items, gIndex) => (
-        <div key={gIndex}>
+        <Box key={gIndex} display="grid">
           <StickyDateSeparator date={new Date(items[0].timestamp)} />
           {items?.map((entry, cIndex) => {
             return (
@@ -111,7 +111,7 @@ export const History: React.FC<PanelContentProps> = ({ keyData, language }) => {
               </React.Fragment>
             );
           })}
-        </div>
+        </Box>
       ))}
     </StyledContainer>
   );

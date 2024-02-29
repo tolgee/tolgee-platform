@@ -1,8 +1,14 @@
 import { styled } from '@mui/material';
 
 const StyledWrapper = styled('div')`
-  padding: ${({ theme }) => theme.spacing(1, 1.25)};
-  color: ${({ theme }) => theme.palette.text.disabled};
+  height: 100%;
+  padding: 8px 12px 8px 12px;
+  margin: 0px 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: ${({ theme }) => theme.palette.cell.selected};
+  border-radius: 8px;
 `;
 
 type Props = {

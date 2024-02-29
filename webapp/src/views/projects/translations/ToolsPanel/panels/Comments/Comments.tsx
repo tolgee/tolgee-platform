@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
-import { IconButton, styled, TextField } from '@mui/material';
+import { Box, IconButton, styled, TextField } from '@mui/material';
 import { Send } from '@mui/icons-material';
 
 import { useUser } from 'tg.globalContext/helpers';
@@ -30,8 +30,8 @@ const StyledContainer = styled('div')`
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
-  margin-left: 12px;
-  margin-right: 4px;
+  margin-left: 8px;
+  margin-right: 8px;
   margin-top: 8px;
   opacity: 0.5;
   &:focus-within {
@@ -106,7 +106,7 @@ export const Comments: React.FC<PanelContentProps> = ({
     >
       {dayGroups.length !== 0 ? (
         dayGroups.map((items, gIndex) => (
-          <div key={gIndex}>
+          <Box key={gIndex} display="grid">
             <StickyDateSeparator date={new Date(items[0].createdAt)} />
             {items?.map((comment, cIndex) => {
               const canDelete =
@@ -132,7 +132,7 @@ export const Comments: React.FC<PanelContentProps> = ({
                 </React.Fragment>
               );
             })}
-          </div>
+          </Box>
         ))
       ) : (
         <TabMessage>

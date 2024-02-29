@@ -5,17 +5,18 @@ import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 const StyledStickyContainer = styled('div')`
   display: flex;
   align-items: start;
+  justify-self: start;
   position: sticky;
-  top: 39px;
-  height: 25px;
-  background: 1px solid ${({ theme }) => theme.palette.background.default};
+  top: 38px;
+  background: ${({ theme }) => theme.palette.background.default};
   padding-left: 8px;
   z-index: 1;
+  border-radius: 0px 0px 12px 12px;
 `;
 
 const StyledDate = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider};
-  border-radius: 0px 0px 12px 12px;
+  border-radius: 12px;
   padding: 0px 10px;
   font-size: 14px;
   background: ${({ theme }) => theme.palette.background.default};

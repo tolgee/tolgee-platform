@@ -80,8 +80,7 @@ const StyledTextPre = styled('pre')`
   word-wrap: break-word;
 
   &.textUnresolved {
-    color: ${({ theme }) => theme.palette.primary.main};
-    font-weight: 500;
+    font-weight: 700;
   }
 `;
 
