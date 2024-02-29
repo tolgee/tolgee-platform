@@ -11,8 +11,8 @@ type Props = {
   locale: string;
   value: TolgeeFormat;
   onChange?: (value: TolgeeFormat) => void;
-  activeVariant?: Intl.LDMLPluralRule;
-  onActiveVariantChange?: (variant: Intl.LDMLPluralRule) => void;
+  activeVariant?: string;
+  onActiveVariantChange?: (variant: string) => void;
   editorProps?: Partial<EditorProps>;
   autofocus?: boolean;
   activeEditorRef?: RefObject<EditorView | null>;
@@ -30,7 +30,7 @@ export const PluralEditor = ({
   editorProps,
   mode,
 }: Props) => {
-  function handleChange(text: string, variant: Intl.LDMLPluralRule) {
+  function handleChange(text: string, variant: string) {
     onChange?.({ ...value, variants: { ...value.variants, [variant]: text } });
   }
 

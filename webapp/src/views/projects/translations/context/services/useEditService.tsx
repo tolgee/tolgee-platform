@@ -31,7 +31,7 @@ import {
   EditorProps,
   SetEdit,
 } from '../types';
-import { getPluralVariants } from '../../translationVisual/pluralTools';
+import { getPluralVariants } from '@tginternal/editor';
 
 /**
  * Kinda hacky way how to update react-list size cache, when editor gets open

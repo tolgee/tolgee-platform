@@ -13,7 +13,6 @@ const StyledContainer = styled('div')`
   box-sizing: border-box;
   width: 24vw;
   min-width: 300px;
-  max-width: 400px;
   height: 800px;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-bottom: 0px;

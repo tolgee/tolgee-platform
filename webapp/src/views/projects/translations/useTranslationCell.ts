@@ -133,7 +133,7 @@ export const useTranslationCell = ({
     }
   };
 
-  function setVariant(activeVariant: Intl.LDMLPluralRule | undefined) {
+  function setVariant(activeVariant: string | undefined) {
     updateEdit({ activeVariant });
   }
 

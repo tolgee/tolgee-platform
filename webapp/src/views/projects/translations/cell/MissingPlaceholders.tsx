@@ -1,8 +1,11 @@
 import { styled, useTheme } from '@mui/material';
-import { Placeholder, generatePlaceholdersStyle } from '@tginternal/editor';
+import {
+  Placeholder,
+  generatePlaceholdersStyle,
+  getVariantExample,
+} from '@tginternal/editor';
 import { useMemo } from 'react';
 import { placeholderToElement } from '../translationVisual/placeholderToElement';
-import { getVariantExample } from '../translationVisual/pluralTools';
 import { T } from '@tolgee/react';
 
 const StyledWrapper = styled('span')``;
@@ -18,7 +21,7 @@ type Props = {
   placeholders: Placeholder[];
   onPlaceholderClick: (placeholder: Placeholder) => void;
   locale: string;
-  variant: Intl.LDMLPluralRule | undefined;
+  variant: string | undefined;
   className?: string;
 };
 
@@ -39,7 +42,7 @@ export const MissingPlaceholders = ({
   }, [theme.palette.placeholders]);
 
   const pluralExampleValue = useMemo(() => {
-    return variant && getVariantExample(locale, variant);
+    return getVariantExample(locale, variant ?? '');
   }, [locale, variant]);
 
   return (
