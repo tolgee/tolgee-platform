@@ -44,6 +44,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   const deps = {
     keyId: keyData.keyId,
     targetLanguageId: language.id,
+    isPlural: keyData.keyIsPlural,
   };
 
   const dependenciesHash = stringHash(JSON.stringify(deps));
