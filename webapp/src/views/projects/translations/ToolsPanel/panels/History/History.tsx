@@ -19,6 +19,7 @@ const StyledContainer = styled('div')`
   flex-grow: 1;
   flex-basis: 100px;
   position: relative;
+  margin-top: 8px;
 `;
 
 const StyledDifferenceToggle = styled(FormControlLabel)`

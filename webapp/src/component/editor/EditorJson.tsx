@@ -108,6 +108,7 @@ export const EditorJson: React.FC<EditorProps> = ({
           }),
           editorTheme.current.of([]),
           languageCompartment.of([json(), jsonLanguage]),
+          jsonLanguage,
           linter(jsonParseLinter()),
         ],
       }),

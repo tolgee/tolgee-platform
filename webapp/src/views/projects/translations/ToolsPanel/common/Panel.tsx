@@ -46,8 +46,8 @@ const StyledBadge = styled(Box)`
 
 const StyledContent = styled(Box)`
   min-height: 60px;
-  padding-top: 8px;
-  padding-bottom: 24px;
+  padding-top: 0px;
+  padding-bottom: 16px;
 `;
 
 const StyledToggle = styled(Box)`

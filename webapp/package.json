@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/lang-json": "6.0.0",
     "@dicebear/avatars": "4.10.2",
     "@dicebear/avatars-identicon-sprites": "4.10.2",
     "@dicebear/avatars-initials-sprites": "4.10.2",
@@ -109,7 +109,6 @@
     "@testing-library/user-event": "^13.2.1",
     "@tginternal/language-util": "^1.0.6",
     "@tolgee/cli": "^1.4.0",
-    "@types/codemirror": "^5.60.2",
     "@types/diff": "^5.0.2",
     "@types/jest": "^26.0.24",
     "@types/node": "^18.19.4",

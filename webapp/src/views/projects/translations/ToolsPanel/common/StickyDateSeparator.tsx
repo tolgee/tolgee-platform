@@ -9,7 +9,7 @@ const StyledStickyContainer = styled('div')`
   position: sticky;
   top: 38px;
   background: ${({ theme }) => theme.palette.background.default};
-  padding-left: 8px;
+  margin-left: 8px;
   z-index: 1;
   border-radius: 0px 0px 12px 12px;
 `;

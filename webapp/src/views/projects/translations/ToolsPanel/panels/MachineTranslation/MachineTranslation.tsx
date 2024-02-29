@@ -53,6 +53,16 @@ const StyledDescription = styled('div')`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
+const OutOfCreditsWrapper = styled('div')`
+  padding: 8px 12px 8px 12px;
+  margin: 8px 8px 0px 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: ${({ theme }) => theme.palette.cell.selected};
+  border-radius: 8px;
+`;
+
 export const MachineTranslation: React.FC<PanelContentProps> = ({
   keyData,
   language,
@@ -107,7 +117,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   return (
     <StyledContainer>
       {outOfCredit ? (
-        <TabMessage>
+        <OutOfCreditsWrapper>
           <StyledError
             sx={{ display: 'grid', gap: 0.5, justifyItems: 'start' }}
           >
@@ -120,7 +130,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
               )}
             />
           </StyledError>
-        </TabMessage>
+        </OutOfCreditsWrapper>
       ) : baseIsEmpty ? (
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (

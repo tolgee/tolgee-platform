@@ -26,6 +26,7 @@ const StyledContainer = styled('div')`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  margin-top: 8px;
 `;
 
 const StyledTextField = styled(TextField)`
