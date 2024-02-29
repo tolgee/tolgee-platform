@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.translation.TranslationService
 
@@ -15,6 +16,7 @@ class PluralizationHandler(
    */
   private val existingKeysToMigrate = mutableMapOf<Long, String>()
   private val ignoreTranslationsForMigration: MutableList<Long> = mutableListOf()
+  val keysToSave = mutableListOf<Key>()
 
   fun handlePluralization() {
     val byKey =
@@ -53,9 +55,12 @@ class PluralizationHandler(
       return
     }
 
-    data.value.first().second.key.isPlural = true
+    val existingOrNewKey = data.value.first().second.key
+    existingOrNewKey.isPlural = true
     // now we have to migrate the new translations
     val pluralArgName = migrateNewTranslationsToPlurals(data.value, null)
+    existingOrNewKey.pluralArgName = pluralArgName
+    keysToSave.add(existingOrNewKey)
 
     // if the key was already existing, we need to migrate its existing translations
     if (existingKey != null) {
@@ -68,8 +73,9 @@ class PluralizationHandler(
     translationPairs: List<Pair<ImportTranslation, Translation>>,
     pluralArgName: String?,
   ): String {
+    val keyPluralArgName = pluralArgName ?: translationPairs.firstOrNull()?.first?.key?.pluralArgName
     val map = translationPairs.associateWith { it.second.text }
-    val conversionResult = map.convertToIcuPlurals(pluralArgName)
+    val conversionResult = map.convertToIcuPlurals(keyPluralArgName)
     conversionResult.convertedStrings.forEach {
       it.key.second.text = it.value
     }

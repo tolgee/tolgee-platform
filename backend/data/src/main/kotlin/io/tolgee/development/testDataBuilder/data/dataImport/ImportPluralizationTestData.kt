@@ -33,6 +33,7 @@ class ImportPluralizationTestData {
       addKey {
         name = "existing plural key"
         isPlural = true
+        pluralArgName = "count"
       }.build {
         addTranslation("en", "{count, plural, one {one} other {other}}")
       }
@@ -85,6 +86,7 @@ class ImportPluralizationTestData {
               this.key =
                 addImportKey {
                   name = "existing non plural key"
+                  pluralArgName = "count"
                 }.self
               this.conflict = null
               isPlural = true

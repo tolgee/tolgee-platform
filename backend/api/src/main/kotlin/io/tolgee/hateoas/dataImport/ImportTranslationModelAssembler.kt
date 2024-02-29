@@ -24,10 +24,9 @@ class ImportTranslationModelAssembler :
       conflictText = view.conflictText,
       override = view.override,
       resolved = view.resolvedHash != null,
-      importedKeyDescription = view.importedKeyDescription,
-      existingKeyDescription = view.existingKeyDescription,
+      keyDescription = view.keyDescription,
       isPlural = view.plural,
-      willBeConvertedToPlural = view.existingKeyPlural ?: false,
+      existingKeyIsPlural = view.existingKeyPlural ?: false,
     )
   }
 

@@ -3147,4 +3147,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1709210985745-1">
+        <addColumn tableName="import_key">
+            <column name="plural_arg_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

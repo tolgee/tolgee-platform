@@ -59,7 +59,13 @@ data class FileProcessorContext(
       _translations[keyName] = mutableListOf()
     }
 
-    val isPlural = forceIsPlural ?: (getPluralForms(stringValue) != null)
+    val pluralForms = getPluralForms(stringValue)
+    val isPlural = forceIsPlural ?: (pluralForms != null)
+
+    if (pluralForms?.argName != null)
+      {
+        getOrCreateKey(keyName).pluralArgName = pluralForms.argName
+      }
 
     if (convertedBy != null) {
       needsParamConversion = true

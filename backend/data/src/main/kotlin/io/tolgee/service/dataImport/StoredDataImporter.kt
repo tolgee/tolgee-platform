@@ -112,10 +112,12 @@ class StoredDataImporter(
   }
 
   private fun handlePluralization() {
-    PluralizationHandler(importDataManager, this, translationService).handlePluralization()
+    val handler = PluralizationHandler(importDataManager, this, translationService)
+    handler.handlePluralization()
+    saveKeys(handler.keysToSave)
   }
 
-  private fun saveMetaData(keyEntitiesToSave: MutableCollection<Key>) {
+  private fun saveMetaData(keyEntitiesToSave: Collection<Key>) {
     keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
     }.also { keyMetaService.saveAllComments(it) }
@@ -129,10 +131,13 @@ class StoredDataImporter(
     translationService.saveAll(translationsToSave.map { it.second })
   }
 
-  private fun saveKeys(): MutableCollection<Key> {
-    val keyEntitiesToSave = keysToSave.values
-    keyService.saveAll(keyEntitiesToSave)
-    return keyEntitiesToSave
+  private fun saveKeys(): Collection<Key> {
+    return saveKeys(keysToSave.values)
+  }
+
+  private fun saveKeys(keys: Collection<Key>): Collection<Key> {
+    keyService.saveAll(keys)
+    return keys
   }
 
   private fun addKeysAndCheckPermissions() {

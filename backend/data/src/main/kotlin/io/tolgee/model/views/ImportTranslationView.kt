@@ -5,8 +5,7 @@ interface ImportTranslationView {
   val text: String?
   val keyName: String
   val keyId: Long
-  val importedKeyDescription: String?
-  val existingKeyDescription: String?
+  val keyDescription: String?
 
   // there is some kind of Kotlin / Spring Issue when naming params with is* prefix
   val plural: Boolean

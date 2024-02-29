@@ -410,6 +410,27 @@ class ImportTestData {
     return AddFilesWithNamespacesResult(importFrenchInNs!!)
   }
 
+  fun addPluralImport() {
+    this.projectBuilder.build {
+      addKey {
+        name = "plural key"
+        isPlural = true
+        pluralArgName = "count"
+      }
+      importBuilder.data.importFiles[0].build {
+        val key =
+          addImportKey {
+            name = "plural key"
+          }
+        addImportTranslation {
+          text = "Hey!"
+          this.key = key.self
+          language = importEnglish
+        }
+      }
+    }
+  }
+
   data class AddFilesWithNamespacesResult(
     val importFrenchInNs: ImportLanguage,
   )

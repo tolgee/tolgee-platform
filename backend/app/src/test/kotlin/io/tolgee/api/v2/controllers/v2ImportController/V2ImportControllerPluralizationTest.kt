@@ -17,7 +17,7 @@ class V2ImportControllerPluralizationTest : ProjectAuthControllerTest("/v2/proje
     saveTestDataAndApplyImport()
     // new value is migrated
     getTranslation("cs", "existing plural key")
-      .text.assert.isEqualTo("{value, plural,\nother {No plural}\n}")
+      .text.assert.isEqualTo("{count, plural,\nother {No plural}\n}")
 
     // migrates old existing values
     getTranslation("en", "existing non plural key")
