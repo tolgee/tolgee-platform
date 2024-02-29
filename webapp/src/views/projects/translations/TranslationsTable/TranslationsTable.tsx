@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { styled } from '@mui/material';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Portal, styled, useMediaQuery } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import {
@@ -16,6 +16,9 @@ import { ReactList } from 'tg.component/reactList/ReactList';
 import clsx from 'clsx';
 import { useScrollStatus } from './useScrollStatus';
 import { useColumns } from '../useColumns';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+
+const ARROW_SIZE = 50;
 
 const StyledContainer = styled('div')`
   position: relative;
@@ -70,6 +73,7 @@ const StyledContainer = styled('div')`
 const StyledVerticalScroll = styled('div')`
   overflow-x: scroll;
   overflow-y: hidden;
+  scroll-behavior: smooth;
 `;
 
 const StyledContent = styled('div')`
@@ -96,6 +100,42 @@ const StyledHeaderCell = styled('div')`
   }
 `;
 
+const StyledScrollArrow = styled('div')`
+  position: fixed;
+  top: 50vh;
+  width: ${ARROW_SIZE / 2}px;
+  height: ${ARROW_SIZE}px;
+  z-index: 5;
+  cursor: pointer;
+  border: 1px solid ${({ theme }) => theme.palette.divider1};
+  background: ${({ theme }) => theme.palette.background.default};
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+  pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.right {
+    border-radius: ${ARROW_SIZE}px 0px 0px ${ARROW_SIZE}px;
+    padding-left: 4px;
+  }
+  &.left {
+    border-radius: 0px ${ARROW_SIZE}px ${ARROW_SIZE}px 0px;
+    padding-right: 4px;
+  }
+  &.scrollLeft {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  &.scrollRight {
+    opacity: 1;
+    pointer-events: all;
+  }
+`;
+
 type Props = {
   toolsPanelOpen: boolean;
 };
@@ -104,6 +144,7 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
+  const sidePanelOpen = useTranslationsSelector((c) => c.sidePanelOpen);
 
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -170,12 +211,55 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
     fullWidth,
   ]);
 
+  function handleScroll(direction: 'left' | 'right') {
+    const element = verticalScrollRef.current;
+    if (element) {
+      const position = element.scrollLeft;
+      element.scrollTo({
+        left: position + (direction === 'left' ? -350 : +350),
+      });
+    }
+  }
+
+  const [tablePosition, setTablePosition] = useState({ left: 0, right: 0 });
+  useEffect(() => {
+    const position = tableRef.current?.getBoundingClientRect();
+    if (position) {
+      const left = position?.left;
+      const right = window.innerWidth - position?.right;
+      setTablePosition({ left, right });
+    }
+  }, [tableRef.current, fullWidth, sidePanelOpen]);
+  const hasMinimalHeight = useMediaQuery('(min-height: 800px)');
+
   return (
     <StyledContainer
       data-cy="translations-view-table"
       className={clsx({ scrollLeft, scrollRight })}
       ref={tableRef}
     >
+      {hasMinimalHeight && (
+        <Portal>
+          <StyledScrollArrow
+            className={clsx('right', { scrollRight })}
+            style={{
+              right: (tablePosition?.right ?? 0) - 1,
+            }}
+            onClick={() => handleScroll('right')}
+          >
+            <ChevronRight fontSize="small" />
+          </StyledScrollArrow>
+          <StyledScrollArrow
+            className={clsx('left', { scrollLeft })}
+            style={{
+              left: tablePosition?.left,
+            }}
+            onClick={() => handleScroll('left')}
+          >
+            <ChevronLeft fontSize="small" />
+          </StyledScrollArrow>
+        </Portal>
+      )}
       <StyledVerticalScroll ref={verticalScrollRef}>
         <StyledContent>
           <StyledHeaderRow
