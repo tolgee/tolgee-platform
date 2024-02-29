@@ -110,7 +110,7 @@ const StyledScrollArrow = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   background: ${({ theme }) => theme.palette.background.default};
   opacity: 0;
-  transition: opacity 200ms ease-in-out;
+  transition: opacity 150ms ease-in-out;
   pointer-events: none;
 
   display: flex;
@@ -120,10 +120,12 @@ const StyledScrollArrow = styled('div')`
   &.right {
     border-radius: ${ARROW_SIZE}px 0px 0px ${ARROW_SIZE}px;
     padding-left: 4px;
+    border-right: none;
   }
   &.left {
     border-radius: 0px ${ARROW_SIZE}px ${ARROW_SIZE}px 0px;
     padding-right: 4px;
+    border-left: none;
   }
   &.scrollLeft {
     opacity: 1;
@@ -243,7 +245,7 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
           <StyledScrollArrow
             className={clsx('right', { scrollRight })}
             style={{
-              right: (tablePosition?.right ?? 0) - 1,
+              right: tablePosition?.right,
             }}
             onClick={() => handleScroll('right')}
           >
