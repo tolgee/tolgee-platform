@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
-import { IconButton, styled, TextField } from '@mui/material';
+import { Box, IconButton, styled, TextField } from '@mui/material';
 import { Send } from '@mui/icons-material';
 
 import { useUser } from 'tg.globalContext/helpers';
@@ -26,13 +26,12 @@ const StyledContainer = styled('div')`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  margin-top: 4px;
 `;
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
-  margin-left: 12px;
-  margin-right: 4px;
-  margin-top: 8px;
+  margin: 8px;
   opacity: 0.5;
   &:focus-within {
     opacity: 1;
@@ -106,7 +105,7 @@ export const Comments: React.FC<PanelContentProps> = ({
     >
       {dayGroups.length !== 0 ? (
         dayGroups.map((items, gIndex) => (
-          <div key={gIndex}>
+          <Box key={gIndex} display="grid">
             <StickyDateSeparator date={new Date(items[0].createdAt)} />
             {items?.map((comment, cIndex) => {
               const canDelete =
@@ -132,7 +131,7 @@ export const Comments: React.FC<PanelContentProps> = ({
                 </React.Fragment>
               );
             })}
-          </div>
+          </Box>
         ))
       ) : (
         <TabMessage>
@@ -151,7 +150,8 @@ export const Comments: React.FC<PanelContentProps> = ({
           data-cy="translations-comments-input"
           InputProps={{
             sx: {
-              padding: '2px 4px 2px 12px',
+              padding: '8px 4px 8px 12px',
+              borderRadius: '8px',
             },
             endAdornment: (
               <IconButton
@@ -159,6 +159,7 @@ export const Comments: React.FC<PanelContentProps> = ({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleAddComment}
                 disabled={isAddingComment}
+                sx={{ my: '-7px', alignSelf: 'end' }}
               >
                 <Send fontSize="small" color="inherit" />
               </IconButton>

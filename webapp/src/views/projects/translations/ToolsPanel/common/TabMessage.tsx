@@ -1,8 +1,9 @@
 import { styled } from '@mui/material';
 
 const StyledWrapper = styled('div')`
-  padding: ${({ theme }) => theme.spacing(1, 1.25)};
+  margin: ${({ theme }) => theme.spacing(1, 1.25)};
   color: ${({ theme }) => theme.palette.text.disabled};
+  font-style: italic;
 `;
 
 type Props = {

@@ -63,6 +63,9 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
   return (
     <StyledContainer {...controlsProps}>
       <StyledIcons>
+        {displayTransitionButtons && (
+          <StateTransitionButtons state={state} onStateChange={onStateChange} />
+        )}
         {onModeToggle && displayEditorMode && (
           <ControlsButton
             onClick={onModeToggle}
@@ -93,10 +96,6 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
           >
             <ContentCopy fontSize="small" />
           </ControlsButton>
-        )}
-
-        {displayTransitionButtons && (
-          <StateTransitionButtons state={state} onStateChange={onStateChange} />
         )}
       </StyledIcons>
     </StyledContainer>

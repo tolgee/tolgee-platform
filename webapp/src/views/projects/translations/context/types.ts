@@ -84,10 +84,10 @@ export type SetEdit = CellPosition & {
 
 export type EditorProps = CellPosition & {
   mode?: EditMode;
-  activeVariant?: Intl.LDMLPluralRule;
+  activeVariant?: string;
 };
 
-export type PluralVariants = Record<Intl.LDMLPluralRule, string | undefined>;
+export type PluralVariants = Record<string, string | undefined>;
 
 export type EditPlural = TolgeeFormat | null;
 
@@ -95,7 +95,7 @@ export type Edit = CellPosition & {
   value: TolgeeFormat;
   changed?: boolean;
   mode?: EditMode;
-  activeVariant: Intl.LDMLPluralRule;
+  activeVariant: string;
 };
 
 export type EditMode = 'general' | 'advanced' | 'context' | 'comments';

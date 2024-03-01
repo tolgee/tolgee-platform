@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
-import { getVariantExample, getPluralVariants } from './pluralTools';
 import { styled } from '@mui/material';
 import React from 'react';
-import { TolgeeFormat } from '@tginternal/editor';
+import {
+  TolgeeFormat,
+  getPluralVariants,
+  getVariantExample,
+} from '@tginternal/editor';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -40,7 +43,7 @@ const StyledVariantLabel = styled('div')`
   user-select: none;
   margin: 0px 1px;
   text-transform: capitalize;
-
+  white-space: nowrap;
   & > * {
     margin-top: -1px;
   }
@@ -52,7 +55,7 @@ const StyledVariantContent = styled('div')`
 
 type RenderProps = {
   content: string;
-  variant: Intl.LDMLPluralRule | undefined;
+  variant: string | undefined;
   locale: string;
   exampleValue?: number;
 };
@@ -62,7 +65,7 @@ type Props = {
   value: TolgeeFormat;
   render: (props: RenderProps) => React.ReactNode;
   showEmpty?: boolean;
-  activeVariant?: Intl.LDMLPluralRule;
+  activeVariant?: string;
   variantPaddingTop?: number | string;
 };
 
@@ -74,18 +77,25 @@ export const TranslationPlurals = ({
   activeVariant,
   variantPaddingTop,
 }: Props) => {
-  const variants = useMemo(
-    () =>
-      getPluralVariants(locale).map(
-        (variant) => [variant, getVariantExample(locale, variant)] as const
-      ),
-    [locale]
-  );
+  const variants = useMemo(() => {
+    const existing = new Set(Object.keys(value.variants));
+    const required = getPluralVariants(locale);
+    required.forEach((val) => existing.delete(val));
+    const result = Array.from(existing).map((value) => {
+      return [value, getVariantExample(locale, value)] as const;
+    });
+    required.forEach((value) => {
+      result.push([value, getVariantExample(locale, value)]);
+    });
+    return result;
+  }, [locale]);
 
   if (value.parameter) {
     return (
       <StyledContainer>
-        <StyledParameter>{value.parameter}</StyledParameter>
+        <StyledParameter data-cy="translation-plural-parameter">
+          {value.parameter}
+        </StyledParameter>
         <StyledVariants>
           {variants
             .filter(([variant]) => showEmpty || value.variants[variant])
@@ -99,7 +109,10 @@ export const TranslationPlurals = ({
                   >
                     <div>{variant}</div>
                   </StyledVariantLabel>
-                  <StyledVariantContent sx={{ opacity }}>
+                  <StyledVariantContent
+                    sx={{ opacity }}
+                    data-cy="translation-plural-variant"
+                  >
                     {render({
                       variant: variant,
                       content: value.variants[variant] || '',

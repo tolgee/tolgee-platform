@@ -6,6 +6,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import clsx from 'clsx';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
 
 type Props = {
   text?: string;
@@ -17,6 +18,8 @@ type Props = {
   onToggle: () => void;
   onDetectedExpandability: (expandable: boolean) => void;
   expandable: boolean;
+  languageTag: string;
+  isPlural: boolean;
   'data-cy': string;
 };
 
@@ -123,7 +126,11 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
         textOverflow="ellipsis"
         ref={textRef}
       >
-        {props.text}
+        <TranslationVisual
+          text={props.text}
+          locale={props.languageTag}
+          isPlural={props.isPlural}
+        />
       </BoxWithRef>
       {props.expandable && (
         <Box

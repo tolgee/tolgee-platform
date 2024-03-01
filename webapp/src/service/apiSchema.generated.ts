@@ -1815,9 +1815,9 @@ export interface components {
       lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     SuperTokenRequest: {
@@ -2771,9 +2771,9 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
     };
@@ -3533,6 +3533,7 @@ export interface components {
       slug?: string;
       avatar?: components["schemas"]["Avatar"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      icuPlaceholders: boolean;
     };
     UserAccountWithOrganizationRoleModel: {
       /** Format: int64 */
@@ -3558,9 +3559,9 @@ export interface components {
       lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     ApiKeyPermissionsModel: {
@@ -3618,6 +3619,7 @@ export interface components {
       )[];
       /** @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      project: components["schemas"]["SimpleProjectModel"];
     };
     PagedModelUserAccountModel: {
       _embedded?: {

@@ -9,6 +9,7 @@ import { TolgeeHighlight } from '@tginternal/editor';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
+  display: grid;
 
   & .cm-editor {
     outline: none;
@@ -108,6 +109,7 @@ export const EditorJson: React.FC<EditorProps> = ({
           }),
           editorTheme.current.of([]),
           languageCompartment.of([json(), jsonLanguage]),
+          jsonLanguage,
           linter(jsonParseLinter()),
         ],
       }),

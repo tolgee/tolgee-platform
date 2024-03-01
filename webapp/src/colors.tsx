@@ -102,6 +102,7 @@ export type Placeholders = {
   variable: Placeholder;
   tag: Placeholder;
   variant: Placeholder;
+  inactive: Placeholder;
 };
 
 export type QuickStart = {
@@ -228,6 +229,11 @@ export const colors = {
         background: '#F0F2F4',
         text: '#4D5B6E',
       },
+      inactive: {
+        background: '#e3e7ea',
+        border: '#e3e7ea',
+        text: '#808080',
+      },
     } satisfies Placeholders,
   },
   dark: {
@@ -342,6 +348,11 @@ export const colors = {
         border: '#4D5B6E',
         background: '#4D5B6E',
         text: '#F0F2F4',
+      },
+      inactive: {
+        border: '#2c3c52',
+        background: '#2c3c52',
+        text: '#acacac',
       },
     } satisfies Placeholders,
   },

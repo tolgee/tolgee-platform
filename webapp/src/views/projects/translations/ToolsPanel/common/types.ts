@@ -11,7 +11,7 @@ export type PanelContentData = {
   keyData: DeletableKeyWithTranslationsModelType;
   language: LanguageModel;
   baseLanguage: LanguageModel;
-  activeVariant: Intl.LDMLPluralRule | undefined;
+  activeVariant: string | undefined;
   editEnabled: boolean;
 };
 

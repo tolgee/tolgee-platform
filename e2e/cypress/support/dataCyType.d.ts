@@ -248,6 +248,9 @@ declare namespace DataCy {
         "key-edit-tab-context" |
         "key-edit-tab-custom-properties" |
         "key-edit-tab-general" |
+        "key-plural-checkbox" |
+        "key-plural-checkbox-expand" |
+        "key-plural-variable-name" |
         "language-ai-prompt-dialog-description-input" |
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
@@ -476,6 +479,8 @@ declare namespace DataCy {
         "translation-panel" |
         "translation-panel-content" |
         "translation-panel-toggle" |
+        "translation-plural-parameter" |
+        "translation-plural-variant" |
         "translation-state-button" |
         "translation-text" |
         "translation-tools-machine-translation-item" |

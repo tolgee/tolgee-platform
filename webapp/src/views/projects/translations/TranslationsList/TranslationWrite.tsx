@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Box, styled } from '@mui/material';
-import { Placeholder, getTolgeeFormat } from '@tginternal/editor';
+import { Placeholder } from '@tginternal/editor';
 
 import { ControlsEditorMain } from '../cell/ControlsEditorMain';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
@@ -13,6 +13,7 @@ import { MissingPlaceholders } from '../cell/MissingPlaceholders';
 import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
+import { useBaseTranslation } from '../useBaseTranslation';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -82,22 +83,14 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
   const baseLanguage = useTranslationsSelector((c) => c.baseLanguage);
   const nested = Boolean(editVal.value.parameter);
 
-  const baseTranslation = keyData.translations[baseLanguage]?.text;
-
-  const baseVariant = useMemo(() => {
-    if (activeVariant) {
-      const variants = getTolgeeFormat(
-        baseTranslation || '',
-        keyData.keyIsPlural
-      )?.variants;
-      return variants?.[activeVariant] ?? variants?.['other'];
-    } else {
-      return baseTranslation;
-    }
-  }, [baseTranslation, activeVariant]);
+  const baseTranslation = useBaseTranslation(
+    activeVariant,
+    keyData.translations[baseLanguage]?.text,
+    keyData.keyIsPlural
+  );
 
   const missingPlaceholders = useMissingPlaceholders({
-    baseTranslation: baseVariant,
+    baseTranslation,
     currentTranslation: value,
     nested,
   });
