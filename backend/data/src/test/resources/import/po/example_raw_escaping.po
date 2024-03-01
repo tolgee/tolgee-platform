@@ -9,9 +9,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "Localization tools"
-msgstr "Lokalizační {this} {} 'is not icu' nástroje"
+msgstr "Lokalizační %s {this} {} 'is not icu' nástroje"
 
 msgid "%d page read."
 msgid_plural "%d pages read."
-msgstr[0] "Eine Seite {this} {} 'is not icu' gelesen wurde."
+msgstr[0] "Eine Seite {this} {} 'is not icu' %s gelesen wurde."
 msgstr[1] "%d Seiten gelesen wurden."

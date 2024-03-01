@@ -3,7 +3,7 @@ package io.tolgee.formats.escaping
 /**
  * It escapes controlling characters in ICU message, so it's not interpreted when in comes from other formats
  */
-class IcuMessageEscapeRemover(
+class IcuUnescpaer(
   private val input: String,
   private val isPlural: Boolean = false,
 ) {
@@ -15,6 +15,7 @@ class IcuMessageEscapeRemover(
     StateText,
     StateEscapedMaybe,
     StateEscaped,
+    StateEscapeEndMaybe,
   }
 
   private val escapableChars by lazy {
@@ -26,7 +27,7 @@ class IcuMessageEscapeRemover(
     }
   }
 
-  val escapeRemoved: String
+  val unescaped: String
     get() {
       val result = StringBuilder()
       var state = State.StateText
@@ -55,9 +56,19 @@ class IcuMessageEscapeRemover(
 
           State.StateEscaped -> {
             if (ch == ESCAPE_CHAR) {
-              state = State.StateText
+              state = State.StateEscapeEndMaybe
             } else {
               result.append(ch)
+            }
+          }
+
+          State.StateEscapeEndMaybe -> {
+            if (ch == ESCAPE_CHAR) {
+              state = State.StateEscaped
+              result.append(ESCAPE_CHAR)
+            } else {
+              result.append(ch)
+              state = State.StateText
             }
           }
         }

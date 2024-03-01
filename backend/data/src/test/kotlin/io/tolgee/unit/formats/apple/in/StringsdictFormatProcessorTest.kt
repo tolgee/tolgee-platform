@@ -29,8 +29,8 @@ class StringsdictFormatProcessorTest {
     )
     mockUtil.fileProcessorContext.translations["what-a-key-plural-2"]!![0].text.assert.isEqualTo(
       "{0, plural,\n" +
-        "one {Lucy has %la '{dog}'}\n" +
-        "other {Lucy has %la '{dogs}'}\n" +
+        "one {Lucy has %la '{'dog'}'}\n" +
+        "other {Lucy has %la '{'dogs'}'}\n" +
         "}",
     )
   }

@@ -5,7 +5,7 @@ import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
 import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.FromIcuParamConvertor
-import io.tolgee.formats.escaping.ForceIcuUnescaper
+import io.tolgee.formats.escaping.IcuUnescpaer
 import io.tolgee.formats.getPluralDataOrNull
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
@@ -94,7 +94,7 @@ class BaseIcuMessageToPoConvertor(
 
   private fun String.forceUnescape(): String {
     if (!projectIcuPlaceholdersSupport) {
-      return ForceIcuUnescaper(this).unescaped
+      return IcuUnescpaer(this).unescaped
     }
     return this
   }

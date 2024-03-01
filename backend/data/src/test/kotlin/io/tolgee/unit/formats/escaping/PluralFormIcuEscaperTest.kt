@@ -1,40 +1,40 @@
 package io.tolgee.unit.formats.escaping
 
-import io.tolgee.formats.escaping.IcuMessageEscaper
+import io.tolgee.formats.escaping.PluralFormIcuEscaper
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
-class IcuMessageEscaperTest {
+class PluralFormIcuEscaperTest {
   @Test
   fun `it escapes`() {
-    IcuMessageEscaper("{hello}, my friend!").escaped.assert.isEqualTo("'{hello}', my friend!")
+    PluralFormIcuEscaper("{hello}, my friend!").escaped.assert.isEqualTo("'{hello}', my friend!")
   }
 
   @Test
   fun `it works for weird case`() {
-    IcuMessageEscaper(
+    PluralFormIcuEscaper(
       "'What ' complex '' { string # ",
       false,
-    ).escaped.assert.isEqualTo("'What ' complex '''' '{' string # ")
+    ).escaped.assert.isEqualTo("'What ' complex '' '{' string # ")
   }
 
   @Test
   fun `it it escapes escaped`() {
-    IcuMessageEscaper(
+    PluralFormIcuEscaper(
       "'{",
       false,
-    ).escaped.assert.isEqualTo("'''{'")
+    ).escaped.assert.isEqualTo("'{'")
   }
 
   @Test
   fun `it escapes apostrophes`() {
-    IcuMessageEscaper(
+    PluralFormIcuEscaper(
       "we are not entering escaped section: '' " +
         "so it doesn't ' have to be doubled. " +
         "This sequence: { should be immediately closed",
     )
       .escaped.assert.isEqualTo(
-        "we are not entering escaped section: '''' " +
+        "we are not entering escaped section: '' " +
           "so it doesn't ' have to be doubled. " +
           "This sequence: '{' should be immediately closed",
       )
@@ -42,7 +42,7 @@ class IcuMessageEscaperTest {
 
   @Test
   fun `it escapes plurals`() {
-    IcuMessageEscaper(
+    PluralFormIcuEscaper(
       "What a # plural form",
       escapeHash = true,
     ).escaped.assert.isEqualTo("What a '#' plural form")

@@ -168,6 +168,15 @@ class MessagePatternUtilTest {
   }
 
   @Test
+  fun `returns for quotes in escape sequence`() {
+    val contents =
+      MessagePatternUtil.buildMessageNode(
+        "Hey '{ '''This is it'.",
+      ).contents[0]
+    contents.patternString.assert.isEqualTo("Hey '{ '''This is it'.")
+  }
+
+  @Test
   fun `returns correct pattern string for complex plurals`() {
     val root =
       MessagePatternUtil.buildMessageNode(

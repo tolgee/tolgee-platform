@@ -231,4 +231,19 @@ class PluralsFormUtilTest {
         "{value, plural,\none {'{'}\nfew {'''{'''}\nmany {'''{'''}\nother {}\n}",
       )
   }
+
+  @Test
+  fun `it works with longer sequences`() {
+    mapOf(0 to "'{ '' }'").convertToIcuPlurals("value").convertedStrings[0].assert.isEqualTo(
+      "{value, plural,\n" +
+        "other {'{ '' }'}\n" +
+        "}",
+    )
+
+    mapOf(0 to "'{ '' }''").convertToIcuPlurals("value").convertedStrings[0].assert.isEqualTo(
+      "{value, plural,\n" +
+        "other {'{ '' }'''}\n" +
+        "}",
+    )
+  }
 }

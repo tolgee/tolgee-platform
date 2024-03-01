@@ -74,7 +74,7 @@ class PoToICUConverterTest {
       PoCToIcuImportMessageConvertor().convert("%s %d %c %+- #0f %+- #0llf %+-hhs %0hs {hey} %jd", "cs").message
     assertThat(
       result,
-    ).isEqualTo("{0} {1, number} %c %+- #0f %+- #0llf %+-hhs %0hs '{hey}' %jd")
+    ).isEqualTo("{0} {1, number} %c %+- #0f %+- #0llf %+-hhs %0hs '{'hey'}' %jd")
   }
 
   @Test
@@ -89,7 +89,7 @@ class PoToICUConverterTest {
     assertThat(
       result,
     ).isEqualTo(
-      "{one} {two, number} %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld '{hey}'",
+      "{one} {two, number} %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld '{'hey'}'",
     )
   }
 

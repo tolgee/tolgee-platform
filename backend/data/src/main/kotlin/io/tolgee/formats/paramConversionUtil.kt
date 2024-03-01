@@ -1,6 +1,6 @@
 package io.tolgee.formats
 
-import io.tolgee.formats.escaping.IcuMessageEscaper
+import io.tolgee.formats.escaping.ForceIcuEscaper
 import io.tolgee.formats.po.`in`.ParsedCLikeParam
 
 /**
@@ -37,7 +37,7 @@ fun convertMessage(
       convertor.convert(it, isInPlural)
     },
     unmatchedCallback = {
-      IcuMessageEscaper(it, isInPlural).escaped
+      ForceIcuEscaper(it, isInPlural).escaped
     },
   )
 }

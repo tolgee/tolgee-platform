@@ -201,6 +201,7 @@ export const ExportForm = () => {
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
                 supportArrays: values.supportArrays || false,
+                messageFormat: format.messageFormat,
               },
             },
           },

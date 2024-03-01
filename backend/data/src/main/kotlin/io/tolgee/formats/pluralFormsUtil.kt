@@ -1,7 +1,7 @@
 package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
-import io.tolgee.formats.escaping.IcuMessageEscaper
+import io.tolgee.formats.escaping.PluralFormIcuEscaper
 import io.tolgee.util.nullIfEmpty
 
 fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
@@ -274,11 +274,11 @@ private fun String.preparePluralForm(escapeHash: Boolean = false): String {
         result.append(it.patternString)
         return@forEach
       }
-      result.append(IcuMessageEscaper(it.patternString, escapeHash = escapeHash, onlyPluralBreaking = true).escaped)
+      result.append(PluralFormIcuEscaper(it.patternString, escapeHash = escapeHash).escaped)
     }
     result.toString()
   } catch (e: Exception) {
-    IcuMessageEscaper(this, escapeHash).escaped
+    PluralFormIcuEscaper(this, escapeHash).escaped
   }
 }
 

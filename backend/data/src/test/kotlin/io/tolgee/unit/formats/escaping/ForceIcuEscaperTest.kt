@@ -22,7 +22,7 @@ class ForceIcuEscaperTest {
 
   @Test
   fun testEscapesHash() {
-    assertThat(ForceIcuEscaper("hash # is here").escaped).isEqualTo("hash '#' is here")
+    assertThat(ForceIcuEscaper("hash # is here", escapeHash = true).escaped).isEqualTo("hash '#' is here")
   }
 
   @Test
@@ -35,13 +35,15 @@ class ForceIcuEscaperTest {
   @Test
   fun testHandlesTripleQuotes() {
     assertThat(
-      ForceIcuEscaper("this is ''' actually #' escaped").escaped,
+      ForceIcuEscaper("this is ''' actually #' escaped", escapeHash = true).escaped,
     ).isEqualTo("this is ''''' actually '#'' escaped")
   }
 
   @Test
   fun testTakesHashAsEscapeCharacter() {
-    assertThat(ForceIcuEscaper("should be '# }' escaped").escaped).isEqualTo("should be '''#' '}'' escaped")
+    assertThat(
+      ForceIcuEscaper("should be '# }' escaped", escapeHash = true).escaped,
+    ).isEqualTo("should be '''#' '}'' escaped")
   }
 
   @Test

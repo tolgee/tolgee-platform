@@ -1,12 +1,11 @@
 package io.tolgee.formats.escaping
 
 /**
- * It escapes controlling characters in ICU message, so it's not interpreted when in comes from other formats
+ * Escapes a plural form, so it doesn't break the full ICU string
  */
-class IcuMessageEscaper(
+class PluralFormIcuEscaper(
   private val input: String,
   private val escapeHash: Boolean = false,
-  private val onlyPluralBreaking: Boolean = false,
 ) {
   companion object {
     private const val ESCAPE_CHAR = '\''
@@ -16,6 +15,7 @@ class IcuMessageEscaper(
     StateText,
     StateEscaped,
     StateEscapedMaybe,
+    StateEscapeEndMaybe,
   }
 
   private val escapableChars by lazy {
@@ -49,16 +49,8 @@ class IcuMessageEscaper(
           State.StateEscapedMaybe -> {
             if (char == ESCAPE_CHAR) {
               state = State.StateText
-              if (!onlyPluralBreaking) {
-                result.append(ESCAPE_CHAR)
-                result.append(ESCAPE_CHAR)
-              }
             } else if (escapableChars.contains(char)) {
               state = State.StateEscaped
-              if (!onlyPluralBreaking) {
-                result.append(ESCAPE_CHAR)
-                result.append(ESCAPE_CHAR)
-              }
               lastNeedsEscapeIndex = result.length
             } else {
               state = State.StateText
@@ -68,17 +60,23 @@ class IcuMessageEscaper(
 
           State.StateEscaped -> {
             if (char == ESCAPE_CHAR) {
-              state = State.StateText
-              if (!onlyPluralBreaking) {
-                result.append(ESCAPE_CHAR)
-                result.append(ESCAPE_CHAR)
-              }
+              state = State.StateEscapeEndMaybe
             } else {
               if (escapableChars.contains(char)) {
                 lastNeedsEscapeIndex = result.length
               }
             }
             result.append(char)
+          }
+
+          State.StateEscapeEndMaybe -> {
+            if (char == ESCAPE_CHAR) {
+              state = State.StateEscaped
+              result.append(ESCAPE_CHAR)
+            } else {
+              result.append(char)
+              state = State.StateText
+            }
           }
         }
       }
