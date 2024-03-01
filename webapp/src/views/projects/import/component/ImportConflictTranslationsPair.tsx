@@ -81,7 +81,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
           onDetectedExpandability={setLeftExpandable}
           expandable={leftExpandable || rightExpandable}
           languageTag={row.existingLanguageTag || 'en'}
-          isPlural={translation.willBeConvertedToPlural}
+          isPlural={translation.existingKeyIsPlural}
         />
       </Grid>
       <Grid item lg md sm={12} xs={12} zeroMinWidth>
@@ -100,7 +100,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
           onDetectedExpandability={setRightExpandable}
           expandable={leftExpandable || rightExpandable}
           languageTag={row.existingLanguageTag || 'en'}
-          isPlural={translation.willBeConvertedToPlural}
+          isPlural={translation.existingKeyIsPlural || translation.isPlural}
         />
       </Grid>
     </>

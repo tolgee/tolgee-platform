@@ -55,7 +55,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
         rawData = it.items,
         languageTag = guessedLanguage,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
-        forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
+        context.projectIcuPlaceholdersEnabled,
       )
 
     context.addTranslation(
@@ -109,7 +109,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       message,
       guessedLanguage,
       context.importSettings.convertPlaceholdersToIcu,
-      forceEscapePluralForms = false,
+      context.projectIcuPlaceholdersEnabled,
     ).message
   }
 

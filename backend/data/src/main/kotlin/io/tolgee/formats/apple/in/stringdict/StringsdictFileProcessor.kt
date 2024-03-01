@@ -1,10 +1,9 @@
 import io.tolgee.exceptions.ImportCannotParseFileException
-import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.apple.`in`.AppleToIcuParamConvertor
+import io.tolgee.formats.ImportMessageConvertorType
+import io.tolgee.formats.apple.`in`.AppleToIcuMessageConvertor
 import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
-import io.tolgee.formats.convertMessage
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.StartElement
@@ -107,10 +106,7 @@ open class StringsdictFileProcessor(
     }
 
     if (state == ParseState.PluralForm) {
-      forms[pluralForm] =
-        convertMessage(value, true) {
-          AppleToIcuParamConvertor()
-        }
+      forms[pluralForm] = value
       state = ParseState.FormatValues
       return
     }
@@ -151,7 +147,20 @@ open class StringsdictFileProcessor(
   }
 
   private fun addTranslation() {
-    val translation = FormsToIcuPluralConvertor(forms, forceEscape = false, addNewLines = true, argName = "0").convert()
-    context.addTranslation(translationKey, languageName, translation)
+    val translation =
+      AppleToIcuMessageConvertor().convert(
+        forms,
+        languageName,
+        context.importSettings.convertPlaceholdersToIcu,
+        context.projectIcuPlaceholdersEnabled,
+      ).message
+    context.addTranslation(
+      translationKey,
+      languageName,
+      translation,
+      forceIsPlural = true,
+      rawData = forms,
+      convertedBy = ImportMessageConvertorType.STRINGSDICT,
+    )
   }
 }

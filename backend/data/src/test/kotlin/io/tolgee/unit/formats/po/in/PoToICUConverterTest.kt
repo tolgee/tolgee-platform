@@ -29,7 +29,6 @@ class PoToICUConverterTest {
           ),
         languageTag = "cs",
         convertPlaceholders = true,
-        forceEscapePluralForms = false,
       ).message
     assertThat(result).isEqualTo(
       "{0, plural,\n" +
@@ -84,7 +83,6 @@ class PoToICUConverterTest {
         "%(one)s %(two)d %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld {hey}",
         "cs",
         true,
-        false,
       ).message
     assertThat(
       result,
@@ -100,7 +98,6 @@ class PoToICUConverterTest {
         "%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s",
         "cs",
         true,
-        false,
       ).message
 
     assertThat(result)

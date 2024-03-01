@@ -31,7 +31,10 @@ class ImportTranslationModelAssembler :
   }
 
   fun getText(view: ImportTranslationView): String? {
-    if (view.plural || view.existingKeyPlural == true) {
+    if (view.plural) {
+      return view.text
+    }
+    if (view.existingKeyPlural == true) {
       return view.text?.convertToIcuPlural(null)
     }
     return view.text

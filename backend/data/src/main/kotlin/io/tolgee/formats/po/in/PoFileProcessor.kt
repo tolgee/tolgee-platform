@@ -91,7 +91,7 @@ class PoFileProcessor(
         rawData = stringOrPluralForms,
         languageTag = languageId,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
-        forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
+        isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
       ).message
     return icuMessage to messageFormat.importMessageConvertorType
   }

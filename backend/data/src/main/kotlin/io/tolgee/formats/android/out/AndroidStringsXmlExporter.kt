@@ -17,6 +17,7 @@ import java.io.InputStream
 class AndroidStringsXmlExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: IExportParams,
+  private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
   /**
    * Map (Path To file -> Map (Key Name -> Node Wrapper))
@@ -188,6 +189,7 @@ class AndroidStringsXmlExporter(
       IcuToJavaMessageConvertor(
         translation.text ?: "",
         isPlural,
+        isProjectIcuPlaceholdersEnabled,
       ).convert()
 
     return converted

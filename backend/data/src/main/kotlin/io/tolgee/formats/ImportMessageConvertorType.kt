@@ -16,8 +16,6 @@ enum class ImportMessageConvertorType(
   STRINGS(AppleToIcuMessageConvertor()),
   STRINGSDICT(AppleToIcuMessageConvertor()),
   APPLE_XLIFF(AppleToIcuMessageConvertor()),
-  XLIFF12,
   PROPERTIES,
   ANDROID_XML(AndroidToIcuMessageConvertor()),
-  FLUTTER_ARB,
 }

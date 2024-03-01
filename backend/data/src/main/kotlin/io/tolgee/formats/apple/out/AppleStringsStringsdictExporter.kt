@@ -8,6 +8,7 @@ import java.io.InputStream
 class AppleStringsStringsdictExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: IExportParams,
+  private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
   override val fileExtension: String = ""
 
@@ -44,7 +45,8 @@ class AppleStringsStringsdictExporter(
       return
     }
 
-    val converted = IcuToAppleMessageConvertor(message = text, it.key.isPlural).convert()
+    val converted =
+      IcuToAppleMessageConvertor(message = text, it.key.isPlural, isProjectIcuPlaceholdersEnabled).convert()
 
     if (converted.isPlural()) {
       handlePlural(it, converted.formsResult ?: return)

@@ -92,7 +92,7 @@ export const ProjectCreateView: FunctionComponent = () => {
       >
         {(props: FormikProps<CreateProjectValueType>) => {
           return (
-            <Box mb={8}>
+            <Box>
               <Box sx={{ mb: 1 }}>
                 <Typography variant="h6">
                   <T keyName="create_project_name_label" />
@@ -120,22 +120,6 @@ export const ProjectCreateView: FunctionComponent = () => {
                   name="baseLanguageTag"
                   languages={props.values.languages!}
                 />
-              </Box>
-              <Box mt={2} display="grid" justifyItems="start">
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={props.values.icuPlaceholders}
-                      onChange={(_, val) =>
-                        props.setFieldValue('icuPlaceholders', val)
-                      }
-                    />
-                  }
-                  label={t('project_create_use_tolgee_placeholders_label')}
-                />
-                <Typography variant="caption">
-                  {t('project_create_tolgee_placeholders_hint')}
-                </Typography>
               </Box>
             </Box>
           );

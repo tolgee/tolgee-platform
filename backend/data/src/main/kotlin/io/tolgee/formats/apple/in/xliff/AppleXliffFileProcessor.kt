@@ -164,7 +164,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
           rawData = forms,
           languageTag = language,
           convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
-          forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
+          isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
         ).message
       context.addTranslation(
         keyName,
@@ -208,7 +208,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
       message,
       "who-knows",
       context.importSettings.convertPlaceholdersToIcu,
-      forceEscapePluralForms = false,
+      context.projectIcuPlaceholdersEnabled,
     ).message
   }
 

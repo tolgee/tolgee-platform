@@ -111,7 +111,7 @@ class StringsFileProcessor(
         rawData = value,
         languageTag = languageName,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
-        forceEscapePluralForms = !context.projectIcuPlaceholdersEnabled,
+        isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
       ).message
     context.addKeyDescription(key ?: return, currentComment?.toString())
     context.addTranslation(

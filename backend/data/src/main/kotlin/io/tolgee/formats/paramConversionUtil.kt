@@ -27,8 +27,13 @@ fun usesUnsupportedFeature(parsed: ParsedCLikeParam) =
 fun convertMessage(
   message: String,
   isInPlural: Boolean,
+  convertPlaceholders: Boolean,
+  isProjectIcuEnabled: Boolean,
   convertorFactory: () -> ToIcuParamConvertor,
 ): String {
+  if (!isProjectIcuEnabled && !isInPlural) return message
+  if (!convertPlaceholders) return message.escapeIcu(true)
+
   val convertor = convertorFactory()
   return message.replaceMatchedAndUnmatched(
     string = message,

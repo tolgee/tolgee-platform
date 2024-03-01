@@ -388,7 +388,7 @@ class ImportDataManager(
                 rawData = it.rawData,
                 languageTag = language.name,
                 convertPlaceholders = convertPlaceholdersToIcu,
-                forceEscapePluralForms = !import.project.icuPlaceholders,
+                isProjectIcuEnabled = import.project.icuPlaceholders,
               )
             it.isPlural = converted.isPlural
             it.text = converted.message

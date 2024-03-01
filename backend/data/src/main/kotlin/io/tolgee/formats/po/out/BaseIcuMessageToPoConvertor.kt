@@ -3,8 +3,8 @@ package io.tolgee.formats.po.out
 import com.ibm.icu.text.PluralRules
 import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
-import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.FromIcuParamConvertor
+import io.tolgee.formats.MessageConvertorFactory
 import io.tolgee.formats.escaping.IcuUnescpaer
 import io.tolgee.formats.getPluralDataOrNull
 import io.tolgee.formats.getULocaleFromTag
@@ -15,7 +15,7 @@ class BaseIcuMessageToPoConvertor(
   val argumentConverter: FromIcuParamConvertor,
   val languageTag: String = "en",
   private val forceIsPlural: Boolean,
-  private val projectIcuPlaceholdersSupport: Boolean = false,
+  private val projectIcuPlaceholdersSupport: Boolean = true,
 ) {
   companion object {
     const val OTHER_KEYWORD = "other"
@@ -41,25 +41,26 @@ class BaseIcuMessageToPoConvertor(
 
   private fun getPluralResult(): ToPoConversionResult {
     val result =
-      BaseIcuMessageConvertor(
+      MessageConvertorFactory(
         message,
-        argumentConverter,
-        forceIsPlural = true,
-        // it's unescaped manually later, when forceUnescape
-        keepEscaping = !projectIcuPlaceholdersSupport,
-      ).convert()
+        forceIsPlural,
+        projectIcuPlaceholdersSupport,
+      ) {
+        argumentConverter
+      }.create().convert()
     val poPluralResult = getPluralResult(result.formsResult ?: mutableMapOf())
     return ToPoConversionResult(null, poPluralResult)
   }
 
   private fun getSingularResult(): ToPoConversionResult {
     val result =
-      BaseIcuMessageConvertor(
+      MessageConvertorFactory(
         message,
-        argumentConverter,
         forceIsPlural = false,
-        keepEscaping = false,
-      ).convert()
+        projectIcuPlaceholdersSupport,
+      ) {
+        argumentConverter
+      }.create().convert()
     return ToPoConversionResult(result.singleResult, null)
   }
 

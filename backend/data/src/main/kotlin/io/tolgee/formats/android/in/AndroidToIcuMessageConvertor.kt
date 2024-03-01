@@ -4,7 +4,6 @@ import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.ImportMessageConvertor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.convertMessage
-import io.tolgee.formats.escapeIcu
 
 class AndroidToIcuMessageConvertor : ImportMessageConvertor {
   @Suppress("UNCHECKED_CAST")
@@ -12,18 +11,18 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
     rawData: Any?,
     languageTag: String,
     convertPlaceholders: Boolean,
-    forceEscapePluralForms: Boolean,
+    isProjectIcuEnabled: Boolean,
   ): MessageConvertorResult {
     val stringValue = rawData as? String ?: (rawData as? Map<*, *>)?.get("_stringValue") as? String
 
     if (stringValue is String) {
-      val converted = convert(stringValue, false, convertPlaceholders)
+      val converted = convert(stringValue, false, convertPlaceholders, isProjectIcuEnabled)
       return MessageConvertorResult(converted, false)
     }
 
     if (rawData is Map<*, *>) {
       val rawDataMap = rawData as Map<String, String>
-      val converted = convertPlural(rawDataMap, convertPlaceholders, forceEscapePluralForms)
+      val converted = convertPlural(rawDataMap, convertPlaceholders, isProjectIcuEnabled)
       return MessageConvertorResult(converted, true)
     }
 
@@ -37,17 +36,17 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
   private fun convertPlural(
     rawData: Map<String, String>,
     convertPlaceholders: Boolean,
-    forceEscapePluralForms: Boolean,
+    isProjectIcuEnabled: Boolean,
   ): String {
     val forms =
       rawData.mapNotNull {
-        val converted = convert(it.value, true, convertPlaceholders)
+        val converted = convert(it.value, true, convertPlaceholders, isProjectIcuEnabled)
         it.key to (converted ?: return@mapNotNull null)
       }.toMap()
 
     return FormsToIcuPluralConvertor(
       forms,
-      forceEscape = forceEscapePluralForms,
+      forceEscape = false,
       addNewLines = true,
       argName = "0",
     ).convert()
@@ -57,9 +56,14 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
     message: String,
     isInPlural: Boolean = false,
     convertPlaceholders: Boolean,
+    isProjectIcuEnabled: Boolean,
   ): String {
-    if (!convertPlaceholders) return message.escapeIcu(isInPlural)
-    return convertMessage(message, isInPlural) {
+    return convertMessage(
+      message,
+      isInPlural,
+      convertPlaceholders = convertPlaceholders,
+      isProjectIcuEnabled = isProjectIcuEnabled,
+    ) {
       JavaToIcuParamConvertor()
     }
   }

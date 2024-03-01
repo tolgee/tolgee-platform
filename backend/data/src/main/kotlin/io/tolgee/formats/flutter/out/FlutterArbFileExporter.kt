@@ -16,6 +16,7 @@ class FlutterArbFileExporter(
   override val exportParams: IExportParams,
   private val baseLanguageTag: String,
   private val objectMapper: ObjectMapper,
+  private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
   /**
    * Map (Path To file -> Map (Key Name -> Node Wrapper))
@@ -87,6 +88,7 @@ class FlutterArbFileExporter(
       IcuToFlutterArbMessageConvertor(
         message = translation.text ?: "",
         forceIsPlural = isPlural,
+        isProjectIcuPlaceholdersEnabled,
       ).convert()
 
     if (converted.isPlural()) {

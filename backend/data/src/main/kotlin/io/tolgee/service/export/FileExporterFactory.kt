@@ -33,15 +33,30 @@ class FileExporterFactory(
     return when (exportParams.format) {
       ExportFormat.JSON -> JsonFileExporter(data, exportParams)
       ExportFormat.XLIFF -> XliffFileExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
-      ExportFormat.APPLE_XLIFF -> AppleXliffExporter(data, exportParams, baseTranslationsProvider, baseLanguage.tag)
-      ExportFormat.ANDROID_XML -> AndroidStringsXmlExporter(data, exportParams)
+      ExportFormat.APPLE_XLIFF ->
+        AppleXliffExporter(
+          data,
+          exportParams,
+          baseTranslationsProvider,
+          baseLanguage.tag,
+          projectIcuPlaceholdersSupport,
+        )
+
+      ExportFormat.ANDROID_XML -> AndroidStringsXmlExporter(data, exportParams, projectIcuPlaceholdersSupport)
       ExportFormat.PO ->
         getPoExporter(data, exportParams, baseTranslationsProvider, baseLanguage, projectIcuPlaceholdersSupport)
 
       ExportFormat.APPLE_STRINGS_STRINGSDICT ->
-        AppleStringsStringsdictExporter(data, exportParams)
+        AppleStringsStringsdictExporter(data, exportParams, projectIcuPlaceholdersSupport)
 
-      ExportFormat.FLUTTER_ARB -> FlutterArbFileExporter(data, exportParams, baseLanguage.tag, objectMapper)
+      ExportFormat.FLUTTER_ARB ->
+        FlutterArbFileExporter(
+          data,
+          exportParams,
+          baseLanguage.tag,
+          objectMapper,
+          projectIcuPlaceholdersSupport,
+        )
     }
   }
 

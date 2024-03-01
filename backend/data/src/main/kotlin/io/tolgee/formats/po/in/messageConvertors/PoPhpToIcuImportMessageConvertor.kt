@@ -9,13 +9,13 @@ class PoPhpToIcuImportMessageConvertor : ImportMessageConvertor {
     rawData: Any?,
     languageTag: String,
     convertPlaceholders: Boolean,
-    forceEscapePluralForms: Boolean,
+    isProjectIcuEnabled: Boolean,
   ): MessageConvertorResult {
     return BasePoToIcuMessageConvertor { PhpToIcuParamConvertor() }.convert(
       rawData,
       languageTag,
       convertPlaceholders,
-      forceEscapePluralForms,
+      isProjectIcuEnabled,
     )
   }
 }

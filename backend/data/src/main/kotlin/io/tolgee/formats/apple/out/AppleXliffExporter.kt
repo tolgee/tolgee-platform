@@ -20,6 +20,7 @@ class AppleXliffExporter(
   override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   private val baseLanguageTag: String,
+  private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.XLIFF.extension
 
@@ -93,7 +94,13 @@ class AppleXliffExporter(
 
   private fun addTargetTranslation(translation: ExportTranslationView) {
     val converted =
-      translation.text?.let { IcuToAppleMessageConvertor(message = it, translation.key.isPlural).convert() }
+      translation.text?.let {
+        IcuToAppleMessageConvertor(
+          message = it,
+          translation.key.isPlural,
+          isProjectIcuPlaceholdersEnabled,
+        ).convert()
+      }
 
     if (converted?.isPlural() == true) {
       handlePlural(translation, converted)
@@ -112,6 +119,7 @@ class AppleXliffExporter(
           IcuToAppleMessageConvertor(
             message = it,
             forceIsPlural = translation.key.isPlural,
+            isProjectIcuPlaceholdersEnabled,
           ).convert()
         }
       }
