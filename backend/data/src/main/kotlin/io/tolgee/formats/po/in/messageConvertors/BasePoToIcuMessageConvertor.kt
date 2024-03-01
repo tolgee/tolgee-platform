@@ -67,10 +67,9 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
     convertPlaceholders: Boolean,
     forceEscapePluralForms: Boolean,
   ): String {
-    if (forceEscapePluralForms)
-      {
-        return ForceIcuEscaper(message).escaped
-      }
+    if (forceEscapePluralForms) {
+      return ForceIcuEscaper(message).escaped
+    }
     if (!convertPlaceholders) return message.escapeIcu(isInPlural)
     return convertMessage(message, isInPlural, paramConvertorFactory)
   }
