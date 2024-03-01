@@ -232,7 +232,7 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
       setTablePosition({ left, right });
     }
   }, [tableRef.current, fullWidth, sidePanelOpen]);
-  const hasMinimalHeight = useMediaQuery('(min-height: 800px)');
+  const hasMinimalHeight = useMediaQuery('(min-height: 400px)');
 
   return (
     <StyledContainer
