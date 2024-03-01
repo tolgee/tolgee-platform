@@ -10,6 +10,7 @@ class ForceIcuEscaper(private val input: String, private val escapeHash: Boolean
   enum class State {
     StateText,
     StateEscapedMaybe,
+    StateEscaping,
   }
 
   private val escapable by lazy {
@@ -36,7 +37,7 @@ class ForceIcuEscaper(private val input: String, private val escapeHash: Boolean
           } else if (escapable.contains(char)) {
             result.append(escapeChar)
             result.append(char)
-            result.append(escapeChar)
+            state = StateEscaping
           } else {
             result.append(char)
           }
@@ -48,21 +49,35 @@ class ForceIcuEscaper(private val input: String, private val escapeHash: Boolean
             // append() another layer of escape on top
             result.append(escapeChar)
             result.append(char)
-            result.append(escapeChar)
+            state = StateEscaping
           } else if (char == escapeChar) {
             // two escape chars - escape both
             result.append(escapeChar)
             result.append(char)
             result.append(escapeChar)
+            state = StateText
           } else {
             result.append(char)
+            state = StateText
           }
-          state = StateText
+        }
+
+        StateEscaping -> {
+          if (escapable.contains(char)) {
+            result.append(char)
+          } else if (char == escapeChar) {
+            result.append(escapeChar)
+            result.append(escapeChar)
+          } else {
+            result.append(escapeChar)
+            result.append(char)
+            state = StateText
+          }
         }
       }
     }
 
-    if (state == StateEscapedMaybe) {
+    if (state == StateEscapedMaybe || state == StateEscaping) {
       result.append(escapeChar)
     }
 
