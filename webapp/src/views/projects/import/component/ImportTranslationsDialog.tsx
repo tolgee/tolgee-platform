@@ -117,9 +117,9 @@ export const ImportTranslationsDialog: FunctionComponent<{
                   <Grid container spacing={2}>
                     <Grid item lg={4} md={3} sm xs>
                       <Box>{i.keyName}</Box>
-                      {i.importedKeyDescription && (
+                      {i.keyDescription && (
                         <StyledDescription>
-                          {i.importedKeyDescription}
+                          {i.keyDescription}
                         </StyledDescription>
                       )}
                     </Grid>

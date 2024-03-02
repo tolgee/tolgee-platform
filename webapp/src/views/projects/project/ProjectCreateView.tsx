@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Checkbox, FormControlLabel, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { useHistory } from 'react-router-dom';

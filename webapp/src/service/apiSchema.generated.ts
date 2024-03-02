@@ -1664,13 +1664,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      expiresAt?: number;
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1810,14 +1810,14 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      username?: string;
       description: string;
     };
     SuperTokenRequest: {
@@ -2771,9 +2771,9 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
+      avatar?: components["schemas"]["Avatar"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
     };
@@ -2886,8 +2886,8 @@ export interface components {
       id: number;
       baseTranslation?: string;
       translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -2896,8 +2896,8 @@ export interface components {
       id: number;
       baseTranslation?: string;
       translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3426,13 +3426,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      expiresAt?: number;
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -3554,14 +3554,14 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      username?: string;
       description: string;
     };
     ApiKeyPermissionsModel: {
