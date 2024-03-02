@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.escaping
 
 import io.tolgee.formats.escaping.ForceIcuEscaper
-import io.tolgee.formats.escaping.IcuUnescpaer
+import io.tolgee.formats.escaping.IcuUnescper
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -36,7 +36,7 @@ class TwoWayEscapingTest {
     plural: Boolean,
   ) {
     val escaped = ForceIcuEscaper(string, plural).escaped
-    val unescaped = IcuUnescpaer(escaped, plural).unescaped
+    val unescaped = IcuUnescper(escaped, plural).unescaped
     unescaped.assert.describedAs(
       "\n\nInput:\n$string \n\nEscaped:\n$escaped \n\nUnescpaed: \n$unescaped",
     ).isEqualTo(string)

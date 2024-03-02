@@ -11,6 +11,7 @@ import java.io.InputStream
 class JsonFileExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: IExportParams,
+  val convertMessage: (message: String?, isPlural: Boolean) -> String? = { message, _ -> message },
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.JSON.extension
 
@@ -27,12 +28,12 @@ class JsonFileExporter(
 
   private fun prepare() {
     translations.forEach { translation ->
-      val fileContentResult = getFileContentResultMap(translation)
-      fileContentResult.addValue(translation.key.name, translation.text)
+      val fileContentResult = getFileContentResultBuilder(translation)
+      fileContentResult.addValue(translation.key.name, convertMessage(translation.text, translation.key.isPlural))
     }
   }
 
-  private fun getFileContentResultMap(translation: ExportTranslationView): StructureModelBuilder {
+  private fun getFileContentResultBuilder(translation: ExportTranslationView): StructureModelBuilder {
     val absolutePath = translation.getFilePath(translation.key.namespace)
     return result.computeIfAbsent(absolutePath) {
       StructureModelBuilder(exportParams.structureDelimiter, exportParams.supportArrays)

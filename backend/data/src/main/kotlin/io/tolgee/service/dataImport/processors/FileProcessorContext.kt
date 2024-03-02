@@ -5,6 +5,7 @@ import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.ImportMessageConvertorType
+import io.tolgee.formats.forceEscapePluralForms
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
@@ -86,6 +87,24 @@ data class FileProcessorContext(
     }
 
     createKey(keyName)
+  }
+
+  /**
+   * This method currently supports adding translations in ICU Message Format
+   * Later, we will add support for other message formats
+   */
+  fun addGenericFormatTranslation(
+    key: String,
+    languageName: String,
+    text: String?,
+    index: Int,
+  ) {
+    if (!projectIcuPlaceholdersEnabled) {
+      val escapedPlural = text?.forceEscapePluralForms()
+      val escapedText = escapedPlural ?: text
+      return addTranslation(key, languageName, escapedText, index, forceIsPlural = escapedPlural != null)
+    }
+    return addTranslation(keyName = key, languageName = languageName, value = text, idx = index)
   }
 
   private fun validateAndSaveIssues(

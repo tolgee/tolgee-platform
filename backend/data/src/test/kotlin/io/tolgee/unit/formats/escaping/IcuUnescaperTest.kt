@@ -1,18 +1,18 @@
 package io.tolgee.unit.formats.escaping
 
-import io.tolgee.formats.escaping.IcuUnescpaer
+import io.tolgee.formats.escaping.IcuUnescper
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
 class IcuUnescaperTest {
   @Test
   fun `it escapes`() {
-    IcuUnescpaer("'{hello}', my friend!").unescaped.assert.isEqualTo("{hello}, my friend!")
+    IcuUnescper("'{hello}', my friend!").unescaped.assert.isEqualTo("{hello}, my friend!")
   }
 
   @Test
   fun `it escapes apostrophes`() {
-    IcuUnescpaer(
+    IcuUnescper(
       "we are not entering escaped section: '''' " +
         "so it doesn't ' have to be doubled. " +
         "This sequence: '{' should be immediately closed",
@@ -25,7 +25,7 @@ class IcuUnescaperTest {
 
   @Test
   fun `it works for weird case`() {
-    IcuUnescpaer(
+    IcuUnescper(
       "'What ' complex '''' '{' string # ",
       false,
     ).unescaped.assert.isEqualTo("'What ' complex '' { string # ")
@@ -34,13 +34,13 @@ class IcuUnescaperTest {
   @Test
   fun `removes the escape char on end of string`() {
     val escaped = "Another ''''' more complex ' '''{ string }''' with many weird '} cases ''''}'"
-    IcuUnescpaer(escaped, false)
+    IcuUnescper(escaped, false)
       .unescaped.assert.isEqualTo("Another ''' more complex ' '{ string }' with many weird } cases ''}")
   }
 
   @Test
   fun `it it escapes escaped`() {
-    IcuUnescpaer(
+    IcuUnescper(
       "'''{'",
       false,
     ).unescaped.assert.isEqualTo("'{")
@@ -48,7 +48,7 @@ class IcuUnescaperTest {
 
   @Test
   fun `it escapes plurals`() {
-    IcuUnescpaer(
+    IcuUnescper(
       "What a '#' plural form",
       isPlural = true,
     ).unescaped.assert.isEqualTo("What a # plural form")
@@ -56,7 +56,7 @@ class IcuUnescaperTest {
 
   @Test
   fun `it unescapes inner sequence correctly`() {
-    IcuUnescpaer(
+    IcuUnescper(
       "'{ '' 'lakjsa'.",
       isPlural = true,
     ).unescaped.assert.isEqualTo("{ ' lakjsa'.")

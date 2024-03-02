@@ -46,7 +46,6 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
 
     return FormsToIcuPluralConvertor(
       forms,
-      forceEscape = false,
       addNewLines = true,
       argName = "0",
     ).convert()

@@ -41,7 +41,7 @@ class AppleToIcuMessageConvertor : ImportMessageConvertor {
     val converted =
       rawData.mapNotNull {
         it.key to convert(it.value, true, convertPlaceholders, isProjectIcuEnabled)
-      }.toMap().toIcuPluralString(escape = false, optimize = true, addNewLines = true, argName = "0")
+      }.toMap().toIcuPluralString(optimize = true, addNewLines = true, argName = "0")
     return converted
   }
 

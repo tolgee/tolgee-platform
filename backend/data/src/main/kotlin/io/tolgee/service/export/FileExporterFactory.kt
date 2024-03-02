@@ -11,6 +11,7 @@ import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
+import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
@@ -31,7 +32,14 @@ class FileExporterFactory(
     projectIcuPlaceholdersSupport: Boolean,
   ): FileExporter {
     return when (exportParams.format) {
-      ExportFormat.JSON -> JsonFileExporter(data, exportParams)
+      ExportFormat.JSON ->
+        JsonFileExporter(
+          data,
+          exportParams,
+        ) { text, isPlural ->
+          IcuToGenericFormatMessageConvertor(text, isPlural, projectIcuPlaceholdersSupport).convert()
+        }
+
       ExportFormat.XLIFF -> XliffFileExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
       ExportFormat.APPLE_XLIFF ->
         AppleXliffExporter(

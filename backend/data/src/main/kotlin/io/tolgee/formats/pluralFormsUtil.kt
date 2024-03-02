@@ -1,6 +1,7 @@
 package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
+import io.tolgee.formats.escaping.ForceIcuEscaper
 import io.tolgee.formats.escaping.PluralFormIcuEscaper
 import io.tolgee.util.nullIfEmpty
 
@@ -43,7 +44,6 @@ fun optimizePossiblePlural(string: String): String {
   val optimizedForms = optimizePluralForms(forms.forms)
   return FormsToIcuPluralConvertor(
     optimizedForms,
-    forceEscape = false,
     addNewLines = true,
     argName = forms.argName,
   ).convert()
@@ -217,6 +217,18 @@ fun <T> normalizePlurals(
 }
 
 /**
+ * This method is useful when Support for ICU is disabled on project level and we
+ * store such plural strings with escaped forms.
+ *
+ * Returns null if the string is not a plural
+ */
+fun String.forceEscapePluralForms(): String? {
+  val forms = getPluralForms(this)
+  val escapedForms = forms?.forms?.mapValues { ForceIcuEscaper(it.value, escapeHash = true).escaped }
+  return escapedForms?.toIcuPluralString(optimize = false, argName = forms.argName)
+}
+
+/**
  * Convert plurals to the same argument name
  */
 private fun <T> pluralFormsToSameArgName(
@@ -242,7 +254,6 @@ private fun Map<String, String>?.preparedFormsToIcuPlural(argName: String): Stri
   return this?.let {
     FormsToIcuPluralConvertor(
       it,
-      forceEscape = false,
       addNewLines = true,
       argName = argName,
     ).convert()
@@ -250,14 +261,12 @@ private fun Map<String, String>?.preparedFormsToIcuPlural(argName: String): Stri
 }
 
 fun Map<String, String>.toIcuPluralString(
-  escape: Boolean = false,
   optimize: Boolean = true,
   addNewLines: Boolean = true,
   argName: String,
 ): String {
   return FormsToIcuPluralConvertor(
     this,
-    forceEscape = escape,
     optimize = optimize,
     addNewLines = addNewLines,
     argName = argName,

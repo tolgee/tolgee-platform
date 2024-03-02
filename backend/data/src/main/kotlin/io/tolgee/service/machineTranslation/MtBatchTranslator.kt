@@ -99,7 +99,7 @@ class MtBatchTranslator(
     val forms =
       managerResult.translatedPluralForms
         ?: throw IllegalStateException("Plural forms are null")
-    val translatedText = forms.toIcuPluralString(escape = false, optimize = true, argName = argName)
+    val translatedText = forms.toIcuPluralString(optimize = true, argName = argName)
     return managerResult.getTranslatorResult(withReplacedParams, item).also {
       it.translatedText = translatedText
     }

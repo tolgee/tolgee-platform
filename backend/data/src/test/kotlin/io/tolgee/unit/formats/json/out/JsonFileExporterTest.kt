@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.nativeJson.out
+package io.tolgee.unit.formats.json.out
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -12,7 +12,7 @@ import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
 import java.io.InputStream
 
-class NativeJsonFileExporterTest {
+class JsonFileExporterTest {
   @Suppress("UNCHECKED_CAST")
   @Test
   fun `it scopes and handles collisions`() {

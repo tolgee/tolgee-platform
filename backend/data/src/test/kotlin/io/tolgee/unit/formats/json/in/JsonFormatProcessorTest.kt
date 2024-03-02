@@ -1,6 +1,6 @@
-package io.tolgee.unit.formats.nativeJson.`in`
+package io.tolgee.unit.formats.json.`in`
 
-import io.tolgee.formats.json.`in`.NativeJsonFileProcessor
+import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
@@ -9,7 +9,7 @@ import io.tolgee.util.assertTranslations
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class NativeJsonFormatProcessorTest {
+class JsonFormatProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
 
   @BeforeEach
@@ -24,8 +24,8 @@ class NativeJsonFormatProcessorTest {
   // from the debug window
   @Test
   fun `returns correct parsed result`() {
-    mockUtil.mockIt("example.json", "src/test/resources/import/nativeJson/example.json")
-    NativeJsonFileProcessor(mockUtil.fileProcessorContext).process()
+    mockUtil.mockIt("example.json", "src/test/resources/import/json/example.json")
+    JsonFileProcessor(mockUtil.fileProcessorContext).process()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("example", "common.save")
     mockUtil.fileProcessorContext.assertTranslations("example", "array[0]")
@@ -62,8 +62,8 @@ class NativeJsonFormatProcessorTest {
 
   @Test
   fun `returns correct parsed result (root array)`() {
-    mockUtil.mockIt("example.json", "src/test/resources/import/nativeJson/example_root_array.json")
-    NativeJsonFileProcessor(mockUtil.fileProcessorContext).process()
+    mockUtil.mockIt("example.json", "src/test/resources/import/json/example_root_array.json")
+    JsonFileProcessor(mockUtil.fileProcessorContext).process()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("example", "[0]")
       .assertSingle {

@@ -8,7 +8,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
-class NativeJsonFileProcessor(
+class JsonFileProcessor(
   override val context: FileProcessorContext,
 ) : ImportFileProcessor() {
   val result = mutableMapOf<String, MutableList<String?>>()
@@ -19,7 +19,7 @@ class NativeJsonFileProcessor(
       data.parse("")
       result.entries.forEachIndexed { index, (key, translationTexts) ->
         translationTexts.forEach { text ->
-          context.addTranslation(key, languageNameGuesses[0], text, index)
+          context.addGenericFormatTranslation(key, languageNameGuesses[0], text, index)
         }
       }
     } catch (e: JsonParseException) {
