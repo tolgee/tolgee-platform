@@ -56,29 +56,24 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
   fun `streaming responses do not cause a database connection pool exhaustion`() {
     // there is the bug in spring, co it throws the concurrent modification exception
     // to avoid this, we will retry the test until it passes,
-    // but we will also increase the sleep time between requests to make it more probable to pass
     // I know, it's ugly. Sorry. If you have time to spare, remove the repeats and the sleep, maybe it will pass
     // in future spring versions
     // https://github.com/spring-projects/spring-security/issues/9175
-    var sleepBetweenMs = 0L
     retry(
       retries = 100,
       exceptionMatcher = { it is ConcurrentModificationException || it is IllegalStateException },
     ) {
-      try {
-        val hikariDataSource = dataSource as HikariDataSource
-        val pool = hikariDataSource.hikariPoolMXBean
+      val hikariDataSource = dataSource as HikariDataSource
+      val pool = hikariDataSource.hikariPoolMXBean
 
+      waitForNotThrowing {
         pool.idleConnections.assert.isGreaterThan(70)
-        repeat(50) {
-          performProjectAuthGet("export").andIsOk
-          Thread.sleep(sleepBetweenMs)
-        }
-        waitForNotThrowing(pollTime = 50, timeout = 5000) {
-          pool.idleConnections.assert.isGreaterThan(70)
-        }
-      } finally {
-        sleepBetweenMs += 10
+      }
+      repeat(50) {
+        performProjectAuthGet("export").andIsOk
+      }
+      waitForNotThrowing(pollTime = 50, timeout = 5000) {
+        pool.idleConnections.assert.isGreaterThan(70)
       }
     }
   }

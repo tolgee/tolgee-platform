@@ -59,7 +59,6 @@ export const TranslationRead: React.FC<Props> = ({
     isEditing,
     handleOpen,
     handleClose,
-    isEditingRow,
     setState: handleStateChange,
     translation,
     language,
@@ -75,8 +74,6 @@ export const TranslationRead: React.FC<Props> = ({
       handleOpen();
     }
   };
-
-  const showAllLines = isEditing || (language.base && isEditingRow);
 
   const state = translation?.state || 'UNTRANSLATED';
 
@@ -117,7 +114,6 @@ export const TranslationRead: React.FC<Props> = ({
           width={width}
           text={translation?.text}
           locale={language.tag}
-          limitLines={!showAllLines}
           disabled={disabled}
           isPlural={keyData.keyIsPlural}
         />
