@@ -10,6 +10,7 @@ export interface FormatItem {
   format: components['schemas']['ExportParams']['format'];
   messageFormat?: components['schemas']['ExportParams']['messageFormat'];
   matchByExportParams?: (params: ExportParamsWithoutZip) => boolean;
+  extension: string;
 }
 
 export interface FormatGroup {
@@ -23,6 +24,7 @@ export const formatGroups: FormatGroup[] = [
     formats: [
       {
         id: 'native_json',
+        extension: 'json',
         name: 'JSON',
         defaultStructureDelimiter: '',
         canBeStructured: false,
@@ -41,11 +43,13 @@ export const formatGroups: FormatGroup[] = [
     formats: [
       {
         id: 'generic_xliff',
+        extension: 'xliff',
         name: 'XLIFF',
         format: 'XLIFF',
       },
       {
         id: 'generic_structured_json',
+        extension: 'json',
         name: 'Structured JSON',
         defaultStructureDelimiter: '.',
         canBeStructured: true,
@@ -55,6 +59,12 @@ export const formatGroups: FormatGroup[] = [
         matchByExportParams: (params) =>
           params.format === 'JSON' && params.structureDelimiter === '.',
       },
+      {
+        id: 'properties',
+        extension: 'properties',
+        name: '.properties',
+        format: 'PROPERTIES',
+      },
     ],
   },
   {
@@ -62,18 +72,21 @@ export const formatGroups: FormatGroup[] = [
     formats: [
       {
         id: 'po_php',
+        extension: 'po',
         name: 'PHP .po',
         format: 'PO',
         messageFormat: 'PHP_SPRINTF',
       },
       {
         id: 'po_python',
+        extension: 'po',
         name: 'Python .po',
         format: 'PO',
         messageFormat: 'PYTHON_SPRINTF',
       },
       {
         id: 'po_c',
+        extension: 'po',
         name: 'C/C++ .po',
         format: 'PO',
         messageFormat: 'C_SPRINTF',
@@ -85,11 +98,13 @@ export const formatGroups: FormatGroup[] = [
     formats: [
       {
         id: 'apple_strings',
+        extension: 'strings',
         name: 'Apple .strings & .stringsdict',
         format: 'APPLE_STRINGS_STRINGSDICT',
       },
       {
         id: 'apple_xliff',
+        extension: 'xliff',
         name: 'Apple .xliff',
         format: 'APPLE_XLIFF',
       },
@@ -100,6 +115,7 @@ export const formatGroups: FormatGroup[] = [
     formats: [
       {
         id: 'android_xml',
+        extension: 'xml',
         name: 'Android .xml',
         format: 'ANDROID_XML',
       },
@@ -110,6 +126,7 @@ export const formatGroups: FormatGroup[] = [
     formats: [
       {
         id: 'flutter_arb',
+        extension: 'arb',
         name: 'Flutter .arb',
         format: 'FLUTTER_ARB',
       },

@@ -209,13 +209,19 @@ export const ExportForm = () => {
             onSuccess(data) {
               const url = URL.createObjectURL(data as any as Blob);
               const a = document.createElement('a');
+              const onlyPossibleLanguageString =
+                values.languages.length === 1 ? `_${values.languages[0]}` : '';
               a.href = url;
+              const dateStr = '_' + new Date().toISOString().split('T')[0];
               if (data.type === 'application/zip') {
                 a.download = project.name + '.zip';
-              } else if (data.type === 'application/json') {
-                a.download = values.languages[0] + '.json';
-              } else if (data.type === 'application/x-xliff+xml') {
-                a.download = values.languages[0] + '.xliff';
+              } else {
+                a.download =
+                  project.name +
+                  onlyPossibleLanguageString +
+                  dateStr +
+                  '.' +
+                  format.extension;
               }
               a.click();
             },
