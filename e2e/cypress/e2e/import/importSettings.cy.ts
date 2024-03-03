@@ -2,7 +2,6 @@ import 'cypress-file-upload';
 import { gcy } from '../../common/shared';
 import {
   assertInResultDialog,
-  getFileIssuesDialog,
   getLanguageRow,
   getShowDataDialog,
   visitImport,

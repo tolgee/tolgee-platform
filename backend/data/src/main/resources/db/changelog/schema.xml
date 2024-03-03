@@ -3125,7 +3125,7 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1708011399629-2">
         <addColumn tableName="import_file">
-            <column name="needs_param_conversion" type="boolean">
+            <column name="needs_param_conversion" type="boolean" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

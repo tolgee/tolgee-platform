@@ -1,11 +1,11 @@
 /// <reference types="cypress" />
-import { HOST } from '../../common/constants';
+import { HOST } from '../common/constants';
 import {
   createUser,
   forceDate,
   login,
   releaseForcedDate,
-} from '../../common/apiCalls/common';
+} from '../common/apiCalls/common';
 
 describe('Feature announcement', () => {
   let initalUser: string;

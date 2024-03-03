@@ -10,6 +10,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 class ImportFile(
@@ -30,6 +31,7 @@ class ImportFile(
 
   var namespace: String? = null
 
+  @ColumnDefault("false")
   var needsParamConversion = false
 
   fun addIssue(

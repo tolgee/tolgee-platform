@@ -28,6 +28,7 @@ describe('Content delivery', () => {
   afterEach(() => {
     setFeature('MULTIPLE_CONTENT_DELIVERY_CONFIGS', true);
     setContentStorageBypass(false);
+    contentDeliveryTestData.clean();
   });
 
   it('publishes content manually', () => {
@@ -63,7 +64,7 @@ describe('Content delivery', () => {
     );
   });
 
-  it.only('updates content delivery config with proper export params ', () => {
+  it('updates content delivery config with proper export params ', () => {
     function openEditDialog() {
       gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
         .findDcy('content-delivery-item-type')
