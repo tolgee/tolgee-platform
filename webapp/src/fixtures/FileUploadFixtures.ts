@@ -23,7 +23,7 @@ export async function getFilesAsync(dataTransfer: DataTransfer) {
       typeof item.webkitGetAsEntry === 'function' && !isSafari
         ? item.webkitGetAsEntry()
         : null,
-    getAsFile: item.getAsFile,
+    getAsFile: () => item.getAsFile(),
   }));
 
   for (let i = 0; i < items.length; i++) {

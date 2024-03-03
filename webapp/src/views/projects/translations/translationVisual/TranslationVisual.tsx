@@ -15,8 +15,7 @@ const StyledDisabled = styled(DirectionLocaleWrapper)`
 `;
 
 type Props = {
-  limitLines?: boolean;
-  wrapVariants?: boolean;
+  maxLines?: number;
   text: string | undefined;
   locale: string;
   width?: number | string;
@@ -25,8 +24,7 @@ type Props = {
 };
 
 export const TranslationVisual = ({
-  limitLines,
-  wrapVariants,
+  maxLines,
   text,
   locale,
   width,
@@ -51,7 +49,11 @@ export const TranslationVisual = ({
       value={value}
       locale={locale}
       render={({ content, exampleValue, variant }) => (
-        <LimitedHeightText maxLines={3} width={width} lineHeight="1.3em">
+        <LimitedHeightText
+          maxLines={maxLines === undefined ? 3 : maxLines!}
+          width={width}
+          lineHeight="1.3em"
+        >
           <TranslationWithPlaceholders
             content={content}
             pluralExampleValue={exampleValue}

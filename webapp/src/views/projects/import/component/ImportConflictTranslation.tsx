@@ -127,6 +127,7 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
         ref={textRef}
       >
         <TranslationVisual
+          maxLines={props.expanded ? 0 : 3}
           text={props.text}
           locale={props.languageTag}
           isPlural={props.isPlural}

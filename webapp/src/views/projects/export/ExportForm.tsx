@@ -214,7 +214,7 @@ export const ExportForm = () => {
               a.href = url;
               const dateStr = '_' + new Date().toISOString().split('T')[0];
               if (data.type === 'application/zip') {
-                a.download = project.name + '.zip';
+                a.download = project.name + dateStr + '.zip';
               } else {
                 a.download =
                   project.name +

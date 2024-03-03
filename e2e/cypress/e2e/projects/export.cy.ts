@@ -16,6 +16,10 @@ describe('Projects Basics', () => {
         en: `Test english`,
         cs: `Test czech`,
       });
+      createKey(p.id, `test.array[0]`, {
+        en: `Test english`,
+        cs: `Test czech`,
+      });
       visitExport(p.id);
       cy.gcy('export-submit-button').should('be.visible');
     });
@@ -23,7 +27,7 @@ describe('Projects Basics', () => {
 
   it('exports all to zip by default', () => {
     cy.gcy('export-submit-button').click();
-    cy.verifyDownload('Test project.zip');
+    cy.verifyDownload(getFileName('zip'));
   });
 
   it('exports one language to json', () => {
@@ -31,21 +35,42 @@ describe('Projects Basics', () => {
 
     cy.gcy('export-submit-button').click();
 
-    cy.readFile(downloadsFolder + '/en.json').should('deep.equal', {
-      'test.test': 'Test english',
-    });
+    cy.readFile(downloadsFolder + '/' + getFileName('json', 'en')).should(
+      'deep.equal',
+      {
+        'test.array[0]': 'Test english',
+        'test.test': 'Test english',
+      }
+    );
   });
 
   it('exports with nested structure', () => {
     exportToggleLanguage('English');
+    exportSelectFormat('Structured JSON');
 
-    cy.gcy('export-nested-selector').click();
     cy.gcy('export-submit-button').click();
-    cy.verifyDownload('cs.json');
+    const fileName = getFileName('json', 'cs');
+    cy.verifyDownload(fileName);
 
-    cy.readFile(downloadsFolder + '/cs.json')
+    const getFile = () => cy.readFile(downloadsFolder + '/' + fileName);
+    getFile().its('test').its('test').should('eq', 'Test czech');
+    getFile().its('test').its('array[0]').should('eq', 'Test czech');
+  });
+
+  it('the support arrays switch works', () => {
+    exportToggleLanguage('English');
+    exportSelectFormat('Structured JSON');
+
+    cy.gcy('export-support_arrays-selector').click();
+    cy.gcy('export-submit-button').click();
+
+    const fileName = getFileName('json', 'cs');
+    cy.verifyDownload(fileName);
+
+    cy.readFile(downloadsFolder + '/' + fileName)
       .its('test')
-      .its('test')
+      .its('array')
+      .its(0)
       .should('eq', 'Test czech');
   });
 
@@ -55,6 +80,12 @@ describe('Projects Basics', () => {
     exportSelectFormat('XLIFF');
 
     cy.gcy('export-submit-button').click();
-    cy.verifyDownload('en.xliff');
+    cy.verifyDownload(getFileName('xliff', 'en'));
   });
 });
+
+const getFileName = (extension: string, language?: string) => {
+  const dateStr = '_' + new Date().toISOString().split('T')[0];
+  const languageStr = language ? `_${language}` : '';
+  return `Test project${languageStr}${dateStr}.${extension}`;
+};
