@@ -1,7 +1,6 @@
-package io.tolgee.unit.formats.json.`in`
+package io.tolgee.unit.formats.properties.`in`
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.formats.json.`in`.JsonFileProcessor
+import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
@@ -14,7 +13,7 @@ import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class JsonFormatProcessorTest {
+class PropertiesFileProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
 
   @BeforeEach
@@ -22,71 +21,64 @@ class JsonFormatProcessorTest {
     mockUtil = FileProcessorContextMockUtil()
   }
 
-  // This is how to generate the test:
-  // 1. run the test in debug mode
-  // 2. copy the result of calling:
-  // io.tolgee.unit.util.generateTestsForImportResult(mockUtil.fileProcessorContext)
-  // from the debug window
   @Test
-  fun `returns correct parsed result`() {
-    mockUtil.mockIt("example.json", "src/test/resources/import/json/example.json")
+  fun `basic cases`() {
+    mockUtil.mockIt(
+      "messages_en.properties",
+      "src/test/resources/import/properties/example.properties",
+    )
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("example", "common.save")
-    mockUtil.fileProcessorContext.assertTranslations("example", "array[0]")
-    mockUtil.fileProcessorContext.assertTranslations("example", "array[1]")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "key1")
       .assertSingle {
-        hasText("two")
+        hasText("Duplicated")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "array[2]")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "escaping test")
       .assertSingle {
-        hasText("three")
+        hasText("Escaping = \\ = \n new line \n = = \"")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.c")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "array")
       .assertSingle {
-        hasText("This is nested hard.")
+        hasText("1, 2, 3")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.d[0]")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "with.dots.s")
       .assertSingle {
-        hasText("one")
+        hasText("Hey")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.d[1]")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "number")
       .assertSingle {
-        hasText("two")
+        hasText("1")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "a.b.d[2]")
-      .assertSingle {
-        hasText("three")
-      }
-    mockUtil.fileProcessorContext.assertTranslations("example", "boolean")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "boolean")
       .assertSingle {
         hasText("true")
       }
-    mockUtil.fileProcessorContext.keys.assert.containsKeys("null")
-  }
-
-  @Test
-  fun `returns correct parsed result (root array)`() {
-    mockUtil.mockIt("example.json", "src/test/resources/import/json/example_root_array.json")
-    processFile()
-    mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("example", "[0]")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "with_commnet")
       .assertSingle {
-        hasText("item 1")
+        hasText("with comment")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "[1]")
+    mockUtil.fileProcessorContext.assertTranslations("messages_en", "with_commnet_2")
       .assertSingle {
-        hasText("item 2")
+        hasText("with comment")
       }
+    mockUtil.fileProcessorContext.assertKey("with_commnet") {
+      custom.assert.isNull()
+      description.assert.isEqualTo("A commnet")
+    }
+    mockUtil.fileProcessorContext.assertKey("with_commnet_2") {
+      custom.assert.isNull()
+      description.assert.isEqualTo("A commnet")
+    }
   }
 
   @Test
   fun `import with placeholder conversion (disabled ICU)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("en", "key")
       .assertSingle {
-        hasText("Hello {icuPara}")
+        hasText("Hello {icuPara} '{escaped}',")
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "plural")
       .assertSinglePlural {
@@ -94,23 +86,25 @@ class JsonFormatProcessorTest {
           """
           {count, plural,
           one {Hello one '#' '{'icuParam'}'}
-          other {Hello other '{'icuParam'}'}
+          other {Hello other '{'icuParam'}' '''{'escaped'}'''}
           }
           """.trimIndent(),
         )
         isPluralOptimized()
       }
+    mockUtil.fileProcessorContext.assertKey("plural") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
   }
 
   @Test
   fun `import with placeholder conversion (no conversion)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
-    mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("en", "key")
       .assertSingle {
-        hasText("Hello {icuPara}")
+        hasText("Hello {icuPara} '{escaped}',")
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "plural")
       .assertSinglePlural {
@@ -118,21 +112,26 @@ class JsonFormatProcessorTest {
           """
           {count, plural,
           one {Hello one # {icuParam}}
-          other {Hello other {icuParam}}
+          other {Hello other {icuParam} '{escaped}'}
           }
           """.trimIndent(),
         )
         isPluralOptimized()
       }
+    mockUtil.fileProcessorContext.assertKey("plural") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
   }
 
   @Test
   fun `import with placeholder conversion (with conversion)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("en", "key")
       .assertSingle {
-        hasText("Hello {icuPara}")
+        hasText("Hello {icuPara} '{escaped}',")
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "plural")
       .assertSinglePlural {
@@ -140,7 +139,7 @@ class JsonFormatProcessorTest {
           """
           {count, plural,
           one {Hello one # {icuParam}}
-          other {Hello other {icuParam}}
+          other {Hello other {icuParam} '{escaped}'}
           }
           """.trimIndent(),
         )
@@ -157,14 +156,14 @@ class JsonFormatProcessorTest {
     projectIcuPlaceholdersEnabled: Boolean,
   ) {
     mockUtil.mockIt(
-      "en.json",
-      "src/test/resources/import/json/example_params.json",
+      "en.properties",
+      "src/test/resources/import/properties/example_params.properties",
       convertPlaceholders,
       projectIcuPlaceholdersEnabled,
     )
   }
 
   private fun processFile() {
-    JsonFileProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
+    PropertiesFileProcessor(mockUtil.fileProcessorContext).process()
   }
 }

@@ -35,7 +35,8 @@ class AppleXliffFormatProcessorTest {
 
   @Test
   fun `returns correct parsed result`() {
-    processFile("cs", "cs.xliff")
+    mockFile("cs", "cs.xliff")
+    processFile()
     mockUtil.fileProcessorContext
     mockUtil.fileProcessorContext.assertLanguagesCount(2)
     mockUtil.fileProcessorContext.assertTranslations("en", "Dogs %lld")
@@ -151,8 +152,9 @@ class AppleXliffFormatProcessorTest {
   }
 
   @Test
-  fun `correctly parses `() {
-    processFile("en", "en_xcstrings.xliff")
+  fun `correctly parses xcstrings xliff`() {
+    mockFile("en", "en_xcstrings.xliff")
+    processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("en", "CFBundleName")
       .assertAllSame {
@@ -198,11 +200,164 @@ class AppleXliffFormatProcessorTest {
     }
   }
 
-  private fun processFile(
+  @Test
+  fun `import with placeholder conversion (disabled ICU)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "Dogs %lld")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          zero {No dogs here %@ '{'icuParam'}'!}
+          one {One dog is here %@ '{'icuParam'}'!}
+          other {%lld dogs here %@ '{'icuParam'}'}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "Hi %lld")
+      .assertSingle {
+        hasText("Hi %lld {icuParam}")
+      }
+    mockUtil.fileProcessorContext.assertKey("Dogs %lld") {
+      customEquals(
+        """
+        {
+            "_appleXliffFileOriginal" : "Localization test/en.lproj/Localizable.stringsdict",
+            "_appleXliffPropertyName" : "dog",
+            "_appleXliffStringsFileOriginal" : "en.lproj/Localizable.strings"
+          }
+        """.trimIndent(),
+      )
+      description.assert.isEqualTo("The count of dogs in the app")
+    }
+    mockUtil.fileProcessorContext.assertKey("Hi %lld") {
+      customEquals(
+        """
+        {
+            "_appleXliffFileOriginal" : "en.lproj/Localizable.strings"
+          }
+        """.trimIndent(),
+      )
+      description.assert.isNull()
+    }
+  }
+
+  @Test
+  fun `import with placeholder conversion (no conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "Dogs %lld")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          zero {No dogs here %@ '{'icuParam'}'!}
+          one {One dog is here %@ '{'icuParam'}'!}
+          other {%lld dogs here %@ '{'icuParam'}'}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "Hi %lld")
+      .assertSingle {
+        hasText("Hi %lld '{'icuParam'}'")
+      }
+    mockUtil.fileProcessorContext.assertKey("Dogs %lld") {
+      customEquals(
+        """
+        {
+            "_appleXliffFileOriginal" : "Localization test/en.lproj/Localizable.stringsdict",
+            "_appleXliffPropertyName" : "dog",
+            "_appleXliffStringsFileOriginal" : "en.lproj/Localizable.strings"
+          }
+        """.trimIndent(),
+      )
+      description.assert.isEqualTo("The count of dogs in the app")
+    }
+    mockUtil.fileProcessorContext.assertKey("Hi %lld") {
+      customEquals(
+        """
+        {
+            "_appleXliffFileOriginal" : "en.lproj/Localizable.strings"
+          }
+        """.trimIndent(),
+      )
+      description.assert.isNull()
+    }
+  }
+
+  @Test
+  fun `import with placeholder conversion (with conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "Dogs %lld")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          zero {No dogs here {0} '{'icuParam'}'!}
+          one {One dog is here {0} '{'icuParam'}'!}
+          other {# dogs here {1} '{'icuParam'}'}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "Hi %lld")
+      .assertSingle {
+        hasText("Hi {0, number} '{'icuParam'}'")
+      }
+    mockUtil.fileProcessorContext.assertKey("Dogs %lld") {
+      customEquals(
+        """
+        {
+            "_appleXliffFileOriginal" : "Localization test/en.lproj/Localizable.stringsdict",
+            "_appleXliffPropertyName" : "dog",
+            "_appleXliffStringsFileOriginal" : "en.lproj/Localizable.strings"
+          }
+        """.trimIndent(),
+      )
+      description.assert.isEqualTo("The count of dogs in the app")
+    }
+    mockUtil.fileProcessorContext.assertKey("Hi %lld") {
+      customEquals(
+        """
+        {
+            "_appleXliffFileOriginal" : "en.lproj/Localizable.strings"
+          }
+        """.trimIndent(),
+      )
+      description.assert.isNull()
+    }
+  }
+
+  private fun mockPlaceholderConversionTestFile(
+    convertPlaceholders: Boolean,
+    projectIcuPlaceholdersEnabled: Boolean,
+  ) {
+    mockUtil.mockIt(
+      "cs.xliff",
+      "src/test/resources/import/apple/params_everywhere_cs.xliff",
+      convertPlaceholders,
+      projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  private fun mockFile(
     languageTag: String,
     fileName: String = "cs.xliff",
   ) {
     mockUtil.mockIt("$languageTag.xliff", "src/test/resources/import/apple/$fileName")
+  }
+
+  private fun processFile() {
     AppleXliffFileProcessor(mockUtil.fileProcessorContext, parsed).process()
   }
 }

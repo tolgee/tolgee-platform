@@ -1,13 +1,17 @@
-package io.tolgee.unit.formats.xliff
+package io.tolgee.unit.formats.xliff.`in`
 
 import io.tolgee.formats.xliff.`in`.Xliff12FileProcessor
 import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
+import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
+import io.tolgee.util.assertSinglePlural
 import io.tolgee.util.assertTranslations
+import io.tolgee.util.custom
 import io.tolgee.util.description
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -110,5 +114,93 @@ class Xliff12FileProcessorTest {
       assertThat(issues[1].params[0].type).isEqualTo(FileIssueParamType.FILE_NODE_ORIGINAL)
       assertThat(issues[1].params[0].value).isEqualTo("../src/platforms/android/androidauthenticationview.qml")
     }
+  }
+
+  @Test
+  fun `import with placeholder conversion (disabled ICU)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
+    processFile()
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("Hello {icuPara}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+      .assertSinglePlural {
+        hasText(
+          """
+          {count, plural,
+          one {Hello one '#' '{'icuParam'}'}
+          other {Hello other '{'icuParam'}'}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (no conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("Hello {icuPara}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+      .assertSinglePlural {
+        hasText(
+          """
+          {count, plural,
+          one {Hello one # {icuParam}}
+          other {Hello other {icuParam}}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (with conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("Hello {icuPara}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+      .assertSinglePlural {
+        hasText(
+          """
+          {count, plural,
+          one {Hello one # {icuParam}}
+          other {Hello other {icuParam}}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertKey("plural") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
+  }
+
+  private fun mockPlaceholderConversionTestFile(
+    convertPlaceholders: Boolean,
+    projectIcuPlaceholdersEnabled: Boolean,
+  ) {
+    mockUtil.mockIt(
+      "en.xliff",
+      "src/test/resources/import/xliff/example_params.xliff",
+      convertPlaceholders,
+      projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  private fun processFile() {
+    Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
   }
 }

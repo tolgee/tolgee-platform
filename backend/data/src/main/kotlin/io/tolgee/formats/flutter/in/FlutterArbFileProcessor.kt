@@ -13,7 +13,7 @@ class FlutterArbFileProcessor(
   ImportFileProcessor() {
   override fun process() {
     parsed.translations.forEach { (keyName, item) ->
-      context.addTranslation(keyName, guessedLanguage, item.value.convertMessage())
+      context.addGenericFormatTranslation(keyName, guessedLanguage, item.value.convertMessage())
       if (item.description != null) {
         context.addKeyDescription(keyName, item.description)
       }

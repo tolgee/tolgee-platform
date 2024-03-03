@@ -3,6 +3,10 @@ package io.tolgee.unit.formats.apple.`in`
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.assertLanguagesCount
+import io.tolgee.util.assertSingle
+import io.tolgee.util.assertTranslations
+import io.tolgee.util.description
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,7 +22,7 @@ class StringsFormatProcessorTest {
 
   @Test
   fun `returns correct parsed result`() {
-    StringsFileProcessor(mockUtil.fileProcessorContext).process()
+    processFile()
     Assertions.assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
     Assertions.assertThat(mockUtil.fileProcessorContext.translations).hasSize(7)
     assertParsed("""welcome_header""", """Hello, {0}""")
@@ -42,6 +46,55 @@ class StringsFormatProcessorTest {
       "another key\n\n multiline",
       null,
     )
+  }
+
+  @Test
+  fun `import with placeholder conversion (disabled ICU)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+      .assertSingle {
+        hasText("Hello, %@ {meto}")
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (no conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+      .assertSingle {
+        hasText("Hello, %@ '{'meto'}'")
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (with conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+      .assertSingle {
+        hasText("Hello, {0} '{'meto'}'")
+      }
+  }
+
+  private fun mockPlaceholderConversionTestFile(
+    convertPlaceholders: Boolean,
+    projectIcuPlaceholdersEnabled: Boolean,
+  ) {
+    mockUtil.mockIt(
+      "values-en/Localizable.string",
+      "src/test/resources/import/apple/Localizable_params.strings",
+      convertPlaceholders,
+      projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  private fun processFile() {
+    StringsFileProcessor(mockUtil.fileProcessorContext).process()
   }
 
   private fun assertParsed(

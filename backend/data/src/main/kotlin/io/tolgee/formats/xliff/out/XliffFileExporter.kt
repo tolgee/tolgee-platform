@@ -15,6 +15,7 @@ class XliffFileExporter(
   override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
+  val convertMessage: (message: String?, isPlural: Boolean) -> String? = { message, _ -> message },
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.XLIFF.extension
 
@@ -47,15 +48,19 @@ class XliffFileExporter(
     resultItem.transUnits.add(
       XliffTransUnit().apply {
         this.id = translation.key.name
-        this.source = baseTranslations[translation.key.namespace to translation.key.name]?.text
-        this.target = translation.text
+        this.source =
+          convertMessage(
+            baseTranslations[translation.key.namespace to translation.key.name]?.text,
+            translation.key.isPlural,
+          )
+        this.target = convertMessage(translation.text, translation.key.isPlural)
         this.note = translation.key.description
       },
     )
   }
 
   private fun getResultXliffFile(translation: ExportTranslationView): XliffFile {
-    val absolutePath = translation.getFilePath(translation.key.namespace)
+    val absolutePath = translation.getFilePath()
     return models.computeIfAbsent(absolutePath) {
       XliffModel().apply {
         files.add(

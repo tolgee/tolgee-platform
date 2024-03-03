@@ -1,5 +1,6 @@
 package io.tolgee.util
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
@@ -20,6 +21,8 @@ class FileProcessorContextMockUtil {
   fun mockIt(
     fileName: String,
     resourcesFilePath: String,
+    convertPlaceholders: Boolean = true,
+    projectIcuPlaceholdersEnabled: Boolean = true,
   ) {
     importMock = mock()
     importFile = ImportFile(fileName, importMock)
@@ -35,6 +38,17 @@ class FileProcessorContextMockUtil {
     val validator = Mockito.mock(KeyCustomValuesValidator::class.java)
     Mockito.`when`(applicationContextMock.getBean(KeyCustomValuesValidator::class.java)).thenReturn(validator)
     Mockito.`when`(validator.isValid(any())).thenReturn(true)
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, applicationContext = applicationContextMock)
+    fileProcessorContext =
+      FileProcessorContext(
+        importFileDto,
+        importFile,
+        applicationContext = applicationContextMock,
+        importSettings =
+          object : IImportSettings {
+            override var overrideKeyDescriptions: Boolean = false
+            override var convertPlaceholdersToIcu: Boolean = convertPlaceholders
+          },
+        projectIcuPlaceholdersEnabled = projectIcuPlaceholdersEnabled,
+      )
   }
 }

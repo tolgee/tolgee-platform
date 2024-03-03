@@ -1,8 +1,8 @@
 package io.tolgee.formats.json.`in`
 
 import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
@@ -10,12 +10,13 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class JsonFileProcessor(
   override val context: FileProcessorContext,
+  private val objectMapper: ObjectMapper,
 ) : ImportFileProcessor() {
   val result = mutableMapOf<String, MutableList<String?>>()
 
   override fun process() {
     try {
-      val data = jacksonObjectMapper().readValue<Any?>(context.file.data)
+      val data = objectMapper.readValue<Any?>(context.file.data)
       data.parse("")
       result.entries.forEachIndexed { index, (key, translationTexts) ->
         translationTexts.forEach { text ->

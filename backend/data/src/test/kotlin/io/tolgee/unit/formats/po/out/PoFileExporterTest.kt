@@ -8,11 +8,14 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
+import io.tolgee.unit.util.assertFile
+import io.tolgee.unit.util.getExported
+import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 
-class PhpPoFileExporterTest {
+class PoFileExporterTest {
   @Test
   fun `exports plurals correctly`() {
     val exporter = getPluralsExporter()
@@ -237,16 +240,113 @@ class PhpPoFileExporterTest {
       ),
     )
 
-  private fun getExporter(translations: List<ExportTranslationView>): PoFileExporter {
+  @Test
+  fun `exports with placeholders (ICU placeholders enabled)`() {
+    val exporter = getIcuPlaceholdersEnabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.po",
+      """
+    |msgid ""
+    |msgstr ""
+    |"Language: cs\n"
+    |"MIME-Version: 1.0\n"
+    |"Content-Type: text/plain; charset=UTF-8\n"
+    |"Content-Transfer-Encoding: 8bit\n"
+    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"X-Generator: Tolgee\n"
+    |
+    |msgid "key3"
+    |msgstr[0] "%d den %s"
+    |msgstr[1] "%d dny"
+    |msgstr[2] "%d dní"
+    |
+    |msgid "item"
+    |msgstr "I will be first {icuParam}"
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersEnabledExporter(): PoFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}'",
+        )
+      }
+    return getExporter(built.translations, true)
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled)`() {
+    val exporter = getIcuPlaceholdersDisabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.po",
+      """
+    |msgid ""
+    |msgstr ""
+    |"Language: cs\n"
+    |"MIME-Version: 1.0\n"
+    |"Content-Type: text/plain; charset=UTF-8\n"
+    |"Content-Transfer-Encoding: 8bit\n"
+    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"X-Generator: Tolgee\n"
+    |
+    |msgid "key3"
+    |msgstr[0] "# den {icuParam}"
+    |msgstr[1] "# dny"
+    |msgstr[2] "# dní"
+    |
+    |msgid "item"
+    |msgstr "I will be first {icuParam}"
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(): PoFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first {icuParam}",
+        )
+      }
+    return getExporter(built.translations, false)
+  }
+
+  private fun getExporter(
+    translations: List<ExportTranslationView>,
+    isProjectIcuPlaceholdersEnabled: Boolean = true,
+  ): PoFileExporter {
     val baseLanguageMock = mock<ILanguage>()
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
-
     return PoFileExporter(
       translations = translations,
       exportParams = ExportParams(),
+      projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
+      baseLanguage = baseLanguageMock,
       baseTranslationsProvider = { listOf() },
-      baseLanguageMock,
-      PoSupportedMessageFormat.PHP,
+      poSupportedMessageFormat = PoSupportedMessageFormat.PHP,
     )
   }
 }

@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.xliff
+package io.tolgee.unit.formats.xliff.`in`
 
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
 import io.tolgee.util.FileProcessorContextMockUtil

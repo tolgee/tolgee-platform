@@ -34,7 +34,7 @@ class JsonFileExporter(
   }
 
   private fun getFileContentResultBuilder(translation: ExportTranslationView): StructureModelBuilder {
-    val absolutePath = translation.getFilePath(translation.key.namespace)
+    val absolutePath = translation.getFilePath()
     return result.computeIfAbsent(absolutePath) {
       StructureModelBuilder(exportParams.structureDelimiter, exportParams.supportArrays)
     }

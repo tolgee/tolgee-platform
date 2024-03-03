@@ -11,8 +11,8 @@ interface FileExporter {
 
   fun produceFiles(): Map<String, InputStream>
 
-  fun ExportTranslationView.getFilePath(namespace: String?): String {
-    return getFilePath(namespace, fileExtension)
+  fun ExportTranslationView.getFilePath(): String {
+    return getFilePath(this.key.namespace, fileExtension)
   }
 
   fun ExportTranslationView.getFilePath(

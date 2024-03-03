@@ -15,6 +15,7 @@ import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
+import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
@@ -40,7 +41,16 @@ class FileExporterFactory(
           IcuToGenericFormatMessageConvertor(text, isPlural, projectIcuPlaceholdersSupport).convert()
         }
 
-      ExportFormat.XLIFF -> XliffFileExporter(data, exportParams, baseTranslationsProvider, baseLanguage)
+      ExportFormat.XLIFF ->
+        XliffFileExporter(
+          data,
+          exportParams,
+          baseTranslationsProvider,
+          baseLanguage,
+        ) { text, isPlural ->
+          IcuToGenericFormatMessageConvertor(text, isPlural, projectIcuPlaceholdersSupport).convert()
+        }
+
       ExportFormat.APPLE_XLIFF ->
         AppleXliffExporter(
           data,
@@ -65,6 +75,11 @@ class FileExporterFactory(
           objectMapper,
           projectIcuPlaceholdersSupport,
         )
+
+      ExportFormat.PROPERTIES ->
+        PropertiesFileExporter(data, exportParams) { text, isPlural ->
+          IcuToGenericFormatMessageConvertor(text, isPlural, projectIcuPlaceholdersSupport).convert()
+        }
     }
   }
 

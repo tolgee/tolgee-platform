@@ -26,7 +26,7 @@ class Xliff12FileProcessor(
           context.addKeyCodeReference(transUnitId, fileOriginal, null)
         }
         transUnit.source?.let { source ->
-          context.addTranslation(
+          context.addGenericFormatTranslation(
             transUnitId,
             file.sourceLanguage ?: "unknown source",
             source,
@@ -34,7 +34,7 @@ class Xliff12FileProcessor(
         }
 
         transUnit.target?.let { target ->
-          context.addTranslation(
+          context.addGenericFormatTranslation(
             transUnitId,
             file.targetLanguage ?: "unknown target",
             target,

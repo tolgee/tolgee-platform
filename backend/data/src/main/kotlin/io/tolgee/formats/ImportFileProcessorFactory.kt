@@ -9,10 +9,10 @@ import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
+import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportArchiveProcessor
-import io.tolgee.service.dataImport.processors.PropertyFileProcessor
 import io.tolgee.service.dataImport.processors.ZipTypeProcessor
 import org.springframework.stereotype.Component
 
@@ -32,13 +32,13 @@ class ImportFileProcessorFactory(
     context: FileProcessorContext,
   ): ImportFileProcessor {
     return when (file.name.fileNameExtension) {
-      "json" -> JsonFileProcessor(context)
+      "json" -> JsonFileProcessor(context, objectMapper)
       "po" -> PoFileProcessor(context)
       "strings" -> StringsFileProcessor(context)
       "stringsdict" -> StringsdictFileProcessor(context)
       "xliff" -> XliffFileProcessor(context)
       "xlf" -> XliffFileProcessor(context)
-      "properties" -> PropertyFileProcessor(context)
+      "properties" -> PropertiesFileProcessor(context)
       "xml" -> AndroidStringsXmlProcessor(context)
       "arb" -> FlutterArbFileProcessor(context, objectMapper)
       else -> throw ImportCannotParseFileException(file.name, "No matching processor")

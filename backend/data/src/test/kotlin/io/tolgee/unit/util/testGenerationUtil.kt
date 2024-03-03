@@ -26,7 +26,7 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
         return@let it?.replace("\n", "\\n")
       }
       it
-    }
+    }?.replace("\$", "\${'$'}")
   }
   code.appendLine("${i(2)}mockUtil.fileProcessorContext.assertLanguagesCount($languageCount)")
   fileProcessorContext.translations.forEach { (keyName, translations) ->

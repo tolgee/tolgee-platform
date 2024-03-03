@@ -2,22 +2,20 @@ package io.tolgee.unit.formats.apple.out
 
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
-import io.tolgee.model.ILanguage
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
-import io.tolgee.testing.assert
+import io.tolgee.unit.util.assertFile
+import io.tolgee.unit.util.getExported
+import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.whenever
 
 class StringsStringsdictFileExporterTest {
   @Test
   fun `exports`() {
     val exporter = getExporter()
 
-    val files = exporter.produceFiles()
-    val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
+    val data = getExported(exporter)
 
     // generate this with:
     // data.map { "data.assertFile(\"${it.key}\", \"\"\"\n    |${it.value.replace("\$", "\${'$'}").replace("\n", "\n    |")}\n    \"\"\".trimMargin())" }.joinToString("\n")
@@ -124,11 +122,124 @@ class StringsStringsdictFileExporterTest {
     )
   }
 
-  private fun Map<String, String>.assertFile(
-    file: String,
-    content: String,
-  ) {
-    this[file]!!.assert.isEqualTo(content)
+  @Test
+  fun `exports with placeholders (ICU placeholders enabled)`() {
+    val exporter = getIcuPlaceholdersEnabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.lproj/Localizable.strings",
+      """
+    |"item" = "I will be first {icuParam}";
+    |
+    |
+      """.trimMargin(),
+    )
+    data.assertFile(
+      "cs.lproj/Localizable.stringsdict",
+      """
+    |<?xml version="1.0" encoding="UTF-8"?>
+    |<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    |
+    |<plist version="1.0">
+    |  <dict>
+    |    <key>key3</key>
+    |    <dict>
+    |      <key>NSStringLocalizedFormatKey</key>
+    |      <string>%#${'$'}{#@format@}</string>
+    |      <key>format</key>
+    |      <dict>
+    |        <key>one</key>
+    |        <string>%lld den %@</string>
+    |        <key>few</key>
+    |        <string>%lld dny</string>
+    |        <key>other</key>
+    |        <string>%lld dní</string>
+    |      </dict>
+    |    </dict>
+    |  </dict>
+    |</plist>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersEnabledExporter(): AppleStringsStringsdictExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}'",
+        )
+      }
+    return getExporter(built.translations, true)
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled)`() {
+    val exporter = getIcuPlaceholdersDisabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.lproj/Localizable.strings",
+      """
+    |"item" = "I will be first {icuParam}";
+    |
+    |
+      """.trimMargin(),
+    )
+    data.assertFile(
+      "cs.lproj/Localizable.stringsdict",
+      """
+    |<?xml version="1.0" encoding="UTF-8"?>
+    |<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    |
+    |<plist version="1.0">
+    |  <dict>
+    |    <key>key3</key>
+    |    <dict>
+    |      <key>NSStringLocalizedFormatKey</key>
+    |      <string>%#${'$'}{#@format@}</string>
+    |      <key>format</key>
+    |      <dict>
+    |        <key>one</key>
+    |        <string># den {icuParam}</string>
+    |        <key>few</key>
+    |        <string># dny</string>
+    |        <key>other</key>
+    |        <string># dní</string>
+    |      </dict>
+    |    </dict>
+    |  </dict>
+    |</plist>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(): AppleStringsStringsdictExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first {icuParam}",
+        )
+      }
+    return getExporter(built.translations, false)
   }
 
   private fun getExporter() =
@@ -181,10 +292,18 @@ class StringsStringsdictFileExporterTest {
       ),
     )
 
-  private fun getExporter(translations: List<ExportTranslationView>): AppleStringsStringsdictExporter {
-    val baseLanguageMock = mock<ILanguage>()
-    whenever(baseLanguageMock.tag).thenAnswer { "en" }
+  private fun getExporter(
+    translations: List<ExportTranslationView>,
+    isProjectIcuPlaceholdersEnabled: Boolean = true,
+  ): AppleStringsStringsdictExporter {
+    return AppleStringsStringsdictExporter(
+      translations = translations,
+      exportParams = ExportParams(),
+      isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+    )
+  }
 
+  private fun getExporter(translations: List<ExportTranslationView>): AppleStringsStringsdictExporter {
     return AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = ExportParams(),

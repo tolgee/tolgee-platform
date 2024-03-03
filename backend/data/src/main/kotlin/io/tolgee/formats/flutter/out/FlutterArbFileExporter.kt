@@ -79,15 +79,12 @@ class FlutterArbFileExporter(
 
   private fun convertLanguageTag(languageTag: String) = languageTag.replace("-", "_")
 
-  private fun getConvertedMessage(
-    translation: ExportTranslationView,
-    isPlural: Boolean = translation.key.isPlural,
-  ): String? {
+  private fun getConvertedMessage(translation: ExportTranslationView): String? {
     translation.text ?: return null
     val converted =
       IcuToFlutterArbMessageConvertor(
         message = translation.text ?: "",
-        forceIsPlural = isPlural,
+        forceIsPlural = translation.key.isPlural,
         isProjectIcuPlaceholdersEnabled,
       ).convert()
 

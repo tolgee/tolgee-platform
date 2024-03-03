@@ -74,7 +74,7 @@ data class FileProcessorContext(
 
     if (value != null) {
       val entity =
-        ImportTranslation(stringValue, language).also {
+        ImportTranslation(pluralForms?.icuString ?: stringValue, language).also {
           it.isPlural = isPlural
           it.rawData = rawData
           it.convertor = convertedBy
@@ -97,7 +97,7 @@ data class FileProcessorContext(
     key: String,
     languageName: String,
     text: String?,
-    index: Int,
+    index: Int = 0,
   ) {
     if (!projectIcuPlaceholdersEnabled) {
       val escapedPlural = text?.forceEscapePluralForms()

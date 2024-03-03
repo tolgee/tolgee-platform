@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 
 class AppleXliffFileExporterTest {
   @Test
-  fun `exports`() {
+  fun exports() {
     val exporter = getExporter()
 
     val files = exporter.produceFiles()
@@ -159,6 +159,118 @@ class AppleXliffFileExporterTest {
     )
   }
 
+  @Test
+  fun `exports with placeholders (ICU placeholders enabled)`() {
+    val exporter = getIcuPlaceholdersEnabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.xlf",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    |  <file datatype="plaintext" original="Localizable.stringsdict" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="/key3:dict/NSStringLocalizedFormatKey:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">%#@property@</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/one:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">%lld den %@</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/few:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">%lld dny</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/many:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">%lld dní</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/other:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">%lld dní</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |  <file datatype="plaintext" original="Localizable.strings" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="item">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">I will be first {icuParam}</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |</xliff>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled)`() {
+    val exporter = getIcuPlaceholdersDisabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.xlf",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    |  <file datatype="plaintext" original="Localizable.stringsdict" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="/key3:dict/NSStringLocalizedFormatKey:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">%#@property@</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/one:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve"># den {icuParam}</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/few:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve"># dny</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/many:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve"># dní</target>
+    |      </trans-unit>
+    |      <trans-unit id="/key3:dict/property:dict/other:dict/:string">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve"># dní</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |  <file datatype="plaintext" original="Localizable.strings" source-language="tag" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="item">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">I will be first {icuParam}</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |</xliff>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getExported(exporter: AppleXliffExporter): Map<String, String> {
+    val files = exporter.produceFiles()
+    val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
+    return data
+  }
+
   private fun Map<String, String>.assertFile(
     file: String,
     content: String,
@@ -249,15 +361,55 @@ class AppleXliffFileExporterTest {
     return getExporter(built.translations, built.baseTranslations)
   }
 
+  private fun getIcuPlaceholdersEnabledExporter(): AppleXliffExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}'",
+        )
+      }
+    return getExporter(built.translations, emptyList(), true)
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(): AppleXliffExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first {icuParam}",
+        )
+      }
+    return getExporter(built.translations, emptyList(), false)
+  }
+
   private fun getExporter(
     translations: List<ExportTranslationView>,
     baseTranslations: List<ExportTranslationView>,
+    isProjectIcuPlaceholdersEnabled: Boolean = true,
   ): AppleXliffExporter {
     return AppleXliffExporter(
       translations = translations,
       exportParams = ExportParams(),
       baseTranslationsProvider = { baseTranslations },
       baseLanguageTag = "tag",
+      isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
   }
 }

@@ -1,106 +1,60 @@
-package io.tolgee.unit.formats.json.out
+package io.tolgee.unit.formats.properties.out
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
-import io.tolgee.formats.json.out.JsonFileExporter
+import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
-import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
 import java.io.InputStream
 
-class JsonFileExporterTest {
+class PropertiesFileExporterTest {
   @Suppress("UNCHECKED_CAST")
   @Test
-  fun `it scopes and handles collisions`() {
-    val data = generateTranslationsForKeys(listOf("a.a.a.a", "a.a", "a.a.a", "a.b.b", "a.c.c", "b", "b.b"))
-    val exported = JsonFileExporter(data, ExportParams()).produceFiles()
-    val json = exported.getFileTextContent("en.json")
-    val parsed =
-      jacksonObjectMapper()
-        .readValue<Map<String, Any>>(json)
-
-    val a = (parsed["a"] as Map<String, String>)
-    val aa = a["a"]
-    val aaa = a["a.a"]
-    val aaaa = a["a.a.a"]
-    val b = parsed["b"]
-    val bb = parsed["b.b"]
-
-    listOf(aa, aaa, aaaa, b, bb).forEach {
-      assertThat(it).isEqualTo("text")
-    }
+  fun `it exports`() {
+    val exporter = getBasicExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.properties",
+      """
+    |# I am a description
+    |key = {value, plural, other {I am basic text}}
+    |key.with.dots = I am key with dots
+    |escaping\ test = I am key with dots = a = \n # not a comment \n = = \\ yep +áěááššá
+    |
+      """.trimMargin(),
+    )
   }
 
-  @Suppress("UNCHECKED_CAST")
-  @Test
-  fun `it exports when key starts with dot`() {
-    val data = generateTranslationsForKeys(listOf(".a"))
-    val exported = JsonFileExporter(data, ExportParams()).produceFiles()
-    val json = exported.getFileTextContent("en.json")
-    val parsed =
-      jacksonObjectMapper()
-        .readValue<Map<String, Any>>(json)
-
-    val map = (parsed[""] as Map<String, String>)
-    val a = map["a"]
-    assertThat(a).isEqualTo("text")
-  }
-
-  @Suppress("UNCHECKED_CAST")
-  @Test
-  fun `it scopes by namespaces`() {
-    val data = generateTranslationsForKeys(listOf("a:a.a", "a", "a:a", "a:b.a"))
-    val exported =
-      JsonFileExporter(
-        data,
-        ExportParams().apply {},
-      ).produceFiles()
-
-    val ajson = exported.getFileTextContent("en.json")
-    assertThatJson(ajson) {
-      node("a").isEqualTo("text")
-    }
-    val aajson = exported.getFileTextContent("a/en.json")
-    assertThatJson(aajson) {
-      node("a").isEqualTo("text")
-      node("a\\.a").isEqualTo("text")
-      node("b.a").isEqualTo("text")
-    }
-  }
-
-  @Suppress("UNCHECKED_CAST")
-  @Test
-  fun `it returns result in the same order as it comes from DB`() {
-    val keys = listOf("a", "b", "c", "d", "e", "f")
-    val data = generateTranslationsForKeys(keys)
-    val exported =
-      JsonFileExporter(
-        data,
-        ExportParams(),
-      ).produceFiles()
-    val parsed: LinkedHashMap<String, String> = exported.parseFileContent("en.json")
-    assertThat(parsed.keys.toList()).isEqualTo(keys)
-  }
-
-  @Suppress("UNCHECKED_CAST")
-  @Test
-  fun `it is formatted`() {
-    val keys = listOf("a", "b")
-    val data = generateTranslationsForKeys(keys)
-    val exported =
-      JsonFileExporter(
-        data,
-        ExportParams(),
-      ).produceFiles()
-    assertThat(exported.getFileTextContent("en.json")).contains("\n").contains("  ")
+  private fun getBasicExporter(): PropertiesFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key",
+          text = "I am basic text",
+        ) {
+          key.description = "I am a description"
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "key.with.dots",
+          text = "I am key with dots",
+        )
+        add(
+          languageTag = "cs",
+          keyName = "escaping test",
+          text = "I am key with dots = a = \n # not a comment \n = = \\ yep +áěááššá",
+        )
+      }
+    return getExporter(built.translations, false)
   }
 
   @Test
@@ -108,17 +62,16 @@ class JsonFileExporterTest {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.json",
+      "cs.properties",
       """
-    |{
-    |  "key3" : "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
-    |  "item" : "I will be first {icuParam, number}"
-    |}
+    |key3 = {count, plural, one {# den {icuParam}} few {# dny} other {# dní}}
+    |item = I will be first {icuParam, number}
+    |
       """.trimMargin(),
     )
   }
 
-  private fun getIcuPlaceholdersDisabledExporter(): JsonFileExporter {
+  private fun getIcuPlaceholdersDisabledExporter(): PropertiesFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -142,17 +95,16 @@ class JsonFileExporterTest {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.json",
+      "cs.properties",
       """
-    |{
-    |  "key3" : "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
-    |  "item" : "I will be first '{'icuParam'}' {hello, number}"
-    |}
+    |key3 = {count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}
+    |item = I will be first '{'icuParam'}' {hello, number}
+    |
       """.trimMargin(),
     )
   }
 
-  private fun getIcuPlaceholdersEnabledExporter(): JsonFileExporter {
+  private fun getIcuPlaceholdersEnabledExporter(): PropertiesFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -194,8 +146,8 @@ class JsonFileExporterTest {
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
-  ): JsonFileExporter {
-    return JsonFileExporter(
+  ): PropertiesFileExporter {
+    return PropertiesFileExporter(
       translations = translations,
       exportParams = ExportParams(),
       convertMessage = { message, isPlural ->

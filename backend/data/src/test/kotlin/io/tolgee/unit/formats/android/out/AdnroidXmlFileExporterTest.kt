@@ -11,12 +11,9 @@ class AdnroidXmlFileExporterTest {
   @Test
   fun exports() {
     val exporter = getExporter()
-
-    val files = exporter.produceFiles()
-    val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
+    val data = getExported(exporter)
     // generate this with:
     // data.map { "data.assertFile(\"${it.key}\", \"\"\"\n    |${it.value.replace("\$", "\${'$'}").replace("\n", "\n    |")}\n    \"\"\".trimMargin())" }.joinToString("\n")
-
     data.assertFile(
       "values-cs/strings.xml",
       """
@@ -58,6 +55,60 @@ class AdnroidXmlFileExporterTest {
     )
   }
 
+  @Test
+  fun `exports with placeholders (ICU placeholders enabled)`() {
+    val exporter = getIcuPlaceholdersEnabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "values-cs/strings.xml",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    |  <plurals name="key3">
+    |    <item quantity="one">%d den %s</item>
+    |    <item quantity="few">%d dny</item>
+    |    <item quantity="many">%d dní</item>
+    |    <item quantity="other">%d dní</item>
+    |  </plurals>
+    |  <string-array name="i_am_array_item">
+    |    <item>I will be first {icuParam}</item>
+    |  </string-array>
+    |</resources>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled)`() {
+    val exporter = getIcuPlaceholdersDisabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "values-cs/strings.xml",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    |  <plurals name="key3">
+    |    <item quantity="one"># den {icuParam}</item>
+    |    <item quantity="few"># dny</item>
+    |    <item quantity="many"># dní</item>
+    |    <item quantity="other"># dní</item>
+    |  </plurals>
+    |  <string-array name="i_am_array_item">
+    |    <item>I will be first {icuParam}</item>
+    |  </string-array>
+    |</resources>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getExported(exporter: AndroidStringsXmlExporter): Map<String, String> {
+    val files = exporter.produceFiles()
+    val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
+    return data
+  }
+
   private fun Map<String, String>.assertFile(
     file: String,
     content: String,
@@ -75,16 +126,11 @@ class AdnroidXmlFileExporterTest {
             "Ahoj! I" +
               "{number, number}, {name}, {number, number, scientific}, " +
               "{number, number, 0.000000}",
-          baseText =
-            "Hello! I" +
-              "{number, number}, {name}, {number, number, scientific}, " +
-              "{number, number, 0.000000}",
         )
         add(
           languageTag = "cs",
           keyName = "Empty plural",
           text = null,
-          baseText = null,
         ) {
           key.isPlural = true
         }
@@ -93,7 +139,6 @@ class AdnroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "key3",
           text = "{count, plural, one {# den} few {# dny} other {# dní}}",
-          baseText = "{count, plural, one {# day} other {# days}}",
         ) {
           key.isPlural = true
         }
@@ -101,7 +146,6 @@ class AdnroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "forced_not plural",
           text = "{count, plural, one {# den} few {# dny} other {# dní}}",
-          baseText = "{count, plural, one {# day} other {# days}}",
         ) {
           key.isPlural = false
         }
@@ -160,16 +204,55 @@ class AdnroidXmlFileExporterTest {
           text = "This is english!",
         )
       }
-    return getExporter(built.translations, built.baseTranslations)
+    return getExporter(built.translations)
+  }
+
+  private fun getIcuPlaceholdersEnabledExporter(): AndroidStringsXmlExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "i_am_array_item[20]",
+          text = "I will be first '{'icuParam'}'",
+        )
+      }
+    return getExporter(built.translations, true)
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(): AndroidStringsXmlExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "i_am_array_item[20]",
+          text = "I will be first {icuParam}",
+        )
+      }
+    return getExporter(built.translations, false)
   }
 
   private fun getExporter(
     translations: List<ExportTranslationView>,
-    baseTranslations: List<ExportTranslationView>,
+    isProjectIcuPlaceholdersEnabled: Boolean = true,
   ): AndroidStringsXmlExporter {
     return AndroidStringsXmlExporter(
       translations = translations,
       exportParams = ExportParams(),
+      isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
   }
 }

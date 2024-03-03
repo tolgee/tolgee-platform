@@ -103,7 +103,10 @@ private fun getPluralFormsFromConversionResult(converted: PossiblePluralConversi
 data class PluralForms(
   val forms: Map<String, String>,
   val argName: String,
-)
+) {
+  val icuString: String
+    get() = forms.toIcuPluralString(optimize = false, argName = argName)
+}
 
 fun optimizePluralForms(forms: Map<String, String>): Map<String, String> {
   val otherForm = forms[PluralRules.KEYWORD_OTHER] ?: return forms

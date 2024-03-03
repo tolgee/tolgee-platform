@@ -47,6 +47,76 @@ class FlutterArbFileExporterTest {
     )
   }
 
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled)`() {
+    val exporter = getIcuPlaceholdersDisabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "app_cs.arb",
+      """
+    |{
+    |  "@@locale" : "cs",
+    |  "key3" : "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
+    |  "item" : "I will be first {icuParam, number}"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(): FlutterArbFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first {icuParam, number}",
+        )
+      }
+    return getExporter(built.translations, false)
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders enabled)`() {
+    val exporter = getIcuPlaceholdersEnabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "app_cs.arb",
+      """
+    |{
+    |  "@@locale" : "cs",
+    |  "key3" : "{count, plural, one {{count} den {icuParam}} few {{count} dny} other {{count} dní}}",
+    |  "item" : "I will be first {icuParam} {hello}"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersEnabledExporter(): FlutterArbFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}' {hello, number}",
+        )
+      }
+    return getExporter(built.translations, true)
+  }
+
   private fun Map<String, String>.assertFile(
     file: String,
     content: String,
@@ -118,4 +188,23 @@ private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFi
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
   )
+}
+
+private fun getExporter(
+  translations: List<ExportTranslationView>,
+  isProjectIcuPlaceholdersEnabled: Boolean = true,
+): FlutterArbFileExporter {
+  return FlutterArbFileExporter(
+    translations = translations,
+    exportParams = ExportParams(),
+    baseLanguageTag = "en",
+    objectMapper = jacksonObjectMapper(),
+    isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+  )
+}
+
+private fun getExported(exporter: FlutterArbFileExporter): Map<String, String> {
+  val files = exporter.produceFiles()
+  val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
+  return data
 }

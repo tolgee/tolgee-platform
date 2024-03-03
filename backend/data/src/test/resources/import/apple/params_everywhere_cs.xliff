@@ -9,12 +9,8 @@
         <source>Dogs %lld</source>
         <note>The count of dogs in the app</note>
       </trans-unit>
-      <trans-unit id="Order %lld" xml:space="preserve">
-        <source>Order %lld</source>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Hi %lld" xml:space="preserve">
-        <source>Hi %lld</source>
+        <source>Hi %lld {icuParam}</source>
       </trans-unit>
     </body>
   </file>
@@ -28,47 +24,23 @@
         <note/>
       </trans-unit>
       <trans-unit id="/Dogs %lld:dict/dog:dict/few:dict/:string" xml:space="preserve">
-        <source>%lld dogs here %@</source>
+        <source>%lld dogs here %@ {icuParam}</source>
         <note/>
       </trans-unit>
       <trans-unit id="/Dogs %lld:dict/dog:dict/many:dict/:string" xml:space="preserve">
-        <source>%lld dogs here %@</source>
+        <source>%lld dogs here %@ {icuParam}</source>
         <note/>
       </trans-unit>
       <trans-unit id="/Dogs %lld:dict/dog:dict/one:dict/:string" xml:space="preserve">
-        <source>One dog is here %@!</source>
+        <source>One dog is here %@ {icuParam}!</source>
         <note/>
       </trans-unit>
       <trans-unit id="/Dogs %lld:dict/dog:dict/other:dict/:string" xml:space="preserve">
-        <source>%lld dogs here %@</source>
+        <source>%lld dogs here %@ {icuParam}</source>
         <note/>
       </trans-unit>
       <trans-unit id="/Dogs %lld:dict/dog:dict/zero:dict/:string" xml:space="preserve">
-        <source>No dogs here %@!</source>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/Order %lld:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
-        <source>%#@Ticket@</source>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/Order %lld:dict/Ticket:dict/few:dict/:string" xml:space="preserve">
-        <source>Order %lld Tickets</source>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/Order %lld:dict/Ticket:dict/many:dict/:string" xml:space="preserve">
-        <source>Order %lld Tickets</source>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/Order %lld:dict/Ticket:dict/one:dict/:string" xml:space="preserve">
-        <source>Order %lld Ticket</source>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/Order %lld:dict/Ticket:dict/other:dict/:string" xml:space="preserve">
-        <source>Order %lld Tickets</source>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/Order %lld:dict/Ticket:dict/zero:dict/:string" xml:space="preserve">
-        <source>Order %lld Ticket</source>
+        <source>No dogs here %@ {icuParam}!</source>
         <note/>
       </trans-unit>
     </body>

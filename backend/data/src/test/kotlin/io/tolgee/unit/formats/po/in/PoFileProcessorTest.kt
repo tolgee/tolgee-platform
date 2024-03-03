@@ -4,11 +4,22 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.assertLanguagesCount
+import io.tolgee.util.assertSingle
+import io.tolgee.util.assertSinglePlural
+import io.tolgee.util.assertTranslations
+import io.tolgee.util.description
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
 class PoFileProcessorTest {
+  @BeforeEach
+  fun setup() {
+    mockUtil = FileProcessorContextMockUtil()
+  }
+
   @Test
   fun `processes standard file correctly`() {
     mockImportFile("example.po")
@@ -58,6 +69,89 @@ class PoFileProcessorTest {
     assertThat(mockUtil.fileProcessorContext.translations).hasSize(1)
     assertThat(mockUtil.fileProcessorContext.translations.values.toList()[0][0].text)
       .isEqualTo("# Hex код (#fff)")
+  }
+
+  @Test
+  fun `import with placeholder conversion (disabled ICU)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("de", "hello")
+      .assertSingle {
+        hasText("Hi %d {icuParam}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          one {Hallo %d '{'icuParam'}'}
+          other {Hallo %d '{'icuParam'}'}
+          }
+          """.trimIndent(),
+        )
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (no conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("de", "hello")
+      .assertSingle {
+        hasText("Hi %d '{'icuParam'}'")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          one {Hallo %d '{'icuParam'}'}
+          other {Hallo %d '{'icuParam'}'}
+          }
+          """.trimIndent(),
+        )
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (with conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("de", "hello")
+      .assertSingle {
+        hasText("Hi {0, number} '{'icuParam'}'")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          one {Hallo {0, number} '{'icuParam'}'}
+          other {Hallo {0, number} '{'icuParam'}'}
+          }
+          """.trimIndent(),
+        )
+      }
+  }
+
+  private fun mockPlaceholderConversionTestFile(
+    convertPlaceholders: Boolean,
+    projectIcuPlaceholdersEnabled: Boolean,
+  ) {
+    mockUtil.mockIt(
+      "en.po",
+      "src/test/resources/import/po/example_params.po",
+      convertPlaceholders,
+      projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  private fun processFile() {
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
   }
 
   private fun mockImportFile(fileName: String) {

@@ -51,7 +51,7 @@ class PoFileExporter(
   }
 
   private fun getResultStringBuilder(translation: ExportTranslationView): StringBuilder {
-    val path = translation.getFilePath(translation.key.namespace)
+    val path = translation.getFilePath()
     return preparedResult.computeIfAbsent(path) {
       initPoFile(translation)
     }

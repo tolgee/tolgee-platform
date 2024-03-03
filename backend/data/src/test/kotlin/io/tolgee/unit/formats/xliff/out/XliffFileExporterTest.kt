@@ -1,12 +1,16 @@
 package io.tolgee.unit.formats.xliff.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.unit.util.assertFile
+import io.tolgee.unit.util.getExported
+import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Attr
 import org.w3c.dom.Document
@@ -225,5 +229,122 @@ class XliffFileExporterTest {
     files["en.xlf"].use { validFileContent ->
       validator.validate(StreamSource(validFileContent))
     }
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled)`() {
+    val exporter = getIcuPlaceholdersDisabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.xlf",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    |  <file datatype="plaintext" original="" source-language="en" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="key3">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}</target>
+    |      </trans-unit>
+    |      <trans-unit id="item">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">I will be first {icuParam, number}</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |</xliff>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(): XliffFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first {icuParam, number}",
+        )
+      }
+    return getExporter(built.translations, false)
+  }
+
+  @Test
+  fun `exports with placeholders (ICU placeholders enabled)`() {
+    val exporter = getIcuPlaceholdersEnabledExporter()
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.xlf",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    |  <file datatype="plaintext" original="" source-language="en" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="key3">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">{count, plural, one {# den {icuParam, number} '{hey}'} few {# dny} other {# dní}}</target>
+    |      </trans-unit>
+    |      <trans-unit id="item">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">I will be first '{'icuParam'}' {hello, number}</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |</xliff>
+    |
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersEnabledExporter(): XliffFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "key3",
+          text = "{count, plural, one {# den {icuParam, number} '{hey}'} few {# dny} other {# dní}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}' {hello, number}",
+        )
+      }
+    return getExporter(built.translations, true)
+  }
+
+  private fun getExporter(
+    translations: List<ExportTranslationView>,
+    isProjectIcuPlaceholdersEnabled: Boolean = true,
+  ): XliffFileExporter {
+    return XliffFileExporter(
+      translations = translations,
+      exportParams = ExportParams(),
+      baseLanguage = Language().apply { tag = "en" },
+      baseTranslationsProvider = { listOf() },
+      convertMessage = { message, isPlural ->
+        IcuToGenericFormatMessageConvertor(
+          message,
+          isPlural,
+          isProjectIcuPlaceholdersEnabled,
+        ).convert()
+      },
+    )
   }
 }

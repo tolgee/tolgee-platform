@@ -76,4 +76,93 @@ class FlutterArbFormatProcessorTest {
       description.assert.isEqualTo("The conventional newborn programmer greeting")
     }
   }
+
+  @Test
+  fun `import with placeholder conversion (disabled ICU)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "helloWorld")
+      .assertSingle {
+        hasText("Hello World! {name}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "dogsCount")
+      .assertSinglePlural {
+        hasText(
+          """
+          {count, plural,
+          one {I have one dog.}
+          other {I have '{'count'}' dogs.}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (no conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "helloWorld")
+      .assertSingle {
+        hasText("Hello World! {name}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "dogsCount")
+      .assertSinglePlural {
+        hasText(
+          """
+          {count, plural,
+          one {I have one dog.}
+          other {I have {count} dogs.}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertKey("dogsCount") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
+  }
+
+  @Test
+  fun `import with placeholder conversion (with conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "helloWorld")
+      .assertSingle {
+        hasText("Hello World! {name}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "dogsCount")
+      .assertSinglePlural {
+        hasText(
+          """
+          {count, plural,
+          one {I have one dog.}
+          other {I have {count} dogs.}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+  }
+
+  private fun mockPlaceholderConversionTestFile(
+    convertPlaceholders: Boolean,
+    projectIcuPlaceholdersEnabled: Boolean,
+  ) {
+    mockUtil.mockIt(
+      "values-en/app_en.arb",
+      "src/test/resources/import/flutter/app_en_params.arb",
+      convertPlaceholders,
+      projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  private fun processFile() {
+    FlutterArbFileProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
+  }
 }
