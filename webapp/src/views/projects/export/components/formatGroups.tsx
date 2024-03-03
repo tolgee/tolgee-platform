@@ -145,7 +145,12 @@ export const findByExportParams = (params: ExportParamsWithoutZip) => {
       .map((g) =>
         g.formats.find((f) => {
           if (f.matchByExportParams === undefined) {
-            return f.format === params.format;
+            return (
+              f.format === params.format &&
+              ((f.messageFormat === undefined &&
+                params.messageFormat === null) ||
+                f.messageFormat === params.messageFormat)
+            );
           }
           return f.matchByExportParams(params);
         })

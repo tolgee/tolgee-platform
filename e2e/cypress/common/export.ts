@@ -51,5 +51,4 @@ export const exportToggleLanguage = (lang: string) => {
 export const exportSelectFormat = (format: string) => {
   cy.gcy('export-format-selector').click();
   cy.gcy('export-format-selector-item').contains(format).click();
-  dismissMenu();
 };

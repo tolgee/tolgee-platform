@@ -102,6 +102,7 @@ export const ImportSettingsPanel: FC = (props) => {
           onChange={(e) => {
             onChange('convertPlaceholdersToIcu', e.target.checked);
           }}
+          data-cy={'import-convert-placeholders-to-icu-checkbox'}
           hint={t('import_convert_placeholders_to_icu_checkbox_label_hint')}
           label={t('import_convert_placeholders_to_icu_checkbox_label')}
           checked={state?.convertPlaceholdersToIcu}
@@ -113,6 +114,7 @@ export const ImportSettingsPanel: FC = (props) => {
         onChange={(e) => {
           onChange('overrideKeyDescriptions', e.target.checked);
         }}
+        data-cy={'import-override-key-descriptions-checkbox'}
         hint={t('import_override_key_descriptions_label_hint')}
         label={t('import_override_key_descriptions_label')}
         checked={state?.overrideKeyDescriptions}

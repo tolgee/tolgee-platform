@@ -1,14 +1,16 @@
 import 'cypress-file-upload';
-import { createKey } from '../../common/apiCalls/common';
+import { createKey, deleteProject } from '../../../common/apiCalls/common';
 import {
   createExportableProject,
   exportSelectFormat,
   exportToggleLanguage,
   visitExport,
-} from '../../common/export';
+} from '../../../common/export';
 
-describe('Projects Basics', () => {
+describe('Export Basics', () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
+
+  let projectId: number;
 
   beforeEach(() => {
     createExportableProject().then((p) => {
@@ -21,6 +23,7 @@ describe('Projects Basics', () => {
         cs: `Test czech`,
       });
       visitExport(p.id);
+      projectId = p.id;
       cy.gcy('export-submit-button').should('be.visible');
     });
   });
@@ -81,6 +84,10 @@ describe('Projects Basics', () => {
 
     cy.gcy('export-submit-button').click();
     cy.verifyDownload(getFileName('xliff', 'en'));
+  });
+
+  afterEach(() => {
+    deleteProject(projectId);
   });
 });
 

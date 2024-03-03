@@ -236,9 +236,7 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                       filterState: values.states,
                       languages: values.languages,
                       structureDelimiter: format.canBeStructured
-                        ? values.nested
-                          ? '.'
-                          : ''
+                        ? format.defaultStructureDelimiter
                         : '',
                       filterNamespace: undefinedIfAllNamespaces(
                         values.namespaces,

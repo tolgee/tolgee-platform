@@ -18,7 +18,7 @@ export type LoadingCheckboxWithSkeletonProps = {
   loading: boolean;
   labelProps?: Partial<React.ComponentProps<typeof FormControlLabel>>;
   labelInnerProps?: Partial<React.ComponentProps<typeof StyledLabel>>;
-};
+} & React.ComponentProps<typeof Checkbox>;
 
 const StyledLabel = styled('div')`
   display: flex;
@@ -33,14 +33,23 @@ const StyledHelpIcon = styled(HelpOutline)`
 
 export const LoadingCheckboxWithSkeleton: FC<
   LoadingCheckboxWithSkeletonProps
-> = (props) => {
+> = ({
+  checked,
+  hint,
+  label,
+  labelInnerProps,
+  labelProps,
+  loading,
+  onChange,
+  ...checkboxProps
+}) => {
   return (
     <FormControlLabel
       label={
-        <StyledLabel {...props.labelInnerProps}>
-          <div>{props.label}</div>
-          {props.hint && (
-            <Tooltip title={props.hint}>
+        <StyledLabel {...labelInnerProps}>
+          <div>{label}</div>
+          {hint && (
+            <Tooltip title={hint}>
               <StyledHelpIcon />
             </Tooltip>
           )}
@@ -56,14 +65,14 @@ export const LoadingCheckboxWithSkeleton: FC<
               bottom: 0,
               right: 0,
               zIndex: 10,
-              opacity: props.checked == undefined || props.loading ? 1 : 0,
+              opacity: checked == undefined || loading ? 1 : 0,
               transition: 'opacity 0.3s',
               paddingLeft: '12px',
               paddingTop: '12px',
               pointerEvents: 'none',
             })}
           >
-            {props.loading ? (
+            {loading ? (
               <SpinnerProgress size={18} />
             ) : (
               <Skeleton
@@ -78,17 +87,17 @@ export const LoadingCheckboxWithSkeleton: FC<
           </Box>
           <Checkbox
             sx={{
-              opacity: props.checked == undefined || props.loading ? 0 : 1,
+              opacity: checked == undefined || loading ? 0 : 1,
               transition: 'opacity 0.3s',
             }}
-            disabled={props.loading || props.checked == undefined}
-            checked={!!props.checked}
-            onChange={props.onChange}
-            data-cy="content-delivery-auto-publish-checkbox"
+            disabled={loading || checked == undefined}
+            checked={!!checked}
+            onChange={onChange}
+            {...checkboxProps}
           />
         </Box>
       }
-      {...props.labelProps}
+      {...labelProps}
     />
   );
 };

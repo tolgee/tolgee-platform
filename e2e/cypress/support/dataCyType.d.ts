@@ -190,12 +190,14 @@ declare namespace DataCy {
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |
         "import-conflicts-not-resolved-dialog-resolve-button" |
+        "import-convert-placeholders-to-icu-checkbox" |
         "import-file-error" |
         "import-file-error-collapse-button" |
         "import-file-error-more-less-button" |
         "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
+        "import-override-key-descriptions-checkbox" |
         "import-progress" |
         "import-progress-overlay" |
         "import-resolution-dialog-accept-imported-button" |
