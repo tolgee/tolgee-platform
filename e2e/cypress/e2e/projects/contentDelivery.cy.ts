@@ -10,7 +10,7 @@ import { contentDeliveryTestData } from '../../common/apiCalls/testData/testData
 import { login, setContentStorageBypass } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { setFeature } from '../../common/features';
-import { testExportFormats } from './export/exportFormats.cy';
+import { testExportFormats } from '../../common/export';
 
 describe('Content delivery', () => {
   let projectId: number;
@@ -19,7 +19,7 @@ describe('Content delivery', () => {
     setContentStorageBypass(true);
     contentDeliveryTestData.clean();
     contentDeliveryTestData.generateStandard().then((response) => {
-      login();
+      login('test_username');
       projectId = response.body.projects[0].id;
       visitProjectDeveloperContentDelivery(projectId);
     });

@@ -15,7 +15,7 @@ describe('Content storage', () => {
     setContentStorageBypass(true);
     contentDeliveryTestData.clean();
     contentDeliveryTestData.generateStandard().then((response) => {
-      login();
+      login('test_username');
       const projectId = response.body.projects[0].id;
       visitProjectDeveloperStorage(projectId);
     });
