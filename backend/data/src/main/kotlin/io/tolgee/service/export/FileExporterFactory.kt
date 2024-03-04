@@ -95,7 +95,7 @@ class FileExporterFactory(
         null -> PoSupportedMessageFormat.C
         ExportMessageFormat.PHP_SPRINTF -> PoSupportedMessageFormat.PHP
         ExportMessageFormat.C_SPRINTF -> PoSupportedMessageFormat.C
-        ExportMessageFormat.PYTHON_SPRINTF -> PoSupportedMessageFormat.PYTHON
+//        ExportMessageFormat.PYTHON_SPRINTF -> PoSupportedMessageFormat.PYTHON
         else -> throw BadRequestException(Message.UNSUPPORTED_PO_MESSAGE_FORMAT)
       }
     return PoFileExporter(

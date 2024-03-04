@@ -65,7 +65,7 @@ This is possible only when single language is exported. Otherwise it returns "40
   @field:Parameter(
     description = """Message format to be used for export. (applicable for .po)
       
-e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s   
+e.g. PHP_PO: Hello %s
     """,
   )
   override var messageFormat: ExportMessageFormat? = null,

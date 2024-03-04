@@ -108,13 +108,13 @@ export const testExportFormats = (
     },
   });
 
-  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-    format: 'Python .po',
-    expectedParams: {
-      format: 'PO',
-      messageFormat: 'PYTHON_SPRINTF',
-    },
-  });
+  // testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+  //   format: 'Python .po',
+  //   expectedParams: {
+  //     format: 'PO',
+  //     messageFormat: 'PYTHON_SPRINTF',
+  //   },
+  // });
 
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
     format: 'C/C++ .po',

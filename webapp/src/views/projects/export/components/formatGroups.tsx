@@ -77,13 +77,13 @@ export const formatGroups: FormatGroup[] = [
         format: 'PO',
         messageFormat: 'PHP_SPRINTF',
       },
-      {
-        id: 'po_python',
-        extension: 'po',
-        name: 'Python .po',
-        format: 'PO',
-        messageFormat: 'PYTHON_SPRINTF',
-      },
+      // {
+      //   id: 'po_python',
+      //   extension: 'po',
+      //   name: 'Python .po',
+      //   format: 'PO',
+      //   messageFormat: 'PYTHON_SPRINTF',
+      // },
       {
         id: 'po_c',
         extension: 'po',
