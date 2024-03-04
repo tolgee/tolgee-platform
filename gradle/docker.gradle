@@ -21,13 +21,35 @@ task docker {
     doLast {
         exec {
             workingDir dockerPath
-            commandLine "docker", "buildx", "build", ".", "-t", "tolgee/tolgee", "--platform", "linux/arm64,linux/amd64", "--push"
+            commandLine "docker", "build", ".", "-t", "tolgee/tolgee"
             environment.put("DOCKER_BUILDKIT", "0")
         }
     }
     dependsOn("dockerPrepare")
 }
 
+void createDockerBuildxTask(String taskName, boolean isPush) {
+    task(taskName) {
+        doLast {
+            if (project.hasProperty('dockerImageTag')) {
+                def commandParams = ["docker", "buildx", "build", ".", "-t", project.property('dockerImageTag'), "--platform", "linux/arm64,linux/amd64"]
+                if (isPush) {
+                    commandParams += ["--push"]
+                }
+                exec {
+                    workingDir dockerPath
+                    commandLine commandParams
+                }
+            } else {
+                throw new GradleException('A "dockerImageTag" project property must be defined! e.g. ./gradlew dockerBuildx -PdockerImageTag=myImageTag');
+            }
+        }
+        dependsOn("dockerPrepare")
+    }
+}
+
+createDockerBuildxTask("dockerBuildxPush", true)
+createDockerBuildxTask("dockerBuildx", false)
 
 task cleanDocker{
     delete(dockerPath)
