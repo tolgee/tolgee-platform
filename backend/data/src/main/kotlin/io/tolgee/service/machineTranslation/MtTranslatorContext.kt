@@ -154,8 +154,8 @@ class MtTranslatorContext(
     }
   }
 
-  fun getBaseLanguage(): LanguageDto {
-    return languages.values.singleOrNull { it.base } ?: throw IllegalStateException("Base language not found")
+  val baseLanguage: LanguageDto by lazy {
+    languages.values.singleOrNull { it.base } ?: throw IllegalStateException("Base language not found")
   }
 
   fun getServiceInfo(

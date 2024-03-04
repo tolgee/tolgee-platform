@@ -2,9 +2,10 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.TranslationParams
-import io.tolgee.formats.PluralForms
-import io.tolgee.formats.getPluralFormsForLocale
+import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
+import io.tolgee.formats.forceEscapePluralForms
 import io.tolgee.formats.toIcuPluralString
+import io.tolgee.formats.unescapePluralForms
 import io.tolgee.helpers.TextHelper
 
 class MtBatchTranslator(
@@ -39,10 +40,24 @@ class MtBatchTranslator(
     item: MtBatchItemParams,
     baseTranslationText: String,
   ): MtTranslatorResult {
-    if (item.service.supportsPlurals) {
-      return translateInSingleRequest(item, baseTranslationText, context.getPluralForms(baseTranslationText))
-    }
-    return translatePluralSeparately(item, baseTranslationText)
+    val preparedText =
+      if (context.project.icuPlaceholders) baseTranslationText else baseTranslationText.unescapePluralForms() ?: ""
+
+    val translated =
+      if (item.service.supportsPlurals) {
+        translateInSingleRequest(item, preparedText, isPlural = true)
+      } else {
+        return translatePluralSeparately(item, preparedText)
+      }
+
+    translated.translatedText =
+      if (context.project.icuPlaceholders) {
+        translated.translatedText
+      } else {
+        translated.translatedText?.forceEscapePluralForms()
+      }
+
+    return translated
   }
 
   private fun translatePluralSeparately(
@@ -69,7 +84,7 @@ class MtBatchTranslator(
   private fun translateInSingleRequest(
     item: MtBatchItemParams,
     baseTranslationText: String,
-    pluralForms: PluralForms? = null,
+    isPlural: Boolean = false,
   ): MtTranslatorResult {
     val withReplacedParams = TextHelper.replaceIcuParams(baseTranslationText)
 
@@ -79,12 +94,17 @@ class MtBatchTranslator(
           item = item,
           baseTranslationText = baseTranslationText,
           withReplacedParams = withReplacedParams.text,
-          pluralForms = pluralForms,
+          isPlural = true,
         ),
       )
 
-    if (managerResult.translatedPluralForms != null && pluralForms != null) {
-      return getPluralResult(managerResult, withReplacedParams, item, pluralForms.argName)
+    if (managerResult.translatedPluralForms != null && isPlural) {
+      return getPluralResult(
+        managerResult,
+        withReplacedParams,
+        item,
+        context.getPluralForms(baseTranslationText)?.argName ?: DEFAULT_PLURAL_ARGUMENT_NAME,
+      )
     }
 
     return managerResult.getTranslatorResult(withReplacedParams, item)
@@ -135,25 +155,34 @@ class MtBatchTranslator(
     item: MtBatchItemParams,
     baseTranslationText: String,
     withReplacedParams: String,
-    pluralForms: PluralForms?,
+    isPlural: Boolean,
   ): TranslationParams {
     val targetLanguageTag =
       context.languages[item.targetLanguageId]?.tag
         ?: throw IllegalStateException("Language ${item.targetLanguageId} not found")
 
-    val expectedPluralForms = pluralForms?.let { getPluralFormsForLocale(targetLanguageTag) }
+    val pluralForms = if (isPlural) context.getPluralForms(baseTranslationText) else null
+    val pluralFormsWithReplacedParam =
+      if (isPlural) context.getPluralFormsReplacingReplaceParam(baseTranslationText) else null
 
     return TranslationParams(
       text = withReplacedParams,
       textRaw = baseTranslationText,
       keyName = context.keys[item.keyId]?.name,
-      sourceLanguageTag = context.getBaseLanguage().tag,
+      sourceLanguageTag = context.baseLanguage.tag,
       targetLanguageTag = targetLanguageTag,
       serviceInfo = context.getServiceInfo(item.targetLanguageId, item.service),
       metadata = context.getMetadata(item),
       isBatch = context.isBatch,
       pluralForms = pluralForms?.forms,
-      expectedPluralForms = expectedPluralForms,
+      pluralFormExamples =
+        pluralFormsWithReplacedParam?.let {
+          PluralTranslationUtil.getSourceExamples(
+            context.baseLanguage.tag,
+            targetLanguageTag,
+            it,
+          )
+        },
     )
   }
 

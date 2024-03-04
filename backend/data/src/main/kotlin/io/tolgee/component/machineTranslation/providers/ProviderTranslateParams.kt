@@ -22,5 +22,5 @@ data class ProviderTranslateParams(
   /**
    * Only for translators supporting plurals
    */
-  val expectedPluralForms: Set<String>? = null,
+  val pluralFormExamples: Map<String, String>? = null,
 )

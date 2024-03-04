@@ -58,7 +58,7 @@ class CloudTolgeeTranslateApiServiceImpl(
         params.metadata?.projectDescription,
         params.metadata?.languageDescription,
         params.pluralForms,
-        params.expectedPluralForms,
+        params.pluralFormExamples,
       )
 
     val request = HttpEntity(requestBody, headers)
@@ -136,7 +136,7 @@ class CloudTolgeeTranslateApiServiceImpl(
       val projectDescription: String? = null,
       val languageNote: String? = null,
       val pluralForms: Map<String, String>? = null,
-      val expectedPluralForms: Set<String>? = null,
+      val pluralFormExamples: Map<String, String>? = null,
     )
 
     class TolgeeTranslateExample(

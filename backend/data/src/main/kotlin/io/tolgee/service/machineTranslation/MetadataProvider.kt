@@ -28,7 +28,7 @@ class MetadataProvider(
       closeItems =
         closeKeyIds?.let {
           getCloseItems(
-            context.getBaseLanguage(),
+            context.baseLanguage,
             targetLanguage,
             it,
             metadataKey.keyId,

@@ -2,6 +2,7 @@ package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.escaping.ForceIcuEscaper
+import io.tolgee.formats.escaping.IcuUnescper
 import io.tolgee.formats.escaping.PluralFormIcuEscaper
 import io.tolgee.util.nullIfEmpty
 
@@ -229,6 +230,18 @@ fun String.forceEscapePluralForms(): String? {
   val forms = getPluralForms(this)
   val escapedForms = forms?.forms?.mapValues { ForceIcuEscaper(it.value, escapeHash = true).escaped }
   return escapedForms?.toIcuPluralString(optimize = false, argName = forms.argName)
+}
+
+/**
+ * This method is useful when Support for ICU is disabled on project level and we
+ * store such plural strings with escaped forms.
+ *
+ * Returns null if the string is not a plural
+ */
+fun String.unescapePluralForms(): String? {
+  val forms = getPluralForms(this)
+  val unescaped = forms?.forms?.mapValues { IcuUnescper(it.value, isPlural = true).unescaped }
+  return unescaped?.toIcuPluralString(optimize = false, argName = forms.argName)
 }
 
 /**

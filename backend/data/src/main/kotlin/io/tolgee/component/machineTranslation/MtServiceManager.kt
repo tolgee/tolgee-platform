@@ -77,7 +77,7 @@ class MtServiceManager(
             params.metadata,
             params.serviceInfo.formality,
             params.isBatch,
-            expectedPluralForms = params.expectedPluralForms,
+            pluralFormExamples = params.pluralFormExamples,
             pluralForms = params.pluralForms,
           ),
         )

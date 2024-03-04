@@ -12,5 +12,5 @@ class TolgeeTranslateParams(
   val formality: Formality?,
   val isBatch: Boolean,
   val pluralForms: Map<String, String>? = null,
-  val expectedPluralForms: Set<String>? = null,
+  val pluralFormExamples: Map<String, String>? = null,
 )

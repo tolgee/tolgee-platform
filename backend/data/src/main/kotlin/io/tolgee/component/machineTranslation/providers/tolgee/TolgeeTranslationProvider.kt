@@ -37,7 +37,7 @@ class TolgeeTranslationProvider(
         params.formality,
         params.isBatch,
         pluralForms = params.pluralForms,
-        expectedPluralForms = params.expectedPluralForms,
+        pluralFormExamples = params.pluralFormExamples,
       ),
     )
   }
