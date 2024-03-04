@@ -52,9 +52,9 @@ class MtBatchTranslatorTest {
     translated.translatedText.assert.isEqualTo(
       "{value, plural,\n" +
         "one {Jeden pes}\n" +
-        "few {# psi}\n" +
-        "many {# psa}\n" +
-        "other {# psů}\n" +
+        "few {'#' psi}\n" +
+        "many {'#' psa}\n" +
+        "other {'#' psů}\n" +
         "}",
     )
     translated.actualPrice.assert.isEqualTo(400)
@@ -130,17 +130,17 @@ class MtBatchTranslatorTest {
           usedService = MtServiceType.GOOGLE,
         ),
         TranslateResult(
-          translatedText = "<tolgee>2</tolgee> psi",
+          translatedText = "<x id=\"tolgee-number\">2</x> psi",
           actualPrice = 100,
           usedService = MtServiceType.GOOGLE,
         ),
         TranslateResult(
-          translatedText = "<tolgee>0,5</tolgee> psa",
+          translatedText = "<x id=\"tolgee-number\">0,5</x> psa",
           actualPrice = 100,
           usedService = MtServiceType.GOOGLE,
         ),
         TranslateResult(
-          translatedText = "<tolgee>10</tolgee> psů",
+          translatedText = "<x id=\"tolgee-number\">10</x> psů",
           actualPrice = 100,
           usedService = MtServiceType.GOOGLE,
         ),
@@ -219,7 +219,7 @@ class MtBatchTranslatorTest {
     whenever(queryMock.setParameter(any<String>(), any())).thenReturn(queryMock)
   }
 
-  fun getMtTranslatorContext(): MtTranslatorContext {
+  private fun getMtTranslatorContext(): MtTranslatorContext {
     val applicationContext = mockApplicationContext()
     val context = MtTranslatorContext(0, applicationContext, false)
     context.enabledServices[1L] =

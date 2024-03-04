@@ -77,8 +77,8 @@ class PluralTranslationUtil(
 
   companion object {
     const val REPLACE_NUMBER_PLACEHOLDER = "{%{REPLACE_NUMBER}%}"
-    const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
-    const val TOLGEE_TAG_CLOSE = "</x>"
+    private const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
+    private const val TOLGEE_TAG_CLOSE = "</x>"
     val TOLGEE_TAG_REGEX = "$TOLGEE_TAG_OPEN.*?$TOLGEE_TAG_CLOSE".toRegex()
 
     /**
