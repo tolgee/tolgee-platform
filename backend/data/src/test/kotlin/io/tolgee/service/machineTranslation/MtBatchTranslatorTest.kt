@@ -83,9 +83,9 @@ class MtBatchTranslatorTest {
     translated.translatedText.assert.isEqualTo(
       "{value, plural,\n" +
         "one {Jeden pes}\n" +
-        "few {# psi}\n" +
-        "many {# psa}\n" +
-        "other {# psů}\n" +
+        "few {'#' psi}\n" +
+        "many {'#' psa}\n" +
+        "other {'#' psů}\n" +
         "}",
     )
     translated.actualPrice.assert.isEqualTo(100)

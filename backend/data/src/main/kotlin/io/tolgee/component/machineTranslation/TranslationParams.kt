@@ -19,5 +19,7 @@ data class TranslationParams(
   val cacheKey: String
     get() =
       jacksonObjectMapper()
-        .writeValueAsString(listOf(text, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata))
+        .writeValueAsString(
+          listOf(text, textRaw, pluralForms, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata),
+        )
 }

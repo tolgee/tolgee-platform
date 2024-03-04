@@ -47,7 +47,7 @@ class MtBatchTranslator(
       if (item.service.supportsPlurals) {
         translateInSingleRequest(item, preparedText, isPlural = true)
       } else {
-        return translatePluralSeparately(item, preparedText)
+        translatePluralSeparately(item, preparedText)
       }
 
     translated.translatedText =
@@ -94,7 +94,7 @@ class MtBatchTranslator(
           item = item,
           baseTranslationText = baseTranslationText,
           withReplacedParams = withReplacedParams.text,
-          isPlural = true,
+          isPlural = isPlural,
         ),
       )
 
