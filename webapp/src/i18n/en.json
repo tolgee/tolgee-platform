@@ -168,6 +168,7 @@
   "announcement_feature_mt_formality" : "Machine translations now supports formality",
   "announcement_general_link_text" : "Show more",
   "announcement_new_pricing" : "Tolgee is introducing new pricing for self-hosted instances",
+  "announcement_visual_editor_and_formats_support" : "New visual editor and formats support released!",
   "api-key-delete-button" : "Delete",
   "api-key-deleted-message" : "API key deleted",
   "api-key-delete-token-confirmation-message" : "Do you really want to delete this API key?",
