@@ -30,9 +30,8 @@ class SlackSubscriptionProcessor(
     if(!checkSavedEvent(config, activityModel.type))
       return
     when (activityModel.type) {
-      ActivityType.KEY_NAME_EDIT, ActivityType.COMPLEX_EDIT -> slackExecutor.sendMessageOnKeyChange()
       ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded()
-      ActivityType.SET_TRANSLATIONS -> slackExecutor.sendMessageOnTranslationSet()
+      ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE -> slackExecutor.sendMessageOnTranslationSet()
       else -> {  }
     }
   }
@@ -41,7 +40,7 @@ class SlackSubscriptionProcessor(
     if(config.onEvent == EventName.ALL) return true
     return when (activity) {
       ActivityType.CREATE_KEY ->  config.onEvent == EventName.NEW_KEY
-      ActivityType.SET_TRANSLATIONS -> config.onEvent == EventName.TRANSLATION_CHANGED || config.onEvent == EventName.BASE_CHANGED
+      ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE -> config.onEvent == EventName.TRANSLATION_CHANGED || config.onEvent == EventName.BASE_CHANGED
       else -> false
     }
   }

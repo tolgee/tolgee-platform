@@ -46,39 +46,46 @@ class SlackConfigService(
       userAccount = slackConfigDto.userAccount,
       channelId = slackConfigDto.channelId,
     ).apply {
-      languageTag = slackConfigDto.languageTag
+      languageTags = if (!slackConfigDto.languageTag.isNullOrBlank()) {
+        mutableSetOf(slackConfigDto.languageTag)
+      } else {
+        mutableSetOf()
+      }
       visibilityOptions = visibilityOptions
       slackId = slackConfigDto.slackId
       onEvent = slackConfigDto.onEvent ?: EventName.ALL
+      isGlobalSubscription = slackConfigDto.languageTag?.isEmpty() ?: true
     }
 
-    slackConfigRepository.save(slackConfig)
-    automationService.createForSlackIntegration(slackConfig)
-    return slackConfig
+    val existingConfigs = get(slackConfig.project.id, slackConfig.channelId)
+    return if (existingConfigs == null) {
+      slackConfigRepository.save(slackConfig)
+      automationService.createForSlackIntegration(slackConfig)
+      slackConfig
+    } else {
+      update(slackConfigDto)
+    }
+
   }
 
   fun update(
     slackConfigDto: SlackConfigDto
   ): SlackConfig {
-    val slackConfig = get(slackConfigDto.project.id, slackConfigDto.channelId)!!
-
-    slackConfigDto.languageTag?.let { tag ->
-      slackConfig.languageTag = tag
-    }
-
-    slackConfigDto.visibilityOptions?.let { visibilityOptions ->
-      slackConfig.visibilityOptions = visibilityOptions
-    }
-
+    val slackConfig =  get(slackConfigDto.project.id, slackConfigDto.channelId) ?: throw Exception()
     slackConfigDto.onEvent?.let { eventName ->
       slackConfig.onEvent = eventName
+    }
+
+    slackConfigDto.languageTag.let { tag ->
+      if(!tag.isNullOrBlank()) {
+        slackConfig.languageTags.add(tag)
+      }else
+        slackConfig.isGlobalSubscription = true
     }
 
     automationService.updateForSlackConfig(slackConfig)
     slackConfigRepository.save(slackConfig)
     return slackConfig
   }
-
-  fun ifExist(projectId: Long, channelId: String) = get(projectId, channelId) != null
 
 }

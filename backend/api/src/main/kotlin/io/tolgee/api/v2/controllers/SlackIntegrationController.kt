@@ -17,7 +17,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.slackIntegration.EventName
-import io.tolgee.model.slackIntegration.VisibilityOptions
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeyService
@@ -51,6 +50,8 @@ class SlackIntegrationController(
   fun slackCommand(
     @ModelAttribute payload: SlackCommandDto
   ): SlackMessageDto? {
+
+    //TODO check if message was sent from personal chat
     val regex = """^(\w+)\s+(\d+)(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
     val matchResult = regex.matchEntire(payload.text) ?: return SlackMessageDto("Invalid command")
 
@@ -71,18 +72,10 @@ class SlackIntegrationController(
 
       "subscribe" -> {
         if (projectId.isEmpty()) return SlackMessageDto("Invalid command")
-        var visibilityOptions: VisibilityOptions? = null
         var onEvent: EventName? = null
 
         optionsMap.forEach { (option, value) ->
           when(option) {
-            "--visibility-option" -> {
-              try {
-                visibilityOptions = VisibilityOptions.valueOf(value.uppercase())
-              }catch (e: IllegalArgumentException) {
-                return SlackMessageDto("Invalid command")
-              }
-            }
             "--on" -> {
               try {
                 onEvent = EventName.valueOf(value.uppercase())
@@ -94,7 +87,7 @@ class SlackIntegrationController(
           }
         }
 
-        return subscribe(payload, projectId, visibilityOptions, languageTag, onEvent)
+        return subscribe(payload, projectId, languageTag, onEvent)
       }
 
       "unsubscribe" -> {
@@ -132,7 +125,6 @@ class SlackIntegrationController(
   private fun subscribe(
     payload: SlackCommandDto,
     projectId: String,
-    visibilityOptions: VisibilityOptions?,
     languageTag: String?,
     onEventName: EventName?
   ): SlackMessageDto? {
@@ -146,19 +138,16 @@ class SlackIntegrationController(
       channelId = payload.channel_id,
       userAccount = validationResult.user,
       languageTag = languageTag,
-      visibilityOptions = visibilityOptions,
       onEvent = onEventName
     )
 
-    if (slackConfigService.ifExist(slackConfigDto.project.id, slackConfigDto.channelId)) {
-      slackConfigService.update(slackConfigDto)
-    } else {
+    try {
       slackConfigService.create(slackConfigDto)
+    }catch (e: Exception) {
+      return SlackMessageDto(text = "Error")
     }
 
-    return SlackMessageDto(
-      text = "subscribed"
-    )
+    return SlackMessageDto(text = "Subscribed")
   }
 
   private fun unsubscribe(
@@ -180,6 +169,7 @@ class SlackIntegrationController(
   @PostMapping("/event")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @UseDefaultPermissions
+  @AllowApiAccess
   @Transactional
   fun fetchEvent(
     @RequestBody payload: String
@@ -200,7 +190,7 @@ class SlackIntegrationController(
       val translation = mapOf(
         langName to action.value
       )
-
+      activityHolder.activityRevision.projectId = key.project.id
       translationService.setForKey(key, translation)
       slackExecutor.sendSuccessModal(event.triggerId)
     }
