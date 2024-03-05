@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, ReactElement } from 'react';
 import {
   Box,
   Checkbox,
@@ -18,6 +18,7 @@ export type LoadingCheckboxWithSkeletonProps = {
   loading: boolean;
   labelProps?: Partial<React.ComponentProps<typeof FormControlLabel>>;
   labelInnerProps?: Partial<React.ComponentProps<typeof StyledLabel>>;
+  customHelpIcon?: ReactElement;
 } & React.ComponentProps<typeof Checkbox>;
 
 const StyledLabel = styled('div')`
@@ -41,6 +42,7 @@ export const LoadingCheckboxWithSkeleton: FC<
   labelProps,
   loading,
   onChange,
+  customHelpIcon,
   ...checkboxProps
 }) => {
   return (
@@ -50,7 +52,7 @@ export const LoadingCheckboxWithSkeleton: FC<
           <div>{label}</div>
           {hint && (
             <Tooltip title={hint}>
-              <StyledHelpIcon />
+              {customHelpIcon || <StyledHelpIcon />}
             </Tooltip>
           )}
         </StyledLabel>

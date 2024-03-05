@@ -5,6 +5,9 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingCheckboxWithSkeleton';
+import { Link } from 'react-router-dom';
+import { HelpOutline } from '@mui/icons-material';
+import { DOC_LINKS } from '../../../../docLinks';
 
 type ImportSettingRequest = components['schemas']['ImportSettingsRequest'];
 type ImportSettingModel = components['schemas']['ImportSettingsModel'];
@@ -107,6 +110,11 @@ export const ImportSettingsPanel: FC = (props) => {
           label={t('import_convert_placeholders_to_icu_checkbox_label')}
           checked={state?.convertPlaceholdersToIcu}
           {...additionalCheckboxProps}
+          customHelpIcon={
+            <StyledLink href={DOC_LINKS.importingPlaceholders}>
+              <HelpOutline className="icon" />
+            </StyledLink>
+          }
         />
       )}
       <LoadingCheckboxWithSkeleton
@@ -118,6 +126,11 @@ export const ImportSettingsPanel: FC = (props) => {
         hint={t('import_override_key_descriptions_label_hint')}
         label={t('import_override_key_descriptions_label')}
         checked={state?.overrideKeyDescriptions}
+        customHelpIcon={
+          <StyledLink href={DOC_LINKS.importOverridingDescriptions}>
+            <HelpOutline className="icon" />
+          </StyledLink>
+        }
         {...additionalCheckboxProps}
       />
     </StyledPanelBox>
@@ -128,3 +141,11 @@ const additionalCheckboxProps = {
   labelInnerProps: { sx: { fontSize: '15px' } },
   labelProps: { sx: { marginRight: 0 } },
 };
+
+const StyledLink = styled('a')`
+  color: ${({ theme }) => theme.palette.tokens.ICON_PRIMARY};
+
+  .icon {
+    font-size: 16px;
+  }
+`;
