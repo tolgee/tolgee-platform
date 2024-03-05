@@ -5,7 +5,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingCheckboxWithSkeleton';
-import { Link } from 'react-router-dom';
 import { HelpOutline } from '@mui/icons-material';
 import { DOC_LINKS } from '../../../../docLinks';
 

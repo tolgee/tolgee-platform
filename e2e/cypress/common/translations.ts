@@ -93,7 +93,9 @@ export function selectLangsInLocalstorage(projectId: number, langs: string[]) {
   );
 }
 
-export function translationsBeforeEach(): Chainable<ProjectDTO> {
+export function translationsBeforeEach(
+  languages?: string[]
+): Chainable<ProjectDTO> {
   return login().then(() => {
     return createProject({
       name: 'Test',
@@ -111,7 +113,7 @@ export function translationsBeforeEach(): Chainable<ProjectDTO> {
       ],
     }).then((r) => {
       const project = r.body as ProjectDTO;
-      selectLangsInLocalstorage(project.id, ['en']);
+      selectLangsInLocalstorage(project.id, languages ?? ['en']);
       return visitTranslations(project.id).then(() => project);
     });
   });
