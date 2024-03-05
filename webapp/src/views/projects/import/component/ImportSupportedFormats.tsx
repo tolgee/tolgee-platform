@@ -13,15 +13,18 @@ import FluttrerLogo from 'tg.svgs/logos/flutter.svg?react';
 const TechLogo = ({
   svg,
   height,
+  width,
 }: {
   svg: React.ReactNode;
   height?: string;
+  width?: string;
 }) => {
   return (
     <Box
       sx={(theme) => ({
         color: theme.palette.tokens.TEXT_SECONDARY,
         height: height || '20px',
+        width,
       })}
     >
       {svg}
@@ -34,6 +37,7 @@ const FORMATS = [
     name: 'JSON',
     logo: <TolgeeLogo />,
     logoHeight: '24px',
+    logoWidth: '24px',
   },
   {
     name: 'XLIFF',
@@ -70,6 +74,7 @@ export const ImportSupportedFormats = () => {
             name={f.name}
             logo={f.logo}
             logoHeight={f.logoHeight}
+            logoWidth={f.logoWidth}
           />
         ))}
       </StyledContainer>
@@ -81,14 +86,16 @@ const Item = ({
   name,
   logo,
   logoHeight,
+  logoWidth,
 }: {
   name: string;
   logo?: React.ReactNode;
   logoHeight?: string;
+  logoWidth?: string;
 }) => {
   return (
     <StyledItem>
-      <TechLogo svg={logo} height={logoHeight} />
+      <TechLogo svg={logo} height={logoHeight} width={logoWidth} />
       {name}
     </StyledItem>
   );
