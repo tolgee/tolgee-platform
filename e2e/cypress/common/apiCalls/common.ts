@@ -6,6 +6,7 @@ import Chainable = Cypress.Chainable;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
+type CreateProjectRequest = components['schemas']['CreateProjectRequest'];
 
 type ImportKeysItemDto = components['schemas']['ImportKeysItemDto'];
 
@@ -121,10 +122,9 @@ export const getDefaultOrganization = () => {
   });
 };
 
-export const createProject = (createProjectDto: {
-  name: string;
-  languages: Partial<components['schemas']['LanguageRequest']>[];
-}): Chainable<Cypress.Response<any>> => {
+export const createProject = (
+  createProjectDto: Partial<CreateProjectRequest>
+): Chainable<Cypress.Response<any>> => {
   const create = () => {
     return getDefaultOrganization().then((org) => {
       return v2apiFetch('projects', {
