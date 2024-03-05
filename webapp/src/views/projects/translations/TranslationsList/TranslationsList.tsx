@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useEffect, useRef } from 'react';
-import ReactList from 'react-list';
 import { styled } from '@mui/material';
+import { ReactList } from 'tg.component/reactList/ReactList';
 
 import { components } from 'tg.service/apiSchema.generated';
 import {
@@ -11,18 +11,16 @@ import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
 import { NamespaceBanner } from '../Namespace/NamespaceBanner';
 import { useNsBanners } from '../context/useNsBanners';
-import {
-  useColumnsActions,
-  useColumnsContext,
-} from '../context/ColumnsContext';
+
 import { NAMESPACE_BANNER_SPACING } from '../cell/styles';
+import { useColumns } from '../useColumns';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const StyledContainer = styled('div')`
   display: flex;
   position: relative;
-  margin: 10px 0px 100px 0px;
+  margin: 10px 0px 0px 0px;
   border-left: 0px;
   border-right: 0px;
   background: ${({ theme }) => theme.palette.background.default};
@@ -31,7 +29,11 @@ const StyledContainer = styled('div')`
   align-items: stretch;
 `;
 
-export const TranslationsList = () => {
+type Props = {
+  toolsPanelOpen: boolean;
+};
+
+export const TranslationsList = ({ toolsPanelOpen }: Props) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
@@ -42,17 +44,18 @@ export const TranslationsList = () => {
   );
   const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
-  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
 
-  const columnSizes = useColumnsContext((c) => c.columnSizes);
-  const columnSizesPercent = useColumnsContext((c) => c.columnSizesPercent);
-
-  const { startResize, resizeColumn, addResizer, resetColumns } =
-    useColumnsActions();
-
-  useEffect(() => {
-    resetColumns([1, 3], tableRef);
-  }, [tableRef]);
+  const {
+    columnSizes,
+    columnSizesPercent,
+    startResize,
+    resizeColumn,
+    addResizer,
+  } = useColumns({
+    tableRef,
+    initialRatios: [1, 3],
+    deps: [toolsPanelOpen],
+  });
 
   const handleFetchMore = useCallback(() => {
     fetchMore();
@@ -84,11 +87,7 @@ export const TranslationsList = () => {
   }
 
   return (
-    <StyledContainer
-      style={{ marginBottom: cursorKeyId ? 500 : undefined }}
-      ref={tableRef}
-      data-cy="translations-view-list"
-    >
+    <StyledContainer ref={tableRef} data-cy="translations-view-list">
       {columnSizes.slice(0, -1).map((w, i) => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
         return (
@@ -127,7 +126,7 @@ export const TranslationsList = () => {
 
           return (
             <div
-              key={row.keyId}
+              key={`${row.keyNamespace}.${row.keyId}`}
               style={{
                 paddingTop: bannerSpacing
                   ? NAMESPACE_BANNER_SPACING

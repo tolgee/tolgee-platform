@@ -147,6 +147,10 @@ class Translation(
       @PrePersist
       @PreUpdate
       fun preSave(translation: Translation) {
+        if (translation.text == "") {
+          translation.text = null
+        }
+
         if (!translation.isEmpty() && translation.state == TranslationState.DISABLED) {
           throw BadRequestException(Message.CANNOT_MODIFY_DISABLED_TRANSLATION)
         }

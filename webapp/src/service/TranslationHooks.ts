@@ -28,6 +28,7 @@ export const usePutTranslationState = () =>
   useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/set-state/{state}',
     method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/translations/{translationId}',
   });
 
 export const usePutTag = () =>

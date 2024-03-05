@@ -12,7 +12,8 @@ enum class Announcement(
   FEATURE_MT_FORMALITY(parseTime("2023-10-20 00:00 UTC")),
   FEATURE_CONTENT_DELIVERY_AND_WEBHOOKS(parseTime("2024-01-05 00:00 UTC")),
   NEW_PRICING(parseTime("2024-02-01 00:00 UTC"), AnnouncementTarget.SELF_HOSTED),
-  FEATURE_AI_CUSTOMIZATION(parseTime("2024-03-15 00:00 UTC"), AnnouncementTarget.CLOUD),
+  FEATURE_AI_CUSTOMIZATION(parseTime("2024-03-05 00:00 UTC"), AnnouncementTarget.CLOUD),
+  FEATURE_VISUAL_EDITOR(parseTime("2024-05-01 00:00 UTC")),
   ;
 
   companion object {

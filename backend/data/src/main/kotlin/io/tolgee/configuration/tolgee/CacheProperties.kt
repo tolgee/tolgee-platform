@@ -43,7 +43,7 @@ class CacheProperties(
   )
   var caffeineMaxSize: Long = -1,
   @DocProperty(
-    "Whether to clean the cache on Tolgee startup",
+    description = "Whether to clean the cache on Tolgee startup",
   )
   var cleanOnStartup: Boolean = true,
 )

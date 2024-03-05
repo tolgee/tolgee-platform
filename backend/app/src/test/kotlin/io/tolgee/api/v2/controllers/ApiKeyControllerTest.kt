@@ -228,6 +228,9 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       node("translateLanguageIds").isNull()
       node("viewLanguageIds").isNull()
       node("stateChangeLanguageIds").isNull()
+      node("project") {
+        node("id").isNumber.isGreaterThan(0.toBigDecimal())
+      }
     }
   }
 

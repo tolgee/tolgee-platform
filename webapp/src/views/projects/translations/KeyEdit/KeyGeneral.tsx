@@ -11,6 +11,7 @@ import { KeyFormType } from './types';
 import { Tag } from '../Tags/Tag';
 import { RequiredField } from 'tg.component/common/form/RequiredField';
 import { LabelHint } from 'tg.component/common/LabelHint';
+import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 
 const StyledSection = styled('div')``;
 
@@ -54,8 +55,13 @@ export const KeyGeneral = () => {
               autofocus
               value={values.name}
               onChange={(val) => setFieldValue('name', val)}
-              onSave={submitForm}
-              plaintext
+              shortcuts={[
+                {
+                  key: 'Enter',
+                  run: () => (submitForm(), true),
+                },
+              ]}
+              mode="plain"
               minHeight="unset"
             />
           </EditorWrapper>
@@ -90,8 +96,13 @@ export const KeyGeneral = () => {
           <Editor
             value={values.description || ''}
             onChange={(val) => setFieldValue('description', val)}
-            onSave={submitForm}
-            plaintext
+            shortcuts={[
+              {
+                key: 'Enter',
+                run: () => (submitForm(), true),
+              },
+            ]}
+            mode="plain"
             minHeight={50}
           />
         </EditorWrapper>
@@ -126,6 +137,11 @@ export const KeyGeneral = () => {
         </StyledTags>
         <FieldError error={errors.tags} />
       </StyledSection>
+
+      <PluralFormCheckbox
+        pluralParameterName="pluralParameter"
+        isPluralName="isPlural"
+      />
     </>
   );
 };

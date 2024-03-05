@@ -1,27 +1,31 @@
-import { useCallback, useEffect, useState } from 'react';
-import { FastField, FieldArray, FieldProps, useFormikContext } from 'formik';
+import {
+  FastField,
+  Field,
+  FieldArray,
+  FieldProps,
+  useFormikContext,
+} from 'formik';
 import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
 import { FieldError } from 'tg.component/FormField';
-import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
 import { useProject } from 'tg.hooks/useProject';
 import { FieldLabel } from 'tg.component/FormField';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { LabelHint } from 'tg.component/common/LabelHint';
 
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
-import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
-import { useTranslationTools } from '../TranslationTools/useTranslationTools';
 import { RequiredField } from 'tg.component/common/form/RequiredField';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { LabelHint } from 'tg.component/common/LabelHint';
-
-type LanguageModel = components['schemas']['LanguageModel'];
+import { PluralEditor } from '../translationVisual/PluralEditor';
+import type { ValuesCreateType } from './KeyCreateForm';
+import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
+import { useState } from 'react';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -60,59 +64,22 @@ const StyledTags = styled('div')`
 type Props = {
   onCancel?: () => void;
   autofocus?: boolean;
-  languages: LanguageModel[];
 };
 
-export const FormBody: React.FC<Props> = ({
-  onCancel,
-  autofocus,
-  languages,
-}) => {
-  const [editedLang, setEditedLang] = useState<string | null>(null);
+export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const { t } = useTranslate();
-  const form = useFormikContext<any>();
+  const form = useFormikContext<ValuesCreateType>();
   const project = useProject();
 
-  const onFocus = (lang: string | null) => {
-    setEditedLang(lang);
-  };
+  const baseLang = project.baseLanguage!;
 
-  const baseLang = project.baseLanguage?.tag;
+  const isPlural = form.values.isPlural;
 
-  const baseText = form.values?.translations?.[baseLang || ''];
-  const targetLang = languages.find(({ tag }) => tag === editedLang);
+  const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
 
-  const hintRelevant = Boolean(
-    baseText && targetLang && editedLang !== baseLang
-  );
-
-  const [hintDisplayed, setHintDisplayed] = useState(false);
-
-  const onValueUpdate = useCallback(
-    (value: string) => {
-      form.setFieldValue(`translations.${editedLang}`, value);
-    },
-    [editedLang]
-  );
-
-  useEffect(() => {
-    if (hintRelevant) {
-      if (!hintDisplayed) {
-        setHintDisplayed(true);
-      }
-    } else if (!baseText) {
-      setHintDisplayed(false);
-    }
-  }, [hintRelevant, baseText]);
-
-  const toolsData = useTranslationTools({
-    projectId: project.id,
-    baseText,
-    targetLanguageId: targetLang?.id as number,
-    keyId: undefined as any,
-    onValueUpdate,
-    enabled: hintRelevant,
-  });
+  const actualParameter = isPlural
+    ? form.values.pluralParameter || 'value'
+    : undefined;
 
   return (
     <>
@@ -130,17 +97,22 @@ export const FormBody: React.FC<Props> = ({
                   <EditorWrapper>
                     <StyledEdtorWrapper data-cy="translation-create-key-input">
                       <Editor
-                        plaintext
+                        mode="plain"
                         value={field.value}
                         onChange={(val) => {
                           form.setFieldValue(field.name, val);
                         }}
-                        onSave={() => form.handleSubmit()}
                         onBlur={() => form.setFieldTouched(field.name, true)}
                         minHeight="unset"
                         autofocus={autofocus}
                         scrollMargins={{ bottom: 150 }}
                         autoScrollIntoView
+                        shortcuts={[
+                          {
+                            key: 'Enter',
+                            run: () => (form.handleSubmit(), true),
+                          },
+                        ]}
                       />
                     </StyledEdtorWrapper>
                   </EditorWrapper>
@@ -184,12 +156,17 @@ export const FormBody: React.FC<Props> = ({
               <EditorWrapper>
                 <StyledEdtorWrapper data-cy="translation-create-description-input">
                   <Editor
-                    plaintext
+                    mode="plain"
                     value={field.value}
                     onChange={(val) => {
                       form.setFieldValue(field.name, val);
                     }}
-                    onSave={() => form.handleSubmit()}
+                    shortcuts={[
+                      {
+                        key: 'Enter',
+                        run: () => (form.handleSubmit(), true),
+                      },
+                    ]}
                     onBlur={() => form.setFieldTouched(field.name, true)}
                     minHeight={50}
                     scrollMargins={{ bottom: 150 }}
@@ -236,40 +213,52 @@ export const FormBody: React.FC<Props> = ({
           )}
         />
 
-        <Box pt={2} />
+        <PluralFormCheckbox
+          isPluralName="isPlural"
+          pluralParameterName="pluralArgName"
+        />
 
-        {languages.map((lang, i) => (
-          <FastField key={lang.tag} name={`translations.${lang.tag}`}>
-            {({ field, form, meta }) => (
-              <div key={lang.tag}>
+        <Field key={baseLang.tag} name="baseValue">
+          {({ field, meta }) => (
+            <div data-cy="translation-create-translation-input">
+              <Box display="flex" justifyContent="space-between">
                 <FieldLabel>
                   <Box display="flex" gap={0.5}>
-                    <CircledLanguageIcon flag={lang.flagEmoji} size={16} />
-                    {lang.name}
+                    <CircledLanguageIcon flag={baseLang.flagEmoji} size={16} />
+                    {baseLang.name}
                   </Box>
                 </FieldLabel>
-                <EditorWrapper>
-                  <StyledEdtorWrapper data-cy="translation-create-translation-input">
-                    <Editor
-                      value={field.value || ''}
-                      onSave={() => form.handleSubmit()}
-                      onChange={(val) => {
-                        form.setFieldValue(field.name, val);
-                      }}
-                      direction={getLanguageDirection(lang.tag)}
-                      onFocus={() => onFocus(lang.tag)}
-                      minHeight={50}
-                      scrollMargins={{ bottom: 150 }}
-                      autoScrollIntoView
-                    />
-                  </StyledEdtorWrapper>
-                </EditorWrapper>
-                <FieldError error={meta.touched && meta.error} />
-              </div>
-            )}
-          </FastField>
-        ))}
+                <ControlsEditorSmall
+                  mode={mode}
+                  onModeToggle={() =>
+                    setMode(mode === 'syntax' ? 'placeholders' : 'syntax')
+                  }
+                />
+              </Box>
+              <PluralEditor
+                value={{ ...field.value, parameter: actualParameter }}
+                onChange={(val) => {
+                  form.setFieldValue(field.name, val);
+                }}
+                locale={baseLang.tag}
+                mode={mode}
+                editorProps={{
+                  autoScrollIntoView: true,
+                  scrollMargins: { bottom: 150 },
+                  shortcuts: [
+                    {
+                      key: 'Enter',
+                      run: () => (form.handleSubmit(), true),
+                    },
+                  ],
+                }}
+              />
+              <FieldError error={meta.touched && meta.error} />
+            </div>
+          )}
+        </Field>
       </StyledContainer>
+
       <Box display="flex" alignItems="flex-end" justifySelf="flex-end">
         {onCancel && (
           <Button data-cy="global-form-cancel-button" onClick={onCancel}>
@@ -290,9 +279,6 @@ export const FormBody: React.FC<Props> = ({
           </LoadingButton>
         </Box>
       </Box>
-      {hintDisplayed && targetLang && (
-        <ToolsBottomPanel data={toolsData} languageTag={targetLang.tag} />
-      )}
     </>
   );
 };

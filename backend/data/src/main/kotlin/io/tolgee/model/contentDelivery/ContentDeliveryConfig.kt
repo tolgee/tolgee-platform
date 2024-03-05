@@ -2,18 +2,22 @@ package io.tolgee.model.contentDelivery
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.dtos.IExportParams
-import io.tolgee.dtos.request.export.ExportFormat
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.enums.TranslationState
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.*
 
@@ -44,6 +48,9 @@ class ContentDeliveryConfig(
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'
 
+  @ColumnDefault("false")
+  override var supportArrays: Boolean = false
+
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   override var filterKeyId: List<Long>? = null
@@ -65,4 +72,7 @@ class ContentDeliveryConfig(
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   override var filterNamespace: List<String?>? = null
+
+  @Enumerated(EnumType.STRING)
+  override var messageFormat: ExportMessageFormat? = null
 }

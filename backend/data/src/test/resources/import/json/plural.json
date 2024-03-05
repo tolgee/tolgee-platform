@@ -1,0 +1,3 @@
+{
+  "plural": "{count, plural, one {# day} other {# days}}"
+}

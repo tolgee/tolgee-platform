@@ -1,7 +1,6 @@
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
 
 import {
-  assertAvailableCommands,
   editCell,
   IS_MAC,
   move,
@@ -96,19 +95,4 @@ describe('Shortcuts', () => {
       cy.focused().contains('Cool translated text 2').should('be.visible');
     }
   );
-
-  it('will show correct context hint', () => {
-    assertAvailableCommands(['Move']);
-
-    selectFirst();
-    cy.gcy('translations-shortcuts-command').should('have.length', 3);
-    assertAvailableCommands(['Move', 'Edit', 'Reviewed']);
-
-    editCell('Cool translated text 1');
-    assertAvailableCommands(['Save', 'Save & continue', 'Reviewed']);
-    cy.focused().type('{esc}');
-
-    move('leftarrow');
-    assertAvailableCommands(['Move', 'Edit']);
-  });
 });

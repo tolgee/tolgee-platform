@@ -147,7 +147,7 @@ function doSensitiveOperation(
   otp: string = undefined
 ) {
   login(username, undefined, otp);
-  cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+  cy.visit(`${HOST}/projects/${projectId}/manage/edit/advanced`);
   gcy('project-settings-delete-button')
     .click()
     .then(() => {

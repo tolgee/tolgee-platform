@@ -10,8 +10,8 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
-import io.tolgee.dtos.request.project.CreateProjectDTO
-import io.tolgee.dtos.request.project.EditProjectDTO
+import io.tolgee.dtos.request.project.CreateProjectRequest
+import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
@@ -223,7 +223,7 @@ class V2ProjectsController(
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   fun createProject(
     @RequestBody @Valid
-    dto: CreateProjectDTO,
+    dto: CreateProjectRequest,
   ): ProjectModel {
     organizationRoleService.checkUserIsOwner(dto.organizationId)
     val project = projectService.createProject(dto)
@@ -238,7 +238,7 @@ class V2ProjectsController(
   @AllowApiAccess
   fun editProject(
     @RequestBody @Valid
-    dto: EditProjectDTO,
+    dto: EditProjectRequest,
   ): ProjectModel {
     val project = projectService.editProject(projectHolder.project.id, dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))

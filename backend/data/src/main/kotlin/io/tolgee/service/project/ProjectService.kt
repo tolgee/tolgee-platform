@@ -7,8 +7,8 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.dtos.request.project.CreateProjectDTO
-import io.tolgee.dtos.request.project.EditProjectDTO
+import io.tolgee.dtos.request.project.CreateProjectRequest
+import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
@@ -143,9 +143,10 @@ class ProjectService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectDTO): Project {
+  fun createProject(dto: CreateProjectRequest): Project {
     val project = Project()
     project.name = dto.name
+    project.icuPlaceholders = dto.icuPlaceholders
 
     project.organizationOwner = organizationService.get(dto.organizationId)
 
@@ -165,13 +166,14 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
   fun editProject(
     id: Long,
-    dto: EditProjectDTO,
+    dto: EditProjectRequest,
   ): Project {
     val project =
       projectRepository.findById(id)
         .orElseThrow { NotFoundException() }!!
     project.name = dto.name
     project.description = dto.description
+    project.icuPlaceholders = dto.icuPlaceholders
 
     dto.baseLanguageId?.let {
       val language =
@@ -391,7 +393,7 @@ class ProjectService(
   }
 
   private fun getOrAssignBaseLanguage(
-    dto: CreateProjectDTO,
+    dto: CreateProjectRequest,
     createdLanguages: List<Language>,
   ): Language {
     if (dto.baseLanguageTag != null) {

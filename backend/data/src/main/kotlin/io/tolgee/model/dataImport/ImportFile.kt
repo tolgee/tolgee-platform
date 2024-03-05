@@ -10,6 +10,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 class ImportFile(
@@ -30,18 +31,28 @@ class ImportFile(
 
   var namespace: String? = null
 
+  @ColumnDefault("false")
+  var needsParamConversion = false
+
   fun addIssue(
     type: FileIssueType,
     params: Map<FileIssueParamType, String>,
-  ) {
-    val issue =
-      ImportFileIssue(file = this, type = type).apply {
-        this.params =
-          params.map {
-            ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
-          }.toMutableList()
-      }
+  ): ImportFileIssue {
+    val issue = prepareIssue(type, params)
     this.issues.add(issue)
+    return issue
+  }
+
+  fun prepareIssue(
+    type: FileIssueType,
+    params: Map<FileIssueParamType, String>,
+  ): ImportFileIssue {
+    return ImportFileIssue(file = this, type = type).apply {
+      this.params =
+        params.map {
+          ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
+        }.toMutableList()
+    }
   }
 
   fun addKeyIsNotStringIssue(
@@ -104,5 +115,13 @@ class ImportFile(
       return this.substring(0..100) + "..."
     }
     return this
+  }
+
+  fun addIssues(
+    fileCollisions: MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>>,
+  ): List<ImportFileIssue> {
+    return fileCollisions.map { (issueType, params) ->
+      addIssue(issueType, params)
+    }
   }
 }

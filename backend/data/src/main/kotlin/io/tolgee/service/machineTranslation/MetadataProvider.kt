@@ -6,12 +6,10 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
-import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.PageRequest
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
-  private val applicationContext: ApplicationContext,
 ) {
   fun get(metadataKey: MetadataKey): Metadata {
     val closeKeyIds = metadataKey.keyId?.let { bigMetaService.getCloseKeyIds(it) }
@@ -23,13 +21,14 @@ class MetadataProvider(
       examples =
         getExamples(
           targetLanguage,
+          context.getKey(metadataKey.keyId)?.isPlural ?: false,
           metadataKey.baseTranslationText,
           metadataKey.keyId,
         ),
       closeItems =
         closeKeyIds?.let {
           getCloseItems(
-            context.getBaseLanguage(),
+            context.baseLanguage,
             targetLanguage,
             it,
             metadataKey.keyId,
@@ -74,11 +73,13 @@ class MetadataProvider(
 
   private fun getExamples(
     targetLanguage: LanguageDto,
+    isPlural: Boolean,
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
     return translationService.getTranslationMemorySuggestions(
       sourceTranslationText = text,
+      isPlural = isPlural,
       key = null,
       targetLanguage = targetLanguage,
       pageable = PageRequest.of(0, 5),
@@ -95,14 +96,14 @@ class MetadataProvider(
   }
 
   private val bigMetaService: BigMetaService by lazy {
-    applicationContext.getBean(BigMetaService::class.java)
+    context.applicationContext.getBean(BigMetaService::class.java)
   }
 
   private val translationService: TranslationService by lazy {
-    applicationContext.getBean(TranslationService::class.java)
+    context.applicationContext.getBean(TranslationService::class.java)
   }
 
   private val entityManager: EntityManager by lazy {
-    applicationContext.getBean(EntityManager::class.java)
+    context.applicationContext.getBean(EntityManager::class.java)
   }
 }

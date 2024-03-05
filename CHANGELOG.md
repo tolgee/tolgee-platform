@@ -1,3 +1,17 @@
+# [3.49.0](https://github.com/tolgee/tolgee-platform/compare/v3.48.4...v3.49.0) (2024-03-05)
+
+
+### Features
+
+* Visual editor & Formats support ([#2145](https://github.com/tolgee/tolgee-platform/issues/2145)) ([7fef4e3](https://github.com/tolgee/tolgee-platform/commit/7fef4e3fe5f8c2c3fcd893359df92fde26c73921))
+
+## [3.48.4](https://github.com/tolgee/tolgee-platform/compare/v3.48.3...v3.48.4) (2024-02-23)
+
+
+### Bug Fixes
+
+* Automations stop to work due to wrong caching ([#2141](https://github.com/tolgee/tolgee-platform/issues/2141)) ([766b5f7](https://github.com/tolgee/tolgee-platform/commit/766b5f77b548fbf9da747dc178ccf5f4f61f65e8))
+
 ## [3.48.3](https://github.com/tolgee/tolgee-platform/compare/v3.48.2...v3.48.3) (2024-02-20)
 
 

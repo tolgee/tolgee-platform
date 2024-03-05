@@ -1,19 +1,14 @@
 import { waitForGlobalLoading } from './loading';
-import { confirmStandard } from './shared';
+import { confirmStandard, gcyAdvanced } from './shared';
 
-export function commentsButton(index: number, language: string) {
-  return cy
-    .gcy('translations-row')
-    .eq(index)
+export function commentsButton(key: string, language: string) {
+  return gcyAdvanced({ value: 'translations-table-cell', language, key })
     .trigger('mouseover')
-    .findDcy('translations-table-cell-language')
-    .contains(language)
-    .closestDcy('translations-table-cell')
     .findDcy('translations-cell-comments-button');
 }
 
-export function createComment(text: string, index: number, lang: string) {
-  commentsButton(index, lang).click();
+export function createComment(text: string, key: string, lang: string) {
+  commentsButton(key, lang).click();
   waitForGlobalLoading();
   cy.gcy('translations-comments-input').type(text).type('{enter}');
   waitForGlobalLoading();

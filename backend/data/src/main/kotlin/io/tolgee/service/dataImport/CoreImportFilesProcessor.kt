@@ -1,10 +1,13 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.api.IImportSettings
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
+import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
@@ -13,17 +16,24 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ProcessorFactory
 import io.tolgee.util.Logging
+import io.tolgee.util.filterFiles
+import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
 
 class CoreImportFilesProcessor(
   val applicationContext: ApplicationContext,
   val import: Import,
   val params: ImportAddFilesParams = ImportAddFilesParams(),
+  val importSettings: IImportSettings,
+  val projectIcuPlaceholdersEnabled: Boolean = true,
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
-  private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
+  private val importFileProcessorFactory: ImportFileProcessorFactory by lazy {
+    applicationContext.getBean(
+      ImportFileProcessorFactory::class.java,
+    )
+  }
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
@@ -68,20 +78,31 @@ class CoreImportFilesProcessor(
         fileEntity = savedFileEntity,
         maxTranslationTextLength = tolgeeProperties.maxTranslationTextLength,
         params = params,
+        importSettings,
+        projectIcuPlaceholdersEnabled,
+        applicationContext,
       )
-    val processor = processorFactory.getProcessor(file, fileProcessorContext)
+    val processor = importFileProcessorFactory.getProcessor(file, fileProcessorContext)
     processor.process()
-    processor.context.processResult()
+    processor.processResult()
+    savedFileEntity.updateFileEntity(fileProcessorContext)
+  }
+
+  private fun ImportFile.updateFileEntity(fileProcessorContext: FileProcessorContext) {
+    if (fileProcessorContext.needsParamConversion) {
+      this.needsParamConversion = fileProcessorContext.needsParamConversion
+      importService.saveFile(this)
+    }
   }
 
   private fun processArchive(
     archive: ImportFileDto,
     errors: MutableList<ErrorResponseBody>,
   ): MutableList<ErrorResponseBody> {
-    val processor = processorFactory.getArchiveProcessor(archive)
+    val processor = importFileProcessorFactory.getArchiveProcessor(archive)
     val files = processor.process(archive)
-
-    errors.addAll(processFiles(files))
+    val filtered = filterFiles(files.map { it.name to it })
+    errors.addAll(processFiles(filtered))
     return errors
   }
 
@@ -100,18 +121,23 @@ class CoreImportFilesProcessor(
     return importService.saveFile(entity)
   }
 
-  private fun FileProcessorContext.processResult() {
-    this.fileEntity.preselectNamespace()
-    this.processLanguages()
-    this.processTranslations()
-    importService.saveAllFileIssues(this.fileEntity.issues)
-    importService.saveAllFileIssueParams(this.fileEntity.issues.flatMap { it.params ?: emptyList() })
+  private fun ImportFileProcessor.processResult() {
+    context.preselectNamespace()
+    context.processLanguages()
+    context.processTranslations()
+    importService.saveAllFileIssues(this.context.fileEntity.issues)
   }
 
-  private fun ImportFile.preselectNamespace() {
-    val namespace = """^[\/]?([^/\\]+)[/\\].*""".toRegex().matchEntire(this.name!!)?.groups?.get(1)?.value
+  private fun FileProcessorContext.preselectNamespace() {
+    if (this.namespace != null) {
+      // namespace was selected by processor
+      this.fileEntity.namespace = getSafeNamespace(this.namespace)
+      return
+    }
+    // select namespace from file name
+    val namespace = """^[\/]?([^/\\]+)[/\\].*""".toRegex().matchEntire(this.fileEntity.name!!)?.groups?.get(1)?.value
     if (!namespace.isNullOrBlank()) {
-      this.namespace = namespace
+      this.fileEntity.namespace = namespace
     }
   }
 
@@ -119,7 +145,7 @@ class CoreImportFilesProcessor(
     this.languages.forEach { entry ->
       val languageEntity = entry.value
       importDataManager.storedLanguages.add(languageEntity)
-      val existingLanguageDto = importDataManager.findMatchingExistingLanguage(languageEntity)
+      val existingLanguageDto = importDataManager.findMatchingExistingLanguage(languageEntity.name)
       languageEntity.existingLanguage = existingLanguageDto?.id?.let { languageService.getEntity(it) }
       importService.saveLanguages(this.languages.values)
       importDataManager.populateStoredTranslations(entry.value)
@@ -134,8 +160,6 @@ class CoreImportFilesProcessor(
     return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
       this.keys.computeIfAbsent(name) {
         ImportKey(name = name, this.fileEntity)
-      }.also {
-        importService.saveKey(it)
       }
     }
   }
@@ -144,24 +168,58 @@ class CoreImportFilesProcessor(
     this.translations.forEach { entry ->
       val keyEntity = getOrCreateKey(entry.key)
       entry.value.forEach translationForeach@{ newTranslation ->
-        val storedTranslations = importDataManager.getStoredTranslations(keyEntity, newTranslation.language)
-        newTranslation.key = keyEntity
-        if (storedTranslations.size > 0) {
-          storedTranslations.forEach { collidingTranslations ->
-            fileEntity.addIssue(
-              FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
-              mapOf(
-                FileIssueParamType.KEY_ID to collidingTranslations.key.id.toString(),
-                FileIssueParamType.LANGUAGE_ID to collidingTranslations.language.id.toString(),
-              ),
-            )
-          }
-          return@translationForeach
-        }
-        this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
+        processTranslation(newTranslation, keyEntity)
       }
     }
     importDataManager.saveAllStoredKeys()
     importDataManager.saveAllStoredTranslations()
+  }
+
+  private fun FileProcessorContext.processTranslation(
+    newTranslation: ImportTranslation,
+    keyEntity: ImportKey,
+  ) {
+    newTranslation.key = keyEntity
+    val (isCollision, fileCollisions) = checkForInFileCollisions(newTranslation)
+    if (isCollision) {
+      fileEntity.addIssues(fileCollisions)
+      return
+    }
+    val otherFilesCollisions =
+      importDataManager.checkForOtherFilesCollisions(newTranslation)
+    if (otherFilesCollisions.isNotEmpty()) {
+      fileEntity.addIssues(otherFilesCollisions)
+      newTranslation.isSelectedToImport = false
+    }
+    this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
+  }
+
+  private fun checkForInFileCollisions(
+    newTranslation: ImportTranslation,
+  ): Pair<Boolean, MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>>> {
+    var isCollision = false
+    val issues =
+      mutableListOf<Pair<FileIssueType, Map<FileIssueParamType, String>>>()
+    val storedTranslations =
+      importDataManager
+        .getStoredTranslations(newTranslation.key, newTranslation.language)
+    if (storedTranslations.isNotEmpty()) {
+      isCollision = true
+      storedTranslations.forEach { collision ->
+        if (newTranslation.text == collision.text) {
+          return@forEach
+        }
+        issues.add(
+          FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE to
+            mapOf(
+              FileIssueParamType.KEY_ID to collision.key.id.toString(),
+              FileIssueParamType.LANGUAGE_ID to collision.language.id.toString(),
+              FileIssueParamType.KEY_NAME to collision.key.name,
+              FileIssueParamType.LANGUAGE_NAME to collision.language.name,
+            ),
+        )
+      }
+    }
+    return isCollision to issues
   }
 }

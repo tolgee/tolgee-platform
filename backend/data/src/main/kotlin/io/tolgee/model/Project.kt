@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.api.ISimpleProject
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -32,10 +33,10 @@ class Project(
   @field:NotBlank
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp
-  var name: String = "",
+  override var name: String = "",
   @field:Size(min = 3, max = 2000)
   @ActivityLoggedProp
-  var description: String? = null,
+  override var description: String? = null,
   @field:Size(max = 2000)
   @Column(columnDefinition = "text")
   @ActivityLoggedProp
@@ -44,8 +45,8 @@ class Project(
   @ActivityLoggedProp
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
-  var slug: String? = null,
-) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable {
+  override var slug: String? = null,
+) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable, ISimpleProject {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()
@@ -100,6 +101,9 @@ class Project(
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
+
+  @ColumnDefault("true")
+  override var icuPlaceholders: Boolean = true
 
   override var deletedAt: Date? = null
 

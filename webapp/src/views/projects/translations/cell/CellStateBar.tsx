@@ -10,6 +10,7 @@ const StyledStateHover = styled('div')`
   position: absolute;
   width: 12px;
   height: 100%;
+  z-index: 1;
 `;
 
 const StyledState = styled('div')`
