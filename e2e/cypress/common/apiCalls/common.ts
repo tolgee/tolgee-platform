@@ -156,13 +156,18 @@ export const createTestProject = () =>
     ],
   });
 
+type CreateKeyOptions = {
+  isPlural?: boolean;
+};
+
 export const createKey = (
   projectId,
   key: string,
-  translations: { [lang: string]: string }
+  translations: { [lang: string]: string },
+  options?: CreateKeyOptions
 ): Chainable<components['schemas']['KeyModel']> =>
   v2apiFetch(`projects/${projectId}/keys`, {
-    body: { name: key, translations },
+    body: { ...options, name: key, translations },
     method: 'POST',
   }).then((r) => {
     return r.body;
