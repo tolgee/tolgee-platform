@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Box, styled } from '@mui/material';
+import { Box, IconButton, Tooltip, styled } from '@mui/material';
 import { Placeholder } from '@tginternal/editor';
 
 import { ControlsEditorMain } from '../cell/ControlsEditorMain';
@@ -14,6 +14,8 @@ import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
+import { Help } from '@mui/icons-material';
+import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -74,6 +76,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     editEnabled,
     disabled,
   } = tools;
+  const { t } = useTranslate();
   const editVal = tools.editVal!;
   const state = translation?.state || 'UNTRANSLATED';
   const activeVariant = editVal.activeVariant;
@@ -156,12 +159,19 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
       <StyledBottom onMouseDown={(e) => e.preventDefault()}>
         {editEnabled ? (
           <>
-            <MissingPlaceholders
-              placeholders={missingPlaceholders}
-              onPlaceholderClick={handlePlaceholderClick}
-              variant={editVal.value.parameter ? activeVariant : undefined}
-              locale={language.tag}
-            />
+            <Box display="flex" alignItems="center" gap="8px">
+              <Tooltip title={t('translation_format_help')}>
+                <IconButton style={{ margin: '-4px -4px -4px -6px' }}>
+                  <Help fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <MissingPlaceholders
+                placeholders={missingPlaceholders}
+                onPlaceholderClick={handlePlaceholderClick}
+                variant={editVal.value.parameter ? activeVariant : undefined}
+                locale={language.tag}
+              />
+            </Box>
             <ControlsEditorMain
               className="controls-main"
               onSave={handleSave}
