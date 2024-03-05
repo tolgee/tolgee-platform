@@ -161,7 +161,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
           <>
             <Box display="flex" alignItems="center" gap="8px">
               <Tooltip title={t('translation_format_help')}>
-                <IconButton style={{ margin: '-4px -4px -4px -6px' }}>
+                <IconButton
+                  style={{ margin: '-4px -4px -4px -6px' }}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://tolgee.io/platform/projects_and_organizations/editing_translations"
+                >
                   <Help fontSize="small" />
                 </IconButton>
               </Tooltip>

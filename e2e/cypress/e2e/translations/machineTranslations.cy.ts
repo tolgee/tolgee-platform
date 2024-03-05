@@ -2,12 +2,13 @@ import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import {
   create4Translations,
   editCell,
+  getPluralEditor,
+  getTranslationCell,
   selectLangsInLocalstorage,
   translationsBeforeEach,
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { deleteProject } from '../../common/apiCalls/common';
 
 describe('Translation memory', () => {
   let project: ProjectDTO = null;
@@ -22,9 +23,9 @@ describe('Translation memory', () => {
       });
   });
 
-  afterEach(() => {
-    deleteProject(project.id);
-  });
+  // afterEach(() => {
+  //   deleteProject(project.id);
+  // });
 
   it('will show correct suggestions', () => {
     waitForGlobalLoading();
@@ -66,6 +67,51 @@ describe('Translation memory', () => {
         'Cool translated text 1 edited translated with GOOGLE from en to cs'
       )
       .should('be.visible');
+  });
+
+  it('will suggest correctly when key is plural', () => {
+    // edit key to be plural
+    waitForGlobalLoading();
+    openEditor('Cool key 01');
+    cy.gcy('key-plural-checkbox').click();
+    cy.gcy('translations-cell-save-button').click();
+
+    waitForGlobalLoading();
+
+    getTranslationCell('Cool key 01', 'en').click();
+    getPluralEditor('one').type('# item');
+    getPluralEditor('other').clear().type('# items');
+    cy.gcy('translations-cell-save-button').click();
+    waitForGlobalLoading();
+
+    // check variant "one"
+    getTranslationCell('Cool key 01', 'cs').click();
+    getPluralEditor('one').click();
+    waitForGlobalLoading();
+    cy.gcy('translation-tools-machine-translation-item')
+      .contains('#1 item translated with GOOGLE from en to cs')
+      .should('be.visible')
+      .click();
+
+    // check variant "few"
+    getPluralEditor('few').click();
+    waitForGlobalLoading();
+    cy.gcy('translation-tools-machine-translation-item')
+      .contains('#2 items translated with GOOGLE from en to cs')
+      .should('be.visible')
+      .click();
+
+    // check variant "other"
+    getPluralEditor('other').click();
+    waitForGlobalLoading();
+    cy.gcy('translation-tools-machine-translation-item')
+      .contains('#10 items translated with GOOGLE from en to cs')
+      .should('be.visible')
+      .click();
+
+    cy.gcy('translations-cell-save-button').click();
+    waitForGlobalLoading();
+    cy.gcy('global-editor').should('not.exist');
   });
 
   const visit = () => {

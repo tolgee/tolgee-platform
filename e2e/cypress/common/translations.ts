@@ -31,6 +31,12 @@ export const getTranslationCell = (key: string, language: string) => {
   return gcyAdvanced({ value: 'translations-table-cell', key, language });
 };
 
+export const getPluralEditor = (variant: string) => {
+  return gcyAdvanced({ value: 'translation-editor', variant }).find(
+    '[contenteditable]'
+  );
+};
+
 type Props = {
   key: string;
   translation?: string | Record<string, string>;
