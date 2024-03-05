@@ -7,6 +7,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
+import { deleteProject } from '../../common/apiCalls/common';
 
 describe('Translation memory', () => {
   let project: ProjectDTO = null;
@@ -21,9 +22,9 @@ describe('Translation memory', () => {
       });
   });
 
-  // afterEach(() => {
-  //   deleteProject(project.id);
-  // });
+  afterEach(() => {
+    deleteProject(project.id);
+  });
 
   it('will show correct suggestions', () => {
     waitForGlobalLoading();
