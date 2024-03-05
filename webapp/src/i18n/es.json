@@ -81,6 +81,7 @@
   "administration_users" : "Usuarios",
   "announcement_feature_content_delivery_and_webhooks" : "¡Acelera tu localización con <link-delivery>Entrega de contenido</link-delivery> y <link-webhooks>Webhooks</link-webhooks>!",
   "announcement_feature_mt_formality" : "Las traducciones automáticas ahora admiten formalidad",
+  "announcement_visual_editor_and_formats_support" : "Lanzado el Editor Visual y soporte para iOS, Android, Flutter y otros",
   "api-key-delete-button" : "Eliminar",
   "api-key-deleted-message" : "Clave API eliminada",
   "api-key-delete-token-confirmation-message" : "¿Realmente quieres eliminar esta clave de API?",
