@@ -78,6 +78,7 @@ export const ProjectSettingsAdvanced = () => {
             />
           }
           label={t('project_settings_use_tolgee_placeholders_label')}
+          data-cy="project-settings-use-tolgee-placeholders-checkbox"
         />
         <Typography variant="caption">
           {t('project_settings_tolgee_placeholders_hint')}

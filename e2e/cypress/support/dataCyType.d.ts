@@ -411,6 +411,7 @@ declare namespace DataCy {
         "project-settings-menu-general" |
         "project-settings-name" |
         "project-settings-transfer-button" |
+        "project-settings-use-tolgee-placeholders-checkbox" |
         "project-states-bar-bar" |
         "project-states-bar-dot" |
         "project-states-bar-legend" |
