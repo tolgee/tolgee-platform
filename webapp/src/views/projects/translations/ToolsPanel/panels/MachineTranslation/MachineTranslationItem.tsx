@@ -24,7 +24,7 @@ const StyledItem = styled('div')`
   transition-property: background color;
 
   &:hover {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
+    background: ${({ theme }) => theme.palette.emphasis[50]};
   }
   &.clickable {
     cursor: pointer;
