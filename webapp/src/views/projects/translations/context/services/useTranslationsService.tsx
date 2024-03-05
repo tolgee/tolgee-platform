@@ -52,6 +52,26 @@ type Props = {
   baseLang: string | undefined;
 };
 
+const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
+  if (!base) {
+    throw new Error('Missing base language');
+  }
+  if (languages && languages.length > 0 && !languages.includes(base)) {
+    return [...languages, base];
+  }
+  return languages;
+};
+
+const shaveBy = (
+  largerSet: string[] | undefined,
+  smallerSet: string[] | undefined
+) => {
+  if (!largerSet || !smallerSet) {
+    return largerSet;
+  }
+  return largerSet.filter((i) => smallerSet.includes(i));
+};
+
 const flattenKeys = (
   data: InfiniteData<TranslationsResponse>
 ): DeletableKeyWithTranslationsModelType[] =>
@@ -89,7 +109,7 @@ export const useTranslationsService = (props: Props) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (query.languages !== languages) {
+      if (query.languages?.toString() !== languages?.toString()) {
         updateQuery({ languages });
       }
     }, 500);
@@ -112,6 +132,8 @@ export const useTranslationsService = (props: Props) => {
 
   const requestQuery = {
     ...query,
+    // smuggle in base lang if not present
+    languages: addBaseIfMissing(query.languages, props.baseLang!),
     ...parsedFilters,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
     filterNamespace,
@@ -144,13 +166,16 @@ export const useTranslationsService = (props: Props) => {
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
 
-        const selectedLanguages = data.pages[0].selectedLanguages.map(
-          (l) => l.tag
-        );
+        const selectedLanguages = languages?.length
+          ? shaveBy(
+              data.pages[0].selectedLanguages.map((l) => l.tag),
+              languages
+            )
+          : data.pages[0].selectedLanguages.map((l) => l.tag);
         if (query.languages?.toString() !== selectedLanguages?.toString()) {
           // update language selection to the fetched one
           // if there are some languages which are not permitted or were deleted
-          _setLanguages(selectedLanguages);
+          _setLanguages(() => selectedLanguages);
           projectPreferencesService.setForProject(
             props.projectId,
             selectedLanguages
@@ -246,24 +271,6 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const getTranslations = useApiMutation({
-    url: '/v2/projects/{projectId}/translations',
-    method: 'get',
-  });
-
-  const getBaseText = async (keyId: number) => {
-    const baseLanguage = props.baseLang!;
-    const baseTextResponse = await getTranslations.mutateAsync({
-      path: { projectId: props.projectId },
-      query: { filterKeyId: [keyId], languages: [baseLanguage] },
-    });
-
-    const baseText =
-      baseTextResponse._embedded?.keys![0].translations[baseLanguage]?.text ||
-      '';
-    return baseText;
-  };
-
   const setFilters = (filters: FiltersType) => {
     refetchTranslations(() => {
       _setFilters(JSON.stringify(filters));
@@ -331,8 +338,9 @@ export const useTranslationsService = (props: Props) => {
   const totalCount = translations.data?.pages[0].page?.totalElements;
 
   const currentFetchedLangs = useMemo(() => {
-    const langs = translations.data?.pages[0]?.selectedLanguages.map(
-      (l) => l.tag
+    const langs = shaveBy(
+      translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
+      languages
     );
 
     if (languages) {
@@ -374,7 +382,6 @@ export const useTranslationsService = (props: Props) => {
     setLanguages,
     setUrlSearch,
     setFilters,
-    getBaseText,
     updateTranslationKeys,
     updateTranslation,
     insertAsFirst,

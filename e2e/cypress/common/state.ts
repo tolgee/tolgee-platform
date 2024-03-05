@@ -8,10 +8,10 @@ export const stateColors = {
 
 export const getCell = (translationText: string) => {
   return cy
-    .gcy('translations-table-cell-translation-text')
+    .gcy('translation-text')
     .contains(translationText)
     .should('be.visible')
-    .closestDcy('translations-table-cell');
+    .closestDcy('translations-table-cell-translation');
 };
 
 export const getStateIndicator = (translationText: string) => {

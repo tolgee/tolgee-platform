@@ -2,6 +2,7 @@ import { formerUserTestData } from '../common/apiCalls/testData/testData';
 import { HOST } from '../common/constants';
 import { deleteUser, login, setTranslations } from '../common/apiCalls/common';
 import { visitTranslations } from '../common/translations';
+import { gcyAdvanced } from '../common/shared';
 
 describe('Former user', () => {
   let projectId: number;
@@ -31,7 +32,7 @@ describe('Former user', () => {
   it('shows the former user in translation history', () => {
     visitTranslations(projectId);
     cy.gcy('translations-cell-comments-button').click();
-    cy.gcy('translations-cell-tab-history').click();
+    gcyAdvanced({ value: 'translation-panel-toggle', id: 'history' }).click();
     cy.waitForDom();
     cy.gcy('translation-history-item')
       .findDcy('auto-avatar-img')

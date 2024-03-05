@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="1" datatype="plaintext" source-language="en" target-language="es-MX" xml:space="preserve">
+    <body>
+      <trans-unit id="1">
+        <source>  Back</source>
+      </trans-unit>
+    </body>
+  </file>
+    <file original="2" datatype="plaintext" source-language="en" target-language="es-MX">
+      <body>
+        <trans-unit id="2" xml:space="preserve">
+          <source xml:space="default">  Back</source>
+        </trans-unit>
+      </body>
+    </file>
+    <file original="3" datatype="plaintext" source-language="en" target-language="es-MX">
+      <body>
+        <trans-unit id="3" xml:space="preserve">
+          <source xml:space="preserve">  Back</source>
+        </trans-unit>
+      </body>
+    </file>
+</xliff>

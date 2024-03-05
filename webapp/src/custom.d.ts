@@ -10,6 +10,7 @@ import {
   ExampleBanner,
   Marker,
   Navbar,
+  Placeholders,
   QuickStart,
   Tile,
   TipsBanner,
@@ -44,6 +45,8 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
+    tokens: typeof all.tokens;
+    placeholders: Placeholders;
   }
 
   interface PaletteOptions {
@@ -65,6 +68,8 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
+    tokens: typeof all.tokens;
+    placeholders: Placeholders;
   }
 }
 
@@ -77,5 +82,11 @@ declare module '@mui/material/Button' {
 declare global {
   interface Window {
     openReplayTracker?: API;
+  }
+}
+
+declare module 'react' {
+  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+    webkitdirectory?: boolean;
   }
 }

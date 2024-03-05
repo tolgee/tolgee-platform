@@ -1,4 +1,5 @@
 import { grey } from '@mui/material/colors';
+import { ALL_TOKENS } from './tokens';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',
@@ -73,7 +74,6 @@ export type Tile = {
 export type Cell = {
   hover: string;
   selected: string;
-  inside: string;
 };
 
 export type Navbar = {
@@ -92,6 +92,19 @@ export type TipsBanner = {
   background: string;
 };
 
+export type Placeholder = {
+  border: string;
+  background: string;
+  text: string;
+};
+
+export type Placeholders = {
+  variable: Placeholder;
+  tag: Placeholder;
+  variant: Placeholder;
+  inactive: Placeholder;
+};
+
 export type QuickStart = {
   highlight: string;
   circleNormal: string;
@@ -102,6 +115,18 @@ export type QuickStart = {
   finishIcon: string;
   finishBackground: string;
   finishCircle: string;
+};
+
+const getTokensByMode = (mode: 'light' | 'dark') => {
+  const result = {} as Record<keyof typeof ALL_TOKENS, string>;
+  Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
+    if (typeof value === 'string') {
+      result[tokenName] = value;
+    } else {
+      result[tokenName] = value[mode];
+    }
+  });
+  return result;
 };
 
 export const colors = {
@@ -122,10 +147,9 @@ export const colors = {
       backgroundHover: '#f4f4f6',
     },
     cell: {
-      hover: '#f7f7f7',
-      selected: '#EEEFF1',
-      inside: '#F9F9F9',
-    },
+      hover: '#f9f9f9',
+      selected: '#F6F6F8',
+    } satisfies Cell,
     navbar: {
       background: '#fff',
       text: '#2C3C52',
@@ -140,7 +164,7 @@ export const colors = {
       function: '#007300',
       other: '#002bff',
       main: '#2C3C52',
-    },
+    } satisfies Editor,
     billingProgress: {
       background: '#C4C4C4',
       low: '#E80000',
@@ -188,6 +212,29 @@ export const colors = {
     tipsBanner: {
       background: '#FDECF280',
     },
+    tokens: getTokensByMode('light'),
+    placeholders: {
+      variable: {
+        border: '#7AD3C1',
+        background: '#BEF3E9',
+        text: '#008371',
+      },
+      tag: {
+        border: '#F27FA6',
+        background: '#F9C4D6',
+        text: '#822343',
+      },
+      variant: {
+        border: '#BBC2CB',
+        background: '#F0F2F4',
+        text: '#4D5B6E',
+      },
+      inactive: {
+        background: '#e3e7ea',
+        border: '#e3e7ea',
+        text: '#808080',
+      },
+    } satisfies Placeholders,
   },
   dark: {
     white: '#dddddd',
@@ -207,8 +254,7 @@ export const colors = {
     cell: {
       hover: '#233043',
       selected: '#243245',
-      inside: '#283a53',
-    },
+    } satisfies Cell,
     navbar: {
       background: '#182230',
       text: '#dddddd',
@@ -239,7 +285,7 @@ export const colors = {
       function: '#9ac99a',
       other: '#99aaff',
       main: '#eeeeee',
-    },
+    } satisfies Editor,
     billingProgress: {
       background: '#565656',
       low: '#ca0000',
@@ -286,5 +332,28 @@ export const colors = {
     tipsBanner: {
       background: '#29242580',
     },
+    tokens: getTokensByMode('dark'),
+    placeholders: {
+      variable: {
+        border: '#008371',
+        background: '#008371',
+        text: '#F0F2F4',
+      },
+      tag: {
+        border: '#824563',
+        background: '#824563',
+        text: '#F0F2F4',
+      },
+      variant: {
+        border: '#4D5B6E',
+        background: '#4D5B6E',
+        text: '#F0F2F4',
+      },
+      inactive: {
+        border: '#2c3c52',
+        background: '#2c3c52',
+        text: '#acacac',
+      },
+    } satisfies Placeholders,
   },
 } as const;

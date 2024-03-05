@@ -101,6 +101,7 @@ class KeysTestData {
                 line = 20
                 path = "./code/exist.extension"
               }
+              custom = mutableMapOf("custom" to "value")
             }
           }
         }

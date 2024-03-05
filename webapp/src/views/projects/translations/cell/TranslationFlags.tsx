@@ -13,7 +13,6 @@ type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
 const StyledWrapper = styled('div')`
-  height: 0px;
   display: flex;
   gap: 2px;
 `;
@@ -136,6 +135,7 @@ export const TranslationFlags: React.FC<Props> = ({
               role="button"
               onClick={handleClearOutdated}
               data-cy="translations-outdated-clear-button"
+              className="clearButton"
             />
           </StyledContainer>
         )}

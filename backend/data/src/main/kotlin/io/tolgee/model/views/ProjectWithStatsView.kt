@@ -17,5 +17,6 @@ class ProjectWithStatsView(
     view.organizationOwner,
     view.organizationRole,
     view.directPermission,
+    view.icuPlaceholders,
     view.permittedLanguageIds,
   )

@@ -3049,4 +3049,107 @@
             <column name="ai_translator_prompt_description" type="text"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1707039103481-2">
+        <addColumn tableName="import_translation">
+            <column defaultValueBoolean="true" name="is_selected_to_import" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707039103481-3">
+        <addColumn tableName="content_delivery_config">
+            <column name="message_format" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707213133613-1">
+        <addColumn tableName="key_meta">
+            <column name="custom" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-1">
+        <createTable tableName="import_settings">
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="convert_placeholders_to_icu" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="override_key_descriptions" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-2">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="true" name="icu_placeholders" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-3">
+        <addColumn tableName="key">
+            <column defaultValueBoolean="false" name="is_plural" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-4">
+        <addPrimaryKey columnNames="project_id, user_account_id" constraintName="import_settingsPK" tableName="import_settings"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-5">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="import_settings" constraintName="FK7soifoin7r9oo67hubts9x1k1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707480981173-6">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="import_settings" constraintName="FKh3y42gacmr9fm5emmte5oa8hc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1707643023313-1">
+        <addColumn tableName="import_translation">
+            <column defaultValueBoolean="false" name="is_plural" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1708011399629-1">
+        <addColumn tableName="import_translation">
+            <column name="convertor" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1708011399629-2">
+        <addColumn tableName="import_file">
+            <column name="needs_param_conversion" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1708011399629-3">
+        <addColumn tableName="import_translation">
+            <column name="raw_data" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1708343851872-1">
+        <addColumn tableName="key">
+            <column name="plural_arg_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1708609189470-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="support_arrays" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1709210985745-1">
+        <addColumn tableName="import_key">
+            <column name="plural_arg_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -2,7 +2,7 @@ import { Warning } from '@mui/icons-material';
 import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { useServiceImg } from 'tg.views/projects/translations/TranslationTools/useServiceImg';
+import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/MachineTranslation/useServiceImg';
 import { getServiceName } from './getServiceName';
 import { ServiceType } from './types';
 

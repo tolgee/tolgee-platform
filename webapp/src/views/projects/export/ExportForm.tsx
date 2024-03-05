@@ -9,16 +9,14 @@ import { EXPORTABLE_STATES, StateType } from 'tg.constants/translationStates';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StateSelector } from 'tg.views/projects/export/components/StateSelector';
 import { LanguageSelector } from 'tg.views/projects/export/components/LanguageSelector';
-import {
-  FORMATS,
-  FormatSelector,
-} from 'tg.views/projects/export/components/FormatSelector';
+import { FormatSelector } from 'tg.views/projects/export/components/FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
-import { NestedSelector } from 'tg.views/projects/export/components/NestedSelector';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { SupportArraysSelector } from './components/SupportArraysSelector';
+import { formatGroups, getFormatById } from './components/formatGroups';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -29,8 +27,6 @@ const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
   'TRANSLATED',
   'REVIEWED',
 ]);
-
-const EXPORT_DEFAULT_FORMAT: (typeof FORMATS)[number] = 'JSON';
 
 const StyledForm = styled('form')`
   display: grid;
@@ -44,19 +40,24 @@ const StyledForm = styled('form')`
     'langs   format'
     'ns      ns    '
     'options submit';
+
   & .states {
     grid-area: states;
   }
+
   & .langs {
     grid-area: langs;
   }
+
   & .format {
     grid-area: format;
   }
+
   & .submit {
     grid-area: submit;
     justify-self: end;
   }
+
   & .ns {
     grid-area: ns;
   }
@@ -131,8 +132,10 @@ export const ExportForm = () => {
     allowedTags.includes(l)
   );
 
-  const [format, setFormat] = useUrlSearchState('format', {
-    defaultVal: EXPORT_DEFAULT_FORMAT,
+  const defaultFormat = formatGroups[0].formats[0];
+
+  const [urlFormat, setUrlFormat] = useUrlSearchState('format', {
+    defaultVal: defaultFormat.id,
   });
 
   const [nested, setNested] = useUrlSearchState('nested', {
@@ -154,9 +157,13 @@ export const ExportForm = () => {
           ? states
           : EXPORT_DEFAULT_STATES) as StateType[],
         languages: (languages?.length ? selectedTags : allowedTags) as string[],
-        format: (format || EXPORT_DEFAULT_FORMAT) as (typeof FORMATS)[number],
+        format: (urlFormat as string) || defaultFormat.id,
         namespaces: allNamespaces || [],
         nested: nested === 'true',
+        supportArrays:
+          (urlFormat
+            ? getFormatById(urlFormat as string).defaultSupportArrays
+            : defaultFormat.defaultSupportArrays) || false,
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -171,26 +178,30 @@ export const ExportForm = () => {
         // store values in url
         setStates(sortStates(values.states));
         setLanguages(sortLanguages(values.languages));
-        setFormat(values.format);
+        setUrlFormat(values.format);
         setNested(String(values.nested));
-
         return errors;
       }}
       validateOnBlur={false}
       enableReinitialize={false}
       onSubmit={(values, actions) => {
+        const format = getFormatById(values.format);
         exportLoadable.mutate(
           {
             path: { projectId: project.id },
             content: {
               'application/json': {
-                format: values.format,
+                format: format.format,
                 filterState: values.states,
                 languages: values.languages,
-                structureDelimiter: values.nested ? '.' : '',
+                structureDelimiter: format.canBeStructured
+                  ? format.defaultStructureDelimiter
+                  : '',
                 filterNamespace: values.namespaces,
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
+                supportArrays: values.supportArrays || false,
+                messageFormat: format.messageFormat,
               },
             },
           },
@@ -198,13 +209,19 @@ export const ExportForm = () => {
             onSuccess(data) {
               const url = URL.createObjectURL(data as any as Blob);
               const a = document.createElement('a');
+              const onlyPossibleLanguageString =
+                values.languages.length === 1 ? `_${values.languages[0]}` : '';
               a.href = url;
+              const dateStr = '_' + new Date().toISOString().split('T')[0];
               if (data.type === 'application/zip') {
-                a.download = project.name + '.zip';
-              } else if (data.type === 'application/json') {
-                a.download = values.languages[0] + '.json';
-              } else if (data.type === 'application/x-xliff+xml') {
-                a.download = values.languages[0] + '.xliff';
+                a.download = project.name + dateStr + '.zip';
+              } else {
+                a.download =
+                  project.name +
+                  onlyPossibleLanguageString +
+                  dateStr +
+                  '.' +
+                  format.extension;
               }
               a.click();
             },
@@ -226,10 +243,12 @@ export const ExportForm = () => {
             <StateSelector className="states" />
             <LanguageSelector className="langs" languages={allowedLanguages} />
             <FormatSelector className="format" />
-            {values.format === 'JSON' && (
-              <StyledOptions className="options">
-                <NestedSelector />
-              </StyledOptions>
+            {getFormatById(values.format).defaultSupportArrays && (
+              <>
+                <StyledOptions className="options">
+                  <SupportArraysSelector />
+                </StyledOptions>
+              </>
             )}
             <NsSelector className="ns" namespaces={allNamespaces} />
             <div className="submit">

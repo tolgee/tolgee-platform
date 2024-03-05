@@ -5,7 +5,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 const StyledDangerZone = styled(Box)`
   display: grid;
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
-  border: 1px solid ${({ theme }) => theme.palette.error.dark};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis[300]};
   gap: 16px;
 `;
 

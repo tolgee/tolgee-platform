@@ -1,0 +1,188 @@
+package io.tolgee.unit.formats.android.`in`
+
+import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
+import io.tolgee.testing.assert
+import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.assertKey
+import io.tolgee.util.assertLanguagesCount
+import io.tolgee.util.assertSingle
+import io.tolgee.util.assertSinglePlural
+import io.tolgee.util.assertTranslations
+import io.tolgee.util.custom
+import io.tolgee.util.description
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+class AndroidXmlFormatProcessorTest {
+  lateinit var mockUtil: FileProcessorContextMockUtil
+
+  @BeforeEach
+  fun setup() {
+    mockUtil = FileProcessorContextMockUtil()
+    mockUtil.mockIt("values-en/strings.xml", "src/test/resources/import/android/strings.xml")
+  }
+
+  @Test
+  fun `returns correct parsed result`() {
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "app_name")
+      .assertSingle {
+        hasText("Tolgee test")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          one {# dog}
+          other {# dogs}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+      .assertSingle {
+        hasText("First item")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[1]")
+      .assertSingle {
+        hasText("Second item")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "with_spaces")
+      .assertSingle {
+        hasText("Hello!")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "with_html")
+      .assertSingle {
+        hasText("<b>Hello!</b>")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "with_xliff_gs")
+      .assertSingle {
+        hasText(
+          "<b>Hello!\n" +
+            "            <xliff:g id=\"number\">{0, number}</xliff:g>\n" +
+            "        </b>\n" +
+            "        <xliff:g id=\"number\">Dont'translate this</xliff:g>",
+        )
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+      .assertSingle {
+        hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+  }
+
+  @Test
+  fun `import with placeholder conversion (disabled ICU)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          one {%d dog %s '{'escape'}'}
+          other {%d dogs %s}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+      .assertSingle {
+        hasText("First item %d {escape}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+      .assertSingle {
+        hasText("%d %4${'$'}s %.2f %e %+d {escape}")
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (no conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          one {%d dog %s '{'escape'}'}
+          other {%d dogs %s}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+      .assertSingle {
+        hasText("First item %d '{'escape'}'")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+      .assertSingle {
+        hasText("%d %4${'$'}s %.2f %e %+d '{'escape'}'")
+      }
+  }
+
+  @Test
+  fun `import with placeholder conversion (with conversion)`() {
+    mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+      .assertSinglePlural {
+        hasText(
+          """
+          {0, plural,
+          one {# dog {1} '{'escape'}'}
+          other {# dogs {1}}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+      .assertSingle {
+        hasText("First item {0, number} '{'escape'}'")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[1]")
+      .assertSingle {
+        hasText("Second item {0, number}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+      .assertSingle {
+        hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d '{'escape'}'")
+      }
+    mockUtil.fileProcessorContext.assertKey("dogs_count") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
+  }
+
+  private fun mockPlaceholderConversionTestFile(
+    convertPlaceholders: Boolean,
+    projectIcuPlaceholdersEnabled: Boolean,
+  ) {
+    mockUtil.mockIt(
+      "values-en/strings.xml",
+      "src/test/resources/import/android/strings_params_everywhere.xml",
+      convertPlaceholders,
+      projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  private fun processFile() {
+    AndroidStringsXmlProcessor(mockUtil.fileProcessorContext).process()
+  }
+}

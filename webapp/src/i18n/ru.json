@@ -70,6 +70,7 @@
   "administration-debugging-customer-account-message" : "Вы отлаживаете учетную запись пользователя.",
   "administration_delete_user_button" : "Удалить",
   "administration_disable_user_button" : "Отключить",
+  "administration_ee_plan_delete_message" : "Вы действительно хотите удалить этот тарифный план?",
   "administration_enable_user_button" : "Включить",
   "administration_organization_projects" : "Проекты",
   "administration_organizations" : "Организации",

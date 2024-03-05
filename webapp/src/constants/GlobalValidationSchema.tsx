@@ -4,6 +4,8 @@ import * as Yup from 'yup';
 import { components } from 'tg.service/apiSchema.generated';
 import { organizationService } from '../service/OrganizationService';
 import { signUpService } from '../service/SignUpService';
+import { checkParamNameIsValid } from '@tginternal/editor';
+import { validateObject } from 'tg.fixtures/validateObject';
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -373,6 +375,32 @@ export class Validation {
   static readonly WEBHOOK_FORM = Yup.object().shape({
     url: Yup.string().required().max(255),
   });
+
+  static readonly NEW_KEY_FORM = (t: TFnType) =>
+    Yup.object().shape({
+      name: Yup.string().required(),
+      pluralParameter: Yup.string()
+        .required()
+        .when('isPlural', {
+          is: true,
+          then: Yup.string().test(
+            'invalid-plural-parameter',
+            // @tolgee-key validation_invalid_plural_parameter
+            t('validation_invalid_plural_parameter'),
+            (value) => checkParamNameIsValid(value ?? '')
+          ),
+        }),
+    });
+
+  static readonly KEY_SETTINGS_FORM = (t: TFnType) =>
+    Yup.object().shape({
+      custom: Yup.string().test(
+        'invalid-custom-values',
+        // @tolgee-key validation_invalid_plural_parameter
+        t('validation_invalid_custom_values'),
+        validateObject
+      ),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

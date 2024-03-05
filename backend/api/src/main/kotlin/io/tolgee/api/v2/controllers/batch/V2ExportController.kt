@@ -45,7 +45,7 @@ class V2ExportController(
 ) {
   @GetMapping(value = [""])
   @Operation(summary = "Exports data")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun export(
     @ParameterObject params: ExportParams,
@@ -66,7 +66,7 @@ class V2ExportController(
     summary = """Exports data (post). Useful when providing params exceeding allowed query size.
   """,
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun exportPost(
     @RequestBody params: ExportParams,
@@ -95,12 +95,10 @@ class V2ExportController(
     params: ExportParams,
     exported: Map<String, InputStream>,
   ): ResponseEntity<StreamingResponseBody> {
-    if (params.zip) {
-      return getZipResponseEntity(exported)
-    } else if (exported.entries.size == 1) {
+    if (exported.entries.size == 1 && !params.zip) {
       return exportSingleFile(exported, params)
     }
-    throw BadRequestException(message = Message.MULTIPLE_FILES_MUST_BE_ZIPPED)
+    return getZipResponseEntity(exported)
   }
 
   private fun checkExportNotEmpty(exported: Map<String, InputStream>) {

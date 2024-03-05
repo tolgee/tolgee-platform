@@ -32,6 +32,9 @@ class KeysInfoTestData : BaseTestData() {
         addKey("key-$it") {
           setDescription("description")
           addTranslation("de", "existing translation")
+          addMeta {
+            custom = mutableMapOf("key" to "value")
+          }
         }
         addKey("ns", "key-$it") {
           setDescription("description")

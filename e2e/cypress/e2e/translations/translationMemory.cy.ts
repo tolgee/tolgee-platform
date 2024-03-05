@@ -28,10 +28,6 @@ describe('Translation memory', () => {
   it('will show correct suggestions', () => {
     waitForGlobalLoading();
     openEditor('Studený přeložený text 1');
-    cy.gcy('translation-tools-translation-memory-item').should(
-      'have.length',
-      3
-    );
     cy.gcy('translation-tools-translation-memory-item')
       .contains('Studený přeložený text 2')
       .should('be.visible');

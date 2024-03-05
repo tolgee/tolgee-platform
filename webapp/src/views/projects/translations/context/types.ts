@@ -1,5 +1,6 @@
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { StateInType } from 'tg.constants/translationStates';
+import { TolgeeFormat } from '@tginternal/editor';
 
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type KeyWithTranslationsModel =
@@ -81,13 +82,23 @@ export type SetEdit = CellPosition & {
   value: string;
 };
 
-export type Edit = CellPosition & {
-  value?: string;
-  changed?: boolean;
-  mode: EditMode;
+export type EditorProps = CellPosition & {
+  mode?: EditMode;
+  activeVariant?: string;
 };
 
-export type EditMode = 'editor' | 'comments' | 'history' | 'context';
+export type PluralVariants = Record<string, string | undefined>;
+
+export type EditPlural = TolgeeFormat | null;
+
+export type Edit = CellPosition & {
+  value: TolgeeFormat;
+  changed?: boolean;
+  mode?: EditMode;
+  activeVariant: string;
+};
+
+export type EditMode = 'general' | 'advanced' | 'context' | 'comments';
 
 export type KeyUpdateData = {
   keyId: number;
