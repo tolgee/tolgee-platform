@@ -1,3 +1,10 @@
+## [3.49.3](https://github.com/tolgee/tolgee-platform/compare/v3.49.2...v3.49.3) (2024-03-06)
+
+
+### Bug Fixes
+
+* Scale of MT Credits price ([#2158](https://github.com/tolgee/tolgee-platform/issues/2158)) ([27c0dfd](https://github.com/tolgee/tolgee-platform/commit/27c0dfd0bbabb5b8b6079a0e12b336d48d5178b7))
+
 ## [3.49.2](https://github.com/tolgee/tolgee-platform/compare/v3.49.1...v3.49.2) (2024-03-06)
 
 
