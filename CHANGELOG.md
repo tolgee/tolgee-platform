@@ -1,3 +1,10 @@
+## [3.49.1](https://github.com/tolgee/tolgee-platform/compare/v3.49.0...v3.49.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* post release fixes - MT/TM + invalid language tags ([#2155](https://github.com/tolgee/tolgee-platform/issues/2155)) ([7f96f8a](https://github.com/tolgee/tolgee-platform/commit/7f96f8aa474476c2627d892948444eb35cc812d5))
+
 # [3.49.0](https://github.com/tolgee/tolgee-platform/compare/v3.48.4...v3.49.0) (2024-03-05)
 
 

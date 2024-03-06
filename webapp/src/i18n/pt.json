@@ -48,7 +48,7 @@
   "activity_entity_translation.flag_emoji" : "bandeira",
   "activity_entity_translation.name" : "nome",
   "activity_entity_translation.tag" : "etiqueta",
-  "activity_import" : "{KeyCount, plural, \n  one {Importada # chave}\n  other {Importadas # chaves}\n} ({TranslationCount, plural, \n  one {# tradução} \n  other {# traduções}\n})",
+  "activity_import" : "{value, plural, one {Importada # chave ({TranslationCount, plural, \n  one {# tradução} \n  other {# traduções}\n})} other {Importadas # chaves ({TranslationCount, plural, \n  one {# tradução} \n  other {# traduções}\n})}}",
   "activity_key_delete" : "{keyCount, plural, one {# chave excluída} other {# chaves excluídas}}",
   "activity_key_name_edit" : "Nome da chave editado",
   "activity_key_tags_edit" : "Etiquetas da chave atualizadas",
