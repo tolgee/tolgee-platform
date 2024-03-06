@@ -71,7 +71,7 @@ export const ToolsPanel = () => {
     keyData: keyData!,
     language: language!,
     baseLanguage: baseLanguage!,
-    activeVariant: activeVariant!,
+    activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
     setValue: setEditValueString,
     editEnabled: language
       ? satisfiesLanguageAccess('translations.edit', language.id) &&
