@@ -1,3 +1,24 @@
+## [3.49.3](https://github.com/tolgee/tolgee-platform/compare/v3.49.2...v3.49.3) (2024-03-06)
+
+
+### Bug Fixes
+
+* Scale of MT Credits price ([#2158](https://github.com/tolgee/tolgee-platform/issues/2158)) ([27c0dfd](https://github.com/tolgee/tolgee-platform/commit/27c0dfd0bbabb5b8b6079a0e12b336d48d5178b7))
+
+## [3.49.2](https://github.com/tolgee/tolgee-platform/compare/v3.49.1...v3.49.2) (2024-03-06)
+
+
+### Bug Fixes
+
+* update tolgee SDK ([#2156](https://github.com/tolgee/tolgee-platform/issues/2156)) ([79c0022](https://github.com/tolgee/tolgee-platform/commit/79c0022f870a2f7fe41d46d8225f546ad78eabf1))
+
+## [3.49.1](https://github.com/tolgee/tolgee-platform/compare/v3.49.0...v3.49.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* post release fixes - MT/TM + invalid language tags ([#2155](https://github.com/tolgee/tolgee-platform/issues/2155)) ([7f96f8a](https://github.com/tolgee/tolgee-platform/commit/7f96f8aa474476c2627d892948444eb35cc812d5))
+
 # [3.49.0](https://github.com/tolgee/tolgee-platform/compare/v3.48.4...v3.49.0) (2024-03-05)
 
 

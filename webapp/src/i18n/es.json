@@ -49,7 +49,7 @@
   "activity_entity_translation.flag_emoji" : "bandera",
   "activity_entity_translation.name" : "nombre",
   "activity_entity_translation.tag" : "tag",
-  "activity_import" : "{KeyCount, plural, \n  one {Una clave importada}\n  other {# claves importadas}\n} ({TranslationCount, plural, \n  one {1 traducción}\n  other {# traducciones}\n})",
+  "activity_import" : "{value, plural, one {Una clave importada ({TranslationCount, plural, \n  one {1 traducción}\n  other {# traducciones}\n})} other {# claves importadas ({TranslationCount, plural, \n  one {1 traducción}\n  other {# traducciones}\n})}}",
   "activity_key_delete" : "{KeyCount, plural, one {Eliminada 1 clave} other {Eliminadas # claves}}",
   "activity_key_name_edit" : "Nombre de clave editado",
   "activity_key_tags_edit" : "Tags de la clave actualizadas",

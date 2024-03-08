@@ -1,4 +1,8 @@
-import { getTolgeePlurals, getVariantExample } from '@tginternal/editor';
+import {
+  getTolgeePlurals,
+  getVariantExample,
+  selectPluralRule,
+} from '@tginternal/editor';
 import { useMemo } from 'react';
 import { useProject } from 'tg.hooks/useProject';
 
@@ -39,7 +43,7 @@ export const useBaseVariant = (
 
   return useMemo(() => {
     if (example) {
-      return new Intl.PluralRules(baseLanguage).select(example);
+      return selectPluralRule(baseLanguage, example);
     }
   }, [baseLanguage, example]);
 };

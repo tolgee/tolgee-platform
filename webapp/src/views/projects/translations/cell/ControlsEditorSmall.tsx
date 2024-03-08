@@ -76,8 +76,8 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
             data-cy="translations-cell-switch-mode"
             tooltip={
               mode === 'placeholders'
-                ? t('translations_editor_switch_to_raw')
-                : t('translations_editor_switch_to_placeholders')
+                ? t('translations_editor_switch_show_code')
+                : t('translations_editor_switch_hide_code')
             }
           >
             <Code fontSize="small" />

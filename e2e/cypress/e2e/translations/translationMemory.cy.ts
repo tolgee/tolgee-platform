@@ -29,7 +29,7 @@ describe('Translation memory', () => {
     waitForGlobalLoading();
     openEditor('Studený přeložený text 1');
     cy.gcy('translation-tools-translation-memory-item')
-      .contains('Studený přeložený text 2')
+      .contains('Studený přeložený text')
       .should('be.visible');
     cy.gcy('translation-tools-translation-memory-item')
       .contains('Studený přeložený text 1')
@@ -40,12 +40,16 @@ describe('Translation memory', () => {
     waitForGlobalLoading();
     openEditor('Studený přeložený text 1');
     cy.gcy('translation-tools-translation-memory-item')
-      .contains('Studený přeložený text 2')
+      .contains('Studený přeložený text')
+      .first()
       .should('be.visible')
       .click();
     cy.gcy('global-editor')
-      .contains('Studený přeložený text 2')
+      .contains('Studený přeložený text')
       .should('be.visible');
+    cy.gcy('global-editor')
+      .contains('Studený přeložený text 1')
+      .should('not.exist');
   });
 
   const visit = () => {
