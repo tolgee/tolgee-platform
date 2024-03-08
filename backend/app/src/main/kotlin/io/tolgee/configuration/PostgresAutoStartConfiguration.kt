@@ -24,7 +24,7 @@ class PostgresAutoStartConfiguration(
     dataSource?.let { return it }
     postgresRunner.run()
     dataSource = buildDataSource(postgresRunner)
-
+    waitForPostgresRunning()
     return dataSource!!
   }
 
@@ -33,7 +33,6 @@ class PostgresAutoStartConfiguration(
     dataSourceBuilder.url(postgresRunner.datasourceUrl)
     dataSourceBuilder.username(postgresAutostartProperties.user)
     dataSourceBuilder.password(postgresAutostartProperties.password)
-    waitForPostgresRunning()
     return dataSourceBuilder.build()
   }
 
