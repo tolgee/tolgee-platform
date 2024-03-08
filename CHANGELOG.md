@@ -1,3 +1,10 @@
+## [3.49.4](https://github.com/tolgee/tolgee-platform/compare/v3.49.3...v3.49.4) (2024-03-08)
+
+
+### Bug Fixes
+
+* Wait for postgres startup ([#2163](https://github.com/tolgee/tolgee-platform/issues/2163)) ([c808589](https://github.com/tolgee/tolgee-platform/commit/c808589d4b6c08b5f078a2398a1afedb0ac29695))
+
 ## [3.49.3](https://github.com/tolgee/tolgee-platform/compare/v3.49.2...v3.49.3) (2024-03-06)
 
 
