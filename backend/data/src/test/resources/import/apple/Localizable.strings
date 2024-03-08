@@ -22,3 +22,5 @@ Escaping is fun!
 
 Schlüssel.";
 
+/* this is a comment with newlines \n \n yep*/
+"A key with \n \n" = "Ein Schlüssel mit \n \n";

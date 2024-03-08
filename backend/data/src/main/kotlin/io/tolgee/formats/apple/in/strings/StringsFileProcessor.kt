@@ -64,21 +64,24 @@ class StringsFileProcessor(
         }
 
         State.INSIDE_KEY -> {
-          if (char == '\"' && !wasLastCharEscape) {
-            state = State.OUTSIDE
-          } else {
-            key += char
+          when {
+            char == '\"' && !wasLastCharEscape -> state = State.OUTSIDE
+            wasLastCharEscape && char == 'n' -> key += "\n"
+            else -> key += char
           }
         }
 
         State.INSIDE_VALUE -> {
-          if (char == '\"' && !wasLastCharEscape) {
-            state = State.OUTSIDE
-            onPairParsed()
-            key = null
-            value = null
-          } else {
-            value += char
+          when {
+            char == '\"' && !wasLastCharEscape -> {
+              state = State.OUTSIDE
+              onPairParsed()
+              key = null
+              value = null
+            }
+
+            wasLastCharEscape && char == 'n' -> value += "\n"
+            else -> value += char
           }
         }
 
@@ -90,19 +93,26 @@ class StringsFileProcessor(
         }
 
         State.INSIDE_BLOCK_COMMENT -> {
-          if (lastChar == '*' && char == '/' && !wasLastCharEscape) {
-            currentComment?.let {
-              it.deleteCharAt(it.length - 1)
+          when {
+            lastChar == '*' && char == '/' && !wasLastCharEscape -> {
+              currentComment?.let {
+                it.deleteCharAt(it.length - 1)
+              }
+              state = State.OUTSIDE
             }
-            state = State.OUTSIDE
-          } else {
-            currentComment = (currentComment ?: StringBuilder()).also { it.append(char) }
+
+            wasLastCharEscape && char == 'n' -> addToCurrentComment("\n")
+            else -> addToCurrentComment(char.toString())
           }
         }
       }
       lastChar = char
       wasLastCharEscape = false
     }
+  }
+
+  private fun addToCurrentComment(char: CharSequence) {
+    currentComment = (currentComment ?: StringBuilder()).also { it.append(char) }
   }
 
   private fun onPairParsed() {

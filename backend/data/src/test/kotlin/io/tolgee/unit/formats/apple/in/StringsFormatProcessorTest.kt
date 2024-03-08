@@ -6,7 +6,6 @@ import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
 import io.tolgee.util.assertTranslations
-import io.tolgee.util.description
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,7 +23,7 @@ class StringsFormatProcessorTest {
   fun `returns correct parsed result`() {
     processFile()
     Assertions.assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
-    Assertions.assertThat(mockUtil.fileProcessorContext.translations).hasSize(7)
+    Assertions.assertThat(mockUtil.fileProcessorContext.translations).hasSize(8)
     assertParsed("""welcome_header""", """Hello, {0}""")
     assertParsed("""welcome_sub_header""", """Hello, %s""")
     assertParsed("""another key""", """Dies ist ein weiterer Schlüssel.""")
@@ -32,6 +31,8 @@ class StringsFormatProcessorTest {
     assertParsed("""another key \ with escaping 2""", """Dies ist ein weiterer \ Schlüssel.""")
     assertParsed("""another key with escaping 3\""", """Dies ist ein weiterer Schlüssel\""")
     assertParsed("another key\n\n multiline", "Dies ist ein weiterer\n\nSchlüssel.")
+    assertParsed("A key with \n \n", "Ein Schlüssel mit \n \n")
+    assertKeyDescription("A key with \n \n", "this is a comment with newlines \n \n yep")
 
     assertKeyDescription(
       "welcome_sub_header",
