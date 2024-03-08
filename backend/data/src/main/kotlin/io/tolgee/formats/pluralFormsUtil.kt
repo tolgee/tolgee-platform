@@ -111,7 +111,8 @@ data class PluralForms(
 
 fun optimizePluralForms(forms: Map<String, String>): Map<String, String> {
   val otherForm = forms[PluralRules.KEYWORD_OTHER] ?: return forms
-  val filtered = forms.filter { it.key == PluralRules.KEYWORD_OTHER || it.value != otherForm }
+  val filtered =
+    forms.filter { it.key == PluralRules.KEYWORD_OTHER || (it.value != otherForm && it.value.isNotEmpty()) }
   return orderPluralForms(filtered)
 }
 
