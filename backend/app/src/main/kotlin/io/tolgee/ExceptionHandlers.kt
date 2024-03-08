@@ -40,8 +40,7 @@ import java.util.*
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class ExceptionHandlers() {
-
+class ExceptionHandlers {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -246,5 +245,4 @@ class ExceptionHandlers() {
     val headerXFF = request.getHeader("X-FORWARDED-FOR")
     logger.warn(message, request.method, request.requestURL, request.remoteAddr, headerXFF)
   }
-
 }

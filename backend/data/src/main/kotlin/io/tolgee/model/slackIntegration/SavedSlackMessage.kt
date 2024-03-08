@@ -14,6 +14,4 @@ class SavedSlackMessage(
   val keyId: Long,
   @ElementCollection
   val langTags: Set<String>,
-): StandardAuditModel() {
-
-}
+) : StandardAuditModel()

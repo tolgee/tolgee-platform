@@ -18,5 +18,5 @@ enum class AutomationActionType(
   }),
   WEBHOOK(WebhookProcessor::class),
 
-  SLACK_SUBSCRIPTION(SlackSubscriptionProcessor::class)
+  SLACK_SUBSCRIPTION(SlackSubscriptionProcessor::class),
 }

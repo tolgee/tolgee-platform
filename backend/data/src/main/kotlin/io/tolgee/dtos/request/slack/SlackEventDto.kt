@@ -11,16 +11,16 @@ data class SlackEventDto(
   val channel: Channel,
   val actions: List<ActionDetail>,
   @JsonProperty("trigger_id")
-  val triggerId: String
+  val triggerId: String,
 ) {
   @JsonIgnoreProperties(ignoreUnknown = true)
   data class Channel(
-    val id: String
+    val id: String,
   )
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   data class User(
-    val id: String
+    val id: String,
   )
 
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,7 +30,4 @@ data class SlackEventDto(
     val value: String?,
     val type: String,
   )
-
 }
-
-

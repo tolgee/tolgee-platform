@@ -20,7 +20,6 @@ class SlackExecutor(
   private val permissionService: PermissionService,
   private val savedSlackMessageService: SavedSlackMessageService,
 ) {
-
   private val slackToken = properties.slackProperties.slackToken
   private val slackClient: Slack = Slack.getInstance()
   private lateinit var slackExecutorHelper: SlackExecutorHelper
@@ -30,7 +29,7 @@ class SlackExecutor(
     val messageDto = slackExecutorHelper.createTranslationChangeMessage() ?: return
     val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag)
 
-    if(savedMessage.isEmpty()) {
+    if (savedMessage.isEmpty()) {
       sendRegularMessage(messageDto, config)
       return
     }
@@ -40,19 +39,20 @@ class SlackExecutor(
       val newLanguages = messageDto.langTag
 
       val languagesToAdd = existingLanguages - newLanguages
-      if(languagesToAdd == existingLanguages)
+      if (languagesToAdd == existingLanguages) {
         return@forEach
-
-      val additionalAttachments = languagesToAdd.mapNotNull { lang ->
-        slackExecutorHelper.createAttachmentForLanguage(lang, messageDto.keyId)
       }
+
+      val additionalAttachments =
+        languagesToAdd.mapNotNull { lang ->
+          slackExecutorHelper.createAttachmentForLanguage(lang, messageDto.keyId)
+        }
 
       val updatedAttachments = messageDto.attachments + additionalAttachments
       val updatedMessageDto = messageDto.copy(attachments = updatedAttachments)
 
       updateMessage(savedMsg, config, updatedMessageDto)
     }
-
   }
 
   fun sendMessageOnKeyAdded() {
@@ -69,7 +69,10 @@ class SlackExecutor(
     }
   }
 
-  fun sendErrorMessage(errorMessage: Message, slackChannelId: String) {
+  fun sendErrorMessage(
+    errorMessage: Message,
+    slackChannelId: String,
+  ) {
     slackClient.methods(slackToken).chatPostMessage {
       it.channel(slackChannelId)
         .blocks {
@@ -90,7 +93,10 @@ class SlackExecutor(
     }
   }
 
-  fun sendRedirectUrl(slackChannelId: String, slackId: String) {
+  fun sendRedirectUrl(
+    slackChannelId: String,
+    slackId: String,
+  ) {
     slackClient.methods(slackToken).chatPostMessage {
       it.channel(slackChannelId)
         .blocks {
@@ -109,7 +115,6 @@ class SlackExecutor(
           }
         }
     }
-
   }
 
   fun sendSuccessMessage(slackChannelId: String) {
@@ -126,7 +131,11 @@ class SlackExecutor(
     }
   }
 
-  private fun updateMessage(savedMessage: SavedSlackMessage, config: SlackConfig, messageDto: SavedMessageDto) {
+  private fun updateMessage(
+    savedMessage: SavedSlackMessage,
+    config: SlackConfig,
+    messageDto: SavedMessageDto,
+  ) {
     slackClient.methods(slackToken).chatUpdate { request ->
       request
         .channel(config.channelId)
@@ -138,26 +147,30 @@ class SlackExecutor(
 
   private fun sendRegularMessage(
     messageDto: SavedMessageDto,
-    config: SlackConfig
-    ) {
-    val response = slackClient.methods(slackToken).chatPostMessage { request ->
-      request.channel(config.channelId)
-        .blocks(messageDto.blocks)
-        .attachments(messageDto.attachments)
-    }
-    if(response.isOk)
+    config: SlackConfig,
+  ) {
+    val response =
+      slackClient.methods(slackToken).chatPostMessage { request ->
+        request.channel(config.channelId)
+          .blocks(messageDto.blocks)
+          .attachments(messageDto.attachments)
+      }
+    if (response.isOk) {
       saveMessage(messageDto, response.ts, config)
+    }
   }
 
   fun setHelper(
     slackConfig: SlackConfig,
-    data: SlackRequest
+    data: SlackRequest,
   ) {
     slackExecutorHelper = SlackExecutorHelper(slackConfig, data, keyService, permissionService)
   }
 
-  private fun findSavedMessageOrNull(keyId: Long, langTags: Set<String>) =
-    savedSlackMessageService.find(keyId, langTags)
+  private fun findSavedMessageOrNull(
+    keyId: Long,
+    langTags: Set<String>,
+  ) = savedSlackMessageService.find(keyId, langTags)
 
   private fun saveMessage(
     messageDto: SavedMessageDto,
@@ -165,12 +178,13 @@ class SlackExecutor(
     config: SlackConfig,
   ) {
     savedSlackMessageService.create(
-      savedSlackMessage = SavedSlackMessage(
-        messageTs = ts,
-        slackConfig = config,
-        keyId = messageDto.keyId,
-        langTags = messageDto.langTag
-      )
+      savedSlackMessage =
+        SavedSlackMessage(
+          messageTs = ts,
+          slackConfig = config,
+          keyId = messageDto.keyId,
+          langTags = messageDto.langTag,
+        ),
     )
   }
 }

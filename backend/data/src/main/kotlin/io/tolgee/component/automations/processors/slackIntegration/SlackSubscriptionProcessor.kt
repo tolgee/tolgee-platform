@@ -14,10 +14,12 @@ class SlackSubscriptionProcessor(
   private val activityService: ActivityService,
   private val activityModelAssembler: IProjectActivityModelAssembler,
   private val slackExecutor: SlackExecutor,
-): AutomationProcessor {
-
-  override fun process(action: AutomationAction, activityRevisionId: Long?) {
-    if(activityRevisionId == null) return
+) : AutomationProcessor {
+  override fun process(
+    action: AutomationAction,
+    activityRevisionId: Long?,
+  ) {
+    if (activityRevisionId == null) return
 
     val view = activityService.getProjectActivity(activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
@@ -27,22 +29,26 @@ class SlackSubscriptionProcessor(
     slackExecutor.setHelper(data = data, slackConfig = config)
 
     // Checks if the saved(by user) onEvent matches the current activity type.
-    if(!checkSavedEvent(config, activityModel.type))
+    if (!checkSavedEvent(config, activityModel.type)) {
       return
+    }
     when (activityModel.type) {
       ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded()
       ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE -> slackExecutor.sendMessageOnTranslationSet()
-      else -> {  }
+      else -> { }
     }
   }
 
-  private fun checkSavedEvent(config: SlackConfig, activity: ActivityType): Boolean {
-    if(config.onEvent == EventName.ALL) return true
+  private fun checkSavedEvent(
+    config: SlackConfig,
+    activity: ActivityType,
+  ): Boolean {
+    if (config.onEvent == EventName.ALL) return true
     return when (activity) {
-      ActivityType.CREATE_KEY ->  config.onEvent == EventName.NEW_KEY
-      ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE -> config.onEvent == EventName.TRANSLATION_CHANGED || config.onEvent == EventName.BASE_CHANGED
+      ActivityType.CREATE_KEY -> config.onEvent == EventName.NEW_KEY
+      ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE ->
+        config.onEvent == EventName.TRANSLATION_CHANGED || config.onEvent == EventName.BASE_CHANGED
       else -> false
     }
   }
-
 }

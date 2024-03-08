@@ -26,19 +26,19 @@ class SlackExecutorHelper(
   val slackConfig: SlackConfig,
   val data: SlackRequest,
   val keyService: KeyService,
-  val permissionService: PermissionService
+  val permissionService: PermissionService,
 ) {
-
   fun buildSuccessView(): View {
-    return view { thisView -> thisView
-      .callbackId("callback")
-      .type("modal")
-      .title(viewTitle { it.type("plain_text").text("Result").emoji(true) })
-      .blocks {
-        section {
-          markdownText("*New translation was added!*")
+    return view { thisView ->
+      thisView
+        .callbackId("callback")
+        .type("modal")
+        .title(viewTitle { it.type("plain_text").text("Result").emoji(true) })
+        .blocks {
+          section {
+            markdownText("*New translation was added!*")
+          }
         }
-      }
     }
   }
 
@@ -52,7 +52,7 @@ class SlackExecutorHelper(
     // Extracting Key and Translation Information
     val modifiedEntities = activities.modifiedEntities ?: return null
     modifiedEntities.forEach modifiedEntities@{ (entityType, modifiedEntityList) ->
-      modifiedEntityList.forEach modifiedEntitiesList@ { modifiedEntity ->
+      modifiedEntityList.forEach modifiedEntitiesList@{ modifiedEntity ->
         when (entityType) {
           "Key" -> {
             keyId = modifiedEntity.entityId
@@ -69,7 +69,7 @@ class SlackExecutorHelper(
                   .color(color)
                   .blocks(blocksBody.toList())
                   .fallback("New key added to Tolgee project")
-                  .build()
+                  .build(),
               )
               langTags.add(translation.language.tag)
             }
@@ -83,20 +83,21 @@ class SlackExecutorHelper(
       return null
     }
     return SavedMessageDto(
-      blocks =  blocksHeader,
+      blocks = blocksHeader,
       attachments = attachments,
       keyId = keyId,
-      langTag = langTags
+      langTag = langTags,
     )
   }
 
   private fun buildBodyForNewKey(
     translation: Translation,
     baseLanguage: Language,
-    keyId: Long
+    keyId: Long,
   ) = withBlocks {
-    if(shouldSkipModification(slackConfig.languageTags, translation, baseLanguage, slackConfig.isGlobalSubscription))
+    if (shouldSkipModification(slackConfig.languageTags, translation, baseLanguage, slackConfig.isGlobalSubscription)) {
       return@withBlocks
+    }
 
     val language = translation.language
     val languageName = language.name
@@ -114,26 +115,25 @@ class SlackExecutorHelper(
 
     val shouldSkip = shouldSkipInput(translation, slackConfig.languageTags)
     if (shouldSkip ||
-      !hasPermissions(slackConfig.project.id, slackConfig.userAccount.id))
+      !hasPermissions(slackConfig.project.id, slackConfig.userAccount.id)
+    ) {
       return@withBlocks
+    }
     input {
       translateInput(keyId, language)
     }
   }
 
+  private fun buildKeyInfoBlock(key: Key) =
+    withBlocks {
+      section {
+        markdownText("*Key:* ${key.name}")
+      }
 
-
-  private fun buildKeyInfoBlock(
-    key: Key
-  ) = withBlocks {
-    section {
-      markdownText("*Key:* ${key.name}")
+      section {
+        markdownText("*Key namespace:* ${key.namespace ?: "None"}")
+      }
     }
-
-    section {
-      markdownText("*Key namespace:* ${key.namespace ?: "None"}")
-    }
-  }
 
   fun createTranslationChangeMessage(): SavedMessageDto? {
     var result: SavedMessageDto? = null
@@ -141,12 +141,14 @@ class SlackExecutorHelper(
     data.activityData?.modifiedEntities?.forEach modifiedEntities@{ (entityType, modifiedEntityList) ->
       modifiedEntityList.forEach { modifiedEntity ->
         modifiedEntity.modifications?.forEach modificationLoop@{ (property, modification) ->
-          if(property != "text" && property != "state")
+          if (property != "text" && property != "state") {
             return@modificationLoop
+          }
           val translationKey = modifiedEntity.entityId
           result = processTranslationChange(translationKey, modification, entityType, property)
-          if(result != null)
+          if (result != null) {
             return@modifiedEntities
+          }
         }
       }
     }
@@ -158,7 +160,7 @@ class SlackExecutorHelper(
     translationKey: Long,
     modification: PropertyModification,
     entityType: String,
-    property: String
+    property: String,
   ): SavedMessageDto? {
     val keyId: Long
     val langTags: MutableSet<String> = mutableSetOf()
@@ -181,39 +183,42 @@ class SlackExecutorHelper(
       }
 
       val savedLanguageTags = slackConfig.languageTags
-      if(shouldSkipModification(savedLanguageTags, translation, baseLanguage, slackConfig.isGlobalSubscription))
+      if (shouldSkipModification(savedLanguageTags, translation, baseLanguage, slackConfig.isGlobalSubscription)) {
         return null
+      }
 
       val color = determineColorByState(translation.state)
       val bodyBlock = buildBlocksForTranslation(translation, this, modification, entityType, property)
       headerBlock = buildKeyInfoBlock(this)
-      footerBlock = withBlocks {
-        section {
-          addBaseTranslationSection(baseTranslation, baseLanguage)
+      footerBlock =
+        withBlocks {
+          section {
+            addBaseTranslationSection(baseTranslation, baseLanguage)
+          }
+          divider()
         }
-        divider()
-      }
 
-      attachments.add(Attachment.builder()
-        .color(color)
-        .blocks(bodyBlock)
-        .fallback("New update in Tolgee project for ${this.name}")
-        .build())
+      attachments.add(
+        Attachment.builder()
+          .color(color)
+          .blocks(bodyBlock)
+          .fallback("New update in Tolgee project for ${this.name}")
+          .build(),
+      )
 
       langTags.add(lang)
     }
 
-    return if (attachments.isEmpty() || headerBlock.isEmpty() || footerBlock.isEmpty())
+    return if (attachments.isEmpty() || headerBlock.isEmpty() || footerBlock.isEmpty()) {
       null
-    else {
+    } else {
       SavedMessageDto(
         blocks = headerBlock + footerBlock,
         attachments = attachments,
         keyId = keyId,
-        langTag = langTags
+        langTag = langTags,
       )
     }
-
   }
 
   private fun buildBlocksForTranslation(
@@ -221,13 +226,12 @@ class SlackExecutorHelper(
     key: Key,
     modification: PropertyModification,
     entityType: String,
-    property: String
+    property: String,
   ) = withBlocks {
-
     section {
-      if(property == "text")
+      if (property == "text") {
         addModificationSection(entityType, property, modification, translation)
-      else {
+      } else {
         val langInfo = translation?.language?.let { "*Language:* ${it.name} ${it.flagEmoji}" } ?: ""
         markdownText("*State was changed* \n *Key translate: * ${translation?.text} \n $langInfo")
       }
@@ -235,8 +239,10 @@ class SlackExecutorHelper(
 
     val shouldSkip = shouldSkipInput(translation, slackConfig.languageTags)
     if (shouldSkip ||
-      !hasPermissions(slackConfig.project.id, slackConfig.userAccount.id))
+      !hasPermissions(slackConfig.project.id, slackConfig.userAccount.id)
+    ) {
       return@withBlocks
+    }
 
     input {
       if (translation != null) {
@@ -254,8 +260,10 @@ class SlackExecutorHelper(
     }
   }
 
-
-  private fun InputBlockBuilder.translateInput(keyId: Long, language: Language) {
+  private fun InputBlockBuilder.translateInput(
+    keyId: Long,
+    language: Language,
+  ) {
     dispatchAction(true)
     label(text = "Translate me ${language.flagEmoji}", emoji = true)
     plainTextInput {
@@ -266,37 +274,42 @@ class SlackExecutorHelper(
     }
   }
 
-  private fun SectionBlockBuilder
-    .addModificationSection(
-     entityType: String,
-     property: String,
-     modification: PropertyModification,
-     translation: Translation?,
-
+  private fun SectionBlockBuilder.addModificationSection(
+    entityType: String,
+    property: String,
+    modification: PropertyModification,
+    translation: Translation?,
   ) {
-      val oldValue = modification.old?.toString() ?: "None"
-      val newValue = modification.new?.toString() ?: "None"
-      val langInfo = translation?.language?.let { "*Language:* ${it.name} ${it.flagEmoji}" } ?: ""
-      markdownText("*$entityType $property* $langInfo \n  ~$oldValue~ -> $newValue")
+    val oldValue = modification.old?.toString() ?: "None"
+    val newValue = modification.new?.toString() ?: "None"
+    val langInfo = translation?.language?.let { "*Language:* ${it.name} ${it.flagEmoji}" } ?: ""
+    markdownText("*$entityType $property* $langInfo \n  ~$oldValue~ -> $newValue")
   }
 
-  private fun SectionBlockBuilder
-    .addBaseTranslationSection(
+  private fun SectionBlockBuilder.addBaseTranslationSection(
     baseTranslation: Translation,
-    baseLanguage: Language
+    baseLanguage: Language,
   ) {
-      markdownText("*Base translation*: ${baseTranslation.text} *Language:* ${baseLanguage.name} ${baseLanguage.flagEmoji}")
+    markdownText(
+      "*Base translation*: ${baseTranslation.text} *Language:* ${baseLanguage.name} ${baseLanguage.flagEmoji}",
+    )
   }
 
   private fun shouldSkipModification(
     savedLanguageTags: Set<String>,
     translation: Translation,
     baseLanguage: Language,
-    globalSubscription: Boolean
+    globalSubscription: Boolean,
   ): Boolean =
-    !globalSubscription && !savedLanguageTags.contains(translation.language.tag) && baseLanguage.id != translation.language.id
+    !globalSubscription &&
+      !savedLanguageTags.contains(
+        translation.language.tag,
+      ) && baseLanguage.id != translation.language.id
 
-  private fun shouldSkipEvent(isBaseLanguageChangedEvent: Boolean, isBaseLanguage: Boolean): Boolean {
+  private fun shouldSkipEvent(
+    isBaseLanguageChangedEvent: Boolean,
+    isBaseLanguage: Boolean,
+  ): Boolean {
     return (isBaseLanguageChangedEvent && !isBaseLanguage) || (!isBaseLanguageChangedEvent && isBaseLanguage)
   }
 
@@ -306,37 +319,49 @@ class SlackExecutorHelper(
   ) = translation?.language == null ||
     (slackConfig.isGlobalSubscription && (langTags.isEmpty() || !langTags.contains(translation.language.tag)))
 
-  private fun hasPermissions(projectId: Long, userAccountId: Long): Boolean =
+  private fun hasPermissions(
+    projectId: Long,
+    userAccountId: Long,
+  ): Boolean =
     permissionService.getProjectPermissionScopes(projectId, userAccountId)?.contains(Scope.TRANSLATIONS_EDIT) == true
 
-  fun createAttachmentForLanguage(lang: String, keyId: Long): Attachment? {
-    val result = keyService.find(keyId)?.let { foundKey ->
-      val translation = foundKey.translations.find { it.language.tag == lang } ?: return null
-      val color = determineColorByState(translation.state
-      )
-      val bodyBlock = withBlocks {
-        section {
-          val langInfo = translation.language.let { "*Language:* ${it.name} ${it.flagEmoji}" }
-          markdownText("*Current translate: * ${translation.text}\n $langInfo")
-        }
-        divider()
+  fun createAttachmentForLanguage(
+    lang: String,
+    keyId: Long,
+  ): Attachment? {
+    val result =
+      keyService.find(keyId)?.let { foundKey ->
+        val translation = foundKey.translations.find { it.language.tag == lang } ?: return null
+        val color =
+          determineColorByState(
+            translation.state,
+          )
+        val bodyBlock =
+          withBlocks {
+            section {
+              val langInfo = translation.language.let { "*Language:* ${it.name} ${it.flagEmoji}" }
+              markdownText("*Current translate: * ${translation.text}\n $langInfo")
+            }
+            divider()
 
-        val shouldSkip = shouldSkipInput(translation, slackConfig.languageTags)
-        if (shouldSkip ||
-          !hasPermissions(slackConfig.project.id, slackConfig.userAccount.id))
-          return@withBlocks
+            val shouldSkip = shouldSkipInput(translation, slackConfig.languageTags)
+            if (shouldSkip ||
+              !hasPermissions(slackConfig.project.id, slackConfig.userAccount.id)
+            ) {
+              return@withBlocks
+            }
 
-        input {
-          translateInput(keyId, translation.language)
-        }
-      }
+            input {
+              translateInput(keyId, translation.language)
+            }
+          }
 
-      Attachment.builder()
-        .color(color)
-        .blocks(bodyBlock.toList())
-        .fallback("New key added to Tolgee project")
-        .build()
-    } ?: return null
+        Attachment.builder()
+          .color(color)
+          .blocks(bodyBlock.toList())
+          .fallback("New key added to Tolgee project")
+          .build()
+      } ?: return null
 
     return result
   }

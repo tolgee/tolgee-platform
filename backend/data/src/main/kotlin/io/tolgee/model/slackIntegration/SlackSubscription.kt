@@ -7,10 +7,9 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 
 @Entity
-class SlackSubscription: StandardAuditModel(){
+class SlackSubscription : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
   var userAccount: UserAccount? = null
 
   var slackUserId: String = ""
-
 }

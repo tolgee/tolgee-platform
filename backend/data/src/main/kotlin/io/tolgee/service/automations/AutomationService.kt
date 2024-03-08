@@ -195,7 +195,7 @@ class AutomationService(
 
   private fun addSlackSubscriptionTriggersAndActions(
     slackConfig: SlackConfig,
-    automation: Automation
+    automation: Automation,
   ) {
     automation.triggers.add(
       AutomationTrigger(automation).apply {
@@ -336,5 +336,4 @@ class AutomationService(
       },
     )
   }
-
 }

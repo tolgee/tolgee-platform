@@ -221,11 +221,16 @@ interface KeyRepository : JpaRepository<Key, Long> {
   )
   fun getViewsByKeyIds(ids: List<Long>): List<KeyView>
 
-  @Query("""
+  @Query(
+    """
         SELECT k
         FROM Key k
         JOIN k.translations t
         WHERE k.project.id = :projectId AND t.id = :translationId
-    """)
-  fun searchKey(projectId: Long, translationId: Long): Optional<Key>
+    """,
+  )
+  fun searchKey(
+    projectId: Long,
+    translationId: Long,
+  ): Optional<Key>
 }

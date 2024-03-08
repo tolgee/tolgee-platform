@@ -14,20 +14,26 @@ class SlackConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var userAccount: UserAccount,
   var channelId: String,
-): StandardAuditModel() {
+) : StandardAuditModel() {
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true, fetch = FetchType.LAZY)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
+
   @Column(nullable = false)
   var slackId: String = ""
+
   @ElementCollection
   var languageTags: MutableSet<String> = hashSetOf()
+
   @ColumnDefault("1")
   var visibilityOptions: VisibilityOptions = VisibilityOptions.ONLY_ME
+
   @ColumnDefault("0")
   var onEvent: EventName = EventName.ALL
+
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true, fetch = FetchType.LAZY)
   @Column(nullable = true)
   var savedSlackMessage: MutableList<SavedSlackMessage> = mutableListOf()
+
   @ColumnDefault("false")
   @Column(nullable = true)
   var isGlobalSubscription: Boolean = false

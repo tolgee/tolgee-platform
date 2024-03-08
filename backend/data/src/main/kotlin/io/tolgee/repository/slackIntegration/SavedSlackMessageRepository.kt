@@ -10,11 +10,13 @@ import java.util.*
 
 @Transactional
 @Repository
-interface SavedSlackMessageRepository: JpaRepository<SavedSlackMessage, Long> {
+interface SavedSlackMessageRepository : JpaRepository<SavedSlackMessage, Long> {
   @Modifying
-  @Query("""
+  @Query(
+    """
     delete from SavedSlackMessage sm where sm.createdAt < :cutoff
-    """)
+    """,
+  )
   fun deleteOlderThan(cutoff: Date)
 
   fun findByKeyId(keyId: Long): List<SavedSlackMessage>

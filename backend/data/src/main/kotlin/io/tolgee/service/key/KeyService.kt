@@ -85,7 +85,7 @@ class KeyService(
 
   fun find(
     projectId: Long,
-    translationId: Long
+    translationId: Long,
   ): Optional<Key> {
     return keyRepository.searchKey(projectId, translationId)
   }

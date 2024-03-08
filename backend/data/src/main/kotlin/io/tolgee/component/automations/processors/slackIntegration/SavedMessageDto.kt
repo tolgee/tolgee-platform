@@ -7,5 +7,5 @@ data class SavedMessageDto(
   val blocks: List<LayoutBlock>,
   val attachments: List<Attachment>,
   val keyId: Long,
-  val langTag: Set<String>
+  val langTag: Set<String>,
 )

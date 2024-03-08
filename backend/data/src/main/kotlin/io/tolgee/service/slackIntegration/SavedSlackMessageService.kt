@@ -12,7 +12,7 @@ import java.util.*
 @Service
 class SavedSlackMessageService(
   private val savedSlackMessageRepository: SavedSlackMessageRepository,
-  private val slackConfigRepository: SlackConfigRepository
+  private val slackConfigRepository: SlackConfigRepository,
 ) {
   fun create(savedSlackMessage: SavedSlackMessage): SavedSlackMessage {
     savedSlackMessage.slackConfig.apply {
@@ -27,7 +27,10 @@ class SavedSlackMessageService(
     return savedSlackMessageRepository.findById(id).orElse(null)
   }
 
-  fun find(keyId: Long, langTags: Set<String>): List<SavedSlackMessage> {
+  fun find(
+    keyId: Long,
+    langTags: Set<String>,
+  ): List<SavedSlackMessage> {
     val savedSlackMessages = findByKey(keyId)
 
     return savedSlackMessages.filter { savedSlackMessage ->

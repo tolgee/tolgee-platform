@@ -12,9 +12,8 @@ import org.springframework.stereotype.Service
 @Service
 class SlackConfigService(
   private val automationService: AutomationService,
-  private val slackConfigRepository: SlackConfigRepository
+  private val slackConfigRepository: SlackConfigRepository,
 ) {
-
   fun get(
     projectId: Long,
     channelId: String,
@@ -22,40 +21,38 @@ class SlackConfigService(
     return slackConfigRepository.findByProjectIdAndChannelId(projectId, channelId)
   }
 
-  fun get(
-    configId: Long,
-  ): SlackConfig {
+  fun get(configId: Long): SlackConfig {
     return slackConfigRepository.findById(configId).orElseThrow { NotFoundException() }
   }
 
   @Transactional
   fun delete(
     projectId: Long,
-    channelId: String
+    channelId: String,
   ) {
     val config = get(projectId, channelId) ?: return
     automationService.deleteForSlackIntegration(config)
     slackConfigRepository.delete(config)
   }
 
-  fun create(
-    slackConfigDto: SlackConfigDto
-  ): SlackConfig {
-    val slackConfig = SlackConfig(
-      project = slackConfigDto.project,
-      userAccount = slackConfigDto.userAccount,
-      channelId = slackConfigDto.channelId,
-    ).apply {
-      languageTags = if (!slackConfigDto.languageTag.isNullOrBlank()) {
-        mutableSetOf(slackConfigDto.languageTag)
-      } else {
-        mutableSetOf()
+  fun create(slackConfigDto: SlackConfigDto): SlackConfig {
+    val slackConfig =
+      SlackConfig(
+        project = slackConfigDto.project,
+        userAccount = slackConfigDto.userAccount,
+        channelId = slackConfigDto.channelId,
+      ).apply {
+        languageTags =
+          if (!slackConfigDto.languageTag.isNullOrBlank()) {
+            mutableSetOf(slackConfigDto.languageTag)
+          } else {
+            mutableSetOf()
+          }
+        visibilityOptions = visibilityOptions
+        slackId = slackConfigDto.slackId
+        onEvent = slackConfigDto.onEvent ?: EventName.ALL
+        isGlobalSubscription = slackConfigDto.languageTag?.isEmpty() ?: true
       }
-      visibilityOptions = visibilityOptions
-      slackId = slackConfigDto.slackId
-      onEvent = slackConfigDto.onEvent ?: EventName.ALL
-      isGlobalSubscription = slackConfigDto.languageTag?.isEmpty() ?: true
-    }
 
     val existingConfigs = get(slackConfig.project.id, slackConfig.channelId)
     return if (existingConfigs == null) {
@@ -65,27 +62,24 @@ class SlackConfigService(
     } else {
       update(slackConfigDto)
     }
-
   }
 
-  fun update(
-    slackConfigDto: SlackConfigDto
-  ): SlackConfig {
-    val slackConfig =  get(slackConfigDto.project.id, slackConfigDto.channelId) ?: throw Exception()
+  fun update(slackConfigDto: SlackConfigDto): SlackConfig {
+    val slackConfig = get(slackConfigDto.project.id, slackConfigDto.channelId) ?: throw Exception()
     slackConfigDto.onEvent?.let { eventName ->
       slackConfig.onEvent = eventName
     }
 
     slackConfigDto.languageTag.let { tag ->
-      if(!tag.isNullOrBlank()) {
+      if (!tag.isNullOrBlank()) {
         slackConfig.languageTags.add(tag)
-      }else
+      } else {
         slackConfig.isGlobalSubscription = true
+      }
     }
 
     automationService.updateForSlackConfig(slackConfig)
     slackConfigRepository.save(slackConfig)
     return slackConfig
   }
-
 }

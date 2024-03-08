@@ -7,28 +7,28 @@ import org.springframework.stereotype.Service
 
 @Service
 class SlackSubscriptionService(
-  private val slackSubscriptionRepository: SlackSubscriptionRepository
+  private val slackSubscriptionRepository: SlackSubscriptionRepository,
 ) {
   fun get(
     id: Long,
-    channelId: String
+    channelId: String,
   ): SlackSubscription {
     return slackSubscriptionRepository.findById(id).get()
   }
 
-  fun getBySlackId(
-    slackId: String,
-  ): SlackSubscription? {
+  fun getBySlackId(slackId: String): SlackSubscription? {
     return slackSubscriptionRepository.findBySlackUserId(slackId)
   }
 
   fun ifSlackConnected(slackId: String) = getBySlackId(slackId) != null
 
-  fun create(userAccount: UserAccount, slackId: String): SlackSubscription {
+  fun create(
+    userAccount: UserAccount,
+    slackId: String,
+  ): SlackSubscription {
     val slackSubscription = SlackSubscription()
     slackSubscription.slackUserId = slackId
     slackSubscription.userAccount = userAccount
     return slackSubscriptionRepository.save(slackSubscription)
   }
-
 }

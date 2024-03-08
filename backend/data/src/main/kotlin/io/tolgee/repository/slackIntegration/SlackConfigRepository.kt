@@ -5,10 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface SlackConfigRepository: JpaRepository<SlackConfig, Long> {
+interface SlackConfigRepository : JpaRepository<SlackConfig, Long> {
   fun findByProjectIdAndChannelId(
     id: Long,
-    channelId: String
+    channelId: String,
   ): SlackConfig?
-
 }
