@@ -379,17 +379,15 @@ export class Validation {
   static readonly NEW_KEY_FORM = (t: TFnType) =>
     Yup.object().shape({
       name: Yup.string().required(),
-      pluralParameter: Yup.string()
-        .required()
-        .when('isPlural', {
-          is: true,
-          then: Yup.string().test(
-            'invalid-plural-parameter',
-            // @tolgee-key validation_invalid_plural_parameter
-            t('validation_invalid_plural_parameter'),
-            (value) => checkParamNameIsValid(value ?? '')
-          ),
-        }),
+      pluralParameter: Yup.string().when('isPlural', {
+        is: true,
+        then: Yup.string().test(
+          'invalid-plural-parameter',
+          // @tolgee-key validation_invalid_plural_parameter
+          t('validation_invalid_plural_parameter'),
+          (value) => checkParamNameIsValid(value ?? '')
+        ),
+      }),
     });
 
   static readonly KEY_SETTINGS_FORM = (t: TFnType) =>

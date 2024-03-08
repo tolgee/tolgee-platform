@@ -37,6 +37,28 @@ describe('Translations Base', () => {
       .should('be.visible');
   });
 
+  it('will switch translation and correctly change the plural argument', () => {
+    createKey(project.id, 'Test key', {
+      en: 'You have {testValue, plural, one {# item} other {# items}}',
+      cs: 'Máte {testValue, plural, one {# položku} few {# položky} other {# položek}}',
+    });
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+
+    getCell('Test key').click();
+    cy.gcy('key-plural-checkbox').click();
+    cy.gcy('key-plural-variable-name')
+      .find('input')
+      .should('have.value', 'testValue');
+    cy.gcy('translations-cell-save-button').click();
+    waitForGlobalLoading();
+    cy.waitForDom();
+    getTranslationCell('Test key', 'en')
+      .findDcy('translation-plural-parameter')
+      .contains('testValue')
+      .should('be.visible');
+  });
+
   it('will change plural parameter name for all translations', () => {
     createKey(
       project.id,

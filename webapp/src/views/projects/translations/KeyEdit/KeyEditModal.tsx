@@ -10,13 +10,14 @@ import {
 import { useTranslate, T, TFnType } from '@tolgee/react';
 import { Formik } from 'formik';
 import { Button } from '@mui/material';
+import { getFirstPluralParameter } from '@tginternal/editor';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { KeyGeneral } from './KeyGeneral';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { KeyAdvanced } from './KeyAdvanced';
 import { KeyContext } from './KeyContext';
 import { KeyFormType } from './types';
@@ -101,6 +102,15 @@ export const KeyEditModal: React.FC<Props> = ({
   const disabledLangs =
     disabledLangsLoadable.data?._embedded?.languages?.map((l) => l.id) || [];
 
+  const extractedArgName = useMemo(() => {
+    // try to extract parameter name from base language translation
+    if (project.baseLanguage?.tag) {
+      return getFirstPluralParameter(
+        data.translations?.[project.baseLanguage.tag]?.text ?? ''
+      );
+    }
+  }, [data]);
+
   const initialValues = {
     name: data.keyName,
     namespace: data.keyNamespace ?? '',
@@ -108,7 +118,10 @@ export const KeyEditModal: React.FC<Props> = ({
     tags: data.keyTags.map((t) => t.name),
     disabledLangs,
     isPlural: data.keyIsPlural,
-    pluralParameter: data.keyPluralArgName || 'value',
+    pluralParameter:
+      (data.keyIsPlural ? data.keyPluralArgName : undefined) ||
+      extractedArgName ||
+      'value',
     custom: JSON.stringify(customValues ?? {}, null, 2),
   } satisfies KeyFormType;
 
