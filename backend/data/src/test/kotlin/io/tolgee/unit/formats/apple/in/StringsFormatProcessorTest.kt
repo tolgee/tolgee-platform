@@ -31,8 +31,8 @@ class StringsFormatProcessorTest {
     assertParsed("""another key \ with escaping 2""", """Dies ist ein weiterer \ Schlüssel.""")
     assertParsed("""another key with escaping 3\""", """Dies ist ein weiterer Schlüssel\""")
     assertParsed("another key\n\n multiline", "Dies ist ein weiterer\n\nSchlüssel.")
-    assertParsed("A key with \n \n", "Ein Schlüssel mit \n \n")
-    assertKeyDescription("A key with \n \n", "this is a comment with newlines \n \n yep")
+    assertParsed("A key with \n \n \r", "Ein Schlüssel mit \n \n \r")
+    assertKeyDescription("A key with \n \n \r", "this is a comment with newlines \n \n \r yep")
 
     assertKeyDescription(
       "welcome_sub_header",

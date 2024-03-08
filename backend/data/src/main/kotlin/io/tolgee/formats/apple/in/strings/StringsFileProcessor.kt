@@ -67,6 +67,7 @@ class StringsFileProcessor(
           when {
             char == '\"' && !wasLastCharEscape -> state = State.OUTSIDE
             wasLastCharEscape && char == 'n' -> key += "\n"
+            wasLastCharEscape && char == 'r' -> key += "\r"
             else -> key += char
           }
         }
@@ -81,6 +82,8 @@ class StringsFileProcessor(
             }
 
             wasLastCharEscape && char == 'n' -> value += "\n"
+            wasLastCharEscape && char == 'r' -> value += "\r"
+
             else -> value += char
           }
         }
@@ -102,6 +105,8 @@ class StringsFileProcessor(
             }
 
             wasLastCharEscape && char == 'n' -> addToCurrentComment("\n")
+            wasLastCharEscape && char == 'r' -> addToCurrentComment("\r")
+
             else -> addToCurrentComment(char.toString())
           }
         }
