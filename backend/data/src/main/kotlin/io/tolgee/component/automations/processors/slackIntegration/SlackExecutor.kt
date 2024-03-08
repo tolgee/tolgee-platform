@@ -44,7 +44,7 @@ class SlackExecutor(
         return@forEach
 
       val additionalAttachments = languagesToAdd.mapNotNull { lang ->
-        slackExecutorHelper.createAttachmentForLanguage(lang, messageDto.keyId, config.project.id)
+        slackExecutorHelper.createAttachmentForLanguage(lang, messageDto.keyId)
       }
 
       val updatedAttachments = messageDto.attachments + additionalAttachments

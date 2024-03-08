@@ -52,7 +52,7 @@ class SlackIntegrationController(
   ): SlackMessageDto? {
 
     //TODO check if message was sent from personal chat
-    val regex = """^(\w+)\s+(\d+)(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
+    val regex = """^(\w+)(?:\s+(\d+))?(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
     val matchResult = regex.matchEntire(payload.text) ?: return SlackMessageDto("Invalid command")
 
     val (command, projectId, languageTag, optionsString) = matchResult.destructured
