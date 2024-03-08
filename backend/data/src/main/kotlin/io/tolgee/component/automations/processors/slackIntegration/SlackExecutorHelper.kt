@@ -145,6 +145,8 @@ class SlackExecutorHelper(
             return@modificationLoop
           val translationKey = modifiedEntity.entityId
           result = processTranslationChange(translationKey, modification, entityType, property)
+          if(result != null)
+            return@modifiedEntities
         }
       }
     }
@@ -307,7 +309,7 @@ class SlackExecutorHelper(
   private fun hasPermissions(projectId: Long, userAccountId: Long): Boolean =
     permissionService.getProjectPermissionScopes(projectId, userAccountId)?.contains(Scope.TRANSLATIONS_EDIT) == true
 
-  fun createAttachmentForLanguage(lang: String, keyId: Long, id: Long): Attachment? {
+  fun createAttachmentForLanguage(lang: String, keyId: Long): Attachment? {
     val result = keyService.find(keyId)?.let { foundKey ->
       val translation = foundKey.translations.find { it.language.tag == lang } ?: return null
       val color = determineColorByState(translation.state
