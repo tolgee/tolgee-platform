@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 @Lazy
 @Component
 class SlackExecutor(
-  private val properties: TolgeeProperties,
+  properties: TolgeeProperties,
   private val keyService: KeyService,
   private val permissionService: PermissionService,
   private val savedSlackMessageService: SavedSlackMessageService,
@@ -28,7 +28,7 @@ class SlackExecutor(
   fun sendMessageOnTranslationSet() {
     val config = slackExecutorHelper.slackConfig
     val messageDto = slackExecutorHelper.createTranslationChangeMessage() ?: return
-    val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag, config)
+    val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag)
 
     if(savedMessage.isEmpty()) {
       sendRegularMessage(messageDto, config)
@@ -156,7 +156,7 @@ class SlackExecutor(
     slackExecutorHelper = SlackExecutorHelper(slackConfig, data, keyService, permissionService)
   }
 
-  private fun findSavedMessageOrNull(keyId: Long, langTags: Set<String>, config: SlackConfig) =
+  private fun findSavedMessageOrNull(keyId: Long, langTags: Set<String>) =
     savedSlackMessageService.find(keyId, langTags)
 
   private fun saveMessage(

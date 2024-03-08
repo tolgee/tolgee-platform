@@ -48,15 +48,13 @@ class SlackIntegrationController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun slackCommand(
-    @ModelAttribute payload: SlackCommandDto
+    @ModelAttribute payload: SlackCommandDto,
   ): SlackMessageDto? {
-
-    //TODO check if message was sent from personal chat
     val regex = """^(\w+)(?:\s+(\d+))?(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
     val matchResult = regex.matchEntire(payload.text) ?: return SlackMessageDto("Invalid command")
 
     val (command, projectId, languageTag, optionsString) = matchResult.destructured
-    //retrieving map of options
+    // retrieving map of options
     val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
     val optionsMap = mutableMapOf<String, String>()
 
@@ -75,11 +73,11 @@ class SlackIntegrationController(
         var onEvent: EventName? = null
 
         optionsMap.forEach { (option, value) ->
-          when(option) {
+          when (option) {
             "--on" -> {
               try {
                 onEvent = EventName.valueOf(value.uppercase())
-              }catch (e: IllegalArgumentException) {
+              } catch (e: IllegalArgumentException) {
                 return SlackMessageDto("Invalid command")
               }
             }
@@ -96,13 +94,12 @@ class SlackIntegrationController(
 
       else -> return SlackMessageDto("Invalid command")
     }
-
   }
 
   @PostMapping("/connect")
   @UseDefaultPermissions
   fun connectSlack(
-    @RequestBody payload: SlackConnectionDto
+    @RequestBody payload: SlackConnectionDto,
   ) {
     val user = userAccountService.get(payload.userAccountId.toLong())
     slackSubscriptionService.create(user, payload.slackId)
@@ -112,9 +109,9 @@ class SlackIntegrationController(
 
   private fun login(
     userId: String,
-    channelId: String
+    channelId: String,
   ): SlackMessageDto? {
-    if(slackSubscriptionService.ifSlackConnected(userId)) {
+    if (slackSubscriptionService.ifSlackConnected(userId)) {
       return SlackMessageDto(text = "You are already logged in.")
     }
 
@@ -126,24 +123,26 @@ class SlackIntegrationController(
     payload: SlackCommandDto,
     projectId: String,
     languageTag: String?,
-    onEventName: EventName?
+    onEventName: EventName?,
   ): SlackMessageDto? {
     val validationResult = validateRequest(payload, projectId)
-    if(!validationResult.success)
+    if (!validationResult.success) {
       return null
+    }
 
-    val slackConfigDto = SlackConfigDto(
-      project = validationResult.project,
-      slackId = payload.user_id,
-      channelId = payload.channel_id,
-      userAccount = validationResult.user,
-      languageTag = languageTag,
-      onEvent = onEventName
-    )
+    val slackConfigDto =
+      SlackConfigDto(
+        project = validationResult.project,
+        slackId = payload.user_id,
+        channelId = payload.channel_id,
+        userAccount = validationResult.user,
+        languageTag = languageTag,
+        onEvent = onEventName,
+      )
 
     try {
       slackConfigService.create(slackConfigDto)
-    }catch (e: Exception) {
+    } catch (e: Exception) {
       return SlackMessageDto(text = "Error")
     }
 
@@ -152,17 +151,17 @@ class SlackIntegrationController(
 
   private fun unsubscribe(
     payload: SlackCommandDto,
-    projectId: String
+    projectId: String,
   ): SlackMessageDto? {
-
     val validationResult = validateRequest(payload, projectId)
-    if(!validationResult.success)
+    if (!validationResult.success) {
       return null
+    }
 
     slackConfigService.delete(validationResult.project.id, payload.channel_id)
 
     return SlackMessageDto(
-      text = "unsubscribed"
+      text = "unsubscribed",
     )
   }
 
@@ -172,24 +171,27 @@ class SlackIntegrationController(
   @AllowApiAccess
   @Transactional
   fun fetchEvent(
-    @RequestBody payload: String
+    @RequestBody payload: String,
   ): SlackMessageDto? {
     val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
     val event: SlackEventDto = jacksonObjectMapper().readValue(decodedPayload)
 
     event.actions.forEach { action ->
       val parameters = action.actionId.substringAfter(SlackEventActions.TRANSLATE_VALUE.name + "/")
-      if(parameters == action.actionId)
+      if (parameters == action.actionId) {
         return@forEach
+      }
 
       val regex = "(\\d+)/([a-zA-Z-]+)".toRegex()
       val matchResult = regex.find(parameters) ?: return@forEach
 
       val (keyId, langName) = matchResult.destructured
       val key = keyService.get(keyId.toLong())
-      val translation = mapOf(
-        langName to action.value
-      )
+      val translation =
+        mapOf(
+          langName to action.value,
+        )
+
       activityHolder.activityRevision.projectId = key.project.id
       translationService.setForKey(key, translation)
       slackExecutor.sendSuccessModal(event.triggerId)
@@ -198,7 +200,10 @@ class SlackIntegrationController(
     return null
   }
 
-  private fun validateRequest(payload: SlackCommandDto, projectId: String): ValidationResult {
+  private fun validateRequest(
+    payload: SlackCommandDto,
+    projectId: String,
+  ): ValidationResult {
     val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
 
     if (slackSubscription == null) {
@@ -209,7 +214,7 @@ class SlackIntegrationController(
     val project = projectService.find(projectId.toLong()) ?: return ValidationResult(false)
     val userAccount = slackSubscription.userAccount ?: return ValidationResult(false)
 
-    return if(permissionService.getProjectPermissionScopes(project.id, userAccount.id)
+    return if (permissionService.getProjectPermissionScopes(project.id, userAccount.id)
         ?.contains(Scope.ACTIVITY_VIEW) == true
     ) {
       ValidationResult(true, user = userAccount, project = project)
