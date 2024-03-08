@@ -226,7 +226,6 @@ bootJar {
     manifest {
         attributes('Implementation-Version': project.version)
     }
-    onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 }
 
 def unpackTarget = "build/dependency"
@@ -246,11 +245,6 @@ task addVersionFile(type: Task) {
         file.write(project.version.toString())
     }
 }
-
-project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootBuildInfo").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
