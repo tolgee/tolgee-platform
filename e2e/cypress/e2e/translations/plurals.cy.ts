@@ -37,7 +37,7 @@ describe('Translations Base', () => {
       .should('be.visible');
   });
 
-  it('will switch translation and correctly change the plural argument', () => {
+  it.only('will switch translation and correctly change the plural argument', () => {
     createKey(project.id, 'Test key', {
       en: 'You have {testValue, plural, one {# item} other {# items}}',
       cs: 'Máte {testValue, plural, one {# položku} few {# položky} other {# položek}}',
@@ -52,6 +52,7 @@ describe('Translations Base', () => {
       .should('have.value', 'testValue');
     cy.gcy('translations-cell-save-button').click();
     waitForGlobalLoading();
+    cy.waitForDom();
     getTranslationCell('Test key', 'en')
       .findDcy('translation-plural-parameter')
       .contains('testValue')

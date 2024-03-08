@@ -14,6 +14,10 @@ import { FieldError, FieldLabel } from 'tg.component/FormField';
 
 import { LabelHint } from '../LabelHint';
 
+function isParameterDefault(value: string | undefined) {
+  return value === undefined || value === 'value';
+}
+
 type Props = {
   pluralParameterName: string;
   isPluralName: string;
@@ -25,11 +29,14 @@ export const PluralFormCheckbox = ({
 }: Props) => {
   const { values } = useFormikContext<any>();
   const [_expanded, setExpanded] = useState(
-    values[pluralParameterName] !== 'value'
+    !isParameterDefault(values[pluralParameterName])
   );
 
   useEffect(() => {
-    if (values[isPluralName] && values[pluralParameterName] !== 'value') {
+    if (
+      values[isPluralName] &&
+      !isParameterDefault(values[pluralParameterName])
+    ) {
       setExpanded(true);
     }
   }, [values[pluralParameterName]]);
