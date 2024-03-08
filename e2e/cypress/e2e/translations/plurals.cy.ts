@@ -37,7 +37,7 @@ describe('Translations Base', () => {
       .should('be.visible');
   });
 
-  it.only('will switch translation and correctly change the plural argument', () => {
+  it('will switch translation and correctly change the plural argument', () => {
     createKey(project.id, 'Test key', {
       en: 'You have {testValue, plural, one {# item} other {# items}}',
       cs: 'Máte {testValue, plural, one {# položku} few {# položky} other {# položek}}',
