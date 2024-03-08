@@ -138,15 +138,17 @@ ktlint {
 }
 
 rootProject.subprojects {
-    tasks.findByName("compileKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("bootBuildInfo")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("compileJava")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("jar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("bootJar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-    tasks.findByName("compileTestKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+    afterEvaluate {
+        tasks.findByName("compileKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("bootBuildInfo")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("compileJava")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("jar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("bootJar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("compileTestKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+    }
 }
 
 subprojects {
