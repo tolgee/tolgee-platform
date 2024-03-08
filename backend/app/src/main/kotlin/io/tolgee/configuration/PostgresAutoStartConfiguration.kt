@@ -2,6 +2,7 @@ package io.tolgee.configuration
 
 import io.tolgee.PostgresRunner
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
+import io.tolgee.util.Logging
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
@@ -13,7 +14,7 @@ import javax.sql.DataSource
 @ConditionalOnProperty(name = ["tolgee.postgres-autostart.enabled"], havingValue = "true")
 class PostgresAutoStartConfiguration(
   val postgresAutostartProperties: PostgresAutostartProperties,
-) {
+) : Logging {
   private var dataSource: DataSource? = null
 
   @Bean("dataSource")
@@ -23,6 +24,7 @@ class PostgresAutoStartConfiguration(
     dataSource?.let { return it }
     postgresRunner.run()
     dataSource = buildDataSource(postgresRunner)
+
     return dataSource!!
   }
 
@@ -31,6 +33,30 @@ class PostgresAutoStartConfiguration(
     dataSourceBuilder.url(postgresRunner.datasourceUrl)
     dataSourceBuilder.username(postgresAutostartProperties.user)
     dataSourceBuilder.password(postgresAutostartProperties.password)
+    waitForPostgresRunning()
     return dataSourceBuilder.build()
+  }
+
+  private fun waitForPostgresRunning() {
+    val maxRetries = postgresAutostartProperties.maxWaitTime
+    val retryInterval = 1000L
+    var numTries = 0
+    while (numTries < maxRetries) {
+      try {
+        dataSource?.connection?.use { conn ->
+          val statement = conn.createStatement()
+          statement.executeQuery("SELECT 1") // Execute a simple SQL statement
+        }
+        // If we got this far without an exception, break the loop
+        break
+      } catch (e: Exception) {
+        if (e.message?.contains("the database system is starting up") != true) {
+          throw e
+        }
+        // Wait and then try again
+        Thread.sleep(retryInterval)
+        numTries++
+      }
+    }
   }
 }
