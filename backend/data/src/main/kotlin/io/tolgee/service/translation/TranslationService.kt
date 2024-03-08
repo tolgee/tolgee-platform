@@ -10,7 +10,6 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.StringIsNotPluralException
 import io.tolgee.formats.convertToIcuPlural
-import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.normalizePlurals
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
@@ -560,8 +559,7 @@ class TranslationService(
     if (newIsPlural) {
       return text.convertToIcuPlural(newPluralArgName)
     }
-    val forms = getPluralForms(text)
-    return forms?.forms?.get("other") ?: text
+    return text
   }
 
   fun <T> validateAndNormalizePlurals(
