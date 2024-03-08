@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Field, useFormikContext } from 'formik';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import {
@@ -24,10 +24,18 @@ export const PluralFormCheckbox = ({
   isPluralName,
 }: Props) => {
   const { values } = useFormikContext<any>();
-  const [expanded, setExpanded] = useState(
-    values[isPluralName] && values[pluralParameterName] !== 'value'
+  const [_expanded, setExpanded] = useState(
+    values[pluralParameterName] !== 'value'
   );
+
+  useEffect(() => {
+    if (values[isPluralName] && values[pluralParameterName] !== 'value') {
+      setExpanded(true);
+    }
+  }, [values[pluralParameterName]]);
+
   const isPlural = values[isPluralName];
+  const expanded = _expanded && isPlural;
   const { t } = useTranslate();
 
   return (
