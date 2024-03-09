@@ -23,8 +23,8 @@ class PostgresAutoStartConfiguration(
     postgresRunner ?: throw IllegalStateException("Postgres runner is not initialized")
     dataSource?.let { return it }
     postgresRunner.run()
+    waitForPostgresRunning(postgresRunner)
     dataSource = buildDataSource(postgresRunner)
-    waitForPostgresRunning()
     return dataSource!!
   }
 
@@ -36,13 +36,14 @@ class PostgresAutoStartConfiguration(
     return dataSourceBuilder.build()
   }
 
-  private fun waitForPostgresRunning() {
+  private fun waitForPostgresRunning(postgresRunner: PostgresRunner) {
+    val localDataSource = buildDataSource(postgresRunner)
     val maxRetries = postgresAutostartProperties.maxWaitTime
     val retryInterval = 1000L
     var numTries = 0
     while (numTries < maxRetries) {
       try {
-        dataSource?.connection?.use { conn ->
+        localDataSource.connection?.use { conn ->
           val statement = conn.createStatement()
           statement.executeQuery("SELECT 1") // Execute a simple SQL statement
         }
