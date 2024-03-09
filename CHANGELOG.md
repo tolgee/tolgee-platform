@@ -1,3 +1,13 @@
+## [3.49.5](https://github.com/tolgee/tolgee-platform/compare/v3.49.4...v3.49.5) (2024-03-09)
+
+
+### Bug Fixes
+
+* New lines in Apple .strings import ([#2167](https://github.com/tolgee/tolgee-platform/issues/2167)) ([8ddb1cd](https://github.com/tolgee/tolgee-platform/commit/8ddb1cdbb0a9b2e0c11547748c4622d4805f169c))
+* plural variable auto naming when there is a valid ICU ([#2164](https://github.com/tolgee/tolgee-platform/issues/2164)) ([fc19366](https://github.com/tolgee/tolgee-platform/commit/fc19366bdb7e30750a596e3b6eacf58dadbf78ca))
+* Wait for postgres startup ([#2168](https://github.com/tolgee/tolgee-platform/issues/2168)) ([f841ac3](https://github.com/tolgee/tolgee-platform/commit/f841ac38fb8679d3df67c1a4cea992e08f05ae2a))
+* Wait for postgres using separate datasource ([#2170](https://github.com/tolgee/tolgee-platform/issues/2170)) ([0110ec8](https://github.com/tolgee/tolgee-platform/commit/0110ec890323c58e150fedb458be89b129c0ef20))
+
 ## [3.49.4](https://github.com/tolgee/tolgee-platform/compare/v3.49.3...v3.49.4) (2024-03-08)
 
 
