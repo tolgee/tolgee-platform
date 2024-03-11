@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -70,6 +71,7 @@ class ProjectAuthorizationInterceptorTest {
       requestContextService,
       Mockito.mock(ProjectHolder::class.java),
       Mockito.mock(OrganizationHolder::class.java),
+      Mockito.mock(ActivityHolder::class.java),
     )
 
   private val mockMvc =

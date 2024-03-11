@@ -271,7 +271,7 @@ class InterceptedEventsManager(
         activityHolder.modifiedEntities,
         activityHolder.organizationId,
         activityHolder.utmData,
-        activityHolder.sdkInfo,
+        activityHolder.businessEventData,
       ),
     )
   }
