@@ -8,10 +8,12 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.PluralForms
 import io.tolgee.formats.StringIsNotPluralException
 import io.tolgee.formats.convertToIcuPlural
 import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.normalizePlurals
+import io.tolgee.formats.optimizePluralForms
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
@@ -532,11 +534,12 @@ class TranslationService(
     keyIdToArgNameMap: Map<Long, String?>,
     newIsPlural: Boolean,
     ignoreTranslationsForMigration: MutableList<Long> = mutableListOf(),
+    throwOnDataLoss: Boolean = false,
   ) {
     val translations =
       translationRepository
         .getAllByKeyIdInExcluding(keyIdToArgNameMap.keys, ignoreTranslationsForMigration.nullIfEmpty())
-    translations.forEach { handleIsPluralChanged(it, newIsPlural, keyIdToArgNameMap[it.key.id]) }
+    translations.forEach { handleIsPluralChanged(it, newIsPlural, keyIdToArgNameMap[it.key.id], throwOnDataLoss) }
     saveAll(translations)
   }
 
@@ -544,8 +547,9 @@ class TranslationService(
     it: Translation,
     newIsPlural: Boolean,
     newPluralArgName: String?,
+    throwOnDataLoss: Boolean,
   ) {
-    it.text = getNewText(it.text, newIsPlural, newPluralArgName)
+    it.text = getNewText(it.text, newIsPlural, newPluralArgName, throwOnDataLoss)
   }
 
   /**
@@ -556,12 +560,27 @@ class TranslationService(
     text: String?,
     newIsPlural: Boolean,
     newPluralArgName: String?,
+    throwOnDataLoss: Boolean,
   ): String? {
     if (newIsPlural) {
       return text.convertToIcuPlural(newPluralArgName)
     }
     val forms = getPluralForms(text)
+    if (throwOnDataLoss) {
+      throwOnDataLoss(forms, text)
+    }
     return forms?.forms?.get("other") ?: text
+  }
+
+  private fun throwOnDataLoss(
+    forms: PluralForms?,
+    text: String? = null,
+  ) {
+    forms ?: return
+    val keys = optimizePluralForms(forms.forms).keys
+    if (keys.size > 1) {
+      throw BadRequestException(Message.PLURAL_FORMS_DATA_LOSS, listOf(text))
+    }
   }
 
   fun <T> validateAndNormalizePlurals(
