@@ -1,3 +1,10 @@
+## [3.49.11](https://github.com/tolgee/tolgee-platform/compare/v3.49.10...v3.49.11) (2024-03-12)
+
+
+### Bug Fixes
+
+* Wrong JSONArray class ([#2182](https://github.com/tolgee/tolgee-platform/issues/2182)) ([682e31f](https://github.com/tolgee/tolgee-platform/commit/682e31f0a19a593a7d06cb9ef2c9ca6c2f438fbf))
+
 ## [3.49.10](https://github.com/tolgee/tolgee-platform/compare/v3.49.9...v3.49.10) (2024-03-12)
 
 
