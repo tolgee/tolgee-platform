@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  ContentDeliveryConfigReferenceData,
-  ContentStorageReferenceData,
-} from '../types';
+import { ContentStorageReferenceData } from '../types';
 
 type Props = {
   data: ContentStorageReferenceData;
