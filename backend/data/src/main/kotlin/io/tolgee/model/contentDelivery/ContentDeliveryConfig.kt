@@ -2,6 +2,7 @@ package io.tolgee.model.contentDelivery
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.dtos.IExportParams
@@ -45,6 +46,7 @@ class ContentDeliveryConfig(
   @OneToMany(mappedBy = "contentDeliveryConfig")
   var automationActions: MutableList<AutomationAction> = mutableListOf()
 
+  @ActivityIgnoredProp
   var lastPublished: Date? = null
 
   @Type(JsonBinaryType::class)

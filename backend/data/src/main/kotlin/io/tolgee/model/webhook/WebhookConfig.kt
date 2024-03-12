@@ -1,6 +1,7 @@
 package io.tolgee.model.webhook
 
 import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.Project
@@ -30,7 +31,9 @@ class WebhookConfig(
   @OneToMany(mappedBy = "webhookConfig", orphanRemoval = true)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
 
+  @ActivityIgnoredProp
   var firstFailed: Date? = null
 
+  @ActivityIgnoredProp
   var lastExecuted: Date? = null
 }

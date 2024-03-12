@@ -2,6 +2,7 @@ package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.EntityDescriptionProvider
+import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.data.EntityDescriptionRef
@@ -96,12 +97,32 @@ class InterceptedEventsManager(
 
     val activityModifiedEntity = getModifiedEntity(entity, revisionType)
 
+    if (isAllIgnored(entity, currentState, previousState, propertyNames)) {
+      return
+    }
+
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
     activityModifiedEntity.revisionType = revisionType
     activityModifiedEntity.modifications.putAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
+  }
+
+  private fun isAllIgnored(
+    entity: EntityWithId,
+    currentState: Array<out Any>?,
+    previousState: Array<out Any>?,
+    propertyNames: Array<out String>?,
+  ): Boolean {
+    val ignoredFields = getEntityIgnoredMembers(entity)
+
+    return propertyNames?.foldIndexed(true) { index, acc, current ->
+      if (currentState?.get(index) != previousState?.get(index) && !ignoredFields.contains(current)) {
+        return@foldIndexed false
+      }
+      return@foldIndexed acc
+    } ?: true
   }
 
   private fun ActivityModifiedEntity.setEntityDescription(entity: EntityWithId) {
@@ -196,15 +217,28 @@ class InterceptedEventsManager(
     entity: Any,
     propertyName: String,
   ): PropChangesProvider? {
-    val propertyAnnotation =
-      entity::class.members
-        .find { it.name == propertyName }
-        ?.findAnnotation<ActivityLoggedProp>()
-        ?: return null
-
+    val propertyAnnotation = getEntityAnnotatedMembers(entity)[propertyName] ?: return null
     val providerClass = propertyAnnotation.modificationProvider
     return applicationContext.getBean(providerClass.java)
   }
+
+  private fun getEntityAnnotatedMembers(entity: Any): Map<String, ActivityLoggedProp> {
+    return annotatedMembersCache.computeIfAbsent(entity::class.java) {
+      entity::class.members.mapNotNull {
+        val annotation = it.findAnnotation<ActivityLoggedProp>() ?: return@mapNotNull null
+        it.name to annotation
+      }.toMap()
+    }
+  }
+
+  private fun getEntityIgnoredMembers(entity: Any): Set<String> {
+    return ignoredMembersCache.computeIfAbsent(entity::class.java) {
+      entity::class.members.filter { it.hasAnnotation<ActivityIgnoredProp>() }.map { it.name }.toSet()
+    }
+  }
+
+  private val annotatedMembersCache: MutableMap<Class<*>, Map<String, ActivityLoggedProp>> = mutableMapOf()
+  private val ignoredMembersCache: MutableMap<Class<*>, Set<String>> = mutableMapOf()
 
   private fun shouldHandleActivity(entity: Any?) =
     entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>() &&
