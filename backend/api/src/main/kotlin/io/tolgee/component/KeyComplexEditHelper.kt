@@ -162,6 +162,7 @@ class KeyComplexEditHelper(
 
   private fun doUpdateTags() {
     if (dtoTags !== null && areTagsModified) {
+      activityHolder.businessEventData["usesTags"] = "true"
       key.project.checkKeysEditPermission()
       tagService.updateTags(key, dtoTags)
     }

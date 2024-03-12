@@ -31,7 +31,9 @@ open class ActivityHolder(val applicationContext: ApplicationContext) {
 
   open var utmData: UtmData = null
 
-  open var sdkInfo: Map<String, String?>? = null
+  open val businessEventData: MutableMap<String, String?> by lazy {
+    mutableMapOf()
+  }
 
   /**
    * This field stores all modified entities, it's stored before the transaction is committed

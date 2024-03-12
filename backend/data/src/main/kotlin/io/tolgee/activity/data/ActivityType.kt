@@ -11,6 +11,11 @@ enum class ActivityType(
   val restrictEntitiesInList: Array<KClass<out EntityWithId>>? = null,
   val paramsProvider: KClass<out PublicParamsProvider>? = null,
   val hideInList: Boolean = false,
+  /**
+   * If true, the activity will be saved even if it does
+   * not contain any changes in fields market for activity logging
+   */
+  val saveWithoutModification: Boolean = false,
 ) {
   UNKNOWN,
   SET_TRANSLATION_STATE,
@@ -45,4 +50,13 @@ enum class ActivityType(
   BATCH_UNTAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class),
   AUTOMATION(onlyCountsInList = true, hideInList = true),
+  CONTENT_DELIVERY_CONFIG_CREATE,
+  CONTENT_DELIVERY_CONFIG_UPDATE,
+  CONTENT_DELIVERY_CONFIG_DELETE,
+  CONTENT_STORAGE_CREATE,
+  CONTENT_STORAGE_UPDATE,
+  CONTENT_STORAGE_DELETE,
+  WEBHOOK_CONFIG_CREATE,
+  WEBHOOK_CONFIG_UPDATE,
+  WEBHOOK_CONFIG_DELETE,
 }

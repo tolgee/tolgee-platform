@@ -756,6 +756,24 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
@@ -792,24 +810,6 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1411,7 +1411,7 @@ export interface components {
        *
        * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
        */
-      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF" | "PYTHON_SPRINTF";
+      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
     };
     ContentDeliveryConfigModel: {
       /** Format: int64 */
@@ -1465,7 +1465,7 @@ export interface components {
        *
        * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
        */
-      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF" | "PYTHON_SPRINTF";
+      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
       /**
        * @description
        *       If true, for structured formats (like JSON) arrays are supported.
@@ -1665,15 +1665,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1810,17 +1810,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
-      scopes: string[];
+      projectName: string;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       username?: string;
       description: string;
+      scopes: string[];
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1854,7 +1854,7 @@ export interface components {
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
       isBatch: boolean;
       pluralForms?: { [key: string]: string };
-      expectedPluralForms?: string[];
+      pluralFormExamples?: { [key: string]: string };
     };
     MtResult: {
       translated?: string;
@@ -2514,7 +2514,7 @@ export interface components {
        *
        * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
        */
-      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF" | "PYTHON_SPRINTF";
+      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
       /**
        * @description
        *       If true, for structured formats (like JSON) arrays are supported.
@@ -2775,11 +2775,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2889,9 +2889,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
       namespace?: string;
       description?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -2899,9 +2899,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
       namespace?: string;
       description?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3012,7 +3012,16 @@ export interface components {
         | "BATCH_TAG_KEYS"
         | "BATCH_UNTAG_KEYS"
         | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION";
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -3429,15 +3438,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3556,17 +3565,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
-      scopes: string[];
+      projectName: string;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       username?: string;
       description: string;
+      scopes: string[];
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -7906,9 +7915,9 @@ export interface operations {
         /**
          * Message format to be used for export. (applicable for .po)
          *
-         * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+         * e.g. PHP_PO: Hello %s
          */
-        messageFormat?: "C_SPRINTF" | "PHP_SPRINTF" | "PYTHON_SPRINTF";
+        messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
         supportArrays?: boolean;
       };
       path: {

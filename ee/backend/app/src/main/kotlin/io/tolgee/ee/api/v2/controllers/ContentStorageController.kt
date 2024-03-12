@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.contentDelivery.ContentStorageRequest
@@ -48,6 +50,7 @@ class ContentStorageController(
   @PostMapping("")
   @Operation(description = "Create Content Storage")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
+  @RequestActivity(ActivityType.CONTENT_STORAGE_CREATE)
   @AllowApiAccess
   fun create(
     @Valid @RequestBody
@@ -65,6 +68,7 @@ class ContentStorageController(
   @Operation(description = "Updates Content Storage")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
+  @RequestActivity(ActivityType.CONTENT_STORAGE_UPDATE)
   fun update(
     @PathVariable contentStorageId: Long,
     @Valid @RequestBody
@@ -92,6 +96,7 @@ class ContentStorageController(
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @DeleteMapping("/{contentStorageId}")
   @Operation(description = "Delete Content Storage")
+  @RequestActivity(ActivityType.CONTENT_STORAGE_DELETE)
   @AllowApiAccess
   fun delete(
     @PathVariable contentStorageId: Long,

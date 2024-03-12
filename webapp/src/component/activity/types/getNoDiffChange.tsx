@@ -1,6 +1,7 @@
 import { styled } from '@mui/material';
 import { DiffValue } from '../types';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
+import { valueToText } from '../formatTools';
 
 const StyledDiff = styled('span')`
   word-break: break-word;
@@ -11,8 +12,8 @@ const StyledRemoved = styled('span')`
 `;
 
 export const getNoDiffChange = (input?: DiffValue, languageTag?: string) => {
-  const oldInput = input?.old;
-  const newInput = input?.new;
+  const oldInput = valueToText(input?.old);
+  const newInput = valueToText(input?.new);
   const dir = languageTag ? getLanguageDirection(languageTag) : undefined;
   if (newInput) {
     return (

@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -45,6 +46,7 @@ class ProjectAuthorizationInterceptor(
   private val requestContextService: RequestContextService,
   private val projectHolder: ProjectHolder,
   private val organizationHolder: OrganizationHolder,
+  private val activityHolder: ActivityHolder,
 ) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -152,6 +154,7 @@ class ProjectAuthorizationInterceptor(
     }
 
     projectHolder.project = project
+    activityHolder.activityRevision.projectId = project.id
     organizationHolder.organization = organizationService.findDto(project.organizationOwnerId)
       ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
 

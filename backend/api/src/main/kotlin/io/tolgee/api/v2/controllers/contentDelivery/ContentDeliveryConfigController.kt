@@ -2,6 +2,8 @@ package io.tolgee.api.v2.controllers.contentDelivery
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
 import io.tolgee.dtos.request.ContentDeliveryConfigRequest
@@ -49,6 +51,7 @@ class ContentDeliveryConfigController(
   @Operation(description = "Create Content Delivery Config")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
+  @RequestActivity(ActivityType.CONTENT_DELIVERY_CONFIG_CREATE)
   fun create(
     @Valid @RequestBody
     dto: ContentDeliveryConfigRequest,
@@ -61,6 +64,7 @@ class ContentDeliveryConfigController(
   @Operation(description = "Updates Content Delivery Config")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
+  @RequestActivity(ActivityType.CONTENT_DELIVERY_CONFIG_UPDATE)
   fun update(
     @PathVariable id: Long,
     @Valid @RequestBody
@@ -85,6 +89,7 @@ class ContentDeliveryConfigController(
   @DeleteMapping("/{id}")
   @Operation(description = "Delete Content Delivery Config")
   @AllowApiAccess
+  @RequestActivity(ActivityType.CONTENT_DELIVERY_CONFIG_DELETE)
   fun delete(
     @PathVariable id: Long,
   ) {
