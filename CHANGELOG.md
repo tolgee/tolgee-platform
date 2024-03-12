@@ -1,3 +1,10 @@
+## [3.49.10](https://github.com/tolgee/tolgee-platform/compare/v3.49.9...v3.49.10) (2024-03-12)
+
+
+### Bug Fixes
+
+* Keep namespaces in Content Delivery edit dialog & empty state ([#2181](https://github.com/tolgee/tolgee-platform/issues/2181)) ([5cf1099](https://github.com/tolgee/tolgee-platform/commit/5cf10999b69751c0f7eca6576d33a920b1c8cd1c))
+
 ## [3.49.9](https://github.com/tolgee/tolgee-platform/compare/v3.49.8...v3.49.9) (2024-03-12)
 
 
