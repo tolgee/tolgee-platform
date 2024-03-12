@@ -1,3 +1,10 @@
+## [3.49.9](https://github.com/tolgee/tolgee-platform/compare/v3.49.8...v3.49.9) (2024-03-12)
+
+
+### Bug Fixes
+
+* s3 bucket delete ([#2180](https://github.com/tolgee/tolgee-platform/issues/2180)) ([0121dbe](https://github.com/tolgee/tolgee-platform/commit/0121dbe3e9c34e7160e79cd7ff935448ddf87368))
+
 ## [3.49.8](https://github.com/tolgee/tolgee-platform/compare/v3.49.7...v3.49.8) (2024-03-12)
 
 
