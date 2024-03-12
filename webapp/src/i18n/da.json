@@ -59,6 +59,7 @@
   "activity_entity_content_delivery_config.format" : "Format",
   "activity_entity_content_delivery_config.languageTags" : "Sprog",
   "activity_entity_content_delivery_config.name" : "Navn",
+  "activity_entity_content_delivery_config.supportArrays" : "Understøt arrays",
   "activity_entity_content_storage" : "Indholdsopbevaring",
   "activity_entity_key" : "Nøgle",
   "activity_entity_key_meta" : "Nøgleattributter",

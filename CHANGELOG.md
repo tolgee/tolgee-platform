@@ -1,3 +1,10 @@
+## [3.49.7](https://github.com/tolgee/tolgee-platform/compare/v3.49.6...v3.49.7) (2024-03-12)
+
+
+### Bug Fixes
+
+* Don't remove plural forms when string changed to no plural ([#2169](https://github.com/tolgee/tolgee-platform/issues/2169)) ([2a32b29](https://github.com/tolgee/tolgee-platform/commit/2a32b29aee7ba271a3dd9a05e3d593ce91ac2adb))
+
 ## [3.49.6](https://github.com/tolgee/tolgee-platform/compare/v3.49.5...v3.49.6) (2024-03-12)
 
 

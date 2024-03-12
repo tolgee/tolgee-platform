@@ -59,6 +59,7 @@
   "activity_entity_content_delivery_config.format" : "Format",
   "activity_entity_content_delivery_config.languageTags" : "Languages",
   "activity_entity_content_delivery_config.name" : "Name",
+  "activity_entity_content_delivery_config.supportArrays" : "Support arrays",
   "activity_entity_content_storage" : "Content Storage",
   "activity_entity_key" : "Key",
   "activity_entity_key_meta" : "Key attributes",

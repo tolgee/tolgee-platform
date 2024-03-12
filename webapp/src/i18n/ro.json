@@ -59,6 +59,7 @@
   "activity_entity_content_delivery_config.format" : "Format",
   "activity_entity_content_delivery_config.languageTags" : "Limbi",
   "activity_entity_content_delivery_config.name" : "Nume",
+  "activity_entity_content_delivery_config.supportArrays" : "Suport pentru tablouri",
   "activity_entity_content_storage" : "Stocare conținut",
   "activity_entity_key" : "Cheie",
   "activity_entity_key_meta" : "Atribute cheie",

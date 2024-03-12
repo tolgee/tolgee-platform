@@ -58,7 +58,8 @@
     "filterState" : "Stavy",
     "format" : "Formát",
     "languageTags" : "Jazyky",
-    "name" : "Název"
+    "name" : "Název",
+    "supportArrays" : "Podpora polí"
   },
   "activity_entity_key" : "Klíč",
   "activity_entity_key_meta" : "Atributy klíče",
