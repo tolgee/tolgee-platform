@@ -1,4 +1,4 @@
-import { Field } from 'formik';
+import { Field, useField } from 'formik';
 import {
   MenuItem,
   Select,
@@ -7,6 +7,7 @@ import {
   FormControl,
   InputLabel,
   FormHelperText,
+  SelectChangeEvent,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
@@ -20,50 +21,48 @@ type Props = {
 export const NsSelector: React.FC<Props> = ({ namespaces, className }) => {
   const { t } = useTranslate();
 
+  const [field, meta, helper] = useField('namespaces');
+
   if (!namespaces) {
     return null;
   }
 
+  const onChange = (e: SelectChangeEvent<StateType[]>) => {
+    helper.setValue(e.target.value);
+  };
+
   return (
-    <Field name="namespaces">
-      {({ field, meta }) => {
-        return (
-          <FormControl
-            className={className}
-            error={meta.error}
-            variant="standard"
+    <FormControl className={className} error={!!meta.error} variant="standard">
+      <InputLabel shrink={true}>
+        {t('export_translations_namespaces_label')}
+      </InputLabel>
+      <Select
+        {...field}
+        onChange={onChange}
+        variant="standard"
+        data-cy="export-namespace-selector"
+        renderValue={(values: StateType[]) => {
+          if (values.length === namespaces.length || values.length === 0) {
+            return t('export_translations_namespaces_all');
+          }
+          return values.map((ns) => ns || t('namespace_default')).join(', ');
+        }}
+        displayEmpty={true}
+        multiple
+      >
+        {namespaces?.map((ns) => (
+          <MenuItem
+            data-cy="export-namespace-selector-item"
+            key={ns}
+            value={ns}
+            dense
           >
-            <InputLabel>{t('export_translations_namespaces_label')}</InputLabel>
-            <Select
-              {...field}
-              variant="standard"
-              data-cy="export-namespace-selector"
-              renderValue={(values: StateType[]) => {
-                if (values.length === namespaces.length) {
-                  return t('export_translations_namespaces_all');
-                }
-                return values
-                  .map((ns) => ns || t('namespace_default'))
-                  .join(', ');
-              }}
-              multiple
-            >
-              {namespaces?.map((ns) => (
-                <MenuItem
-                  data-cy="export-namespace-selector-item"
-                  key={ns}
-                  value={ns}
-                  dense
-                >
-                  <Checkbox checked={field.value.includes(ns)} />
-                  <ListItemText primary={ns || t('namespace_default')} />
-                </MenuItem>
-              ))}
-            </Select>
-            <FormHelperText>{meta.error}</FormHelperText>
-          </FormControl>
-        );
-      }}
-    </Field>
+            <Checkbox checked={field.value.includes(ns)} />
+            <ListItemText primary={ns || t('namespace_default')} />
+          </MenuItem>
+        ))}
+      </Select>
+      <FormHelperText>{meta.error}</FormHelperText>
+    </FormControl>
   );
 };
