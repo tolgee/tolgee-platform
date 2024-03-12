@@ -626,6 +626,8 @@
   "key_edit_modal_context_hint" : "This key is related to following keys:",
   "key_edit_modal_disabled_languages_hint" : "Select languages to which this key shouldn't be translated",
   "key_edit_modal_disabled_translations" : "Disabled translations",
+  "key_edit_modal_force_plural_change_message" : "Key plural variants are already filled, so they will be lost with this action.",
+  "key_edit_modal_force_plural_change_title" : "Are you sure?",
   "key_edit_modal_switch_advanced" : "Advanced",
   "key_edit_modal_switch_context" : "Context",
   "key_edit_modal_switch_general" : "General",

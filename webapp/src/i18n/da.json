@@ -626,6 +626,8 @@
   "key_edit_modal_context_hint" : "Denne nøgle er relateret til følgende nøgler:",
   "key_edit_modal_disabled_languages_hint" : "Vælg sprog, som denne nøgle ikke skal oversættes til",
   "key_edit_modal_disabled_translations" : "Deaktiverede oversættelser",
+  "key_edit_modal_force_plural_change_message" : "Flertalsvarianterne for nøglen er allerede udfyldt, så de vil gå tabt med denne handling.",
+  "key_edit_modal_force_plural_change_title" : "Er du sikker?",
   "key_edit_modal_switch_advanced" : "Avanceret",
   "key_edit_modal_switch_context" : "Kontekst",
   "key_edit_modal_switch_general" : "Generelt",

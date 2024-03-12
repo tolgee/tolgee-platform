@@ -626,6 +626,8 @@
   "key_edit_modal_context_hint" : "Tento klíč se vztahuje k následujícím klíčům:",
   "key_edit_modal_disabled_languages_hint" : "Vyberte jazyky, do kterých se tento klíč nemá překládat",
   "key_edit_modal_disabled_translations" : "Deaktivované překlady",
+  "key_edit_modal_force_plural_change_message" : "Plurální varianty klíče jsou již vyplněny, takže budou ztraceny touto akcí.",
+  "key_edit_modal_force_plural_change_title" : "Jste si jistí?",
   "key_edit_modal_switch_advanced" : "Pokročilé",
   "key_edit_modal_switch_context" : "Kontext",
   "key_edit_modal_switch_general" : "Obecné",

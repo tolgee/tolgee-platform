@@ -1,3 +1,10 @@
+## [3.49.8](https://github.com/tolgee/tolgee-platform/compare/v3.49.7...v3.49.8) (2024-03-12)
+
+
+### Bug Fixes
+
+* Fixed activity, more Business events logged ([#2173](https://github.com/tolgee/tolgee-platform/issues/2173)) ([749c420](https://github.com/tolgee/tolgee-platform/commit/749c42025bf82c9e54915578d3f1764918051a70))
+
 ## [3.49.7](https://github.com/tolgee/tolgee-platform/compare/v3.49.6...v3.49.7) (2024-03-12)
 
 

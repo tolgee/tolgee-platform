@@ -626,6 +626,8 @@
   "key_edit_modal_context_hint" : "Această cheie este legată de următoarele chei:",
   "key_edit_modal_disabled_languages_hint" : "Selectați limbile către care această cheie nu ar trebui să fie tradusă",
   "key_edit_modal_disabled_translations" : "Traduceri dezactivate",
+  "key_edit_modal_force_plural_change_message" : "Variantele de plural ale cheii sunt deja completate, astfel vor fi pierdute cu această acțiune.",
+  "key_edit_modal_force_plural_change_title" : "Sunteți sigur?",
   "key_edit_modal_switch_advanced" : "Avansat",
   "key_edit_modal_switch_context" : "Context",
   "key_edit_modal_switch_general" : "General",
