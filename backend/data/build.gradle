@@ -160,7 +160,9 @@ dependencies {
     implementation 'net.datafaker:datafaker:1.5.0'
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
-    implementation libs.mailjet
+    implementation(libs.mailjet) {
+        exclude group: 'org.json', module: 'json'
+    }
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
