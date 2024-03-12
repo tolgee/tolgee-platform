@@ -1,12 +1,12 @@
-import { Field, useField } from 'formik';
+import { useField } from 'formik';
 import {
+  Checkbox,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  ListItemText,
   MenuItem,
   Select,
-  Checkbox,
-  ListItemText,
-  FormControl,
-  InputLabel,
-  FormHelperText,
   SelectChangeEvent,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
