@@ -80,7 +80,7 @@ describe('Translations Base', () => {
     waitForGlobalLoading();
   });
 
-  it.only('will warn user when data are being lost', () => {
+  it('will warn user when data are being lost', () => {
     createKey(
       project.id,
       'Test key',
