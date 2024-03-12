@@ -8,6 +8,7 @@ import {
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { createKey, deleteProject } from '../../common/apiCalls/common';
+import { confirmStandard } from '../../common/shared';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
@@ -77,5 +78,31 @@ describe('Translations Base', () => {
     cy.gcy('key-plural-variable-name').clear().type('testVariable');
     cy.gcy('translations-cell-save-button').click();
     waitForGlobalLoading();
+  });
+
+  it.only('will warn user when data are being lost', () => {
+    createKey(
+      project.id,
+      'Test key',
+      {
+        en: '{value, plural, one {# item} other {# items}}',
+        cs: '{value, plural, one {# položka} few {# položky} other {# položek}}',
+      },
+      { isPlural: true }
+    );
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+
+    getCell('Test key').click();
+    cy.gcy('key-plural-checkbox').click();
+    cy.gcy('translations-cell-save-button').click();
+    waitForGlobalLoading();
+
+    cy.gcy('global-confirmation-dialog').should('be.visible');
+    confirmStandard();
+    waitForGlobalLoading();
+    getTranslationCell('Test key', 'en')
+      .contains('# items')
+      .should('be.visible');
   });
 });
