@@ -71,7 +71,7 @@ class ProjectAuthorizationInterceptorTest {
       requestContextService,
       Mockito.mock(ProjectHolder::class.java),
       Mockito.mock(OrganizationHolder::class.java),
-      Mockito.mock(ActivityHolder::class.java),
+      Mockito.mock(ActivityHolder::class.java, Mockito.RETURNS_DEEP_STUBS),
     )
 
   private val mockMvc =
