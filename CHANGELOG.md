@@ -1,3 +1,10 @@
+## [3.49.6](https://github.com/tolgee/tolgee-platform/compare/v3.49.5...v3.49.6) (2024-03-12)
+
+
+### Bug Fixes
+
+* Usage and Invoicing UI fixes ([#2174](https://github.com/tolgee/tolgee-platform/issues/2174)) ([3a68137](https://github.com/tolgee/tolgee-platform/commit/3a68137c81323a312bf8934b9027e46f09978ed2))
+
 ## [3.49.5](https://github.com/tolgee/tolgee-platform/compare/v3.49.4...v3.49.5) (2024-03-09)
 
 

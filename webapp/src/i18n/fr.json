@@ -594,7 +594,7 @@
   "invoice_usage_dialog_table_subscription_item" : "Abonnement",
   "invoice_usage_dialog_table_subtotal" : "Sous-total",
   "invoice_usage_dialog_table_total" : "Total",
-  "invoice_usage_dialog_table_translations_item" : "Traductions",
+  "invoice_usage_dialog_table_translations_item" : "Chaînes",
   "invoice_usage_dialog_table_vat" : "TVA",
   "invoice_usage_dialog_table_vat_rate" : "Taux de TVA",
   "invoice_usage_dialog_title" : "Détails d’utilisation",
