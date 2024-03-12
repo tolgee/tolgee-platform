@@ -95,11 +95,11 @@ class InterceptedEventsManager(
 
     entity as EntityWithId
 
-    val activityModifiedEntity = getModifiedEntity(entity, revisionType)
-
     if (isAllIgnored(entity, currentState, previousState, propertyNames)) {
       return
     }
+
+    val activityModifiedEntity = getModifiedEntity(entity, revisionType)
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
@@ -118,7 +118,7 @@ class InterceptedEventsManager(
     val ignoredFields = getEntityIgnoredMembers(entity)
 
     return propertyNames?.foldIndexed(true) { index, acc, current ->
-      if (currentState?.get(index) != previousState?.get(index) && !ignoredFields.contains(current)) {
+      if (currentState?.get(index) !== previousState?.get(index) && !ignoredFields.contains(current)) {
         return@foldIndexed false
       }
       return@foldIndexed acc
