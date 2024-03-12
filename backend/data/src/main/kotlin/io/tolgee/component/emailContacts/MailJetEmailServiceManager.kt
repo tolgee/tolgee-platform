@@ -83,8 +83,11 @@ class MailJetEmailServiceManager(
 
   private val JSONArray?.contactId: Long
     get() {
-      return (this?.firstOrNull() as? JSONObject)?.get("ID")?.toString()?.toLong()
-        ?: throw IllegalStateException("Mailjet did not return contact id")
+      return try {
+        (this?.get(0) as? JSONObject)?.get("ID")?.toString()?.toLong()
+      } catch (e: Exception) {
+        throw IllegalStateException("Mailjet did not return contact id", e)
+      } ?: throw IllegalStateException("Mailjet did not return contact id")
     }
 
   @Async
