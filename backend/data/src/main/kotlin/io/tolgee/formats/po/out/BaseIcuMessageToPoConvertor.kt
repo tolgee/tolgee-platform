@@ -3,7 +3,7 @@ package io.tolgee.formats.po.out
 import com.ibm.icu.text.PluralRules
 import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
-import io.tolgee.formats.FromIcuParamConvertor
+import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessageConvertorFactory
 import io.tolgee.formats.escaping.IcuUnescper
 import io.tolgee.formats.getPluralDataOrNull
@@ -12,7 +12,7 @@ import io.tolgee.formats.pluralData.PluralData
 
 class BaseIcuMessageToPoConvertor(
   val message: String,
-  val argumentConverter: FromIcuParamConvertor,
+  val placeholderConvertor: FromIcuPlaceholderConvertor,
   val languageTag: String = "en",
   private val forceIsPlural: Boolean,
   private val projectIcuPlaceholdersSupport: Boolean = true,
@@ -46,7 +46,7 @@ class BaseIcuMessageToPoConvertor(
         forceIsPlural,
         projectIcuPlaceholdersSupport,
       ) {
-        argumentConverter
+        placeholderConvertor
       }.create().convert()
     val poPluralResult = getPluralResult(result.formsResult ?: mutableMapOf())
     return ToPoConversionResult(null, poPluralResult)
@@ -59,7 +59,7 @@ class BaseIcuMessageToPoConvertor(
         forceIsPlural = false,
         projectIcuPlaceholdersSupport,
       ) {
-        argumentConverter
+        placeholderConvertor
       }.create().convert()
     return ToPoConversionResult(result.singleResult, null)
   }

@@ -10,7 +10,7 @@ class IcuToJavaMessageConvertor(
 ) {
   fun convert(): PossiblePluralConversionResult {
     return MessageConvertorFactory(message, forceIsPlural, isProjectIcuPlaceholdersEnabled) {
-      JavaFromIcuParamConvertor()
+      JavaFromIcuPlaceholderConvertor()
     }.create().convert()
   }
 }

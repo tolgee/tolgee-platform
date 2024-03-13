@@ -1,6 +1,6 @@
 package io.tolgee.formats
 
-interface FromIcuParamConvertor {
+interface FromIcuPlaceholderConvertor {
   fun convert(
     node: MessagePatternUtil.ArgNode,
     isInPlural: Boolean,

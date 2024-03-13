@@ -1,8 +1,8 @@
 package io.tolgee.formats.po
 
 import io.tolgee.formats.ImportMessageConvertorType
-import io.tolgee.formats.po.`in`.paramConvertors.CToIcuParamConvertor
-import io.tolgee.formats.po.`in`.paramConvertors.PhpToIcuParamConvertor
+import io.tolgee.formats.paramConvertors.`in`.CToIcuParamConvertor
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuParamConvertor
 import io.tolgee.formats.po.out.ToPoMessageConvertor
 import io.tolgee.formats.po.out.c.ToCPoMessageConvertor
 import io.tolgee.formats.po.out.php.ToPhpPoMessageConvertor

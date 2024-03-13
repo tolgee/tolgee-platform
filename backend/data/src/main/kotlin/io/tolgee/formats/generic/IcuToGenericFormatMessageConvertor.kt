@@ -2,8 +2,8 @@ package io.tolgee.formats.generic
 
 import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
-import io.tolgee.formats.FromIcuParamConvertor
-import io.tolgee.formats.NoOpFromIcuParamConvertor
+import io.tolgee.formats.FromIcuPlaceholderConvertor
+import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.toIcuPluralString
 
 /**
@@ -16,7 +16,7 @@ class IcuToGenericFormatMessageConvertor(
   private val message: String?,
   private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean,
-  private val paramConvertorFactory: () -> FromIcuParamConvertor = { NoOpFromIcuParamConvertor() },
+  private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor = { NoOpFromIcuPlaceholderConvertor() },
 ) {
   fun convert(): String? {
     message ?: return null

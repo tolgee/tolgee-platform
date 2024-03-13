@@ -5,7 +5,7 @@ import io.tolgee.constants.Message
 
 class BaseIcuMessageConvertor(
   private val message: String,
-  private val argumentConvertor: FromIcuParamConvertor,
+  private val argumentConvertor: FromIcuPlaceholderConvertor,
   private val keepEscaping: Boolean = false,
   private val forceIsPlural: Boolean? = null,
 ) {

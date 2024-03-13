@@ -1,11 +1,14 @@
-package io.tolgee.formats
+package io.tolgee.formats.flutter.out
 
-class NoOpFromIcuParamConvertor : FromIcuParamConvertor {
+import io.tolgee.formats.FromIcuPlaceholderConvertor
+import io.tolgee.formats.MessagePatternUtil
+
+class FlutterArbFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
   override fun convert(
     node: MessagePatternUtil.ArgNode,
     isInPlural: Boolean,
   ): String {
-    return node.patternString
+    return "{${node.name}}"
   }
 
   override fun convertText(string: String): String {
@@ -15,5 +18,5 @@ class NoOpFromIcuParamConvertor : FromIcuParamConvertor {
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
-  ): String = node.patternString
+  ): String = "{$argName}"
 }
