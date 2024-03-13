@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.activity.ActivityHolder
@@ -43,6 +44,7 @@ class SlackIntegrationController(
   private val translationService: TranslationService,
   private val keyService: KeyService,
   private val activityHolder: ActivityHolder,
+  private val objectMapper: ObjectMapper
 ) {
   @PostMapping("/tolgee")
   @UseDefaultPermissions
@@ -166,9 +168,6 @@ class SlackIntegrationController(
   }
 
   @PostMapping("/event")
-  @RequestActivity(ActivityType.SET_TRANSLATIONS)
-  @UseDefaultPermissions
-  @AllowApiAccess
   @Transactional
   fun fetchEvent(
     @RequestBody payload: String,
