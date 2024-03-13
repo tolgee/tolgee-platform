@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.po.out
 
 import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
-import io.tolgee.formats.po.out.php.IcuToPhpParamConvertor
+import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -10,7 +10,7 @@ class BaseIcuMessageToPoConvertorTest {
   fun `converts simple message`() {
     BaseIcuMessageToPoConvertor(
       "Hello {hello} {hello, number} {hello, number, .00}",
-      IcuToPhpParamConvertor(),
+      IcuToPhpPlaceholderConvertor(),
       forceIsPlural = false,
     ).convert().singleResult.assert.isEqualTo("Hello %s %d %.2f")
   }
@@ -20,7 +20,7 @@ class BaseIcuMessageToPoConvertorTest {
     val forms =
       BaseIcuMessageToPoConvertor(
         "{0, plural, one {# dog} other {# dogs}}",
-        IcuToPhpParamConvertor(),
+        IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,
       )
         .convert().formsResult
@@ -35,7 +35,7 @@ class BaseIcuMessageToPoConvertorTest {
       BaseIcuMessageToPoConvertor(
         message = "{0, plural, one {# pes} few {# psi} other {# psů}}",
         languageTag = "cs",
-        argumentConverter = IcuToPhpParamConvertor(),
+        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,
       ).convert().formsResult
 
@@ -50,7 +50,7 @@ class BaseIcuMessageToPoConvertorTest {
       BaseIcuMessageToPoConvertor(
         message = "{0, plural, one {# pes} other {# psů}}",
         languageTag = "cs",
-        argumentConverter = IcuToPhpParamConvertor(),
+        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,
       ).convert().formsResult
 
@@ -65,7 +65,7 @@ class BaseIcuMessageToPoConvertorTest {
       BaseIcuMessageToPoConvertor(
         message = "{0, plural, one {# pes} many {# pesos} other {# psů}}",
         languageTag = "cs",
-        argumentConverter = IcuToPhpParamConvertor(),
+        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,
       ).convert().formsResult
 

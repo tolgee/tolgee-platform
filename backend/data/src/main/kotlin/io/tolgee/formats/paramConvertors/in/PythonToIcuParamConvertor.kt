@@ -1,4 +1,4 @@
-package io.tolgee.formats.po.`in`.paramConvertors
+package io.tolgee.formats.paramConvertors.`in`
 
 import io.tolgee.formats.ToIcuParamConvertor
 import io.tolgee.formats.convertFloatToIcu

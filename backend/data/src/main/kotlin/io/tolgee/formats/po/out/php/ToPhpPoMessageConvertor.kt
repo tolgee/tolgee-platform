@@ -1,5 +1,6 @@
 package io.tolgee.formats.po.out.php
 
+import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
 import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
 import io.tolgee.formats.po.out.ToPoConversionResult
 import io.tolgee.formats.po.out.ToPoMessageConvertor
@@ -14,7 +15,7 @@ class ToPhpPoMessageConvertor(
     BaseIcuMessageToPoConvertor(
       message = message,
       languageTag = languageTag,
-      argumentConverter = IcuToPhpParamConvertor(),
+      placeholderConvertor = IcuToPhpPlaceholderConvertor(),
       forceIsPlural = forceIsPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     )

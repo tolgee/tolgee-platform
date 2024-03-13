@@ -1,24 +1,26 @@
-package io.tolgee.formats.po.out.python
+package io.tolgee.formats.paramConvertors.out
 
 import com.ibm.icu.text.MessagePattern
-import io.tolgee.formats.FromIcuParamConvertor
+import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
 import io.tolgee.formats.escapePercentSign
 
-class PythonFromIcuParamConvertor : FromIcuParamConvertor {
+class IcuToCPlaceholderConvertor : FromIcuPlaceholderConvertor {
   private var argIndex = -1
+  private var wasNumberedArg = false
 
   override fun convert(
     node: MessagePatternUtil.ArgNode,
     isInPlural: Boolean,
   ): String {
     argIndex++
-    val argNumString = getArgNameString(node)
+    val argNum = node.name?.toIntOrNull()
+    val argNumString = getArgNumString(argNum)
     val type = node.argType
 
     if (type == MessagePattern.ArgType.SIMPLE) {
       when (node.typeName) {
-        "number" -> return convertNumber(node)
+        "number" -> return convertNumber(node, argNum)
       }
     }
 
@@ -33,22 +35,25 @@ class PythonFromIcuParamConvertor : FromIcuParamConvertor {
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
   ): String {
-    return "%($argName)d"
+    return "%d"
   }
 
-  private fun convertNumber(node: MessagePatternUtil.ArgNode): String {
-    if (node.simpleStyle?.trim() == "scientific") {
-      return "%${getArgNameString(node)}e"
+  private fun convertNumber(
+    node: MessagePatternUtil.ArgNode,
+    argNum: Int?,
+  ): String {
+    if (node.simpleStyle.trim() == "scientific") {
+      return "%${getArgNumString(argNum)}e"
     }
     val precision = getPrecision(node)
     if (precision == 6) {
-      return "%${getArgNameString(node)}f"
+      return "%${getArgNumString(argNum)}f"
     }
     if (precision != null) {
-      return "%${getArgNameString(node)}.${precision}f"
+      return "%${getArgNumString(argNum)}.${precision}f"
     }
 
-    return "%${getArgNameString(node)}d"
+    return "%${getArgNumString(argNum)}d"
   }
 
   private fun getPrecision(node: MessagePatternUtil.ArgNode): Int? {
@@ -57,8 +62,12 @@ class PythonFromIcuParamConvertor : FromIcuParamConvertor {
     return precisionMatch.groups["precision"]?.value?.length
   }
 
-  private fun getArgNameString(node: MessagePatternUtil.ArgNode): String {
-    return "(${node.name})"
+  private fun getArgNumString(icuArgNum: Int?): String {
+    if ((icuArgNum != argIndex || wasNumberedArg) && icuArgNum != null) {
+      wasNumberedArg = true
+      return "${icuArgNum + 1}$"
+    }
+    return ""
   }
 
   companion object {

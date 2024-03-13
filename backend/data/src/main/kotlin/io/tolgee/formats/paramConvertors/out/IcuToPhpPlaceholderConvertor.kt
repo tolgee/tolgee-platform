@@ -1,11 +1,11 @@
-package io.tolgee.formats.android.out
+package io.tolgee.formats.paramConvertors.out
 
 import com.ibm.icu.text.MessagePattern
-import io.tolgee.formats.FromIcuParamConvertor
+import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
 import io.tolgee.formats.escapePercentSign
 
-class JavaFromIcuParamConvertor : FromIcuParamConvertor {
+class IcuToPhpPlaceholderConvertor : FromIcuPlaceholderConvertor {
   private var argIndex = -1
   private var wasNumberedArg = false
 
@@ -24,11 +24,7 @@ class JavaFromIcuParamConvertor : FromIcuParamConvertor {
       }
     }
 
-    if (type == MessagePattern.ArgType.NONE) {
-      return "%${argNumString}s"
-    }
-
-    return node.toString()
+    return "%${argNumString}s"
   }
 
   override fun convertText(string: String): String {
@@ -46,7 +42,7 @@ class JavaFromIcuParamConvertor : FromIcuParamConvertor {
     node: MessagePatternUtil.ArgNode,
     argNum: Int?,
   ): String {
-    if (node.simpleStyle?.trim() == "scientific") {
+    if (node.simpleStyle.trim() == "scientific") {
       return "%${getArgNumString(argNum)}e"
     }
     val precision = getPrecision(node)
@@ -61,7 +57,7 @@ class JavaFromIcuParamConvertor : FromIcuParamConvertor {
   }
 
   private fun getPrecision(node: MessagePatternUtil.ArgNode): Int? {
-    val precisionMatch = ICU_PRECISION_REGEX.matchEntire(node.simpleStyle ?: "")
+    val precisionMatch = ICU_PRECISION_REGEX.matchEntire(node.simpleStyle)
     precisionMatch ?: return null
     return precisionMatch.groups["precision"]?.value?.length
   }

@@ -2,7 +2,7 @@ package io.tolgee.formats.po.`in`.messageConvertors
 
 import io.tolgee.formats.ImportMessageConvertor
 import io.tolgee.formats.MessageConvertorResult
-import io.tolgee.formats.po.`in`.paramConvertors.PhpToIcuParamConvertor
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuParamConvertor
 
 class PoPhpToIcuImportMessageConvertor : ImportMessageConvertor {
   override fun convert(
