@@ -1,3 +1,10 @@
+## [3.49.12](https://github.com/tolgee/tolgee-platform/compare/v3.49.11...v3.49.12) (2024-03-13)
+
+
+### Bug Fixes
+
+* show warning when plural change leads to data loss ([#2179](https://github.com/tolgee/tolgee-platform/issues/2179)) ([1e17fb4](https://github.com/tolgee/tolgee-platform/commit/1e17fb403e904470ffe1bcde616aa05c93e1da62))
+
 ## [3.49.11](https://github.com/tolgee/tolgee-platform/compare/v3.49.10...v3.49.11) (2024-03-12)
 
 
