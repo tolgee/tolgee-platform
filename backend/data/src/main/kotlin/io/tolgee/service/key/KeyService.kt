@@ -1,5 +1,6 @@
 package io.tolgee.service.key
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -49,6 +50,7 @@ class KeyService(
   private var translationService: TranslationService,
   private val languageRepository: LanguageRepository,
   private val bigMetaService: BigMetaService,
+  private val activityHolder: ActivityHolder,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -143,6 +145,7 @@ class KeyService(
     }
 
     dto.tags?.forEach {
+      activityHolder.businessEventData["usesTags"] = "true"
       tagService.tagKey(key, it)
     }
 

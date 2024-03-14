@@ -1,10 +1,12 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
@@ -131,6 +133,38 @@ class KeyControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/"
     }
 
     keyService.get(key.self.id).isPlural.assert.isEqualTo(true)
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      Scope.KEYS_EDIT,
+      Scope.TRANSLATIONS_EDIT,
+    ],
+  )
+  @Test
+  fun `warns on data loss when disabling plural`() {
+    val key =
+      testData.projectBuilder
+        .addKey {
+          name = "plural_test_key"
+          isPlural = true
+          pluralArgName = "dogsCount"
+        }.build {
+          addTranslation("de", RAW_PLURAL)
+        }
+    testData.projectBuilder.addCzech()
+
+    saveAndPrepare()
+
+    val keyName = "plural_test_key"
+    performProjectAuthPut(
+      "keys/${key.self.id}/complex-update",
+      ComplexEditKeyDto(
+        name = keyName,
+        isPlural = false,
+        warnOnDataLoss = true,
+      ),
+    ).andIsBadRequest.andHasErrorMessage(message = Message.PLURAL_FORMS_DATA_LOSS)
   }
 
   @ProjectApiKeyAuthTestMethod(

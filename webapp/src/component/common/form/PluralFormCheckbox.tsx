@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Field, useFormikContext } from 'formik';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import {
@@ -14,6 +14,10 @@ import { FieldError, FieldLabel } from 'tg.component/FormField';
 
 import { LabelHint } from '../LabelHint';
 
+function isParameterDefault(value: string | undefined) {
+  return value === undefined || value === 'value';
+}
+
 type Props = {
   pluralParameterName: string;
   isPluralName: string;
@@ -24,10 +28,21 @@ export const PluralFormCheckbox = ({
   isPluralName,
 }: Props) => {
   const { values } = useFormikContext<any>();
-  const [expanded, setExpanded] = useState(
-    values[isPluralName] && values[pluralParameterName] !== 'value'
+  const [_expanded, setExpanded] = useState(
+    !isParameterDefault(values[pluralParameterName])
   );
+
+  useEffect(() => {
+    if (
+      values[isPluralName] &&
+      !isParameterDefault(values[pluralParameterName])
+    ) {
+      setExpanded(true);
+    }
+  }, [values[pluralParameterName]]);
+
   const isPlural = values[isPluralName];
+  const expanded = _expanded && isPlural;
   const { t } = useTranslate();
 
   return (

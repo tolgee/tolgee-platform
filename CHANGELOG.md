@@ -1,3 +1,69 @@
+## [3.49.12](https://github.com/tolgee/tolgee-platform/compare/v3.49.11...v3.49.12) (2024-03-13)
+
+
+### Bug Fixes
+
+* show warning when plural change leads to data loss ([#2179](https://github.com/tolgee/tolgee-platform/issues/2179)) ([1e17fb4](https://github.com/tolgee/tolgee-platform/commit/1e17fb403e904470ffe1bcde616aa05c93e1da62))
+
+## [3.49.11](https://github.com/tolgee/tolgee-platform/compare/v3.49.10...v3.49.11) (2024-03-12)
+
+
+### Bug Fixes
+
+* Wrong JSONArray class ([#2182](https://github.com/tolgee/tolgee-platform/issues/2182)) ([682e31f](https://github.com/tolgee/tolgee-platform/commit/682e31f0a19a593a7d06cb9ef2c9ca6c2f438fbf))
+
+## [3.49.10](https://github.com/tolgee/tolgee-platform/compare/v3.49.9...v3.49.10) (2024-03-12)
+
+
+### Bug Fixes
+
+* Keep namespaces in Content Delivery edit dialog & empty state ([#2181](https://github.com/tolgee/tolgee-platform/issues/2181)) ([5cf1099](https://github.com/tolgee/tolgee-platform/commit/5cf10999b69751c0f7eca6576d33a920b1c8cd1c))
+
+## [3.49.9](https://github.com/tolgee/tolgee-platform/compare/v3.49.8...v3.49.9) (2024-03-12)
+
+
+### Bug Fixes
+
+* s3 bucket delete ([#2180](https://github.com/tolgee/tolgee-platform/issues/2180)) ([0121dbe](https://github.com/tolgee/tolgee-platform/commit/0121dbe3e9c34e7160e79cd7ff935448ddf87368))
+
+## [3.49.8](https://github.com/tolgee/tolgee-platform/compare/v3.49.7...v3.49.8) (2024-03-12)
+
+
+### Bug Fixes
+
+* Fixed activity, more Business events logged ([#2173](https://github.com/tolgee/tolgee-platform/issues/2173)) ([749c420](https://github.com/tolgee/tolgee-platform/commit/749c42025bf82c9e54915578d3f1764918051a70))
+
+## [3.49.7](https://github.com/tolgee/tolgee-platform/compare/v3.49.6...v3.49.7) (2024-03-12)
+
+
+### Bug Fixes
+
+* Don't remove plural forms when string changed to no plural ([#2169](https://github.com/tolgee/tolgee-platform/issues/2169)) ([2a32b29](https://github.com/tolgee/tolgee-platform/commit/2a32b29aee7ba271a3dd9a05e3d593ce91ac2adb))
+
+## [3.49.6](https://github.com/tolgee/tolgee-platform/compare/v3.49.5...v3.49.6) (2024-03-12)
+
+
+### Bug Fixes
+
+* Usage and Invoicing UI fixes ([#2174](https://github.com/tolgee/tolgee-platform/issues/2174)) ([3a68137](https://github.com/tolgee/tolgee-platform/commit/3a68137c81323a312bf8934b9027e46f09978ed2))
+
+## [3.49.5](https://github.com/tolgee/tolgee-platform/compare/v3.49.4...v3.49.5) (2024-03-09)
+
+
+### Bug Fixes
+
+* New lines in Apple .strings import ([#2167](https://github.com/tolgee/tolgee-platform/issues/2167)) ([8ddb1cd](https://github.com/tolgee/tolgee-platform/commit/8ddb1cdbb0a9b2e0c11547748c4622d4805f169c))
+* plural variable auto naming when there is a valid ICU ([#2164](https://github.com/tolgee/tolgee-platform/issues/2164)) ([fc19366](https://github.com/tolgee/tolgee-platform/commit/fc19366bdb7e30750a596e3b6eacf58dadbf78ca))
+* Wait for postgres startup ([#2168](https://github.com/tolgee/tolgee-platform/issues/2168)) ([f841ac3](https://github.com/tolgee/tolgee-platform/commit/f841ac38fb8679d3df67c1a4cea992e08f05ae2a))
+* Wait for postgres using separate datasource ([#2170](https://github.com/tolgee/tolgee-platform/issues/2170)) ([0110ec8](https://github.com/tolgee/tolgee-platform/commit/0110ec890323c58e150fedb458be89b129c0ef20))
+
+## [3.49.4](https://github.com/tolgee/tolgee-platform/compare/v3.49.3...v3.49.4) (2024-03-08)
+
+
+### Bug Fixes
+
+* Wait for postgres startup ([#2163](https://github.com/tolgee/tolgee-platform/issues/2163)) ([c808589](https://github.com/tolgee/tolgee-platform/commit/c808589d4b6c08b5f078a2398a1afedb0ac29695))
+
 ## [3.49.3](https://github.com/tolgee/tolgee-platform/compare/v3.49.2...v3.49.3) (2024-03-06)
 
 

@@ -34,6 +34,9 @@ class PostgresAutostartProperties {
   @DocProperty(description = "The name of the database created to store Tolgee data.")
   var databaseName: String = "postgres"
 
+  @DocProperty(description = "The max time to wait for running postgres in seconds.")
+  var maxWaitTime: Long = 300
+
   @DocProperty(
     description =
       "The port of Postgres to listen on host machine.\n" +

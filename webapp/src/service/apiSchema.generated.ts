@@ -278,15 +278,6 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
-  "/v2/slack/events/tolgee": {
-    post: operations["slackCommand"];
-  };
-  "/v2/slack/events/event": {
-    post: operations["fetchEvent"];
-  };
-  "/v2/slack/events/connect": {
-    post: operations["connectSlack"];
-  };
   "/v2/public/business-events/report": {
     post: operations["report"];
   };
@@ -741,6 +732,14 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -755,14 +754,6 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1089,6 +1080,8 @@ export interface components {
       isPlural?: boolean;
       /** @description The argument name for the plural. If null, value won't be modified. If isPlural is false, this value will be ignored. */
       pluralArgName?: string;
+      /** @description If true, it will fail with 400 (with code plural_forms_data_loss) if plural is disabled and there are plural forms, which would be lost by the action. You can get rid of this warning by setting this value to false. */
+      warnOnDataLoss?: boolean;
       /** @description Custom values of the key. If not provided, custom values won't be modified */
       custom?: { [key: string]: { [key: string]: unknown } };
     };
@@ -1472,17 +1465,17 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     IImportSettings: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
       settings?: components["schemas"]["IImportSettings"];
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -1650,15 +1643,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1795,16 +1788,16 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       projectId: number;
-      userFullName?: string;
-      projectName: string;
+      description: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1816,24 +1809,6 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
-    };
-    SlackCommandDto: {
-      token?: string;
-      channel_id: string;
-      command: string;
-      channel_name?: string;
-      user_id: string;
-      userName?: string;
-      text: string;
-      trigger_id?: string;
-    };
-    SlackMessageDto: {
-      text: string;
-    };
-    SlackConnectionDto: {
-      slackId: string;
-      userAccountId: string;
-      channelId: string;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -2169,7 +2144,7 @@ export interface components {
         | "MULTIPLE_PLURALS_NOT_SUPPORTED"
         | "CUSTOM_VALUES_JSON_TOO_LONG"
         | "UNSUPPORTED_PO_MESSAGE_FORMAT"
-        | "SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT";
+        | "PLURAL_FORMS_DATA_LOSS";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2681,15 +2656,15 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
@@ -2726,8 +2701,8 @@ export interface components {
     };
     DocItem: {
       name: string;
-      description?: string;
       displayName?: string;
+      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -2801,20 +2776,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
+      translation?: string;
       description?: string;
       namespace?: string;
-      translation?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
+      translation?: string;
       description?: string;
       namespace?: string;
-      translation?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2925,7 +2900,16 @@ export interface components {
         | "BATCH_TAG_KEYS"
         | "BATCH_UNTAG_KEYS"
         | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION";
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -3342,15 +3326,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3469,16 +3453,16 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       projectId: number;
-      userFullName?: string;
-      projectName: string;
+      description: string;
       scopes: string[];
     };
     ApiKeyPermissionsModel: {
@@ -6576,85 +6560,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  slackCommand: {
-    parameters: {};
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SlackMessageDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SlackCommandDto"];
-      };
-    };
-  };
-  fetchEvent: {
-    parameters: {};
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SlackMessageDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": string;
-      };
-    };
-  };
-  connectSlack: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SlackConnectionDto"];
       };
     };
   };

@@ -1,5 +1,8 @@
 package io.tolgee.model.contentDelivery
 
+import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Entity
@@ -8,13 +11,17 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
 
-@Entity()
+@Entity
+@ActivityLoggedEntity
 class ContentStorage(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
   @NotBlank
+  @ActivityLoggedProp
+  @ActivityDescribingProp
   var name: String,
 ) : StandardAuditModel() {
+  @ActivityLoggedProp
   var publicUrlPrefix: String? = null
 
   @OneToOne(mappedBy = "contentStorage", optional = true, orphanRemoval = true)
