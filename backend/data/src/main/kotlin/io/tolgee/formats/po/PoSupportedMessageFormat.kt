@@ -1,8 +1,8 @@
 package io.tolgee.formats.po
 
 import io.tolgee.formats.ImportMessageConvertorType
-import io.tolgee.formats.paramConvertors.`in`.CToIcuParamConvertor
-import io.tolgee.formats.paramConvertors.`in`.PhpToIcuParamConvertor
+import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.po.out.ToPoMessageConvertor
 import io.tolgee.formats.po.out.c.ToCPoMessageConvertor
 import io.tolgee.formats.po.out.php.ToPhpPoMessageConvertor
@@ -21,7 +21,7 @@ enum class PoSupportedMessageFormat(
   PHP(
     poFlag = "php-format",
     importMessageConvertorType = ImportMessageConvertorType.PO_PHP,
-    paramRegex = PhpToIcuParamConvertor.PHP_PARAM_REGEX,
+    paramRegex = PhpToIcuPlaceholderConvertor.PHP_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural, projectIcuPlaceholdersSupport ->
       ToPhpPoMessageConvertor(
         message,
@@ -34,7 +34,7 @@ enum class PoSupportedMessageFormat(
   C(
     poFlag = "c-format",
     importMessageConvertorType = ImportMessageConvertorType.PO_C,
-    paramRegex = CToIcuParamConvertor.C_PARAM_REGEX,
+    paramRegex = CToIcuPlaceholderConvertor.C_PARAM_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural, projectIcuPlaceholdersSupport ->
       ToCPoMessageConvertor(
         message,

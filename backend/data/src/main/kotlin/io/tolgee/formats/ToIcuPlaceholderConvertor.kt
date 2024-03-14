@@ -1,6 +1,6 @@
 package io.tolgee.formats
 
-interface ToIcuParamConvertor {
+interface ToIcuPlaceholderConvertor {
   fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,

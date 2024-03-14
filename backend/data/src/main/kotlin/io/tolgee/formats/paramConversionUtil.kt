@@ -29,10 +29,12 @@ fun convertMessage(
   isInPlural: Boolean,
   convertPlaceholders: Boolean,
   isProjectIcuEnabled: Boolean,
-  convertorFactory: () -> ToIcuParamConvertor,
+  escapeUnmatched: Boolean = true,
+  convertorFactory: (() -> ToIcuPlaceholderConvertor)?,
 ): String {
   if (!isProjectIcuEnabled && !isInPlural) return message
-  if (!convertPlaceholders) return message.escapeIcu(true)
+  if (!escapeUnmatched && convertorFactory == null) return message
+  if (!convertPlaceholders || convertorFactory == null) return message.escapeIcu(true)
 
   val convertor = convertorFactory()
   return message.replaceMatchedAndUnmatched(
@@ -42,7 +44,11 @@ fun convertMessage(
       convertor.convert(it, isInPlural)
     },
     unmatchedCallback = {
-      ForceIcuEscaper(it, isInPlural).escaped
+      if (escapeUnmatched) {
+        ForceIcuEscaper(it, isInPlural).escaped
+      } else {
+        it
+      }
     },
   )
 }

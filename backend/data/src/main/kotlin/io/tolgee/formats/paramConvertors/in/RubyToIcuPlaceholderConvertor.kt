@@ -1,17 +1,17 @@
 package io.tolgee.formats.paramConvertors.`in`
 
-import io.tolgee.formats.ToIcuParamConvertor
+import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.usesUnsupportedFeature
 
-class RubyToIcuParamConvertor : ToIcuParamConvertor {
+class RubyToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
   private var index = 0
 
   override val regex: Regex
-    get() = RUBY_PARAM_REGEX
+    get() = RUBY_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
@@ -43,16 +43,17 @@ class RubyToIcuParamConvertor : ToIcuParamConvertor {
   }
 
   companion object {
-    val RUBY_PARAM_REGEX =
+    val RUBY_PLACEHOLDER_REGEX =
 """
-    (?x)(
-    %
-    (?:(?<argnum>\d+)?${"\\$"}|<(?<argname>\w+)>)?
-    (?<flags>[+\-\s0\#*]+)?
-    (?<width>\d+)?
-    (?:\.(?<precision>\d+))?
-    (?<specifier>[bBdiouxXeEfgGaAcps%])|
-    %\{(?<argname2>\w+)}
-    )""".trimIndent().toRegex()
+(?x)(
+%
+(?:(?<argnum>\d+)?${"\\$"}|<(?<argname>\w+)>)?
+(?<flags>[+\-\s0\#*]+)?
+(?<width>\d+)?
+(?:\.(?<precision>\d+))?
+(?<specifier>[bBdiouxXeEfgGaAcps%])|
+%\{(?<argname2>\w+)}
+)
+""".trimIndent().toRegex()
   }
 }

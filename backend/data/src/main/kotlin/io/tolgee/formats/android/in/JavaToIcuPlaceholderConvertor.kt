@@ -1,12 +1,12 @@
 package io.tolgee.formats.android.`in`
 
-import io.tolgee.formats.ToIcuParamConvertor
+import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.usesUnsupportedFeature
 
-class JavaToIcuParamConvertor() : ToIcuParamConvertor {
+class JavaToIcuPlaceholderConvertor() : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
   private var index = 0
 

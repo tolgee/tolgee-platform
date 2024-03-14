@@ -1,12 +1,11 @@
 package io.tolgee.unit.formats.messageConvertors.`in`
 
 import io.tolgee.formats.convertMessage
-import io.tolgee.formats.paramConvertors.`in`.RubyToIcuParamConvertor
+import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
-class RubyToIcuParamConvertorTest {
-
+class RubyToIcuPlaceholderConvertorTest {
   @Test
   fun converts() {
     convertMessage(
@@ -20,9 +19,12 @@ class RubyToIcuParamConvertorTest {
       %<hello>s
       %2${'$'}+-s
       %#20.8b
-      """.trimIndent(), isInPlural = false, convertPlaceholders = true, isProjectIcuEnabled = true
+      """.trimIndent(),
+      isInPlural = false,
+      convertPlaceholders = true,
+      isProjectIcuEnabled = true,
     ) {
-      RubyToIcuParamConvertor()
+      RubyToIcuPlaceholderConvertor()
     }.assert.isEqualTo(
       """
       Hello {name}!
@@ -34,7 +36,7 @@ class RubyToIcuParamConvertorTest {
       {hello}
       %2${'$'}+-s
       %#20.8b
-      """.trimIndent()
+      """.trimIndent(),
     )
   }
 }

@@ -2,7 +2,7 @@ package io.tolgee.formats.po.`in`.messageConvertors
 
 import io.tolgee.formats.ImportMessageConvertor
 import io.tolgee.formats.MessageConvertorResult
-import io.tolgee.formats.paramConvertors.`in`.CToIcuParamConvertor
+import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 
 class PoCToIcuImportMessageConvertor : ImportMessageConvertor {
   override fun convert(
@@ -11,7 +11,7 @@ class PoCToIcuImportMessageConvertor : ImportMessageConvertor {
     convertPlaceholders: Boolean,
     isProjectIcuEnabled: Boolean,
   ): MessageConvertorResult {
-    return BasePoToIcuMessageConvertor { CToIcuParamConvertor() }.convert(
+    return BasePoToIcuMessageConvertor { CToIcuPlaceholderConvertor() }.convert(
       rawData,
       languageTag,
       convertPlaceholders,

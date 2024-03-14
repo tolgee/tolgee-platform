@@ -52,7 +52,7 @@ class AppleToIcuMessageConvertor : ImportMessageConvertor {
     isProjectIcuEnabled: Boolean,
   ): String {
     return convertMessage(message, isInPlural, convertPlaceholders, isProjectIcuEnabled) {
-      AppleToIcuParamConvertor()
+      AppleToIcuPlaceholderConvertor()
     }
   }
 }

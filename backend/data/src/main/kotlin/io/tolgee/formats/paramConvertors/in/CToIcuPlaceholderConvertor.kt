@@ -1,21 +1,23 @@
 package io.tolgee.formats.paramConvertors.`in`
 
-import io.tolgee.formats.ToIcuParamConvertor
+import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.usesUnsupportedFeature
 
-class PythonToIcuParamConvertor : ToIcuParamConvertor {
+class CToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
+  private var index = 0
 
   override val regex: Regex
-    get() = PYTHON_PARAM_REGEX
+    get() = C_PARAM_REGEX
 
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
   ): String {
+    index++
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 
     if (usesUnsupportedFeature(parsed)) {
@@ -26,29 +28,30 @@ class PythonToIcuParamConvertor : ToIcuParamConvertor {
       return "%"
     }
 
-    val argName = parsed.argName ?: throw IllegalArgumentException("Python spec requires named arguments")
+    val zeroIndexedArgNum = parsed.argNum?.toIntOrNull()?.minus(1)
+    val name = zeroIndexedArgNum?.toString() ?: ((index - 1).toString())
 
     when (parsed.specifier) {
-      "s" -> return "{$argName}"
-      "d" -> return "{$argName, number}"
-      "f" -> return convertFloatToIcu(parsed, argName) ?: return matchResult.value.escapeIcu(isInPlural)
-      "e" -> return "{$argName, number, scientific}"
+      "s" -> return "{$name}"
+      "d" -> return "{$name, number}"
+      "e" -> return "{$name, number, scientific}"
+      "f" -> return convertFloatToIcu(parsed, name) ?: parsed.fullMatch.escapeIcu(isInPlural)
     }
 
-    return "{$argName}"
+    return matchResult.value.escapeIcu(isInPlural)
   }
 
   companion object {
-    val PYTHON_PARAM_REGEX =
+    val C_PARAM_REGEX =
       """
       (?x)(
       %
-      (?:\((?<argname>[\w-]+)\))?
+      (?:(?<argnum>\d+)${"\\$"})?
       (?<flags>[-+\s0\#]+)?
-      (?<width>[\d*]+)?
+      (?<width>\d+)?
       (?:\.(?<precision>\d+))?
-      (?<length>[hlL])?
-      (?<specifier>[diouxXeEfFgGcrs%])
+      (?<length>hh|h|l|ll|j|z|t|L)?
+      (?<specifier>[diuoxXfFeEgGaAcspn%])
       )
       """.trimIndent().toRegex()
   }
