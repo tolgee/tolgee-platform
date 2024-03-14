@@ -5,6 +5,7 @@ import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.ImportMessageConvertorType
+import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.forceEscapePluralForms
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.dataImport.ImportFile
@@ -76,7 +77,7 @@ data class FileProcessorContext(
       val entity =
         ImportTranslation(pluralForms?.icuString ?: stringValue, language).also {
           it.isPlural = isPlural
-          it.rawData = rawData
+          it.rawData = rawData.wrapIfRequired()
           it.convertor = convertedBy
         }
       if (isPlural && replaceNonPlurals) {
@@ -131,6 +132,7 @@ data class FileProcessorContext(
       fileEntity.addIssue(FileIssueType.TRANSLATION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to keyName))
       return false
     }
+
     return true
   }
 
@@ -197,4 +199,11 @@ data class FileProcessorContext(
   val customValuesValidator: KeyCustomValuesValidator by lazy {
     applicationContext.getBean(KeyCustomValuesValidator::class.java)
   }
+}
+
+private fun Any?.wrapIfRequired(): Any? {
+  if (this is String) {
+    return StringWrapper(this)
+  }
+  return this
 }

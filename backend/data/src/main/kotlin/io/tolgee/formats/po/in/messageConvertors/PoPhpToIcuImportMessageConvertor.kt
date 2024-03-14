@@ -2,7 +2,7 @@ package io.tolgee.formats.po.`in`.messageConvertors
 
 import io.tolgee.formats.ImportMessageConvertor
 import io.tolgee.formats.MessageConvertorResult
-import io.tolgee.formats.paramConvertors.`in`.PhpToIcuParamConvertor
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 
 class PoPhpToIcuImportMessageConvertor : ImportMessageConvertor {
   override fun convert(
@@ -11,7 +11,7 @@ class PoPhpToIcuImportMessageConvertor : ImportMessageConvertor {
     convertPlaceholders: Boolean,
     isProjectIcuEnabled: Boolean,
   ): MessageConvertorResult {
-    return BasePoToIcuMessageConvertor { PhpToIcuParamConvertor() }.convert(
+    return BasePoToIcuMessageConvertor { PhpToIcuPlaceholderConvertor() }.convert(
       rawData,
       languageTag,
       convertPlaceholders,

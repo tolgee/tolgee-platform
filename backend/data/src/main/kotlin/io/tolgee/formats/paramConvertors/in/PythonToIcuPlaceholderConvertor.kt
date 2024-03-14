@@ -1,17 +1,16 @@
 package io.tolgee.formats.paramConvertors.`in`
 
-import io.tolgee.formats.ToIcuParamConvertor
+import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.usesUnsupportedFeature
 
-class PhpToIcuParamConvertor : ToIcuParamConvertor {
+class PythonToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
-  private var index = 0
 
   override val regex: Regex
-    get() = PHP_PARAM_REGEX
+    get() = PYTHON_PARAM_REGEX
 
   override fun convert(
     matchResult: MatchResult,
@@ -27,30 +26,29 @@ class PhpToIcuParamConvertor : ToIcuParamConvertor {
       return "%"
     }
 
-    index++
-    val zeroIndexedArgNum = parsed.argNum?.toIntOrNull()?.minus(1)?.toString()
-    val name = zeroIndexedArgNum ?: ((index - 1).toString())
+    val argName = parsed.argName ?: throw IllegalArgumentException("Python spec requires named arguments")
 
     when (parsed.specifier) {
-      "s" -> return "{$name}"
-      "d" -> return "{$name, number}"
-      "e" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name) ?: matchResult.value.escapeIcu(isInPlural)
+      "s" -> return "{$argName}"
+      "d" -> return "{$argName, number}"
+      "f" -> return convertFloatToIcu(parsed, argName) ?: return matchResult.value.escapeIcu(isInPlural)
+      "e" -> return "{$argName, number, scientific}"
     }
 
-    return matchResult.value.escapeIcu(isInPlural)
+    return "{$argName}"
   }
 
   companion object {
-    val PHP_PARAM_REGEX =
+    val PYTHON_PARAM_REGEX =
       """
       (?x)(
       %
-      (?:(?<argnum>\d+)${"\\$"})?
-      (?<flags>(?:[-+\s0]|'.)+)?
-      (?<width>\d+)?
+      (?:\((?<argname>[\w-]+)\))?
+      (?<flags>[-+\s0\#]+)?
+      (?<width>[\d*]+)?
       (?:\.(?<precision>\d+))?
-      (?<specifier>[bcdeEfFgGhHosuxX%])
+      (?<length>[hlL])?
+      (?<specifier>[diouxXeEfFgGcrs%])
       )
       """.trimIndent().toRegex()
   }
