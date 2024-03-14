@@ -12,7 +12,6 @@ import { AppState } from '../store';
 import { globalActions } from '../store/global/GlobalActions';
 import ConfirmationDialog from './common/ConfirmationDialog';
 import SnackBar from './common/SnackBar';
-import { HelpMenu } from './HelpMenu';
 import { PlanLimitPopover } from './billing/PlanLimitPopover';
 import { RootRouter } from './RootRouter';
 import { MandatoryDataProvider } from './MandatoryDataProvider';
@@ -125,7 +124,6 @@ export class App extends React.Component {
       <>
         <Head />
         <Redirection />
-        <HelpMenu />
         <Ga4Tag />
         <SensitiveOperationAuthDialog />
         <MandatoryDataProvider>

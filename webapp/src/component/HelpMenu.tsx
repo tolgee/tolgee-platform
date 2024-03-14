@@ -24,7 +24,11 @@ import {
 } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { useConfig, useUser } from 'tg.globalContext/helpers';
+import {
+  useConfig,
+  usePreferredOrganization,
+  useUser,
+} from 'tg.globalContext/helpers';
 import { SlackIcon } from './CustomIcons';
 
 const BASE_URL = 'https://app.chatwoot.com';
@@ -71,6 +75,7 @@ export const HelpMenu = () => {
   const { t } = useTranslate();
   const user = useUser();
   const config = useConfig();
+  const { preferredOrganization } = usePreferredOrganization();
   const token = config?.chatwootToken;
   const {
     palette: { mode },
@@ -101,16 +106,6 @@ export const HelpMenu = () => {
     }
   }, [token]);
 
-  useEffect(() => {
-    if (token) {
-      const timer = setInterval(() => {
-        // @ts-ignore
-        setIsOpen(window.$chatwoot?.isOpen);
-      }, 500);
-      return () => clearInterval(timer);
-    }
-  }, [token]);
-
   const openChatwoot = () => {
     handleClose();
     loadScript(token!, darkMode).then(() => {
@@ -118,6 +113,7 @@ export const HelpMenu = () => {
       window.$chatwoot.setUser(user.id, {
         email: user!.username,
         name: user!.name,
+        url: window.location,
       });
       // @ts-ignore
       window.$chatwoot.toggle();
@@ -128,7 +124,10 @@ export const HelpMenu = () => {
     return { href: url, target: 'blank', rel: 'noreferrer noopener' };
   }
 
-  const displayChat = user && token;
+  const hasStandardSupport =
+    preferredOrganization.enabledFeatures.includes('STANDARD_SUPPORT');
+
+  const displayChat = token && user && hasStandardSupport;
 
   return (
     <>

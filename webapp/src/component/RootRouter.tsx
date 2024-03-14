@@ -10,6 +10,7 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
 import { OrganizationBillingRedirect } from './security/OrganizationRedirectHandler';
 import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
+import { HelpMenu } from './HelpMenu';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
@@ -99,6 +100,7 @@ export const RootRouter = () => (
           <OrganizationsRouter />
         </PrivateRoute>
       </Switch>
+      <HelpMenu />
     </RequirePreferredOrganization>
   </Switch>
 );
