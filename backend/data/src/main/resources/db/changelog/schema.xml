@@ -3313,4 +3313,26 @@
             <column name="plural_arg_name" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1710445771893-3">
+        <dropForeignKeyConstraint baseTableName="saved_slack_message_lang_tags" constraintName="FK3ec0swpap3761y9o0mbq5tgly"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1710445771893-4">
+        <dropForeignKeyConstraint baseTableName="slack_config_language_tags" constraintName="FKc082r41k35tbts8flw2n754ux"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1710445771893-1">
+        <addColumn tableName="saved_slack_message">
+            <column name="lang_tags" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1710445771893-2">
+        <addColumn tableName="slack_config">
+            <column name="language_tags" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1710445771893-5">
+        <dropTable tableName="saved_slack_message_lang_tags"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1710445771893-6">
+        <dropTable tableName="slack_config_language_tags"/>
+    </changeSet>
 </databaseChangeLog>

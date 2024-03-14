@@ -1,11 +1,13 @@
 package io.tolgee.model.slackIntegration
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.automations.AutomationAction
 import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Type
 
 @Entity
 class SlackConfig(
@@ -21,7 +23,8 @@ class SlackConfig(
   @Column(nullable = false)
   var slackId: String = ""
 
-  @ElementCollection
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
   var languageTags: MutableSet<String> = hashSetOf()
 
   @ColumnDefault("1")
