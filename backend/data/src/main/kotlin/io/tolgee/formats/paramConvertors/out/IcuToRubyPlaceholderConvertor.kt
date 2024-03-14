@@ -16,7 +16,7 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
     val argNameString = getArgNameString(node)
     val type = node.argType
 
-    if(type == MessagePattern.ArgType.NONE && node.argNumOrNull == null){
+    if (type == MessagePattern.ArgType.NONE && node.argNumOrNull == null) {
       return "%$argNameString"
     }
 
@@ -65,16 +65,17 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
       argType != MessagePattern.ArgType.NONE -> {
         when {
           argNum != null -> getArgNumString(argNum)
-          argName != null -> "<${argName}>"
+          argName != null -> "<$argName>"
           else -> ""
         }
       }
 
-      else -> when {
-        argNum != null -> getArgNumString(argNum)
-        argName != null -> "{${argName}}"
-        else -> ""
-      }
+      else ->
+        when {
+          argNum != null -> getArgNumString(argNum)
+          argName != null -> "{$argName}"
+          else -> ""
+        }
     }
   }
 
