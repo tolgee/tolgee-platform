@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.po.out
 
-import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
+import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 

@@ -20,7 +20,6 @@ class IcuToRubyParamConvertorTest {
       .assertConvertedTo("Hello %3\$s I am string %2\$d with multiple %1\$.3f arguments")
   }
 
-
   private fun String.assertConvertedTo(expected: String) {
     MessageConvertorFactory(
       this,
