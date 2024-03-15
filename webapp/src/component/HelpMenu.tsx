@@ -124,6 +124,10 @@ export const HelpMenu = () => {
     return { href: url, target: 'blank', rel: 'noreferrer noopener' };
   }
 
+  if (!preferredOrganization) {
+    return null;
+  }
+
   const hasStandardSupport =
     preferredOrganization.enabledFeatures.includes('STANDARD_SUPPORT');
 
