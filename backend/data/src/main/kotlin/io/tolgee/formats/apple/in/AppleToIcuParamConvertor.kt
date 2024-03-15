@@ -11,7 +11,7 @@ class AppleToIcuParamConvertor() : ToIcuParamConvertor {
   private var index = 0
 
   override val regex: Regex
-    get() = REGEX
+    get() = APPLE_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
@@ -52,7 +52,7 @@ class AppleToIcuParamConvertor() : ToIcuParamConvertor {
   }
 
   companion object {
-    val REGEX =
+    val APPLE_PLACEHOLDER_REGEX =
       """
       (?x)(
       %
