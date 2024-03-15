@@ -1,3 +1,10 @@
+## [3.50.1](https://github.com/tolgee/tolgee-platform/compare/v3.50.0...v3.50.1) (2024-03-15)
+
+
+### Bug Fixes
+
+* Apple export to stringsdict and export UI fixes ([#2191](https://github.com/tolgee/tolgee-platform/issues/2191)) ([1741dea](https://github.com/tolgee/tolgee-platform/commit/1741deab1ef652e09d9fd28a321715faf06b2947))
+
 # [3.50.0](https://github.com/tolgee/tolgee-platform/compare/v3.49.12...v3.50.0) (2024-03-15)
 
 
