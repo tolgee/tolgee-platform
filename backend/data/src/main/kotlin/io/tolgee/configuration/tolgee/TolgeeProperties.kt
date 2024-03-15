@@ -117,5 +117,5 @@ open class TolgeeProperties(
   var postHog: PostHogProperties = PostHogProperties(),
   var telemetry: TelemetryProperties = TelemetryProperties(),
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
-  var slackProperties: SlackProperties = SlackProperties(),
+  var slack: SlackProperties = SlackProperties(),
 )
