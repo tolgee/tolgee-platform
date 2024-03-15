@@ -19,7 +19,7 @@ class AppleXliffFileExporterTest {
     // generate this with:
     // data.map { "data.assertFile(\"${it.key}\", \"\"\"\n    |${it.value.replace("\$", "\${'$'}").replace("\n", "\n    |")}\n    \"\"\".trimMargin())" }.joinToString("\n")
     data.assertFile(
-      "cs.xlf",
+      "cs.xliff",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
@@ -164,7 +164,7 @@ class AppleXliffFileExporterTest {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.xlf",
+      "cs.xliff",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
@@ -217,7 +217,7 @@ class AppleXliffFileExporterTest {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.xlf",
+      "cs.xliff",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
