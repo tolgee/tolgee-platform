@@ -38,9 +38,13 @@ class StringsStringsdictFileExporterTest {
     |    <key>key</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@format@}</string>
+    |      <string>%#@format@</string>
     |      <key>format</key>
     |      <dict>
+    |        <key>NSStringFormatSpecTypeKey</key>
+    |        <string>NSStringPluralRuleType</string>
+    |        <key>NSStringFormatValueTypeKey</key>
+    |        <string>lld</string>
     |        <key>one</key>
     |        <string>%lld day</string>
     |        <key>other</key>
@@ -71,9 +75,13 @@ class StringsStringsdictFileExporterTest {
     |    <key>key</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@format@}</string>
+    |      <string>%#@format@</string>
     |      <key>format</key>
     |      <dict>
+    |        <key>NSStringFormatSpecTypeKey</key>
+    |        <string>NSStringPluralRuleType</string>
+    |        <key>NSStringFormatValueTypeKey</key>
+    |        <string>lld</string>
     |        <key>one</key>
     |        <string>%lld day</string>
     |        <key>other</key>
@@ -104,9 +112,13 @@ class StringsStringsdictFileExporterTest {
     |    <key>key</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@format@}</string>
+    |      <string>%#@format@</string>
     |      <key>format</key>
     |      <dict>
+    |        <key>NSStringFormatSpecTypeKey</key>
+    |        <string>NSStringPluralRuleType</string>
+    |        <key>NSStringFormatValueTypeKey</key>
+    |        <string>lld</string>
     |        <key>one</key>
     |        <string>%lld den</string>
     |        <key>few</key>
@@ -145,9 +157,13 @@ class StringsStringsdictFileExporterTest {
     |    <key>key3</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@format@}</string>
+    |      <string>%#@format@</string>
     |      <key>format</key>
     |      <dict>
+    |        <key>NSStringFormatSpecTypeKey</key>
+    |        <string>NSStringPluralRuleType</string>
+    |        <key>NSStringFormatValueTypeKey</key>
+    |        <string>lld</string>
     |        <key>one</key>
     |        <string>%lld den %@</string>
     |        <key>few</key>
@@ -205,9 +221,13 @@ class StringsStringsdictFileExporterTest {
     |    <key>key3</key>
     |    <dict>
     |      <key>NSStringLocalizedFormatKey</key>
-    |      <string>%#${'$'}{#@format@}</string>
+    |      <string>%#@format@</string>
     |      <key>format</key>
     |      <dict>
+    |        <key>NSStringFormatSpecTypeKey</key>
+    |        <string>NSStringPluralRuleType</string>
+    |        <key>NSStringFormatValueTypeKey</key>
+    |        <string>lld</string>
     |        <key>one</key>
     |        <string># den {icuParam}</string>
     |        <key>few</key>

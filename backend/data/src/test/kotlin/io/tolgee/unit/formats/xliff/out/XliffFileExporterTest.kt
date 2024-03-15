@@ -46,13 +46,13 @@ class XliffFileExporterTest {
       ).produceFiles()
 
     assertThat(files).hasSize(2)
-    var fileContent = files["de.xlf"]!!.bufferedReader().readText()
+    var fileContent = files["de.xliff"]!!.bufferedReader().readText()
     var transUnit = assertHasTransUnitAndReturn(fileContent, "en", "de")
     assertThat(transUnit.attribute("id").value).isEqualTo("A key")
     assertThat(transUnit.selectNodes("./source")[0].text).isEqualTo("")
     assertThat(transUnit.selectNodes("./target")[0].text).isEqualTo("Z translation")
 
-    fileContent = files["en.xlf"]!!.bufferedReader().readText()
+    fileContent = files["en.xliff"]!!.bufferedReader().readText()
     transUnit = assertHasTransUnitAndReturn(fileContent, "en", "en")
     assertThat(transUnit.attribute("id").value).isEqualTo("Z key")
     assertThat(transUnit.selectNodes("./source")[0].text).isEqualTo("A translation")
@@ -87,7 +87,7 @@ class XliffFileExporterTest {
       ).produceFiles()
 
     assertThat(files).hasSize(2)
-    val fileContent = files["de.xlf"]!!.bufferedReader().readText()
+    val fileContent = files["de.xliff"]!!.bufferedReader().readText()
     val document = fileContent.parseToDocument()
     val valid = document.selectNodes("//trans-unit[@id = 'html_key']/source/p")[0]
     assertThat(valid.text).isEqualTo("Sweat jesus, this is HTML!")
@@ -115,7 +115,7 @@ class XliffFileExporterTest {
         baseLanguage = Language().apply { tag = "en" },
       ).produceFiles()
 
-    val fileContent = files["en.xlf"]!!.bufferedReader().readText()
+    val fileContent = files["en.xliff"]!!.bufferedReader().readText()
     fileContent.contains(
       "<note xml:space=\"preserve\">Omg!\n" +
         "  This is really.    \n" +
@@ -220,13 +220,13 @@ class XliffFileExporterTest {
 
     assertThat(files).hasSize(2)
 
-    // de.xlf is invalid because of a missing a "source" element inside the "trans-unit". Should throw a SAXParseException.
-    files["de.xlf"].use { invalidFileContent ->
+    // de.xliff is invalid because of a missing a "source" element inside the "trans-unit". Should throw a SAXParseException.
+    files["de.xliff"].use { invalidFileContent ->
       validator.validate(StreamSource(invalidFileContent))
     }
 
-    // en.xlf is valid
-    files["en.xlf"].use { validFileContent ->
+    // en.xliff is valid
+    files["en.xliff"].use { validFileContent ->
       validator.validate(StreamSource(validFileContent))
     }
   }
@@ -236,7 +236,7 @@ class XliffFileExporterTest {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.xlf",
+      "cs.xliff",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
@@ -285,7 +285,7 @@ class XliffFileExporterTest {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.xlf",
+      "cs.xliff",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">

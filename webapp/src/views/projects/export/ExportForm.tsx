@@ -17,6 +17,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { SupportArraysSelector } from './components/SupportArraysSelector';
 import { formatGroups, getFormatById } from './components/formatGroups';
+import { downloadExported } from './downloadExported';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -74,7 +75,7 @@ export const ExportForm = () => {
     url: '/v2/projects/{projectId}/export',
     method: 'post',
     fetchOptions: {
-      asBlob: true,
+      rawResponse: true,
     },
   });
 
@@ -206,24 +207,13 @@ export const ExportForm = () => {
             },
           },
           {
-            onSuccess(data) {
-              const url = URL.createObjectURL(data as any as Blob);
-              const a = document.createElement('a');
-              const onlyPossibleLanguageString =
-                values.languages.length === 1 ? `_${values.languages[0]}` : '';
-              a.href = url;
-              const dateStr = '_' + new Date().toISOString().split('T')[0];
-              if (data.type === 'application/zip') {
-                a.download = project.name + dateStr + '.zip';
-              } else {
-                a.download =
-                  project.name +
-                  onlyPossibleLanguageString +
-                  dateStr +
-                  '.' +
-                  format.extension;
-              }
-              a.click();
+            async onSuccess(response) {
+              return downloadExported(
+                response as unknown as Response,
+                values.languages,
+                format,
+                project.name
+              );
             },
             onSettled() {
               actions.setSubmitting(false);
