@@ -19,23 +19,21 @@ class GenericStructuredRawDataToTextConvertor(
   }
 
   override fun convert(
-    keyPrefix: String,
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
     convertPlaceholdersToIcu: Boolean,
   ): List<StructuredRawDataConversionResult>? {
-    tryConvertToSingle(keyPrefix, rawData, projectIcuPlaceholdersEnabled, convertPlaceholdersToIcu)
+    tryConvertToSingle(rawData, projectIcuPlaceholdersEnabled, convertPlaceholdersToIcu)
       ?.let {
         return it
       }
-    tryConvertToPlural(keyPrefix, rawData, projectIcuPlaceholdersEnabled, convertPlaceholdersToIcu)
+    tryConvertToPlural(rawData, projectIcuPlaceholdersEnabled, convertPlaceholdersToIcu)
       ?.let { return it }
 
     return null
   }
 
   private fun tryConvertToSingle(
-    keyPrefix: String,
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
     convertPlaceholdersToIcu: Boolean,
@@ -43,10 +41,10 @@ class GenericStructuredRawDataToTextConvertor(
     val stringValue = getStringValue(rawData) ?: return null
 
     if (rawData is Number || rawData is Boolean) {
-      return listOf(StructuredRawDataConversionResult(keyPrefix, rawData.toString(), isPlural = false))
+      return listOf(StructuredRawDataConversionResult(rawData.toString(), isPlural = false))
     }
 
-    tryHandleIcuPlural(keyPrefix, rawData, projectIcuPlaceholdersEnabled)?.let {
+    tryHandleIcuPlural(rawData, projectIcuPlaceholdersEnabled)?.let {
       return it
     }
 
@@ -54,7 +52,6 @@ class GenericStructuredRawDataToTextConvertor(
       stringValue,
       convertPlaceholdersToIcu,
       projectIcuPlaceholdersEnabled,
-      keyPrefix,
     )
   }
 
@@ -62,7 +59,6 @@ class GenericStructuredRawDataToTextConvertor(
     stringValue: String,
     convertPlaceholdersToIcu: Boolean,
     projectIcuPlaceholdersEnabled: Boolean,
-    keyPrefix: String,
   ): List<StructuredRawDataConversionResult> {
     val converted =
       convertMessage(
@@ -74,7 +70,7 @@ class GenericStructuredRawDataToTextConvertor(
         convertorFactory = format.placeholderConvertorFactory,
       )
 
-    return listOf(StructuredRawDataConversionResult(keyPrefix, converted, null))
+    return listOf(StructuredRawDataConversionResult(converted, null))
   }
 
   private fun getStringValue(rawData: Any?) =
@@ -82,7 +78,6 @@ class GenericStructuredRawDataToTextConvertor(
       ?.get(StringWrapper::_stringValue.name) as? String
 
   private fun tryHandleIcuPlural(
-    keyPrefix: String,
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
   ): List<StructuredRawDataConversionResult>? {
@@ -90,22 +85,23 @@ class GenericStructuredRawDataToTextConvertor(
       val stringValue = getStringValue(rawData) ?: return null
       val escapedPlural = stringValue.forceEscapePluralForms()
       escapedPlural?.let {
-        return listOf(StructuredRawDataConversionResult(keyPrefix, escapedPlural, true))
+        return listOf(StructuredRawDataConversionResult(escapedPlural, true))
       }
     }
     return null
   }
 
   private fun tryConvertToPlural(
-    keyPrefix: String,
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
     convertPlaceholdersToIcu: Boolean,
   ): List<StructuredRawDataConversionResult>? {
+    val map = rawData as? Map<*, *> ?: return null
+
     if (!format.pluralsViaNesting) {
       return null
     }
-    val map = rawData as? Map<*, *> ?: return null
+
     if (!map.keys.all { it in availablePluralKeywords }) {
       return null
     }
@@ -124,6 +120,6 @@ class GenericStructuredRawDataToTextConvertor(
           )
       }.toMap().toIcuPluralString(argName = "value")
 
-    return listOf(StructuredRawDataConversionResult(keyPrefix, converted, true))
+    return listOf(StructuredRawDataConversionResult(converted, true))
   }
 }
