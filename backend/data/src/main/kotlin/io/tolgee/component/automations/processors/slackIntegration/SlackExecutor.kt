@@ -9,18 +9,20 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
+import io.tolgee.util.I18n
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
 @Lazy
 @Component
 class SlackExecutor(
-  properties: TolgeeProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val keyService: KeyService,
   private val permissionService: PermissionService,
   private val savedSlackMessageService: SavedSlackMessageService,
+  private val i18n: I18n,
 ) {
-  private val slackToken = properties.slackProperties.slackToken
+  private val slackToken = tolgeeProperties.slack.token
   private val slackClient: Slack = Slack.getInstance()
   private lateinit var slackExecutorHelper: SlackExecutorHelper
 
@@ -76,16 +78,26 @@ class SlackExecutor(
     slackClient.methods(slackToken).chatPostMessage {
       it.channel(slackChannelId)
         .blocks {
-          section {
-            val emojiUnicode = "x"
-            markdownText(":$emojiUnicode: ${errorMessage.code}")
-          }
 
-          if (errorMessage == Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT) {
-            context {
-              elements {
-                val suggestion = "Try to use /login"
-                plainText(suggestion)
+
+          when (errorMessage) {
+            Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> {
+              section {
+                markdownText(i18n.translate("slack-not-connected-message"))
+              }
+              context {
+                elements {
+                  //TODO: @Ivan: this should be removed and the link should be provided directly on this message
+                  val suggestion = "Try to use /login"
+                  plainText(suggestion)
+                }
+              }
+            }
+
+            else -> {
+              section {
+                val emojiUnicode = "x"
+                markdownText(":$emojiUnicode: ${errorMessage.code}")
               }
             }
           }
@@ -105,7 +117,7 @@ class SlackExecutor(
           }
           actions {
             button {
-              val redirectUrl = "http://localhost:3000/slack/login?slackId=$slackId&channelId=$slackChannelId"
+              val redirectUrl = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId"
 
               text("Connect Slack to Tolgee", emoji = true)
               value("connect_slack")
