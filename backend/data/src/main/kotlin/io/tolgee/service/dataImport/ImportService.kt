@@ -15,6 +15,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -160,9 +161,12 @@ class ImportService(
 
   @Transactional
   fun selectNamespace(
-    file: ImportFile,
+    projectId: Long,
+    authorId: Long,
+    fileId: Long,
     namespace: String?,
   ) {
+    val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
     val import = file.import
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
@@ -380,20 +384,25 @@ class ImportService(
     this.importTranslationRepository.saveAll(translations)
   }
 
-  fun findFile(fileId: Long): ImportFile? {
-    return importFileRepository.findById(fileId).orElse(null)
+  fun findFile(
+    projectId: Long,
+    authorId: Long,
+    fileId: Long,
+  ): ImportFile? {
+    return importFileRepository.finByProjectAuthorAndId(projectId, authorId, fileId)
   }
 
   fun getFileIssues(
+    projectId: Long,
+    authorId: Long,
     fileId: Long,
     pageable: Pageable,
   ): Page<ImportFileIssueView> {
-    return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
+    val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
+    return importFileIssueRepository.findAllByFileIdView(file.id, pageable)
   }
 
   fun saveAllKeys(keys: Iterable<ImportKey>): MutableList<ImportKey> = this.importKeyRepository.saveAll(keys)
-
-  fun saveKey(entity: ImportKey): ImportKey = this.importKeyRepository.save(entity)
 
   fun saveAllFileIssues(issues: Iterable<ImportFileIssue>) {
     this.importFileIssueRepository.saveAll(issues)
@@ -494,5 +503,18 @@ class ImportService(
 
   fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> {
     return importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
+  }
+
+  @Transactional
+  fun selectFormat(
+    projectId: Long,
+    authorId: Long,
+    fileId: Long,
+    format: ImportMessageFormat,
+  ) {
+    val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
+    ImportDataManager(applicationContext, file.import).selectFormat(file, format)
+    file.format = format
+    saveFile(file)
   }
 }

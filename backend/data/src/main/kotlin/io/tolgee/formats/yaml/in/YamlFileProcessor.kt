@@ -19,14 +19,15 @@ class YamlFileProcessor(
     if (detectedFormat.rootKeyIsLanguageTag) {
       dataMap.entries.forEach { (languageTag, languageData) ->
         if (languageTag !is String) return@forEach
-        processLanguageData(detectedFormat, languageTag, languageData)
+        processLanguageData(listOf(languageTag), detectedFormat, languageTag, languageData)
       }
       return
     }
-    processLanguageData(detectedFormat, languageNameGuesses.firstOrNull() ?: "unknown", data)
+    processLanguageData(listOf(), detectedFormat, languageNameGuesses.firstOrNull() ?: "unknown", data)
   }
 
   private fun processLanguageData(
+    initialKeyPath: List<String>,
     detectedFormat: ImportMessageFormat,
     languageTag: String,
     languageData: Any?,
@@ -37,6 +38,7 @@ class YamlFileProcessor(
         languageTag,
       )
     GenericStructuredProcessor(
+      initialKeyPath = initialKeyPath,
       context = context,
       data = languageData,
       convertor = convertor,

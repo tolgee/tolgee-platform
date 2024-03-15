@@ -15,7 +15,7 @@ import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class YamlFormatProcessorTest {
+class YamlFileProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
 
   @BeforeEach

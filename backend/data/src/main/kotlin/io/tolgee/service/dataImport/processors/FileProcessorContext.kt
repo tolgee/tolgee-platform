@@ -196,6 +196,14 @@ data class FileProcessorContext(
     }
   }
 
+  fun addKeyPath(
+    key: String,
+    path: List<Any>,
+  ) {
+    val keyEntity = getOrCreateKey(key)
+    keyEntity.nestedKeyPath = path
+  }
+
   val customValuesValidator: KeyCustomValuesValidator by lazy {
     applicationContext.getBean(KeyCustomValuesValidator::class.java)
   }

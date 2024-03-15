@@ -1,5 +1,6 @@
 package io.tolgee.model.dataImport
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.key.KeyMeta
 import jakarta.persistence.Column
@@ -9,6 +10,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.Type
 
 @Entity
 class ImportKey(
@@ -26,6 +28,10 @@ class ImportKey(
   override var keyMeta: KeyMeta? = null
 
   var pluralArgName: String? = null
+
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  var nestedKeyPath: List<Any>? = null
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
