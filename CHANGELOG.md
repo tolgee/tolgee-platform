@@ -1,3 +1,10 @@
+# [3.50.0](https://github.com/tolgee/tolgee-platform/compare/v3.49.12...v3.50.0) (2024-03-15)
+
+
+### Features
+
+* add help menu ([#2190](https://github.com/tolgee/tolgee-platform/issues/2190)) ([34daec1](https://github.com/tolgee/tolgee-platform/commit/34daec16910e488bd24ddce55a4411960325772f))
+
 ## [3.49.12](https://github.com/tolgee/tolgee-platform/compare/v3.49.11...v3.49.12) (2024-03-13)
 
 
