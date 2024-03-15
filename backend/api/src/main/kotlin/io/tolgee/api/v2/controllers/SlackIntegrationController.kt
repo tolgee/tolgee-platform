@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.activity.ActivityHolder
-import io.tolgee.activity.RequestActivity
-import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.constants.Message
 import io.tolgee.constants.SlackEventActions
@@ -33,7 +31,7 @@ import java.net.URLDecoder
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/slack/events"])
+@RequestMapping(value = ["/v2/slack"])
 class SlackIntegrationController(
   private val projectService: ProjectService,
   private val slackConfigService: SlackConfigService,
@@ -44,9 +42,9 @@ class SlackIntegrationController(
   private val translationService: TranslationService,
   private val keyService: KeyService,
   private val activityHolder: ActivityHolder,
-  private val objectMapper: ObjectMapper
+  private val objectMapper: ObjectMapper,
 ) {
-  @PostMapping("/tolgee")
+  @PostMapping
   @UseDefaultPermissions
   @AllowApiAccess
   fun slackCommand(
@@ -167,7 +165,7 @@ class SlackIntegrationController(
     )
   }
 
-  @PostMapping("/event")
+  @PostMapping("/on-event")
   @Transactional
   fun fetchEvent(
     @RequestBody payload: String,
