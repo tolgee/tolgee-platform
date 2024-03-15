@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
@@ -51,48 +50,31 @@ class SlackIntegrationController(
     @ModelAttribute payload: SlackCommandDto,
   ): SlackMessageDto? {
     val regex = """^(\w+)(?:\s+(\d+))?(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
-    val matchResult = regex.matchEntire(payload.text) ?: return SlackMessageDto("Invalid command")
+    val matchResult = regex.matchEntire(payload.text)
 
-    val (command, projectId, languageTag, optionsString) = matchResult.destructured
-    // retrieving map of options
-    val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
-    val optionsMap = mutableMapOf<String, String>()
-
-    optionsRegex.findAll(optionsString).forEach { match ->
-      val (key, value) = match.destructured
-      optionsMap[key] = value
+    if (matchResult == null) {
+      slackExecutor.sendErrorMessage(Message.SLACK_INVALID_COMMAND, payload.channel_id)
+      return null
     }
 
-    when (command) {
-      "login" -> {
-        return login(payload.user_id, payload.channel_id)
+    val (command, projectId, languageTag, optionsString) = matchResult.destructured
+
+    val optionsMap = parseOptions(optionsString)
+
+    return when (command) {
+      "login" -> return login(payload.user_id, payload.channel_id)
+
+      "subscribe" -> return handleSubscribe(payload, projectId, languageTag, optionsMap)
+
+      "unsubscribe" -> return unsubscribe(payload, projectId)
+
+      else -> {
+        slackExecutor.sendErrorMessage(
+          Message.SLACK_INVALID_COMMAND,
+          payload.channel_id,
+        )
+        null
       }
-
-      "subscribe" -> {
-        if (projectId.isEmpty()) return SlackMessageDto("Invalid command")
-        var onEvent: EventName? = null
-
-        optionsMap.forEach { (option, value) ->
-          when (option) {
-            "--on" -> {
-              try {
-                onEvent = EventName.valueOf(value.uppercase())
-              } catch (e: IllegalArgumentException) {
-                return SlackMessageDto("Invalid command")
-              }
-            }
-            else -> return SlackMessageDto("Invalid command")
-          }
-        }
-
-        return subscribe(payload, projectId, languageTag, onEvent)
-      }
-
-      "unsubscribe" -> {
-        return unsubscribe(payload, projectId)
-      }
-
-      else -> return SlackMessageDto("Invalid command")
     }
   }
 
@@ -117,6 +99,37 @@ class SlackIntegrationController(
 
     slackExecutor.sendRedirectUrl(channelId, userId)
     return null
+  }
+
+  fun handleSubscribe(
+    payload: SlackCommandDto,
+    projectId: String,
+    languageTag: String?,
+    optionsMap: Map<String, String>,
+  ): SlackMessageDto? {
+    if (projectId.isEmpty()) {
+      slackExecutor.sendErrorMessage(Message.SLACK_INVALID_COMMAND, payload.channel_id)
+      return null
+    }
+
+    var onEvent: EventName? = null
+    optionsMap.forEach { (option, value) ->
+      when (option) {
+        "--on" ->
+          onEvent =
+            try {
+              EventName.valueOf(value.uppercase())
+            } catch (e: IllegalArgumentException) {
+              return SlackMessageDto("Invalid command")
+            }
+        else -> {
+          slackExecutor.sendErrorMessage(Message.SLACK_INVALID_COMMAND, payload.channel_id)
+          return null
+        }
+      }
+    }
+
+    return subscribe(payload, projectId, languageTag, onEvent)
   }
 
   private fun subscribe(
@@ -171,7 +184,7 @@ class SlackIntegrationController(
     @RequestBody payload: String,
   ): SlackMessageDto? {
     val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
-    val event: SlackEventDto = jacksonObjectMapper().readValue(decodedPayload)
+    val event: SlackEventDto = objectMapper.readValue(decodedPayload)
 
     event.actions.forEach { action ->
       val parameters = action.actionId.substringAfter(SlackEventActions.TRANSLATE_VALUE.name + "/")
@@ -218,6 +231,18 @@ class SlackIntegrationController(
     } else {
       ValidationResult(false)
     }
+  }
+
+  fun parseOptions(optionsString: String): Map<String, String> {
+    val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
+    val optionsMap = mutableMapOf<String, String>()
+
+    optionsRegex.findAll(optionsString).forEach { match ->
+      val (key, value) = match.destructured
+      optionsMap[key] = value
+    }
+
+    return optionsMap
   }
 
   data class ValidationResult(
