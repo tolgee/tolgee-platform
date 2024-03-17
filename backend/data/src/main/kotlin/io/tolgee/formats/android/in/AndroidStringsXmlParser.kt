@@ -53,7 +53,9 @@ class AndroidStringsXmlParser(
 
             "item" -> {
               if (currentPluralEntry != null) {
-                currentPluralQuantity = startElement.getAttributeByName(QName(null, "quantity"))?.value
+                currentPluralQuantity =
+                  startElement
+                    .getAttributeByName(QName(null, "quantity"))?.value
               } else if (currentArrayEntry != null) {
                 isArrayItemOpen = true
               }
@@ -112,7 +114,10 @@ class AndroidStringsXmlParser(
     return result
   }
 
-  private fun getKeyName(startElement: StartElement) = startElement.getAttributeByName(QName(null, "name"))?.value
+  private fun getKeyName(startElement: StartElement) =
+    startElement.getAttributeByName(
+      QName(null, "name"),
+    )?.value
 
   private fun getCurrentTextOrXml(): String {
     return sw.toString()

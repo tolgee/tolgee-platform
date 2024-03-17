@@ -200,7 +200,7 @@ class AndroidStringsXmlExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     return getModels().map { (path, model) ->
-      path to AndroidStringsXmlFileWriter(model, true).produceFiles()
+      path to AndroidStringsXmlFileWriter(model).produceFiles()
     }.toMap()
   }
 }

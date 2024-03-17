@@ -11,7 +11,7 @@ class JavaToIcuParamConvertor() : ToIcuParamConvertor {
   private var index = 0
 
   override val regex: Regex
-    get() = REGEX
+    get() = JAVA_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
@@ -51,7 +51,7 @@ class JavaToIcuParamConvertor() : ToIcuParamConvertor {
   }
 
   companion object {
-    val REGEX =
+    val JAVA_PLACEHOLDER_REGEX =
       """
       (?x)(
       %

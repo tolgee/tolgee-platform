@@ -5,14 +5,13 @@ import io.tolgee.formats.android.AndroidXmlNode
 import io.tolgee.formats.android.PluralUnit
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
-import io.tolgee.util.appendXmlOrText
 import io.tolgee.util.attr
 import io.tolgee.util.buildDom
 import io.tolgee.util.element
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel, private val enableXmlContent: Boolean) {
+class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
   fun produceFiles(): InputStream {
     return buildDom {
       element("resources") {
@@ -57,10 +56,15 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel, pri
   }
 
   private fun Element.appendXmlIfEnabledOrText(content: String?) {
-    if (!enableXmlContent) {
-      textContent = content
-      return
+    val contentToAppend = TextToAndroidXmlConvertor().getContent(this.ownerDocument, content)
+    if (contentToAppend?.text != null) {
+      this.textContent = contentToAppend.text
     }
-    this.appendXmlOrText(content)
+
+    if (contentToAppend?.children != null) {
+      contentToAppend.children.forEach {
+        this.appendChild(it)
+      }
+    }
   }
 }
