@@ -1,15 +1,15 @@
-import { Alert, Button, useMediaQuery } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
-import { useSelector } from 'react-redux';
-import { CompactView } from 'tg.component/layout/CompactView';
-import { SPLIT_CONTENT_BREAK_POINT } from 'tg.component/security/SplitContent';
-import { AppState } from 'tg.store/index';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useUser } from 'tg.globalContext/helpers';
-import { LINKS } from 'tg.constants/links';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
+import {Alert, Button, useMediaQuery} from '@mui/material';
+import {T, useTranslate} from '@tolgee/react';
+import {useSelector} from 'react-redux';
+import {CompactView} from 'tg.component/layout/CompactView';
+import {SPLIT_CONTENT_BREAK_POINT} from 'tg.component/security/SplitContent';
+import {AppState} from 'tg.store/index';
+import {TranslatedError} from 'tg.translationTools/TranslatedError';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {useHistory, useLocation} from 'react-router-dom';
+import {useUser} from 'tg.globalContext/helpers';
+import {LINKS} from 'tg.constants/links';
+import {useMessage} from 'tg.hooks/useSuccessMessage';
 
 export const SlackLoginView = () => {
   const { t } = useTranslate();
@@ -28,7 +28,7 @@ export const SlackLoginView = () => {
   const validUserAccountId = user?.id?.toString() ?? 'defaultAccountId';
 
   const slackMutation = useApiMutation({
-    url: '/v2/slack/events/connect',
+    url: '/v2/slack/connect',
     method: 'post',
   });
 
