@@ -50,7 +50,7 @@ class SavedSlackMessageService(
     savedSlackMessageRepository.deleteById(id)
   }
 
-  @Scheduled(cron = "0 0 * * * *")
+  @Scheduled(cron = "*/5 * * * * *")
   fun deleteOldMessage() {
     val cutoff = Date.from(LocalDateTime.now().minusHours(2).atZone(ZoneId.systemDefault()).toInstant())
     savedSlackMessageRepository.deleteOlderThan(cutoff)

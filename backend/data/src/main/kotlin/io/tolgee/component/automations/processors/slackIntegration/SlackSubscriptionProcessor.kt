@@ -32,6 +32,7 @@ class SlackSubscriptionProcessor(
     if (!checkSavedEvent(config, activityModel.type)) {
       return
     }
+
     when (activityModel.type) {
       ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded()
       ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE -> slackExecutor.sendMessageOnTranslationSet()

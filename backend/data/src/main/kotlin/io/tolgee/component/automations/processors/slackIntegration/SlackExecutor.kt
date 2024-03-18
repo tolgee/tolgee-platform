@@ -2,6 +2,7 @@ package io.tolgee.component.automations.processors.slackIntegration
 
 import com.slack.api.Slack
 import com.slack.api.methods.kotlin_extension.request.chat.blocks
+import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.model.slackIntegration.SavedSlackMessage
@@ -32,7 +33,7 @@ class SlackExecutor(
     val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag)
 
     if (savedMessage.isEmpty()) {
-      sendRegularMessage(messageDto, config)
+      sendRegularMessageWithSaving(messageDto, config)
       return
     }
 
@@ -61,7 +62,7 @@ class SlackExecutor(
     val config = slackExecutorHelper.slackConfig
     val messageDto = slackExecutorHelper.createKeyAddMessage() ?: return
 
-    sendRegularMessage(messageDto, config)
+    sendRegularMessageWithSaving(messageDto, config)
   }
 
   fun sendSuccessModal(triggerId: String) {
@@ -74,34 +75,13 @@ class SlackExecutor(
   fun sendErrorMessage(
     errorMessage: Message,
     slackChannelId: String,
+    slackId: String,
   ) {
-    slackClient.methods(slackToken).chatPostMessage {
-      it.channel(slackChannelId)
-        .blocks {
+    val blocks = createErrorBlocks(errorMessage, getRedirectUrl(slackChannelId, slackId))
 
-
-          when (errorMessage) {
-            Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> {
-              section {
-                markdownText(i18n.translate("slack-not-connected-message"))
-              }
-              context {
-                elements {
-                  //TODO: @Ivan: this should be removed and the link should be provided directly on this message
-                  val suggestion = "Try to use /login"
-                  plainText(suggestion)
-                }
-              }
-            }
-
-            else -> {
-              section {
-                val emojiUnicode = "x"
-                markdownText(":$emojiUnicode: ${errorMessage.code}")
-              }
-            }
-          }
-        }
+    slackClient.methods(slackToken).chatPostMessage { request ->
+      request.channel(slackChannelId)
+        .blocks(blocks)
     }
   }
 
@@ -113,16 +93,20 @@ class SlackExecutor(
       it.channel(slackChannelId)
         .blocks {
           section {
-            markdownText(" :no_entry: You need to connect Slack to Tolgee first. ")
+            markdownText(i18n.translate("slack-not-connected-message"))
           }
+
+          section {
+            markdownText(i18n.translate("connect-account-instruction"))
+          }
+
           actions {
             button {
-              val redirectUrl = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId"
-
-              text("Connect Slack to Tolgee", emoji = true)
+              text(i18n.translate("connect-button-text"), emoji = true)
               value("connect_slack")
-              url(redirectUrl)
+              url(getRedirectUrl(slackChannelId, slackId))
               actionId("button_connect_slack")
+              style("primary")
             }
           }
         }
@@ -157,7 +141,7 @@ class SlackExecutor(
     }
   }
 
-  private fun sendRegularMessage(
+  private fun sendRegularMessageWithSaving(
     messageDto: SavedMessageDto,
     config: SlackConfig,
   ) {
@@ -198,5 +182,54 @@ class SlackExecutor(
           langTags = messageDto.langTag,
         ),
     )
+  }
+
+  private fun getRedirectUrl(
+    slackChannelId: String,
+    slackId: String,
+  ) = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId"
+
+  fun createErrorBlocks(
+    errorMessageType: Message,
+    redirectUrl: String,
+  ) = withBlocks {
+    section {
+      markdownText(
+        when (errorMessageType) {
+          Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT ->
+            i18n.translate("slack-not-connected-message")
+          Message.SLACK_INVALID_COMMAND ->
+            i18n.translate("command-not-recognized")
+          else ->
+            i18n.translate("unknown-error-occurred")
+        },
+      )
+    }
+
+    when (errorMessageType) {
+      Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> {
+        section {
+          markdownText(i18n.translate("connect-account-instruction"))
+        }
+        actions {
+          button {
+            text(i18n.translate("connect-button-text"), emoji = true)
+            url(redirectUrl)
+            style("primary")
+          }
+        }
+      }
+      Message.SLACK_INVALID_COMMAND -> {
+        section {
+          markdownText(i18n.translate("check-command-solutions"))
+        }
+        actions {
+          button {
+            text(i18n.translate("view-help-button-text"), emoji = true)
+          }
+        }
+      }
+      else -> {}
+    }
   }
 }

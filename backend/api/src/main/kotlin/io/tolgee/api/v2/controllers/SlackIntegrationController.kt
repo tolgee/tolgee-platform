@@ -53,7 +53,11 @@ class SlackIntegrationController(
     val matchResult = regex.matchEntire(payload.text)
 
     if (matchResult == null) {
-      slackExecutor.sendErrorMessage(Message.SLACK_INVALID_COMMAND, payload.channel_id)
+      slackExecutor.sendErrorMessage(
+        Message.SLACK_INVALID_COMMAND,
+        payload.channel_id,
+        payload.user_id,
+      )
       return null
     }
 
@@ -72,6 +76,7 @@ class SlackIntegrationController(
         slackExecutor.sendErrorMessage(
           Message.SLACK_INVALID_COMMAND,
           payload.channel_id,
+          payload.user_id,
         )
         null
       }
@@ -108,7 +113,11 @@ class SlackIntegrationController(
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
     if (projectId.isEmpty()) {
-      slackExecutor.sendErrorMessage(Message.SLACK_INVALID_COMMAND, payload.channel_id)
+      slackExecutor.sendErrorMessage(
+        Message.SLACK_INVALID_COMMAND,
+        payload.channel_id,
+        payload.user_id,
+      )
       return null
     }
 
@@ -123,7 +132,11 @@ class SlackIntegrationController(
               return SlackMessageDto("Invalid command")
             }
         else -> {
-          slackExecutor.sendErrorMessage(Message.SLACK_INVALID_COMMAND, payload.channel_id)
+          slackExecutor.sendErrorMessage(
+            Message.SLACK_INVALID_COMMAND,
+            payload.channel_id,
+            payload.user_id,
+          )
           return null
         }
       }
@@ -217,7 +230,11 @@ class SlackIntegrationController(
     val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
 
     if (slackSubscription == null) {
-      slackExecutor.sendErrorMessage(Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT, payload.channel_id)
+      slackExecutor.sendErrorMessage(
+        Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT,
+        payload.channel_id,
+        payload.user_id,
+      )
       return ValidationResult(false)
     }
 
