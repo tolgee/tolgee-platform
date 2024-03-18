@@ -35,6 +35,11 @@ export type Emphasis = {
   A700: string;
 };
 
+export type Tooltip = {
+  background: string;
+  text: string;
+};
+
 export type Editor = {
   function: string;
   other: string;
@@ -181,7 +186,7 @@ export const colors = {
     tooltip: {
       background: '#ffffff',
       text: '#111111',
-    },
+    } satisfies Tooltip,
     info: '#009B85',
     topBanner: {
       background: '#BEF4E9',
@@ -302,7 +307,7 @@ export const colors = {
     tooltip: {
       background: '#394556',
       text: '#efefef',
-    },
+    } satisfies Tooltip,
     info: '#6db2a4',
     topBanner: {
       background: '#008371',

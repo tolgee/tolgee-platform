@@ -76,6 +76,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     baseTranslation,
     currentTranslation: value,
     nested,
+    enabled: baseLanguage !== language.tag,
   });
 
   const handleModeToggle = () => {
