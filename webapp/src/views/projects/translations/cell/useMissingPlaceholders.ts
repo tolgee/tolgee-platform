@@ -22,7 +22,7 @@ export const useMissingPlaceholders = ({
   }
 
   const basePlaceholders = useMemo(() => {
-    return (enabled && getPlaceholders(baseTranslation || '', nested)) ?? [];
+    return (enabled && getPlaceholders(baseTranslation || '', nested)) || [];
   }, [baseTranslation, nested, enabled]);
 
   const lastValidPlaceholders = useRef<Placeholder[]>();
