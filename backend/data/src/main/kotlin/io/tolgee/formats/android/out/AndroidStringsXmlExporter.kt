@@ -3,6 +3,8 @@ package io.tolgee.formats.android.out
 import com.ibm.icu.util.ULocale
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.PossiblePluralConversionResult
+import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
+import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.AndroidStringsXmlModel
 import io.tolgee.formats.android.AndroidXmlNode
 import io.tolgee.formats.android.PluralUnit
@@ -61,9 +63,13 @@ class AndroidStringsXmlExporter(
   ) {
     val stringUnit =
       StringUnit().apply {
-        this.value = text
+        this.value = AndroidStringValue(text, translation.isWrappedWithCdata())
       }
     addToUnits(translation, stringUnit)
+  }
+
+  private fun ExportTranslationView.isWrappedWithCdata(): Boolean {
+    return this.key.custom?.get(ANDROID_CDATA_CUSTOM_KEY) == true
   }
 
   private fun buildStringArrayUnit(
@@ -92,7 +98,7 @@ class AndroidStringsXmlExporter(
         stringsArrayWrapper == null || (!stringsArrayWrapper.isExactKeyName && isExactKeyName) -> {
           NodeWrapper(
             StringArrayUnit().apply {
-              this.items.add(StringArrayItem(text, index))
+              this.items.add(StringArrayItem(AndroidStringValue(text, translation.isWrappedWithCdata()), index))
             },
             isExactKeyName,
             keyNameWithoutIndex,
@@ -101,7 +107,12 @@ class AndroidStringsXmlExporter(
 
         // it is already a string array and the key is the same
         (stringsArrayWrapper.node is StringArrayUnit && keyNameWithoutIndex == stringsArrayWrapper.exactKeyName) -> {
-          stringsArrayWrapper.node.items.add(StringArrayItem(text, index))
+          stringsArrayWrapper.node.items.add(
+            StringArrayItem(
+              AndroidStringValue(text, translation.isWrappedWithCdata()),
+              index,
+            ),
+          )
           stringsArrayWrapper
         }
 
@@ -117,7 +128,11 @@ class AndroidStringsXmlExporter(
     pluralForms: Map<String, String>,
   ) {
     // Assuming your translation view contain a map of plural forms as value
-    val pluralMap = populateForms(translation.languageTag, pluralForms)
+    val pluralMap =
+      populateForms(translation.languageTag, pluralForms).map {
+        it.key to AndroidStringValue(it.value, translation.isWrappedWithCdata())
+      }.toMap()
+
     val pluralUnit =
       PluralUnit().apply {
         this.items.putAll(pluralMap)

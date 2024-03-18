@@ -1,5 +1,6 @@
 package io.tolgee.formats.android.out
 
+import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.AndroidStringsXmlModel
 import io.tolgee.formats.android.AndroidXmlNode
 import io.tolgee.formats.android.PluralUnit
@@ -55,15 +56,21 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
     }
   }
 
-  private fun Element.appendXmlIfEnabledOrText(content: String?) {
-    val contentToAppend = TextToAndroidXmlConvertor().getContent(this.ownerDocument, content)
-    if (contentToAppend?.text != null) {
+  private fun Element.appendXmlIfEnabledOrText(value: AndroidStringValue?) {
+    if (value == null) {
+      return
+    }
+    val contentToAppend =
+      TextToAndroidXmlConvertor(this.ownerDocument, value)
+        .convert()
+    if (contentToAppend.text != null) {
       this.textContent = contentToAppend.text
     }
 
-    if (contentToAppend?.children != null) {
+    if (contentToAppend.children != null) {
       contentToAppend.children.forEach {
-        this.appendChild(it)
+        val imported = this.ownerDocument.importNode(it, true)
+        this.appendChild(imported)
       }
     }
   }

@@ -4,6 +4,8 @@ import AndroidStringsXmlParser
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.StringWrapper
+import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
+import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.PluralUnit
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
@@ -32,14 +34,33 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     if (keyName.isBlank()) {
       return
     }
+    val text = it.value?.string
     context.addTranslation(
       keyName,
       guessedLanguage,
-      convertMessage(it.value),
+      convertMessage(text),
       forceIsPlural = false,
-      rawData = StringWrapper(it.value),
+      rawData = StringWrapper(text),
       convertedBy = ImportMessageConvertorType.ANDROID_XML,
     )
+    setCustomWrappedWithCdata(keyName, it.value)
+  }
+
+  private fun setCustomWrappedWithCdata(
+    keyName: String,
+    value: Collection<AndroidStringValue>,
+  ) {
+    val isWrappedCdata = value.any { it.isWrappedCdata }
+    if (isWrappedCdata) {
+      context.setCustom(keyName, ANDROID_CDATA_CUSTOM_KEY, true)
+    }
+  }
+
+  private fun setCustomWrappedWithCdata(
+    keyName: String,
+    value: AndroidStringValue?,
+  ) {
+    setCustomWrappedWithCdata(keyName, value?.let { listOf(it) } ?: emptyList())
   }
 
   private fun handlePlural(
@@ -50,9 +71,11 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       return
     }
 
+    val rawData = it.items.map { it.key to it.value.string }.toMap()
+
     val converted =
       AndroidToIcuMessageConvertor().convert(
-        rawData = it.items,
+        rawData = rawData,
         languageTag = guessedLanguage,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
         context.projectIcuPlaceholdersEnabled,
@@ -63,9 +86,11 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       guessedLanguage,
       converted.message,
       forceIsPlural = true,
-      rawData = it.items,
+      rawData = rawData,
       convertedBy = ImportMessageConvertorType.ANDROID_XML,
     )
+
+    setCustomWrappedWithCdata(keyName, it.items.map { it.value })
   }
 
   private fun handleStringsArray(
@@ -77,14 +102,17 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     }
     arrayUnit.items.forEachIndexed { index, item ->
       val keyNameWithIndex = "$keyName[$index]"
+
+      val text = item.value?.string
       context.addTranslation(
         keyNameWithIndex,
         guessedLanguage,
-        convertMessage(item.value),
+        convertMessage(text),
         forceIsPlural = false,
-        rawData = StringWrapper(item.value),
+        rawData = StringWrapper(text),
         convertedBy = ImportMessageConvertorType.ANDROID_XML,
       )
+      setCustomWrappedWithCdata(keyNameWithIndex, item.value)
     }
   }
 

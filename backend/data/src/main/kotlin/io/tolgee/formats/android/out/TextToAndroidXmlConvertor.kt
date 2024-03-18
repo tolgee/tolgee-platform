@@ -1,5 +1,7 @@
 package io.tolgee.formats.android.out
 
+import io.tolgee.formats.android.AndroidParsingConstants
+import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.`in`.JavaToIcuParamConvertor
 import org.w3c.dom.Document
 import org.w3c.dom.Node
@@ -15,49 +17,76 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-class TextToAndroidXmlConvertor {
-  fun getContent(
-    document: Document,
-    content: String?,
-  ): ContentToAppend? {
-    val contentNotNull =
-      content ?: let {
-        return null
-      }
+class TextToAndroidXmlConvertor(
+  private val document: Document,
+  private val value: AndroidStringValue,
+) {
+  val string = value.string
 
+  fun convert(): ContentToAppend {
     try {
-      val doc = parseString(contentNotNull)
-      val analysisResult = doc.analyze()
-      if (analysisResult.containsXml && analysisResult.containsPlaceholders) {
-        val cdata =
-          document.createCDATASection(
-            contentNotNull.escape(escapeApos = true, keepPercentSignEscaped = true, quoteMoreWhitespaces = false),
-          )
-        return ContentToAppend(children = listOf(cdata))
+      if (containsXmlAndPlaceholders || value.isWrappedCdata) {
+        return contentWrappedInCdata
       }
 
-      analysisResult.unsupportedTagNodes.forEach { node ->
-        node.parentNode.replaceChild(
-          doc.createCDATASection(
-            node.writeToString().escape(
-              escapeApos = true,
-              keepPercentSignEscaped = analysisResult.containsPlaceholders,
-              quoteMoreWhitespaces = false,
-            ),
-          ),
-          node,
-        )
-      }
-
-      analysisResult.textNodes.forEach { node ->
-        node.escapeText(keepPercentSignEscaped = analysisResult.containsPlaceholders, quoteMoreWhitespaces = true)
-      }
+      wrapUnsupportedTagsWithCdata(analysisResult, parsed)
+      escapeTextNodes()
 
       return ContentToAppend(
-        children = doc.childNodes.item(0).childNodes.asSequence().toList(),
+        children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
       )
     } catch (ex: java.lang.Exception) {
-      return ContentToAppend(text = contentNotNull)
+      return ContentToAppend(text = string)
+    }
+  }
+
+  private val parsed by lazy {
+    parseString(string)
+  }
+
+  private val analysisResult by lazy {
+    parsed.analyze()
+  }
+
+  private val containsXmlAndPlaceholders
+    get() = analysisResult.containsXml && analysisResult.containsPlaceholders
+
+  private val contentWrappedInCdata: ContentToAppend
+    get() {
+      val cdata =
+        document.createCDATASection(
+          string.escape(
+            escapeApos = true,
+            keepPercentSignEscaped = true,
+            quoteMoreWhitespaces = false,
+            escapeNewLines = true,
+          ),
+        )
+      return ContentToAppend(children = listOf(cdata))
+    }
+
+  private fun escapeTextNodes() {
+    analysisResult.textNodes.forEach { node ->
+      node.escapeText(keepPercentSignEscaped = analysisResult.containsPlaceholders, quoteMoreWhitespaces = true)
+    }
+  }
+
+  private fun wrapUnsupportedTagsWithCdata(
+    analysisResult: AnalysisResult,
+    doc: Document,
+  ) {
+    analysisResult.unsupportedTagNodes.forEach { node ->
+      node.parentNode.replaceChild(
+        doc.createCDATASection(
+          node.writeToString().escape(
+            escapeApos = true,
+            keepPercentSignEscaped = analysisResult.containsPlaceholders,
+            quoteMoreWhitespaces = false,
+            escapeNewLines = true,
+          ),
+        ),
+        node,
+      )
     }
   }
 
@@ -94,7 +123,7 @@ class TextToAndroidXmlConvertor {
         textNodes.add(node)
       }
       if (node.nodeType == Node.ELEMENT_NODE) {
-        if (node.nodeName.lowercase() !in supportedTags) {
+        if (node.nodeName.lowercase() !in AndroidParsingConstants.supportedTags) {
           unsupportedTagNodes.add(node)
         } else {
           containsTags = true
@@ -137,24 +166,18 @@ class TextToAndroidXmlConvertor {
       escapeApos = isParentRoot(),
       keepPercentSignEscaped = keepPercentSignEscaped,
       quoteMoreWhitespaces = quoteMoreWhitespaces,
+      escapeNewLines = !analysisResult.containsXml,
     )
   }
 
   private fun Node.isParentRoot(): Boolean {
-    return this.parentNode.nodeName == "root" && this.parentNode.parentNode == null
+    return this.parentNode.nodeName == "root" && this.parentNode.parentNode === this.ownerDocument
   }
 
   companion object {
     private val documentBuilder: DocumentBuilder by lazy { DocumentBuilderFactory.newInstance().newDocumentBuilder() }
-    private val supportedTags =
-      setOf(
-        "b", "i", "cite", "dfn", "em",
-        "big", "small", "font",
-        "tt", "s", "strike", "del", "u",
-        "sup", "sub", "ul", "li",
-        "br", "div", "p",
-      )
-    val spacesRegex = """([\u0020\u2008\u2003]{2,})""".toRegex()
+
+    val spacesRegex = """([${AndroidParsingConstants.spaces.joinToString("")}]{2,})""".toRegex()
     private val xmlTransformer by lazy {
       val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
       transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
@@ -169,13 +192,20 @@ class TextToAndroidXmlConvertor {
      * We only support this non XML strings
      */
     quoteMoreWhitespaces: Boolean,
+    escapeNewLines: Boolean,
   ): String {
     return this
+      .replace("\\", "\\\\")
       .replace("\"", "\\\"")
-      .replace("\n", "\\n")
       .let {
         if (quoteMoreWhitespaces) {
           it.replace(spacesRegex, "\"$1\"")
+        } else {
+          it
+        }
+      }.let {
+        if (escapeNewLines) {
+          it.replace("\n", "\\n")
         } else {
           it
         }
