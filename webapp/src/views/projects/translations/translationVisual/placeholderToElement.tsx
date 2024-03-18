@@ -22,19 +22,7 @@ export const placeholderToElement = ({
           <div>{`${placeholder.name}${pluralExampleValue ?? ''}`}</div>
         </div>
       );
-    case 'variable':
-      return (
-        <div {...props} key={key} className={className}>
-          <div>{placeholder.name}</div>
-        </div>
-      );
-    case 'tagOpen':
-      return (
-        <div {...props} key={key} className={className}>
-          <div>{placeholder.name}</div>
-        </div>
-      );
-    case 'tagClose':
+    default:
       return (
         <div {...props} key={key} className={className}>
           <div>{placeholder.name}</div>

@@ -160,7 +160,13 @@ export const Editor: React.FC<EditorProps> = ({
   useEffect(() => {
     const placholderPlugins =
       mode === 'placeholders'
-        ? [PlaceholderPlugin({ examplePluralNum, nested: Boolean(nested) })]
+        ? [
+            PlaceholderPlugin({
+              examplePluralNum,
+              nested: Boolean(nested),
+              tooltips: true,
+            }),
+          ]
         : [];
     const syntaxPlugins =
       mode === 'plain' ? [] : [tolgeeSyntax(Boolean(nested))];
