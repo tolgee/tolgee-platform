@@ -278,6 +278,15 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
+  "/v2/slack": {
+    post: operations["slackCommand"];
+  };
+  "/v2/slack/on-event": {
+    post: operations["fetchEvent"];
+  };
+  "/v2/slack/connect": {
+    post: operations["connectSlack"];
+  };
   "/v2/public/business-events/report": {
     post: operations["report"];
   };
@@ -732,14 +741,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -754,6 +755,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1643,15 +1652,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1788,16 +1797,16 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
+      description: string;
       username?: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      projectId: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1809,6 +1818,24 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    SlackCommandDto: {
+      token?: string;
+      channel_id: string;
+      command: string;
+      channel_name?: string;
+      user_id: string;
+      userName?: string;
+      text: string;
+      trigger_id?: string;
+    };
+    SlackMessageDto: {
+      text: string;
+    };
+    SlackConnectionDto: {
+      slackId: string;
+      userAccountId: string;
+      channelId: string;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -2144,7 +2171,10 @@ export interface components {
         | "MULTIPLE_PLURALS_NOT_SUPPORTED"
         | "CUSTOM_VALUES_JSON_TOO_LONG"
         | "UNSUPPORTED_PO_MESSAGE_FORMAT"
-        | "PLURAL_FORMS_DATA_LOSS";
+        | "PLURAL_FORMS_DATA_LOSS"
+        | "SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT"
+        | "SLACK_INVALID_COMMAND"
+        | "SLACK_NOT_SUBSCRIBED_YET";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2656,18 +2686,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
       /** @example btforg */
       slug: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2776,9 +2806,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      description?: string;
       baseTranslation?: string;
       translation?: string;
-      description?: string;
       namespace?: string;
     };
     KeySearchSearchResultModel: {
@@ -2786,9 +2816,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      description?: string;
       baseTranslation?: string;
       translation?: string;
-      description?: string;
       namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -3326,15 +3356,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3453,16 +3483,16 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
+      description: string;
       username?: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      projectId: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
     };
     ApiKeyPermissionsModel: {
@@ -6560,6 +6590,84 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  slackCommand: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SlackMessageDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SlackCommandDto"];
+      };
+    };
+  };
+  fetchEvent: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SlackMessageDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": string;
+      };
+    };
+  };
+  connectSlack: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SlackConnectionDto"];
       };
     };
   };
