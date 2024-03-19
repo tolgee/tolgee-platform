@@ -1,3 +1,10 @@
+# [3.51.0](https://github.com/tolgee/tolgee-platform/compare/v3.50.2...v3.51.0) (2024-03-19)
+
+
+### Features
+
+* support for tags with attributes & tooltips in editor ([#2194](https://github.com/tolgee/tolgee-platform/issues/2194)) ([ba82cf6](https://github.com/tolgee/tolgee-platform/commit/ba82cf648b16ce4f8918e3294d17f104ba57228d))
+
 ## [3.50.2](https://github.com/tolgee/tolgee-platform/compare/v3.50.1...v3.50.2) (2024-03-19)
 
 
