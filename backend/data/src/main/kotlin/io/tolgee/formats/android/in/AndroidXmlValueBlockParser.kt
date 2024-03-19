@@ -58,6 +58,13 @@ class AndroidXmlValueBlockParser {
       replaceWithTextIfUnsupported(node)
       unescapeText(node)
     }
+    removeEmptyTextNodes()
+  }
+
+  private fun removeEmptyTextNodes() {
+    rootModel.removeIfDeep {
+      it is ModelCharacters && it.characters.isEmpty()
+    }
   }
 
   private var lastStartElementLocationCharacterOffset = -1
@@ -105,6 +112,14 @@ class AndroidXmlValueBlockParser {
 
     private val stringBuilder by lazy {
       StringBuilder()
+    }
+
+    fun removeIfDeep(predicate: (ModelNode) -> Boolean) {
+      children.forEach { child ->
+        if (child !is ModelElement) return@forEach
+        child.removeIfDeep(predicate)
+      }
+      children.removeIf(predicate)
     }
 
     override fun toXmlString(): String {

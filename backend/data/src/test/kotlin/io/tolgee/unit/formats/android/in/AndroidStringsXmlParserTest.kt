@@ -27,7 +27,7 @@ class AndroidStringsXmlParserTest {
 
   @Test
   fun `replaces CDATA elements with inner text`() {
-    "<![CDATA[<b>text</b>]]>".assertParsedTo("<b>text</b>", true)
+    "\n<![CDATA[<b>text</b>]]>\n".assertParsedTo("<b>text</b>", true)
   }
 
   @Test
