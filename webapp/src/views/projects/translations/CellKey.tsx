@@ -1,31 +1,31 @@
-import React, { useRef, useState } from 'react';
-import { Checkbox, styled, Tooltip, Box } from '@mui/material';
 import clsx from 'clsx';
+import React, { useRef, useState } from 'react';
+import { useDebounce } from 'use-debounce';
+import { useTranslate } from '@tolgee/react';
+import { Checkbox, styled, Tooltip, Box } from '@mui/material';
+import { Bolt } from '@mui/icons-material';
 
+import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { components } from 'tg.service/apiSchema.generated';
-import { LimitedHeightText } from './LimitedHeightText';
+import { stopBubble } from 'tg.fixtures/eventHandler';
+
 import { Tags } from './Tags/Tags';
-import { useEditableRow } from './useEditableRow';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import {
   CELL_CLICKABLE,
   CELL_PLAIN,
   CELL_SELECTED,
-  PositionType,
   StyledCell,
 } from './cell/styles';
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from './context/TranslationsContext';
-import { stopBubble } from 'tg.fixtures/eventHandler';
-import { useDebounce } from 'use-debounce';
 import { ControlsKey } from './cell/ControlsKey';
 import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
 import { KeyEditModal } from './KeyEdit/KeyEditModal';
-import { Bolt } from '@mui/icons-material';
-import { useTranslate } from '@tolgee/react';
+import { useKeyCell } from './useKeyCell';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -111,7 +111,6 @@ type Props = {
   editEnabled: boolean;
   active: boolean;
   simple?: boolean;
-  position?: PositionType;
   className?: string;
   onSaveSuccess?: (value: string) => void;
   editInDialog?: boolean;
@@ -123,7 +122,6 @@ export const CellKey: React.FC<Props> = ({
   editEnabled,
   active,
   simple,
-  position,
   onSaveSuccess,
   className,
 }) => {
@@ -151,19 +149,14 @@ export const CellKey: React.FC<Props> = ({
 
   const [tagEdit, setTagEdit] = useState(false);
 
-  const { isEditing, handleOpen, handleClose, editVal } = useEditableRow({
-    keyId: data.keyId,
-    keyName: data.keyName,
-    defaultVal: data.keyName,
-    language: undefined,
-    onSaveSuccess,
+  const { isEditing, handleOpen, handleClose, editVal } = useKeyCell({
+    keyData: data,
     cellRef,
   });
 
   return (
     <>
       <StyledContainer
-        position={position}
         className={clsx(
           {
             [CELL_PLAIN]: true,
@@ -173,7 +166,7 @@ export const CellKey: React.FC<Props> = ({
           className
         )}
         style={{ width }}
-        onClick={editEnabled ? () => handleOpen('editor') : undefined}
+        onClick={editEnabled ? () => handleOpen() : undefined}
         data-cy="translations-table-cell"
         tabIndex={0}
         ref={cellRef}
@@ -241,7 +234,7 @@ export const CellKey: React.FC<Props> = ({
           {!tagEdit ? (
             active || screenshotsOpen || screenshotsOpenDebounced ? (
               <ControlsKey
-                onEdit={() => handleOpen('editor')}
+                onEdit={() => handleOpen()}
                 onScreenshots={
                   simple ? undefined : () => setScreenshotsOpen(true)
                 }
@@ -277,14 +270,9 @@ export const CellKey: React.FC<Props> = ({
       )}
       {isEditing && (
         <KeyEditModal
-          keyId={data.keyId}
-          name={data.keyName}
-          description={data.keyDescription}
-          tags={data.keyTags.map((k) => k.name)}
-          namespace={data.keyNamespace}
+          data={data}
           onClose={() => handleClose(true)}
           initialTab={editVal?.mode === 'context' ? 'context' : 'general'}
-          contextPresent={data.contextPresent}
         />
       )}
     </>

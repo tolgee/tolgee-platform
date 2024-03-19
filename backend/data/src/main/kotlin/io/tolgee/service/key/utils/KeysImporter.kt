@@ -1,6 +1,7 @@
 package io.tolgee.service.key.utils
 
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
+import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
@@ -59,8 +60,13 @@ class KeysImporter(
             }
             this.namespace = namespaces[safeNamespace]
           }
+
+        val convertedToPlurals = keyDto.translations.convertToPluralIfAnyIsPlural()?.convertedStrings
+        key.isPlural = convertedToPlurals != null
         keyService.save(key)
-        keyDto.translations.entries.forEach { (languageTag, value) ->
+
+        val translations = convertedToPlurals ?: keyDto.translations
+        translations.entries.forEach { (languageTag, value) ->
           languages[languageTag]?.let { language ->
             translationService.setTranslation(key, language, value)
           }

@@ -1,11 +1,14 @@
 package io.tolgee.development.testDataBuilder.data.dataImport
 
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 
 class ImportCleanTestData {
+  lateinit var french: Language
+  lateinit var english: Language
   var project: Project
   var userAccount: UserAccount
   val projectBuilder get() = root.data.projects[0]
@@ -29,12 +32,12 @@ class ImportCleanTestData {
             addKey {
               name = "key1"
             }.self
-          val english =
+          english =
             addLanguage {
               name = "English"
               tag = "en"
             }.self
-          val french =
+          french =
             addLanguage {
               name = "French"
               tag = "fr"

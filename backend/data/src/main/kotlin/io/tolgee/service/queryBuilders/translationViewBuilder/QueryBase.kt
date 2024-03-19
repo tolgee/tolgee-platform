@@ -41,6 +41,8 @@ class QueryBase<T>(
   val whereConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
   val keyNameExpression: Path<String> = root.get(Key_.name)
+  val keyIsPluralExpression: Path<Boolean> = root.get(Key_.isPlural)
+  val keyArgNameExpression: Path<String?> = root.get(Key_.pluralArgName)
   val keyIdExpression: Path<Long> = root.get(Key_.id)
   val querySelection = QuerySelection()
   val fullTextFields: MutableSet<Expression<String>> = HashSet()
@@ -54,6 +56,8 @@ class QueryBase<T>(
   init {
     querySelection[KeyWithTranslationsView::keyId.name] = keyIdExpression
     querySelection[KeyWithTranslationsView::keyName.name] = keyNameExpression
+    querySelection[KeyWithTranslationsView::keyIsPlural.name] = keyIsPluralExpression
+    querySelection[KeyWithTranslationsView::keyPluralArgName.name] = keyArgNameExpression
     whereConditions.add(cb.equal(root.get<Any>(Key_.PROJECT).get<Any>(Project_.ID), this.projectId))
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()

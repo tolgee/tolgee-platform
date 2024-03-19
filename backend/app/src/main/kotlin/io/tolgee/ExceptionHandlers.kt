@@ -139,6 +139,7 @@ class ExceptionHandlers {
 
   @ExceptionHandler(EntityNotFoundException::class)
   fun handleServerError(ex: EntityNotFoundException?): ResponseEntity<ErrorResponseBody> {
+    logger.debug("Entity not found", ex)
     return ResponseEntity(ErrorResponseBody(Message.RESOURCE_NOT_FOUND.code, null), HttpStatus.NOT_FOUND)
   }
 
@@ -155,7 +156,8 @@ class ExceptionHandlers {
   )
   @ExceptionHandler(NotFoundException::class)
   fun handleNotFound(ex: NotFoundException): ResponseEntity<ErrorResponseBody> {
-    return ResponseEntity(ErrorResponseBody(ex.msg!!.code, null), HttpStatus.NOT_FOUND)
+    logger.debug(ex.message, ex)
+    return ResponseEntity(ErrorResponseBody(ex.msg.code, null), HttpStatus.NOT_FOUND)
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException::class)

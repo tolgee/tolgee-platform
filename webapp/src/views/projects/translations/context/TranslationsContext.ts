@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import ReactList from 'react-list';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { TolgeeFormat } from '@tginternal/editor';
 
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { createProvider } from 'tg.fixtures/createProvider';
 import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -14,11 +15,11 @@ import {
   ChangeScreenshotNum,
   ChangeValue,
   Edit,
+  EditorProps,
   Filters,
   KeyElement,
   KeyUpdateData,
   RemoveTag,
-  ScrollToElement,
   SetTranslationState,
   UpdateTranslation,
   ViewMode,
@@ -48,6 +49,7 @@ export const [
   useTranslationsSelector,
 ] = createProvider((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
+  const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
@@ -109,7 +111,7 @@ export const [
   const stateService = useStateService({ translations: translationService });
 
   const handleTranslationsReset = () => {
-    editService.setPosition(undefined);
+    editService.clearPosition();
     selectionService.clear();
   };
 
@@ -142,12 +144,21 @@ export const [
         return handleTranslationsReset();
       }
     },
-    async setEdit(edit: Edit | undefined) {
+    async setEdit(edit: EditorProps | undefined) {
       if (await editService.confirmUnsavedChanges(edit)) {
+        setSidePanelOpen(true);
         return editService.setPositionAndFocus(edit);
       }
     },
-    setEditForce(edit: Edit | undefined) {
+    async setEditValue(value: TolgeeFormat) {
+      setSidePanelOpen(true);
+      editService.setEditValue(value);
+    },
+    async setEditValueString(value: string) {
+      setSidePanelOpen(true);
+      editService.setEditValueString(value);
+    },
+    setEditForce(edit: EditorProps | undefined) {
       return editService.setPositionAndFocus(edit);
     },
     async updateEdit(edit: Partial<Edit>) {
@@ -167,9 +178,6 @@ export const [
     },
     fetchMore() {
       return translationService.fetchNextPage();
-    },
-    getBaseText(keyId: number) {
-      return translationService.getBaseText(keyId);
     },
     changeField(value: ChangeValue) {
       return editService.changeField(value);
@@ -215,9 +223,6 @@ export const [
     unregisterElement(element: KeyElement) {
       return viewRefs.unregisterElement(element);
     },
-    scrollToElement(element: ScrollToElement) {
-      return viewRefs.scrollToElement(element);
-    },
     focusElement(element: CellPosition) {
       return viewRefs.focusCell(element);
     },
@@ -230,6 +235,7 @@ export const [
     refetchTranslations() {
       return translationService.refetchTranslations();
     },
+    setSidePanelOpen,
     setEventBlockers,
   };
 
@@ -238,6 +244,7 @@ export const [
   );
 
   const state = {
+    baseLanguage: props.baseLang!,
     dataReady,
     // changes immediately when user clicks
     selectedLanguages: translationService.selectedLanguages,
@@ -268,6 +275,7 @@ export const [
     view: view as ViewMode,
     elementsRef: viewRefs.elementsRef,
     reactList: viewRefs.reactList,
+    sidePanelOpen,
   };
 
   return [state, actions];

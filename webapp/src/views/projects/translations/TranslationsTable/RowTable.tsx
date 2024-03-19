@@ -13,7 +13,7 @@ import { CELL_SPACE_BOTTOM, CELL_SPACE_TOP } from '../cell/styles';
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const StyledContainer = styled('div')`
-  display: flex;
+  display: grid;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-width: 1px 0px 0px 0px;
   position: relative;
@@ -48,8 +48,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   bannerBefore,
   bannerAfter,
 }) {
-  const { satisfiesPermission, satisfiesLanguageAccess } =
-    useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -59,8 +58,6 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   const relaxedActive = active || activeDebounced;
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const colSizesNum = columnSizes.map((val) => Number(val.replace('%', '')));
 
   const allClassName = clsx({
     [CELL_SPACE_TOP]: bannerBefore,
@@ -75,40 +72,19 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
       onBlur={() => setFocus(false)}
       data-cy="translations-row"
       className={clsx(data.deleted && 'deleted')}
+      style={{
+        gridTemplateColumns: columnSizes.join(' '),
+        width: `calc(${columnSizes.join(' + ')})`,
+      }}
     >
       <CellKey
         editInDialog
         editEnabled={satisfiesPermission('keys.edit')}
         data={data}
-        width={columnSizes[0]}
         active={relaxedActive}
-        position="left"
         className={allClassName}
       />
       {languages.map((language, index) => {
-        const allWidth = 100 - colSizesNum[0];
-
-        const prevWidth = colSizesNum
-          .slice(1, index + 1)
-          .reduce((prev, cur) => prev + cur, 0);
-
-        const cellWidth = Number(colSizesNum[index + 1]);
-
-        // calculate arrow position for popup
-        const cellPosition = `${
-          ((prevWidth + cellWidth / 2) / allWidth) * 100
-        }%`;
-
-        const canChangeState = satisfiesLanguageAccess(
-          'translations.state-edit',
-          language.id
-        );
-
-        const canEdit = satisfiesLanguageAccess(
-          'translations.edit',
-          language.id
-        );
-
         return (
           <CellTranslation
             key={language.tag}
@@ -116,14 +92,9 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             language={language}
             colIndex={index}
             onResize={onResize}
-            stateChangeEnabled={canChangeState}
-            editEnabled={canEdit}
-            width={columnSizes[index + 1]}
-            cellPosition={cellPosition}
             active={relaxedActive}
             // render last focusable button on last item, so it's focusable
             lastFocusable={index === languages.length - 1}
-            containerRef={containerRef}
             className={allClassName}
           />
         );

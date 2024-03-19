@@ -4,4 +4,7 @@ export type KeyFormType = {
   description: string | undefined;
   tags: string[];
   disabledLangs: number[];
+  isPlural: boolean;
+  pluralParameter: string;
+  custom: string;
 };

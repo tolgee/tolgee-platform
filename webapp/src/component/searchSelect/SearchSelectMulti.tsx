@@ -12,7 +12,6 @@ import { Add } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
 import { SelectItem } from 'tg.component/searchSelect/SearchSelect';
-import { CompactMenuItem } from '../../views/projects/translations/Filters/FiltersComponents';
 import {
   StyledWrapper,
   StyledHeading,
@@ -20,6 +19,7 @@ import {
   StyledInputContent,
   StyledInputWrapper,
 } from './SearchStyled';
+import { CompactMenuItem } from '../ListComponents';
 
 function PopperComponent(props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -234,4 +234,38 @@ class SuggestionTestData : BaseTestData() {
     germanLanguage.aiTranslatorPromptDescription = "This is a description for AI translator"
     project.aiTranslatorPromptDescription = "This is a description for AI translator"
   }
+
+  fun addPluralKeys(): PluralKeys {
+    return PluralKeys(
+      addPluralKey("true plural", true),
+      addPluralKey("same true plural", true),
+      addPluralKey("false plural", false),
+      addPluralKey("same false plural", false),
+    )
+  }
+
+  data class PluralKeys(
+    val truePlural: Key,
+    val sameTruePlural: Key,
+    val falsePlural: Key,
+    val sameFalsePlural: Key,
+  )
+
+  private fun addPluralKey(
+    name: String,
+    isPlural: Boolean,
+  ): Key {
+    val isNotPluralString = if (isPlural) "" else "not plural"
+    return projectBuilder.addKey(name) {
+      this.self.isPlural = isPlural
+      addTranslation {
+        language = englishLanguage
+        text = "{value, plural, one {# dog} other {# dogs}}$isNotPluralString"
+      }
+      addTranslation {
+        language = germanLanguage
+        text = "{value, plural, one {# Hund} other {# Hunde}}$isNotPluralString"
+      }
+    }.self
+  }
 }

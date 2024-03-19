@@ -99,23 +99,31 @@ describe('Import Resolving', () => {
         .click();
 
       const assertBothExpanded = () => {
-        cy.contains('Hello, I am old translation').then(($text: any) => {
-          cy.wrap($text!.height()).should('be.greaterThan', 80);
-        });
-        cy.contains('Hello, I am translation').then(($text: any) => {
-          cy.wrap($text!.height()).should('be.greaterThan', 80);
-        });
+        cy.contains('Hello, I am old translation')
+          .closestDcy('import-resolution-dialog-existing-translation')
+          .then(($text: any) => {
+            cy.wrap($text!.height()).should('be.greaterThan', 80);
+          });
+        cy.contains('Hello, I am translation')
+          .closestDcy('import-resolution-dialog-new-translation')
+          .then(($text: any) => {
+            cy.wrap($text!.height()).should('be.greaterThan', 80);
+          });
       };
 
       const assertBothCollapsed = () => {
-        cy.contains('Hello, I am old translation').then(($text: any) => {
-          cy.wrap($text!.width()).should('be.lessThan', 520);
-          cy.wrap($text!.height()).should('be.lessThan', 35);
-        });
-        cy.contains('Hello, I am translation').then(($text: any) => {
-          cy.wrap($text!.width()).should('be.lessThan', 520);
-          cy.wrap($text!.height()).should('be.lessThan', 35);
-        });
+        cy.contains('Hello, I am old translation')
+          .closestDcy('import-resolution-dialog-existing-translation')
+          .then(($text: any) => {
+            cy.wrap($text!.width()).should('be.lessThan', 520);
+            cy.wrap($text!.height()).should('be.lessThan', 70);
+          });
+        cy.contains('Hello, I am translation')
+          .closestDcy('import-resolution-dialog-new-translation')
+          .then(($text: any) => {
+            cy.wrap($text!.width()).should('be.lessThan', 520);
+            cy.wrap($text!.height()).should('be.lessThan', 70);
+          });
       };
 
       assertBothCollapsed();

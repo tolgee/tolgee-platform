@@ -58,7 +58,7 @@ export function testTranslations({ project, languages }: ProjectInfo) {
             'be.visible'
           );
         }
-        cy.gcy('translations-cell-close').click();
+        cy.gcy('translations-cell-cancel-button').click();
       } else if (languageAccess('translations.view', lang)) {
         cy.gcy('translations-table-cell-translation').contains(text).click();
         cy.gcy('global-editor').should('not.exist');
@@ -86,7 +86,7 @@ export function testTranslations({ project, languages }: ProjectInfo) {
     if (languageAccess('translations.view', lang)) {
       cy.gcy('translations-state-indicator').should('be.visible');
 
-      commentsButton(0, lang).click();
+      commentsButton('key-10', lang).click();
       cy.gcy('comment-text').should('be.visible');
 
       if (scopes.includes('translation-comments.set-state')) {
@@ -105,7 +105,7 @@ export function testTranslations({ project, languages }: ProjectInfo) {
         cy.gcy('comment-text').contains('test comment').should('be.visible');
       }
 
-      cy.gcy('translations-cell-close').click();
+      cy.gcy('translations-cell-cancel-button').click();
     }
   });
 }

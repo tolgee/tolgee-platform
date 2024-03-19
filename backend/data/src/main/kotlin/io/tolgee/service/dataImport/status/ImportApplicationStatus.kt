@@ -5,4 +5,5 @@ enum class ImportApplicationStatus {
   STORING_KEYS,
   STORING_TRANSLATIONS,
   FINALIZING,
+  ERROR,
 }

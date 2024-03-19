@@ -18,6 +18,7 @@ jobs:
           stale-issue-message: "This issue is stale because it has been open for 30 days with no activity."
           close-issue-message: "This issue was closed because it has been inactive for 14 days since being marked as stale."
           exempt-issue-labels: "roadmap item,enhancement,keep-open,bug"
+          exempt-all-assignees: true
 
           days-before-pr-stale: 30
           days-before-pr-close: 14

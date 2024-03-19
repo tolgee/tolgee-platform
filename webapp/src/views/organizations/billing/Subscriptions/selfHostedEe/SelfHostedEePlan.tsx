@@ -10,6 +10,7 @@ import { PlanPrice } from '../cloud/Plans/PlanPrice';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { IncludedFeatures } from './IncludedFeatures';
 import { BillingPeriodType, PeriodSwitch } from '../cloud/Plans/PeriodSwitch';
+import { PlanDescription } from './PlanDescription';
 
 export const SelfHostedEePlan = (props: {
   plan: components['schemas']['SelfHostedEePlanModel'];
@@ -18,17 +19,11 @@ export const SelfHostedEePlan = (props: {
 }) => {
   const { t } = useTranslate();
 
-  const hasFixedPrice = Boolean(
+  const hasPrice = Boolean(
     props.plan.prices.subscriptionMonthly ||
       props.plan.prices.subscriptionYearly
   );
   const organization = useOrganization();
-
-  const description = !hasFixedPrice
-    ? t('billing_subscriptions_pay_for_what_you_use')
-    : t('billing_subscriptions_pay_fixed_price', {
-        includedSeats: props.plan.includedUsage.seats,
-      });
 
   const subscribeMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions',
@@ -40,6 +35,38 @@ export const SelfHostedEePlan = (props: {
     },
   });
 
+  const subscribeFreeMutation = useBillingApiMutation({
+    url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscribe-free',
+    method: 'post',
+    options: {
+      onSuccess: () => {},
+    },
+    invalidatePrefix: '/v2/organizations/{organizationId}/billing',
+  });
+
+  const onSubscribe = () => {
+    if (props.plan.free) {
+      subscribeFreeMutation.mutate({
+        path: { organizationId: organization!.id },
+        content: {
+          'application/json': {
+            planId: props.plan.id,
+          },
+        },
+      });
+      return;
+    }
+    subscribeMutation.mutate({
+      path: { organizationId: organization!.id },
+      content: {
+        'application/json': {
+          planId: props.plan.id,
+          period: props.period,
+        },
+      },
+    });
+  };
+
   return (
     <>
       <Plan data-cy="billing-self-hosted-ee-plan">
@@ -47,11 +74,16 @@ export const SelfHostedEePlan = (props: {
           <PlanTitle title={props.plan.name}></PlanTitle>
 
           <Box gridArea="info">
-            <Box>{description}</Box>
-            <IncludedFeatures features={props.plan.enabledFeatures} />
+            <Box>
+              <PlanDescription hasPrice={hasPrice} free={props.plan.free} />
+            </Box>
+            <IncludedFeatures
+              features={props.plan.enabledFeatures}
+              includedUsage={props.plan.includedUsage}
+            />
           </Box>
 
-          {hasFixedPrice && (
+          {hasPrice && (
             <PeriodSwitch value={props.period} onChange={props.onChange} />
           )}
 
@@ -60,17 +92,7 @@ export const SelfHostedEePlan = (props: {
           <PlanActionButton
             data-cy="billing-self-hosted-ee-plan-subscribe-button"
             loading={subscribeMutation.isLoading}
-            onClick={() =>
-              subscribeMutation.mutate({
-                path: { organizationId: organization!.id },
-                content: {
-                  'application/json': {
-                    planId: props.plan.id,
-                    period: props.period,
-                  },
-                },
-              })
-            }
+            onClick={onSubscribe}
           >
             {t('billing_plan_subscribe')}
           </PlanActionButton>

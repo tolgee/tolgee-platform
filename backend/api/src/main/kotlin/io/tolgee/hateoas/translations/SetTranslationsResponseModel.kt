@@ -13,6 +13,7 @@ open class SetTranslationsResponseModel(
   val keyName: String,
   @Schema(description = "The namespace of the key", example = "homepage")
   val keyNamespace: String?,
+  val keyIsPlural: Boolean,
   @Schema(
     description = "Translations object containing values updated in this request",
     example = "{\"en\": {\"id\": 100000003, \"text\": \"This is super translation!\" }}",

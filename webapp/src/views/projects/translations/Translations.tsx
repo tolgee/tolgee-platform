@@ -1,27 +1,40 @@
 import { useEffect, useMemo } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, styled, useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { useProject } from 'tg.hooks/useProject';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from './context/TranslationsContext';
-import { useProject } from 'tg.hooks/useProject';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
 import { TranslationsHeader } from './TranslationHeader/TranslationsHeader';
 import { TranslationsList } from './TranslationsList/TranslationsList';
 import { useTranslationsShortcuts } from './context/shortcuts/useTranslationsShortcuts';
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
-import { useColumnsContext } from './context/ColumnsContext';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
+import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
+
+const StyledContainer = styled('div')`
+  display: grid;
+  grid-template-columns: 1fr auto;
+`;
 
 export const Translations = () => {
+  const { setQuickStartOpen, quickStartForceFloating } = useGlobalActions();
+  const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
+  const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
   const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
@@ -30,7 +43,7 @@ export const Translations = () => {
   const isFetching = useTranslationsSelector((c) => c.isFetching);
   const view = useTranslationsSelector((v) => v.view);
   const translations = useTranslationsSelector((c) => c.translations);
-  const totalWidth = useColumnsContext((c) => c.totalWidth);
+  const sidePanelOpen = useTranslationsSelector((c) => c.sidePanelOpen);
 
   const filtersOrSearchApplied = useTranslationsSelector((c) =>
     Boolean(Object.values(c.filters).filter(Boolean).length || c.urlSearch)
@@ -66,6 +79,17 @@ export const Translations = () => {
     setSearchImmediate('');
     setFilters({});
   };
+
+  // hide quick start panel
+  useEffect(() => {
+    if (sidePanelOpen && quickStartEnabled) {
+      quickStartForceFloating(true);
+      setQuickStartOpen(true);
+      return () => {
+        quickStartForceFloating(false);
+      };
+    }
+  }, [sidePanelOpen, quickStartEnabled]);
 
   const renderPlaceholder = () =>
     memoizedFiltersOrSearchApplied ? (
@@ -108,6 +132,8 @@ export const Translations = () => {
       </EmptyListMessage>
     );
 
+  const toolsPanelOpen = sidePanelOpen && !isSmall;
+
   return (
     <BaseProjectView
       windowTitle={t('translations_view_title')}
@@ -119,17 +145,21 @@ export const Translations = () => {
           }),
         ],
       ]}
+      wrapperProps={{ pb: 0 }}
     >
       <BatchOperationsChangeIndicator />
       <TranslationsHeader />
-      {translationsEmpty ? (
-        renderPlaceholder()
-      ) : view === 'TABLE' ? (
-        <TranslationsTable />
-      ) : (
-        <TranslationsList />
-      )}
-      <TranslationsToolbar width={totalWidth} />
+      <StyledContainer>
+        {translationsEmpty ? (
+          renderPlaceholder()
+        ) : view === 'TABLE' ? (
+          <TranslationsTable key="table" toolsPanelOpen={toolsPanelOpen} />
+        ) : (
+          <TranslationsList key="list" toolsPanelOpen={toolsPanelOpen} />
+        )}
+        {toolsPanelOpen && <FloatingToolsPanel />}
+      </StyledContainer>
+      <TranslationsToolbar />
     </BaseProjectView>
   );
 };

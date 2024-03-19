@@ -10,5 +10,5 @@ const StyledLoadingButton = styled(LoadingButton)`
 type Props = ComponentProps<typeof LoadingButton>;
 
 export const DangerButton: React.FC<Props> = (props) => {
-  return <StyledLoadingButton variant="outlined" {...props} />;
+  return <StyledLoadingButton variant="outlined" color="error" {...props} />;
 };

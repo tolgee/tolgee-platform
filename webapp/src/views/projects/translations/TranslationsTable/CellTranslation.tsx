@@ -1,64 +1,31 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import clsx from 'clsx';
-
 import { components } from 'tg.service/apiSchema.generated';
-import { useEditableRow } from '../useEditableRow';
-import { TranslationVisual } from '../TranslationVisual';
-import { useTranslationsActions } from '../context/TranslationsContext';
+
 import {
   CELL_CLICKABLE,
   CELL_PLAIN,
   CELL_RAISED,
   StyledCell,
 } from '../cell/styles';
+import { useTranslationCell } from '../useTranslationCell';
 import { CellStateBar } from '../cell/CellStateBar';
-import { ControlsTranslation } from '../cell/ControlsTranslation';
-import { TranslationOpened } from '../TranslationOpened';
-import { TranslationFlags } from '../cell/TranslationFlags';
-import { StateInType } from 'tg.constants/translationStates';
-import { styled } from '@mui/material';
+import { TranslationRead } from './TranslationRead';
+import { TranslationWrite } from './TranslationWrite';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
-const StyledContainer = styled(StyledCell)`
-  display: flex;
-  flex-direction: column;
-  position: relative;
-`;
-
-const StyledTranslationOpened = styled(TranslationOpened)`
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  padding-left: 4px;
-`;
-
-const StyledAutoIndicator = styled(TranslationFlags)`
-  height: 0;
-  position: relative;
-`;
-
-const StyledTranslation = styled('div')`
-  flex-grow: 1;
-  margin: ${({ theme }) => theme.spacing(1.5, 1.5, 1, 1.5)};
-`;
-
 type Props = {
   data: KeyWithTranslationsModel;
   language: LanguageModel;
   colIndex?: number;
   onResize?: (colIndex: number) => void;
-  editEnabled: boolean;
-  stateChangeEnabled: boolean;
   width?: number | string;
-  cellPosition: string;
   active: boolean;
   lastFocusable: boolean;
-  containerRef: React.RefObject<HTMLDivElement>;
   className?: string;
 };
 
@@ -67,13 +34,9 @@ export const CellTranslation: React.FC<Props> = ({
   language,
   colIndex,
   onResize,
-  editEnabled,
-  stateChangeEnabled,
   width,
-  cellPosition,
   active,
   lastFocusable,
-  containerRef,
   className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
@@ -81,116 +44,49 @@ export const CellTranslation: React.FC<Props> = ({
   const translation = data.translations[language.tag] as
     | TranslationViewModel
     | undefined;
-  const state = translation?.state || 'UNTRANSLATED';
 
-  const disabled = state === 'DISABLED';
-  const editable = editEnabled && !disabled;
-
-  const {
-    isEditing,
-    editVal,
-    value,
-    setValue,
-    handleOpen,
-    handleClose,
-    handleInsertBase,
-    handleSave,
-    autofocus,
-    handleModeChange,
-    isEditingRow,
-  } = useEditableRow({
-    keyId: data.keyId,
-    keyName: data.keyName,
-    defaultVal: translation?.text || '',
-    language: language.tag,
-    cellRef,
+  const tools = useTranslationCell({
+    keyData: data,
+    language: language,
+    cellRef: cellRef,
   });
 
-  const { setTranslationState } = useTranslationsActions();
-
-  const handleStateChange = (state: StateInType) => {
-    setTranslationState({
-      keyId: data.keyId,
-      translationId: translation?.id as number,
-      language: language.tag as string,
-      state,
-    });
-  };
+  const { isEditing, editEnabled: canEditTranslation } = tools;
 
   const handleResize = () => {
     onResize?.(colIndex || 0);
   };
 
-  const showAllLines = isEditing || (language.base && isEditingRow);
+  const state = translation?.state || 'UNTRANSLATED';
+
+  const disabled = state === 'DISABLED';
+  const editable = canEditTranslation && !disabled;
 
   return (
-    <StyledContainer
-      position={lastFocusable ? 'right' : undefined}
+    <StyledCell
       className={clsx({
         [CELL_PLAIN]: true,
-        [CELL_CLICKABLE]: editable && !isEditing,
         [CELL_RAISED]: isEditing,
+        [CELL_CLICKABLE]: editable && !isEditing,
+        className,
       })}
-      style={{ width }}
-      onClick={editable && !isEditing ? () => handleOpen('editor') : undefined}
       tabIndex={0}
       ref={cellRef}
       data-cy="translations-table-cell-translation"
       data-cy-lang={language.tag}
     >
-      {editVal ? (
-        <StyledTranslationOpened
-          keyData={data}
-          language={language}
-          translation={translation}
-          value={value}
-          onChange={(v) => setValue(v as string)}
-          onSave={() => handleSave()}
-          onCmdSave={() => handleSave('EDIT_NEXT')}
-          onInsertBase={handleInsertBase}
-          onCancel={handleClose}
-          autofocus={autofocus}
-          state={state}
-          onStateChange={handleStateChange}
-          mode={editVal.mode}
-          onModeChange={handleModeChange}
-          editEnabled={editable}
-          stateChangeEnabled={stateChangeEnabled}
-          cellRef={containerRef}
-          cellPosition={cellPosition}
-        />
-      ) : (
-        <>
-          <StyledTranslation className={className}>
-            <div data-cy="translations-table-cell">
-              <TranslationVisual
-                width={width}
-                text={isEditing ? value : translation?.text}
-                locale={language.tag}
-                limitLines={!showAllLines}
-                disabled={disabled}
-              />
-            </div>
-
-            <StyledAutoIndicator keyData={data} lang={language.tag} />
-          </StyledTranslation>
-
-          <ControlsTranslation
-            onEdit={() => handleOpen('editor')}
-            editEnabled={editable}
-            state={state}
-            stateChangeEnabled={stateChangeEnabled}
-            onStateChange={handleStateChange}
-            onComments={() => handleOpen('comments')}
-            commentsCount={translation?.commentCount}
-            unresolvedCommentCount={translation?.unresolvedCommentCount}
-            lastFocusable={lastFocusable}
-            active={active}
-          />
-        </>
-      )}
-
       <CellStateBar state={state} onResize={handleResize} />
-    </StyledContainer>
+      {isEditing ? (
+        <TranslationWrite tools={tools} />
+      ) : (
+        <TranslationRead
+          active={active}
+          lastFocusable={lastFocusable}
+          tools={tools}
+          width={width}
+          colIndex={colIndex}
+        />
+      )}
+    </StyledCell>
   );
 };

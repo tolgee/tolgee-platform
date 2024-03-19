@@ -99,7 +99,6 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
 
-
     /**
      * DB
      */
@@ -160,6 +159,9 @@ dependencies {
     implementation 'net.datafaker:datafaker:1.5.0'
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
+    implementation(libs.mailjet) {
+        exclude group: 'org.json', module: 'json'
+    }
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
@@ -167,6 +169,7 @@ dependencies {
     implementation libs.micrometerPrometheus
     implementation 'org.dom4j:dom4j:2.1.4'
     implementation libs.jacksonKotlin
+    implementation("org.apache.commons:commons-configuration2:2.9.0")
 
     /**
      * Google translation API

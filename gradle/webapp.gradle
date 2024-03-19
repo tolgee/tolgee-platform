@@ -27,7 +27,7 @@ task buildWebapp(type: Exec) {
     commandLine npmCommandName, "run", "build"
     workingDir = webappPath
     inputs.dir("${project.projectDir}/webapp/")
-    outputs.dir("${project.projectDir}/webapp/dist/")
+    outputs.dir("${project.projectDir}/webapp/build/")
     dependsOn "installWebappDeps", "updateStaticTranslations"
 }
 
@@ -40,7 +40,6 @@ task createBuildDir() {
 
 task updateStaticTranslations(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
-    def tolgeeApiKey = System.env.TOLGEE_API_KEY
     def tolgeeApiUrl = System.env.TOLGEE_API_URL
     onlyIf { tolgeeApiUrl != null && tolgeeApiUrl != "" }
     workingDir = webappPath

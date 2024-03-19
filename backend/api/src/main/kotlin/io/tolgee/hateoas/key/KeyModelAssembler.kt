@@ -10,11 +10,13 @@ class KeyModelAssembler : RepresentationModelAssemblerSupport<KeyView, KeyModel>
   TranslationsController::class.java,
   KeyModel::class.java,
 ) {
+  @Suppress("UNCHECKED_CAST")
   override fun toModel(view: KeyView) =
     KeyModel(
       id = view.id,
       name = view.name,
       namespace = view.namespace,
       description = view.description,
+      custom = view.custom as? Map<String, Any?>?,
     )
 }

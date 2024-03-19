@@ -53,10 +53,13 @@ describe('Import errors', () => {
         login('franta');
         visitImport(res.body.id);
       });
-      gcy('import-file-input').attachFile({
-        filePath: 'import/error.jsn',
-        fileName: 'error.json',
-      });
+      cy.get('[data-cy=dropzone]').attachFile(
+        {
+          filePath: 'import/error.json.zip',
+          fileName: 'error.zip',
+        },
+        { subjectType: 'drag-n-drop', force: true }
+      );
     });
 
     it('shows error for bad file', () => {
@@ -71,13 +74,13 @@ describe('Import errors', () => {
         .findDcy('import-file-error-more-less-button')
         .click();
       gcy('import-file-error')
-        .contains('Cannot construct instance of')
+        .contains("Unrecognized token 'asdlasj")
         .should('be.visible');
       gcy('import-file-error')
         .findDcy('import-file-error-more-less-button')
         .click();
       gcy('import-file-error')
-        .contains('Cannot construct instance of')
+        .contains("Unrecognized token 'asdlasj")
         .should('not.exist');
     });
 

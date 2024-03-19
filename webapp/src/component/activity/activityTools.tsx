@@ -1,5 +1,5 @@
 import { components } from 'tg.service/apiSchema.generated';
-import { actionsConfiguration, entitiesConfiguration } from './configuration';
+import { actionsConfiguration } from './configuration';
 import {
   Activity,
   ActivityModel,
@@ -11,6 +11,7 @@ import {
   FieldOptionsObj,
   Reference,
 } from './types';
+import { activityEntities } from './activityEntities';
 
 type ModifiedEntityModel = components['schemas']['ModifiedEntityModel'];
 
@@ -179,7 +180,7 @@ export const buildActivity = (
 
   // add params as "entity" with only `new` modifications
   if (data.params && (!filter || options?.entities?.Params)) {
-    const entityOptions = entitiesConfiguration.Params;
+    const entityOptions = activityEntities.Params;
     const selectedFields =
       filter && Array.isArray(options?.entities?.Params)
         ? (options?.entities?.Params as string[])
@@ -210,7 +211,7 @@ export const buildActivity = (
       if (filter && !options?.entities?.[entityName]) {
         return;
       }
-      const entityOptions = entitiesConfiguration[entityName] as
+      const entityOptions = activityEntities[entityName] as
         | EntityOptions
         | undefined;
 

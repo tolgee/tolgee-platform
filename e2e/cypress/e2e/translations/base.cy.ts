@@ -2,6 +2,7 @@ import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { deleteLanguage, visitLanguageSettings } from '../../common/languages';
 import {
   createTranslation,
+  getTranslationCell,
   toggleLang,
   translationsBeforeEach,
   visitTranslations,
@@ -74,6 +75,39 @@ describe('Translations Base', () => {
         .should('be.visible');
     }
   );
+
+  it('will create translation with plural', () => {
+    cy.gcy('global-empty-list').should('be.visible');
+    createTranslation({
+      key: 'test-key',
+      translation: { one: '# key', other: '# keys' },
+    });
+    getTranslationCell('test-key', 'en')
+      .findDcy('translation-plural-parameter')
+      .contains('value')
+      .should('be.visible');
+    getTranslationCell('test-key', 'en')
+      .findDcy('translation-plural-variant')
+      .contains('#1 key')
+      .should('be.visible');
+  });
+
+  it('will create translation with plural and custom variable name', () => {
+    cy.gcy('global-empty-list').should('be.visible');
+    createTranslation({
+      key: 'test-key',
+      translation: { one: '# key', other: '# keys' },
+      variableName: 'testVariable',
+    });
+    getTranslationCell('test-key', 'en')
+      .findDcy('translation-plural-parameter')
+      .contains('testVariable')
+      .should('be.visible');
+    getTranslationCell('test-key', 'en')
+      .findDcy('translation-plural-variant')
+      .contains('#1 key')
+      .should('be.visible');
+  });
 
   it('will create translation with namespace', () => {
     cy.wait(100);

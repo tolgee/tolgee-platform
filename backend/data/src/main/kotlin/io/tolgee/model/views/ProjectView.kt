@@ -15,4 +15,5 @@ interface ProjectView {
   val organizationOwner: Organization
   val organizationRole: OrganizationRoleType?
   val directPermission: Permission?
+  var icuPlaceholders: Boolean
 }

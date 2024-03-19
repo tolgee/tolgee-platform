@@ -140,6 +140,7 @@ const getTheme = (mode: PaletteMode) => {
         default: c.background,
         paper: c.backgroundPaper,
       },
+      tooltip: c.tooltip,
       navbar: c.navbar,
       activity: c.activity,
       emphasis: c.emphasis,
@@ -153,6 +154,8 @@ const getTheme = (mode: PaletteMode) => {
       import: c.import,
       exampleBanner: c.exampleBanner,
       tipsBanner: c.tipsBanner,
+      tokens: c.tokens,
+      placeholders: c.placeholders,
     },
     mixins: {
       toolbar: {
@@ -252,6 +255,13 @@ const getTheme = (mode: PaletteMode) => {
         styleOverrides: {
           root: {
             textDecoration: 'none',
+          },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            marginLeft: 0,
           },
         },
       },

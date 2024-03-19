@@ -53,8 +53,12 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
 
   ${combine('&', CELL_PLAIN)} {
     scroll-margin-top: ${TOP_BAR_HEIGHT}px;
+    scroll-margin-left: 10px;
+    scroll-margin-right: 10px;
     position: relative;
     outline: 0;
+    container-type: inline-size;
+    display: grid;
 
     &:hover .${CELL_SHOW_ON_HOVER} {
       opacity: 1;

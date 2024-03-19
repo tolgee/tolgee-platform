@@ -27,7 +27,7 @@ class MtTranslator(
     publishBeforeEvent(context.project)
     context.preparePossibleTargetLanguages(paramsList)
     val batchItems = expandParams(paramsList)
-    val result = MtBatchTranslator(context, applicationContext).translate(batchItems)
+    val result = MtBatchTranslator(context).translate(batchItems)
     publishAfterEvent(context.project, result.sumOf { it.actualPrice })
     return result
   }

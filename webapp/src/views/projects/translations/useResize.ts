@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 
 type PassedRefType = React.RefObject<HTMLElement | undefined>;
 
-export const useResize = (tableRef: PassedRefType, dependency: any) => {
+export const useResize = (
+  tableRef: PassedRefType,
+  deps: React.DependencyList = []
+) => {
   const [width, setWidth] = useState<number>();
 
   const handleResize = useCallback(() => {
@@ -14,7 +17,7 @@ export const useResize = (tableRef: PassedRefType, dependency: any) => {
 
   useEffect(() => {
     handleResize();
-  }, [dependency]);
+  }, deps);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -28,29 +31,66 @@ export const useResize = (tableRef: PassedRefType, dependency: any) => {
   return { width: width || 0 };
 };
 
-export const resizeColumn = (
-  allSizes: number[],
-  index: number,
-  newSize: number,
-  minSizeMult = 0.5
-) => {
+const minSizeMult = 0.5;
+
+type Props = {
+  allSizes: number[];
+  index: number;
+  newSize: number;
+  originalRatios: number[];
+  minSize?: number;
+};
+
+export const resizeColumn = ({
+  allSizes,
+  index,
+  newSize,
+  originalRatios,
+  minSize,
+}: Props) => {
   const oldColumnSize = allSizes[index];
   let newColumnSize = newSize;
   const totalSize = allSizes.reduce((a, b) => a + b, 0);
-  const minSize = (totalSize / allSizes.length) * minSizeMult;
+  let minSizeCalculated: number;
+  const originalSum = originalRatios.reduce((prev, curr) => prev + curr, 0);
+  const originalSizes = originalRatios.map(
+    (ratio) => (totalSize / originalSum) * ratio
+  );
+  if (minSize === undefined) {
+    minSizeCalculated = originalSizes[index] * minSizeMult;
+  } else {
+    minSizeCalculated = minSize;
+  }
+  const margins = allSizes.map(
+    (size, i) => size - originalSizes[i] * minSizeMult
+  );
+  const originalRatiosAfter = originalRatios.slice(index + 1);
   const columnsAfter = allSizes.slice(index + 1);
-  const marginsAfter = columnsAfter.map((w) => w - minSize);
+  const marginsAfter = margins.slice(index + 1);
+  const originalRatiosSum = originalRatiosAfter.reduce(
+    (prev, curr) => prev + curr
+  );
+
   const maxIncrease = marginsAfter.reduce((a, b) => a + b, 0);
-  if (newColumnSize < minSize) {
-    newColumnSize = minSize;
+
+  if (newColumnSize < minSizeCalculated) {
+    newColumnSize = minSizeCalculated;
   } else if (newColumnSize - oldColumnSize > maxIncrease) {
     newColumnSize = oldColumnSize + maxIncrease;
   }
   const columnsBefore = allSizes.slice(0, index);
+  const difference = newColumnSize - oldColumnSize;
 
-  const newAfterSizes = marginsAfter.map((w) => {
-    const portion = maxIncrease ? w / maxIncrease : 1 / marginsAfter.length;
-    return minSize + (w - portion * (newColumnSize - oldColumnSize));
-  });
-  return [...columnsBefore, newColumnSize, ...newAfterSizes];
+  let newAfterSizes: number[];
+  if (!minSize) {
+    newAfterSizes = columnsAfter.map((size, i) => {
+      const portion = originalRatiosAfter[i] / originalRatiosSum;
+      return size - portion * difference;
+    });
+  } else {
+    newAfterSizes = columnsAfter;
+  }
+
+  const result = [...columnsBefore, newColumnSize, ...newAfterSizes];
+  return result;
 };

@@ -1,258 +1,240 @@
-import { useMemo, useRef } from 'react';
-import CodeMirror from 'codemirror';
-import { Controlled as CodeMirrorReact, DomEvent } from 'react-codemirror2';
-import { parse } from '@formatjs/icu-messageformat-parser';
-import { GlobalStyles, styled } from '@mui/material';
-import 'codemirror/keymap/sublime';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/lint/lint';
-import 'codemirror/addon/lint/lint.css';
+import { RefObject, useEffect, useMemo, useRef } from 'react';
+import { minimalSetup } from 'codemirror';
+import { Compartment, EditorState, Prec } from '@codemirror/state';
+import { EditorView, ViewUpdate, keymap, KeyBinding } from '@codemirror/view';
+import { styled, useTheme } from '@mui/material';
+import {
+  tolgeeSyntax,
+  PlaceholderPlugin,
+  TolgeeHighlight,
+  htmlIsolatesPlugin,
+  generatePlaceholdersStyle,
+} from '@tginternal/editor';
 
-import icuMode from './icuMode';
-import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { Direction } from 'tg.fixtures/getLanguageDirection';
-import { useParserErrorTranslation } from 'tg.translationTools/useParserErrorTranslation';
+import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 
-const StyledWrapper = styled('div')<{
-  minheight: string | number;
-  background: string | undefined;
-}>`
+const StyledEditor = styled('div')`
+  font-size: 14px;
   display: grid;
 
-  & .react-codemirror2 {
-    display: grid;
-    position: relative;
-    align-self: stretch;
+  & .cm-editor {
+    outline: none;
   }
 
-  & .CodeMirror *::selection {
+  & .cm-selectionBackground {
     background: ${({ theme }) =>
       theme.palette.mode === 'dark'
-        ? theme.palette.emphasis[300]
-        : theme.palette.emphasis[200]};
+        ? theme.palette.emphasis[400]
+        : theme.palette.emphasis[200]} !important;
   }
 
-  & .CodeMirror {
-    width: 100%;
-    min-height: ${({ minheight }) => minheight}px;
-    height: 100%;
-    margin-left: -5px;
-    background: ${({ background, theme }) =>
-      background || theme.palette.background.default};
+  & .cm-line {
+    font-size: 15px;
+    font-family: ${({ theme }) => theme.typography.fontFamily};
+    padding: 0px 1px;
+  }
 
-    * {
-      overflow: visible !important;
-    }
+  & .cm-content {
+    padding: 0px;
+  }
 
-    .CodeMirror-lines {
-      padding: 0px !important;
-    }
+  & .cm-cursor {
+    border-color: ${({ theme }) => theme.palette.text.primary};
+  }
 
-    .CodeMirror-line {
-      padding: 0px !important;
-      color: ${({ theme }) => theme.palette.editor.main} !important;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol' !important;
-    }
-
-    .CodeMirror-lint-markers {
-      width: 5px;
-    }
-
-    .CodeMirror-gutters {
-      border: 0px;
-      background: transparent;
-    }
-
-    .CodeMirror-lint-marker-error {
-      width: 4px;
-      background: red;
-      cursor: default;
-      position: relative;
-      top: -1px;
-    }
-
-    .cm-function {
-      color: ${({ theme }) => theme.palette.editor.function};
-    }
-
-    .cm-string {
-      color: ${({ theme }) => theme.palette.editor.main};
-    }
-
-    .cm-parameter {
-      color: ${({ theme }) => theme.palette.editor.other};
-    }
-
-    .cm-option {
-      color: ${({ theme }) => theme.palette.editor.other};
-    }
-
-    .cm-keyword {
-      color: ${({ theme }) => theme.palette.editor.other};
-    }
-
-    .cm-bracket {
-      color: ${({ theme }) => theme.palette.editor.other};
-    }
-
-    .cm-def {
-      color: ${({ theme }) => theme.palette.editor.function};
-    }
+  & .cm-tooltip {
+    font-size: 12px;
+    box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.25);
+    border-radius: 11px;
+    border: none;
+    color: ${({ theme }) => theme.palette.tooltip.text};
+    background-color: ${({ theme }) => theme.palette.tooltip.background};
+    padding: 4px 8px;
+    margin-top: 4px;
   }
 `;
 
-function linter(text: string, data: any) {
-  const errors = data.errors;
-  const translateParserError = data.translateParserError as ReturnType<
-    typeof useParserErrorTranslation
-  >;
-  return errors?.map((error) => {
-    const location = error.location;
-    const start = location?.start;
-    const end = location?.end;
-
-    const startColumn = start?.column - 1;
-    const endColumn =
-      start?.column === start?.column ? end?.column : end?.column - 1;
-    const hint = {
-      message: translateParserError(error.message?.toLowerCase()),
-      severity: 'error',
-      type: 'validation',
-      from: CodeMirror.Pos(start.line - 1, startColumn),
-      to: CodeMirror.Pos(end.line - 1, endColumn),
-    };
-    return hint;
-  });
-}
-
-CodeMirror.registerHelper('lint', 'icu', linter);
-
-type Props = {
+export type EditorProps = {
   value: string;
   onChange?: (val: string) => void;
-  onSave?: (val: string) => void;
-  onInsertBase?: (val?: string) => void;
-  onCancel?: () => void;
   background?: string;
-  plaintext?: boolean;
+  mode: 'placeholders' | 'syntax' | 'plain';
   autofocus?: boolean;
   minHeight?: number | string;
   onBlur?: () => void;
   onFocus?: () => void;
-  shortcuts?: CodeMirror.KeyMap;
+  shortcuts?: KeyBinding[];
   scrollMargins?: Parameters<typeof useScrollMargins>[0];
   autoScrollIntoView?: boolean;
   direction?: Direction;
-  onKeyDown?: DomEvent;
+  locale?: string;
+  editorRef?: React.RefObject<EditorView | null>;
+  examplePluralNum?: number;
+  nested?: boolean;
 };
 
-export const Editor: React.FC<Props> = ({
+function useRefGroup<T>(value: T): RefObject<T> {
+  const refObject = useRef(value);
+  refObject.current = value;
+  return refObject;
+}
+
+export const Editor: React.FC<EditorProps> = ({
   value,
   onChange,
-  onCancel,
-  onSave,
-  onBlur,
   onFocus,
-  plaintext,
-  background,
+  onBlur,
+  mode,
   autofocus,
-  minHeight = 100,
   shortcuts,
-  scrollMargins,
-  autoScrollIntoView,
-  direction = 'ltr',
-  onKeyDown,
+  minHeight,
+  direction,
+  locale,
+  editorRef,
+  examplePluralNum,
+  nested,
 }) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const translateParserError = useParserErrorTranslation();
+  const ref = useRef<HTMLDivElement>(null);
+  const editor = useRef<EditorView>();
+  const placeholders = useRef<Compartment>(new Compartment());
+  const editorTheme = useRef<Compartment>(new Compartment());
+  const isolates = useRef<Compartment>(new Compartment());
+  const keyBindings = useRef(shortcuts);
+  const theme = useTheme();
+  const callbacksRef = useRefGroup({
+    onChange,
+    onFocus,
+    onBlur,
+  });
+  const languageCompartment = useRef<Compartment>(new Compartment());
 
-  const handleChange = (val: string) => {
-    onChange?.(val);
-  };
+  const StyledEditorWrapper = useMemo(() => {
+    return generatePlaceholdersStyle({
+      styled,
+      colors: theme.palette.placeholders,
+      component: StyledEditor,
+    });
+  }, [theme.palette.placeholders]);
 
-  const error = useMemo(() => {
-    try {
-      parse(value, { captureLocation: true, ignoreTag: true });
-    } catch (e) {
-      return e;
+  keyBindings.current = shortcuts;
+
+  useEffect(() => {
+    const shortcutsUptoDate = shortcuts?.map((value, i) => {
+      return {
+        ...value,
+        run: (val: EditorView) => keyBindings.current?.[i].run?.(val) ?? false,
+      };
+    });
+
+    const instance = new EditorView({
+      parent: ref.current!,
+      state: EditorState.create({
+        doc: value,
+        extensions: [
+          minimalSetup,
+          Prec.highest(keymap.of(shortcutsUptoDate ?? [])),
+          EditorView.lineWrapping,
+          EditorView.updateListener.of((v: ViewUpdate) => {
+            if (v.focusChanged) {
+              if (v.view.hasFocus) {
+                callbacksRef.current?.onFocus?.();
+              } else {
+                callbacksRef.current?.onBlur?.();
+              }
+            }
+            if (v.docChanged) {
+              callbacksRef.current?.onChange?.(v.state.doc.toString());
+            }
+          }),
+          EditorView.contentAttributes.of({
+            spellcheck: 'true',
+            dir: direction || 'ltr',
+            lang: locale || '',
+          }),
+          languageCompartment.current.of([]),
+          editorTheme.current.of([]),
+          placeholders.current.of([]),
+          isolates.current.of([]),
+          direction === 'rtl' ? htmlIsolatesPlugin : [],
+        ],
+      }),
+    });
+
+    if (autofocus) {
+      instance.focus();
+    }
+
+    editor.current = instance;
+  }, [theme.palette.mode]);
+
+  useEffect(() => {
+    const placholderPlugins =
+      mode === 'placeholders'
+        ? [
+            PlaceholderPlugin({
+              examplePluralNum,
+              nested: Boolean(nested),
+              tooltips: true,
+            }),
+          ]
+        : [];
+    const syntaxPlugins =
+      mode === 'plain' ? [] : [tolgeeSyntax(Boolean(nested))];
+    editor.current?.dispatch({
+      selection: editor.current.state.selection,
+      effects: [
+        placeholders.current?.reconfigure(placholderPlugins),
+        languageCompartment.current.reconfigure(syntaxPlugins),
+      ],
+    });
+  }, [mode, nested, examplePluralNum]);
+
+  useEffect(() => {
+    const state = editor.current?.state;
+    const editorValue = state?.doc.toString();
+    if (state && editorValue !== value) {
+      const transaction = state.update({
+        changes: { from: 0, to: state.doc.length, insert: value || '' },
+      });
+      editor.current?.update([transaction]);
     }
   }, [value]);
 
-  const options: CodeMirror.EditorConfiguration = {
-    lineNumbers: false,
-    mode: plaintext ? undefined : 'icu',
-    autofocus,
-    lineWrapping: true,
-    keyMap: 'sublime',
-    extraKeys: {
-      Enter: (editor) => onSave?.(editor.getValue()),
-      Esc: () => onCancel?.(),
-      Tab: false,
-      'Shift-Tab': false,
-      End: 'goLineRight',
-      Home: 'goLineLeft',
-      ...shortcuts,
-    },
-    gutters: ['CodeMirror-lint-markers'],
-    lint: {
-      // @ts-ignore
-      errors: error ? [error] : [],
-      translateParserError,
-    },
-    inputStyle: 'contenteditable',
-    spellcheck: !plaintext,
-    direction: direction,
-  };
+  useEffect(() => {
+    editor.current?.dispatch({
+      effects: editorTheme.current?.reconfigure([
+        TolgeeHighlight(theme.palette.editor),
+      ]),
+    });
+  }, [theme.palette.mode]);
 
-  const wrapperScrollMargins = useScrollMargins(scrollMargins);
+  useEffect(() => {
+    // set cursor to the end of document
+    const length = editor.current!.state.doc.length;
+    editor.current!.dispatch({ selection: { anchor: length } });
+
+    return () => {
+      editor.current!.destroy();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (editorRef) {
+      // @ts-ignore
+      editorRef.current = editor.current;
+    }
+  });
 
   return (
-    <>
-      <GlobalStyles
-        styles={(theme) => ({
-          '.CodeMirror-lint-tooltip': {
-            background: theme.palette.emphasis[100] + ' !important',
-            borderRadius: '0px !important',
-            zIndex: theme.zIndex.tooltip + ' !important',
-            color: theme.palette.text.primary + ' !important',
-          },
-          '.CodeMirror-lint-message-error': {
-            backgroundImage: 'unset !important',
-            paddingLeft: '0px !important',
-          },
-        })}
-      />
-      <StyledWrapper
-        background={background}
-        minheight={minHeight}
-        data-cy="global-editor"
-        style={scrollMargins ? wrapperScrollMargins : undefined}
-        ref={wrapperRef}
-      >
-        <CodeMirrorReact
-          value={value}
-          // @ts-ignore
-          defineMode={{ name: 'icu', fn: icuMode }}
-          options={options}
-          onBeforeChange={(editor, data, value) => {
-            handleChange(value);
-          }}
-          onKeyDown={(...params) => onKeyDown?.(...params)}
-          onBlur={() => onBlur?.()}
-          onFocus={(e) => {
-            onFocus?.();
-            if (autoScrollIntoView) {
-              wrapperRef.current?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'nearest',
-              });
-            }
-          }}
-        />
-      </StyledWrapper>
-    </>
+    <StyledEditorWrapper
+      data-cy="global-editor"
+      ref={ref}
+      dir={direction}
+      style={{
+        minHeight,
+        direction,
+      }}
+    />
   );
 };

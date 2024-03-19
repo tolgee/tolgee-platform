@@ -1,0 +1,5 @@
+{
+  "@@locale": "en",
+  "helloWorld": "Hello World! {name}",
+  "dogsCount": "I have {count, plural, one {one dog} other {{count} dogs}}."
+}

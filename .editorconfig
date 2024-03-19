@@ -9,3 +9,6 @@ max_line_length = 120
 
 [backend/data/src/main/kotlin/io/tolgee/service/dataImport/processors/messageFormat/data/PluralData.kt]
 max_line_length = 500
+
+[**/in/**/*.{kt, kts}]
+ktlint_standard_package-name = disabled

@@ -8,12 +8,14 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.satisfies
 import org.junit.jupiter.api.BeforeEach
@@ -50,6 +52,114 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
         node("keyId").isValidId
         node("keyName").isEqualTo("A key")
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `validates plurals on set for existing`() {
+    testData.addPluralKey()
+    saveTestData()
+    performUpdatePluralKey("Not a plural").andIsBadRequest
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `normalizes plurals on set for existing`() {
+    testData.addPluralKey()
+    saveTestData()
+    performUpdatePluralKey("Hello! {count, plural, other {test}}").andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isString.isEqualTo("{count, plural,\nother {Hello! test}\n}")
+        node("keyIsPlural").isBoolean.isTrue
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `doesnt touch isPlural if not plural`() {
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "A key",
+        null,
+        mutableMapOf("en" to "English"),
+      ),
+    ).andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isEqualTo("English")
+        node("keyIsPlural").isBoolean.isFalse
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `works with no other`() {
+    testData.addPluralKey()
+    saveTestData()
+    performUpdatePluralKey(
+      "{count, plural,\n" +
+        "one {test}\n" +
+        "other{}}",
+    ).andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isString.isEqualTo("{count, plural,\none {test}\nother {}\n}")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `works with empty string`() {
+    val key = testData.addPluralKey()
+    saveTestData()
+    performUpdatePluralKey("").andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isEqualTo(null)
+      }
+
+    executeInNewTransaction {
+      keyService.get(key.id).translations.find { it.language.tag == "en" }!!.text.assert.isNull()
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates key with correct isPlural for new keys`() {
+    saveTestData()
+    performProjectAuthPost(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "plural_key",
+        null,
+        mutableMapOf(
+          "en" to "Hi! {count, plural, other {test}}",
+          "de" to "Nicht ein Plural",
+        ),
+      ),
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("translations.en.text").isString.isEqualTo("{count, plural,\nother {Hi! test}\n}")
+      node("translations.de.text").isString.isEqualTo("{count, plural,\nother {Nicht ein Plural}\n}")
+      node("keyIsPlural").isBoolean.isTrue
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates key with correct isPlural for new keys (not plural)`() {
+    saveTestData()
+    performProjectAuthPost(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "other key",
+        null,
+        mutableMapOf(
+          "de" to "Nicht ein Plural",
+        ),
+      ),
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("translations.de.text").isString.isEqualTo("Nicht ein Plural")
+      node("keyIsPlural").isBoolean.isFalse
+    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -296,4 +406,14 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     userAccount = testData.user
     this.projectSupplier = { testData.project }
   }
+
+  private fun performUpdatePluralKey(value: String?) =
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "plural_key",
+        null,
+        mutableMapOf("en" to value),
+      ),
+    )
 }

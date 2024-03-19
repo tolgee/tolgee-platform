@@ -7,6 +7,8 @@ import { useNdJsonStreamedMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { T } from '@tolgee/react';
 import { OperationStatusType } from '../component/ImportFileInput';
+import { ApiError } from 'tg.service/http/ApiError';
+import { errorAction } from 'tg.service/http/errorAction';
 
 export const useApplyImportHelper = (
   dataHelper: ReturnType<typeof useImportDataHelper>
@@ -24,9 +26,14 @@ export const useApplyImportHelper = (
     fetchOptions: {
       // error is displayed on the page
       disableErrorNotification: true,
+      disableAutoErrorHandle: true,
     },
     onData(data) {
-      setStatus(data.status);
+      if (data.status == 'ERROR') {
+        errorAction(data.errorResponseBody.code);
+        throw new ApiError(data.errorResponseBody.code, data.errorResponseBody);
+      }
+      return setStatus(data.status);
     },
   });
 

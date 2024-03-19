@@ -13,9 +13,13 @@ data class TranslationParams(
   val serviceInfo: MtServiceInfo,
   val metadata: Metadata?,
   val isBatch: Boolean,
+  var pluralForms: Map<String, String>? = null,
+  val pluralFormExamples: Map<String, String>? = null,
 ) {
   val cacheKey: String
     get() =
       jacksonObjectMapper()
-        .writeValueAsString(listOf(text, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata))
+        .writeValueAsString(
+          listOf(text, textRaw, pluralForms, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata),
+        )
 }

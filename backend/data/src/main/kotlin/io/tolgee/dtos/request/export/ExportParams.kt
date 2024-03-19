@@ -2,6 +2,8 @@ package io.tolgee.dtos.request.export
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.tolgee.dtos.IExportParams
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
 
 data class ExportParams(
@@ -60,4 +62,13 @@ This is possible only when single language is exported. Otherwise it returns "40
     """,
   )
   var zip: Boolean = true,
-) : IExportParams
+  @field:Parameter(
+    description = """Message format to be used for export. (applicable for .po)
+      
+e.g. PHP_PO: Hello %s
+    """,
+  )
+  override var messageFormat: ExportMessageFormat? = null,
+) : IExportParams {
+  override var supportArrays: Boolean = false
+}

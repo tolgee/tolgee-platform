@@ -19,4 +19,6 @@ open class KeyModel(
     example = "This key is used on homepage. It's a label of sign up button.",
   )
   val description: String?,
+  @Schema(description = "Custom values of the key")
+  val custom: Map<String, Any?>?,
 ) : RepresentationModel<KeyModel>(), Serializable

@@ -19,7 +19,10 @@ export const useWebsocketService = (
     const translationUpdates = event.data?.translations?.map((translation) => ({
       keyId: translation.relations.key.entityId,
       language: translation.relations.language.data.tag,
-      value: getModifyingObject(translation.modifications),
+      value: {
+        ...getModifyingObject(translation.modifications),
+        id: translation.id,
+      },
     }));
 
     if (translationUpdates) {

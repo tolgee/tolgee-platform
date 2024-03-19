@@ -12,9 +12,9 @@ const StyledDraggableContent = styled('div')`
   justify-content: center;
 
   & .expanded {
-    width: 34px;
-    margin-left: -15px;
-    margin-right: -15px;
+    width: 2004px;
+    margin-left: -1000px;
+    margin-right: -1000px;
   }
 `;
 
@@ -64,11 +64,13 @@ export const ColumnResizer: React.FC<Props> = ({
       onDrag={(e, data) => {
         setPosition({ x: data.x, y: 0 });
       }}
-      onStop={() => {
+      onStop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
         setIsDragging(false);
         setPosition({ x: 0, y: 0 });
       }}
-      bounds="parent"
+      bounds={false}
     >
       <StyledDraggableContent
         ref={(el) =>

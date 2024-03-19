@@ -1,0 +1,4 @@
+{
+  "key": "Hello {icuPara}",
+  "plural": "Hello {count, plural, one {one # {icuParam}} other {other {icuParam}}}"
+}

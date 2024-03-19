@@ -140,7 +140,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/x-xliff+xml")
       assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
-        .isEqualTo("""attachment; filename="en.xlf"""")
+        .isEqualTo("""attachment; filename="en.xliff"""")
     }
   }
 

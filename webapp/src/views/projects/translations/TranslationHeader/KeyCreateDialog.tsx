@@ -2,23 +2,13 @@ import { DialogTitle, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
-import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
-
-const StyledTitle = styled('div')`
-  justify-self: stretch;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-`;
 
 const StyledContent = styled('div')`
   display: grid;
@@ -38,38 +28,7 @@ export const KeyCreateDialog: React.FC<Props> = ({
   onDirtyChange,
 }) => {
   const { insertTranslation } = useTranslationsActions();
-
-  const { satisfiesLanguageAccess } = useProjectPermissions();
-  const languages = useTranslationsSelector((c) => c.languages)?.filter((l) =>
-    satisfiesLanguageAccess('translations.edit', l.id)
-  );
-  const selectedLanguagesDefault = useTranslationsSelector(
-    (c) => c.selectedLanguages
-  );
-
-  const handleLanguageChange = (langs: string[]) => {
-    setUrlSelectedLanguages(langs);
-  };
-
-  const [urlSelectedLanguages, setUrlSelectedLanguages] = useUrlSearchState(
-    'languages',
-    {
-      array: true,
-      cleanup: true,
-    }
-  );
-
-  const selectedLanguages =
-    (urlSelectedLanguages?.length && (urlSelectedLanguages as string[])) ||
-    selectedLanguagesDefault ||
-    [];
-
-  const selectedLanguagesMapped = selectedLanguages!
-    .map((l) => {
-      const language = languages?.find(({ tag }) => tag === l);
-      return language!;
-    })
-    .filter(Boolean);
+  const baseLanguage = useTranslationsSelector((c) => c.baseLanguage);
 
   const handleOnSuccess = (data: KeyWithDataModel) => {
     onClose();
@@ -95,25 +54,19 @@ export const KeyCreateDialog: React.FC<Props> = ({
       screenshotCount: 0,
       translations,
       contextPresent: false,
+      keyIsPlural: data.isPlural,
+      keyPluralArgName: data.pluralArgName,
     });
   };
 
   return (
     <>
       <DialogTitle>
-        <StyledTitle>
-          <T keyName="translation_single_create_title" />
-          <LanguagesSelect
-            languages={languages || []}
-            value={selectedLanguagesMapped.map((l) => l.tag)}
-            onChange={handleLanguageChange}
-            context="translations-dialog"
-          />
-        </StyledTitle>
+        <T keyName="translation_single_create_title" />
       </DialogTitle>
       <StyledContent>
         <KeyCreateForm
-          languages={selectedLanguagesMapped!}
+          baseLanguage={baseLanguage}
           onSuccess={handleOnSuccess}
           onCancel={onClose}
           onDirtyChange={onDirtyChange}

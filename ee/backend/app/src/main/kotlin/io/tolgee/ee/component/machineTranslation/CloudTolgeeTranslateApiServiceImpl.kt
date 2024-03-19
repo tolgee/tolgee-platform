@@ -57,7 +57,10 @@ class CloudTolgeeTranslateApiServiceImpl(
         params.formality,
         params.metadata?.projectDescription,
         params.metadata?.languageDescription,
+        params.pluralForms,
+        params.pluralFormExamples,
       )
+
     val request = HttpEntity(requestBody, headers)
 
     checkPositiveRateLimitTokens(params)
@@ -132,6 +135,8 @@ class CloudTolgeeTranslateApiServiceImpl(
       val formality: Formality? = null,
       val projectDescription: String? = null,
       val languageNote: String? = null,
+      val pluralForms: Map<String, String>? = null,
+      val pluralFormExamples: Map<String, String>? = null,
     )
 
     class TolgeeTranslateExample(

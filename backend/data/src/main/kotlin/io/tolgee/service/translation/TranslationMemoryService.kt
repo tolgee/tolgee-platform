@@ -29,11 +29,13 @@ class TranslationMemoryService(
 
   fun suggest(
     baseTranslationText: String,
+    isPlural: Boolean,
     targetLanguage: LanguageDto,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
     return translationsService.getTranslationMemorySuggestions(
       baseTranslationText,
+      isPlural,
       null,
       targetLanguage,
       pageable,

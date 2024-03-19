@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.api.IImportSettings
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
@@ -20,6 +21,12 @@ class StoredDataImporterTest : AbstractSpringTest() {
   lateinit var storedDataImporter: StoredDataImporter
   lateinit var importTestData: ImportTestData
 
+  val defaultImportSettings =
+    object : IImportSettings {
+      override var convertPlaceholdersToIcu: Boolean = true
+      override var overrideKeyDescriptions: Boolean = false
+    }
+
   @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
@@ -27,6 +34,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
       StoredDataImporter(
         applicationContext,
         importTestData.import,
+        importSettings = defaultImportSettings,
       )
   }
 
@@ -92,6 +100,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         applicationContext,
         importTestData.import,
         ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
       )
     testDataService.saveTestData(importTestData.root)
     login()
@@ -112,6 +121,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         applicationContext,
         importTestData.import,
         ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
       )
     login()
     storedDataImporter.doImport()
@@ -141,6 +151,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         applicationContext,
         importTestData.import,
         ForceMode.KEEP,
+        importSettings = defaultImportSettings,
       )
     testDataService.saveTestData(importTestData.root)
     login()

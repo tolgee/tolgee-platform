@@ -19,6 +19,7 @@ enum class MtServiceType(
   val propertyClass: Class<out MachineTranslationServiceProperties>,
   val providerClass: Class<out MtValueProvider>,
   val usesMetadata: Boolean = false,
+  val supportsPlurals: Boolean = false,
   val order: Int = 0,
 ) {
   GOOGLE(
@@ -51,5 +52,6 @@ enum class MtServiceType(
     providerClass = TolgeeTranslationProvider::class.java,
     usesMetadata = true,
     order = -1,
+    supportsPlurals = true,
   ),
 }

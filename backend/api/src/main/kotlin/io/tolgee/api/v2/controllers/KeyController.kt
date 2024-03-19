@@ -135,7 +135,7 @@ class KeyController(
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
     keyService.edit(id, dto)
-    val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description)
+    val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom)
     return keyModelAssembler.toModel(view)
   }
 
@@ -164,6 +164,19 @@ class KeyController(
   ): PagedModel<KeyModel> {
     val data = keyService.getPaged(projectHolder.project.id, pageable)
     return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
+  }
+
+  @GetMapping(value = ["{id}"])
+  @Transactional
+  @Operation(summary = "Returns single key")
+  @RequiresProjectPermissions([Scope.KEYS_VIEW])
+  @AllowApiAccess
+  fun get(
+    @PathVariable
+    id: Long,
+  ): KeyModel {
+    val key = keyService.getView(projectHolder.project.id, id)
+    return keyModelAssembler.toModel(key)
   }
 
   @DeleteMapping(value = [""])

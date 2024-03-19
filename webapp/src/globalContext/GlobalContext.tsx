@@ -12,12 +12,15 @@ import { useQuickStartGuide } from './useQuickStartGuide';
 
 type UsageModel = components['schemas']['PublicUsageModel'];
 
+export const TOP_BAR_HEIGHT = 52;
+
 export const [GlobalProvider, useGlobalActions, useGlobalContext] =
   createProvider(() => {
     const [clientConnected, setClientConnected] = useState<boolean>();
     const [client, setClient] = useState<ReturnType<typeof WebsocketClient>>();
     const initialData = useInitialDataService();
     const [topBannerHeight, setTopBannerHeight] = useState(0);
+    const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
     const [rightPanelWidth, setRightPanelWidth] = useState(0);
     const [topBarHidden, setTopBarHidden] = useState(false);
     const [quickStartState, quickStartActions] =
@@ -68,6 +71,7 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
         return organizationUsage.incrementSpendingLimitErrors();
       },
       setTopBannerHeight,
+      setTopSubBannerHeight,
       dismissTopBanner: () => {
         return initialData.dismissAnnouncement();
       },
@@ -85,8 +89,9 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       client,
       clientConnected,
       topBannerHeight,
+      topSubBannerHeight,
       rightPanelWidth,
-      topBarHeight: topBarHidden ? 0 : 52,
+      topBarHeight: topBarHidden ? 0 : TOP_BAR_HEIGHT,
       quickStartGuide: quickStartState,
     };
 

@@ -4,7 +4,7 @@ import {
   gcyAdvanced,
   visitProjectDeveloperStorage,
 } from '../../common/shared';
-import { contentDelivery } from '../../common/apiCalls/testData/testData';
+import { contentDeliveryTestData } from '../../common/apiCalls/testData/testData';
 import { login, setContentStorageBypass } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { setFeature } from '../../common/features';
@@ -13,9 +13,9 @@ describe('Content storage', () => {
   beforeEach(() => {
     setFeature('PROJECT_LEVEL_CONTENT_STORAGES', true);
     setContentStorageBypass(true);
-    contentDelivery.clean();
-    contentDelivery.generateStandard().then((response) => {
-      login();
+    contentDeliveryTestData.clean();
+    contentDeliveryTestData.generateStandard().then((response) => {
+      login('test_username');
       const projectId = response.body.projects[0].id;
       visitProjectDeveloperStorage(projectId);
     });

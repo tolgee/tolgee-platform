@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Badge, styled } from '@mui/material';
+import { Badge, Box, styled } from '@mui/material';
 import { Check, Comment, Edit } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
@@ -12,17 +12,13 @@ import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const StyledControlsWrapper = styled('div')`
+const StyledControlsWrapper = styled(Box)`
   display: grid;
   box-sizing: border-box;
-  grid-area: controls;
   justify-content: end;
-  overflow: hidden;
-  min-height: 44px;
-  padding: 12px 14px 12px 12px;
-  margin-top: -16px;
-  margin-right: -8px;
+  padding: 0px 0px 0px 0px;
   gap: 4px;
+  margin: 0px 0px;
 `;
 
 const StyledStateButtons = styled('div')`
@@ -68,6 +64,8 @@ type ControlsProps = {
   // render last focusable button
   lastFocusable: boolean;
   active?: boolean;
+  containerProps?: React.ComponentProps<typeof Box>;
+  className?: string;
 };
 
 export const ControlsTranslation: React.FC<ControlsProps> = ({
@@ -81,6 +79,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   unresolvedCommentCount,
   lastFocusable,
   active,
+  className,
 }) => {
   const spots: string[] = [];
 
@@ -115,6 +114,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
         gridTemplateAreas,
         gridTemplateColumns,
       }}
+      className={className}
     >
       {inDomTransitionButtons && (
         <StyledStateButtons style={{ gridArea: 'state' }}>

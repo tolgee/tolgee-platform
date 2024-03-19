@@ -11,7 +11,6 @@ import { FormatIcu } from '@tolgee/format-icu';
 import ReactDOM from 'react-dom';
 import { QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
 import { SnackbarProvider } from 'notistack';
 import 'reflect-metadata';
@@ -86,7 +85,6 @@ const MainWrapper = () => {
                         </GlobalProvider>
                       </SnackbarProvider>
                     </ErrorBoundary>
-                    <ReactQueryDevtools />
                   </QueryClientProvider>
                 </Provider>
               </BrowserRouter>

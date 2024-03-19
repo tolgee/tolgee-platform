@@ -117,6 +117,8 @@ export function useErrorTranslation() {
         return t('credit_spending_limit_exceeded');
       case 'subscription_not_active':
         return t('subscription_not_active');
+      case 'invalid_plural_form':
+        return t('invalid_plural_form');
       default:
         return code;
     }

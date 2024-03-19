@@ -141,19 +141,6 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `resets language when selecting namespace`() {
-    val testData = ImportNamespacesTestData()
-    testDataService.saveTestData(testData.root)
-    projectSupplier = { testData.project }
-    userAccount = testData.userAccount
-    val path = "import/result/files/${testData.defaultNsFile.id}/select-namespace"
-    performProjectAuthPut(path, mapOf("namespace" to "homepage")).andIsOk
-    importService.findLanguage(testData.importEnglish.id)!!.existingLanguage.assert.isNull()
-    importService.findLanguage(testData.importGerman.id)!!.existingLanguage.assert.isNull()
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
   fun `returns all namespaces`() {
     val testData = ImportNamespacesTestData()
     testDataService.saveTestData(testData.root)

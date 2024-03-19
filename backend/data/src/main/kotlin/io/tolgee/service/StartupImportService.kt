@@ -6,7 +6,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.LanguageRequest
-import io.tolgee.dtos.request.project.CreateProjectDTO
+import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
@@ -140,7 +140,7 @@ class StartupImportService(
 
     val project =
       projectService.createProject(
-        CreateProjectDTO(
+        CreateProjectRequest(
           name = projectName,
           languages = languages,
           organizationId = organization.id,

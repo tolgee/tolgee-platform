@@ -124,6 +124,15 @@ class ActivityEventListener(
       ActivityType.EDIT_PROJECT,
       ActivityType.NAMESPACE_EDIT,
       ActivityType.AUTOMATION,
+      ActivityType.CONTENT_DELIVERY_CONFIG_CREATE,
+      ActivityType.CONTENT_DELIVERY_CONFIG_UPDATE,
+      ActivityType.CONTENT_DELIVERY_CONFIG_DELETE,
+      ActivityType.CONTENT_STORAGE_CREATE,
+      ActivityType.CONTENT_STORAGE_UPDATE,
+      ActivityType.CONTENT_STORAGE_DELETE,
+      ActivityType.WEBHOOK_CONFIG_CREATE,
+      ActivityType.WEBHOOK_CONFIG_UPDATE,
+      ActivityType.WEBHOOK_CONFIG_DELETE,
       null,
       -> {}
     }

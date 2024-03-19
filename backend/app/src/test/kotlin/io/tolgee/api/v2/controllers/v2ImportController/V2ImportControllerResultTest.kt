@@ -95,12 +95,35 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `it return correct translation data`() {
+  fun `it return correct translation data (all)`() {
     val testData = ImportTestData()
+    testData.addPluralImport()
     testDataService.saveTestData(testData.root)
-
     loginAsUser(testData.root.data.userAccounts[0].self.username)
+    performAuthGet(
+      "/v2/projects/${testData.project.id}" +
+        "/import/result/languages/${testData.importEnglish.id}/translations",
+    ).andIsOk
+      .andPrettyPrint.andAssertThatJson {
+        node("_embedded.translations") {
+          isArray.isNotEmpty.hasSize(6)
+          node("[1]") {
+            node("id").isNotNull
+            node("keyName").isEqualTo("plural key")
+            node("keyId").isNotNull
+            node("isPlural").isEqualTo(false)
+            node("existingKeyIsPlural").isEqualTo(true)
+          }
+        }
+      }
+  }
 
+  @Test
+  fun `it return correct translation data (only conflicts)`() {
+    val testData = ImportTestData()
+    testData.addPluralImport()
+    testDataService.saveTestData(testData.root)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
         "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true",
@@ -116,6 +139,9 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
             node("conflictId").isNotNull
             node("conflictText").isEqualTo("What a text")
             node("override").isEqualTo(false)
+            node("isPlural").isEqualTo(false)
+            node("existingKeyIsPlural").isEqualTo(false)
+            node("keyDescription").isEqualTo("This is a key")
           }
         }
       }

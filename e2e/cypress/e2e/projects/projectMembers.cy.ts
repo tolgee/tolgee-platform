@@ -32,6 +32,7 @@ describe('Project members', () => {
 
   after(() => {
     setBypassSeatCountCheck(false);
+    projectTestData.clean();
   });
 
   describe('Permission settings', () => {
@@ -39,6 +40,10 @@ describe('Project members', () => {
       before(() => {
         projectTestData.clean();
         projectTestData.generate();
+      });
+
+      after(() => {
+        projectTestData.clean();
       });
 
       beforeEach(() => {

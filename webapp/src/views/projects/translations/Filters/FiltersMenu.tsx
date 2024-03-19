@@ -1,9 +1,9 @@
 import { Menu, MenuProps } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { CompactMenuItem } from 'tg.component/ListComponents';
 
 import { useTranslationsActions } from '../context/TranslationsContext';
-import { CompactMenuItem } from './FiltersComponents';
 import { useActiveFilters } from './useActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
 

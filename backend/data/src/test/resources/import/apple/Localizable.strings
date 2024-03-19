@@ -1,0 +1,26 @@
+"welcome_header" = "Hello, %@";
+
+/*
+Welcome header comment
+it's a multiline comment
+*\/
+
+I cannot trick you!
+
+\*/
+"welcome_sub_header" = "Hello, %s"; // this is an inline comment\n dada
+"another key" = "Dies ist ein weiterer Schlüssel.";
+"another key \" with escaping" = "Dies ist ein weiterer \" Schlüssel.";
+
+// this is a comment with escaped \/\/ haha \
+Escaping is fun!
+"another key \\ with escaping 2" = "Dies ist ein weiterer \\ Schlüssel.";
+"another key with escaping 3\\" = "Dies ist ein weiterer Schlüssel\\";
+"another key
+
+ multiline" = "Dies ist ein weiterer
+
+Schlüssel.";
+
+/* this is a comment with newlines \n \n \r yep*/
+"A key with \n \n \r" = "Ein Schlüssel mit \n \n \r";

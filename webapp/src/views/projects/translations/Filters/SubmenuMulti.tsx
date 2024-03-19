@@ -3,8 +3,8 @@ import { ListItemText, Popover } from '@mui/material';
 import { ArrowRight } from '@mui/icons-material';
 
 import { OptionType } from './tools';
-import { CompactMenuItem } from './FiltersComponents';
 import { SearchSelectMulti } from '../../../../component/searchSelect/SearchSelectMulti';
+import { CompactMenuItem } from 'tg.component/ListComponents';
 
 type Props = {
   item: OptionType;

@@ -49,6 +49,7 @@ export interface BaseViewProps {
   'data-cy'?: string;
   initialSearch?: string;
   overflow?: string;
+  wrapperProps?: React.ComponentProps<typeof Box>;
 }
 
 export const BaseView = (props: BaseViewProps) => {
@@ -140,7 +141,7 @@ export const BaseView = (props: BaseViewProps) => {
             </StyledContainer>
           </SecondaryBar>
         )}
-        <Box pl={3} pr={3} pt={2} pb={2}>
+        <Box pl={3} pr={3} pt={2} pb={2} {...props.wrapperProps}>
           <StyledContainer style={{ maxWidth }}>
             {!props.loading || !hideChildrenOnLoading ? (
               <Box

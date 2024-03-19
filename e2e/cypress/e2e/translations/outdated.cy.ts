@@ -51,7 +51,7 @@ describe('Translation states', () => {
   });
 
   it("won't mark empty translation", () => {
-    editCell('Studený přeložený text 1', '', true);
+    editCell('Studený přeložený text 1', '{del}', true);
     waitForGlobalLoading();
 
     editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
@@ -93,17 +93,13 @@ describe('Translation states', () => {
     cy.gcy('translations-add-button').click();
     cy.gcy('translation-create-key-input').type('test_key');
     cy.gcy('translation-create-translation-input')
-      .first()
+      .find('[contenteditable]')
       .type('Test translation');
-
-    cy.gcy('translation-create-translation-input')
-      .eq(1)
-      .type('Testovací překlad');
 
     cy.gcy('global-form-save-button').click();
     assertMessage('Key created');
 
-    getOutdatedIndicator('Testovací překlad').should('not.exist');
+    cy.gcy('translations-outdated-indicator').should('not.exist');
   });
 
   const getOutdatedIndicator = (translationText: string) => {

@@ -22,7 +22,7 @@ const detectLoop = (url) => {
 };
 
 export class RequestOptions {
-  asBlob? = false;
+  rawResponse? = false;
   signal?: any;
   disableAutoErrorHandle? = false;
   disableAuthRedirect? = false;
@@ -212,8 +212,8 @@ export class ApiHttpService {
   }
 
   static async getResObject(r: Response, o?: RequestOptions) {
-    if (o?.asBlob) {
-      return r.blob();
+    if (o?.rawResponse) {
+      return r;
     }
 
     const textBody = await r.text();

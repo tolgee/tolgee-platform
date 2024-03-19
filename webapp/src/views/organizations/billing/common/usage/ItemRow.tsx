@@ -1,5 +1,5 @@
 import { components } from 'tg.service/billingApiSchema.generated';
-import { useMoneyFormatter } from 'tg.hooks/useLocale';
+import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Download } from '@mui/icons-material';
@@ -12,6 +12,7 @@ export const ItemRow = (props: {
   onDownloadReport?: () => void;
 }) => {
   const formatMoney = useMoneyFormatter();
+  const formatNumber = useNumberFormatter();
 
   const { t } = useTranslate();
 
@@ -27,8 +28,11 @@ export const ItemRow = (props: {
           </Tooltip>
         )}
       </TableCell>
-      <TableCell align="right">{props.item.usedQuantity}</TableCell>
-      <TableCell align="right">{props.item.usedQuantityOverPlan}</TableCell>
+      <TableCell align="right">
+        {formatNumber(props.item.usedQuantityOverPlan, {
+          maximumFractionDigits: 0,
+        })}
+      </TableCell>
       <TableCell align="right">{formatMoney(props.item.total)}</TableCell>
     </TableRow>
   );

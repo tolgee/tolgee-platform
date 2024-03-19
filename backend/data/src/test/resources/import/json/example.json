@@ -1,0 +1,24 @@
+{
+  "common": {
+    "save": "Save"
+  },
+  "array": [
+    "one",
+    "two",
+    "three"
+  ],
+  "common.save": "This is conflict",
+  "array[0]": "This is conflict",
+  "a": {
+    "b": {
+      "c": "This is nested hard.",
+      "d": [
+        "one",
+        "two",
+        "three"
+      ]
+    }
+  },
+  "null": null,
+  "boolean": true
+}

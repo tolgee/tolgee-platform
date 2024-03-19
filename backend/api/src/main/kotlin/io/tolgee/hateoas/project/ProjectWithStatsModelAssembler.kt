@@ -52,12 +52,13 @@ class ProjectWithStatsModelAssembler(
       slug = view.slug,
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationRole = view.organizationRole,
-      baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
+      baseLanguage = baseLanguage.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       stats = view.stats,
       languages = view.languages.map { languageModelAssembler.toModel(it) },
+      icuPlaceholders = view.icuPlaceholders,
     ).add(link).also { model ->
       view.organizationOwner.slug.let {
         model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))

@@ -37,12 +37,24 @@ class KeyMetaService(
   fun import(
     target: KeyMeta,
     source: KeyMeta,
+    overrideDescriptions: Boolean = true,
   ) {
     target.comments.import(target, source.comments.toList()) { a, b ->
       a.text == b.text && a.fromImport == b.fromImport
     }
     target.codeReferences.import(target, source.codeReferences.toList()) { a, b ->
       a.line == b.line && a.path == b.path
+    }
+    source.custom?.let { sourceCustom ->
+      val targetCustom =
+        target.custom ?: mutableMapOf<String, Any?>()
+          .also {
+            target.custom = it
+          }
+      targetCustom.putAll(sourceCustom)
+    }
+    if (overrideDescriptions || target.description.isNullOrEmpty()) {
+      target.description = source.description
     }
   }
 

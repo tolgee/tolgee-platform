@@ -16,7 +16,7 @@ export const ProportionalUsageItemRow = (props: {
   const downloadReport = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage/{type}.csv',
     method: 'get',
-    fetchOptions: { asBlob: true },
+    fetchOptions: { rawResponse: true },
   });
 
   const onDownload =
@@ -31,8 +31,9 @@ export const ProportionalUsageItemRow = (props: {
             },
           },
           {
-            onSuccess: (data) => {
-              const fileUrl = URL.createObjectURL(data as any as Blob);
+            onSuccess: async (response) => {
+              const data = (await (response as any).blob()) as Blob;
+              const fileUrl = URL.createObjectURL(data);
               const filename = `Report - ${props.invoiceNumber} - ${props.type}.csv`;
               const a = document.createElement('a');
               a.href = fileUrl;

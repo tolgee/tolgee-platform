@@ -9,6 +9,8 @@ import io.tolgee.model.key.Tag
 data class KeyWithTranslationsView(
   val keyId: Long,
   val keyName: String,
+  val keyIsPlural: Boolean,
+  val keyPluralArgName: String?,
   val keyNamespaceId: Long?,
   val keyNamespace: String?,
   val keyDescription: String?,
@@ -29,6 +31,8 @@ data class KeyWithTranslationsView(
         KeyWithTranslationsView(
           keyId = data.removeFirst() as Long,
           keyName = data.removeFirst() as String,
+          keyIsPlural = data.removeFirst() as Boolean,
+          keyPluralArgName = data.removeFirst() as String?,
           keyNamespaceId = data.removeFirst() as Long?,
           keyNamespace = data.removeFirst() as String?,
           keyDescription = data.removeFirst() as String?,

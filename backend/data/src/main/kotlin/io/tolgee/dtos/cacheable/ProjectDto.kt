@@ -1,16 +1,19 @@
 package io.tolgee.dtos.cacheable
 
+import io.tolgee.api.ISimpleProject
 import io.tolgee.model.Project
 import java.io.Serializable
 
 data class ProjectDto(
-  val name: String,
-  val description: String?,
-  val slug: String?,
-  val id: Long,
+  override val name: String,
+  override val description: String?,
+  override val slug: String?,
+  override val id: Long,
   val organizationOwnerId: Long,
   var aiTranslatorPromptDescription: String?,
-) : Serializable {
+  override var avatarHash: String? = null,
+  override var icuPlaceholders: Boolean,
+) : Serializable, ISimpleProject {
   companion object {
     fun fromEntity(entity: Project) =
       ProjectDto(
@@ -20,6 +23,8 @@ data class ProjectDto(
         id = entity.id,
         organizationOwnerId = entity.organizationOwner.id,
         aiTranslatorPromptDescription = entity.aiTranslatorPromptDescription,
+        avatarHash = entity.avatarHash,
+        icuPlaceholders = entity.icuPlaceholders,
       )
   }
 }

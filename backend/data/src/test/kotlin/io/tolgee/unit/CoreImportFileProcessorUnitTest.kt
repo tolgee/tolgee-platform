@@ -1,9 +1,13 @@
 package io.tolgee.unit
 
+import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.dtos.request.dataImport.ImportSettingsRequest
+import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -17,8 +21,6 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.ImportFileProcessor
-import io.tolgee.service.dataImport.processors.ProcessorFactory
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
@@ -31,13 +33,12 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
-import java.util.*
 
 class CoreImportFileProcessorUnitTest {
   private lateinit var existingLanguageEntity: Language
   private lateinit var applicationContextMock: ApplicationContext
   private lateinit var importMock: Import
-  private lateinit var processorFactoryMock: ProcessorFactory
+  private lateinit var importFileProcessorFactoryMock: ImportFileProcessorFactory
   private lateinit var importServiceMock: ImportService
   private lateinit var languageServiceMock: LanguageService
   private lateinit var processor: CoreImportFilesProcessor
@@ -51,12 +52,13 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var authenticationFacadeMock: AuthenticationFacade
   private lateinit var keyMetaServiceMock: KeyMetaService
   private lateinit var tolgeePropertiesMock: TolgeeProperties
+  private lateinit var keyCustomValuesValidatorMock: KeyCustomValuesValidator
 
   @BeforeEach
   fun setup() {
     applicationContextMock = mock()
     importMock = mock()
-    processorFactoryMock = mock()
+    importFileProcessorFactoryMock = mock()
     importServiceMock = mock()
     languageServiceMock = mock()
     translationServiceMock = mock()
@@ -64,25 +66,38 @@ class CoreImportFileProcessorUnitTest {
     authenticationFacadeMock = mock()
     keyMetaServiceMock = mock()
     tolgeePropertiesMock = mock()
+    keyCustomValuesValidatorMock = mock()
 
     importFile = ImportFile("lgn.json", importMock)
     importFileDto = ImportFileDto("lng.json", "".toByteArray())
     existingLanguage = LanguageDto(name = "lng")
     existingLanguageEntity = Language().apply { name = existingLanguage.name }
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
-    processor = CoreImportFilesProcessor(applicationContextMock, importMock)
+    processor =
+      CoreImportFilesProcessor(
+        applicationContextMock, importMock,
+        importSettings =
+          ImportSettingsRequest(
+            overrideKeyDescriptions = false,
+            convertPlaceholdersToIcu = true,
+          ),
+      )
 
-    whenever(applicationContextMock.getBean(ProcessorFactory::class.java)).thenReturn(processorFactoryMock)
+    whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java)).thenReturn(
+      importFileProcessorFactoryMock,
+    )
     whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)
     whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
     whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
     whenever(applicationContextMock.getBean(AuthenticationFacade::class.java)).thenReturn(authenticationFacadeMock)
     whenever(applicationContextMock.getBean(KeyMetaService::class.java)).thenReturn(keyMetaServiceMock)
     whenever(applicationContextMock.getBean(TolgeeProperties::class.java)).thenReturn(tolgeePropertiesMock)
+    whenever(applicationContextMock.getBean(KeyCustomValuesValidator::class.java))
+      .thenReturn(keyCustomValuesValidatorMock)
     whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
 
-    whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
+    whenever(importFileProcessorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile, applicationContext = applicationContextMock)
     fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
     whenever(typeProcessorMock.context).then { fileProcessorContext }
     whenever(importMock.project).thenReturn(Project(1, "test repo"))
@@ -138,13 +153,13 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addTranslation("test_key", "lng", "value")
     fileProcessorContext.addKeyCodeReference("test_key", "hello.php", 10)
     fileProcessorContext.addKeyCodeReference("test_key", "hello2.php", 10)
-    fileProcessorContext.addKeyComment("test_key", "test comment")
+    fileProcessorContext.addKeyDescription("test_key", "test comment")
     whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
 
     processor.processFiles(listOf(importFileDto))
     verify(keyMetaServiceMock).save(
       argThat {
-        this.comments.any { it.text == "test comment" }
+        this.description == "test comment"
       },
     )
     verify(keyMetaServiceMock).save(
@@ -156,7 +171,7 @@ class CoreImportFileProcessorUnitTest {
       argThat {
         assertThat(this[0].key.keyMeta).isNotNull
         assertThat(this[0].key.keyMeta?.codeReferences).hasSize(2)
-        assertThat(this[0].key.keyMeta?.comments).hasSize(1)
+        assertThat(this[0].key.keyMeta?.description).isNotBlank()
         true
       },
     )

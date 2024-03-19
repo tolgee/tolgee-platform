@@ -13,7 +13,6 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
@@ -31,7 +30,6 @@ class EeSubscription : AuditModel(), IEeSubscription {
   @field:ColumnDefault("Plan")
   lateinit var name: String
 
-  @field:NotNull
   override var currentPeriodEnd: Date? = null
 
   override var cancelAtPeriodEnd: Boolean = false

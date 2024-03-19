@@ -2,7 +2,6 @@ import { Translations } from './Translations';
 import { TranslationsContextProvider } from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 import { HeaderNsContext } from './context/HeaderNsContext';
-import { ColumnsContext } from './context/ColumnsContext';
 
 export const TranslationsView = () => {
   const project = useProject();
@@ -14,9 +13,7 @@ export const TranslationsView = () => {
       updateLocalStorageLanguages
     >
       <HeaderNsContext>
-        <ColumnsContext>
-          <Translations />
-        </ColumnsContext>
+        <Translations />
       </HeaderNsContext>
     </TranslationsContextProvider>
   );

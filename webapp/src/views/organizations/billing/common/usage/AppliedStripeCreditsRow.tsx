@@ -8,7 +8,7 @@ export const AppliedStripeCreditsRow = (props: { value: number }) => {
 
   return (
     <TableRow>
-      <TableCell colSpan={3}>
+      <TableCell colSpan={2}>
         {t('invoice_usage_dialog_table_applied_stripe_credits_item')}
       </TableCell>
       <TableCell align="right">{formatMoney(-props.value)}</TableCell>

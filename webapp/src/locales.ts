@@ -34,7 +34,7 @@ export const locales = {
   },
   pt: {
     name: 'Português',
-    flag: '🇵🇹',
+    flag: '🇧🇷',
     dateFnsLocale: ptDateLocale,
   },
   da: {

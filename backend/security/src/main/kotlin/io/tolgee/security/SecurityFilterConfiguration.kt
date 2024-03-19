@@ -16,7 +16,6 @@
 
 package io.tolgee.security
 
-import io.tolgee.security.authentication.AuthenticationDisabledFilter
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
 import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
@@ -28,13 +27,6 @@ import org.springframework.context.annotation.Configuration
 class SecurityFilterConfiguration {
   @Bean("filterRegistrationAuth")
   fun authenticationFilter(filter: AuthenticationFilter): FilterRegistrationBean<*> {
-    val registration = FilterRegistrationBean(filter)
-    registration.isEnabled = false
-    return registration
-  }
-
-  @Bean("filterRegistrationAuthDisabled")
-  fun authenticationDisabledFilter(filter: AuthenticationDisabledFilter): FilterRegistrationBean<*> {
     val registration = FilterRegistrationBean(filter)
     registration.isEnabled = false
     return registration

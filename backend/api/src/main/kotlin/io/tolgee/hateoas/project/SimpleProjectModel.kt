@@ -14,4 +14,5 @@ open class SimpleProjectModel(
   val slug: String?,
   val avatar: Avatar?,
   val baseLanguage: LanguageModel?,
+  var icuPlaceholders: Boolean,
 ) : RepresentationModel<SimpleProjectModel>()

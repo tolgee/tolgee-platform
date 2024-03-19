@@ -4,7 +4,7 @@ import {
   gcyAdvanced,
   visitProjectDeveloperHooks,
 } from '../../common/shared';
-import { contentDelivery } from '../../common/apiCalls/testData/testData';
+import { contentDeliveryTestData } from '../../common/apiCalls/testData/testData';
 import {
   login,
   setWebhookControllerStatus,
@@ -19,8 +19,8 @@ describe('Content delivery', () => {
   beforeEach(() => {
     setWebhookControllerStatus(200);
     setFeature('WEBHOOKS', true);
-    contentDelivery.clean();
-    contentDelivery.generateStandard().then((response) => {
+    contentDeliveryTestData.clean();
+    contentDeliveryTestData.generateStandard().then((response) => {
       login();
       const projectId = response.body.projects[0].id;
       visitProjectDeveloperHooks(projectId);
