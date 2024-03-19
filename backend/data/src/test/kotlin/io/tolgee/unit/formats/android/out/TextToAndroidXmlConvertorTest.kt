@@ -32,14 +32,26 @@ class TextToAndroidXmlConvertorTest {
 
   @Test
   fun `unsupported tags are converted to CDATA nodes`() {
-    var nodes = "What a <a href=\"https://example.com\">link ' %% \" </a>.".convertedNodes().toList()
+    var nodes =
+      "What a <unsupported attr=\"https://example.com\">link ' %% \" </unsupported>."
+        .convertedNodes().toList()
     nodes[0].assertTextContent("What a ")
-    nodes[1].nodeAssertCdataNodeText("<a href=\\\"https://example.com\\\">link \\' % \\\" </a>")
+    nodes[1].nodeAssertCdataNodeText(
+      "<unsupported attr=\\\"https://example.com\\\">link \\' % \\\" " +
+        "</unsupported>",
+    )
     nodes[2].assertTextContent(".")
 
-    nodes = "What a <a href=\"https://example.com\">link ' %% %s \"    </a>.".convertedNodes().toList()
+    nodes =
+      (
+        "What a <unsupported attr=\"https://example.com\">link ' %% %s \"    " +
+          "</unsupported>."
+      ).convertedNodes().toList()
     nodes[0].assertTextContent("What a ")
-    nodes[1].nodeAssertCdataNodeText("<a href=\\\"https://example.com\\\">link \\' %% %s \\\"    </a>")
+    nodes[1].nodeAssertCdataNodeText(
+      "<unsupported attr=\\\"https://example.com\\\">link \\' %% %s \\\"    " +
+        "</unsupported>",
+    )
     nodes[2].assertTextContent(".")
   }
 

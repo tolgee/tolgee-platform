@@ -22,7 +22,7 @@ class AndroidStringsXmlParserTest {
 
   @Test
   fun `it removes unsupported tags`() {
-    "<a><b>text</b></a>".assertParsedTo("text", false)
+    "<unsupported><b>text</b></unsupported>".assertParsedTo("text", false)
   }
 
   @Test
