@@ -3,7 +3,8 @@ package io.tolgee.dtos
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.dtos.request.export.ExportFormat
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
 
 interface IExportParams {
@@ -29,6 +30,14 @@ When null, resulting file won't be structured.
     """,
   )
   var structureDelimiter: Char?
+
+  @get:Schema(
+    description = """
+      If true, for structured formats (like JSON) arrays are supported. 
+      e.g. Key hello[0] will be exported as {"hello": ["..."]}
+    """,
+  )
+  var supportArrays: Boolean
 
   @get:Schema(
     description = """Filter key IDs to be contained in export""",
@@ -65,6 +74,14 @@ When null, resulting file won't be structured.
   val shouldContainUntranslated: Boolean
     get() = this.filterState?.contains(TranslationState.UNTRANSLATED) != false
 
+  @get:Schema(
+    description = """Message format to be used for export. (applicable for .po)
+      
+e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s   
+    """,
+  )
+  var messageFormat: ExportMessageFormat?
+
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages
     this.format = other.format
@@ -75,5 +92,7 @@ When null, resulting file won't be structured.
     this.filterKeyPrefix = other.filterKeyPrefix
     this.filterState = other.filterState
     this.filterNamespace = other.filterNamespace
+    this.messageFormat = other.messageFormat
+    this.supportArrays = other.supportArrays
   }
 }

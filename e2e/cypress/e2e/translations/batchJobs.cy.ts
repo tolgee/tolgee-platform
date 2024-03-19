@@ -74,13 +74,9 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     selectAll();
     selectOperation('Clear translations');
     selectLanguage('English');
-    cy.gcy('translations-table-cell-translation-text')
-      .contains('en')
-      .should('exist');
+    cy.gcy('translation-text').contains('en').should('exist');
     executeBatchOperation();
-    cy.gcy('translations-table-cell-translation-text')
-      .contains('en')
-      .should('not.exist');
+    cy.gcy('translation-text').contains('en').should('not.exist');
   });
 
   it('will change state to reviewed and back to translated', () => {
@@ -125,9 +121,9 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     cy.gcy('translations-row')
       .eq(1)
       .findDcy('translations-table-cell-language')
-      .contains('de')
+      .contains('German')
       .closestDcy('translations-table-cell')
-      .findDcy('translations-table-cell-translation-text')
+      .findDcy('translation-text')
       .contains('en')
       .should('exist');
   });

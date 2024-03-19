@@ -25,6 +25,7 @@ class ExportService(
   ): Map<String, InputStream> {
     val data = getDataForExport(projectId, exportParams)
     val baseLanguage = getProjectBaseLanguage(projectId)
+    val project = projectService.get(projectId)
     val baseTranslationsProvider =
       getBaseTranslationsProvider(
         exportParams = exportParams,
@@ -37,6 +38,7 @@ class ExportService(
       exportParams = exportParams,
       baseTranslationsProvider = baseTranslationsProvider,
       baseLanguage,
+      projectIcuPlaceholdersSupport = project.icuPlaceholders,
     ).produceFiles().also {
       businessEventPublisher.publishOnceInTime(
         OnBusinessEventToCaptureEvent(

@@ -1,4 +1,4 @@
-import { Button, styled } from '@mui/material';
+import { Box, Button, styled, useMediaQuery } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -22,9 +22,11 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { FloatingToolsPanel } from '../ToolsPanel/FloatingToolsPanel';
 
 const StyledContainer = styled('div')`
   display: grid;
+  align-content: start;
   row-gap: ${({ theme }) => theme.spacing(2)};
   margin-bottom: ${({ theme }) => theme.spacing(2)};
 `;
@@ -43,20 +45,20 @@ const StyledTags = styled('div')`
 `;
 
 const StyledField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.emphasis[200]};
+  border-color: ${({ theme }) => theme.palette.divider1};
   border-width: 1px;
   border-style: solid;
 `;
 
 const StyledGalleryField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.emphasis[200]};
+  border-color: ${({ theme }) => theme.palette.divider1};
   border-width: 1px;
   border-style: solid;
   padding: 2px;
 `;
 
 const StyledLanguageField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.emphasis[200]};
+  border-color: ${({ theme }) => theme.palette.divider1};
   border-width: 1px 1px 1px 0px;
   border-style: solid;
 
@@ -73,28 +75,34 @@ export const KeyEditForm: React.FC = () => {
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
-  const { satisfiesLanguageAccess, satisfiesPermission } =
-    useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
   const canViewScreenshots = satisfiesPermission('screenshots.view');
   const editEnabled = satisfiesPermission('keys.edit');
 
-  const translation = useTranslationsSelector((c) => c.translations)?.[0];
+  const keyData = useTranslationsSelector((c) => c.translations)?.[0];
+  const translationOpen = useTranslationsSelector((c) =>
+    Boolean(c.cursor?.keyId === keyData?.keyId && c.cursor?.language)
+  );
+
   const languages = useTranslationsSelector((c) => c.languages);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const history = useHistory();
+
+  const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
+  const toolsPanelOpen = translationOpen && !isSmall;
 
   const urlId = useUrlSearch().id as string | undefined;
   const [_urlKey, setUrlKey] = useUrlSearchState('key');
   const [_urlNamespace, setUrlNamespace] = useUrlSearchState('ns');
 
   const handleAddTag = (name: string) => {
-    addTag({ keyId: translation!.keyId, name });
+    addTag({ keyId: keyData!.keyId, name });
   };
 
   const { refetchUsage } = useGlobalActions();
 
   const handleRemoveTag = (tagId: number) => {
-    removeTag({ keyId: translation!.keyId, tagId });
+    removeTag({ keyId: keyData!.keyId, tagId });
   };
 
   const deleteKeys = useApiMutation({
@@ -109,19 +117,19 @@ export const KeyEditForm: React.FC = () => {
 
   const cacheUpdateNs = (namespace: string) => {
     updateKey({
-      keyId: translation!.keyId,
+      keyId: keyData!.keyId,
       value: { keyNamespace: namespace },
     });
   };
 
   const handleNamespaceChange = (namespace: string | undefined = '') => {
-    const previousNs = translation!.keyNamespace;
+    const previousNs = keyData!.keyNamespace;
     cacheUpdateNs(namespace);
     updateNamespace.mutate(
       {
-        path: { projectId: project.id, id: translation!.keyId },
+        path: { projectId: project.id, id: keyData!.keyId },
         content: {
-          'application/json': { name: translation!.keyName, namespace },
+          'application/json': { name: keyData!.keyName, namespace },
         },
       },
       {
@@ -144,7 +152,7 @@ export const KeyEditForm: React.FC = () => {
       onConfirm() {
         deleteKeys.mutate(
           {
-            path: { projectId: project.id, ids: [translation!.keyId] },
+            path: { projectId: project.id, ids: [keyData!.keyId] },
           },
           {
             onSuccess() {
@@ -164,111 +172,112 @@ export const KeyEditForm: React.FC = () => {
     });
   };
 
-  return translation ? (
-    <StyledContainer>
-      <div>
-        <FieldLabel>
-          <T keyName="translation_single_label_key" />
-        </FieldLabel>
-        <StyledField data-cy="translation-edit-key-field">
-          <CellKey
-            data={translation!}
-            editEnabled={editEnabled}
-            active={true}
-            simple={true}
-            onSaveSuccess={(key) => urlId === undefined && setUrlKey(key)}
-          />
-        </StyledField>
-      </div>
-
-      <div>
-        <FieldLabel>
-          <T keyName="translation_single_label_namespace" />
-        </FieldLabel>
-        <NamespaceSelector
-          value={translation.keyNamespace}
-          onChange={handleNamespaceChange}
-        />
-      </div>
-
-      <div>
-        <FieldLabel>
-          <T keyName="translation_single_label_tags" />
-        </FieldLabel>
-        <StyledTags>
-          {translation.keyTags.map((tag) => {
-            return (
-              <Tag
-                key={tag.id}
-                name={tag.name}
-                onDelete={
-                  editEnabled ? () => handleRemoveTag(tag.id) : undefined
-                }
-              />
-            );
-          })}
-          {editEnabled && (
-            <TagInput
-              onAdd={handleAddTag}
-              placeholder={t('translation_single_tag_placeholder')}
-            />
-          )}
-        </StyledTags>
-      </div>
-
-      <div>
-        <FieldLabel>
-          <T keyName="translation_single_translations_title" />
-        </FieldLabel>
-        {selectedLanguages?.map((lang) => {
-          const language = languages?.find((l) => l.tag === lang);
-          return language ? (
-            <StyledLanguageField
-              key={lang}
-              data-cy="translation-edit-translation-field"
-            >
-              <CellTranslation
-                data={translation!}
-                language={language}
-                active={true}
-                editEnabled={satisfiesLanguageAccess(
-                  'translations.edit',
-                  language.id
-                )}
-                stateChangeEnabled={satisfiesLanguageAccess(
-                  'translations.state-edit',
-                  language.id
-                )}
-                lastFocusable={false}
-              />
-            </StyledLanguageField>
-          ) : null;
-        })}
-      </div>
-
-      {canViewScreenshots && (
+  return keyData ? (
+    <Box display="grid" gridTemplateColumns="1fr auto">
+      <StyledContainer>
         <div>
           <FieldLabel>
-            <T keyName="translation_single_label_screenshots" />
+            <T keyName="translation_single_label_key" />
           </FieldLabel>
-          <StyledGalleryField>
-            <ScreenshotGallery keyId={translation!.keyId} />
-          </StyledGalleryField>
+          <StyledField data-cy="translation-edit-key-field">
+            <CellKey
+              data={keyData!}
+              editEnabled={editEnabled}
+              active={true}
+              simple={true}
+              onSaveSuccess={(key) => urlId === undefined && setUrlKey(key)}
+            />
+          </StyledField>
         </div>
-      )}
 
-      <StyledActions>
-        {editEnabled && (
-          <Button
-            color="secondary"
-            variant="outlined"
-            onClick={handleRemoveKey}
-            data-cy="translation-edit-delete-button"
-          >
-            <T keyName="translation_single_label_delete" />
-          </Button>
+        <div>
+          <FieldLabel>
+            <T keyName="translation_single_label_namespace" />
+          </FieldLabel>
+          <NamespaceSelector
+            value={keyData.keyNamespace}
+            onChange={handleNamespaceChange}
+          />
+        </div>
+
+        <div>
+          <FieldLabel>
+            <T keyName="translation_single_label_tags" />
+          </FieldLabel>
+          <StyledTags>
+            {keyData.keyTags.map((tag) => {
+              return (
+                <Tag
+                  key={tag.id}
+                  name={tag.name}
+                  onDelete={
+                    editEnabled ? () => handleRemoveTag(tag.id) : undefined
+                  }
+                />
+              );
+            })}
+            {editEnabled && (
+              <TagInput
+                onAdd={handleAddTag}
+                placeholder={t('translation_single_tag_placeholder')}
+              />
+            )}
+          </StyledTags>
+        </div>
+
+        <div>
+          <FieldLabel>
+            <T keyName="translation_single_translations_title" />
+          </FieldLabel>
+          <Box>
+            {selectedLanguages?.map((lang) => {
+              const language = languages?.find((l) => l.tag === lang);
+              return language ? (
+                <StyledLanguageField
+                  key={lang}
+                  data-cy="translation-edit-translation-field"
+                >
+                  <CellTranslation
+                    data={keyData!}
+                    language={language}
+                    active={true}
+                    lastFocusable={false}
+                  />
+                </StyledLanguageField>
+              ) : null;
+            })}
+          </Box>
+        </div>
+
+        {canViewScreenshots && (
+          <div>
+            <FieldLabel>
+              <T keyName="translation_single_label_screenshots" />
+            </FieldLabel>
+            <StyledGalleryField>
+              <ScreenshotGallery keyId={keyData!.keyId} />
+            </StyledGalleryField>
+          </div>
         )}
-      </StyledActions>
-    </StyledContainer>
+
+        <StyledActions>
+          {editEnabled && (
+            <Button
+              color="secondary"
+              variant="outlined"
+              onClick={handleRemoveKey}
+              data-cy="translation-edit-delete-button"
+            >
+              <T keyName="translation_single_label_delete" />
+            </Button>
+          )}
+        </StyledActions>
+      </StyledContainer>
+      {toolsPanelOpen && (
+        <Box ml="-1px" mt="15px">
+          <FloatingToolsPanel />
+        </Box>
+      )}
+    </Box>
   ) : null;
 };

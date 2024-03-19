@@ -31,4 +31,10 @@ open class KeyWithDataModel(
   val tags: Set<TagModel>,
   @Schema(description = "Screenshots of the key")
   val screenshots: List<ScreenshotModel>,
+  @Schema(description = "If key is pluralized. If it will be reflected in the editor")
+  val isPlural: Boolean,
+  @Schema(description = "The argument name for the plural")
+  val pluralArgName: String?,
+  @Schema(description = "Custom values of the key")
+  val custom: Map<String, Any?>,
 ) : RepresentationModel<KeyWithDataModel>(), Serializable

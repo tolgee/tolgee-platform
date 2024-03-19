@@ -57,4 +57,7 @@
     <changeSet author="stepangranat (generated)" id="1692866900534-1">
         <dropColumn columnName="instance_id" tableName="ee_subscription"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1706777078864-1">
+        <dropNotNullConstraint columnDataType="timestamp(6)" columnName="current_period_end" tableName="ee_subscription"/>
+    </changeSet>
 </databaseChangeLog>

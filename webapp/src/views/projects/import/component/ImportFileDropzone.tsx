@@ -4,13 +4,17 @@ import { green, red } from '@mui/material/colors';
 import { HighlightOff } from '@mui/icons-material';
 import React, { FunctionComponent, useState } from 'react';
 
-import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
+import {
+  FilesType,
+  FileUploadFixtures,
+  getFilesAsync,
+} from 'tg.fixtures/FileUploadFixtures';
 
 import { MAX_FILE_COUNT } from './ImportFileInput';
 import { DropzoneIcon } from 'tg.component/CustomIcons';
 
 export interface ScreenshotDropzoneProps {
-  onNewFiles: (files: File[]) => void;
+  onNewFiles: (files: FilesType) => void;
   active: boolean;
 }
 
@@ -18,7 +22,8 @@ const StyledWrapper = styled(Box)`
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s;
-  background-color: ${({ theme }) => theme.palette.background.paper};
+  background-color: ${({ theme }) =>
+    theme.palette.tokens.SURFACE_BACKGROUND_DRAG_DROP};
 
   &:before {
     content: '';
@@ -104,12 +109,9 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
     }
     e.stopPropagation();
     e.preventDefault();
-    if (e.dataTransfer.items) {
-      const files = FileUploadFixtures.dataTransferItemsToArray(
-        e.dataTransfer.items
-      );
-      props.onNewFiles(files);
-    }
+
+    const files = await getFilesAsync(e.dataTransfer);
+    props.onNewFiles(files);
     setDragOver(null);
   };
 

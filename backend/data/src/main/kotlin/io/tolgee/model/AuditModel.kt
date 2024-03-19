@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import io.tolgee.activity.annotation.ActivityIgnoredProp
 import jakarta.persistence.Column
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.MappedSuperclass
@@ -19,10 +20,12 @@ abstract class AuditModel : Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created_at", nullable = false, updatable = false)
   @CreatedDate
+  @ActivityIgnoredProp
   var createdAt: Date? = null
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "updated_at", nullable = false)
   @LastModifiedDate
+  @ActivityIgnoredProp
   var updatedAt: Date? = null
 }

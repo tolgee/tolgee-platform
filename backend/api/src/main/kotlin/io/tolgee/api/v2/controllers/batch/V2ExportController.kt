@@ -13,6 +13,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
 import io.tolgee.util.StreamingResponseBodyProvider
+import io.tolgee.util.nullIfEmpty
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.http.ContentDisposition
@@ -45,7 +46,7 @@ class V2ExportController(
 ) {
   @GetMapping(value = [""])
   @Operation(summary = "Exports data")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun export(
     @ParameterObject params: ExportParams,
@@ -66,7 +67,7 @@ class V2ExportController(
     summary = """Exports data (post). Useful when providing params exceeding allowed query size.
   """,
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun exportPost(
     @RequestBody params: ExportParams,
@@ -83,7 +84,10 @@ class V2ExportController(
     mediaType: String,
   ): HttpHeaders {
     val httpHeaders = HttpHeaders()
-    httpHeaders.contentType = MediaType.valueOf(mediaType)
+    mediaType.nullIfEmpty?.let {
+      httpHeaders.contentType = MediaType.valueOf(it)
+    }
+    httpHeaders.accessControlExposeHeaders = listOf("Content-Disposition")
     httpHeaders.contentDisposition =
       ContentDisposition.parse(
         """attachment; filename="$fileName"""",
@@ -95,12 +99,10 @@ class V2ExportController(
     params: ExportParams,
     exported: Map<String, InputStream>,
   ): ResponseEntity<StreamingResponseBody> {
-    if (params.zip) {
-      return getZipResponseEntity(exported)
-    } else if (exported.entries.size == 1) {
+    if (exported.entries.size == 1 && !params.zip) {
       return exportSingleFile(exported, params)
     }
-    throw BadRequestException(message = Message.MULTIPLE_FILES_MUST_BE_ZIPPED)
+    return getZipResponseEntity(exported)
   }
 
   private fun checkExportNotEmpty(exported: Map<String, InputStream>) {

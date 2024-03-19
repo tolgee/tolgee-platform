@@ -1,6 +1,7 @@
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
 import {
+  Tooltip,
   Activity,
   BillingProgress,
   Cell,
@@ -10,6 +11,7 @@ import {
   ExampleBanner,
   Marker,
   Navbar,
+  Placeholders,
   QuickStart,
   Tile,
   TipsBanner,
@@ -27,6 +29,7 @@ declare module '@mui/material/styles/createPalette' {
   interface Palette {
     primaryText: string;
     divider1: string;
+    tooltip: Tooltip;
     tile: Tile;
     cell: Cell;
     default: PaletteColor;
@@ -43,11 +46,14 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
+    tokens: typeof all.tokens;
+    placeholders: Placeholders;
   }
 
   interface PaletteOptions {
     primaryText: string;
     divider1: string;
+    tooltip: Tooltip;
     tile: Tile;
     cell: Cell;
     default: PaletteColor;
@@ -64,6 +70,8 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
+    tokens: typeof all.tokens;
+    placeholders: Placeholders;
   }
 }
 
@@ -77,5 +85,11 @@ declare module '@mui/material/ButtonBase' {
   interface ButtonBaseOwnProps<TProps, T extends React.ElementType<TProps>>
     extends TProps {
     component?: T;
+  }
+}
+
+declare module 'react' {
+  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+    webkitdirectory?: boolean;
   }
 }

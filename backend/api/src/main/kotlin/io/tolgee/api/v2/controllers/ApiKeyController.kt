@@ -19,6 +19,7 @@ import io.tolgee.hateoas.apiKey.ApiKeyPermissionsModel
 import io.tolgee.hateoas.apiKey.ApiKeyWithLanguagesModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModelAssembler
+import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.model.ApiKey
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
@@ -64,6 +65,7 @@ class ApiKeyController(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>,
   private val permissionService: PermissionService,
+  private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
 ) {
   @PostMapping(path = ["/api-keys"])
   @Operation(summary = "Creates new API key with provided scopes")
@@ -176,6 +178,7 @@ class ApiKeyController(
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
       scopes = scopes,
+      project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
     )
   }
 

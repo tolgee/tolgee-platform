@@ -43,7 +43,7 @@ const StyledHeader = styled(Box)`
 const StyledArrow = styled(Box)`
   position: absolute;
   top: -10px;
-  right: 170px;
+  right: 87px;
   width: 0;
   height: 0;
   border-left: 10px solid transparent;

@@ -2,6 +2,7 @@ package io.tolgee.hateoas.apiKey
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.hateoas.permission.IPermissionModel
+import io.tolgee.hateoas.project.SimpleProjectModel
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import org.springframework.hateoas.RepresentationModel
@@ -22,4 +23,5 @@ class ApiKeyPermissionsModel(
         "granular permissions or if returning API key's permissions",
   )
   override val type: ProjectPermissionType?,
+  var project: SimpleProjectModel,
 ) : RepresentationModel<ApiKeyPermissionsModel>(), IPermissionModel

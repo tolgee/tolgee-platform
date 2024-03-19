@@ -52,6 +52,7 @@ class ProjectModelAssembler(
       baseLanguage = baseLanguage.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
+      icuPlaceholders = view.icuPlaceholders,
     ).add(link).also { model ->
       model.add(linkTo<OrganizationController> { get(view.organizationOwner.slug) }.withRel("organizationOwner"))
     }

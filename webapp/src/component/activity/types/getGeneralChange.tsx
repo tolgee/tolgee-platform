@@ -1,5 +1,6 @@
 import { styled } from '@mui/material';
 import { DiffValue } from '../types';
+import { valueToText } from '../formatTools';
 
 const StyledDiff = styled('span')`
   word-break: break-word;
@@ -14,8 +15,8 @@ const StyledArrow = styled('span')`
 `;
 
 export const getGeneralChange = (input?: DiffValue) => {
-  const oldInput = input?.old;
-  const newInput = input?.new;
+  const oldInput = valueToText(input?.old);
+  const newInput = valueToText(input?.new);
   if (oldInput && newInput) {
     return (
       <StyledDiff>

@@ -13,6 +13,8 @@ import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectDescription } from './ProjectDescription';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { useEffect } from 'react';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -47,6 +49,14 @@ const StyledProjectId = styled('div')`
 
 export const DashboardView = () => {
   const project = useProject();
+
+  const reportEvent = useReportEvent();
+  useEffect(() => {
+    if (project?.name === 'Demo project') {
+      reportEvent('DEMO_PROJECT_VIEWED');
+    }
+  }, [project?.name]);
+
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
 

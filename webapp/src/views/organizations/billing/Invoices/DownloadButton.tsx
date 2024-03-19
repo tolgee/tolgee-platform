@@ -18,7 +18,7 @@ export const DownloadButton: FC<DownloadButtonProps> = (props) => {
     url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf',
     method: 'get',
     fetchOptions: {
-      asBlob: true,
+      rawResponse: true,
     },
   });
 
@@ -31,8 +31,10 @@ export const DownloadButton: FC<DownloadButtonProps> = (props) => {
         },
       },
       {
-        onSuccess(blob) {
-          const url = URL.createObjectURL(blob as any as Blob);
+        async onSuccess(response) {
+          const res = response as unknown as Response;
+          const data = await res.blob();
+          const url = URL.createObjectURL(data as any as Blob);
           const a = document.createElement('a');
           a.href = url;
           a.download = `${config.appName.toLowerCase()}-${

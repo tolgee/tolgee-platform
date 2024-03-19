@@ -8,4 +8,5 @@ enum class FileIssueParamType {
   VALUE,
   LINE,
   FILE_NODE_ORIGINAL,
+  LANGUAGE_NAME,
 }

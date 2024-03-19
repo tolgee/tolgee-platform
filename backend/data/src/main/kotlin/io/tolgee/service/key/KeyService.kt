@@ -1,5 +1,6 @@
 package io.tolgee.service.key
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -17,6 +18,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.bigMeta.BigMetaService
@@ -48,6 +50,7 @@ class KeyService(
   private var translationService: TranslationService,
   private val languageRepository: LanguageRepository,
   private val bigMetaService: BigMetaService,
+  private val activityHolder: ActivityHolder,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -86,6 +89,13 @@ class KeyService(
     return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
   }
 
+  fun getView(
+    projectId: Long,
+    id: Long,
+  ): KeyView {
+    return keyRepository.findView(projectId, id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+  }
+
   fun find(id: Long): Key? {
     return keyRepository.findById(id).orElse(null)
   }
@@ -109,13 +119,12 @@ class KeyService(
     dto: CreateKeyDto,
   ): Key {
     val key = create(project, dto.name, dto.namespace)
-    val created =
-      dto.translations?.let {
-        if (it.isEmpty()) {
-          return@let null
-        }
-        translationService.setForKey(key, it)
-      }
+    key.isPlural = dto.isPlural
+    if (key.isPlural) {
+      key.pluralArgName = dto.pluralArgName
+    }
+
+    val created = createTranslationsOnKeyCreate(dto, key)
 
     dto.states?.map {
       val translation =
@@ -129,6 +138,7 @@ class KeyService(
     }
 
     dto.tags?.forEach {
+      activityHolder.businessEventData["usesTags"] = "true"
       tagService.tagKey(key, it)
     }
 
@@ -137,6 +147,16 @@ class KeyService(
     storeScreenshots(dto, key)
 
     return key
+  }
+
+  private fun createTranslationsOnKeyCreate(
+    dto: CreateKeyDto,
+    key: Key,
+  ): Map<String, Translation>? {
+    if (dto.translations.isNullOrEmpty()) {
+      return null
+    }
+    return translationService.setForKey(key, dto.translations!!)
   }
 
   private fun storeScreenshots(
@@ -167,9 +187,10 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    isPlural: Boolean = false,
   ): Key {
     checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
-    return createWithoutExistenceCheck(project, name, namespace)
+    return createWithoutExistenceCheck(project, name, namespace, isPlural)
   }
 
   @Transactional
@@ -177,8 +198,9 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    isPlural: Boolean,
   ): Key {
-    val key = Key(name = name, project = project)
+    val key = Key(name = name, project = project).apply { this.isPlural = isPlural }
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
     }

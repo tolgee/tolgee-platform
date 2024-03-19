@@ -25,7 +25,8 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             count(it) as totalCount, 
             sum(case when it.conflict is null then 0 else 1 end) as conflictCount,
             sum(case when (it.conflict is null or it.resolvedHash is null) then 0 else 1 end) as resolvedCount
-            from ImportLanguage il join il.file if left join il.existingLanguage el left join il.translations it
+            from ImportLanguage il join il.file if left join il.existingLanguage el left 
+            join il.translations it on it.isSelectedToImport = true
         """
 
     private const val VIEW_GROUP_BY = """

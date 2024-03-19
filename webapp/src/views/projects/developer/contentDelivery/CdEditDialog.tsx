@@ -17,12 +17,8 @@ import { EXPORTABLE_STATES, StateType } from 'tg.constants/translationStates';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StateSelector } from 'tg.views/projects/export/components/StateSelector';
 import { LanguageSelector } from 'tg.views/projects/export/components/LanguageSelector';
-import {
-  FORMATS,
-  FormatSelector,
-} from 'tg.views/projects/export/components/FormatSelector';
+import { FormatSelector } from 'tg.views/projects/export/components/FormatSelector';
 import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
-import { NestedSelector } from 'tg.views/projects/export/components/NestedSelector';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { components } from 'tg.service/apiSchema.generated';
@@ -33,6 +29,12 @@ import { CdStorageSelector } from './CdStorageSelector';
 import { CdAutoPublish } from './CdAutoPublish';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import {
+  findByExportParams,
+  formatGroups,
+  getFormatById,
+} from '../../export/components/formatGroups';
+import { SupportArraysSelector } from '../../export/components/SupportArraysSelector';
 
 type ContentDeliveryConfigModel =
   components['schemas']['ContentDeliveryConfigModel'];
@@ -46,8 +48,6 @@ const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
   'TRANSLATED',
   'REVIEWED',
 ]);
-
-const EXPORT_DEFAULT_FORMAT: (typeof FORMATS)[number] = 'JSON';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -156,6 +156,10 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
     });
   }
 
+  const initialFormat = data
+    ? findByExportParams(data)
+    : formatGroups[0].formats[0];
+
   return (
     <Dialog open onClose={onClose} maxWidth="lg">
       {languagesLoadable.isFetching || namespacesLoadable.isFetching ? (
@@ -168,16 +172,23 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
             name: data?.name ?? '',
             states: data?.filterState ?? EXPORT_DEFAULT_STATES,
             languages: data?.languages ?? allowedTags,
-            format: data?.format ?? EXPORT_DEFAULT_FORMAT,
-            namespaces: allNamespaces ?? [],
+            format: initialFormat.id,
+            namespaces: data?.filterNamespace ?? allNamespaces ?? [],
             autoPublish: data?.autoPublish ?? true,
-            nested: data?.structureDelimiter === '.',
+            nested: initialFormat.canBeStructured
+              ? data?.structureDelimiter === '.'
+              : false,
             contentStorageId: data?.storage?.id,
+            supportArrays:
+              data?.supportArrays !== undefined
+                ? data.supportArrays
+                : initialFormat.defaultSupportArrays || false,
           }}
           validationSchema={Validation.CONTENT_DELIVERY_FORM}
           validateOnBlur={false}
           enableReinitialize={false}
           onSubmit={(values, actions) => {
+            const format = getFormatById(values.format);
             if (data) {
               updateCd.mutate(
                 {
@@ -185,16 +196,20 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                   content: {
                     'application/json': {
                       name: values.name,
-                      format: values.format,
+                      format: format.format,
                       filterState: values.states,
                       languages: values.languages,
-                      structureDelimiter: values.nested ? '.' : '',
+                      structureDelimiter: format.canBeStructured
+                        ? format.defaultStructureDelimiter
+                        : '',
                       filterNamespace: undefinedIfAllNamespaces(
                         values.namespaces,
                         allNamespaces
                       ),
                       autoPublish: values.autoPublish,
                       contentStorageId: values.contentStorageId,
+                      supportArrays: values.supportArrays || false,
+                      messageFormat: format.messageFormat,
                     },
                   },
                 },
@@ -217,16 +232,20 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                   content: {
                     'application/json': {
                       name: values.name,
-                      format: values.format,
+                      format: format.format,
                       filterState: values.states,
                       languages: values.languages,
-                      structureDelimiter: values.nested ? '.' : '',
+                      structureDelimiter: format.canBeStructured
+                        ? format.defaultStructureDelimiter
+                        : '',
                       filterNamespace: undefinedIfAllNamespaces(
                         values.namespaces,
                         allNamespaces
                       ),
                       autoPublish: values.autoPublish,
                       contentStorageId: values.contentStorageId,
+                      supportArrays: values.supportArrays || false,
+                      messageFormat: format.messageFormat,
                     },
                   },
                 },
@@ -245,81 +264,86 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
             }
           }}
         >
-          {({ isSubmitting, handleSubmit, isValid, values }) => (
-            <>
-              <DialogTitle>
-                {data
-                  ? t('content_delivery_update_title')
-                  : t('content_delivery_create_title')}
-              </DialogTitle>
-              <StyledDialogContent>
-                <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
-                  <TextField
-                    name="name"
-                    label={t('content_delivery_form_name_label')}
-                    variant="standard"
-                    data-cy="content-delivery-form-name"
-                  />
-                </Box>
-                <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
-                  <StateSelector className="states" />
-                </Box>
-                <LanguageSelector
-                  className="langs"
-                  languages={allowedLanguages}
-                />
-                <FormatSelector className="format" />
-                <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
-                  <NsSelector className="ns" namespaces={allNamespaces} />
-                </Box>
-                {Boolean(
-                  storagesLoadable.data?._embedded?.contentStorages?.length
-                ) && (
+          {({ isSubmitting, handleSubmit, isValid, values }) => {
+            return (
+              <>
+                <DialogTitle>
+                  {data
+                    ? t('content_delivery_update_title')
+                    : t('content_delivery_create_title')}
+                </DialogTitle>
+                <StyledDialogContent>
                   <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
-                    <CdStorageSelector
-                      name="contentStorageId"
-                      label={t('content_delivery_form_storage')}
-                      items={
-                        storagesLoadable.data?._embedded?.contentStorages || []
-                      }
+                    <TextField
+                      name="name"
+                      label={t('content_delivery_form_name_label')}
+                      variant="standard"
+                      data-cy="content-delivery-form-name"
                     />
                   </Box>
-                )}
-
-                <StyledOptions>
-                  {values.format === 'JSON' && <NestedSelector />}
-                  <CdAutoPublish />
-                </StyledOptions>
-              </StyledDialogContent>
-              <DialogActions sx={{ justifyContent: 'space-between' }}>
-                <div>
-                  {data && (
-                    <Button
-                      onClick={handleDelete}
-                      variant="outlined"
-                      data-cy="content-delivery-delete-button"
-                    >
-                      {t('content_delivery_form_delete')}
-                    </Button>
+                  <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
+                    <StateSelector className="states" />
+                  </Box>
+                  <LanguageSelector
+                    className="langs"
+                    languages={allowedLanguages}
+                  />
+                  <FormatSelector className="format" />
+                  <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
+                    <NsSelector className="ns" namespaces={allNamespaces} />
+                  </Box>
+                  {Boolean(
+                    storagesLoadable.data?._embedded?.contentStorages?.length
+                  ) && (
+                    <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
+                      <CdStorageSelector
+                        name="contentStorageId"
+                        label={t('content_delivery_form_storage')}
+                        items={
+                          storagesLoadable.data?._embedded?.contentStorages ||
+                          []
+                        }
+                      />
+                    </Box>
                   )}
-                </div>
-                <Box display="flex" gap={1}>
-                  <Button onClick={onClose}>
-                    {t('content_delivery_form_cancel')}
-                  </Button>
-                  <LoadingButton
-                    data-cy="content-delivery-form-save"
-                    loading={isSubmitting}
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleSubmit()}
-                  >
-                    {t('content_delivery_form_save')}
-                  </LoadingButton>
-                </Box>
-              </DialogActions>
-            </>
-          )}
+
+                  <StyledOptions>
+                    {getFormatById(values.format).showSupportArrays && (
+                      <SupportArraysSelector />
+                    )}
+                    <CdAutoPublish />
+                  </StyledOptions>
+                </StyledDialogContent>
+                <DialogActions sx={{ justifyContent: 'space-between' }}>
+                  <div>
+                    {data && (
+                      <Button
+                        onClick={handleDelete}
+                        variant="outlined"
+                        data-cy="content-delivery-delete-button"
+                      >
+                        {t('content_delivery_form_delete')}
+                      </Button>
+                    )}
+                  </div>
+                  <Box display="flex" gap={1}>
+                    <Button onClick={onClose}>
+                      {t('content_delivery_form_cancel')}
+                    </Button>
+                    <LoadingButton
+                      data-cy="content-delivery-form-save"
+                      loading={isSubmitting}
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleSubmit()}
+                    >
+                      {t('content_delivery_form_save')}
+                    </LoadingButton>
+                  </Box>
+                </DialogActions>
+              </>
+            );
+          }}
         </Formik>
       )}
     </Dialog>

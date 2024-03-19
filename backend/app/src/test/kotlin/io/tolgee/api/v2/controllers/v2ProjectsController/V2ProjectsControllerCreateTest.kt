@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.LanguageRequest
-import io.tolgee.dtos.request.project.CreateProjectDTO
+import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -32,14 +32,14 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
       "\uD83C\uDDEC\uD83C\uDDE7",
     )
 
-  lateinit var createForLanguagesDto: CreateProjectDTO
+  lateinit var createForLanguagesDto: CreateProjectRequest
 
   @BeforeEach
   fun setup() {
     val base = dbPopulator.createBase("SomeProject", "user")
     userAccount = base.userAccount
     createForLanguagesDto =
-      CreateProjectDTO(
+      CreateProjectRequest(
         name = "What a project",
         organizationId = base.organization.id,
         languages =
@@ -74,8 +74,10 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
     val userAccount = dbPopulator.createUserIfNotExists("testuser")
     val organization = dbPopulator.createOrganization("Test Organization", userAccount)
     loginAsUser("testuser")
-    val request = CreateProjectDTO("aaa", listOf(languageDTO), organizationId = organization.id)
+    val request =
+      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
+      node("icuPlaceholders").isBoolean.isTrue
       node("id").asNumber().satisfies {
         projectService.get(it.toLong()).let {
           assertThat(it.organizationOwner.id).isEqualTo(organization.id)
@@ -87,7 +89,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   @Test
   fun testCreateValidationEmptyLanguages() {
     val request =
-      CreateProjectDTO(
+      CreateProjectRequest(
         "A name",
         listOf(),
       )
@@ -97,7 +99,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   @Test
   fun `validates languages`() {
     val request =
-      CreateProjectDTO(
+      CreateProjectRequest(
         "A name",
         listOf(
           LanguageRequest(
@@ -116,7 +118,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
 
   private fun testCreateCorrectRequest() {
     val organization = dbPopulator.createOrganizationIfNotExist("nice", userAccount = userAccount!!)
-    val request = CreateProjectDTO("aaa", listOf(languageDTO), organizationId = organization.id)
+    val request = CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id)
     mvc.perform(
       AuthorizedRequestFactory.loggedPost("/v2/projects")
         .contentType(MediaType.APPLICATION_JSON).content(
@@ -138,14 +140,14 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   private fun testCreateValidationSizeShort() {
-    val request = CreateProjectDTO("aa", listOf(languageDTO))
+    val request = CreateProjectRequest("aa", listOf(languageDTO))
     val mvcResult = performAuthPost("/v2/projects", request).andIsBadRequest.andReturn()
     assertThat(mvcResult).error().isStandardValidation
   }
 
   private fun testCreateValidationSizeLong() {
     val request =
-      CreateProjectDTO(
+      CreateProjectRequest(
         "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
         listOf(languageDTO),
       )

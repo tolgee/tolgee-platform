@@ -1,7 +1,7 @@
 package io.tolgee.util
 
 import com.ibm.icu.text.BreakIterator
-import com.ibm.icu.util.ULocale
+import io.tolgee.formats.getULocaleFromTag
 
 object WordCounter {
   private val NON_WORD = """[\p{P} \t\n\r~!@#$%^&*()_+{}\[\]:;,.<>/?-]""".toRegex()
@@ -11,7 +11,7 @@ object WordCounter {
     text: String,
     languageTag: String,
   ): Int {
-    val uLocale = getLocaleFromTag(languageTag)
+    val uLocale = getULocaleFromTag(languageTag)
     val iterator: BreakIterator = BreakIterator.getWordInstance(uLocale)
     iterator.setText(text)
 
@@ -27,20 +27,5 @@ object WordCounter {
       end = iterator.next()
     }
     return words
-  }
-
-  fun getLocaleFromTag(tag: String): ULocale {
-    var result = ULocale.forLanguageTag(tag)
-    if (result.language.isNotBlank()) {
-      return result
-    }
-
-    val languagePart = tag.replace(LANGUAGE_PART, "$1")
-    result = ULocale.forLanguageTag(languagePart)
-    if (result.language.isNotBlank()) {
-      return result
-    }
-
-    return ULocale.ENGLISH
   }
 }
