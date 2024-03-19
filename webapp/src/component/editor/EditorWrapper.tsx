@@ -3,7 +3,6 @@ import { styled } from '@mui/material';
 const StyledEditorWrapper = styled('div')`
   border: 1px solid
     ${({ theme }) => (theme.palette.mode === 'dark' ? '#535e6c' : '#bfbfbf')};
-  overflow: hidden;
   border-radius: 4px;
   cursor: text;
   background: ${({ theme }) => theme.palette.background.default};

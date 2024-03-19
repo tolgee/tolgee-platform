@@ -2,6 +2,7 @@ import API from '@openreplay/tracker';
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
 import {
+  Tooltip,
   Activity,
   BillingProgress,
   Cell,
@@ -29,6 +30,7 @@ declare module '@mui/material/styles/createPalette' {
   interface Palette {
     primaryText: string;
     divider1: string;
+    tooltip: Tooltip;
     tile: Tile;
     cell: Cell;
     default: PaletteColor;
@@ -52,6 +54,7 @@ declare module '@mui/material/styles/createPalette' {
   interface PaletteOptions {
     primaryText: string;
     divider1: string;
+    tooltip: Tooltip;
     tile: Tile;
     cell: Cell;
     default: PaletteColor;

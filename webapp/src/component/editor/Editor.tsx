@@ -42,6 +42,17 @@ const StyledEditor = styled('div')`
   & .cm-cursor {
     border-color: ${({ theme }) => theme.palette.text.primary};
   }
+
+  & .cm-tooltip {
+    font-size: 12px;
+    box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.25);
+    border-radius: 11px;
+    border: none;
+    color: ${({ theme }) => theme.palette.tooltip.text};
+    background-color: ${({ theme }) => theme.palette.tooltip.background};
+    padding: 4px 8px;
+    margin-top: 4px;
+  }
 `;
 
 export type EditorProps = {
@@ -160,7 +171,13 @@ export const Editor: React.FC<EditorProps> = ({
   useEffect(() => {
     const placholderPlugins =
       mode === 'placeholders'
-        ? [PlaceholderPlugin({ examplePluralNum, nested: Boolean(nested) })]
+        ? [
+            PlaceholderPlugin({
+              examplePluralNum,
+              nested: Boolean(nested),
+              tooltips: true,
+            }),
+          ]
         : [];
     const syntaxPlugins =
       mode === 'plain' ? [] : [tolgeeSyntax(Boolean(nested))];
