@@ -78,6 +78,10 @@ fun getPluralFormsReplacingReplaceParam(
         return noOpConvertor.convert(node, isInPlural)
       }
 
+      override fun convertText(string: String): String {
+        return noOpConvertor.convertText(string)
+      }
+
       override fun convertReplaceNumber(
         node: MessagePatternUtil.MessageContentsNode,
         argName: String?,
