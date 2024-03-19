@@ -3,6 +3,7 @@ package io.tolgee.formats.apple.out
 import com.ibm.icu.text.MessagePattern
 import io.tolgee.formats.FromIcuParamConvertor
 import io.tolgee.formats.MessagePatternUtil
+import io.tolgee.formats.escapePercentSign
 
 class AppleFromIcuParamConvertor : FromIcuParamConvertor {
   private var argIndex = -1
@@ -28,6 +29,10 @@ class AppleFromIcuParamConvertor : FromIcuParamConvertor {
     }
 
     return node.toString()
+  }
+
+  override fun convertText(string: String): String {
+    return escapePercentSign(string)
   }
 
   override fun convertReplaceNumber(

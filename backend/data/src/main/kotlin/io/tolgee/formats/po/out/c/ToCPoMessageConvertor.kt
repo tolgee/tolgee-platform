@@ -14,7 +14,7 @@ class ToCPoMessageConvertor(
     BaseIcuMessageToPoConvertor(
       message = message,
       languageTag = languageTag,
-      argumentConverter = CFromIcuParamConvertor(),
+      argumentConverter = IcuToCParamConvertor(),
       forceIsPlural = forceIsPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     )

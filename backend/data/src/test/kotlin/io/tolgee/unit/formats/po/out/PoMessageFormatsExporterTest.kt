@@ -75,7 +75,7 @@ class PoMessageFormatsExporterTest {
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
-    |msgstr "%d %s %s"
+    |msgstr "%3${'$'}d %2${'$'}s %1${'$'}s"
     |
       """.trimMargin(),
     )

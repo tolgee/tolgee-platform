@@ -14,7 +14,7 @@ class ToPhpPoMessageConvertor(
     BaseIcuMessageToPoConvertor(
       message = message,
       languageTag = languageTag,
-      argumentConverter = PhpFromIcuParamConvertor(),
+      argumentConverter = IcuToPhpParamConvertor(),
       forceIsPlural = forceIsPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     )

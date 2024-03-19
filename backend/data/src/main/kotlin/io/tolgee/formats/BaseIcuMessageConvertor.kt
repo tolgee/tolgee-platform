@@ -153,10 +153,12 @@ class BaseIcuMessageConvertor(
     form: String?,
   ) {
     if (keepEscaping) {
-      addToResult(node.patternString, form)
+      val convertedPatternString = argumentConvertor.convertText(node.patternString)
+      addToResult(convertedPatternString, form)
       return
     }
-    addToResult(node.text, form)
+    val convertedText = argumentConvertor.convertText(node.text)
+    addToResult(convertedText, form)
   }
 
   private fun handleArgNode(
