@@ -1173,7 +1173,6 @@
   "translation_single_translations_title" : "Fordítások",
   "translations_key_created" : "Kulcs létrehozva",
   "translations_key_delete_confirmation_text" : "{count, plural, one {Biztosan törölni szeretné a kijelölt kulcsot és annak fordításait?} other {Biztosan törölni szeretné az összes # kijelölt kulcsot és azok fordításait?}}",
-  "translations_key_edit_custom_properties_description" : "Egyedi attribútumok, amelyek bizonyos formátumokhoz kapcsolódnak",
   "translations_key_edit_label" : "Kulcs",
   "translations_key_edit_label_description" : "Leírás",
   "translations_key_edit_label_description_hint" : "Leírja a fordítási kontextust. Ha a Tolgee fordítót használja, a leírást az fordítás javítására használják",
