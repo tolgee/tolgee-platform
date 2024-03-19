@@ -12,14 +12,14 @@ import { Add, Clear } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 
-import { useStateObject } from 'tg.fixtures/useStateObject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
 
 import { useImportDataHelper } from '../hooks/useImportDataHelper';
-import { ImportLanguageCreateDialog } from './ImportLanguageCreateDialog';
 import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
 import { components } from 'tg.service/apiSchema.generated';
+import { LanguagesAddDialog } from 'tg.component/languages/LanguagesAddDialog';
+import { useState } from 'react';
 
 const StyledItem = styled(MenuItem)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
@@ -47,16 +47,17 @@ export const LanguageSelector: React.FC<{
   const languages = useProjectLanguages();
   const importData = useImportDataHelper();
   const languageHelper = useImportLanguageHelper(props.row);
+  const existingLanguages = useProjectLanguages();
 
-  const state = useStateObject({ addNewLanguageDialogOpen: false });
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const onChange = (changeEvent: any) => {
     const value = changeEvent.target.value;
     if (value == NEW_LANGUAGE_VALUE) {
-      state.addNewLanguageDialogOpen = true;
-      return;
+      setDialogOpen(true);
+    } else {
+      languageHelper.onSelectExisting(value);
     }
-    languageHelper.onSelectExisting(value);
   };
 
   const items = languages.map((l) => (
@@ -113,18 +114,18 @@ export const LanguageSelector: React.FC<{
           </FormHelperText>
         )}
       </FormControl>
-      <ImportLanguageCreateDialog
-        open={state.addNewLanguageDialogOpen}
-        onCreated={(id) => {
-          // we need to invalidate languages provider
-          invalidateUrlPrefix(
-            queryClient,
-            '/v2/projects/{projectId}/languages'
-          );
-          languageHelper.onSelectExisting(id);
-        }}
-        onClose={() => (state.addNewLanguageDialogOpen = false)}
-      />
+      {dialogOpen && (
+        <LanguagesAddDialog
+          onClose={() => setDialogOpen(false)}
+          onChangesMade={() => {
+            invalidateUrlPrefix(
+              queryClient,
+              '/v2/projects/{projectId}/languages'
+            );
+          }}
+          existingLanguages={existingLanguages.map((l) => l.tag)}
+        />
+      )}
     </>
   );
 };

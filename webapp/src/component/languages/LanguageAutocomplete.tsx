@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState } from 'react';
+import React, { FC, ReactNode, useMemo, useState } from 'react';
 import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
 import { Add, Clear } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
@@ -41,8 +41,14 @@ export const LanguageAutocomplete: FC<{
   onSelect: (value: AutocompleteOption) => void;
   onClear?: () => void;
   autoFocus?: boolean;
+  existingLanguages: string[];
 }> = (props) => {
   const [options, setOptions] = useState([] as AutocompleteOption[]);
+  const [search, setSearch] = useState('');
+  const existingLanguages = useMemo(
+    () => new Set(props.existingLanguages),
+    [props.existingLanguages]
+  );
 
   return (
     <Autocomplete
@@ -51,19 +57,32 @@ export const LanguageAutocomplete: FC<{
       onOpen={() => setOptions(getOptions(''))}
       filterOptions={(options) => options}
       getOptionLabel={(option) => option.englishName}
+      inputValue={search}
+      onInputChange={(_, value) => setSearch(value)}
+      value={null}
       onChange={(_, value) => {
         props.onSelect(value as AutocompleteOption);
+        setSearch('');
       }}
-      renderOption={(props, option) => (
-        <MenuItem {...props}>
+      renderOption={(props, option) => {
+        const itemContent = (
           <span data-cy="languages-create-autocomplete-suggested-option">
             {option.customRenderOption ||
               `${option.englishName} - ${option.originalName} - ${
                 option.languageId
               } ${option.flags?.[0] || ''}`}
           </span>
-        </MenuItem>
-      )}
+        );
+        return existingLanguages.has(option.languageId) ? (
+          <MenuItem key={option.languageId + ':disabled'} disabled={true}>
+            {itemContent}
+          </MenuItem>
+        ) : (
+          <MenuItem key={option.languageId} {...props}>
+            {itemContent}
+          </MenuItem>
+        );
+      }}
       renderInput={(params) => (
         <TextField
           data-cy="languages-create-autocomplete-field"
@@ -73,8 +92,8 @@ export const LanguageAutocomplete: FC<{
           }}
           label={<T keyName="language_create_autocomplete_label" />}
           margin="normal"
-          variant="standard"
-          required={true}
+          variant="outlined"
+          size="small"
           InputProps={{
             autoFocus: props.autoFocus,
             ...params.InputProps,

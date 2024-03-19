@@ -36,12 +36,19 @@ export const LanguageModifyFields: FC<{
         name="originalName"
         required={true}
       />
-      <Box display="flex">
-        <FlagSelector
-          preferredEmojis={props.preferredEmojis || []}
-          name="flagEmoji"
-        />
-        <Box flexGrow={1} ml={2}>
+      <Box
+        display="grid"
+        gridAutoFlow="column"
+        gridTemplateColumns="100px auto"
+        alignItems="start"
+      >
+        <Box mt={2}>
+          <FlagSelector
+            preferredEmojis={props.preferredEmojis || []}
+            name="flagEmoji"
+          />
+        </Box>
+        <Box ml={2}>
           <TextField
             variant="standard"
             fullWidth
@@ -50,14 +57,14 @@ export const LanguageModifyFields: FC<{
             required={true}
             onValueChange={() => validateTag()}
           />
-          {!tagValid && (
-            <Box mb={4}>
-              <Alert severity="warning">
-                <T keyName="invalid_language_tag" />
-              </Alert>
-            </Box>
-          )}
         </Box>
+      </Box>
+      <Box mb={4} minHeight={80}>
+        {!tagValid && (
+          <Alert severity="warning">
+            <T keyName="invalid_language_tag" />
+          </Alert>
+        )}
       </Box>
     </>
   );

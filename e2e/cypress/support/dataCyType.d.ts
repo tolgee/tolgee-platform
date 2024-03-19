@@ -136,7 +136,6 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
-        "create-project-language-add-button" |
         "dashboard-projects-list-item" |
         "delete-user-button" |
         "developer-menu-content-delivery" |
@@ -262,7 +261,6 @@ declare namespace DataCy {
         "languages-create-autocomplete-suggested-option" |
         "languages-create-cancel-prepared-button" |
         "languages-create-customize-button" |
-        "languages-create-submit-button" |
         "languages-flag-selector-open-button" |
         "languages-menu-ai-prompt-customization" |
         "languages-menu-machine-translation" |
