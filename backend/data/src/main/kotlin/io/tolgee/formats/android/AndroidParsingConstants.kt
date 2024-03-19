@@ -7,7 +7,7 @@ object AndroidParsingConstants {
       "big", "small", "font",
       "tt", "s", "strike", "del", "u",
       "sup", "sub", "ul", "li",
-      "br", "div", "p",
+      "br", "div", "p", "a",
     )
 
   val spaces = setOf(' ', '\n', '\t', '\u0020', '\u2008', '\u2003')
