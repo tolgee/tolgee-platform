@@ -522,7 +522,7 @@
   "help_menu_chat_with_us_description" : "Ia legătura direct",
   "help_menu_documentation" : "Documentație",
   "help_menu_email" : "Contactați-ne prin email",
-  "help_menu_email_dialog_message" : "Scrieți-ne la adresa <email>info@tolgee.io</email>. În majoritatea cazurilor vom răspunde în 24 de ore.",
+  "help_menu_email_dialog_message" : "Scrieți-ne la <email>info@tolgee.io</email>. În majoritatea cazurilor, vom răspunde în decurs de 24 de ore.",
   "help_menu_email_dialog_title" : "Contactați-ne prin email",
   "help_menu_github_discussions" : "Discuții GitHub",
   "help_menu_github_discussions_description" : "Întrebări și răspunsuri, discuții despre funcționalități",

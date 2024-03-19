@@ -1,3 +1,10 @@
+## [3.50.2](https://github.com/tolgee/tolgee-platform/compare/v3.50.1...v3.50.2) (2024-03-19)
+
+
+### Bug Fixes
+
+* Error on project description longer than 255 chars ([#2195](https://github.com/tolgee/tolgee-platform/issues/2195)) ([f06ba24](https://github.com/tolgee/tolgee-platform/commit/f06ba24e679a95e5c0f46fa00cee184ab20fb231))
+
 ## [3.50.1](https://github.com/tolgee/tolgee-platform/compare/v3.50.0...v3.50.1) (2024-03-15)
 
 

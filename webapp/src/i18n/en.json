@@ -522,7 +522,7 @@
   "help_menu_chat_with_us_description" : "Get in touch directly",
   "help_menu_documentation" : "Documentation",
   "help_menu_email" : "Contact us via email",
-  "help_menu_email_dialog_message" : "Write us on <email>info@tolgee.io</email>. In most cases we'll reply in 24 hours.",
+  "help_menu_email_dialog_message" : "Write us at <email>info@tolgee.io</email>. In most cases, we'll reply within 24 hours.",
   "help_menu_email_dialog_title" : "Contact us via Email",
   "help_menu_github_discussions" : "GitHub discussions",
   "help_menu_github_discussions_description" : "Q&A, discussions about features",
