@@ -3152,4 +3152,7 @@
             <column name="plural_arg_name" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1710826031205-1">
+        <modifyDataType columnName="description" newDataType="varchar(2000)" tableName="project"/>
+    </changeSet>
 </databaseChangeLog>
