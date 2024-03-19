@@ -1,13 +1,12 @@
+import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.AndroidStringsXmlModel
 import io.tolgee.formats.android.PluralUnit
 import io.tolgee.formats.android.StringArrayItem
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
-import java.io.StringWriter
+import io.tolgee.formats.android.`in`.AndroidXmlValueBlockParser
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLEventWriter
-import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.events.StartElement
 
 class AndroidStringsXmlParser(
@@ -18,9 +17,7 @@ class AndroidStringsXmlParser(
   private var currentArrayEntry: StringArrayUnit? = null
   private var currentPluralEntry: PluralUnit? = null
   private var currentPluralQuantity: String? = null
-  private var sw = StringWriter()
-  private var xw: XMLEventWriter? = null
-  private val of: XMLOutputFactory = XMLOutputFactory.newDefaultFactory()
+  private var blockParser: AndroidXmlValueBlockParser? = null
   private var isArrayItemOpen = false
 
   fun parse(): AndroidStringsXmlModel {
@@ -30,8 +27,7 @@ class AndroidStringsXmlParser(
       when {
         event.isStartElement -> {
           if (!isAnyToContentSaveOpen) {
-            sw = StringWriter()
-            xw = of.createXMLEventWriter(sw)
+            blockParser = AndroidXmlValueBlockParser()
           }
           val startElement = event as StartElement
           when (startElement.name.localPart.lowercase()) {
@@ -53,7 +49,9 @@ class AndroidStringsXmlParser(
 
             "item" -> {
               if (currentPluralEntry != null) {
-                currentPluralQuantity = startElement.getAttributeByName(QName(null, "quantity"))?.value
+                currentPluralQuantity =
+                  startElement
+                    .getAttributeByName(QName(null, "quantity"))?.value
               } else if (currentArrayEntry != null) {
                 isArrayItemOpen = true
               }
@@ -102,22 +100,21 @@ class AndroidStringsXmlParser(
 
       if (isAnyToContentSaveOpen) {
         if (wasAnyToContentSaveOpenBefore) {
-          xw?.add(event)
+          blockParser?.onXmlEvent(event)
         }
-      } else {
-        xw?.close()
       }
     }
 
     return result
   }
 
-  private fun getKeyName(startElement: StartElement) = startElement.getAttributeByName(QName(null, "name"))?.value
+  private fun getKeyName(startElement: StartElement) =
+    startElement.getAttributeByName(
+      QName(null, "name"),
+    )?.value
 
-  private fun getCurrentTextOrXml(): String {
-    return sw.toString()
-      // android doesn't seem to support xml:space="preserve"
-      .trim()
+  private fun getCurrentTextOrXml(): AndroidStringValue {
+    return blockParser?.result ?: AndroidStringValue("", false)
   }
 
   private val isAnyToContentSaveOpen: Boolean

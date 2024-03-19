@@ -17,6 +17,7 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
     matchResult: MatchResult,
     isInPlural: Boolean,
   ): String {
+    index++
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 
     if (usesUnsupportedFeature(parsed)) {
@@ -27,8 +28,8 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
       return "%"
     }
 
-    index++
-    val name = ((index - 1).toString())
+    val zeroIndexedArgNum = parsed.argNum?.toIntOrNull()?.minus(1)
+    val name = zeroIndexedArgNum?.toString() ?: ((index - 1).toString())
 
     when (parsed.specifier) {
       "s" -> return "{$name}"
@@ -45,6 +46,7 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
       """
       (?x)(
       %
+      (?:(?<argnum>\d+)${"\\$"})?
       (?<flags>[-+\s0\#]+)?
       (?<width>\d+)?
       (?:\.(?<precision>\d+))?

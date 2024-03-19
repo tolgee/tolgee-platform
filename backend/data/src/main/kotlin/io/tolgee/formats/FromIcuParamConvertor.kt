@@ -7,6 +7,11 @@ interface FromIcuParamConvertor {
   ): String
 
   /**
+   * This method is called on the text parts (not argument parts) of the message
+   */
+  fun convertText(string: String): String
+
+  /**
    * How to # in ICU plural form
    */
   fun convertReplaceNumber(

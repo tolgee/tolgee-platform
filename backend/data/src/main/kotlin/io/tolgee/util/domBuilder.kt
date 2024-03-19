@@ -25,14 +25,20 @@ fun buildDom(builder: Document.() -> Unit): DomBuilder {
 }
 
 class DomBuilder(val document: Document) {
+  companion object {
+    private val xmlTransformer by lazy {
+      val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
+      transformer
+    }
+  }
+
   fun write(): String {
-    val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes")
-    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
     val source = DOMSource(document)
     val writer = StringWriter()
     val result = StreamResult(writer)
-    transformer.transform(source, result)
+    xmlTransformer.transform(source, result)
     return writer.buffer.toString()
   }
 }

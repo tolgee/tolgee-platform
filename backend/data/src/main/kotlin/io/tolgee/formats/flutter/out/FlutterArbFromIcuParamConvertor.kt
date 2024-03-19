@@ -11,6 +11,10 @@ class FlutterArbFromIcuParamConvertor : FromIcuParamConvertor {
     return "{${node.name}}"
   }
 
+  override fun convertText(string: String): String {
+    return string
+  }
+
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,

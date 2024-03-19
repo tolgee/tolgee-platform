@@ -8,6 +8,10 @@ class NoOpFromIcuParamConvertor : FromIcuParamConvertor {
     return node.patternString
   }
 
+  override fun convertText(string: String): String {
+    return string
+  }
+
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,

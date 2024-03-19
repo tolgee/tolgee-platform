@@ -3,6 +3,7 @@ package io.tolgee.formats.po.out.python
 import com.ibm.icu.text.MessagePattern
 import io.tolgee.formats.FromIcuParamConvertor
 import io.tolgee.formats.MessagePatternUtil
+import io.tolgee.formats.escapePercentSign
 
 class PythonFromIcuParamConvertor : FromIcuParamConvertor {
   private var argIndex = -1
@@ -22,6 +23,10 @@ class PythonFromIcuParamConvertor : FromIcuParamConvertor {
     }
 
     return "%${argNumString}s"
+  }
+
+  override fun convertText(string: String): String {
+    return escapePercentSign(string)
   }
 
   override fun convertReplaceNumber(

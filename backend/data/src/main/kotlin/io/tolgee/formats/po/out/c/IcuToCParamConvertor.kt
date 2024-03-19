@@ -1,10 +1,11 @@
-package io.tolgee.formats.po.out.php
+package io.tolgee.formats.po.out.c
 
 import com.ibm.icu.text.MessagePattern
 import io.tolgee.formats.FromIcuParamConvertor
 import io.tolgee.formats.MessagePatternUtil
+import io.tolgee.formats.escapePercentSign
 
-class PhpFromIcuParamConvertor : FromIcuParamConvertor {
+class IcuToCParamConvertor : FromIcuParamConvertor {
   private var argIndex = -1
   private var wasNumberedArg = false
 
@@ -26,6 +27,10 @@ class PhpFromIcuParamConvertor : FromIcuParamConvertor {
     return "%${argNumString}s"
   }
 
+  override fun convertText(string: String): String {
+    return escapePercentSign(string)
+  }
+
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
@@ -37,7 +42,7 @@ class PhpFromIcuParamConvertor : FromIcuParamConvertor {
     node: MessagePatternUtil.ArgNode,
     argNum: Int?,
   ): String {
-    if (node.simpleStyle?.trim() == "scientific") {
+    if (node.simpleStyle.trim() == "scientific") {
       return "%${getArgNumString(argNum)}e"
     }
     val precision = getPrecision(node)
