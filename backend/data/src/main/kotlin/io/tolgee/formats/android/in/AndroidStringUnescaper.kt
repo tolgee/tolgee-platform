@@ -2,7 +2,7 @@ package io.tolgee.formats.android.`in`
 
 import io.tolgee.formats.android.AndroidParsingConstants
 
-class AndroidStringUnescaper(private val string: String) {
+class AndroidStringUnescaper(private val string: String, private val isFirst: Boolean, private val isLast: Boolean) {
   companion object {
     private val toUnescape = mapOf('n' to '\n', '\'' to '\'', '"' to '"', 't' to '\t')
     private val spacesToTrim = AndroidParsingConstants.spaces
@@ -32,14 +32,14 @@ class AndroidStringUnescaper(private val string: String) {
             State.NORMAL ->
               quotingState =
                 when (quotingState) {
-                  QuotingState.NORMAL, QuotingState.IGNORING_SPACE -> QuotingState.QUOTED
-                  QuotingState.QUOTED -> QuotingState.NORMAL
+                  QuotingState.USING_SPACE, QuotingState.IGNORING_SPACE -> QuotingState.QUOTED
+                  QuotingState.QUOTED -> QuotingState.USING_SPACE
                 }
           }
 
         in spacesToTrim ->
           when (quotingState) {
-            QuotingState.NORMAL -> {
+            QuotingState.USING_SPACE -> {
               result.append(char)
               quotingState = QuotingState.IGNORING_SPACE
             }
@@ -68,12 +68,16 @@ class AndroidStringUnescaper(private val string: String) {
       }
     }
 
+    if (quotingState == QuotingState.IGNORING_SPACE && result.lastOrNull() in spacesToTrim && isLast) {
+      result.deleteCharAt(result.length - 1)
+    }
+
     result.toString()
   }
 
   private fun resetIgnoreSpace() {
     if (quotingState == QuotingState.IGNORING_SPACE) {
-      quotingState = QuotingState.NORMAL
+      quotingState = QuotingState.USING_SPACE
     }
   }
 
@@ -83,13 +87,13 @@ class AndroidStringUnescaper(private val string: String) {
   }
 
   enum class QuotingState {
-    NORMAL,
+    USING_SPACE,
     QUOTED,
     IGNORING_SPACE,
   }
 
   private var state = State.NORMAL
-  private var quotingState = QuotingState.NORMAL
+  private var quotingState = if (isFirst) QuotingState.IGNORING_SPACE else QuotingState.USING_SPACE
 
   private val result = StringBuilder()
 }

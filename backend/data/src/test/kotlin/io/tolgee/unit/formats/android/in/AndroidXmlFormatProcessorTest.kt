@@ -68,9 +68,9 @@ class AndroidXmlFormatProcessorTest {
       .assertSingle {
         hasText(
           "<b>Hello!\n" +
-            "            <xliff:g id=\"number\">{0, number}</xliff:g>\n" +
-            "        </b>\n" +
-            "        <xliff:g id=\"number\">Dont'translate this</xliff:g>",
+            "{0, number}" +
+            "</b>\n" +
+            "Dont'translate this",
         )
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)

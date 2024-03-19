@@ -30,6 +30,17 @@ class AndroidStringsXmlParserTest {
     "<![CDATA[<b>text</b>]]>".assertParsedTo("<b>text</b>", true)
   }
 
+  @Test
+  fun `it parses self-closing tag`() {
+    "text <br/>".assertParsedTo("text <br/>", false)
+  }
+
+  @Test
+  fun `correctly handles spaces between tags`() {
+    "   <b> text </b><br/>  <b> a a a </b> <b></b> "
+      .assertParsedTo("<b>text</b><br/> <b>a a a</b> <b></b>", false)
+  }
+
   private fun getReader(data: String): XMLEventReader {
     val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
     return inputFactory.createXMLEventReader(data.byteInputStream())

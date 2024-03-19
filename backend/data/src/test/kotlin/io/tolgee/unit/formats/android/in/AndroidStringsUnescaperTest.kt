@@ -12,7 +12,7 @@ class AndroidStringsUnescaperTest {
 
   @Test
   fun `unquoted spaces are correctly trimmed`() {
-    " \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 ".assertUnescaped(" a ")
+    " \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 ".assertUnescaped("a a")
   }
 
   @Test
@@ -21,11 +21,25 @@ class AndroidStringsUnescaperTest {
   }
 
   @Test
+  fun `doesnt keep leading space when not first`() {
+    "  a".assertUnescaped(" a", isFirst = false, isLast = true)
+  }
+
+  @Test
+  fun `doesnt keep trailing space when not last`() {
+    "a  ".assertUnescaped("a ", isFirst = true, isLast = false)
+  }
+
+  @Test
   fun `escaped chars are unescaped`() {
     "\\\" \\' \\n \\t \\\\".assertUnescaped("\" ' \n \t \\")
   }
 
-  private fun String.assertUnescaped(expected: String) {
-    AndroidStringUnescaper(this).unescaped.assert.isEqualTo(expected)
+  private fun String.assertUnescaped(
+    expected: String,
+    isFirst: Boolean = true,
+    isLast: Boolean = true,
+  ) {
+    AndroidStringUnescaper(this, isFirst = isFirst, isLast = isLast).unescaped.assert.isEqualTo(expected)
   }
 }

@@ -30,6 +30,7 @@ class AndroidXmlValueBlockParser {
         val element = ModelElement(event.name.localPart, idCounter++, currentModel)
         currentModel.children.add(element)
         currentModel = element
+        lastStartElementLocationCharacterOffset = event.location.characterOffset
       }
 
       is Attribute -> {
@@ -37,15 +38,9 @@ class AndroidXmlValueBlockParser {
       }
 
       is EndElement -> {
+        currentModel.selfClosing = lastStartElementLocationCharacterOffset == event.location.characterOffset
         currentModel = currentModel.parent ?: rootModel
       }
-    }
-  }
-
-  private fun transform() {
-    rootModel.forEachDeep { node ->
-      replaceWithTextIfUnsupported(node)
-      unescapeText(node)
     }
   }
 
@@ -58,9 +53,18 @@ class AndroidXmlValueBlockParser {
     AndroidStringValue(text, isWrappedCharacterData)
   }
 
+  private fun transform() {
+    rootModel.forEachDeep { node ->
+      replaceWithTextIfUnsupported(node)
+      unescapeText(node)
+    }
+  }
+
+  private var lastStartElementLocationCharacterOffset = -1
+
   private fun unescapeText(node: ModelNode) {
     if (node !is ModelCharacters) return
-    node.characters = AndroidStringUnescaper(node.characters).unescaped
+    node.characters = AndroidStringUnescaper(node.characters, node.isFirstChild, node.isLastChild).unescaped
   }
 
   private fun getRootSingleChild(): ModelNode? {
@@ -95,6 +99,7 @@ class AndroidXmlValueBlockParser {
     id: Int,
     parent: ModelElement?,
   ) : ModelNode(id, parent) {
+    var selfClosing: Boolean = false
     val attributes: LinkedHashMap<String, String> = LinkedHashMap()
     val children: MutableList<ModelNode> = mutableListOf()
 
@@ -108,12 +113,26 @@ class AndroidXmlValueBlockParser {
       attributes.forEach { (key, value) ->
         stringBuilder.append(" $key=\"${value.escapeXmlAttribute()}\"")
       }
-      stringBuilder.append(">")
+      appendOpenTagEnd()
       children.forEach {
         stringBuilder.append(it.toXmlString())
       }
-      stringBuilder.append("</$name>")
+      appendCloseTag()
       return stringBuilder.toString()
+    }
+
+    private fun appendCloseTag() {
+      if (!selfClosing) {
+        stringBuilder.append("</$name>")
+      }
+    }
+
+    private fun appendOpenTagEnd() {
+      if (selfClosing) {
+        stringBuilder.append("/>")
+        return
+      }
+      stringBuilder.append(">")
     }
 
     override fun getText(): String {
@@ -154,14 +173,18 @@ class AndroidXmlValueBlockParser {
       return id == other.id
     }
 
+    val isFirstChild: Boolean
+      get() = parent?.children?.firstOrNull() === this
+
+    val isLastChild: Boolean
+      get() = parent?.children?.lastOrNull() === this
+
     override fun hashCode(): Int {
       return id
     }
 
     abstract fun getText(): String
   }
-
-  data class Result(val text: String, val isWrappedCdata: Boolean)
 }
 
 private fun String.escapeXml(): String {
