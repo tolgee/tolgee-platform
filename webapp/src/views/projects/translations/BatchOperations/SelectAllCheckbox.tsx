@@ -32,9 +32,6 @@ export const SelectAllCheckbox = () => {
   return (
     <Tooltip
       title={
-        // runningOperation
-        //   ? ''
-        //   :
         allSelected
           ? t('translations_clear_selection')
           : t('translations_select_all')
