@@ -156,6 +156,7 @@ const getTheme = (mode: PaletteMode) => {
       tipsBanner: c.tipsBanner,
       tokens: c.tokens,
       placeholders: c.placeholders,
+      languageChips: c.languageChips,
     },
     mixins: {
       toolbar: {

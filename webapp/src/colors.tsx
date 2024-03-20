@@ -122,6 +122,11 @@ export type QuickStart = {
   finishCircle: string;
 };
 
+export type LanguageChips = {
+  background: string;
+  border: string;
+};
+
 const getTokensByMode = (mode: 'light' | 'dark') => {
   const result = {} as Record<keyof typeof ALL_TOKENS, string>;
   Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
@@ -217,6 +222,10 @@ export const colors = {
     tipsBanner: {
       background: '#FDECF280',
     },
+    languageChips: {
+      border: '#D1D6DC',
+      background: '#F6F6F8',
+    } satisfies LanguageChips,
     tokens: getTokensByMode('light'),
     placeholders: {
       variable: {
@@ -337,6 +346,10 @@ export const colors = {
     tipsBanner: {
       background: '#29242580',
     },
+    languageChips: {
+      border: '#4d5b6e',
+      background: '#243245',
+    } satisfies LanguageChips,
     tokens: getTokensByMode('dark'),
     placeholders: {
       variable: {

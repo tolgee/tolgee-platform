@@ -1,10 +1,10 @@
-import React, { FC, ReactNode, useMemo, useState } from 'react';
+import { FC, ReactNode, useMemo, useState } from 'react';
 import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
-import { Add, Clear } from '@mui/icons-material';
+import { Add, Clear, Search } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { suggest } from '@tginternal/language-util';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { MenuItem } from '@mui/material';
 
 export type AutocompleteOption = Omit<SuggestResult, 'languageId'> & {
@@ -49,6 +49,7 @@ export const LanguageAutocomplete: FC<{
     () => new Set(props.existingLanguages),
     [props.existingLanguages]
   );
+  const { t } = useTranslate();
 
   return (
     <Autocomplete
@@ -90,7 +91,7 @@ export const LanguageAutocomplete: FC<{
           onChange={(e) => {
             setTimeout(() => setOptions(getOptions(e.target.value)));
           }}
-          label={<T keyName="language_create_autocomplete_label" />}
+          placeholder={t('language_create_autocomplete_label')}
           margin="normal"
           variant="outlined"
           size="small"
@@ -98,6 +99,11 @@ export const LanguageAutocomplete: FC<{
             autoFocus: props.autoFocus,
             ...params.InputProps,
             style: { paddingRight: 0 },
+            startAdornment: (
+              <InputAdornment position="end">
+                <Search />
+              </InputAdornment>
+            ),
             endAdornment: props.onClear ? (
               <InputAdornment position="end">
                 <IconButton size="small" onClick={props.onClear}>

@@ -57,7 +57,7 @@ export const CreateLanguagesField: FC<Props> = ({
     <>
       <Box display="grid">
         {value.length > 0 && (
-          <Box>
+          <Box display="flex" gap={1} flexWrap="wrap">
             {value.map((item, i) => (
               <PreparedLanguage
                 {...item}

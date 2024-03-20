@@ -6,9 +6,10 @@ import { components } from 'tg.service/apiSchema.generated';
 import { FlagImage } from './FlagImage';
 
 const StyledContainer = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.emphasis['100']};
-  padding: ${({ theme }) => theme.spacing(0.5, 1)};
-  border-radius: ${({ theme }) => theme.shape.borderRadius};
+  border: 1px solid ${({ theme }) => theme.palette.languageChips.border};
+  background: ${({ theme }) => theme.palette.languageChips.background};
+  padding: ${({ theme }) => theme.spacing(0.5, 0.5, 0.5, 1.5)};
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
   display: inline-flex;
   align-items: center;
 `;
@@ -39,10 +40,10 @@ export const PreparedLanguage: React.FC<
     <>
       <StyledContainer data-cy="languages-prepared-language-box">
         {props.flagEmoji && <StyledFlagImage flagEmoji={props.flagEmoji} />}{' '}
-        <Box>
+        <Box display="flex" alignItems="center">
           {props.name} | {props.originalName} ({props.tag})
         </Box>
-        <Box>
+        <Box display="flex" alignItems="center">
           <StyledIconButton
             data-cy="languages-create-customize-button"
             size="small"
