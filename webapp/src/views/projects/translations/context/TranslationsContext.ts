@@ -196,9 +196,6 @@ export const [
     changeView(view: ViewMode) {
       return setView(view);
     },
-    async deleteTranslations() {
-      await selectionService.deleteSelected();
-    },
     setTranslationState(state: SetTranslationState) {
       return stateService.changeState(state);
     },
@@ -265,7 +262,6 @@ export const [
     isEditLoading: editService.isLoading,
     isFetchingMore: translationService.isFetchingNextPage,
     isLoadingAllIds: translationService.isLoadingAllIds,
-    isDeleting: selectionService.isDeleting,
     hasMoreToFetch: translationService.hasNextPage,
     search: translationService.search as string,
     urlSearch: translationService.urlSearch,

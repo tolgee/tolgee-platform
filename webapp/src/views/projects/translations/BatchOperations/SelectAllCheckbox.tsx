@@ -16,7 +16,6 @@ export const SelectAllCheckbox = () => {
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const selection = useTranslationsSelector((c) => c.selection);
   const isLoading = useTranslationsSelector((c) => c.isLoadingAllIds);
-  const isDeleting = useTranslationsSelector((c) => c.isDeleting);
   const allSelected = totalCount === selection.length;
   const somethingSelected = !allSelected && Boolean(selection.length);
 
@@ -45,7 +44,7 @@ export const SelectAllCheckbox = () => {
       <StyledToggleAllButton>
         <Checkbox
           data-cy="translations-select-all-button"
-          disabled={isLoading || isDeleting}
+          disabled={isLoading}
           onClick={handleToggleSelectAll}
           size="small"
           checked={Boolean(selection.length)}
