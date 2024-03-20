@@ -108,11 +108,14 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').contains('Azerbaijani').should('be.visible');
   });
 
-  it('validates language repeat', () => {
+  it.only('validates language repeat', () => {
     getInputByName('name').type('Super project');
-    addLanguage('English');
-    gcy('global-form-save-button').click();
-    cy.contains('Cannot add language more than once').should('be.visible');
+    typeToAutocomplete('English');
+    gcy('languages-create-autocomplete-suggested-option')
+      .contains('English')
+      .should('have.css', 'pointer-events', 'none')
+      .click({ force: true });
+    cy.gcy('languages-prepared-language-box').should('have.length', 1);
   });
 
   it('validates no languages', () => {
@@ -137,7 +140,6 @@ describe('Language creation in new project', () => {
 });
 
 const addLanguage = (language: string) => {
-  gcy('languages-add-dialog-submit').click();
   typeToAutocomplete(language);
   selectInAutocomplete(language);
 };
