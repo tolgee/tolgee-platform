@@ -93,7 +93,7 @@ class ImportService(
     importRepository.save(import)
     Sentry.addBreadcrumb("Import ID: ${import.id}")
 
-    self.saveFilesToFileStorage(import.id, files)
+    self.saveFilesToFileStorage(import.id, files, params.storeFilesToFileStorage)
 
     val fileProcessor =
       CoreImportFilesProcessor(
@@ -423,8 +423,9 @@ class ImportService(
   fun saveFilesToFileStorage(
     importId: Long,
     files: List<ImportFileDto>,
+    storeFilesToFileStorage: Boolean,
   ) {
-    if (tolgeeProperties.import.storeFilesForDebugging) {
+    if (tolgeeProperties.import.storeFilesForDebugging && storeFilesToFileStorage) {
       files.forEach {
         fileStorage.storeFile(getFileStoragePath(importId, it.name), it.data)
       }

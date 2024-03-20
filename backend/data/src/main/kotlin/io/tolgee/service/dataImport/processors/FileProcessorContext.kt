@@ -4,7 +4,6 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.forceEscapePluralForms
 import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.importMessageFormat.ImportMessageFormat
@@ -203,7 +202,9 @@ data class FileProcessorContext(
 
 private fun Any?.wrapIfRequired(): Any? {
   if (this is String) {
-    return StringWrapper(this)
+    return mapOf(STRING_WRAPPER_VALUE_ITEM to this)
   }
   return this
 }
+
+const val STRING_WRAPPER_VALUE_ITEM = "_stringValue"

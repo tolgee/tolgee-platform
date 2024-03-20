@@ -23,7 +23,14 @@ class GenericStructuredProcessor(
     // it means that it's not a string or nested plurals, so we need to parse it further
     convert(this)?.let { result ->
       result.forEach {
-        context.addTranslation(key, languageTagOrGuess, it.value, rawData = this, forceIsPlural = it.isPlural)
+        context.addTranslation(
+          key,
+          languageTagOrGuess,
+          it.value,
+          rawData = this,
+          convertedBy = context.fileEntity.format,
+          forceIsPlural = it.isPlural,
+        )
       }
       return
     }

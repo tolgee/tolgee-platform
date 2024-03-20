@@ -1,22 +1,36 @@
 package io.tolgee.util
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.formats.ImportFileProcessorFactory
+import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
+import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.service.LanguageService
+import io.tolgee.service.dataImport.CoreImportFilesProcessor
+import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import java.io.File
+import kotlin.reflect.jvm.javaMethod
 
 class FileProcessorContextMockUtil {
   private lateinit var importMock: Import
   lateinit var importFile: ImportFile
   lateinit var importFileDto: ImportFileDto
   lateinit var fileProcessorContext: FileProcessorContext
+  lateinit var importServiceMock: ImportService
+  lateinit var coreImportFileProcessor: CoreImportFilesProcessor
 
   fun mockIt(
     fileName: String,
@@ -24,7 +38,80 @@ class FileProcessorContextMockUtil {
     convertPlaceholders: Boolean = true,
     projectIcuPlaceholdersEnabled: Boolean = true,
   ) {
-    importMock = mock()
+    initImportMocks(fileName, resourcesFilePath)
+
+    val applicationContextMock: ApplicationContext = mockApplicationContext()
+
+    fileProcessorContext =
+      FileProcessorContext(
+        importFileDto,
+        importFile,
+        applicationContext = applicationContextMock,
+        importSettings = getImportSettings(convertPlaceholders),
+        projectIcuPlaceholdersEnabled = projectIcuPlaceholdersEnabled,
+      )
+  }
+
+  fun getImportSettings(convertPlaceholders: Boolean) =
+    object : IImportSettings {
+      override var overrideKeyDescriptions: Boolean = false
+      override var convertPlaceholdersToIcu: Boolean = convertPlaceholders
+    }
+
+  private fun mockApplicationContext(): ApplicationContext {
+    val applicationContextMock: ApplicationContext =
+      Mockito.mock(ApplicationContext::class.java, Mockito.RETURNS_DEEP_STUBS)
+    mockImportService(applicationContextMock)
+    mockTolgeeProperties(applicationContextMock)
+    mockImportFileProcessorFactory(applicationContextMock)
+    mockLanguageService(applicationContextMock)
+    val validator = Mockito.mock(KeyCustomValuesValidator::class.java)
+    Mockito.`when`(applicationContextMock.getBean(KeyCustomValuesValidator::class.java)).thenReturn(validator)
+    Mockito.`when`(validator.isValid(any())).thenReturn(true)
+    return applicationContextMock
+  }
+
+  private fun mockLanguageService(applicationContextMock: ApplicationContext) {
+    val languageService = mock<LanguageService>()
+    whenever(applicationContextMock.getBean(LanguageService::class.java))
+      .thenReturn(languageService)
+  }
+
+  private fun mockImportFileProcessorFactory(applicationContextMock: ApplicationContext): ImportFileProcessorFactory {
+    return ImportFileProcessorFactory(
+      objectMapper = jacksonObjectMapper(),
+      yamlObjectMapper = ObjectMapper(YAMLFactory()),
+    ).also {
+      whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java))
+        .thenReturn(it)
+    }
+  }
+
+  private fun mockImportService(applicationContextMock: ApplicationContext): ImportService {
+    return mock<ImportService>().also {
+      whenever(applicationContextMock.getBean(ImportService::class.java))
+        .thenReturn(it)
+      mockSaveFile(it)
+      importServiceMock = it
+    }
+  }
+
+  private fun mockSaveFile(it: ImportService) {
+    whenever(it.saveFile(any())).then { it.arguments[0] as ImportFile }
+  }
+
+  private fun mockTolgeeProperties(applicationContextMock: ApplicationContext): TolgeeProperties {
+    return TolgeeProperties().also {
+      whenever(applicationContextMock.getBean(TolgeeProperties::class.java))
+        .thenReturn(it)
+    }
+  }
+
+  private fun initImportMocks(
+    fileName: String,
+    resourcesFilePath: String,
+  ) {
+    importMock = Import(project = Project())
     importFile = ImportFile(fileName, importMock)
     importFileDto =
       ImportFileDto(
@@ -32,23 +119,30 @@ class FileProcessorContextMockUtil {
         File(resourcesFilePath)
           .readBytes(),
       )
+  }
 
-    val applicationContextMock: ApplicationContext =
-      Mockito.mock(ApplicationContext::class.java, Mockito.RETURNS_DEEP_STUBS)
-    val validator = Mockito.mock(KeyCustomValuesValidator::class.java)
-    Mockito.`when`(applicationContextMock.getBean(KeyCustomValuesValidator::class.java)).thenReturn(validator)
-    Mockito.`when`(validator.isValid(any())).thenReturn(true)
-    fileProcessorContext =
-      FileProcessorContext(
-        importFileDto,
-        importFile,
-        applicationContext = applicationContextMock,
-        importSettings =
-          object : IImportSettings {
-            override var overrideKeyDescriptions: Boolean = false
-            override var convertPlaceholdersToIcu: Boolean = convertPlaceholders
-          },
-        projectIcuPlaceholdersEnabled = projectIcuPlaceholdersEnabled,
-      )
+  fun mockCoreProcessor(
+    fileName: String,
+    resourcesFilePath: String,
+  ): CoreImportFilesProcessor {
+    val applicationContext = mockApplicationContext()
+    initImportMocks(fileName, resourcesFilePath)
+    return CoreImportFilesProcessor(
+      applicationContext = applicationContext,
+      import = importMock,
+      importSettings = getImportSettings(true),
+    ).also { coreImportFileProcessor = it }
+  }
+
+  fun getSavedTranslations(): List<ImportTranslation> {
+    @Suppress("UNCHECKED_CAST")
+    return Mockito.mockingDetails(importServiceMock)
+      .invocations
+      .filter { it.method == ImportService::saveTranslations.javaMethod }
+      .flatMap { it.arguments.first() as List<ImportTranslation> }
+  }
+
+  fun clearImportServiceMockInvocation() {
+    Mockito.clearInvocations(importServiceMock)
   }
 }

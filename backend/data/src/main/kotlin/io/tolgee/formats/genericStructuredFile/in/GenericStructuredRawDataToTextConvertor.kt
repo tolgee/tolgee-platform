@@ -1,9 +1,9 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
 import com.ibm.icu.text.PluralRules
-import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.forceEscapePluralForms
 import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.service.dataImport.processors.STRING_WRAPPER_VALUE_ITEM
 import java.util.*
 
 class GenericStructuredRawDataToTextConvertor(
@@ -74,7 +74,7 @@ class GenericStructuredRawDataToTextConvertor(
 
   private fun getStringValue(rawData: Any?) =
     rawData as? String ?: (rawData as? Map<*, *>)
-      ?.get(StringWrapper::_stringValue.name) as? String
+      ?.get(STRING_WRAPPER_VALUE_ITEM) as? String
 
   private fun tryHandleIcuPlural(
     rawData: Any?,

@@ -2,7 +2,6 @@ package io.tolgee.formats.apple.`in`.strings
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
 import io.tolgee.formats.importMessageFormat.ImportMessageFormat
@@ -133,7 +132,7 @@ class StringsFileProcessor(
       key ?: return,
       languageName,
       converted,
-      rawData = StringWrapper(value),
+      rawData = value,
       convertedBy = importMessageFormat,
     )
     currentComment = null

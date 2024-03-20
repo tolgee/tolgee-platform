@@ -3,7 +3,6 @@ package io.tolgee.formats.po.`in`
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.PoParserException
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
 import io.tolgee.formats.po.PoSupportedMessageFormat
@@ -40,7 +39,7 @@ class PoFileProcessor(
             languageName = languageId,
             value = converted.first,
             idx = idx,
-            rawData = StringWrapper(poTranslation.msgstr.toString()),
+            rawData = poTranslation.msgstr.toString(),
             convertedBy = converted.second,
           )
 

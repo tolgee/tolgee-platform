@@ -1,7 +1,6 @@
 package io.tolgee.formats.apple.`in`.xliff
 
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.APPLE_PLURAL_PROPERTY_CUSTOM_KEY
@@ -187,7 +186,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
         transUnitId,
         file.sourceLanguage ?: "unknown source",
         convertMessage(source),
-        rawData = StringWrapper(source),
+        rawData = source,
         convertedBy = importMessageFormat,
       )
     }
@@ -197,7 +196,7 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
         transUnitId,
         file.targetLanguage ?: "unknown target",
         convertMessage(target),
-        rawData = StringWrapper(target),
+        rawData = target,
         convertedBy = importMessageFormat,
       )
     }

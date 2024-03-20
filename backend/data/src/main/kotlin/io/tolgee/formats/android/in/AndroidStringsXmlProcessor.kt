@@ -2,7 +2,6 @@ package io.tolgee.formats.android.`in`
 
 import AndroidStringsXmlParser
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
 import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.PluralUnit
@@ -40,7 +39,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       guessedLanguage,
       convertMessage(text),
       forceIsPlural = false,
-      rawData = StringWrapper(text),
+      rawData = text,
       convertedBy = ImportMessageFormat.ANDROID_XML,
     )
     setCustomWrappedWithCdata(keyName, it.value)
@@ -109,7 +108,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
         guessedLanguage,
         convertMessage(text),
         forceIsPlural = false,
-        rawData = StringWrapper(text),
+        rawData = text,
         convertedBy = importMessageFormat,
       )
       setCustomWrappedWithCdata(keyNameWithIndex, item.value)
