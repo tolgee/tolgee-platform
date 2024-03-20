@@ -108,7 +108,7 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').contains('Azerbaijani').should('be.visible');
   });
 
-  it.only('validates language repeat', () => {
+  it('validates language repeat', () => {
     getInputByName('name').type('Super project');
     typeToAutocomplete('English');
     gcy('languages-create-autocomplete-suggested-option')
