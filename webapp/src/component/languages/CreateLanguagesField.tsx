@@ -105,7 +105,7 @@ export const CreateLanguagesField: FC<Props> = ({
           }}
           values={editValue}
           preferredEmojis={preferredEmojis}
-          existingTags={existingLangs}
+          existingTags={existingLangs.filter((tag) => editValue.tag !== tag)}
         />
       )}
     </>
