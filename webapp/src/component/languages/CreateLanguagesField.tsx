@@ -41,7 +41,6 @@ export const CreateLanguagesField: FC<Props> = ({
         flagEmoji: option.flags?.[0] || '',
       };
       if (option.isNew) {
-        setEditIndex(value.length);
         setEditValue(item);
       } else {
         onChange([...value, item]);

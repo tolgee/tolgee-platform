@@ -28,7 +28,7 @@ describe('Language creation', () => {
     gcy('languages-add-dialog-submit').click();
     gcy('project-settings-languages').should('contain', 'Czech');
     gcy('project-settings-languages').should('contain', 'čeština');
-    assertMessage('Language created');
+    assertMessage('Languages created');
   });
 
   it('customizes language', () => {
@@ -51,7 +51,7 @@ describe('Language creation', () => {
     );
     cy.gcy('languages-prepared-language-box').should('contain', 'cs-mod');
     gcy('languages-add-dialog-submit').click();
-    assertMessage('Language created');
+    assertMessage('Languages created');
   });
 
   it('custom language can be created', () => {
