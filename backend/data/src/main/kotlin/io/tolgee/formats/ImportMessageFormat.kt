@@ -1,7 +1,6 @@
 package io.tolgee.formats
 
 import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
-import io.tolgee.formats.importMessageFormatConvertor.MessageFormatImportDataConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 enum class ImportMessageFormat(
@@ -9,7 +8,6 @@ enum class ImportMessageFormat(
   val canContainIcu: Boolean = false,
   val placeholderConvertorFactory: (() -> ToIcuPlaceholderConvertor)?,
   val rootKeyIsLanguageTag: Boolean = false,
-  val importDataConvertorFactory: (() -> MessageFormatImportDataConvertor)? = null,
 ) {
   YAML_RUBY(
     pluralsViaNesting = true,

@@ -3,11 +3,9 @@ package io.tolgee.service.dataImport
 import io.tolgee.api.IImportSettings
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.CollisionHandler
-import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -404,12 +402,5 @@ class ImportDataManager(
       handleConflicts(false)
     }
     importService.saveTranslations(toSave)
-  }
-
-  fun selectFormat(
-    file: ImportFile,
-    format: ImportMessageFormat,
-  ) {
-    ImportFormatSelectionHelper(this, import, file, format).select()
   }
 }

@@ -7,7 +7,6 @@ package io.tolgee.api.v2.controllers.dataImport
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.dataImport.SetFileNamespaceRequest
-import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.hateoas.dataImport.ImportFileIssueModel
 import io.tolgee.hateoas.dataImport.ImportFileIssueModelAssembler
 import io.tolgee.model.enums.Scope
@@ -63,20 +62,6 @@ class V2ImportFilesController(
       fileId,
       req.namespace,
     )
-  }
-
-  @PutMapping("/result/files/{fileId}/select-format/{format}")
-  @Operation(
-    description = "Sets a format for the file to import.",
-    summary = "Select namespace",
-  )
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
-  @AllowApiAccess
-  fun selectFormat(
-    @PathVariable fileId: Long,
-    @PathVariable format: ImportMessageFormat,
-  ) {
-    this.importService.selectFormat(projectHolder.project.id, authenticationFacade.authenticatedUser.id, fileId, format)
   }
 
   @GetMapping("/result/files/{importFileId}/issues")

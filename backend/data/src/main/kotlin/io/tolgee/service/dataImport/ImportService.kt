@@ -15,7 +15,6 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -503,18 +502,5 @@ class ImportService(
 
   fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> {
     return importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
-  }
-
-  @Transactional
-  fun selectFormat(
-    projectId: Long,
-    authorId: Long,
-    fileId: Long,
-    format: ImportMessageFormat,
-  ) {
-    val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
-    ImportDataManager(applicationContext, file.import).selectFormat(file, format)
-    file.format = format
-    saveFile(file)
   }
 }
