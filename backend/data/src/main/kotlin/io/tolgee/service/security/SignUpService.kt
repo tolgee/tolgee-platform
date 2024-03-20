@@ -38,7 +38,7 @@ class SignUpService(
     signUp(user, dto.invitationCode, dto.organizationName)
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {
-      return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
+      return JwtAuthenticationResponse(jwtService.emitToken(user.id, true), user.id)
     }
 
     emailVerificationService.createForUser(user, dto.callbackUrl)

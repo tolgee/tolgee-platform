@@ -36,7 +36,7 @@ describe('Content delivery', () => {
       .findDcy('content-delivery-item-publish')
       .click();
     waitForGlobalLoading();
-    assertMessage('Content published sucessfuly!');
+    assertMessage('Content published successfully!');
   });
 
   it('creates content delivery', () => {

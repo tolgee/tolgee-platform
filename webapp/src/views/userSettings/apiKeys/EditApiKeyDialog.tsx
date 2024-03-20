@@ -7,10 +7,9 @@ import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckBoxGroupMultiSelect';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Scopes } from 'tg.fixtures/permissions';
 import { messageService } from 'tg.service/MessageService';
@@ -23,8 +22,9 @@ interface Props {
 }
 
 export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
+  const history = useHistory();
   const onDialogClose = () => {
-    redirect(LINKS.USER_API_KEYS);
+    history.push(LINKS.USER_API_KEYS.build());
   };
 
   const id = useRouteMatch().params[PARAMS.API_KEY_ID];
@@ -81,7 +81,7 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
       {
         onSuccess: () => {
           messageService.success(<T keyName="api_key_successfully_edited" />);
-          redirect(LINKS.USER_API_KEYS);
+          history.push(LINKS.USER_API_KEYS.build());
         },
       }
     );

@@ -58,7 +58,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     },
   ];
 
-  if (preferredOrganization.currentUserRole === 'OWNER' || isAdmin) {
+  if (preferredOrganization?.currentUserRole === 'OWNER' || isAdmin) {
     menuItems.push({
       link: LINKS.ORGANIZATION_MEMBERS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,

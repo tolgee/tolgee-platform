@@ -721,6 +721,8 @@ export interface components {
     };
     JwtAuthenticationResponse: {
       accessToken?: string;
+      /** Format: int64 */
+      userId?: number;
       tokenType?: string;
     };
     UserTotpEnableRequestDto: {
@@ -1515,17 +1517,17 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     IImportSettings: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     ImportSettingsModel: {
       settings?: components["schemas"]["IImportSettings"];
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -1840,6 +1842,7 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
+      description: string;
       username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
@@ -2810,7 +2813,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
@@ -2930,20 +2934,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3609,6 +3613,7 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
+      description: string;
       username?: string;
       /** Format: int64 */
       lastUsedAt?: number;

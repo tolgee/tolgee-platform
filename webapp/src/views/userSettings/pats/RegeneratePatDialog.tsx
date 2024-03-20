@@ -9,12 +9,11 @@ import {
 import { T } from '@tolgee/react';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
 type RevealedPatModel = components['schemas']['RevealedPatModel'];
 type RegeneratePatDto = components['schemas']['RegeneratePatDto'];
@@ -22,10 +21,11 @@ type RegeneratePatDto = components['schemas']['RegeneratePatDto'];
 export const RegeneratePatDialog: FunctionComponent<{
   onGenerated: (pat: RevealedPatModel) => void;
 }> = (props) => {
+  const history = useHistory();
   const expirationDateOptions = useExpirationDateOptions();
 
   const onDialogClose = () => {
-    redirect(LINKS.USER_PATS);
+    history.push(LINKS.USER_PATS.build());
   };
 
   const id = useRouteMatch().params[PARAMS.PAT_ID];

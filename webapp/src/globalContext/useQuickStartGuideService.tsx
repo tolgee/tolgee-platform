@@ -9,7 +9,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import type { useInitialDataService } from './useInitialDataService';
 
-export const useQuickStartGuide = (
+export const useQuickStartGuideService = (
   initialData: ReturnType<typeof useInitialDataService>
 ) => {
   const [active, setActive] = useState<HighlightItem[]>([]);
@@ -22,9 +22,9 @@ export const useQuickStartGuide = (
   const projectId = isNaN(projectIdParam) ? undefined : projectIdParam;
   const [floatingOpen, setFloatingOpen] = useState(false);
 
-  const organizationSlug = initialData.data.preferredOrganization?.slug;
+  const organizationSlug = initialData.state?.preferredOrganization?.slug;
   const isOwner =
-    initialData.data.preferredOrganization?.currentUserRole === 'OWNER';
+    initialData.state?.preferredOrganization?.currentUserRole === 'OWNER';
 
   const projects = useApiQuery({
     url: '/v2/organizations/{slug}/projects',
@@ -41,7 +41,7 @@ export const useQuickStartGuide = (
     : projects.data?._embedded?.projects?.[0]?.id;
 
   const completed =
-    initialData.data.preferredOrganization?.quickStart?.completedSteps || [];
+    initialData.state?.preferredOrganization?.quickStart?.completedSteps || [];
 
   const allCompleted = completed;
 
@@ -61,7 +61,7 @@ export const useQuickStartGuide = (
 
   function quickStartCompleteStep(item: ItemStep) {
     if (enabled) {
-      initialData.completeGuideStep(item);
+      initialData.actions.completeGuideStep(item);
     }
   }
 
@@ -74,14 +74,14 @@ export const useQuickStartGuide = (
   }
 
   const enabled =
-    initialData.data.preferredOrganization?.quickStart?.finished === false &&
+    initialData.state?.preferredOrganization?.quickStart?.finished === false &&
     isOwner;
 
   const open =
     enabled &&
     (floating
       ? floatingOpen
-      : initialData.data.preferredOrganization?.quickStart?.open);
+      : initialData.state?.preferredOrganization?.quickStart?.open);
 
   const state = {
     enabled,
@@ -93,10 +93,10 @@ export const useQuickStartGuide = (
   };
 
   const actions = {
-    quickStartFinish: initialData.finishGuide,
+    quickStartFinish: initialData.actions.finishGuide,
     setQuickStartOpen: floating
       ? setFloatingOpen
-      : initialData.setQuickStartOpen,
+      : initialData.actions.setQuickStartOpen,
     quickStartBegin,
     quickStartVisited,
     quickStartCompleteStep,
@@ -104,5 +104,5 @@ export const useQuickStartGuide = (
     quickStartForceFloating: setFloatingForced,
   };
 
-  return [state, actions] as const;
+  return { state, actions };
 };

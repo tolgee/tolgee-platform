@@ -30,7 +30,7 @@ export const TranslationsHeader = () => {
     defaultVal: 'false',
   });
   const { height: bottomPanelHeight } = useBottomPanel();
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const [dirty, setDirty] = useState(false);
 
   const onDialogOpen = () => {

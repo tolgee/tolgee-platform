@@ -1,14 +1,12 @@
 import { LINKS } from 'tg.constants/links';
 import { GlobalError } from 'tg.error/GlobalError';
-import { errorActions } from 'tg.store/global/ErrorActions';
-import { redirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { tokenService } from '../TokenService';
-import { globalActions } from 'tg.store/global/GlobalActions';
 import { getUtmCookie } from 'tg.fixtures/utmCookie';
 import { handleApiError } from './handleApiError';
 import { ApiError } from './ApiError';
 import { errorAction } from './errorAction';
+import { globalContext } from 'tg.globalContext/globalActions';
 
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
@@ -40,9 +38,8 @@ export class ApiHttpService {
   ): Promise<Response> {
     if (detectLoop(input)) {
       //if we get into loop, maybe something went wrong in login requests etc, rather start over
-      tokenService.disposeToken();
-      redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
-      location.reload();
+      tokenService.disposeAllTokens();
+      location.href = LINKS.PROJECTS.build();
     }
     return new Promise((resolve, reject) => {
       const fetchIt = () => {
@@ -73,7 +70,7 @@ export class ApiHttpService {
                 r.status == 403 &&
                 responseData.code === 'expired_super_jwt_token'
               ) {
-                globalActions.requestSuperJwt.dispatch({
+                globalContext.actions?.waitForSuperToken({
                   onSuccess: () => {
                     fetchIt();
                   },
@@ -102,7 +99,7 @@ export class ApiHttpService {
             }
             // eslint-disable-next-line no-console
             console.error(e);
-            errorActions.globalError.dispatch(
+            globalContext.actions?.setGlobalError(
               new GlobalError(
                 'Error while loading resource',
                 input.toString(),

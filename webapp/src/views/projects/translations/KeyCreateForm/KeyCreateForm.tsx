@@ -12,9 +12,9 @@ import { FormBody } from './FormBody';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useTranslationsWebsocketBlocker } from '../context/useTranslationsWebsocketBlocker';
 import { messageService } from 'tg.service/MessageService';
-import { redirectionActions } from 'tg.store/global/RedirectionActions';
 import { TolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { useHistory } from 'react-router-dom';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
@@ -46,6 +46,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   const project = useProject();
   const permissions = useProjectPermissions();
   const { refetchUsage } = useGlobalActions();
+  const history = useHistory();
 
   const keyName = useUrlSearch().key as string;
   const namespace = useUrlSearch().ns as string;
@@ -97,7 +98,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   const canCreateKeys = permissions.satisfiesPermission('keys.create');
   useEffect(() => {
     if (!canCreateKeys) {
-      redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
+      history.push(LINKS.AFTER_LOGIN.build());
       messageService.error(
         <T keyName="translation_single_no_permission_create" />
       );

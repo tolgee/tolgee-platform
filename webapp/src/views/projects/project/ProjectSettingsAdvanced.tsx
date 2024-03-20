@@ -9,10 +9,13 @@ import { useState } from 'react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { messageService } from 'tg.service/MessageService';
+import { useHistory } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
 
 export const ProjectSettingsAdvanced = () => {
   const project = useProject();
   const { t } = useTranslate();
+  const history = useHistory();
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}',
@@ -59,6 +62,7 @@ export const ProjectSettingsAdvanced = () => {
           { path: { projectId: project.id } },
           {
             onSuccess() {
+              history.push(LINKS.AFTER_LOGIN.build());
               messageService.success(<T keyName="project_deleted_message" />);
             },
           }

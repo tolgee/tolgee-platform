@@ -19,10 +19,8 @@ const LANGUAGE_KEY = '__tolgee_currentLanguage';
 // so user get consistent experience even when he's signed out
 const storageMiddleware: LanguageStorageMiddleware = {
   async getLanguage() {
-    const response = await queryClient.fetchQuery(
-      ['/v2/public/initial-data', null, null],
-      () =>
-        apiSchemaHttpService.schemaRequest('/v2/public/initial-data', 'get')({})
+    const response = await queryClient.fetchQuery([], () =>
+      apiSchemaHttpService.schemaRequest('/v2/public/initial-data', 'get')({})
     );
     return (
       response.languageTag || localStorage.getItem(LANGUAGE_KEY) || undefined

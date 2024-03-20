@@ -5,26 +5,27 @@ import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { securityService } from 'tg.service/SecurityService';
+import { useHistory } from 'react-router-dom';
 
 type TotpDisableDto = components['schemas']['UserTotpDisableRequestDto'];
 
 export const DisableMfaDialog: FunctionComponent = () => {
+  const history = useHistory();
+
   const onDialogClose = () => {
-    redirect(LINKS.USER_ACCOUNT_SECURITY);
+    history.push(LINKS.USER_ACCOUNT_SECURITY.build());
   };
 
   const user = useUser();
   const message = useMessage();
   const { t } = useTranslate();
-  const { refetchInitialData } = useGlobalActions();
+  const { handleAfterLogin } = useGlobalActions();
 
   useEffect(() => {
     if (user && !user.mfaEnabled) onDialogClose();
@@ -35,9 +36,8 @@ export const DisableMfaDialog: FunctionComponent = () => {
     method: 'delete',
     options: {
       onSuccess: (r) => {
-        securityService.setToken(r.accessToken!);
+        handleAfterLogin(r);
         message.success(<T keyName="account-security-mfa-disabled-success" />);
-        refetchInitialData();
         onDialogClose();
       },
     },

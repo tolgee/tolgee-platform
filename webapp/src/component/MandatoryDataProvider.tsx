@@ -1,4 +1,3 @@
-import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/browser';
@@ -7,14 +6,14 @@ import { PostHog } from 'posthog-js';
 import { getUtmParams } from 'tg.fixtures/utmCookie';
 import { useIdentify } from 'tg.hooks/useIdentify';
 import { useIsFetching, useIsMutating } from 'react-query';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 
 const POSTHOG_INITIALIZED_WINDOW_PROPERTY = 'postHogInitialized';
 export const MandatoryDataProvider = (props: any) => {
-  const config = useConfig();
   const userData = useUser();
+  const config = useConfig();
 
-  const isLoading = useGlobalContext((c) => c.isLoading);
-  const isFetching = useGlobalContext((c) => c.isFetching);
+  const isFetching = useGlobalContext((c) => c.initialData.isFetching);
 
   const isGloballyFetching = useIsFetching();
   const isGloballyMutating = useIsMutating();
@@ -79,9 +78,5 @@ export const MandatoryDataProvider = (props: any) => {
     }
   }, [userData?.id]);
 
-  if (isLoading) {
-    return null;
-  } else {
-    return props.children;
-  }
+  return props.children;
 };

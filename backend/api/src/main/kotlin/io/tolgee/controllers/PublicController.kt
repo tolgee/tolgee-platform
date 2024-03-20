@@ -71,7 +71,7 @@ class PublicController(
 
     // two factor passed, so we can generate super token
     val jwt = jwtService.emitToken(userAccount.id, true)
-    return JwtAuthenticationResponse(jwt)
+    return JwtAuthenticationResponse(jwt, userAccount.id)
   }
 
   @Operation(summary = "Reset password request")
@@ -156,7 +156,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     @PathVariable("code") @NotBlank code: String,
   ): JwtAuthenticationResponse {
     emailVerificationService.verify(userId, code)
-    return JwtAuthenticationResponse(jwtService.emitToken(userId))
+    return JwtAuthenticationResponse(jwtService.emitToken(userId), userId)
   }
 
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -178,7 +178,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   ): JwtAuthenticationResponse {
     if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
       val user = getFakeGithubUser()
-      return JwtAuthenticationResponse(jwtService.emitToken(user.id))
+      return JwtAuthenticationResponse(jwtService.emitToken(user.id), user.id)
     }
     return when (serviceType) {
       "github" -> {

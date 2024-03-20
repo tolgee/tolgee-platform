@@ -1,15 +1,15 @@
-const LOCAL_STORAGE_KEY = 'invitationCode';
+export const INVITATION_CODE_STORAGE_KEY = 'invitationCode';
 
 export const InvitationCodeService = {
   getCode() {
-    return localStorage.getItem(LOCAL_STORAGE_KEY);
+    return localStorage.getItem(INVITATION_CODE_STORAGE_KEY) || undefined;
   },
 
   disposeCode() {
-    return localStorage.removeItem(LOCAL_STORAGE_KEY);
+    return localStorage.removeItem(INVITATION_CODE_STORAGE_KEY);
   },
 
   setCode(token: string) {
-    return localStorage.setItem(LOCAL_STORAGE_KEY, token);
+    return localStorage.setItem(INVITATION_CODE_STORAGE_KEY, token);
   },
 };

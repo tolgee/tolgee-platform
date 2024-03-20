@@ -7,7 +7,6 @@ import { LanguageModifyFields } from 'tg.component/languages/LanguageModifyField
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
-import { redirect } from 'tg.hooks/redirect';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -75,9 +74,11 @@ export const LanguageEditDialog = () => {
       {
         onSuccess() {
           messageService.success(<T keyName="language_edited_message" />);
-          redirect(LINKS.PROJECT_LANGUAGES, {
-            [PARAMS.PROJECT_ID]: projectId,
-          });
+          history.push(
+            LINKS.PROJECT_LANGUAGES.build({
+              [PARAMS.PROJECT_ID]: projectId,
+            })
+          );
         },
       }
     );
@@ -95,9 +96,11 @@ export const LanguageEditDialog = () => {
         onSuccess() {
           refetchUsage();
           messageService.success(<T keyName="language_deleted_message" />);
-          redirect(LINKS.PROJECT_LANGUAGES, {
-            [PARAMS.PROJECT_ID]: projectId,
-          });
+          history.push(
+            LINKS.PROJECT_LANGUAGES.build({
+              [PARAMS.PROJECT_ID]: projectId,
+            })
+          );
         },
       }
     );

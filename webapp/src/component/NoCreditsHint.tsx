@@ -15,7 +15,8 @@ export const NoCreditsHint = ({ code }: Props) => {
   const translateError = useErrorTranslation();
   const config = useConfig();
   const canGoToBilling =
-    preferredOrganization.currentUserRole === 'OWNER' && config.billing.enabled;
+    preferredOrganization?.currentUserRole === 'OWNER' &&
+    config.billing.enabled;
 
   if (code === 'out_of_credits') {
     if (canGoToBilling) {

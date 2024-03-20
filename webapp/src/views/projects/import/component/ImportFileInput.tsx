@@ -1,14 +1,14 @@
 import React, { FunctionComponent, ReactNode, useState } from 'react';
-import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { useConfig } from 'tg.globalContext/helpers';
-import { messageActions } from 'tg.store/global/MessageActions';
-import { Message } from 'tg.store/global/types';
-
 import { ImportFileDropzone } from './ImportFileDropzone';
 import { ImportProgressOverlay } from './ImportProgressOverlay';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { FilesType } from 'tg.fixtures/FileUploadFixtures';
+
 import {
   ImportInputAreaLayout,
   ImportInputAreaLayoutBottom,
@@ -16,7 +16,6 @@ import {
   ImportInputAreaLayoutTitle,
   ImportInputAreaLayoutTop,
 } from './ImportInputAreaLayout';
-import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 import { ImportSupportedFormats } from './ImportSupportedFormats';
 
 export const MAX_FILE_COUNT = 20;
@@ -61,6 +60,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
   const [resetKey, setResetKey] = useState(0);
+  const { showMessage } = useGlobalActions();
 
   function resetInput() {
     setResetKey((key) => key + 1);
@@ -119,7 +119,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
       return;
     }
     validation.errors.forEach((e) =>
-      messageActions.showMessage.dispatch(new Message(e, 'error'))
+      showMessage({ text: e, variant: 'error' })
     );
   };
 

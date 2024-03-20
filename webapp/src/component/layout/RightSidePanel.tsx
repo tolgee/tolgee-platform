@@ -39,25 +39,26 @@ export const RightSidePanel = ({
   open,
 }: Props) => {
   const { setRightPanelWidth } = useGlobalActions();
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
-  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
+  const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
+  const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+
+  // useEffect(() => {
+  //   function handler() {
+  //     setRightPanelWidth(containerRef.current?.offsetWidth || 0);
+  //   }
+  //   if (!floating && open) {
+  //     window.addEventListener('resize', handler);
+  //     return () => window.removeEventListener('resize', handler);
+  //   }
+  // }, [floating, open]);
 
   useEffect(() => {
     if (!floating && open) {
       setRightPanelWidth(containerRef.current?.offsetWidth || 0);
     }
     return () => setRightPanelWidth(0);
-  }, [floating, open]);
-
-  useEffect(() => {
-    function handler() {
-      setRightPanelWidth(containerRef.current?.offsetWidth || 0);
-    }
-    if (!floating && open) {
-      window.addEventListener('resize', handler);
-      return () => window.removeEventListener('resize', handler);
-    }
   }, [floating, open]);
 
   const [openedDebounced] = useDebounce(open, 100);

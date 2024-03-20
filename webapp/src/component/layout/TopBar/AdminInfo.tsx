@@ -2,7 +2,7 @@ import { Box, Button, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
-import { globalActions } from 'tg.store/global/GlobalActions';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const StyledExitDebugButton = styled(Button)`
   color: inherit;
@@ -14,6 +14,7 @@ export const AdminInfo = (props: {
   debuggingCustomerAccount: boolean | undefined;
 }) => {
   const history = useHistory();
+  const { exitDebugCustomerAccount } = useGlobalActions();
 
   return (
     <Box
@@ -44,7 +45,7 @@ export const AdminInfo = (props: {
               size="small"
               variant="outlined"
               onClick={() => {
-                globalActions.exitDebugCustomerAccount.dispatch();
+                exitDebugCustomerAccount();
                 history.push(LINKS.ADMINISTRATION_USERS.build());
               }}
             >

@@ -2,10 +2,8 @@ import { RefObject } from 'react';
 import { Alert } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
-import { useSelector } from 'react-redux';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { AppState } from 'tg.store/index';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -13,7 +11,10 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { globalActions } from 'tg.store/global/GlobalActions';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 
 type LoginRequestDto = components['schemas']['LoginRequest'];
 
@@ -25,10 +26,12 @@ type LoginViewTotpProps = {
 
 export function LoginTotpForm(props: LoginViewTotpProps) {
   const { t } = useTranslate();
-  const security = useSelector((state: AppState) => state.global.security);
-  const authLoading = useSelector(
-    (state: AppState) => state.global.authLoading
+  const { login } = useGlobalActions();
+  const loginErrorCode = useGlobalContext(
+    (c) => c.auth.loginLoadable.error?.code
   );
+
+  const authLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
   return (
     <DashboardPage>
@@ -37,10 +40,11 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
         title={t('account-security-mfa')}
         backLink={() => props.onMfaCancel()}
         alerts={
-          security.loginErrorCode &&
+          loginErrorCode &&
+          loginErrorCode !== 'mfa_enabled' &&
           !authLoading && (
             <Alert severity="error">
-              <TranslatedError code={security.loginErrorCode} />
+              <TranslatedError code={loginErrorCode} />
             </Alert>
           )
         }
@@ -68,7 +72,7 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
                 </Box>
               </Box>
             }
-            onSubmit={(data) => globalActions.login.dispatch(data)}
+            onSubmit={(data) => login(data)}
           >
             <TextField
               name="otp"

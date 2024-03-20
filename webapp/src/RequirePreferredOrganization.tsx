@@ -1,15 +1,12 @@
 import { FC } from 'react';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useSelector } from 'react-redux';
-import { AppState } from 'tg.store/index';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { T, useTranslate } from '@tolgee/react';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const RequirePreferredOrganization: FC = (props) => {
-  const allowPrivate = useSelector(
-    (v: AppState) => v.global.security.allowPrivate
-  );
+  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
 
   const { t } = useTranslate();
 

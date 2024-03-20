@@ -8,10 +8,10 @@ import { LINKS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { redirectionActions } from 'tg.store/global/RedirectionActions';
 import { messageService } from 'tg.service/MessageService';
 
 import { OrganizationFields } from './components/OrganizationFields';
+import { useHistory } from 'react-router-dom';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -22,6 +22,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
   });
   const { t } = useTranslate();
   const { updatePreferredOrganization } = usePreferredOrganization();
+  const history = useHistory();
 
   const onSubmit = (values) => {
     loadable.mutate(
@@ -29,7 +30,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
       {
         onSuccess: (organization) => {
           updatePreferredOrganization(organization.id);
-          redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
+          history.push(LINKS.PROJECTS.build());
           messageService.success(<T keyName="organization_created_message" />);
         },
       }

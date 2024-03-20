@@ -72,7 +72,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     languages: [
       { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
     ],
-    organizationId: preferredOrganization.id,
+    organizationId: preferredOrganization?.id || 0,
     baseLanguageTag: 'en',
     icuPlaceholders: true,
   };

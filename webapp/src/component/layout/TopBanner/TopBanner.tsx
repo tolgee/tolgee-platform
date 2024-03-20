@@ -43,8 +43,8 @@ const StyledCloseButton = styled('div')`
 `;
 
 export function TopBanner() {
-  const bannerType = useGlobalContext((c) => c.announcement?.type);
-  const { setTopBannerHeight, dismissTopBanner } = useGlobalActions();
+  const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
+  const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
 
   const getAnnouncement = useAnnouncement();
@@ -74,7 +74,7 @@ export function TopBanner() {
       <StyledCloseButton
         role="button"
         tabIndex={0}
-        onClick={dismissTopBanner}
+        onClick={() => dismissAnnouncement()}
         data-cy="top-banner-dismiss-button"
       >
         <Close />

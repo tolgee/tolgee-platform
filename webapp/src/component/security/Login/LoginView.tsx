@@ -1,57 +1,38 @@
 import { FunctionComponent, useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Alert, useMediaQuery } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { Redirect, useHistory } from 'react-router-dom';
-import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.globalContext/helpers';
-import { AppState } from 'tg.store/index';
 
-import { LoginCredentialsForm } from './LoginCredentialsForm';
-import { LoginTotpForm } from './LoginTotpForm';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { CompactView } from 'tg.component/layout/CompactView';
-import { LoginMoreInfo } from './LoginMoreInfo';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
-import { securityService } from 'tg.service/SecurityService';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-interface LoginProps {}
+import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
+import { LoginCredentialsForm } from './LoginCredentialsForm';
+import { LoginTotpForm } from './LoginTotpForm';
+import { LoginMoreInfo } from './LoginMoreInfo';
 
 // noinspection JSUnusedLocalSymbols
-export const LoginView: FunctionComponent<LoginProps> = (props) => {
+export const LoginView: FunctionComponent = () => {
   const { t } = useTranslate();
   const credentialsRef = useRef({ username: '', password: '' });
   const [mfaRequired, setMfaRequired] = useState(false);
 
-  const security = useSelector((state: AppState) => state.global.security);
-  const remoteConfig = useConfig();
-  const history = useHistory();
+  const error = useGlobalContext((c) => c.auth.loginLoadable.error);
+  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
   useReportOnce('LOGIN_PAGE_OPENED');
-
-  const authLoading = useSelector(
-    (state: AppState) => state.global.authLoading
-  );
-
-  if (history.location.state && (history.location.state as any).from) {
-    securityService.saveAfterLoginLink((history.location.state as any).from);
-  }
-
-  if (!remoteConfig.authentication || security.allowPrivate) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
-  }
 
   if (mfaRequired) {
     return (
       <LoginTotpForm
         credentialsRef={credentialsRef}
         onMfaCancel={() => {
-          credentialsRef.current!.password = '';
           setMfaRequired(false);
+          credentialsRef.current!.password = '';
         }}
       />
     );
@@ -64,10 +45,11 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
         windowTitle={t('login_title')}
         title={t('login_title')}
         alerts={
-          security.loginErrorCode &&
-          !authLoading && (
+          error?.code &&
+          error.code !== 'mfa_enabled' &&
+          !isLoading && (
             <Alert severity="error">
-              <TranslatedError code={security.loginErrorCode} />
+              <TranslatedError code={error.code} />
             </Alert>
           )
         }

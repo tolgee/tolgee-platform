@@ -1,21 +1,21 @@
-import { FunctionComponent, useEffect } from 'react';
+import { FunctionComponent } from 'react';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
-import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { AppState } from 'tg.store/index';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { globalActions } from 'tg.store/global/GlobalActions';
 import { CompactView } from 'tg.component/layout/CompactView';
 
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
 import { DashboardPage } from '../layout/DashboardPage';
+import { GlobalLoading } from 'tg.component/GlobalLoading';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 interface LoginProps {}
 
@@ -25,42 +25,38 @@ type ValueType = {
 
 const PasswordResetView: FunctionComponent<LoginProps> = () => {
   const { t } = useTranslate();
-  const security = useSelector((state: AppState) => state.global.security);
   const remoteConfig = useConfig();
 
-  const loadable = useSelector(
-    (state: AppState) => state.global.loadables.resetPasswordRequest
-  );
+  const { error, isSuccess, isLoading, mutate } = useApiMutation({
+    url: '/api/public/reset_password_request',
+    method: 'post',
+  });
 
-  useEffect(
-    () => () => globalActions.loadableReset.resetPasswordRequest.dispatch(),
-    []
-  );
-
-  if (loadable.error) {
-    return <Redirect to={LINKS.LOGIN.build()} />;
-  }
-
-  if (
-    !remoteConfig.authentication ||
-    security.allowPrivate ||
-    !remoteConfig.passwordResettable
-  ) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+  if (!remoteConfig.passwordResettable) {
+    return (
+      <Redirect to={LINKS.LOGIN.build()}>
+        <GlobalLoading />
+      </Redirect>
+    );
   }
 
   return (
     <DashboardPage>
       <CompactView
         alerts={
-          loadable.error && <Alert severity="error">{loadable.error}</Alert>
+          error?.code &&
+          !isLoading && (
+            <Alert severity="error">
+              <TranslatedError code={error.code} />
+            </Alert>
+          )
         }
         windowTitle={t('reset_password_title')}
         title={t('reset_password_title')}
         backLink={LINKS.LOGIN.build()}
         maxWidth={650}
         content={
-          loadable.loaded ? (
+          isSuccess ? (
             <Alert severity="success">
               <T keyName="reset_password_success_message" />
             </Alert>
@@ -77,7 +73,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = () => {
                         color="primary"
                         type="submit"
                         variant="contained"
-                        loading={loadable.loading}
+                        loading={isLoading}
                       >
                         <T keyName="reset_password_send_request_button" />
                       </LoadingButton>
@@ -86,9 +82,14 @@ const PasswordResetView: FunctionComponent<LoginProps> = () => {
                 </>
               }
               onSubmit={(v: ValueType) => {
-                globalActions.loadableActions.resetPasswordRequest.dispatch(
-                  v.email
-                );
+                mutate({
+                  content: {
+                    'application/json': {
+                      email: v.email,
+                      callbackUrl: LINKS.RESET_PASSWORD.buildWithOrigin(),
+                    },
+                  },
+                });
               }}
             >
               <TextField
