@@ -3160,9 +3160,4 @@
             <column defaultValue="UNKNOWN" name="format" type="varchar(255)"/>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1710929291452-2">
-        <addColumn tableName="import_key">
-            <column name="nested_key_path" type="jsonb"/>
-        </addColumn>
-    </changeSet>
 </databaseChangeLog>
