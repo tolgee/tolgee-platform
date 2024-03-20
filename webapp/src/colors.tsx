@@ -124,7 +124,6 @@ export type QuickStart = {
 
 export type LanguageChips = {
   background: string;
-  border: string;
 };
 
 const getTokensByMode = (mode: 'light' | 'dark') => {
@@ -223,7 +222,6 @@ export const colors = {
       background: '#FDECF280',
     },
     languageChips: {
-      border: '#D1D6DC',
       background: '#F6F6F8',
     } satisfies LanguageChips,
     tokens: getTokensByMode('light'),
@@ -347,7 +345,6 @@ export const colors = {
       background: '#29242580',
     },
     languageChips: {
-      border: '#4d5b6e',
       background: '#243245',
     } satisfies LanguageChips,
     tokens: getTokensByMode('dark'),

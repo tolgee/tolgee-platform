@@ -6,7 +6,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { FlagImage } from './FlagImage';
 
 const StyledContainer = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.languageChips.border};
   background: ${({ theme }) => theme.palette.languageChips.background};
   padding: ${({ theme }) => theme.spacing(0.5, 0.5, 0.5, 1.5)};
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
