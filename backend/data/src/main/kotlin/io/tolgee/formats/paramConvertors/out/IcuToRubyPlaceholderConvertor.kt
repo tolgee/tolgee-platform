@@ -3,6 +3,7 @@ package io.tolgee.formats.paramConvertors.out
 import com.ibm.icu.text.MessagePattern
 import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
+import io.tolgee.formats.escapePercentSign
 
 class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
   private var argIndex = -1
@@ -27,6 +28,10 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
     }
 
     return "%${argNameString}s"
+  }
+
+  override fun convertText(string: String): String {
+    return escapePercentSign(string)
   }
 
   override fun convertReplaceNumber(
