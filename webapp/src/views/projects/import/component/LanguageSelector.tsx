@@ -20,13 +20,19 @@ import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguagesAddDialog } from 'tg.component/languages/LanguagesAddDialog';
 import { useState } from 'react';
+import { FlagImage } from 'tg.component/languages/FlagImage';
 
 const StyledItem = styled(MenuItem)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
-
   &.addNewItem {
     color: ${({ theme }) => theme.palette.primary.main};
   }
+`;
+
+const StyledItemContent = styled('div')`
+  gap: 10px;
+  display: flex;
+  align-items: center;
 `;
 
 const StyledAddIcon = styled(Add)`
@@ -62,7 +68,10 @@ export const LanguageSelector: React.FC<{
 
   const items = languages.map((l) => (
     <StyledItem value={l.id} key={l.id}>
-      {l.flagEmoji} {l.name}
+      <StyledItemContent>
+        <FlagImage height={16} flagEmoji={l.flagEmoji || ''} />
+        <span>{l.name}</span>
+      </StyledItemContent>
     </StyledItem>
   ));
 

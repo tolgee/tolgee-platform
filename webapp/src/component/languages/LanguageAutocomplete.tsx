@@ -1,11 +1,23 @@
 import { FC, ReactNode, useMemo, useState } from 'react';
-import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  styled,
+} from '@mui/material';
 import { Add, Clear, Search } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { suggest } from '@tginternal/language-util';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
 import { T, useTranslate } from '@tolgee/react';
 import { MenuItem } from '@mui/material';
+import { FlagImage } from './FlagImage';
+
+const StyledMenuItem = styled(MenuItem)`
+  display: flex;
+  gap: 12px;
+`;
 
 export type AutocompleteOption = Omit<SuggestResult, 'languageId'> & {
   isNew?: true;
@@ -66,22 +78,28 @@ export const LanguageAutocomplete: FC<{
         setSearch('');
       }}
       renderOption={(props, option) => {
-        const itemContent = (
-          <span data-cy="languages-create-autocomplete-suggested-option">
-            {option.customRenderOption ||
-              `${option.englishName} - ${option.originalName} - ${
-                option.languageId
-              } ${option.flags?.[0] || ''}`}
-          </span>
+        const itemContent = option.customRenderOption || (
+          <>
+            <FlagImage height={16} flagEmoji={option.flags?.[0] || ''} />
+            <span>{`${option.englishName} - ${option.originalName} - ${option.languageId} `}</span>
+          </>
         );
         return existingLanguages.has(option.languageId) ? (
-          <MenuItem key={option.languageId + ':disabled'} disabled={true}>
+          <StyledMenuItem
+            key={option.languageId + ':disabled'}
+            disabled={true}
+            data-cy="languages-create-autocomplete-suggested-option"
+          >
             {itemContent}
-          </MenuItem>
+          </StyledMenuItem>
         ) : (
-          <MenuItem key={option.languageId} {...props}>
+          <StyledMenuItem
+            key={option.languageId}
+            {...props}
+            data-cy="languages-create-autocomplete-suggested-option"
+          >
             {itemContent}
-          </MenuItem>
+          </StyledMenuItem>
         );
       }}
       renderInput={(params) => (
