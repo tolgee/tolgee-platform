@@ -24,7 +24,7 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
   onClose: () => void;
-  onCreated?: (firstAdded: string) => void;
+  onCreated?: (added: LanguageModel[]) => void;
   onChangesMade: () => void;
   existingLanguages: string[];
 };
@@ -63,7 +63,7 @@ export const LanguagesAddDialog: FunctionComponent<Props> = ({
           })
         );
       }
-      onCreated?.(results[0]?.tag as string);
+      onCreated?.(results);
       setValues([]);
       onChangesMade();
       messageService.success(<T keyName="languages_created_message" />);

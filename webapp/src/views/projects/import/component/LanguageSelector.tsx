@@ -123,6 +123,12 @@ export const LanguageSelector: React.FC<{
               '/v2/projects/{projectId}/languages'
             );
           }}
+          onCreated={(langs) => {
+            if (langs.length === 1) {
+              // if user adds exactly one language, put it into select
+              languageHelper.onSelectExisting(langs[0].id);
+            }
+          }}
           existingLanguages={existingLanguages.map((l) => l.tag)}
         />
       )}
