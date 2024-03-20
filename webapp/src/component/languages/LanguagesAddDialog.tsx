@@ -122,6 +122,7 @@ export const LanguagesAddDialog: FunctionComponent<Props> = ({
           color="primary"
           onClick={handleSubmit}
           disabled={values.length === 0}
+          data-cy="languages-add-dialog-submit"
         >
           <T keyName="languages_add_dialog_submit" />
         </Button>

@@ -25,7 +25,7 @@ describe('Language creation', () => {
 
   it('adds language', () => {
     prepareCzechLanguage();
-    gcy('languages-create-submit-button').click();
+    gcy('languages-add-dialog-submit').click();
     gcy('project-settings-languages').should('contain', 'Czech');
     gcy('project-settings-languages').should('contain', 'čeština');
     assertMessage('Language created');
@@ -50,7 +50,7 @@ describe('Language creation', () => {
       'Česky upraveno'
     );
     cy.gcy('languages-prepared-language-box').should('contain', 'cs-mod');
-    gcy('languages-create-submit-button').click();
+    gcy('languages-add-dialog-submit').click();
     assertMessage('Language created');
   });
 

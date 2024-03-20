@@ -137,7 +137,7 @@ describe('Language creation in new project', () => {
 });
 
 const addLanguage = (language: string) => {
-  gcy('create-project-language-add-button').click();
+  gcy('languages-add-dialog-submit').click();
   typeToAutocomplete(language);
   selectInAutocomplete(language);
 };
