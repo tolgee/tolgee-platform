@@ -37,12 +37,14 @@ const getOptions = (input: string): AutocompleteOption[] => {
     originalName: '',
     englishName: input,
     customRenderOption: (
-      <Box display="inline-flex" justifyContent="center">
-        <Box mr={1}>
-          <Add />
-        </Box>
+      <Box
+        display="inline-flex"
+        justifyContent="center"
+        gap={1}
+        alignItems="center"
+      >
+        <Add fontSize="small" />
         <T keyName="language_field_autocomplete_label_new_language" />
-        &nbsp;🏳️
       </Box>
     ),
   };
