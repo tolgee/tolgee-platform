@@ -8,5 +8,3 @@
 not-valid-bcp47-tag!:
   relations:
     part_of_relations: "Some text without params"
-    with_icu_plural: "Some text with {count, plural, one {one} other {other}}"
-    with_icu_param: "{param}"

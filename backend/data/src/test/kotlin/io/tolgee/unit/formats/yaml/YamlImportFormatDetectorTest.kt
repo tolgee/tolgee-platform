@@ -3,7 +3,7 @@ package io.tolgee.unit.formats.yaml
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.formats.ImportMessageFormat
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.formats.yaml.`in`.YamlImportFormatDetector
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil

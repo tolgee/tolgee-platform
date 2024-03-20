@@ -1,7 +1,7 @@
 package io.tolgee.model.dataImport
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
-import io.tolgee.formats.ImportMessageConvertorType
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
@@ -71,7 +71,7 @@ class ImportTranslation(
    * When user enabled the conversion to TUICUP this field tells you what convertor to use
    */
   @Enumerated(EnumType.STRING)
-  var convertor: ImportMessageConvertorType? = null
+  var convertor: ImportMessageFormat? = null
 
   private fun String?.computeMurmur(): String? {
     if (this == null) {

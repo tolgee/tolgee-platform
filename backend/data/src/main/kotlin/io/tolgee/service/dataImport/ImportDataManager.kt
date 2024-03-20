@@ -381,7 +381,7 @@ class ImportDataManager(
     storedTranslations.forEach { (language, keyTranslationsMap) ->
       keyTranslationsMap.forEach { (key, translations) ->
         translations.forEach {
-          val convertor = it.convertor?.importMessageConvertor
+          val convertor = it.convertor?.messageConvertorOrNull
           if (convertor != null) {
             val converted =
               convertor.convert(

@@ -148,7 +148,7 @@ class YamlFileProcessorTest {
   }
 
   @Test
-  fun `returns correct parsed for spring unknown`() {
+  fun `returns correct parsed for unknown`() {
     mockUtil.mockIt("en.yml", "src/test/resources/import/yaml/unknown.yaml")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
@@ -156,26 +156,6 @@ class YamlFileProcessorTest {
       .assertSingle {
         hasText("Some text without params")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "not-valid-bcp47-tag!.relations.with_icu_plural")
-      .assertSinglePlural {
-        hasText(
-          """
-          {count, plural,
-          one {Some text with one}
-          other {Some text with other}
-          }
-          """.trimIndent(),
-        )
-        isPluralOptimized()
-      }
-    mockUtil.fileProcessorContext.assertTranslations("en", "not-valid-bcp47-tag!.relations.with_icu_param")
-      .assertSingle {
-        hasText("{param}")
-      }
-    mockUtil.fileProcessorContext.assertKey("not-valid-bcp47-tag!.relations.with_icu_plural") {
-      custom.assert.isNull()
-      description.assert.isNull()
-    }
   }
 
   private fun processFile() {

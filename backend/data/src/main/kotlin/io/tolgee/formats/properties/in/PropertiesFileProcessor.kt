@@ -21,7 +21,7 @@ class PropertiesFileProcessor(
         if (!comment.isNullOrBlank()) {
           context.addKeyDescription(key, comment)
         }
-        context.addGenericFormatTranslation(key, languageNameGuesses[0], value, idx)
+        context.addGenericFormatTranslation(key, firstLanguageTagGuessOrUnknown, value, idx)
       }
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message)

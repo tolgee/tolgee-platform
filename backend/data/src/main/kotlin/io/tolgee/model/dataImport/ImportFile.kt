@@ -1,6 +1,6 @@
 package io.tolgee.model.dataImport
 
-import io.tolgee.formats.ImportMessageFormat
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam

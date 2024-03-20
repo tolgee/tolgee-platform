@@ -1,4 +1,6 @@
-package io.tolgee.formats
+package io.tolgee.formats.importMessageFormat
+
+import io.tolgee.formats.MessageConvertorResult
 
 interface ImportMessageConvertor {
   fun convert(

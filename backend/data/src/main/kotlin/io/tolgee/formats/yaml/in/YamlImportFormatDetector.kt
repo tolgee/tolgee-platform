@@ -1,9 +1,9 @@
 package io.tolgee.formats.yaml.`in`
 
-import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFromPossibleFormats
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class YamlImportFormatDetector {

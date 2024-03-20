@@ -1,7 +1,7 @@
 package io.tolgee.formats.po.`in`.messageConvertors
 
-import io.tolgee.formats.ImportMessageConvertor
 import io.tolgee.formats.MessageConvertorResult
+import io.tolgee.formats.importMessageFormat.ImportMessageConvertor
 import io.tolgee.formats.paramConvertors.`in`.PythonToIcuPlaceholderConvertor
 
 class PoPythonToIcuImportMessageConvertor : ImportMessageConvertor {

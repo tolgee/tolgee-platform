@@ -2,13 +2,13 @@ package io.tolgee.formats.android.`in`
 
 import AndroidStringsXmlParser
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
 import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.PluralUnit
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
@@ -41,7 +41,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       convertMessage(text),
       forceIsPlural = false,
       rawData = StringWrapper(text),
-      convertedBy = ImportMessageConvertorType.ANDROID_XML,
+      convertedBy = ImportMessageFormat.ANDROID_XML,
     )
     setCustomWrappedWithCdata(keyName, it.value)
   }
@@ -74,7 +74,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     val rawData = it.items.map { it.key to it.value.string }.toMap()
 
     val converted =
-      AndroidToIcuMessageConvertor().convert(
+      messageConvertor.convert(
         rawData = rawData,
         languageTag = guessedLanguage,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
@@ -87,7 +87,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       converted.message,
       forceIsPlural = true,
       rawData = rawData,
-      convertedBy = ImportMessageConvertorType.ANDROID_XML,
+      convertedBy = importMessageFormat,
     )
 
     setCustomWrappedWithCdata(keyName, it.items.map { it.value })
@@ -110,7 +110,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
         convertMessage(text),
         forceIsPlural = false,
         rawData = StringWrapper(text),
-        convertedBy = ImportMessageConvertorType.ANDROID_XML,
+        convertedBy = importMessageFormat,
       )
       setCustomWrappedWithCdata(keyNameWithIndex, item.value)
     }
@@ -133,7 +133,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     if (message == null) {
       return null
     }
-    return AndroidToIcuMessageConvertor().convert(
+    return messageConvertor.convert(
       message,
       guessedLanguage,
       context.importSettings.convertPlaceholdersToIcu,
@@ -143,5 +143,9 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
 
   companion object {
     val LANGUAGE_GUESS_REGEX = Regex("values-(?<language>[a-zA-Z]{2,3})(-r(?<region>[a-zA-Z]{2,3}))?")
+
+    private val importMessageFormat = ImportMessageFormat.ANDROID_XML
+
+    private val messageConvertor = importMessageFormat.messageConvertor
   }
 }

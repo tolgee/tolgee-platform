@@ -9,43 +9,44 @@ class GenericStructuredProcessor(
   private val data: Any?,
   private val convertor: StructuredRawDataConvertor,
   private val languageTag: String? = null,
-  private val initialKeyPath: List<Any> = listOf(),
 ) : ImportFileProcessor() {
   override fun process() {
     try {
-      data.import("", initialKeyPath)
+      data.import("")
     } catch (e: Exception) {
-      throw ImportCannotParseFileException(context.file.name, e.message ?: "")
+      throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
     }
   }
 
-  private fun Any?.import(
-    key: String,
-    keyPath: List<Any>,
-  ) {
+  private fun Any?.import(key: String) {
     // Convertor handles strings and possible nested plurals, if convertor returns null,
     // it means that it's not a string or nested plurals, so we need to parse it further
     convert(this)?.let { result ->
       result.forEach {
-        context.addKeyPath(key, keyPath)
         context.addTranslation(key, languageTagOrGuess, it.value, rawData = this, forceIsPlural = it.isPlural)
       }
       return
     }
 
     (this as? List<*>)?.let {
-      it.parseList(key, keyPath)
+      it.parseList(key)
       return
     }
 
     (this as? Map<*, *>)?.let {
-      it.parseMap(key, keyPath)
+      it.parseMap(key)
       return
     }
 
     convert(this)?.firstOrNull()?.let {
-      context.addKeyPath(key, keyPath)
-      context.addTranslation(key, languageTagOrGuess, it.value, forceIsPlural = it.isPlural)
+      context.addTranslation(
+        keyName = key,
+        languageName = languageTagOrGuess,
+        value = it.value,
+        forceIsPlural = it.isPlural,
+        rawData = this,
+        convertedBy = context.fileEntity.format,
+      )
     }
   }
 
@@ -57,19 +58,13 @@ class GenericStructuredProcessor(
     )
   }
 
-  private fun List<*>.parseList(
-    keyPrefix: String,
-    keyPath: List<Any>,
-  ) {
+  private fun List<*>.parseList(keyPrefix: String) {
     this.forEachIndexed { idx, it ->
-      it.import("$keyPrefix[$idx]", keyPath + idx)
+      it.import("$keyPrefix[$idx]")
     }
   }
 
-  private fun Map<*, *>.parseMap(
-    keyPrefix: String,
-    keyPath: List<Any>,
-  ) {
+  private fun Map<*, *>.parseMap(keyPrefix: String) {
     this.entries.forEachIndexed { idx, entry ->
       val key = entry.key
 
@@ -81,12 +76,12 @@ class GenericStructuredProcessor(
       val keyPrefixWithDelimiter =
         if (keyPrefix.isNotEmpty()) "$keyPrefix${context.params.structureDelimiter}" else ""
 
-      entry.value.import("$keyPrefixWithDelimiter$key", keyPath + key)
+      entry.value.import("$keyPrefixWithDelimiter$key")
       return@forEachIndexed
     }
   }
 
   private val languageTagOrGuess: String by lazy {
-    languageTag ?: languageNameGuesses.firstOrNull() ?: "unknown"
+    languageTag ?: firstLanguageTagGuessOrUnknown
   }
 }

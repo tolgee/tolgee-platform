@@ -1,18 +1,15 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
 import com.ibm.icu.text.PluralRules
-import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.formats.StringWrapper
-import io.tolgee.formats.convertMessage
 import io.tolgee.formats.forceEscapePluralForms
-import io.tolgee.formats.toIcuPluralString
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import java.util.*
 
 class GenericStructuredRawDataToTextConvertor(
   private val format: ImportMessageFormat,
-  private val languageTag: String? = null,
-) :
-  StructuredRawDataConvertor {
+  private val languageTag: String,
+) : StructuredRawDataConvertor {
   private val availablePluralKeywords by lazy {
     val locale = Locale.forLanguageTag(languageTag)
     PluralRules.forLocale(locale).keywords.toSet()
@@ -38,11 +35,15 @@ class GenericStructuredRawDataToTextConvertor(
     projectIcuPlaceholdersEnabled: Boolean,
     convertPlaceholdersToIcu: Boolean,
   ): List<StructuredRawDataConversionResult>? {
-    val stringValue = getStringValue(rawData) ?: return null
-
     if (rawData is Number || rawData is Boolean) {
       return listOf(StructuredRawDataConversionResult(rawData.toString(), isPlural = false))
     }
+
+    if (rawData == null) {
+      return listOf(StructuredRawDataConversionResult(null, isPlural = false))
+    }
+
+    val stringValue = getStringValue(rawData) ?: return null
 
     tryHandleIcuPlural(rawData, projectIcuPlaceholdersEnabled)?.let {
       return it
@@ -61,14 +62,12 @@ class GenericStructuredRawDataToTextConvertor(
     projectIcuPlaceholdersEnabled: Boolean,
   ): List<StructuredRawDataConversionResult> {
     val converted =
-      convertMessage(
-        message = stringValue,
-        isInPlural = false,
+      format.messageConvertor.convert(
+        rawData = stringValue,
+        languageTag = languageTag,
         convertPlaceholders = convertPlaceholdersToIcu,
         isProjectIcuEnabled = projectIcuPlaceholdersEnabled,
-        escapeUnmatched = !format.canContainIcu,
-        convertorFactory = format.placeholderConvertorFactory,
-      )
+      ).message
 
     return listOf(StructuredRawDataConversionResult(converted, null))
   }
@@ -106,19 +105,20 @@ class GenericStructuredRawDataToTextConvertor(
       return null
     }
 
-    val converted =
+    val safePluralMap =
       map.entries.map {
         val key = it.key as? String ?: return null
         val value = it.value as? String ?: return null
-        key to
-          convertMessage(
-            message = value,
-            isInPlural = true,
-            convertPlaceholders = convertPlaceholdersToIcu,
-            isProjectIcuEnabled = projectIcuPlaceholdersEnabled,
-            convertorFactory = format.placeholderConvertorFactory,
-          )
-      }.toMap().toIcuPluralString(argName = "value")
+        key to value
+      }.toMap()
+
+    val converted =
+      format.messageConvertor.convert(
+        rawData = safePluralMap,
+        languageTag = languageTag,
+        convertPlaceholders = convertPlaceholdersToIcu,
+        isProjectIcuEnabled = projectIcuPlaceholdersEnabled,
+      ).message
 
     return listOf(StructuredRawDataConversionResult(converted, true))
   }

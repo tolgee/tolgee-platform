@@ -7,6 +7,7 @@ import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertMessage
 import io.tolgee.formats.getULocaleFromTag
+import io.tolgee.formats.importMessageFormat.BaseImportRawDataConverter
 import io.tolgee.formats.pluralData.PluralData
 
 class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcuPlaceholderConvertor) {
@@ -16,11 +17,16 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
     convertPlaceholders: Boolean,
     isProjectIcuEnabled: Boolean,
   ): MessageConvertorResult {
-    val stringValue = rawData as? String ?: (rawData as? Map<*, *>)?.get("_stringValue") as? String
+    val baseImportRawDataConverter =
+      BaseImportRawDataConverter(
+        canContainIcu = false,
+        toIcuPlaceholderConvertorFactory = paramConvertorFactory,
+        convertPlaceholders = convertPlaceholders,
+        isProjectIcuEnabled = isProjectIcuEnabled,
+      )
 
-    if (stringValue is String) {
-      val converted = convert(stringValue, false, convertPlaceholders, isProjectIcuEnabled)
-      return MessageConvertorResult(converted, false)
+    baseImportRawDataConverter.tryConvertStringValue(rawData)?.let {
+      return it
     }
 
     if (rawData is Map<*, *>) {

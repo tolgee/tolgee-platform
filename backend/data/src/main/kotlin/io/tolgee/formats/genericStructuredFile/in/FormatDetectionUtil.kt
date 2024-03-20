@@ -2,7 +2,7 @@ package io.tolgee.formats.genericStructuredFile.`in`
 
 import com.ibm.icu.util.IllformedLocaleException
 import com.ibm.icu.util.ULocale
-import io.tolgee.formats.ImportMessageFormat
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import java.util.concurrent.atomic.AtomicLong
 
 object FormatDetectionUtil {

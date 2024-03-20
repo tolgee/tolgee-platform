@@ -3,9 +3,9 @@ package io.tolgee.formats.yaml.`in`
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredRawDataToTextConvertor
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class YamlFileProcessor(
@@ -20,15 +20,14 @@ class YamlFileProcessor(
     if (detectedFormat.rootKeyIsLanguageTag) {
       dataMap.entries.forEach { (languageTag, languageData) ->
         if (languageTag !is String) return@forEach
-        processLanguageData(listOf(languageTag), detectedFormat, languageTag, languageData)
+        processLanguageData(detectedFormat, languageTag, languageData)
       }
       return
     }
-    processLanguageData(listOf(), detectedFormat, languageNameGuesses.firstOrNull() ?: "unknown", data)
+    processLanguageData(detectedFormat, firstLanguageTagGuessOrUnknown, data)
   }
 
   private fun processLanguageData(
-    initialKeyPath: List<String>,
     detectedFormat: ImportMessageFormat,
     languageTag: String,
     languageData: Any?,
@@ -39,7 +38,6 @@ class YamlFileProcessor(
         languageTag,
       )
     GenericStructuredProcessor(
-      initialKeyPath = initialKeyPath,
       context = context,
       data = languageData,
       convertor = convertor,

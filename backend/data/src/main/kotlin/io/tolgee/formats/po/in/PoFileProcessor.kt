@@ -3,8 +3,8 @@ package io.tolgee.formats.po.`in`
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.PoParserException
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.StringWrapper
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
@@ -23,7 +23,7 @@ class PoFileProcessor(
   override fun process() {
     try {
       parsed = poParser()
-      languageId = parsed.meta.language ?: languageNameGuesses[0]
+      languageId = parsed.meta.language ?: firstLanguageTagGuessOrUnknown
       context.languages[languageId] = ImportLanguage(languageId, context.fileEntity)
 
       parsed.translations.forEachIndexed { idx, poTranslation ->
@@ -83,9 +83,9 @@ class PoFileProcessor(
   private fun getConvertedMessage(
     poTranslation: PoParsedTranslation,
     stringOrPluralForms: Any?,
-  ): Pair<String?, ImportMessageConvertorType?> {
+  ): Pair<String?, ImportMessageFormat> {
     val messageFormat = getMessageFormat(poTranslation)
-    val convertor = messageFormat.importMessageConvertorType.importMessageConvertor ?: return (null to null)
+    val convertor = messageFormat.importMessageFormat.messageConvertor
     val icuMessage =
       convertor.convert(
         rawData = stringOrPluralForms,
@@ -93,7 +93,7 @@ class PoFileProcessor(
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
         isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
       ).message
-    return icuMessage to messageFormat.importMessageConvertorType
+    return icuMessage to messageFormat.importMessageFormat
   }
 
   private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): PoSupportedMessageFormat {

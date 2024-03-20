@@ -2,10 +2,10 @@ package io.tolgee.formats.apple.`in`.strings
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class StringsFileProcessor(
@@ -122,7 +122,7 @@ class StringsFileProcessor(
 
   private fun onPairParsed() {
     val converted =
-      ImportMessageConvertorType.STRINGS.importMessageConvertor!!.convert(
+      messageConvertor.convert(
         rawData = value,
         languageTag = languageName,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
@@ -134,13 +134,19 @@ class StringsFileProcessor(
       languageName,
       converted,
       rawData = StringWrapper(value),
-      convertedBy = ImportMessageConvertorType.STRINGS,
+      convertedBy = importMessageFormat,
     )
     currentComment = null
   }
 
   private val languageName: String by lazy {
     guessLanguageFromPath(context.file.name)
+  }
+
+  companion object {
+    private val importMessageFormat = ImportMessageFormat.STRINGS
+
+    private val messageConvertor = importMessageFormat.messageConvertor
   }
 
   enum class State {

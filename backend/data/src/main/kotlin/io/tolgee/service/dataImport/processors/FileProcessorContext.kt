@@ -4,10 +4,10 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.ImportMessageConvertorType
 import io.tolgee.formats.StringWrapper
 import io.tolgee.formats.forceEscapePluralForms
 import io.tolgee.formats.getPluralForms
+import io.tolgee.formats.importMessageFormat.ImportMessageFormat
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationContext
 data class FileProcessorContext(
   var file: ImportFileDto,
   val fileEntity: ImportFile,
-  val maxTranslationTextLength: Long = 200L,
+  val maxTranslationTextLength: Long = 2000L,
   val params: ImportAddFilesParams = ImportAddFilesParams(),
   val importSettings: IImportSettings =
     object : IImportSettings {
@@ -50,7 +50,7 @@ data class FileProcessorContext(
     forceIsPlural: Boolean? = null,
     replaceNonPlurals: Boolean = false,
     rawData: Any? = null,
-    convertedBy: ImportMessageConvertorType? = null,
+    convertedBy: ImportMessageFormat? = null,
   ) {
     val stringValue = value as? String
 
@@ -194,14 +194,6 @@ data class FileProcessorContext(
       keyEntity.keyMeta = KeyMeta(importKey = keyEntity)
       keyEntity.keyMeta!!
     }
-  }
-
-  fun addKeyPath(
-    key: String,
-    path: List<Any>,
-  ) {
-    val keyEntity = getOrCreateKey(key)
-    keyEntity.nestedKeyPath = path
   }
 
   val customValuesValidator: KeyCustomValuesValidator by lazy {
