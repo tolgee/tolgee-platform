@@ -17,7 +17,6 @@ const StyledContainer = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-bottom: 0px;
   border-right: 0px;
-  margin-top: 10px;
   transition: top 0.2s ease-in-out;
   margin-bottom: -20px;
   overflow-y: auto;

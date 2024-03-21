@@ -1,5 +1,4 @@
-import { styled, Tooltip, Checkbox, Box } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { styled, Box } from '@mui/material';
 import { useState } from 'react';
 import { useProjectActions } from 'tg.hooks/ProjectContext';
 
@@ -20,6 +19,7 @@ import { BatchOperationDialog } from './OperationsSummary/BatchOperationDialog';
 import { OperationMachineTranslate } from './OperationMachineTranslate';
 import { BatchActions, BatchJobModel } from './types';
 import { OperationPreTranslate } from './OperationPreTranslate';
+import { SelectAllCheckbox } from './SelectAllCheckbox';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -61,12 +61,6 @@ const StyledBase = styled('div')`
   gap: 12px;
 `;
 
-const StyledToggleAllButton = styled(Box)`
-  width: 38px;
-  height: 38px;
-  margin: 0px -12px;
-`;
-
 const StyledItem = styled(Box)`
   height: 40px;
   display: flex;
@@ -80,27 +74,13 @@ type Props = {
 };
 
 export const BatchOperations = ({ open, onClose }: Props) => {
-  const { t } = useTranslate();
   const selection = useTranslationsSelector((c) => c.selection);
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
-  const isLoading = useTranslationsSelector((c) => c.isLoadingAllIds);
-  const isDeleting = useTranslationsSelector((c) => c.isDeleting);
-  const { selectAll, selectionClear, refetchTranslations } =
-    useTranslationsActions();
+  const { selectionClear, refetchTranslations } = useTranslationsActions();
   const { refetchBatchJobs } = useProjectActions();
 
-  const allSelected = totalCount === selection.length;
-  const somethingSelected = !allSelected && Boolean(selection.length);
   const [operation, setOperation] = useState<BatchActions>();
   const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
-
-  const handleToggleSelectAll = () => {
-    if (!allSelected) {
-      selectAll();
-    } else {
-      selectionClear();
-    }
-  };
 
   const sharedProps = {
     disabled: !selection.length,
@@ -149,27 +129,7 @@ export const BatchOperations = ({ open, onClose }: Props) => {
           <StyledContent>
             <StyledBase>
               <StyledItem>
-                <Tooltip
-                  title={
-                    runningOperation
-                      ? ''
-                      : allSelected
-                      ? t('translations_clear_selection')
-                      : t('translations_select_all')
-                  }
-                  disableInteractive
-                >
-                  <StyledToggleAllButton>
-                    <Checkbox
-                      data-cy="translations-select-all-button"
-                      disabled={isLoading || isDeleting}
-                      onClick={handleToggleSelectAll}
-                      size="small"
-                      checked={Boolean(selection.length)}
-                      indeterminate={somethingSelected}
-                    />
-                  </StyledToggleAllButton>
-                </Tooltip>
+                <SelectAllCheckbox />
               </StyledItem>
               <StyledItem>{`${selection.length} / ${totalCount}`}</StyledItem>
               <StyledItem data-cy="batch-operations-select">
