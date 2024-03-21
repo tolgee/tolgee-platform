@@ -1,3 +1,10 @@
+# [3.53.0](https://github.com/tolgee/tolgee-platform/compare/v3.52.0...v3.53.0) (2024-03-21)
+
+
+### Features
+
+* add select all checkbox to top ([#2204](https://github.com/tolgee/tolgee-platform/issues/2204)) ([d277693](https://github.com/tolgee/tolgee-platform/commit/d277693f4fe7a32dd18d6ec34ae3cd8f363eb91b))
+
 # [3.52.0](https://github.com/tolgee/tolgee-platform/compare/v3.51.1...v3.52.0) (2024-03-21)
 
 
