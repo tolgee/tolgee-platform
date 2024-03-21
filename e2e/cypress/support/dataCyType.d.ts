@@ -258,11 +258,11 @@ declare namespace DataCy {
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
         "language-modify-form" |
+        "languages-add-dialog-submit" |
         "languages-create-autocomplete-field" |
         "languages-create-autocomplete-suggested-option" |
         "languages-create-cancel-prepared-button" |
         "languages-create-customize-button" |
-        "languages-create-submit-button" |
         "languages-flag-selector-open-button" |
         "languages-menu-ai-prompt-customization" |
         "languages-menu-machine-translation" |

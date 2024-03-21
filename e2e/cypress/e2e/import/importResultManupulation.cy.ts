@@ -107,7 +107,7 @@ describe('Import result & manipulation', () => {
       cy.gcy('languages-create-autocomplete-suggested-option')
         .contains('Azerbaijani')
         .click();
-      gcy('languages-create-submit-button').click();
+      gcy('languages-add-dialog-submit').click();
       getLanguageSelect(filename).should('contain.text', 'Azerbaijani');
       selectInProjectMenu('Languages');
       cy.contains('Azerbaijani').should('be.visible');

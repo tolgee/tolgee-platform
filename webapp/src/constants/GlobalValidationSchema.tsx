@@ -150,10 +150,15 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = (t: TFunType) =>
+  static readonly LANGUAGE_TAG = (t: TFunType, existingTags?: string[]) =>
     Yup.string()
       .required()
       .max(20)
+      .test({
+        name: 'language-tag-exists',
+        test: (value) => !existingTags?.includes(value!),
+        message: t('validation_language_tag_exists'),
+      })
       .matches(/^[^,]*$/, {
         // @tolgee-key validation_cannot_contain_coma
         message: t('validation_cannot_contain_coma'),
@@ -161,11 +166,11 @@ export class Validation {
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = (t: TFunType) =>
+  static readonly LANGUAGE = (t: TFunType, existingTags?: string[]) =>
     Yup.object().shape({
       name: Validation.LANGUAGE_NAME,
       originalName: Validation.LANGUAGE_ORIGINAL_NAME,
-      tag: Validation.LANGUAGE_TAG(t),
+      tag: Validation.LANGUAGE_TAG(t, existingTags),
       flagEmoji: Validation.LANGUAGE_FLAG_EMOJI,
     });
 
@@ -190,7 +195,7 @@ export class Validation {
         .required()
         // @tolgee-key project_creation_add_at_least_one_language
         .min(1, t('project_creation_add_at_least_one_language'))
-        .of(Validation.LANGUAGE(t).nullable())
+        .of(Validation.LANGUAGE(t, []).nullable())
         .test(
           'language-repeated',
           // @tolgee-key create_project_validation_language_repeated

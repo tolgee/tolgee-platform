@@ -110,9 +110,11 @@ describe('Language creation in new project', () => {
 
   it('validates language repeat', () => {
     getInputByName('name').type('Super project');
-    addLanguage('English');
-    gcy('global-form-save-button').click();
-    cy.contains('Cannot add language more than once').should('be.visible');
+    typeToAutocomplete('English');
+    gcy('languages-create-autocomplete-suggested-option')
+      .contains('English')
+      .should('have.css', 'pointer-events', 'none');
+    cy.gcy('languages-prepared-language-box').should('have.length', 1);
   });
 
   it('validates no languages', () => {
@@ -137,7 +139,6 @@ describe('Language creation in new project', () => {
 });
 
 const addLanguage = (language: string) => {
-  gcy('create-project-language-add-button').click();
   typeToAutocomplete(language);
   selectInAutocomplete(language);
 };

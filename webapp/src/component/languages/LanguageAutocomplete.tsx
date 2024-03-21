@@ -1,11 +1,23 @@
-import React, { FC, ReactNode, useState } from 'react';
-import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
-import { Add, Clear } from '@mui/icons-material';
+import { FC, ReactNode, useMemo, useState } from 'react';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  styled,
+} from '@mui/material';
+import { Add, Clear, Search } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { suggest } from '@tginternal/language-util';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { MenuItem } from '@mui/material';
+import { FlagImage } from './FlagImage';
+
+const StyledMenuItem = styled(MenuItem)`
+  display: flex;
+  gap: 12px;
+`;
 
 export type AutocompleteOption = Omit<SuggestResult, 'languageId'> & {
   isNew?: true;
@@ -25,12 +37,14 @@ const getOptions = (input: string): AutocompleteOption[] => {
     originalName: '',
     englishName: input,
     customRenderOption: (
-      <Box display="inline-flex" justifyContent="center">
-        <Box mr={1}>
-          <Add />
-        </Box>
+      <Box
+        display="inline-flex"
+        justifyContent="center"
+        gap={1}
+        alignItems="center"
+      >
+        <Add fontSize="small" />
         <T keyName="language_field_autocomplete_label_new_language" />
-        &nbsp;🏳️
       </Box>
     ),
   };
@@ -41,8 +55,15 @@ export const LanguageAutocomplete: FC<{
   onSelect: (value: AutocompleteOption) => void;
   onClear?: () => void;
   autoFocus?: boolean;
+  existingLanguages: string[];
 }> = (props) => {
   const [options, setOptions] = useState([] as AutocompleteOption[]);
+  const [search, setSearch] = useState('');
+  const existingLanguages = useMemo(
+    () => new Set(props.existingLanguages),
+    [props.existingLanguages]
+  );
+  const { t } = useTranslate();
 
   return (
     <Autocomplete
@@ -51,19 +72,38 @@ export const LanguageAutocomplete: FC<{
       onOpen={() => setOptions(getOptions(''))}
       filterOptions={(options) => options}
       getOptionLabel={(option) => option.englishName}
+      inputValue={search}
+      onInputChange={(_, value) => setSearch(value)}
+      value={null}
       onChange={(_, value) => {
         props.onSelect(value as AutocompleteOption);
+        setSearch('');
       }}
-      renderOption={(props, option) => (
-        <MenuItem {...props}>
-          <span data-cy="languages-create-autocomplete-suggested-option">
-            {option.customRenderOption ||
-              `${option.englishName} - ${option.originalName} - ${
-                option.languageId
-              } ${option.flags?.[0] || ''}`}
-          </span>
-        </MenuItem>
-      )}
+      renderOption={(props, option) => {
+        const itemContent = option.customRenderOption || (
+          <>
+            <FlagImage height={16} flagEmoji={option.flags?.[0] || ''} />
+            <span>{`${option.englishName} - ${option.originalName} - ${option.languageId} `}</span>
+          </>
+        );
+        return existingLanguages.has(option.languageId) ? (
+          <StyledMenuItem
+            key={option.languageId + ':disabled'}
+            disabled={true}
+            data-cy="languages-create-autocomplete-suggested-option"
+          >
+            {itemContent}
+          </StyledMenuItem>
+        ) : (
+          <StyledMenuItem
+            key={option.languageId}
+            {...props}
+            data-cy="languages-create-autocomplete-suggested-option"
+          >
+            {itemContent}
+          </StyledMenuItem>
+        );
+      }}
       renderInput={(params) => (
         <TextField
           data-cy="languages-create-autocomplete-field"
@@ -71,14 +111,19 @@ export const LanguageAutocomplete: FC<{
           onChange={(e) => {
             setTimeout(() => setOptions(getOptions(e.target.value)));
           }}
-          label={<T keyName="language_create_autocomplete_label" />}
+          placeholder={t('language_create_autocomplete_label')}
           margin="normal"
-          variant="standard"
-          required={true}
+          variant="outlined"
+          size="small"
           InputProps={{
             autoFocus: props.autoFocus,
             ...params.InputProps,
             style: { paddingRight: 0 },
+            startAdornment: (
+              <InputAdornment position="end">
+                <Search />
+              </InputAdornment>
+            ),
             endAdornment: props.onClear ? (
               <InputAdornment position="end">
                 <IconButton size="small" onClick={props.onClear}>
