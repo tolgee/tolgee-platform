@@ -3,6 +3,7 @@ package io.tolgee.formats.generic
 import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.formats.FromIcuPlaceholderConvertor
+import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.toIcuPluralString
 
 /**
@@ -18,14 +19,8 @@ class IcuToGenericFormatMessageConvertor(
   private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
 ) {
   fun convert(): String? {
-    message ?: return null
-    val converted =
-      BaseIcuMessageConvertor(
-        message = message,
-        argumentConvertor = paramConvertorFactory(),
-        forceIsPlural = forceIsPlural,
-        keepEscaping = isProjectIcuPlaceholdersEnabled,
-      ).convert()
+    val converted = getConvertorResult()
+    converted ?: return null
 
     val singleResult = converted.singleResult
     if (singleResult != null) {
@@ -38,5 +33,19 @@ class IcuToGenericFormatMessageConvertor(
         addNewLines = false,
         argName = converted.argName ?: DEFAULT_PLURAL_ARGUMENT_NAME,
       )
+  }
+
+  fun getForcedPluralForms(): Map<String, String>? {
+    return getConvertorResult()?.formsResult
+  }
+
+  private fun getConvertorResult(): PossiblePluralConversionResult? {
+    message ?: return null
+    return BaseIcuMessageConvertor(
+      message = message,
+      argumentConvertor = paramConvertorFactory(),
+      forceIsPlural = forceIsPlural,
+      keepEscaping = isProjectIcuPlaceholdersEnabled,
+    ).convert()
   }
 }
