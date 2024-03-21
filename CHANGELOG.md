@@ -1,3 +1,10 @@
+# [3.52.0](https://github.com/tolgee/tolgee-platform/compare/v3.51.1...v3.52.0) (2024-03-21)
+
+
+### Features
+
+* new language adding ([#2200](https://github.com/tolgee/tolgee-platform/issues/2200)) ([989eb67](https://github.com/tolgee/tolgee-platform/commit/989eb6737c3e62680977cf956f6631594826653d))
+
 ## [3.51.1](https://github.com/tolgee/tolgee-platform/compare/v3.51.0...v3.51.1) (2024-03-19)
 
 
