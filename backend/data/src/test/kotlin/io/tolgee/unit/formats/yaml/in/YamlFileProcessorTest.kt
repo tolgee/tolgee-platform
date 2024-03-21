@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.yaml
+package io.tolgee.unit.formats.yaml.`in`
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory

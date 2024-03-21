@@ -1,7 +1,6 @@
 package io.tolgee.unit.formats.xliff.out
 
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
@@ -43,6 +42,7 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -84,6 +84,7 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -113,6 +114,7 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = { listOf() },
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
     val fileContent = files["en.xliff"]!!.bufferedReader().readText()
@@ -201,6 +203,7 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
     val validator: Validator
@@ -338,13 +341,7 @@ class XliffFileExporterTest {
       exportParams = ExportParams(),
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
-      convertMessage = { message, isPlural ->
-        IcuToGenericFormatMessageConvertor(
-          message,
-          isPlural,
-          isProjectIcuPlaceholdersEnabled,
-        ).convert()
-      },
+      projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
     )
   }
 }

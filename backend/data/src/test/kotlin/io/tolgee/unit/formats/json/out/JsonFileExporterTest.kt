@@ -3,7 +3,6 @@ package io.tolgee.unit.formats.json.out
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
@@ -21,7 +20,7 @@ class JsonFileExporterTest {
   @Test
   fun `it scopes and handles collisions`() {
     val data = generateTranslationsForKeys(listOf("a.a.a.a", "a.a", "a.a.a", "a.b.b", "a.c.c", "b", "b.b"))
-    val exported = JsonFileExporter(data, ExportParams()).produceFiles()
+    val exported = getExporter(data).produceFiles()
     val json = exported.getFileTextContent("en.json")
     val parsed =
       jacksonObjectMapper()
@@ -43,7 +42,7 @@ class JsonFileExporterTest {
   @Test
   fun `it exports when key starts with dot`() {
     val data = generateTranslationsForKeys(listOf(".a"))
-    val exported = JsonFileExporter(data, ExportParams()).produceFiles()
+    val exported = getExporter(data).produceFiles()
     val json = exported.getFileTextContent("en.json")
     val parsed =
       jacksonObjectMapper()
@@ -58,11 +57,7 @@ class JsonFileExporterTest {
   @Test
   fun `it scopes by namespaces`() {
     val data = generateTranslationsForKeys(listOf("a:a.a", "a", "a:a", "a:b.a"))
-    val exported =
-      JsonFileExporter(
-        data,
-        ExportParams().apply {},
-      ).produceFiles()
+    val exported = getExporter(data).produceFiles()
 
     val ajson = exported.getFileTextContent("en.json")
     assertThatJson(ajson) {
@@ -81,11 +76,7 @@ class JsonFileExporterTest {
   fun `it returns result in the same order as it comes from DB`() {
     val keys = listOf("a", "b", "c", "d", "e", "f")
     val data = generateTranslationsForKeys(keys)
-    val exported =
-      JsonFileExporter(
-        data,
-        ExportParams(),
-      ).produceFiles()
+    val exported = getExporter(data).produceFiles()
     val parsed: LinkedHashMap<String, String> = exported.parseFileContent("en.json")
     assertThat(parsed.keys.toList()).isEqualTo(keys)
   }
@@ -95,11 +86,7 @@ class JsonFileExporterTest {
   fun `it is formatted`() {
     val keys = listOf("a", "b")
     val data = generateTranslationsForKeys(keys)
-    val exported =
-      JsonFileExporter(
-        data,
-        ExportParams(),
-      ).produceFiles()
+    val exported = getExporter(data).produceFiles()
     assertThat(exported.getFileTextContent("en.json")).contains("\n").contains("  ")
   }
 
@@ -198,13 +185,8 @@ class JsonFileExporterTest {
     return JsonFileExporter(
       translations = translations,
       exportParams = ExportParams(),
-      convertMessage = { message, isPlural ->
-        IcuToGenericFormatMessageConvertor(
-          message,
-          isPlural,
-          isProjectIcuPlaceholdersEnabled,
-        ).convert()
-      },
+      projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
+      objectMapper = jacksonObjectMapper(),
     )
   }
 }

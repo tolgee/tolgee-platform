@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.android.`in`
 
 import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
 import io.tolgee.testing.assert
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -168,6 +169,35 @@ class AndroidXmlFormatProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
+  }
+
+  @Test
+  fun `placeholder conversion setting application works`() {
+    PlaceholderConversionTestHelper.testFile(
+      "values-en/strings.xml",
+      "src/test/resources/import/android/strings_params_everywhere.xml",
+      assertBeforeSettingsApplication =
+        listOf(
+          "{0, plural,\none {# dog {1} '{'escape'}'}\nother {# dogs {1}}\n}",
+          "First item {0, number} '{'escape'}'",
+          "Second item {0, number}",
+          "{0, number} {3} {2, number, .00} {3, number, scientific} %+d '{'escape'}'",
+        ),
+      assertAfterDisablingConversion =
+        listOf(
+          "{0, plural,\none {%d dog %s '{'escape'}'}\nother {%d dogs %s}\n}",
+          "First item %d '{'escape'}'",
+          "Second item %d",
+          "%d %4\$s %.2f %e %+d '{'escape'}'",
+        ),
+      assertAfterReEnablingConversion =
+        listOf(
+          "{0, plural,\none {# dog {1} '{'escape'}'}\nother {# dogs {1}}\n}",
+          "First item {0, number} '{'escape'}'",
+          "Second item {0, number}",
+          "{0, number} {3} {2, number, .00} {3, number, scientific} %+d '{'escape'}'",
+        ),
+    )
   }
 
   private fun mockPlaceholderConversionTestFile(

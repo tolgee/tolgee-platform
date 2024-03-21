@@ -215,14 +215,25 @@ class StructureModelBuilderTest {
     }
   }
 
+  @Test
+  fun `rootKeyIsLanguageTag works`() {
+    listOf("h", "h[10]").testResult('.', true, rootKeyIsLanguageTag = true) {
+      node("en") {
+        node("h").isEqualTo("text")
+        isObject.containsKeys("h[10]")
+      }
+    }
+  }
+
   private fun List<String>.testResult(
     delimiter: Char,
     supportArrays: Boolean,
+    rootKeyIsLanguageTag: Boolean = false,
     assertFn: JsonAssert.ConfigurableJsonAssert.() -> Unit = {},
   ): JsonAssert.ConfigurableJsonAssert {
-    val builder = StructureModelBuilder(delimiter, supportArrays)
+    val builder = StructureModelBuilder(delimiter, supportArrays, rootKeyIsLanguageTag)
     this.forEach {
-      builder.addValue(it, "text")
+      builder.addValue("en", it, "text")
     }
     val result = builder.result
     val jsonString = jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result)

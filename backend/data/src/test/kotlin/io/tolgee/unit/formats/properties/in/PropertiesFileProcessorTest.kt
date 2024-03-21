@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.properties.`in`
 
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.testing.assert
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -149,6 +150,29 @@ class PropertiesFileProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
+  }
+
+  @Test
+  fun `placeholder conversion setting application works`() {
+    PlaceholderConversionTestHelper.testFile(
+      "en.properties",
+      "src/test/resources/import/properties/example_params.properties",
+      assertBeforeSettingsApplication =
+        listOf(
+          "Hi {0, number} '{'icuParam'}'",
+          "{0, plural,\none {Hallo {0, number} '{'icuParam'}'}\nother {Hallo {0, number} '{'icuParam'}'}\n}",
+        ),
+      assertAfterDisablingConversion =
+        listOf(
+          "Hi %d '{'icuParam'}'",
+          "{0, plural,\none {Hallo %d '{'icuParam'}'}\nother {Hallo %d '{'icuParam'}'}\n}",
+        ),
+      assertAfterReEnablingConversion =
+        listOf(
+          "Hi {0, number} '{'icuParam'}'",
+          "{0, plural,\none {Hallo {0, number} '{'icuParam'}'}\nother {Hallo {0, number} '{'icuParam'}'}\n}",
+        ),
+    )
   }
 
   private fun mockPlaceholderConversionTestFile(

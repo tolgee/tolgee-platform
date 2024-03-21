@@ -12,7 +12,8 @@ object PlaceholderConversionTestHelper {
     assertAfterDisablingConversion: List<String>,
     assertAfterReEnablingConversion: List<String>,
   ) {
-    val (beforeSettingsApplication, afterDisablingConversion, afterReEnablingConversion) = getRestults()
+    val (beforeSettingsApplication, afterDisablingConversion, afterReEnablingConversion) =
+      getResults(fileName, resourcesFilePath)
 
     try {
       beforeSettingsApplication.assert.isEqualTo(assertBeforeSettingsApplication)
@@ -33,13 +34,16 @@ object PlaceholderConversionTestHelper {
     }
   }
 
-  private fun getRestults(): Triple<List<String?>, List<String?>, List<String?>> {
+  private fun getResults(
+    fileName: String,
+    resourcesFilePath: String,
+  ): Triple<List<String?>, List<String?>, List<String?>> {
     val mockUtil = FileProcessorContextMockUtil()
 
     val processor =
       mockUtil.mockCoreProcessor(
-        fileName = "en.yml",
-        resourcesFilePath = "src/test/resources/import/yaml/ruby_params.yaml",
+        fileName = fileName,
+        resourcesFilePath = resourcesFilePath,
       )
     processor.processFiles(listOf(mockUtil.importFileDto))
     val beforeSettingsApplication = getSavedTranslationsAndClearMock(mockUtil)
@@ -82,7 +86,11 @@ object PlaceholderConversionTestHelper {
     fileName: String,
     resourceFilePath: String,
   ): String {
-    val (beforeSettingsApplication, afterDisablingConversion, afterReEnablingConversion) = getRestults()
+    val (beforeSettingsApplication, afterDisablingConversion, afterReEnablingConversion) =
+      getResults(
+        fileName,
+        resourceFilePath,
+      )
     val stringBuilder = StringBuilder()
     val indent = { i: Int -> " ".repeat(i * 2) }
     val escapeString = { s: String? -> s?.replace("\n", "\\n") }

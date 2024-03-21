@@ -66,7 +66,10 @@ This is possible only when single language is exported. Otherwise it returns "40
     description = """Message format to be used for export. (applicable for .po)
       
 e.g. PHP_PO: Hello %s
+
+Deprecated: Select your desired .po format using the "format" parameter.
     """,
+    deprecated = true,
   )
   override var messageFormat: ExportMessageFormat? = null,
 ) : IExportParams {

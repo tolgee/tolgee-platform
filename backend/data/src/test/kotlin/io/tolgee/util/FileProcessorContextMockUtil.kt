@@ -16,6 +16,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.key.KeyMetaService
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -65,10 +66,17 @@ class FileProcessorContextMockUtil {
     mockTolgeeProperties(applicationContextMock)
     mockImportFileProcessorFactory(applicationContextMock)
     mockLanguageService(applicationContextMock)
+    mockKeyMetaService(applicationContextMock)
     val validator = Mockito.mock(KeyCustomValuesValidator::class.java)
     Mockito.`when`(applicationContextMock.getBean(KeyCustomValuesValidator::class.java)).thenReturn(validator)
     Mockito.`when`(validator.isValid(any())).thenReturn(true)
     return applicationContextMock
+  }
+
+  private fun mockKeyMetaService(applicationContextMock: ApplicationContext) {
+    val keyMetaService = mock<KeyMetaService>()
+    whenever(applicationContextMock.getBean(KeyMetaService::class.java))
+      .thenReturn(keyMetaService)
   }
 
   private fun mockLanguageService(applicationContextMock: ApplicationContext) {

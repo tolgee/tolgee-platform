@@ -11,19 +11,22 @@ import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
-import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
+import io.tolgee.formats.yaml.out.YamlFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
 @Component
 class FileExporterFactory(
   private val objectMapper: ObjectMapper,
+  @Qualifier("yamlObjectMapper")
+  private val yamlObjectMapper: ObjectMapper,
 ) {
   fun create(
     data: List<ExportTranslationView>,
@@ -37,9 +40,17 @@ class FileExporterFactory(
         JsonFileExporter(
           data,
           exportParams,
-        ) { text, isPlural ->
-          IcuToGenericFormatMessageConvertor(text, isPlural, projectIcuPlaceholdersSupport).convert()
-        }
+          objectMapper = objectMapper,
+          projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
+        )
+
+      ExportFormat.YAML_RUBY, ExportFormat.YAML_ICU, ExportFormat.YAML_JAVA ->
+        YamlFileExporter(
+          data,
+          exportParams,
+          objectMapper = yamlObjectMapper,
+          projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
+        )
 
       ExportFormat.XLIFF ->
         XliffFileExporter(
@@ -47,9 +58,8 @@ class FileExporterFactory(
           exportParams,
           baseTranslationsProvider,
           baseLanguage,
-        ) { text, isPlural ->
-          IcuToGenericFormatMessageConvertor(text, isPlural, projectIcuPlaceholdersSupport).convert()
-        }
+          projectIcuPlaceholdersSupport,
+        )
 
       ExportFormat.APPLE_XLIFF ->
         AppleXliffExporter(
@@ -64,6 +74,26 @@ class FileExporterFactory(
       ExportFormat.PO ->
         getPoExporter(data, exportParams, baseTranslationsProvider, baseLanguage, projectIcuPlaceholdersSupport)
 
+      ExportFormat.PO_PHP ->
+        PoFileExporter(
+          data,
+          exportParams,
+          baseTranslationsProvider,
+          baseLanguage,
+          PoSupportedMessageFormat.PHP,
+          projectIcuPlaceholdersSupport,
+        )
+
+      ExportFormat.PO_C ->
+        PoFileExporter(
+          data,
+          exportParams,
+          baseTranslationsProvider,
+          baseLanguage,
+          PoSupportedMessageFormat.C,
+          projectIcuPlaceholdersSupport,
+        )
+
       ExportFormat.APPLE_STRINGS_STRINGSDICT ->
         AppleStringsStringsdictExporter(data, exportParams, projectIcuPlaceholdersSupport)
 
@@ -77,9 +107,7 @@ class FileExporterFactory(
         )
 
       ExportFormat.PROPERTIES ->
-        PropertiesFileExporter(data, exportParams) { text, isPlural ->
-          IcuToGenericFormatMessageConvertor(text, isPlural, projectIcuPlaceholdersSupport).convert()
-        }
+        PropertiesFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
     }
   }
 

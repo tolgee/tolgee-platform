@@ -9,6 +9,7 @@ import io.tolgee.formats.path.getPathItems
 class StructureModelBuilder(
   private var structureDelimiter: Char?,
   private var supportJsonArrays: Boolean,
+  private val rootKeyIsLanguageTag: Boolean = false,
 ) {
   private var model: StructuredModelItem? = null
 
@@ -39,12 +40,20 @@ class StructureModelBuilder(
   }
 
   fun addValue(
+    languageTag: String,
     key: String,
     value: String?,
   ) {
-    val path = getPathItems(key, supportJsonArrays, structureDelimiter)
+    val path = getLanguageTagPath(languageTag) + getPathItems(key, supportJsonArrays, structureDelimiter)
     model = model ?: path.first().createNode(null, null)
     addToContent(model!!, path, path, value)
+  }
+
+  private fun getLanguageTagPath(languageTag: String): MutableList<PathItem> {
+    if (rootKeyIsLanguageTag) {
+      return mutableListOf(ObjectPathItem(languageTag, languageTag))
+    }
+    return mutableListOf()
   }
 
   private fun addToContent(

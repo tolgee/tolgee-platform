@@ -1,6 +1,8 @@
 package io.tolgee.formats.properties.out
 
 import io.tolgee.dtos.IExportParams
+import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
+import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import org.apache.commons.configuration2.PropertiesConfiguration
@@ -19,7 +21,7 @@ import java.io.Writer
 class PropertiesFileExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: IExportParams,
-  val convertMessage: (message: String?, isPlural: Boolean) -> String? = { message, _ -> message },
+  private val projectIcuPlaceholdersSupport: Boolean,
 ) : FileExporter {
   override val fileExtension: String = "properties"
 
@@ -34,6 +36,18 @@ class PropertiesFileExporter(
       properties.setProperty(keyName, value)
       properties.layout.setComment(keyName, translation.key.description)
     }
+  }
+
+  private fun convertMessage(
+    text: String?,
+    plural: Boolean,
+  ): String? {
+    return IcuToGenericFormatMessageConvertor(
+      text,
+      plural,
+      projectIcuPlaceholdersSupport,
+      paramConvertorFactory = { NoOpFromIcuPlaceholderConvertor() },
+    ).convert()
   }
 
   override fun produceFiles(): Map<String, InputStream> {
