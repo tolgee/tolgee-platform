@@ -136,6 +136,7 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "create-project-language-add-button" |
         "dashboard-projects-list-item" |
         "delete-user-button" |
         "developer-menu-content-delivery" |

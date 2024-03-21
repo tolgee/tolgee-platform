@@ -113,8 +113,7 @@ describe('Language creation in new project', () => {
     typeToAutocomplete('English');
     gcy('languages-create-autocomplete-suggested-option')
       .contains('English')
-      .should('have.css', 'pointer-events', 'none')
-      .click({ force: true });
+      .should('have.css', 'pointer-events', 'none');
     cy.gcy('languages-prepared-language-box').should('have.length', 1);
   });
 
