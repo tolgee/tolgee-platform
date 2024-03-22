@@ -2,6 +2,7 @@ package io.tolgee.formats.yaml.`in`
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredRawDataToTextConvertor
@@ -13,7 +14,12 @@ class YamlFileProcessor(
   private val objectMapper: ObjectMapper,
 ) : ImportFileProcessor() {
   override fun process() {
-    val data = objectMapper.readValue<Any?>(context.file.data)
+    val data =
+      try {
+        objectMapper.readValue<Any?>(context.file.data)
+      } catch (e: Exception) {
+        throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
+      }
     val dataMap = data as? Map<*, *> ?: return
     val detectedFormat = YamlImportFormatDetector().detectFormat(dataMap)
     if (detectedFormat.rootKeyIsLanguageTag) {

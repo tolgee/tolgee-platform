@@ -1,6 +1,5 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
-import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.importCommon.ImportFormat
@@ -14,11 +13,7 @@ class GenericStructuredProcessor(
   private val format: ImportFormat,
 ) : ImportFileProcessor() {
   override fun process() {
-    try {
-      data.import("")
-    } catch (e: Exception) {
-      throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
-    }
+    data.import("")
   }
 
   private fun Any?.import(key: String) {

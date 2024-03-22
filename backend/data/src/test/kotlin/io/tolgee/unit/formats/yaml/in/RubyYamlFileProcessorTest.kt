@@ -158,7 +158,8 @@ class RubyYamlFileProcessorTest {
         ),
       assertAfterDisablingConversion =
         listOf(
-          "{value, plural,\none {%'{'count'}' relace}\nfew {%'{'count'}' relace}\nmany {%'{'count'}' relace}\nother {%'{'count'}' relací}\n}",
+          "{value, plural,\none {%'{'count'}' relace}\nfew {%'{'count'}' relace}\nmany {%'{'count'}' relace}\n" +
+            "other {%'{'count'}' relací}\n}",
           "Upravit redakci %<count>d",
           "Seznam oprav %d %s %.2f",
           "Toto je text s parametry: %'{'param1'}' a %'{'param2'}'",
