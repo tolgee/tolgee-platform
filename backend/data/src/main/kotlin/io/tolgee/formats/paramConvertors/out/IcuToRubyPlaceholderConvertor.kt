@@ -38,7 +38,7 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
   ): String {
-    return "%($argName)d"
+    return "%{$argName}"
   }
 
   private fun convertNumber(node: MessagePatternUtil.ArgNode): String {

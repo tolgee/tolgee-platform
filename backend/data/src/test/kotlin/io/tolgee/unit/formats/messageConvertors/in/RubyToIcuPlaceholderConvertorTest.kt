@@ -25,7 +25,7 @@ class RubyToIcuPlaceholderConvertorTest {
       isProjectIcuEnabled = true,
     ) {
       RubyToIcuPlaceholderConvertor()
-    }.assert.isEqualTo(
+    }.message.assert.isEqualTo(
       """
       Hello {name}!
       Hey I am {1}!
@@ -39,4 +39,26 @@ class RubyToIcuPlaceholderConvertorTest {
       """.trimIndent(),
     )
   }
+
+  @Test
+  fun `only single plural param is converted`() {
+    convertInPlural("I am %{name} and I have %{count} dogs.").message.assert.isEqualTo(
+      "I am {name} and I have {count} dogs.",
+    )
+    val converted = convertInPlural("I have %{count} dogs.")
+    converted.message.assert.isEqualTo(
+      "I have # dogs.",
+    )
+    converted.pluralArgName.assert.isEqualTo("count")
+  }
+
+  private fun convertInPlural(string: String) =
+    convertMessage(
+      string,
+      isInPlural = true,
+      convertPlaceholders = true,
+      isProjectIcuEnabled = true,
+    ) {
+      RubyToIcuPlaceholderConvertor()
+    }
 }

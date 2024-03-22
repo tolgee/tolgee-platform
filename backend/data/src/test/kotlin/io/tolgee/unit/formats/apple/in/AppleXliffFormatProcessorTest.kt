@@ -210,7 +210,7 @@ class AppleXliffFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           zero {No dogs here %@ '{'icuParam'}'!}
           one {One dog is here %@ '{'icuParam'}'!}
           other {%lld dogs here %@ '{'icuParam'}'}
@@ -256,7 +256,7 @@ class AppleXliffFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           zero {No dogs here %@ '{'icuParam'}'!}
           one {One dog is here %@ '{'icuParam'}'!}
           other {%lld dogs here %@ '{'icuParam'}'}
@@ -374,7 +374,7 @@ class AppleXliffFormatProcessorTest {
         ),
       assertAfterDisablingConversion =
         listOf(
-          "{0, plural,\n" +
+          "{value, plural,\n" +
             "zero {No dogs here %@ '{'icuParam'}'!}\n" +
             "one {One dog is here %@ '{'icuParam'}'!}\n" +
             "other {%lld dogs here %@ '{'icuParam'}'}\n" +

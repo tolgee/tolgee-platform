@@ -10,12 +10,15 @@ class JavaToIcuPlaceholderConvertor() : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
   private var index = 0
 
+  override val pluralArgName: String = "0"
+
   override val regex: Regex
     get() = JAVA_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
+    isSingleParam: Boolean,
   ): String {
     index++
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)

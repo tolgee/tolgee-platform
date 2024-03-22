@@ -35,7 +35,7 @@ class BaseImportRawDataConverter(
     }
 
     val converted = convertMessage(stringValue, false)
-    return MessageConvertorResult(converted, null)
+    return MessageConvertorResult(converted.message, null)
   }
 
   private val doesNotNeedConversion =
@@ -51,7 +51,7 @@ class BaseImportRawDataConverter(
   fun convertMessage(
     message: String,
     isInPlural: Boolean = false,
-  ): String {
+  ): MessageConvertorResult {
     return convertMessage(
       message,
       isInPlural,

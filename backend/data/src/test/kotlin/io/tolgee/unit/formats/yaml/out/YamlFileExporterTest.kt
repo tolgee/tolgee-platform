@@ -70,9 +70,9 @@ class YamlFileExporterTest {
     |  is:
     |    nested:
     |      plural:
-    |        one: "%(count)d den %{icuParam}"
-    |        few: "%(count)d dny"
-    |        other: "%(count)d dní"
+    |        one: "%{count} den %{icuParam}"
+    |        few: "%{count} dny"
+    |        other: "%{count} dní"
     |this[1]:
     |  is:
     |    collision: "Colission"

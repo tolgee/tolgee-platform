@@ -10,12 +10,15 @@ class RubyToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
   private var index = 0
 
+  override var pluralArgName: String? = null
+
   override val regex: Regex
     get() = RUBY_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
+    isSingleParam: Boolean,
   ): String {
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 
@@ -30,6 +33,11 @@ class RubyToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
     index++
     val zeroIndexedArgNum = parsed.argNum?.toIntOrNull()?.minus(1)?.toString()
     val name = parsed.argName ?: zeroIndexedArgNum ?: ((index - 1).toString())
+
+    if (isInPlural && (parsed.specifier == null) && isSingleParam) {
+      pluralArgName = name
+      return "#"
+    }
 
     when (parsed.specifier) {
       null -> return "{$name}"

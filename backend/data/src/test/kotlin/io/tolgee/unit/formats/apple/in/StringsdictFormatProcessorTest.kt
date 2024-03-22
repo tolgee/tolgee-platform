@@ -52,7 +52,7 @@ class StringsdictFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {Peter has %lld dog '{'meto'}'}
           other {Peter hase %lld dogs '{'meto'}'}
           }
@@ -71,7 +71,7 @@ class StringsdictFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {Peter has %lld dog '{'meto'}'}
           other {Peter hase %lld dogs '{'meto'}'}
           }
@@ -115,7 +115,7 @@ class StringsdictFormatProcessorTest {
         ),
       assertAfterDisablingConversion =
         listOf(
-          "{0, plural,\none {Peter has %lld dog '{'meto'}'}\nother {Peter hase %lld dogs '{'meto'}'}\n}",
+          "{value, plural,\none {Peter has %lld dog '{'meto'}'}\nother {Peter hase %lld dogs '{'meto'}'}\n}",
         ),
       assertAfterReEnablingConversion =
         listOf(

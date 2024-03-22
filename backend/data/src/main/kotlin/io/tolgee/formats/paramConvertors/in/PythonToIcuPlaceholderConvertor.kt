@@ -9,12 +9,15 @@ import io.tolgee.formats.usesUnsupportedFeature
 class PythonToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
 
+  override val pluralArgName: String = "0"
+
   override val regex: Regex
     get() = PYTHON_PARAM_REGEX
 
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
+    isSingleParam: Boolean,
   ): String {
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 

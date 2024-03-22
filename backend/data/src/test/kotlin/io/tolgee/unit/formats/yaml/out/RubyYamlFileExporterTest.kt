@@ -23,9 +23,9 @@ class RubyYamlFileExporterTest {
     |    is:
     |      nested:
     |        plural:
-    |          one: "%(count)d den %{icuParam}"
-    |          few: "%(count)d dny"
-    |          other: "%(count)d dní"
+    |          one: "%{count} den %{icuParam}"
+    |          few: "%{count} dny"
+    |          other: "%{count} dní"
     |    '[1]':
     |      is:
     |        collision: "Colission"
@@ -67,9 +67,9 @@ class RubyYamlFileExporterTest {
     |---
     |cs:
     |  key3:
-    |    one: "%(count)d den %<icuParam>d"
-    |    few: "%(count)d dny"
-    |    other: "%(count)d dní"
+    |    one: "%{count} den %<icuParam>d"
+    |    few: "%{count} dny"
+    |    other: "%{count} dní"
     |  item: "I will be first '{'icuParam'}' %<hello>d"
     |
       """.trimMargin(),

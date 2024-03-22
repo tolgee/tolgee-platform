@@ -38,11 +38,11 @@ class RubyYamlFileProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
-          one {{count} relace}
-          few {{count} relace}
-          many {{count} relace}
-          other {{count} relací}
+          {count, plural,
+          one {# relace}
+          few {# relace}
+          many {# relace}
+          other {# relací}
           }
           """.trimIndent(),
         )
@@ -75,7 +75,7 @@ class RubyYamlFileProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {%'{'count'}' relace}
           few {%'{'count'}' relace}
           many {%'{'count'}' relace}
@@ -108,7 +108,7 @@ class RubyYamlFileProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {%'{'count'}' relace}
           few {%'{'count'}' relace}
           many {%'{'count'}' relace}
@@ -151,22 +151,21 @@ class RubyYamlFileProcessorTest {
       "src/test/resources/import/yaml/ruby.yaml",
       assertBeforeSettingsApplication =
         listOf(
-          "{0, plural,\none {{count} relace}\nfew {{count} relace}\nmany {{count} relace}\nother {{count} relací}\n}",
+          "{count, plural,\none {# relace}\nfew {# relace}\nmany {# relace}\nother {# relací}\n}",
           "Upravit redakci {count, number}",
           "Seznam oprav {0, number} {1} {2, number, .00}",
           "Toto je text s parametry: {param1} a {param2}",
         ),
       assertAfterDisablingConversion =
         listOf(
-          "{0, plural,\none {%'{'count'}' relace}\nfew {%'{'count'}' " +
-            "relace}\nmany {%'{'count'}' relace}\nother {%'{'count'}' relací}\n}",
+          "{value, plural,\none {%'{'count'}' relace}\nfew {%'{'count'}' relace}\nmany {%'{'count'}' relace}\nother {%'{'count'}' relací}\n}",
           "Upravit redakci %<count>d",
           "Seznam oprav %d %s %.2f",
           "Toto je text s parametry: %'{'param1'}' a %'{'param2'}'",
         ),
       assertAfterReEnablingConversion =
         listOf(
-          "{0, plural,\none {{count} relace}\nfew {{count} relace}\nmany {{count} relace}\nother {{count} relací}\n}",
+          "{count, plural,\none {# relace}\nfew {# relace}\nmany {# relace}\nother {# relací}\n}",
           "Upravit redakci {count, number}",
           "Seznam oprav {0, number} {1} {2, number, .00}",
           "Toto je text s parametry: {param1} a {param2}",

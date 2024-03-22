@@ -85,7 +85,7 @@ class PoFileProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {Hallo %d '{'icuParam'}'}
           other {Hallo %d '{'icuParam'}'}
           }
@@ -107,7 +107,7 @@ class PoFileProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {Hallo %d '{'icuParam'}'}
           other {Hallo %d '{'icuParam'}'}
           }
@@ -152,7 +152,7 @@ class PoFileProcessorTest {
       assertAfterDisablingConversion =
         listOf(
           "Hi %d '{'icuParam'}'",
-          "{0, plural,\none {Hallo %d '{'icuParam'}'}\nother {Hallo %d '{'icuParam'}'}\n}",
+          "{value, plural,\none {Hallo %d '{'icuParam'}'}\nother {Hallo %d '{'icuParam'}'}\n}",
         ),
       assertAfterReEnablingConversion =
         listOf(

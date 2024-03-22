@@ -91,7 +91,7 @@ class AndroidXmlFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {%d dog %s '{'escape'}'}
           other {%d dogs %s}
           }
@@ -118,7 +118,7 @@ class AndroidXmlFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {%d dog %s '{'escape'}'}
           other {%d dogs %s}
           }
@@ -185,7 +185,7 @@ class AndroidXmlFormatProcessorTest {
         ),
       assertAfterDisablingConversion =
         listOf(
-          "{0, plural,\none {%d dog %s '{'escape'}'}\nother {%d dogs %s}\n}",
+          "{value, plural,\none {%d dog %s '{'escape'}'}\nother {%d dogs %s}\n}",
           "First item %d '{'escape'}'",
           "Second item %d",
           "%d %4\$s %.2f %e %+d '{'escape'}'",

@@ -1,5 +1,6 @@
 package io.tolgee.formats.importCommon
 
+import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.toIcuPluralString
@@ -49,7 +50,7 @@ class GenericMapPluralImportRawDataConvertor(
     rawData: Map<*, *>,
     baseImportRawDataConverter: BaseImportRawDataConverter,
   ): MessageConvertorResult? {
-    val pluralArgName = "0"
+    var pluralArgName = DEFAULT_PLURAL_ARGUMENT_NAME
     val converted =
       rawData.mapNotNull { (key, value) ->
         if (key !is String || value !is String?) {
@@ -58,7 +59,12 @@ class GenericMapPluralImportRawDataConvertor(
         if (value == null) {
           return@mapNotNull null
         }
-        key to baseImportRawDataConverter.convertMessage(value, true)
+        val convertedMessage = baseImportRawDataConverter.convertMessage(value, true)
+        val message = convertedMessage.message ?: return@mapNotNull null
+        convertedMessage.pluralArgName?.let {
+          pluralArgName = it
+        }
+        key to message
       }.toMap().toIcuPluralString(optimize = optimizePlurals, argName = pluralArgName)
 
     return MessageConvertorResult(converted, pluralArgName)

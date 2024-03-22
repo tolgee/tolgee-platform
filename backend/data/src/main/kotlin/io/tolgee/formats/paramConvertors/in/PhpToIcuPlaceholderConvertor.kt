@@ -10,12 +10,15 @@ class PhpToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
   private var index = 0
 
+  override val pluralArgName: String = "0"
+
   override val regex: Regex
     get() = PHP_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
+    isSingleParam: Boolean,
   ): String {
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 

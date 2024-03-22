@@ -2,6 +2,7 @@ package io.tolgee.formats.po.`in`.messageConvertors
 
 import com.ibm.icu.text.PluralRules
 import com.ibm.icu.util.ULocale
+import io.tolgee.formats.DEFAULT_PLURAL_ARGUMENT_NAME
 import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.ToIcuPlaceholderConvertor
@@ -43,7 +44,7 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
     convertPlaceholders: Boolean,
     isProjectIcuEnabled: Boolean,
   ): MessageConvertorResult {
-    val forms =
+    val formsConverted =
       possiblePluralForms.entries.associate { (formNumPossibleString, value) ->
         val formNumber = (formNumPossibleString as? Int) ?: (formNumPossibleString as? String)?.toIntOrNull()
         if (formNumber !is Int || value !is String) {
@@ -54,8 +55,15 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
         val keyword = PluralRules.forLocale(locale).select(example.toDouble())
         keyword to (convert(value, true, convertPlaceholders, isProjectIcuEnabled))
       }
-    val argName = "0"
-    val converted = FormsToIcuPluralConvertor(forms, addNewLines = true, argName = argName).convert()
+    val argName =
+      formsConverted.values.firstNotNullOfOrNull { it.pluralArgName }
+        ?: DEFAULT_PLURAL_ARGUMENT_NAME
+    val form =
+      formsConverted.mapNotNull {
+        val message = it.value.message ?: return@mapNotNull null
+        it.key to message
+      }.toMap()
+    val converted = FormsToIcuPluralConvertor(form, addNewLines = true, argName = argName).convert()
     return MessageConvertorResult(converted, argName)
   }
 
@@ -72,7 +80,7 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
     isInPlural: Boolean = false,
     convertPlaceholders: Boolean,
     isProjectIcuEnabled: Boolean,
-  ): String {
+  ): MessageConvertorResult {
     return convertMessage(
       message,
       isInPlural,
