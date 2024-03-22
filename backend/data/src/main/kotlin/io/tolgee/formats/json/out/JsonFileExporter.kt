@@ -31,7 +31,6 @@ class JsonFileExporter(
       fileExtension = fileExtension,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
       objectMapper = objectMapper,
-      rootKeyIsLanguageTag = exportParams.rootKeyIsLanguageTag,
       supportArrays = supportArrays,
       messageFormat = messageFormat,
     )

@@ -13,7 +13,6 @@ import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
-import io.tolgee.dtos.ExportParamsDocs.ROOT_KEY_IS_LANGUAGE_TAG_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
 import io.tolgee.formats.ExportFormat
@@ -76,11 +75,6 @@ interface IExportParams {
     description = MESSAGE_FORMAT_DESCRIPTION,
   )
   var messageFormat: ExportMessageFormat?
-
-  @get:Schema(
-    description = ROOT_KEY_IS_LANGUAGE_TAG_DESCRIPTION,
-  )
-  val rootKeyIsLanguageTag: Boolean
 
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages

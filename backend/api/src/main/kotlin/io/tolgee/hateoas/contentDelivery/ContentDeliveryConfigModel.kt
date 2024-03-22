@@ -31,5 +31,4 @@ class ContentDeliveryConfigModel(
   override var filterNamespace: List<String?>? = null
   override var messageFormat: ExportMessageFormat? = null
   override var supportArrays: Boolean = false
-  override var rootKeyIsLanguageTag: Boolean = false
 }

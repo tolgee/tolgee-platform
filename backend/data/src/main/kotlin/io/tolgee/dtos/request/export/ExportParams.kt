@@ -10,7 +10,6 @@ import io.tolgee.dtos.ExportParamsDocs.FILTER_STATE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
-import io.tolgee.dtos.ExportParamsDocs.ROOT_KEY_IS_LANGUAGE_TAG_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.ZIP_DESCRIPTION
@@ -69,10 +68,6 @@ data class ExportParams(
     description = MESSAGE_FORMAT_DESCRIPTION,
   )
   override var messageFormat: ExportMessageFormat? = null,
-  @field:Parameter(
-    description = ROOT_KEY_IS_LANGUAGE_TAG_DESCRIPTION,
-  )
-  override val rootKeyIsLanguageTag: Boolean = false,
 ) : IExportParams {
   @field:Parameter(description = SUPPORT_ARRAYS_DESCRIPTION)
   override var supportArrays: Boolean = false

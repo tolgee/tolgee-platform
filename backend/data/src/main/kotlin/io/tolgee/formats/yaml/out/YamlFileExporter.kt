@@ -37,11 +37,7 @@ class YamlFileExporter(
     )
 
   private val rootKeyIsLanguageTag
-    get() =
-      when (exportParams.format) {
-        ExportFormat.YAML_RUBY -> true
-        else -> exportParams.rootKeyIsLanguageTag
-      }
+    get() = exportParams.format == ExportFormat.YAML_RUBY
 
   private val supportArrays
     get() =

@@ -45,15 +45,4 @@ For specific formats like `YAML_RUBY` it's ignored."""
   const val ZIP_DESCRIPTION = """If false, it doesn't return zip of files, but it returns single file.
       
 This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response."""
-
-  const val PLURALS_VIA_NESTING_DESCRIPTION = """If true, plurals are exported via nesting.
-    
-e.g. {"key_name": {"one": "I have one dog.", "other": "I have # dogs"}}
-
-This is supported only for structured formats like JSON or YAML."""
-
-  const val ROOT_KEY_IS_LANGUAGE_TAG_DESCRIPTION =
-    "If true, exported file in format supporting nesting " +
-      "will contain single language tag key in the root.\n\n" +
-      "e.g. {\"en-US\": {\"user-settings-title\": \"User Settings\"}}"
 }

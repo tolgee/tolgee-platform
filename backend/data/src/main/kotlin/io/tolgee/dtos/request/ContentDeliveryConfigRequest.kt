@@ -43,6 +43,4 @@ class ContentDeliveryConfigRequest() : IExportParams {
 
   override var filterNamespace: List<String?>? = null
   override var messageFormat: ExportMessageFormat? = null
-
-  override val rootKeyIsLanguageTag: Boolean = false
 }
