@@ -20,12 +20,11 @@ class BaseImportRawDataConverter(
     }
 
     if (doesNotNeedConversion) {
-      if (canContainIcu)
-        {
-          getPluralForms(stringValue)?.let {
-            return MessageConvertorResult(it.icuString, it.argName)
-          }
+      if (canContainIcu) {
+        getPluralForms(stringValue)?.let {
+          return MessageConvertorResult(it.icuString, it.argName)
         }
+      }
       return MessageConvertorResult(stringValue, null)
     }
 
