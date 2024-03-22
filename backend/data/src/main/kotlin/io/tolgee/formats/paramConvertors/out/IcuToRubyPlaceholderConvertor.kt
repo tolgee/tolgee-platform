@@ -3,63 +3,40 @@ package io.tolgee.formats.paramConvertors.out
 import com.ibm.icu.text.MessagePattern
 import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
-import io.tolgee.formats.escapePercentSign
 
 class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
-  private var argIndex = -1
-  private var wasNumberedArg = false
+  private val baseToCLikePlaceholderConvertor =
+    BaseToCLikePlaceholderConvertor(
+      defaultSpecifier = "s",
+    ) {
+      getArgNameString(it)
+    }
 
   override fun convert(
     node: MessagePatternUtil.ArgNode,
     isInPlural: Boolean,
   ): String {
-    argIndex++
-    val argNameString = getArgNameString(node)
-    val type = node.argType
-
-    if (type == MessagePattern.ArgType.NONE && node.argNumOrNull == null) {
-      return "%$argNameString"
-    }
-
-    if (type == MessagePattern.ArgType.SIMPLE) {
-      when (node.typeName) {
-        "number" -> return convertNumber(node)
-      }
-    }
-
-    return "%${argNameString}s"
+    return baseToCLikePlaceholderConvertor.convert(node)
   }
 
   override fun convertText(string: String): String {
-    return escapePercentSign(string)
+    return baseToCLikePlaceholderConvertor.convertText(string)
   }
 
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
   ): String {
-    return "%{$argName}"
-  }
-
-  private fun convertNumber(node: MessagePatternUtil.ArgNode): String {
-    if (node.simpleStyle.trim() == "scientific") {
-      return "%${getArgNameString(node)}e"
+    val argNum = argName?.toIntOrNull()
+    return when {
+      argNum == 0 -> "%d"
+      argNum != null && argNum > 0 -> "%$argNum\$d"
+      else ->
+        when (argName) {
+          is String -> "%{$argName}"
+          else -> "%d"
+        }
     }
-    val precision = getPrecision(node)
-    if (precision == 6) {
-      return "%${getArgNameString(node)}f"
-    }
-    if (precision != null) {
-      return "%${getArgNameString(node)}.${precision}f"
-    }
-
-    return "%${getArgNameString(node)}d"
-  }
-
-  private fun getPrecision(node: MessagePatternUtil.ArgNode): Int? {
-    val precisionMatch = ICU_PRECISION_REGEX.matchEntire(node.simpleStyle ?: "")
-    precisionMatch ?: return null
-    return precisionMatch.groups["precision"]?.value?.length
   }
 
   private fun getArgNameString(node: MessagePatternUtil.ArgNode): String {
@@ -69,7 +46,7 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
     return when {
       argType != MessagePattern.ArgType.NONE -> {
         when {
-          argNum != null -> getArgNumString(argNum)
+          argNum != null -> baseToCLikePlaceholderConvertor.getArgNumString(argNum)
           argName != null -> "<$argName>"
           else -> ""
         }
@@ -77,24 +54,12 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
 
       else ->
         when {
-          argNum != null -> getArgNumString(argNum)
+          argNum != null -> baseToCLikePlaceholderConvertor.getArgNumString(argNum)
           argName != null -> "{$argName}"
           else -> ""
         }
     }
   }
 
-  private fun getArgNumString(icuArgNum: Int?): String {
-    if ((icuArgNum != argIndex || wasNumberedArg) && icuArgNum != null) {
-      wasNumberedArg = true
-      return "${icuArgNum + 1}$"
-    }
-    return ""
-  }
-
   private val MessagePatternUtil.ArgNode.argNumOrNull get() = this.name?.toLongOrNull()
-
-  companion object {
-    val ICU_PRECISION_REGEX = """.*\.(?<precision>0+)""".toRegex()
-  }
 }

@@ -33,8 +33,8 @@ class PoToICUConverterTest {
     assertThat(result).isEqualTo(
       "{0, plural,\n" +
         "one {Petr má jednoho psa.}\n" +
-        "few {Petr má {0, number} psi.}\n" +
-        "other {Petr má {0, number} psů.}\n" +
+        "few {Petr má # psi.}\n" +
+        "other {Petr má # psů.}\n" +
         "}",
     )
   }

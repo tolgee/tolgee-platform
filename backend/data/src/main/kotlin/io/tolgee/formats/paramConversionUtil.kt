@@ -46,8 +46,8 @@ fun convertMessage(
   val converted =
     message.replaceMatchedAndUnmatched(
       regex = convertor.regex,
-      matchedCallback = { it, isSinglePram ->
-        convertor.convert(it, isInPlural, isSinglePram)
+      matchedCallback = { it ->
+        convertor.convert(it, isInPlural)
       },
       unmatchedCallback = {
         if (escapeUnmatched) {

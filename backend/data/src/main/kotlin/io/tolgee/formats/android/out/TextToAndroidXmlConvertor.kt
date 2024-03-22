@@ -2,7 +2,7 @@ package io.tolgee.formats.android.out
 
 import io.tolgee.formats.android.AndroidParsingConstants
 import io.tolgee.formats.android.AndroidStringValue
-import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList

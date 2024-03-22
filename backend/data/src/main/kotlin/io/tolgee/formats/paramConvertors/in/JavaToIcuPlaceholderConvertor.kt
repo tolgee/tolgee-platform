@@ -1,12 +1,16 @@
 package io.tolgee.formats.paramConvertors.`in`
 
 import io.tolgee.formats.ToIcuPlaceholderConvertor
+import io.tolgee.formats.po.`in`.CLikeParameterParser
 
-class CToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
+class JavaToIcuPlaceholderConvertor() : ToIcuPlaceholderConvertor {
+  private val parser = CLikeParameterParser()
+  private var index = 0
+
   override val pluralArgName: String = "0"
 
   override val regex: Regex
-    get() = C_PARAM_REGEX
+    get() = JAVA_PLACEHOLDER_REGEX
 
   private val baseToIcuPlaceholderConvertor = BaseToIcuPlaceholderConvertor()
 
@@ -18,16 +22,15 @@ class CToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   }
 
   companion object {
-    val C_PARAM_REGEX =
+    val JAVA_PLACEHOLDER_REGEX =
       """
       (?x)(
       %
       (?:(?<argnum>\d+)${"\\$"})?
-      (?<flags>[-+\s0\#]+)?
+      (?<flags>[-\#+\s0,(]+)?
       (?<width>\d+)?
       (?:\.(?<precision>\d+))?
-      (?<length>hh|h|l|ll|j|z|t|L)?
-      (?<specifier>[diuoxXfFeEgGaAcspn%])
+      (?<specifier>[bBhHsScCdoxXeEfgGaAtT%nRrDF])
       )
       """.trimIndent().toRegex()
   }

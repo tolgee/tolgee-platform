@@ -41,13 +41,10 @@ class RubyToIcuPlaceholderConvertorTest {
   }
 
   @Test
-  fun `only single plural param is converted`() {
-    convertInPlural("I am %{name} and I have %{count} dogs.").message.assert.isEqualTo(
-      "I am {name} and I have {count} dogs.",
-    )
-    val converted = convertInPlural("I have %{count} dogs.")
+  fun `only first plural param is converted`() {
+    val converted = convertInPlural("I have %{count} dogs and I am %{name}.")
     converted.message.assert.isEqualTo(
-      "I have # dogs.",
+      "I have # dogs and I am {name}.",
     )
     converted.pluralArgName.assert.isEqualTo("count")
   }

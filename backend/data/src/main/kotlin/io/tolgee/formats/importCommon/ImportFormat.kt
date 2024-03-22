@@ -1,7 +1,7 @@
 package io.tolgee.formats.importCommon
 
-import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
-import io.tolgee.formats.apple.`in`.AppleToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.AppleToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 import io.tolgee.formats.po.`in`.messageConvertors.PoCToIcuImportMessageConvertor

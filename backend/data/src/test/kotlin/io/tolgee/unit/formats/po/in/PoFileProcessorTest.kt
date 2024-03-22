@@ -32,7 +32,7 @@ class PoFileProcessorTest {
       .isEqualTo(
         "{0, plural,\n" +
           "one {Eine Seite gelesen wurde.}\n" +
-          "other {{0, number} Seiten gelesen wurden.}\n" +
+          "other {# Seiten gelesen wurden.}\n" +
           "}",
       )
     assertThat(mockUtil.fileProcessorContext.translations.values.toList()[2][0].text)
@@ -131,8 +131,8 @@ class PoFileProcessorTest {
         hasText(
           """
           {0, plural,
-          one {Hallo {0, number} '{'icuParam'}'}
-          other {Hallo {0, number} '{'icuParam'}'}
+          one {Hallo # '{'icuParam'}'}
+          other {Hallo # '{'icuParam'}'}
           }
           """.trimIndent(),
         )
@@ -147,7 +147,7 @@ class PoFileProcessorTest {
       assertBeforeSettingsApplication =
         listOf(
           "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo {0, number} '{'icuParam'}'}\nother {Hallo {0, number} '{'icuParam'}'}\n}",
+          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
         ),
       assertAfterDisablingConversion =
         listOf(
@@ -157,7 +157,7 @@ class PoFileProcessorTest {
       assertAfterReEnablingConversion =
         listOf(
           "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo {0, number} '{'icuParam'}'}\nother {Hallo {0, number} '{'icuParam'}'}\n}",
+          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
         ),
     )
   }

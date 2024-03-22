@@ -5,18 +5,17 @@ package io.tolgee.formats
  */
 fun String.replaceMatchedAndUnmatched(
   regex: Regex,
-  matchedCallback: (match: MatchResult, isSingleParam: Boolean) -> String,
+  matchedCallback: (match: MatchResult) -> String,
   unmatchedCallback: (String) -> String,
 ): String {
   var lastIndex = 0
   val result = StringBuilder()
 
   val matches = regex.findAll(this)
-  val isSingleParam = matches.count() == 1
   for (match in matches) {
     val unmatchedPart = substring(lastIndex until match.range.first)
     result.append(unmatchedCallback(unmatchedPart))
-    result.append(matchedCallback(match, isSingleParam))
+    result.append(matchedCallback(match))
     lastIndex = match.range.last + 1
   }
 

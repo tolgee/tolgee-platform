@@ -1,10 +1,10 @@
 package io.tolgee.formats.xliff.`in`
 
-import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.ICU_DETECTION_REGEX
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFromPossibleFormats
 import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor.Companion.RUBY_PLACEHOLDER_REGEX
 import io.tolgee.formats.xliff.model.XliffModel
