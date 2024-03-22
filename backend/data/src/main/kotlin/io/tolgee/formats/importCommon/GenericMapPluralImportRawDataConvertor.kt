@@ -1,8 +1,7 @@
-package io.tolgee.formats.importMessageFormat
+package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.ToIcuPlaceholderConvertor
-import io.tolgee.formats.convertMessage
 import io.tolgee.formats.toIcuPluralString
 
 /**
@@ -22,7 +21,7 @@ class GenericMapPluralImportRawDataConvertor(
     isProjectIcuEnabled: Boolean,
   ): MessageConvertorResult {
     if (rawData == null) {
-      return MessageConvertorResult(null, false)
+      return MessageConvertorResult(null, null)
     }
 
     val baseImportRawDataConverter =
@@ -38,20 +37,30 @@ class GenericMapPluralImportRawDataConvertor(
     }
 
     if (rawData is Map<*, *>) {
-      val rawDataMap = rawData as Map<String, String>
-      val converted = convertPlural(rawDataMap, baseImportRawDataConverter)
-      return MessageConvertorResult(converted, true)
+      convertPlural(rawData, baseImportRawDataConverter)?.let {
+        return it
+      }
     }
 
     throw IllegalArgumentException("Unsupported type of message")
   }
 
   private fun convertPlural(
-    rawData: Map<String, String>,
+    rawData: Map<*, *>,
     baseImportRawDataConverter: BaseImportRawDataConverter,
-  ): String {
-    return rawData.mapNotNull {
-      it.key to baseImportRawDataConverter.convertMessage(it.value, true)
-    }.toMap().toIcuPluralString(optimize = optimizePlurals, argName = "0")
+  ): MessageConvertorResult? {
+    val pluralArgName = "0"
+    val converted =
+      rawData.mapNotNull { (key, value) ->
+        if (key !is String || value !is String?) {
+          return null
+        }
+        if (value == null) {
+          return@mapNotNull null
+        }
+        key to baseImportRawDataConverter.convertMessage(value, true)
+      }.toMap().toIcuPluralString(optimize = optimizePlurals, argName = pluralArgName)
+
+    return MessageConvertorResult(converted, pluralArgName)
   }
 }

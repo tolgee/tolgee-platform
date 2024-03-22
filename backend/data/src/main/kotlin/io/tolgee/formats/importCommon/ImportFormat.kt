@@ -1,4 +1,4 @@
-package io.tolgee.formats.importMessageFormat
+package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.apple.`in`.AppleToIcuPlaceholderConvertor
@@ -6,13 +6,14 @@ import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 import io.tolgee.formats.po.`in`.messageConvertors.PoCToIcuImportMessageConvertor
 import io.tolgee.formats.po.`in`.messageConvertors.PoPhpToIcuImportMessageConvertor
 
-enum class ImportMessageFormat(
+enum class ImportFormat(
   val pluralsViaNesting: Boolean = false,
   val canContainIcu: Boolean = false,
   val messageConvertorOrNull: ImportMessageConvertor? = null,
   val rootKeyIsLanguageTag: Boolean = false,
 ) {
   JSON(
+    canContainIcu = true,
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,
@@ -30,12 +31,31 @@ enum class ImportMessageFormat(
   // properties don't store plurals in map, but it doesn't matter.
   // Since they don't support nesting at all, we cannot have plurals by nesting in them, so the plural extracting
   // code won't be executed
-  PROPERTIES(messageConvertorOrNull = GenericMapPluralImportRawDataConvertor(toIcuPlaceholderConvertorFactory = null)),
-  JAVA_PROPERTIES(
+  PROPERTIES_ICU(
+    canContainIcu = true,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
+  PROPERTIES_JAVA(
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
+  PROPERTIES_UNKNOWN(
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor(toIcuPlaceholderConvertorFactory = null),
   ),
 
   ANDROID_XML(messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() }),
+
+  FLUTTER_ARB(
+    canContainIcu = true,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
 
   YAML_RUBY(
     pluralsViaNesting = true,
@@ -57,7 +77,7 @@ enum class ImportMessageFormat(
         toIcuPlaceholderConvertorFactory = null,
       ),
   ),
-  UNKNOWN(
+  YAML_UNKNOWN(
     pluralsViaNesting = false,
     canContainIcu = true,
     messageConvertorOrNull =
@@ -74,7 +94,7 @@ enum class ImportMessageFormat(
       this.messageConvertorOrNull
         ?: throw IllegalStateException(
           "Message convertor required. Provide message convertor for " +
-            "${ImportMessageFormat::class.simpleName}.${this.name}",
+            "${ImportFormat::class.simpleName}.${this.name}",
         )
 }
 

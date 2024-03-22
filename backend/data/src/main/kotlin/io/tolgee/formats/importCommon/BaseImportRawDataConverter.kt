@@ -1,9 +1,10 @@
-package io.tolgee.formats.importMessageFormat
+package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertMessage
 import io.tolgee.formats.forceEscapePluralForms
+import io.tolgee.formats.getPluralForms
 
 class BaseImportRawDataConverter(
   val canContainIcu: Boolean,
@@ -19,7 +20,13 @@ class BaseImportRawDataConverter(
     }
 
     if (doesNotNeedConversion) {
-      return MessageConvertorResult(stringValue, false)
+      if (canContainIcu)
+        {
+          getPluralForms(stringValue)?.let {
+            return MessageConvertorResult(it.icuString, it.argName)
+          }
+        }
+      return MessageConvertorResult(stringValue, null)
     }
 
     if (canContainIcu && !isProjectIcuEnabled) {
@@ -29,7 +36,7 @@ class BaseImportRawDataConverter(
     }
 
     val converted = convertMessage(stringValue, false)
-    return MessageConvertorResult(converted, false)
+    return MessageConvertorResult(converted, null)
   }
 
   private val doesNotNeedConversion =
@@ -39,8 +46,7 @@ class BaseImportRawDataConverter(
 
   private fun tryEscapePlural(stringValue: String): MessageConvertorResult? {
     val escapedPlural = stringValue.forceEscapePluralForms()
-    val escapedText = escapedPlural ?: return null
-    return MessageConvertorResult(escapedText, true)
+    return escapedPlural
   }
 
   fun convertMessage(

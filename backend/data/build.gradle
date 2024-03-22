@@ -170,7 +170,7 @@ dependencies {
     implementation 'org.dom4j:dom4j:2.1.4'
     implementation libs.jacksonKotlin
     implementation("org.apache.commons:commons-configuration2:2.9.0")
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.2'
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
 
     /**
      * Google translation API

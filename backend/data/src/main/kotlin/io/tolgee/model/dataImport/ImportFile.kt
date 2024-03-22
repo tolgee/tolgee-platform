@@ -1,6 +1,6 @@
 package io.tolgee.model.dataImport
 
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
@@ -39,7 +39,7 @@ class ImportFile(
 
   @Enumerated(EnumType.STRING)
   @ColumnDefault("UNKNOWN")
-  var format: ImportMessageFormat = ImportMessageFormat.UNKNOWN
+  var format: ImportFormat = ImportFormat.YAML_UNKNOWN
 
   fun addIssue(
     type: FileIssueType,

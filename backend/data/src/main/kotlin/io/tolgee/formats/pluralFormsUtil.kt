@@ -231,10 +231,11 @@ fun <T> normalizePlurals(
  *
  * Returns null if the string is not a plural
  */
-fun String.forceEscapePluralForms(): String? {
+fun String.forceEscapePluralForms(): MessageConvertorResult? {
   val forms = getPluralForms(this)
   val escapedForms = forms?.forms?.mapValues { ForceIcuEscaper(it.value, escapeHash = true).escaped }
-  return escapedForms?.toIcuPluralString(optimize = false, argName = forms.argName)
+  val text = escapedForms?.toIcuPluralString(optimize = false, argName = forms.argName) ?: return null
+  return MessageConvertorResult(text, forms.argName)
 }
 
 /**

@@ -2,7 +2,7 @@ package io.tolgee.formats.po.`in`
 
 import io.tolgee.formats.po.PoSupportedMessageFormat
 
-class FormatDetector(private val messages: List<String>) {
+class PoFormatDetector(private val messages: List<String>) {
   /**
    * Tries to detect message format by on all messages in file
    */

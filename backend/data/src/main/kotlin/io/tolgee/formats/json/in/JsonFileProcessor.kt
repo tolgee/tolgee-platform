@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredRawDataToTextConvertor
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class JsonFileProcessor(
@@ -19,7 +19,7 @@ class JsonFileProcessor(
       data = data,
       convertor =
         GenericStructuredRawDataToTextConvertor(
-          format = ImportMessageFormat.JSON,
+          format = ImportFormat.JSON,
           firstLanguageTagGuessOrUnknown,
         ),
     ).process()

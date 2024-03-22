@@ -7,7 +7,7 @@ import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.PluralUnit
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
@@ -38,9 +38,9 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       keyName,
       guessedLanguage,
       convertMessage(text),
-      forceIsPlural = false,
+      pluralArgName = null,
       rawData = text,
-      convertedBy = ImportMessageFormat.ANDROID_XML,
+      convertedBy = ImportFormat.ANDROID_XML,
     )
     setCustomWrappedWithCdata(keyName, it.value)
   }
@@ -84,9 +84,9 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       keyName,
       guessedLanguage,
       converted.message,
-      forceIsPlural = true,
+      pluralArgName = converted.pluralArgName,
       rawData = rawData,
-      convertedBy = importMessageFormat,
+      convertedBy = importFormat,
     )
 
     setCustomWrappedWithCdata(keyName, it.items.map { it.value })
@@ -107,9 +107,9 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
         keyNameWithIndex,
         guessedLanguage,
         convertMessage(text),
-        forceIsPlural = false,
+        pluralArgName = null,
         rawData = text,
-        convertedBy = importMessageFormat,
+        convertedBy = importFormat,
       )
       setCustomWrappedWithCdata(keyNameWithIndex, item.value)
     }
@@ -143,8 +143,8 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
   companion object {
     val LANGUAGE_GUESS_REGEX = Regex("values-(?<language>[a-zA-Z]{2,3})(-r(?<region>[a-zA-Z]{2,3}))?")
 
-    private val importMessageFormat = ImportMessageFormat.ANDROID_XML
+    private val importFormat = ImportFormat.ANDROID_XML
 
-    private val messageConvertor = importMessageFormat.messageConvertor
+    private val messageConvertor = importFormat.messageConvertor
   }
 }

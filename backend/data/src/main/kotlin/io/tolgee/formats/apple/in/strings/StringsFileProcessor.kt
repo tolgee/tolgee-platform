@@ -4,7 +4,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class StringsFileProcessor(
@@ -126,14 +126,15 @@ class StringsFileProcessor(
         languageTag = languageName,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
         isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
-      ).message
+      )
     context.addKeyDescription(key ?: return, currentComment?.toString())
     context.addTranslation(
       key ?: return,
       languageName,
-      converted,
+      converted.message,
       rawData = value,
-      convertedBy = importMessageFormat,
+      convertedBy = importFormat,
+      pluralArgName = converted.pluralArgName,
     )
     currentComment = null
   }
@@ -143,9 +144,9 @@ class StringsFileProcessor(
   }
 
   companion object {
-    private val importMessageFormat = ImportMessageFormat.STRINGS
+    private val importFormat = ImportFormat.STRINGS
 
-    private val messageConvertor = importMessageFormat.messageConvertor
+    private val messageConvertor = importFormat.messageConvertor
   }
 
   enum class State {

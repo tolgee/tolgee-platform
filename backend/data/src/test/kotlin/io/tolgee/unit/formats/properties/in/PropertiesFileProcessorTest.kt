@@ -22,6 +22,11 @@ class PropertiesFileProcessorTest {
     mockUtil = FileProcessorContextMockUtil()
   }
 
+  // This is how to generate the test:
+  // 1. run the test in debug mode
+  // 2. copy the result of calling:
+  // io.tolgee.unit.util.generateTestsForImportResult(mockUtil.fileProcessorContext)
+  // from the debug window
   @Test
   fun `basic cases`() {
     mockUtil.mockIt(
@@ -153,25 +158,19 @@ class PropertiesFileProcessorTest {
   }
 
   @Test
-  fun `placeholder conversion setting application works`() {
+  fun `placeholder conversion does nothing`() {
     PlaceholderConversionTestHelper.testFile(
       "en.properties",
       "src/test/resources/import/properties/example_params.properties",
       assertBeforeSettingsApplication =
         listOf(
-          "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo {0, number} '{'icuParam'}'}\nother {Hallo {0, number} '{'icuParam'}'}\n}",
+          "Hello {icuPara} '{escaped}',",
+          "{count, plural,\none {Hello one # {icuParam}}\nother {Hello other {icuParam} '{escaped}'}\n}",
         ),
       assertAfterDisablingConversion =
-        listOf(
-          "Hi %d '{'icuParam'}'",
-          "{0, plural,\none {Hallo %d '{'icuParam'}'}\nother {Hallo %d '{'icuParam'}'}\n}",
-        ),
+        listOf(),
       assertAfterReEnablingConversion =
-        listOf(
-          "Hi {0, number} '{'icuParam'}'",
-          "{0, plural,\none {Hallo {0, number} '{'icuParam'}'}\nother {Hallo {0, number} '{'icuParam'}'}\n}",
-        ),
+        listOf(),
     )
   }
 

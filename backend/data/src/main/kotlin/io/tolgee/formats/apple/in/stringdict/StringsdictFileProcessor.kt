@@ -2,7 +2,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.StartElement
@@ -146,26 +146,26 @@ open class StringsdictFileProcessor(
   }
 
   private fun addTranslation() {
-    val translation =
+    val converted =
       messageConvertor.convert(
         forms,
         languageName,
         context.importSettings.convertPlaceholdersToIcu,
         context.projectIcuPlaceholdersEnabled,
-      ).message
+      )
     context.addTranslation(
       translationKey,
       languageName,
-      translation,
-      forceIsPlural = true,
+      converted.message,
+      pluralArgName = converted.pluralArgName,
       rawData = forms,
-      convertedBy = importMessageFormat,
+      convertedBy = importFormat,
     )
   }
 
   companion object {
-    private val importMessageFormat = ImportMessageFormat.STRINGSDICT
+    private val importFormat = ImportFormat.STRINGSDICT
 
-    private val messageConvertor = importMessageFormat.messageConvertor
+    private val messageConvertor = importFormat.messageConvertor
   }
 }

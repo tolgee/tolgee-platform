@@ -4,9 +4,8 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.formats.forceEscapePluralForms
-import io.tolgee.formats.getPluralForms
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.importCommon.wrapIfRequired
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -38,18 +37,17 @@ data class FileProcessorContext(
   var needsParamConversion = false
 
   /**
-   * @param forceIsPlural when is set to true, it will force the translation to be plurar, when set to false,
-   * it will force the translation not to be plural
+   * @param pluralArgName when is null, the string is not considered plural
    */
   fun addTranslation(
     keyName: String,
     languageName: String,
     value: Any?,
     idx: Int = 0,
-    forceIsPlural: Boolean? = null,
+    pluralArgName: String? = null,
     replaceNonPlurals: Boolean = false,
     rawData: Any? = null,
-    convertedBy: ImportMessageFormat? = null,
+    convertedBy: ImportFormat? = null,
   ) {
     val stringValue = value as? String
 
@@ -61,11 +59,9 @@ data class FileProcessorContext(
       _translations[keyName] = mutableListOf()
     }
 
-    val pluralForms = getPluralForms(stringValue)
-    val isPlural = forceIsPlural ?: (pluralForms != null)
-
-    if (pluralForms?.argName != null) {
-      getOrCreateKey(keyName).pluralArgName = pluralForms.argName
+    val isPlural = pluralArgName != null
+    if (isPlural) {
+      getOrCreateKey(keyName).pluralArgName = pluralArgName
     }
 
     if (convertedBy != null) {
@@ -74,7 +70,7 @@ data class FileProcessorContext(
 
     if (value != null) {
       val entity =
-        ImportTranslation(pluralForms?.icuString ?: stringValue, language).also {
+        ImportTranslation(stringValue, language).also {
           it.isPlural = isPlural
           it.rawData = rawData.wrapIfRequired()
           it.convertor = convertedBy
@@ -87,24 +83,6 @@ data class FileProcessorContext(
     }
 
     createKey(keyName)
-  }
-
-  /**
-   * This method currently supports adding translations in ICU Message Format
-   * Later, we will add support for other message formats
-   */
-  fun addGenericFormatTranslation(
-    key: String,
-    languageName: String,
-    text: String?,
-    index: Int = 0,
-  ) {
-    if (!projectIcuPlaceholdersEnabled) {
-      val escapedPlural = text?.forceEscapePluralForms()
-      val escapedText = escapedPlural ?: text
-      return addTranslation(key, languageName, escapedText, index, forceIsPlural = escapedPlural != null)
-    }
-    return addTranslation(keyName = key, languageName = languageName, value = text, idx = index)
   }
 
   private fun validateAndSaveIssues(
@@ -199,12 +177,3 @@ data class FileProcessorContext(
     applicationContext.getBean(KeyCustomValuesValidator::class.java)
   }
 }
-
-private fun Any?.wrapIfRequired(): Any? {
-  if (this is String) {
-    return mapOf(STRING_WRAPPER_VALUE_ITEM to this)
-  }
-  return this
-}
-
-const val STRING_WRAPPER_VALUE_ITEM = "_stringValue"

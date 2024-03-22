@@ -7,7 +7,7 @@ import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertMessage
 import io.tolgee.formats.getULocaleFromTag
-import io.tolgee.formats.importMessageFormat.BaseImportRawDataConverter
+import io.tolgee.formats.importCommon.BaseImportRawDataConverter
 import io.tolgee.formats.pluralData.PluralData
 
 class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcuPlaceholderConvertor) {
@@ -31,10 +31,10 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
 
     if (rawData is Map<*, *>) {
       val converted = convertPoPlural(rawData, languageTag, convertPlaceholders, isProjectIcuEnabled)
-      return MessageConvertorResult(converted, true)
+      return converted
     }
 
-    return MessageConvertorResult(null, false)
+    throw IllegalArgumentException("Unsupported type of message")
   }
 
   private fun convertPoPlural(
@@ -42,7 +42,7 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
     languageTag: String,
     convertPlaceholders: Boolean,
     isProjectIcuEnabled: Boolean,
-  ): String {
+  ): MessageConvertorResult {
     val forms =
       possiblePluralForms.entries.associate { (formNumPossibleString, value) ->
         val formNumber = (formNumPossibleString as? Int) ?: (formNumPossibleString as? String)?.toIntOrNull()
@@ -54,7 +54,9 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
         val keyword = PluralRules.forLocale(locale).select(example.toDouble())
         keyword to (convert(value, true, convertPlaceholders, isProjectIcuEnabled))
       }
-    return FormsToIcuPluralConvertor(forms, addNewLines = true, argName = "0").convert()
+    val argName = "0"
+    val converted = FormsToIcuPluralConvertor(forms, addNewLines = true, argName = argName).convert()
+    return MessageConvertorResult(converted, argName)
   }
 
   private fun findSuitableExample(

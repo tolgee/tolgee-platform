@@ -3,7 +3,8 @@ package io.tolgee.formats.po.`in`
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.PoParserException
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.MessageConvertorResult
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
 import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
@@ -37,7 +38,8 @@ class PoFileProcessor(
           context.addTranslation(
             keyName = keyName,
             languageName = languageId,
-            value = converted.first,
+            value = converted.first.message,
+            pluralArgName = converted.first.pluralArgName,
             idx = idx,
             rawData = poTranslation.msgstr.toString(),
             convertedBy = converted.second,
@@ -70,29 +72,37 @@ class PoFileProcessor(
   ) {
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
-      val (message, convertedBy) = getConvertedMessage(poTranslation, plurals)
+      val (converted, convertedBy) = getConvertedMessage(poTranslation, plurals)
       val keyName = poTranslation.msgid.toString()
       poTranslation.msgidPlural.toString().nullIfEmpty?.let {
         context.setCustom(keyName, PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY, it)
       }
-      context.addTranslation(keyName, languageId, message, idx, rawData = plurals, convertedBy = convertedBy)
+      context.addTranslation(
+        keyName,
+        languageId,
+        converted.message,
+        pluralArgName = converted.pluralArgName,
+        idx = idx,
+        rawData = plurals,
+        convertedBy = convertedBy,
+      )
     }
   }
 
   private fun getConvertedMessage(
     poTranslation: PoParsedTranslation,
     stringOrPluralForms: Any?,
-  ): Pair<String?, ImportMessageFormat> {
+  ): Pair<MessageConvertorResult, ImportFormat> {
     val messageFormat = getMessageFormat(poTranslation)
-    val convertor = messageFormat.importMessageFormat.messageConvertor
+    val convertor = messageFormat.importFormat.messageConvertor
     val icuMessage =
       convertor.convert(
         rawData = stringOrPluralForms,
         languageTag = languageId,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
         isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
-      ).message
-    return icuMessage to messageFormat.importMessageFormat
+      )
+    return icuMessage to messageFormat.importFormat
   }
 
   private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): PoSupportedMessageFormat {
@@ -115,6 +125,6 @@ class PoFileProcessor(
         }
       }
 
-    FormatDetector(messages.toList())()
+    PoFormatDetector(messages.toList())()
   }
 }

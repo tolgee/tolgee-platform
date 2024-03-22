@@ -8,7 +8,7 @@ import io.tolgee.formats.path.getPathItems
 
 class StructureModelBuilder(
   private var structureDelimiter: Char?,
-  private var supportJsonArrays: Boolean,
+  private var supportArrays: Boolean,
   private val rootKeyIsLanguageTag: Boolean = false,
 ) {
   private var model: StructuredModelItem? = null
@@ -62,7 +62,7 @@ class StructureModelBuilder(
   private fun getPathItems(
     languageTag: String,
     key: String,
-  ) = getLanguageTagPath(languageTag) + getPathItems(key, supportJsonArrays, structureDelimiter)
+  ) = getLanguageTagPath(languageTag) + getPathItems(key, supportArrays, structureDelimiter)
 
   private fun addValueToPath(
     path: List<PathItem>,
@@ -108,7 +108,7 @@ class StructureModelBuilder(
           }
 
           is ArrayStructuredModelItem -> {
-            throw IllegalStateException("Parent node for object item can never be an array")
+            handleCollisions(pathItem, parentNode, fullPath, value)
           }
         }
       }
@@ -122,7 +122,7 @@ class StructureModelBuilder(
           }
 
           is ObjectStructuredModelItem -> {
-            throw IllegalStateException("Parent node for array item can never be an object")
+            handleCollisions(pathItem, parentNode, fullPath, value)
           }
         }
       }

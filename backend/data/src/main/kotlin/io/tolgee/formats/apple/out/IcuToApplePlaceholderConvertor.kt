@@ -5,7 +5,7 @@ import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
 import io.tolgee.formats.escapePercentSign
 
-class AppleFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
+class IcuToApplePlaceholderConvertor : FromIcuPlaceholderConvertor {
   private var argIndex = -1
   private var wasNumberedArg = false
 

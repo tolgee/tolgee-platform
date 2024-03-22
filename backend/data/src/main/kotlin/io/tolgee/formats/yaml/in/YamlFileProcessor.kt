@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredProcessor
 import io.tolgee.formats.genericStructuredFile.`in`.GenericStructuredRawDataToTextConvertor
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class YamlFileProcessor(
@@ -28,7 +28,7 @@ class YamlFileProcessor(
   }
 
   private fun processLanguageData(
-    detectedFormat: ImportMessageFormat,
+    detectedFormat: ImportFormat,
     languageTag: String,
     languageData: Any?,
   ) {

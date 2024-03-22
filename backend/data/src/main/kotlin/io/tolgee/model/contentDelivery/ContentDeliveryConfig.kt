@@ -97,4 +97,8 @@ class ContentDeliveryConfig(
   @Enumerated(EnumType.STRING)
   @ActivityLoggedProp
   override var messageFormat: ExportMessageFormat? = null
+
+  @ActivityLoggedProp
+  @ColumnDefault("false")
+  override val rootKeyIsLanguageTag: Boolean = false
 }

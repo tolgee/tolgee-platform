@@ -2,15 +2,16 @@ package io.tolgee.formats.yaml.`in`
 
 import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil
+import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.ICU_DETECTION_REGEX
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFromPossibleFormats
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class YamlImportFormatDetector {
   companion object {
     private val singleKeyIsBcp47TagFactor =
       FormatDetectionUtil.Factor(5.0) {
-        if (it.size == 1) {
+        if (it is Map<*, *> && it.size == 1) {
           val key = it.keys.first()
           if (FormatDetectionUtil.isValidBCP47Tag(key.toString())) {
             return@Factor 1.0
@@ -21,23 +22,28 @@ class YamlImportFormatDetector {
 
     private val possibleFormats =
       mapOf(
-        ImportMessageFormat.YAML_JAVA to
+        ImportFormat.YAML_JAVA to
           arrayOf(
             FormatDetectionUtil.regexFactor(JavaToIcuPlaceholderConvertor.JAVA_PLACEHOLDER_REGEX),
           ),
-        ImportMessageFormat.YAML_RUBY to
+        ImportFormat.YAML_RUBY to
           arrayOf(
-            FormatDetectionUtil.regexFactor(RubyToIcuPlaceholderConvertor.RUBY_PLACEHOLDER_REGEX),
+            FormatDetectionUtil.regexFactor(
+              RubyToIcuPlaceholderConvertor.RUBY_PLACEHOLDER_REGEX,
+              // Ruby is much more specific than java, so we can lower it's weights.
+              // If the format is candidate for RUBY and JAVA at the same time, it will be detected as JAVA
+              0.9,
+            ),
             singleKeyIsBcp47TagFactor,
           ),
-        ImportMessageFormat.YAML_ICU to
+        ImportFormat.YAML_ICU to
           arrayOf(
-            FormatDetectionUtil.regexFactor("\\s\\{\\w+\\}\\W".toRegex()),
+            FormatDetectionUtil.regexFactor(ICU_DETECTION_REGEX),
           ),
       )
   }
 
-  fun detectFormat(data: Map<*, *>): ImportMessageFormat {
-    return detectFromPossibleFormats(possibleFormats, data) ?: ImportMessageFormat.UNKNOWN
+  fun detectFormat(data: Map<*, *>): ImportFormat {
+    return detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.YAML_UNKNOWN
   }
 }

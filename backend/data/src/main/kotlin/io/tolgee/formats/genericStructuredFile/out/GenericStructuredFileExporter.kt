@@ -2,7 +2,7 @@ package io.tolgee.formats.genericStructuredFile.out
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
-import io.tolgee.formats.FromIcuPlaceholderConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
@@ -16,9 +16,9 @@ class GenericStructuredFileExporter(
   override val fileExtension: String,
   private val projectIcuPlaceholdersSupport: Boolean,
   private val objectMapper: ObjectMapper,
-  private val placeholderConvertorFactory: (() -> FromIcuPlaceholderConvertor)?,
   private val rootKeyIsLanguageTag: Boolean = false,
-  private val pluralsViaNesting: Boolean = false,
+  private val supportArrays: Boolean,
+  private val messageFormat: ExportMessageFormat,
 ) : FileExporter {
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
@@ -54,9 +54,15 @@ class GenericStructuredFileExporter(
     )
   }
 
+  private val pluralsViaNesting
+    get() = messageFormat != ExportMessageFormat.ICU
+
+  private val placeholderConvertorFactory
+    get() = messageFormat.paramConvertorFactory
+
   private fun addPluralTranslation(translation: ExportTranslationView) {
     if (pluralsViaNesting) {
-      addNestedPlural(translation)
+      return addNestedPlural(translation)
     }
     return addSingularTranslation(translation)
   }
@@ -112,7 +118,7 @@ class GenericStructuredFileExporter(
     return result.computeIfAbsent(absolutePath) {
       StructureModelBuilder(
         structureDelimiter = exportParams.structureDelimiter,
-        supportJsonArrays = exportParams.supportArrays,
+        supportArrays = supportArrays,
         rootKeyIsLanguageTag = rootKeyIsLanguageTag,
       )
     }

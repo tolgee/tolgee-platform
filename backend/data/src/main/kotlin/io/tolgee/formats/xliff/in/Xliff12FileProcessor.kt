@@ -1,6 +1,8 @@
 package io.tolgee.formats.xliff.`in`
 
 import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.MessageConvertorResult
+import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
@@ -26,19 +28,11 @@ class Xliff12FileProcessor(
           context.addKeyCodeReference(transUnitId, fileOriginal, null)
         }
         transUnit.source?.let { source ->
-          context.addGenericFormatTranslation(
-            transUnitId,
-            file.sourceLanguage ?: "unknown source",
-            source,
-          )
+          addTranslation(source, transUnitId, file.sourceLanguageOrUnknown)
         }
 
         transUnit.target?.let { target ->
-          context.addGenericFormatTranslation(
-            transUnitId,
-            file.targetLanguage ?: "unknown target",
-            target,
-          )
+          addTranslation(target, transUnitId, file.targetLanguageOrUnknown)
         } ?: let {
           context.fileEntity.addIssue(
             FileIssueType.TARGET_NOT_PROVIDED,
@@ -49,5 +43,47 @@ class Xliff12FileProcessor(
         transUnit.note?.let { context.addKeyDescription(transUnitId, it) }
       }
     }
+  }
+
+  private fun addTranslation(
+    text: String,
+    transUnitId: String,
+    language: String,
+  ) {
+    val converted = convertMessage(text, language)
+    context.addTranslation(
+      transUnitId,
+      language,
+      converted.message,
+      pluralArgName = converted.pluralArgName,
+      rawData = text,
+      convertedBy = context.fileEntity.format,
+    )
+  }
+
+  private val XliffFile.sourceLanguageOrUnknown: String
+    get() = this.sourceLanguage ?: "unknown"
+
+  private val XliffFile.targetLanguageOrUnknown: String
+    get() = this.targetLanguage ?: "unknown"
+
+  fun convertMessage(
+    rawData: String,
+    languageTag: String,
+  ): MessageConvertorResult {
+    return convertor.convert(
+      rawData,
+      languageTag,
+      convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+      isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  private val detectedFormat by lazy {
+    context.fileEntity.format
+  }
+
+  private val convertor by lazy {
+    detectedFormat.messageConvertor
   }
 }

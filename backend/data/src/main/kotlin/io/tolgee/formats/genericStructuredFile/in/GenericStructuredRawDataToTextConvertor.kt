@@ -1,13 +1,13 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
 import com.ibm.icu.text.PluralRules
-import io.tolgee.formats.forceEscapePluralForms
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
-import io.tolgee.service.dataImport.processors.STRING_WRAPPER_VALUE_ITEM
+import io.tolgee.formats.MessageConvertorResult
+import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.importCommon.unwrapString
 import java.util.*
 
 class GenericStructuredRawDataToTextConvertor(
-  private val format: ImportMessageFormat,
+  private val format: ImportFormat,
   private val languageTag: String,
 ) : StructuredRawDataConvertor {
   private val availablePluralKeywords by lazy {
@@ -19,7 +19,7 @@ class GenericStructuredRawDataToTextConvertor(
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
     convertPlaceholdersToIcu: Boolean,
-  ): List<StructuredRawDataConversionResult>? {
+  ): List<MessageConvertorResult>? {
     tryConvertToSingle(rawData, projectIcuPlaceholdersEnabled, convertPlaceholdersToIcu)
       ?.let {
         return it
@@ -34,67 +34,47 @@ class GenericStructuredRawDataToTextConvertor(
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
     convertPlaceholdersToIcu: Boolean,
-  ): List<StructuredRawDataConversionResult>? {
+  ): List<MessageConvertorResult>? {
     if (rawData is Number || rawData is Boolean) {
-      return listOf(StructuredRawDataConversionResult(rawData.toString(), isPlural = false))
+      return listOf(MessageConvertorResult(rawData.toString(), null))
     }
 
     if (rawData == null) {
-      return listOf(StructuredRawDataConversionResult(null, isPlural = false))
+      return listOf(MessageConvertorResult(null, null))
     }
 
     val stringValue = getStringValue(rawData) ?: return null
 
-    tryHandleIcuPlural(rawData, projectIcuPlaceholdersEnabled)?.let {
-      return it
-    }
-
-    return convertSingleValue(
+    return convertStringValue(
       stringValue,
       convertPlaceholdersToIcu,
       projectIcuPlaceholdersEnabled,
     )
   }
 
-  private fun convertSingleValue(
+  private fun convertStringValue(
     stringValue: String,
     convertPlaceholdersToIcu: Boolean,
     projectIcuPlaceholdersEnabled: Boolean,
-  ): List<StructuredRawDataConversionResult> {
+  ): List<MessageConvertorResult> {
     val converted =
       format.messageConvertor.convert(
         rawData = stringValue,
         languageTag = languageTag,
         convertPlaceholders = convertPlaceholdersToIcu,
         isProjectIcuEnabled = projectIcuPlaceholdersEnabled,
-      ).message
+      )
 
-    return listOf(StructuredRawDataConversionResult(converted, null))
+    return listOf(converted)
   }
 
-  private fun getStringValue(rawData: Any?) =
-    rawData as? String ?: (rawData as? Map<*, *>)
-      ?.get(STRING_WRAPPER_VALUE_ITEM) as? String
-
-  private fun tryHandleIcuPlural(
-    rawData: Any?,
-    projectIcuPlaceholdersEnabled: Boolean,
-  ): List<StructuredRawDataConversionResult>? {
-    if (format.canContainIcu && !projectIcuPlaceholdersEnabled) {
-      val stringValue = getStringValue(rawData) ?: return null
-      val escapedPlural = stringValue.forceEscapePluralForms()
-      escapedPlural?.let {
-        return listOf(StructuredRawDataConversionResult(escapedPlural, true))
-      }
-    }
-    return null
-  }
+  private fun getStringValue(rawData: Any?) = unwrapString(rawData)
 
   private fun tryConvertToPlural(
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
     convertPlaceholdersToIcu: Boolean,
-  ): List<StructuredRawDataConversionResult>? {
+  ): List<MessageConvertorResult>? {
     val map = rawData as? Map<*, *> ?: return null
 
     if (!format.pluralsViaNesting) {
@@ -118,8 +98,8 @@ class GenericStructuredRawDataToTextConvertor(
         languageTag = languageTag,
         convertPlaceholders = convertPlaceholdersToIcu,
         isProjectIcuEnabled = projectIcuPlaceholdersEnabled,
-      ).message
+      )
 
-    return listOf(StructuredRawDataConversionResult(converted, true))
+    return listOf(converted)
   }
 }

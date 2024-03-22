@@ -3,6 +3,7 @@ package io.tolgee.formats.json.out
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.genericStructuredFile.out.GenericStructuredFileExporter
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -12,10 +13,16 @@ import java.io.InputStream
 class JsonFileExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: IExportParams,
-  private val projectIcuPlaceholdersSupport: Boolean,
+  projectIcuPlaceholdersSupport: Boolean,
   val objectMapper: ObjectMapper,
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.JSON.extension
+
+  private val messageFormat =
+    when (exportParams.format) {
+      ExportFormat.JSON_TOLGEE -> ExportMessageFormat.ICU
+      else -> exportParams.messageFormat ?: ExportMessageFormat.ICU
+    }
 
   private val genericExporter =
     GenericStructuredFileExporter(
@@ -24,10 +31,17 @@ class JsonFileExporter(
       fileExtension = fileExtension,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
       objectMapper = objectMapper,
-      rootKeyIsLanguageTag = false,
-      pluralsViaNesting = false,
-      placeholderConvertorFactory = null,
+      rootKeyIsLanguageTag = exportParams.rootKeyIsLanguageTag,
+      supportArrays = supportArrays,
+      messageFormat = messageFormat,
     )
+
+  private val supportArrays
+    get() =
+      when (exportParams.format) {
+        ExportFormat.JSON_TOLGEE -> false
+        else -> exportParams.supportArrays
+      }
 
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 

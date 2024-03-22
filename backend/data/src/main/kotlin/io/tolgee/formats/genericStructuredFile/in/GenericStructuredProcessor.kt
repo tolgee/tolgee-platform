@@ -2,6 +2,7 @@ package io.tolgee.formats.genericStructuredFile.`in`
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class GenericStructuredProcessor(
@@ -26,10 +27,10 @@ class GenericStructuredProcessor(
         context.addTranslation(
           key,
           languageTagOrGuess,
-          it.value,
-          rawData = this,
+          it.message,
+          rawData = this@import,
           convertedBy = context.fileEntity.format,
-          forceIsPlural = it.isPlural,
+          pluralArgName = it.pluralArgName,
         )
       }
       return
@@ -49,15 +50,15 @@ class GenericStructuredProcessor(
       context.addTranslation(
         keyName = key,
         languageName = languageTagOrGuess,
-        value = it.value,
-        forceIsPlural = it.isPlural,
-        rawData = this,
+        value = it.message,
+        pluralArgName = it.pluralArgName,
+        rawData = this@import,
         convertedBy = context.fileEntity.format,
       )
     }
   }
 
-  private fun convert(data: Any?): List<StructuredRawDataConversionResult>? {
+  private fun convert(data: Any?): List<MessageConvertorResult>? {
     return convertor.convert(
       rawData = data,
       projectIcuPlaceholdersEnabled = context.projectIcuPlaceholdersEnabled,

@@ -3,11 +3,9 @@ package io.tolgee.formats.yaml.out
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
-import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
-import io.tolgee.formats.android.out.IcuToJavaPlaceholderConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.genericStructuredFile.out.GenericStructuredFileExporter
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
-import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
@@ -20,6 +18,12 @@ class YamlFileExporter(
 ) : FileExporter {
   override val fileExtension: String = exportParams.format.extension
 
+  private val messageFormat =
+    when (exportParams.format) {
+      ExportFormat.YAML_RUBY -> ExportMessageFormat.RUBY_SPRINTF
+      else -> exportParams.messageFormat ?: ExportMessageFormat.ICU
+    }
+
   private val genericExporter =
     GenericStructuredFileExporter(
       translations = translations,
@@ -28,32 +32,22 @@ class YamlFileExporter(
       fileExtension = fileExtension,
       objectMapper = objectMapper,
       rootKeyIsLanguageTag = rootKeyIsLanguageTag,
-      pluralsViaNesting = pluralsViaNesting,
-      placeholderConvertorFactory = placeholderConvertorFactory,
+      messageFormat = messageFormat,
+      supportArrays = supportArrays,
     )
 
-  private val pluralsViaNesting get() = exportParams.format in arrayOf(ExportFormat.YAML_RUBY, ExportFormat.YAML_JAVA)
-  private val rootKeyIsLanguageTag get() = exportParams.format in arrayOf(ExportFormat.YAML_RUBY)
-  private val placeholderConvertorFactory
+  private val rootKeyIsLanguageTag
     get() =
       when (exportParams.format) {
-        ExportFormat.YAML_RUBY -> (
-          {
-            IcuToRubyPlaceholderConvertor()
-          }
-        )
+        ExportFormat.YAML_RUBY -> true
+        else -> exportParams.rootKeyIsLanguageTag
+      }
 
-        ExportFormat.YAML_JAVA -> (
-          {
-            IcuToJavaPlaceholderConvertor()
-          }
-        )
-
-        else -> (
-          {
-            NoOpFromIcuPlaceholderConvertor()
-          }
-        )
+  private val supportArrays
+    get() =
+      when (exportParams.format) {
+        ExportFormat.YAML_RUBY -> true
+        else -> exportParams.supportArrays
       }
 
   val result: LinkedHashMap<String, StructureModelBuilder> =

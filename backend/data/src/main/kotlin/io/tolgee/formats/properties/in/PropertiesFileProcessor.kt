@@ -2,6 +2,7 @@ package io.tolgee.formats.properties.`in`
 
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import org.apache.commons.configuration2.PropertiesConfiguration
 import org.apache.commons.configuration2.io.FileHandler
@@ -11,20 +12,54 @@ class PropertiesFileProcessor(
   override val context: FileProcessorContext,
 ) : ImportFileProcessor() {
   override fun process() {
-    val config = PropertiesConfiguration()
-    val handler = FileHandler(config)
-    handler.load(context.file.data.inputStream())
     try {
-      config.keys.asSequence().forEachIndexed { idx, key ->
-        val value = config.getString(key)
-        val comment = config.layout.getCanonicalComment(key, false)
+      keyValueMap.onEachIndexed { idx, (key, value) ->
+        val comment = preparedConfig.layout.getCanonicalComment(key, false)
         if (!comment.isNullOrBlank()) {
           context.addKeyDescription(key, comment)
         }
-        context.addGenericFormatTranslation(key, firstLanguageTagGuessOrUnknown, value, idx)
+        convert(value).let {
+          context.addTranslation(
+            key,
+            firstLanguageTagGuessOrUnknown,
+            it.message,
+            rawData = value,
+            convertedBy = detectedFormat,
+            pluralArgName = it.pluralArgName,
+          )
+        }
       }
     } catch (e: Exception) {
-      throw ImportCannotParseFileException(context.file.name, e.message)
+      throw ImportCannotParseFileException(context.file.name, e.message, e)
     }
+  }
+
+  private val preparedConfig by lazy {
+    val config = PropertiesConfiguration()
+    val handler = FileHandler(config)
+    handler.load(context.file.data.inputStream())
+    config
+  }
+
+  private val keyValueMap by lazy {
+    preparedConfig.keys.asSequence().map { key -> key to preparedConfig.getString(key) }
+      .toMap(LinkedHashMap())
+  }
+
+  private val detectedFormat by lazy {
+    PropertiesImportFormatDetector().detectFormat(keyValueMap)
+  }
+
+  private val convertor by lazy {
+    detectedFormat.messageConvertor
+  }
+
+  private fun convert(data: Any?): MessageConvertorResult {
+    return convertor.convert(
+      rawData = data,
+      languageTag = firstLanguageTagGuessOrUnknown,
+      isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
+      convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+    )
   }
 }

@@ -383,6 +383,7 @@ class ImportDataManager(
         translations.forEach {
           val convertor = it.convertor?.messageConvertorOrNull
           if (convertor != null) {
+            val prev = it.text to it.isPlural
             val converted =
               convertor.convert(
                 rawData = it.rawData,
@@ -390,9 +391,12 @@ class ImportDataManager(
                 convertPlaceholders = convertPlaceholdersToIcu,
                 isProjectIcuEnabled = import.project.icuPlaceholders,
               )
-            it.isPlural = converted.isPlural
+            it.isPlural = converted.pluralArgName != null
             it.text = converted.message
-            toSave.add(it)
+            val new = it.text to it.isPlural
+            if (prev != new) {
+              toSave.add(it)
+            }
           }
         }
       }

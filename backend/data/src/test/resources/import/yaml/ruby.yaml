@@ -14,10 +14,7 @@ cs:
       other: '%{count} relací'
   redactions:
     edit:
-      heading: Upravit redakci
-      title: Upravit redakci
+      heading: Upravit redakci %<count>d
     index:
-      empty: Žádné opravy k ukázání.
-      heading: Seznam oprav
       title: Seznam oprav %d %s %.2f
   some_text_with_params: 'Toto je text s parametry: %{param1} a %{param2}'

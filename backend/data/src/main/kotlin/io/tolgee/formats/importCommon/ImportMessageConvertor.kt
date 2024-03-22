@@ -1,4 +1,4 @@
-package io.tolgee.formats.importMessageFormat
+package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.MessageConvertorResult
 

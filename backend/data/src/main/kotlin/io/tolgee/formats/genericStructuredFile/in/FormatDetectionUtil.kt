@@ -2,7 +2,7 @@ package io.tolgee.formats.genericStructuredFile.`in`
 
 import com.ibm.icu.util.IllformedLocaleException
 import com.ibm.icu.util.ULocale
-import io.tolgee.formats.importMessageFormat.ImportMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import java.util.concurrent.atomic.AtomicLong
 
 object FormatDetectionUtil {
@@ -19,7 +19,7 @@ object FormatDetectionUtil {
     regex: Regex,
     weight: Double = 1.0,
   ): Factor {
-    return Factor(weight) { it: Map<*, *> ->
+    return Factor(weight) { it: Any? ->
       val hits = AtomicLong(0)
       val total = AtomicLong(0)
       processMapRecursive(it, regex, hits, total)
@@ -46,16 +46,21 @@ object FormatDetectionUtil {
   }
 
   fun detectFromPossibleFormats(
-    possibleFormats: Map<ImportMessageFormat, Array<Factor>>,
-    data: Map<*, *>,
-  ): ImportMessageFormat? {
-    return possibleFormats.asSequence().map { (format, factors) ->
-      val score = factors.sumOf { it.matcher(data) * it.weight }
-      format to score
-    }.filter { it.second != 0.0 }.maxByOrNull { it.second }?.let {
-      return it.first
-    }
+    possibleFormats: Map<ImportFormat, Array<Factor>>,
+    data: Any?,
+  ): ImportFormat? {
+    val options =
+      possibleFormats.asSequence().map { (format, factors) ->
+        val score = factors.sumOf { it.matcher(data) * it.weight }
+        format to score
+      }.filter { it.second != 0.0 }.toMap()
+
+    val maxScore = options.values.maxOrNull()
+    val allWithMaxScore = options.filter { it.value == maxScore }.toList()
+    return allWithMaxScore.singleOrNull()?.first
   }
 
-  data class Factor(val weight: Double, val matcher: (Map<*, *>) -> Double)
+  data class Factor(val weight: Double, val matcher: (Any?) -> Double)
+
+  val ICU_DETECTION_REGEX = "(?:^|\\s)\\{[\\w,\\s]+\\}(?:\\W|\$)".toRegex()
 }

@@ -36,7 +36,7 @@ class FileExporterFactory(
     projectIcuPlaceholdersSupport: Boolean,
   ): FileExporter {
     return when (exportParams.format) {
-      ExportFormat.JSON ->
+      ExportFormat.JSON, ExportFormat.JSON_TOLGEE ->
         JsonFileExporter(
           data,
           exportParams,
@@ -44,7 +44,7 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
         )
 
-      ExportFormat.YAML_RUBY, ExportFormat.YAML_ICU, ExportFormat.YAML_JAVA ->
+      ExportFormat.YAML_RUBY, ExportFormat.YAML ->
         YamlFileExporter(
           data,
           exportParams,

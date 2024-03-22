@@ -7,7 +7,7 @@ import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
 import jakarta.validation.constraints.NotBlank
 
-class ContentDeliveryConfigRequest : IExportParams {
+class ContentDeliveryConfigRequest() : IExportParams {
   @field:NotBlank
   var name: String = ""
 
@@ -43,4 +43,6 @@ class ContentDeliveryConfigRequest : IExportParams {
 
   override var filterNamespace: List<String?>? = null
   override var messageFormat: ExportMessageFormat? = null
+
+  override val rootKeyIsLanguageTag: Boolean = false
 }
