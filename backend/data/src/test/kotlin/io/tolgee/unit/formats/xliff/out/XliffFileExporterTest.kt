@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats.xliff.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
@@ -332,13 +333,52 @@ class XliffFileExporterTest {
     return getExporter(built.translations, true)
   }
 
+  @Test
+  fun `respects message format prop`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}' {hello, number}",
+        )
+      }
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = ExportParams(messageFormat = ExportMessageFormat.RUBY_SPRINTF),
+      )
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.xliff",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    |  <file datatype="plaintext" original="" source-language="en" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="item">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">I will be first '{'icuParam'}' %&lt;hello&gt;d</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |</xliff>
+    |
+      """.trimMargin(),
+    )
+  }
+
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    exportParams: ExportParams = ExportParams(),
   ): XliffFileExporter {
     return XliffFileExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = exportParams,
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,

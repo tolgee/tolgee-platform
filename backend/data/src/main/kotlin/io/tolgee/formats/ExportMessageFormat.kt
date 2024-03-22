@@ -6,6 +6,7 @@ import io.tolgee.formats.paramConvertors.out.IcuToCPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
 
+@Suppress("unused") // it's exposed to the API
 enum class ExportMessageFormat(val paramConvertorFactory: () -> FromIcuPlaceholderConvertor) {
   C_SPRINTF(paramConvertorFactory = { IcuToCPlaceholderConvertor() }),
   PHP_SPRINTF(paramConvertorFactory = { IcuToPhpPlaceholderConvertor() }),

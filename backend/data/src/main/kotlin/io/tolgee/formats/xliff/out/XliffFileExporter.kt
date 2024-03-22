@@ -69,7 +69,9 @@ class XliffFileExporter(
       text,
       plural,
       projectIcuPlaceholdersSupport,
-      paramConvertorFactory = { NoOpFromIcuPlaceholderConvertor() },
+      paramConvertorFactory =
+        exportParams.messageFormat?.paramConvertorFactory
+          ?: { NoOpFromIcuPlaceholderConvertor() },
     ).convert()
   }
 

@@ -46,7 +46,9 @@ class PropertiesFileExporter(
       text,
       plural,
       projectIcuPlaceholdersSupport,
-      paramConvertorFactory = { NoOpFromIcuPlaceholderConvertor() },
+      paramConvertorFactory =
+        exportParams.messageFormat?.paramConvertorFactory
+          ?: { NoOpFromIcuPlaceholderConvertor() },
     ).convert()
   }
 

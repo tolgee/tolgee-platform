@@ -3,6 +3,7 @@ package io.tolgee.unit.formats.json.out
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
@@ -158,6 +159,32 @@ class JsonFileExporterTest {
     return getExporter(built.translations, true)
   }
 
+  @Test
+  fun `respects message format prop`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}' {hello, number}",
+        )
+      }
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = ExportParams(messageFormat = ExportMessageFormat.RUBY_SPRINTF),
+      )
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "item" : "I will be first '{'icuParam'}' %<hello>d"
+    |}
+      """.trimMargin(),
+    )
+  }
+
   private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {
     return this[fileName]!!.bufferedReader().readText()
   }
@@ -181,10 +208,11 @@ class JsonFileExporterTest {
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    exportParams: ExportParams = ExportParams(),
   ): JsonFileExporter {
     return JsonFileExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = exportParams,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
     )
