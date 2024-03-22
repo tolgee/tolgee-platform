@@ -1,14 +1,14 @@
 package io.tolgee.unit.formats.po.out
 
 import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
-import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
+import io.tolgee.formats.po.out.IcuToPoMessageConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
-class BaseIcuMessageToPoConvertorTest {
+class IcuToPoMessageConvertorTest {
   @Test
   fun `converts simple message`() {
-    BaseIcuMessageToPoConvertor(
+    IcuToPoMessageConvertor(
       "Hello {hello} {hello, number} {hello, number, .00}",
       IcuToPhpPlaceholderConvertor(),
       forceIsPlural = false,
@@ -18,7 +18,7 @@ class BaseIcuMessageToPoConvertorTest {
   @Test
   fun `converts with plurals`() {
     val forms =
-      BaseIcuMessageToPoConvertor(
+      IcuToPoMessageConvertor(
         "{0, plural, one {# dog} other {# dogs}}",
         IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,
@@ -32,7 +32,7 @@ class BaseIcuMessageToPoConvertorTest {
   @Test
   fun `converts czech with plurals`() {
     val forms =
-      BaseIcuMessageToPoConvertor(
+      IcuToPoMessageConvertor(
         message = "{0, plural, one {# pes} few {# psi} other {# psů}}",
         languageTag = "cs",
         placeholderConvertor = IcuToPhpPlaceholderConvertor(),
@@ -47,7 +47,7 @@ class BaseIcuMessageToPoConvertorTest {
   @Test
   fun `fallbacks to other`() {
     val forms =
-      BaseIcuMessageToPoConvertor(
+      IcuToPoMessageConvertor(
         message = "{0, plural, one {# pes} other {# psů}}",
         languageTag = "cs",
         placeholderConvertor = IcuToPhpPlaceholderConvertor(),
@@ -62,7 +62,7 @@ class BaseIcuMessageToPoConvertorTest {
   @Test
   fun `fallbacks works when unsupported form is present other`() {
     val forms =
-      BaseIcuMessageToPoConvertor(
+      IcuToPoMessageConvertor(
         message = "{0, plural, one {# pes} many {# pesos} other {# psů}}",
         languageTag = "cs",
         placeholderConvertor = IcuToPhpPlaceholderConvertor(),

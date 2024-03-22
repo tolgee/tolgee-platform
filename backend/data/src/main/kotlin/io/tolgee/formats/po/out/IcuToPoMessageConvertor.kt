@@ -10,7 +10,7 @@ import io.tolgee.formats.getPluralDataOrNull
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
 
-class BaseIcuMessageToPoConvertor(
+class IcuToPoMessageConvertor(
   val message: String,
   val placeholderConvertor: FromIcuPlaceholderConvertor,
   val languageTag: String = "en",

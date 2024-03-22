@@ -6,7 +6,6 @@ import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
-import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
 import io.tolgee.formats.po.`in`.data.PoParserResult
 import io.tolgee.model.dataImport.ImportLanguage
@@ -94,7 +93,7 @@ class PoFileProcessor(
     stringOrPluralForms: Any?,
   ): Pair<MessageConvertorResult, ImportFormat> {
     val messageFormat = getMessageFormat(poTranslation)
-    val convertor = messageFormat.importFormat.messageConvertor
+    val convertor = messageFormat.messageConvertor
     val icuMessage =
       convertor.convert(
         rawData = stringOrPluralForms,
@@ -102,13 +101,13 @@ class PoFileProcessor(
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
         isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
       )
-    return icuMessage to messageFormat.importFormat
+    return icuMessage to messageFormat
   }
 
-  private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): PoSupportedMessageFormat {
-    poParsedTranslation.meta.flags.forEach {
-      PoSupportedMessageFormat.findByFlag(it)
-        ?.let { found -> return found }
+  private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): ImportFormat {
+    poParsedTranslation.meta.flags.forEach { flag ->
+      PoFormatDetector().detectByFlag(flag)
+        ?.let { return it }
     }
     return detectedFormat
   }
@@ -125,6 +124,6 @@ class PoFileProcessor(
         }
       }
 
-    PoFormatDetector(messages.toList())()
+    PoFormatDetector().detectFormat(messages.toList())
   }
 }

@@ -10,7 +10,7 @@ import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
 enum class ExportMessageFormat(val paramConvertorFactory: () -> FromIcuPlaceholderConvertor) {
   C_SPRINTF(paramConvertorFactory = { IcuToCPlaceholderConvertor() }),
   PHP_SPRINTF(paramConvertorFactory = { IcuToPhpPlaceholderConvertor() }),
-  JAVA_SPRINTF(paramConvertorFactory = { IcuToJavaPlaceholderConvertor() }),
+  JAVA_STRING_FORMAT(paramConvertorFactory = { IcuToJavaPlaceholderConvertor() }),
   APPLE_SPRINTF(paramConvertorFactory = { IcuToApplePlaceholderConvertor() }),
   RUBY_SPRINTF(paramConvertorFactory = { IcuToRubyPlaceholderConvertor() }),
   ICU(paramConvertorFactory = { NoOpFromIcuPlaceholderConvertor() }),

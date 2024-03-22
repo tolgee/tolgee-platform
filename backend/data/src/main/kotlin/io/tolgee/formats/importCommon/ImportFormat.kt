@@ -1,11 +1,11 @@
 package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.paramConvertors.`in`.AppleToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
-import io.tolgee.formats.po.`in`.messageConvertors.PoCToIcuImportMessageConvertor
-import io.tolgee.formats.po.`in`.messageConvertors.PoPhpToIcuImportMessageConvertor
+import io.tolgee.formats.po.`in`.PoToIcuMessageConvertor
 
 enum class ImportFormat(
   val pluralsViaNesting: Boolean = false,
@@ -34,10 +34,12 @@ enum class ImportFormat(
       ),
   ),
 
-  PO_PHP(messageConvertorOrNull = PoPhpToIcuImportMessageConvertor()),
-  PO_C(messageConvertorOrNull = PoCToIcuImportMessageConvertor()),
+  PO_PHP(messageConvertorOrNull = PoToIcuMessageConvertor { CToIcuPlaceholderConvertor() }),
+  PO_C(messageConvertorOrNull = PoToIcuMessageConvertor { PhpToIcuPlaceholderConvertor() }),
+  PO_JAVA(messageConvertorOrNull = PoToIcuMessageConvertor { JavaToIcuPlaceholderConvertor() }),
+  PO_ICU(messageConvertorOrNull = PoToIcuMessageConvertor(paramConvertorFactory = null)),
+//  PO_PYTHON(messageConvertorOrNull = BasePoToIcuMessageConvertor { PythonToIcuPlaceholderConvertor() }),
 
-  //  PO_PYTHON(PoPythonToIcuImportMessageConvertor()),
   STRINGS(messageConvertorOrNull = appleConvertor),
   STRINGSDICT(messageConvertorOrNull = appleConvertor),
   APPLE_XLIFF(messageConvertorOrNull = appleConvertor),

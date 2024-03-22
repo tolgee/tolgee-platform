@@ -11,6 +11,7 @@ export interface FormatItem {
   messageFormat?: components['schemas']['ExportParams']['messageFormat'];
   matchByExportParams?: (params: ExportParamsWithoutZip) => boolean;
   extension: string;
+  supportedMessageFormats?: components['schemas']['ExportParams']['messageFormat'][];
 }
 
 export interface FormatGroup {
@@ -46,6 +47,13 @@ export const formatGroups: FormatGroup[] = [
         extension: 'xliff',
         name: 'XLIFF',
         format: 'XLIFF',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_SPRINTF',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
       },
       {
         id: 'generic_structured_json',
@@ -58,12 +66,32 @@ export const formatGroups: FormatGroup[] = [
         format: 'JSON',
         matchByExportParams: (params) =>
           params.format === 'JSON' && params.structureDelimiter === '.',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_SPRINTF',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
       },
       {
         id: 'properties',
         extension: 'properties',
         name: '.properties',
         format: 'PROPERTIES',
+        supportedMessageFormats: ['ICU', 'JAVA_SPRINTF'],
+      },
+      {
+        id: 'yaml',
+        extension: 'properties',
+        name: 'YAML',
+        format: 'YAML',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_SPRINTF',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+        ],
       },
     ],
   },
@@ -71,25 +99,17 @@ export const formatGroups: FormatGroup[] = [
     name: 'Gettext (.po)',
     formats: [
       {
-        id: 'po_php',
+        id: 'po',
         extension: 'po',
         name: 'PHP .po',
         format: 'PO',
-        messageFormat: 'PHP_SPRINTF',
-      },
-      // {
-      //   id: 'po_python',
-      //   extension: 'po',
-      //   name: 'Python .po',
-      //   format: 'PO',
-      //   messageFormat: 'PYTHON_SPRINTF',
-      // },
-      {
-        id: 'po_c',
-        extension: 'po',
-        name: 'C/C++ .po',
-        format: 'PO',
-        messageFormat: 'C_SPRINTF',
+        supportedMessageFormats: [
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'JAVA_SPRINTF',
+          'ICU',
+          'RUBY_SPRINTF',
+        ],
       },
     ],
   },
@@ -129,6 +149,17 @@ export const formatGroups: FormatGroup[] = [
         extension: 'arb',
         name: 'Flutter .arb',
         format: 'FLUTTER_ARB',
+      },
+    ],
+  },
+  {
+    name: 'Ruby on Rails',
+    formats: [
+      {
+        id: 'ruby_yaml',
+        extension: 'yaml',
+        name: 'Ruby .yaml',
+        format: 'YAML_RUBY',
       },
     ],
   },

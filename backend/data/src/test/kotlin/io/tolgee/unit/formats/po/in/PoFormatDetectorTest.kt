@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.po.`in`
 
-import io.tolgee.formats.po.PoSupportedMessageFormat
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.po.`in`.PoFormatDetector
 import io.tolgee.util.FileProcessorContextMockUtil
 import org.assertj.core.api.Assertions.assertThat
@@ -18,13 +18,13 @@ class PoFormatDetectorTest {
 
   @Test
   fun `returns C format`() {
-    val detector = PoFormatDetector(listOf("%jd %hhd", "%d %s", "d %s"))
-    assertThat(detector()).isEqualTo(PoSupportedMessageFormat.C)
+    val detected = PoFormatDetector().detectFormat(listOf("%jd %hhd", "%d %s", "d %s"))
+    assertThat(detected).isEqualTo(ImportFormat.PO_C)
   }
 
   @Test
   fun `returns PHP format`() {
-    val detector = PoFormatDetector(listOf("%b %d", "%d %s", "d %s"))
-    assertThat(detector()).isEqualTo(PoSupportedMessageFormat.PHP)
+    val detected = PoFormatDetector().detectFormat(listOf("%b %d", "%d %s", "d %s"))
+    assertThat(detected).isEqualTo(ImportFormat.PO_PHP)
   }
 }

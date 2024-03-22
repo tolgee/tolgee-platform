@@ -1,4 +1,4 @@
-package io.tolgee.formats.po.`in`.messageConvertors
+package io.tolgee.formats.po.`in`
 
 import com.ibm.icu.text.PluralRules
 import com.ibm.icu.util.ULocale
@@ -9,10 +9,12 @@ import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertMessage
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.importCommon.BaseImportRawDataConverter
+import io.tolgee.formats.importCommon.ImportMessageConvertor
 import io.tolgee.formats.pluralData.PluralData
 
-class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcuPlaceholderConvertor) {
-  fun convert(
+class PoToIcuMessageConvertor(private val paramConvertorFactory: (() -> ToIcuPlaceholderConvertor)?) :
+  ImportMessageConvertor {
+  override fun convert(
     rawData: Any?,
     languageTag: String,
     convertPlaceholders: Boolean,

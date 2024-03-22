@@ -5,8 +5,6 @@ enum class ExportFormat(val extension: String, val mediaType: String) {
   JSON_TOLGEE("json", "application/json"),
   XLIFF("xliff", "application/x-xliff+xml"),
   PO("po", "text/x-gettext-translation"),
-  PO_PHP("po", "text/x-gettext-translation"),
-  PO_C("po", "text/x-gettext-translation"),
   APPLE_STRINGS_STRINGSDICT("", ""),
   APPLE_XLIFF("xliff", "application/x-xliff+xml"),
   ANDROID_XML("xml", "application/xml"),

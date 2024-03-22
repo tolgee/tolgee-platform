@@ -1,18 +1,14 @@
 package io.tolgee.service.export
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.constants.Message
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.ExportFormat
-import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
 import io.tolgee.formats.json.out.JsonFileExporter
-import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
@@ -71,26 +67,13 @@ class FileExporterFactory(
         )
 
       ExportFormat.ANDROID_XML -> AndroidStringsXmlExporter(data, exportParams, projectIcuPlaceholdersSupport)
+
       ExportFormat.PO ->
-        getPoExporter(data, exportParams, baseTranslationsProvider, baseLanguage, projectIcuPlaceholdersSupport)
-
-      ExportFormat.PO_PHP ->
         PoFileExporter(
           data,
           exportParams,
           baseTranslationsProvider,
           baseLanguage,
-          PoSupportedMessageFormat.PHP,
-          projectIcuPlaceholdersSupport,
-        )
-
-      ExportFormat.PO_C ->
-        PoFileExporter(
-          data,
-          exportParams,
-          baseTranslationsProvider,
-          baseLanguage,
-          PoSupportedMessageFormat.C,
           projectIcuPlaceholdersSupport,
         )
 
@@ -109,30 +92,5 @@ class FileExporterFactory(
       ExportFormat.PROPERTIES ->
         PropertiesFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
     }
-  }
-
-  private fun getPoExporter(
-    data: List<ExportTranslationView>,
-    exportParams: IExportParams,
-    baseTranslationsProvider: () -> List<ExportTranslationView>,
-    baseLanguage: LanguageDto,
-    projectIcuPlaceholdersSupport: Boolean,
-  ): PoFileExporter {
-    val poSupportedMessageFormat =
-      when (exportParams.messageFormat) {
-        null -> PoSupportedMessageFormat.C
-        ExportMessageFormat.PHP_SPRINTF -> PoSupportedMessageFormat.PHP
-        ExportMessageFormat.C_SPRINTF -> PoSupportedMessageFormat.C
-//        ExportMessageFormat.PYTHON_SPRINTF -> PoSupportedMessageFormat.PYTHON
-        else -> throw BadRequestException(Message.UNSUPPORTED_PO_MESSAGE_FORMAT)
-      }
-    return PoFileExporter(
-      data,
-      exportParams,
-      baseTranslationsProvider,
-      baseLanguage,
-      poSupportedMessageFormat,
-      projectIcuPlaceholdersSupport,
-    )
   }
 }

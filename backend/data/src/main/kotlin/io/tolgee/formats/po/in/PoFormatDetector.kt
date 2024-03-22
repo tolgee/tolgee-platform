@@ -1,34 +1,63 @@
 package io.tolgee.formats.po.`in`
 
-import io.tolgee.formats.po.PoSupportedMessageFormat
+import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil
+import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor.Companion.JAVA_PLACEHOLDER_REGEX
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
 
-class PoFormatDetector(private val messages: List<String>) {
-  /**
-   * Tries to detect message format by on all messages in file
-   */
-  operator fun invoke(): PoSupportedMessageFormat {
-    val regulars =
-      PoSupportedMessageFormat.entries.associateWith { it.paramRegex }
+class PoFormatDetector() {
+  companion object {
+    private val possibleFormats =
+      mapOf(
+        ImportFormat.PO_C to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(CToIcuPlaceholderConvertor.C_PLACEHOLDER_REGEX),
+          ),
+        ImportFormat.PO_JAVA to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              JAVA_PLACEHOLDER_REGEX,
+              // gettext is not very popular in java world
+              0.95,
+            ),
+          ),
+        ImportFormat.PO_ICU to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              PHP_PLACEHOLDER_REGEX,
+              // gettext is not very popular in java world
+              0.95,
+            ),
+          ),
+        ImportFormat.PO_PHP to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              PHP_PLACEHOLDER_REGEX,
+              1.05,
+            ),
+          ),
+//        ImportFormat.PO_PYTHON to
+//          arrayOf(
+//            FormatDetectionUtil.regexFactor(
+//              PHP_PLACEHOLDER_REGEX,
+//              1.05,
+//            ),
+//          ),
+      )
+  }
 
-    val hitsMap = mutableMapOf<PoSupportedMessageFormat, Int>()
-    regulars.forEach { regularEntry ->
-      val format = regularEntry.key
-      val regex = regularEntry.value
-      messages.forEach {
-        hitsMap[format] = (hitsMap[format] ?: 0) + regex.findAll(it).count()
-      }
+  fun detectByFlag(flag: String): ImportFormat? {
+    return when (flag) {
+      "php-format" -> return ImportFormat.PO_PHP
+      "c-format" -> return ImportFormat.PO_C
+      "java-format" -> return ImportFormat.PO_JAVA
+      "icu-format" -> return ImportFormat.PO_ICU
+      else -> null
     }
+  }
 
-    var result = PoSupportedMessageFormat.PHP
-    var maxValue = 0
-
-    hitsMap.forEach {
-      if (it.value > maxValue) {
-        maxValue = it.value
-        result = it.key
-      }
-    }
-
-    return result
+  fun detectFormat(data: List<String>): ImportFormat {
+    return FormatDetectionUtil.detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.PO_PHP
   }
 }

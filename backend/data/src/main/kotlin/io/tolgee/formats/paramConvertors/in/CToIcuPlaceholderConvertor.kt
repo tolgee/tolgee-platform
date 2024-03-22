@@ -6,7 +6,7 @@ class CToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   override val pluralArgName: String = "0"
 
   override val regex: Regex
-    get() = C_PARAM_REGEX
+    get() = C_PLACEHOLDER_REGEX
 
   private val baseToIcuPlaceholderConvertor = BaseToIcuPlaceholderConvertor()
 
@@ -18,7 +18,7 @@ class CToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   }
 
   companion object {
-    val C_PARAM_REGEX =
+    val C_PLACEHOLDER_REGEX =
       """
       (?x)(
       %
