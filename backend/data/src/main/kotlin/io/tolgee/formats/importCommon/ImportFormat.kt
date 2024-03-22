@@ -2,24 +2,38 @@ package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.android.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.apple.`in`.AppleToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 import io.tolgee.formats.po.`in`.messageConvertors.PoCToIcuImportMessageConvertor
 import io.tolgee.formats.po.`in`.messageConvertors.PoPhpToIcuImportMessageConvertor
 
 enum class ImportFormat(
   val pluralsViaNesting: Boolean = false,
-  val canContainIcu: Boolean = false,
   val messageConvertorOrNull: ImportMessageConvertor? = null,
   val rootKeyIsLanguageTag: Boolean = false,
 ) {
-  JSON(
-    canContainIcu = true,
+  JSON_ICU(
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,
         toIcuPlaceholderConvertorFactory = null,
       ),
   ),
+  JSON_JAVA(
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = false,
+        toIcuPlaceholderConvertorFactory = { JavaToIcuPlaceholderConvertor() },
+      ),
+  ),
+  JSON_PHP(
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = false,
+        toIcuPlaceholderConvertorFactory = { PhpToIcuPlaceholderConvertor() },
+      ),
+  ),
+
   PO_PHP(messageConvertorOrNull = PoPhpToIcuImportMessageConvertor()),
   PO_C(messageConvertorOrNull = PoCToIcuImportMessageConvertor()),
 
@@ -32,7 +46,6 @@ enum class ImportFormat(
   // Since they don't support nesting at all, we cannot have plurals by nesting in them, so the plural extracting
   // code won't be executed
   PROPERTIES_ICU(
-    canContainIcu = true,
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,
@@ -49,7 +62,6 @@ enum class ImportFormat(
   ANDROID_XML(messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() }),
 
   FLUTTER_ARB(
-    canContainIcu = true,
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,
@@ -59,18 +71,13 @@ enum class ImportFormat(
 
   YAML_RUBY(
     pluralsViaNesting = true,
-    canContainIcu = false,
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
     rootKeyIsLanguageTag = true,
   ),
   YAML_JAVA(
-    pluralsViaNesting = false,
-    canContainIcu = false,
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
   ),
   YAML_ICU(
-    pluralsViaNesting = false,
-    canContainIcu = true,
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,
@@ -78,13 +85,31 @@ enum class ImportFormat(
       ),
   ),
   YAML_UNKNOWN(
-    pluralsViaNesting = false,
-    canContainIcu = true,
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,
         toIcuPlaceholderConvertorFactory = null,
       ),
+  ),
+
+  XLIFF_ICU(
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
+
+  XLIFF_JAVA(
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
+
+  XLIFF_PHP(
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { PhpToIcuPlaceholderConvertor() },
+  ),
+
+  XLIFF_RUBY(
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
   ),
 
   ;

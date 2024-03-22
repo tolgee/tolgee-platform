@@ -35,7 +35,7 @@ object FormatDetectionUtil {
   ) {
     when (data) {
       is Map<*, *> -> data.forEach { (_, value) -> processMapRecursive(value, regex, hits, total) }
-      is List<*> -> data.forEach { item -> processMapRecursive(item!!, regex, hits, total) }
+      is List<*> -> data.forEach { item -> processMapRecursive(item, regex, hits, total) }
       else -> {
         total.incrementAndGet()
         if (data is String) {
@@ -49,15 +49,10 @@ object FormatDetectionUtil {
     possibleFormats: Map<ImportFormat, Array<Factor>>,
     data: Any?,
   ): ImportFormat? {
-    val options =
-      possibleFormats.asSequence().map { (format, factors) ->
-        val score = factors.sumOf { it.matcher(data) * it.weight }
-        format to score
-      }.filter { it.second != 0.0 }.toMap()
-
-    val maxScore = options.values.maxOrNull()
-    val allWithMaxScore = options.filter { it.value == maxScore }.toList()
-    return allWithMaxScore.singleOrNull()?.first
+    return possibleFormats.asSequence().map { (format, factors) ->
+      val score = factors.sumOf { it.matcher(data) * it.weight }
+      format to score
+    }.filter { it.second != 0.0 }.maxByOrNull { it.second }?.first
   }
 
   data class Factor(val weight: Double, val matcher: (Any?) -> Double)

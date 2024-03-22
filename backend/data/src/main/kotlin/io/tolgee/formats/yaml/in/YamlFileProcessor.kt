@@ -16,7 +16,6 @@ class YamlFileProcessor(
     val data = objectMapper.readValue<Any?>(context.file.data)
     val dataMap = data as? Map<*, *> ?: return
     val detectedFormat = YamlImportFormatDetector().detectFormat(dataMap)
-    context.fileEntity.format = detectedFormat
     if (detectedFormat.rootKeyIsLanguageTag) {
       dataMap.entries.forEach { (languageTag, languageData) ->
         if (languageTag !is String) return@forEach
@@ -42,6 +41,7 @@ class YamlFileProcessor(
       data = languageData,
       convertor = convertor,
       languageTag = languageTag,
+      format = detectedFormat,
     ).process()
   }
 }

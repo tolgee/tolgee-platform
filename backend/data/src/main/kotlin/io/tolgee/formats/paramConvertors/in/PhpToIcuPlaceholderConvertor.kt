@@ -11,7 +11,7 @@ class PhpToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private var index = 0
 
   override val regex: Regex
-    get() = PHP_PARAM_REGEX
+    get() = PHP_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
@@ -42,12 +42,12 @@ class PhpToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   }
 
   companion object {
-    val PHP_PARAM_REGEX =
+    val PHP_PLACEHOLDER_REGEX =
       """
       (?x)(
       %
       (?:(?<argnum>\d+)${"\\$"})?
-      (?<flags>(?:[-+\s0]|'.)+)?
+      (?<flags>[\-+\s0']+)?
       (?<width>\d+)?
       (?:\.(?<precision>\d+))?
       (?<specifier>[bcdeEfFgGhHosuxX%])

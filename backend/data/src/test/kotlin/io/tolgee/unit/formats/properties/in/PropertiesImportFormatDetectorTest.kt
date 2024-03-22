@@ -28,11 +28,6 @@ class PropertiesImportFormatDetectorTest {
     "src/test/resources/import/properties/java.properties".assertDetected(ImportFormat.PROPERTIES_JAVA)
   }
 
-  @Test
-  fun `fallbacks to unknown`() {
-    "src/test/resources/import/properties/unknown.properties".assertDetected(ImportFormat.PROPERTIES_UNKNOWN)
-  }
-
   private fun parseFile(path: String): Map<*, *> {
     val config = PropertiesConfiguration()
     val handler = FileHandler(config)

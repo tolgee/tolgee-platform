@@ -3,6 +3,7 @@ package io.tolgee.formats.genericStructuredFile.`in`
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class GenericStructuredProcessor(
@@ -10,6 +11,7 @@ class GenericStructuredProcessor(
   private val data: Any?,
   private val convertor: StructuredRawDataConvertor,
   private val languageTag: String? = null,
+  private val format: ImportFormat,
 ) : ImportFileProcessor() {
   override fun process() {
     try {
@@ -29,7 +31,7 @@ class GenericStructuredProcessor(
           languageTagOrGuess,
           it.message,
           rawData = this@import,
-          convertedBy = context.fileEntity.format,
+          convertedBy = format,
           pluralArgName = it.pluralArgName,
         )
       }
@@ -53,7 +55,7 @@ class GenericStructuredProcessor(
         value = it.message,
         pluralArgName = it.pluralArgName,
         rawData = this@import,
-        convertedBy = context.fileEntity.format,
+        convertedBy = format,
       )
     }
   }

@@ -21,7 +21,7 @@ enum class PoSupportedMessageFormat(
   PHP(
     poFlag = "php-format",
     importFormat = ImportFormat.PO_PHP,
-    paramRegex = PhpToIcuPlaceholderConvertor.PHP_PARAM_REGEX,
+    paramRegex = PhpToIcuPlaceholderConvertor.PHP_PLACEHOLDER_REGEX,
     exportMessageConverter = { message, languageTag, forceIsPlural, projectIcuPlaceholdersSupport ->
       ToPhpPoMessageConvertor(
         message,
