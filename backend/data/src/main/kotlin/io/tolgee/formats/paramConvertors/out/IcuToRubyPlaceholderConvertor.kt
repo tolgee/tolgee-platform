@@ -12,10 +12,7 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
       getArgNameString(it)
     }
 
-  override fun convert(
-    node: MessagePatternUtil.ArgNode,
-    isInPlural: Boolean,
-  ): String {
+  override fun convert(node: MessagePatternUtil.ArgNode): String {
     return baseToCLikePlaceholderConvertor.convert(node)
   }
 

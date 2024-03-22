@@ -1,8 +1,8 @@
 package io.tolgee.formats
 
-import io.tolgee.formats.android.out.IcuToJavaPlaceholderConvertor
-import io.tolgee.formats.apple.out.IcuToApplePlaceholderConvertor
+import io.tolgee.formats.paramConvertors.out.IcuToApplePlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToCPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.out.IcuToJavaPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
 

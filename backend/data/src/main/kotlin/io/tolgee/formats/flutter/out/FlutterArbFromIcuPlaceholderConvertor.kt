@@ -4,10 +4,7 @@ import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
 
 class FlutterArbFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
-  override fun convert(
-    node: MessagePatternUtil.ArgNode,
-    isInPlural: Boolean,
-  ): String {
+  override fun convert(node: MessagePatternUtil.ArgNode): String {
     return "{${node.name}}"
   }
 

@@ -71,11 +71,8 @@ fun getPluralFormsReplacingReplaceParam(
   val noOpConvertor = NoOpFromIcuPlaceholderConvertor()
   val convertor =
     object : FromIcuPlaceholderConvertor {
-      override fun convert(
-        node: MessagePatternUtil.ArgNode,
-        isInPlural: Boolean,
-      ): String {
-        return noOpConvertor.convert(node, isInPlural)
+      override fun convert(node: MessagePatternUtil.ArgNode): String {
+        return noOpConvertor.convert(node)
       }
 
       override fun convertText(string: String): String {

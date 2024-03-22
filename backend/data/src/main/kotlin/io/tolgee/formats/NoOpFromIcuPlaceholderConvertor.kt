@@ -1,10 +1,7 @@
 package io.tolgee.formats
 
 class NoOpFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
-  override fun convert(
-    node: MessagePatternUtil.ArgNode,
-    isInPlural: Boolean,
-  ): String {
+  override fun convert(node: MessagePatternUtil.ArgNode): String {
     return node.patternString
   }
 

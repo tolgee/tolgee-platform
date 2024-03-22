@@ -4,11 +4,11 @@ import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
 import io.tolgee.formats.escapePercentSign
 
-class IcuToPhpPlaceholderConvertor : FromIcuPlaceholderConvertor {
+class IcuToApplePlaceholderConvertor : FromIcuPlaceholderConvertor {
   private val baseToCLikePlaceholderConvertor =
     BaseToCLikePlaceholderConvertor(
-      defaultSpecifier = "s",
-      argNameStringProvider = null,
+      defaultSpecifier = "@",
+      numberSpecifier = "lld",
     )
 
   override fun convert(node: MessagePatternUtil.ArgNode): String {
@@ -23,6 +23,6 @@ class IcuToPhpPlaceholderConvertor : FromIcuPlaceholderConvertor {
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
   ): String {
-    return "%d"
+    return "%lld"
   }
 }

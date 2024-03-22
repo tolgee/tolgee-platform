@@ -8,10 +8,7 @@ import io.tolgee.formats.escapePercentSign
 class IcuToPythonPlaceholderConvertor : FromIcuPlaceholderConvertor {
   private var argIndex = -1
 
-  override fun convert(
-    node: MessagePatternUtil.ArgNode,
-    isInPlural: Boolean,
-  ): String {
+  override fun convert(node: MessagePatternUtil.ArgNode): String {
     argIndex++
     val argNumString = getArgNameString(node)
     val type = node.argType

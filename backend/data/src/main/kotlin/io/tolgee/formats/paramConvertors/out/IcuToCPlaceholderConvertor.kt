@@ -11,10 +11,7 @@ class IcuToCPlaceholderConvertor : FromIcuPlaceholderConvertor {
       argNameStringProvider = null,
     )
 
-  override fun convert(
-    node: MessagePatternUtil.ArgNode,
-    isInPlural: Boolean,
-  ): String {
+  override fun convert(node: MessagePatternUtil.ArgNode): String {
     return baseToCLikePlaceholderConvertor.convert(node)
   }
 

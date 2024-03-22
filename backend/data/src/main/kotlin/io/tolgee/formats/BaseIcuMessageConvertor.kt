@@ -170,8 +170,7 @@ class BaseIcuMessageConvertor(
     }
     when (node.argType) {
       MessagePattern.ArgType.SIMPLE, MessagePattern.ArgType.NONE -> {
-        val isInPlural = form != null
-        addToResult(argumentConvertor.convert(node, isInPlural), form)
+        addToResult(argumentConvertor.convert(node), form)
       }
 
       MessagePattern.ArgType.PLURAL -> {

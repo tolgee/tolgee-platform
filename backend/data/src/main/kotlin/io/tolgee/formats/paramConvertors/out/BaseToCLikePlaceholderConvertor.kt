@@ -5,8 +5,9 @@ import io.tolgee.formats.MessagePatternUtil
 import io.tolgee.formats.escapePercentSign
 
 class BaseToCLikePlaceholderConvertor(
-  private val defaultSpecifier: String,
-  val argNameStringProvider: (BaseToCLikePlaceholderConvertor.(MessagePatternUtil.ArgNode) -> String)?,
+  private val defaultSpecifier: String = "s",
+  private val numberSpecifier: String = "d",
+  private val argNameStringProvider: (BaseToCLikePlaceholderConvertor.(MessagePatternUtil.ArgNode) -> String)? = null,
 ) {
   private var argIndex = -1
   private var wasNumberedArg = false
@@ -50,7 +51,7 @@ class BaseToCLikePlaceholderConvertor(
       return "%${getArgNameString(node)}.${precision}f"
     }
 
-    return "%${getArgNameString(node)}d"
+    return "%${getArgNameString(node)}$numberSpecifier"
   }
 
   private fun getPrecision(node: MessagePatternUtil.ArgNode): Int? {
