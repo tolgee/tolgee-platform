@@ -80,13 +80,7 @@ class Xliff12FileProcessor(
   }
 
   private val detectedFormat by lazy {
-    val detectionData =
-      parsed.files
-        .flatMap {
-          it.transUnits
-            .flatMap { unit -> listOf(unit.source, unit.target) }
-        }
-    XliffImportFormatDetector().detectFormat(detectionData)
+    XliffImportFormatDetector().detectFormat(parsed)
   }
 
   private val convertor by lazy {

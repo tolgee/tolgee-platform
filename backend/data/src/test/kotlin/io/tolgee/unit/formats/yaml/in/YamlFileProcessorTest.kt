@@ -3,6 +3,7 @@ package io.tolgee.unit.formats.yaml.`in`
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -112,6 +113,36 @@ class YamlFileProcessorTest {
       .assertSingle {
         hasText("Some text without params")
       }
+  }
+
+  @Test
+  fun `placeholder conversion setting application works`() {
+    PlaceholderConversionTestHelper.testFile(
+      "en.yaml",
+      "src/test/resources/import/yaml/java.yaml",
+      assertBeforeSettingsApplication =
+        listOf(
+          "{0, number} relací",
+          "Upravit redakci",
+          "Upravit redakci",
+          "Žádné opravy k ukázání.",
+          "Seznam oprav",
+          "Seznam oprav {0}",
+          "Toto je text s parametry: {0} {1, number}",
+        ),
+      assertAfterDisablingConversion =
+        listOf(
+          "%d relací",
+          "Seznam oprav %s",
+          "Toto je text s parametry: %s %d",
+        ),
+      assertAfterReEnablingConversion =
+        listOf(
+          "{0, number} relací",
+          "Seznam oprav {0}",
+          "Toto je text s parametry: {0} {1, number}",
+        ),
+    )
   }
 
   private fun processFile() {
