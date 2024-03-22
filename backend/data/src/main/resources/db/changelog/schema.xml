@@ -3160,4 +3160,11 @@
             <column defaultValue="UNKNOWN" name="format" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1711108627911-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="root_key_is_language_tag" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
