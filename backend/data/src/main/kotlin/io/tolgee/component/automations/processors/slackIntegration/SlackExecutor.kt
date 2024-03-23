@@ -13,6 +13,8 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.util.I18n
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
@@ -25,7 +27,7 @@ class SlackExecutor(
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
   private val slackSubscriptionService: SlackSubscriptionService,
-) {
+) : Logging {
   private val slackToken = tolgeeProperties.slack.token
   private val slackClient: Slack = Slack.getInstance()
   private lateinit var slackExecutorHelper: SlackExecutorHelper
@@ -141,12 +143,17 @@ class SlackExecutor(
     config: SlackConfig,
     messageDto: SavedMessageDto,
   ) {
-    slackClient.methods(slackToken).chatUpdate { request ->
-      request
-        .channel(config.channelId)
-        .ts(savedMessage.messageTs)
-        .blocks(messageDto.blocks)
-        .attachments(messageDto.attachments)
+    val response =
+      slackClient.methods(slackToken).chatUpdate { request ->
+        request
+          .channel(config.channelId)
+          .ts(savedMessage.messageTs)
+          .blocks(messageDto.blocks)
+          .attachments(messageDto.attachments)
+      }
+
+    if (!response.isOk) {
+      logger.info(response.error)
     }
   }
 
@@ -162,6 +169,8 @@ class SlackExecutor(
       }
     if (response.isOk) {
       saveMessage(messageDto, response.ts, config)
+    } else {
+      logger.info(response.error)
     }
   }
 
