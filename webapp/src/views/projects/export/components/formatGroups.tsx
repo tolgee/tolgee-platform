@@ -185,6 +185,7 @@ export const formatGroups: FormatGroup[] = [
       {
         id: 'ruby_yaml',
         extension: 'yaml',
+        messageFormat: 'RUBY_SPRINTF',
         name: <T keyName="export-format-ruby-yaml" />,
         format: 'YAML_RUBY',
       },

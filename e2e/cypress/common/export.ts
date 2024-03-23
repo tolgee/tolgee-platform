@@ -121,6 +121,26 @@ export const testExportFormats = (
     }
   );
 
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    {
+      format: 'Flat YAML',
+      expectedParams: {
+        format: 'YAML',
+      },
+    }
+  );
+
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    {
+      format: 'Structured YAML',
+      expectedParams: {
+        format: 'YAML',
+      },
+    }
+  );
+
   testFormatWithMessageFormats(['ICU', 'Java String.format'], {
     format: '.properties',
     expectedParams: {
@@ -164,6 +184,14 @@ export const testExportFormats = (
     format: 'Flutter .arb',
     expectedParams: {
       format: 'FLUTTER_ARB',
+    },
+  });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'Ruby on Rails .yaml',
+    expectedParams: {
+      messageFormat: 'RUBY_SPRINTF',
+      format: 'YAML_RUBY',
     },
   });
 };
