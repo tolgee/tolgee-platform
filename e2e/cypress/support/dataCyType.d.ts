@@ -154,6 +154,8 @@ declare namespace DataCy {
         "export-format-selector-item" |
         "export-language-selector" |
         "export-language-selector-item" |
+        "export-message-format-selector" |
+        "export-message-format-selector-item" |
         "export-namespace-selector" |
         "export-namespace-selector-item" |
         "export-nested-selector" |

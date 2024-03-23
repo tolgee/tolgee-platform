@@ -20,7 +20,7 @@ export const FormatSelector: React.FC<Props> = ({ className }) => {
 
   const options: ReactNode[] = [];
 
-  formatGroups.map((group) => {
+  formatGroups.forEach((group) => {
     options.push(
       <CompactListSubheader key={`g-${group.name}`} disableSticky>
         {group.name}
