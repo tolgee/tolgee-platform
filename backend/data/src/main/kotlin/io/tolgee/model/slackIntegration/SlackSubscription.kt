@@ -10,6 +10,6 @@ import jakarta.persistence.ManyToOne
 class SlackSubscription : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
   var userAccount: UserAccount? = null
-
+  var slackNickName: String = ""
   var slackUserId: String = ""
 }

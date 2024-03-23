@@ -19,5 +19,8 @@ interface SavedSlackMessageRepository : JpaRepository<SavedSlackMessage, Long> {
   )
   fun deleteOlderThan(cutoff: Date)
 
-  fun findByKeyId(keyId: Long): List<SavedSlackMessage>
+  fun findByKeyIdAndSlackConfigId(
+    keyId: Long,
+    configId: Long,
+  ): List<SavedSlackMessage>
 }

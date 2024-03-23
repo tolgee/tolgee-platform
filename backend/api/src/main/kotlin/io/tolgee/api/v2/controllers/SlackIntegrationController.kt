@@ -57,6 +57,7 @@ class SlackIntegrationController(
         Message.SLACK_INVALID_COMMAND,
         payload.channel_id,
         payload.user_id,
+        payload.user_name ?: "",
       )
       return null
     }
@@ -66,7 +67,7 @@ class SlackIntegrationController(
     val optionsMap = parseOptions(optionsString)
 
     return when (command) {
-      "login" -> return login(payload.user_id, payload.channel_id)
+      "login" -> return login(payload.user_id, payload.channel_id, payload.user_name ?: "")
 
       "subscribe" -> return handleSubscribe(payload, projectId, languageTag, optionsMap)
 
@@ -77,6 +78,7 @@ class SlackIntegrationController(
           Message.SLACK_INVALID_COMMAND,
           payload.channel_id,
           payload.user_id,
+          payload.user_name ?: "",
         )
         null
       }
@@ -89,7 +91,7 @@ class SlackIntegrationController(
     @RequestBody payload: SlackConnectionDto,
   ) {
     val user = userAccountService.get(payload.userAccountId.toLong())
-    slackSubscriptionService.create(user, payload.slackId)
+    slackSubscriptionService.create(user, payload.slackId, payload.slackNickName)
 
     slackExecutor.sendSuccessMessage(payload.channelId)
   }
@@ -97,12 +99,13 @@ class SlackIntegrationController(
   private fun login(
     userId: String,
     channelId: String,
+    slackNickName: String,
   ): SlackMessageDto? {
     if (slackSubscriptionService.ifSlackConnected(userId)) {
       return SlackMessageDto(text = "You are already logged in.")
     }
 
-    slackExecutor.sendRedirectUrl(channelId, userId)
+    slackExecutor.sendRedirectUrl(channelId, userId, slackNickName)
     return null
   }
 
@@ -117,6 +120,7 @@ class SlackIntegrationController(
         Message.SLACK_INVALID_COMMAND,
         payload.channel_id,
         payload.user_id,
+        payload.user_name ?: "",
       )
       return null
     }
@@ -136,6 +140,7 @@ class SlackIntegrationController(
             Message.SLACK_INVALID_COMMAND,
             payload.channel_id,
             payload.user_id,
+            payload.user_name ?: "",
           )
           return null
         }
@@ -234,6 +239,7 @@ class SlackIntegrationController(
         Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT,
         payload.channel_id,
         payload.user_id,
+        payload.user_name ?: "",
       )
       return ValidationResult(false)
     }

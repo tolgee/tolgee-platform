@@ -20,12 +20,16 @@ export const SlackLoginView = () => {
   const queryParameters = new URLSearchParams(location.search);
   const slackId = queryParameters.get('slackId');
   const slackChannelId = queryParameters.get('channelId');
+  const slackNickName = queryParameters.get('nickName');
+
   const user = useUser();
   const error = !slackId || !slackChannelId || !user;
 
   const validSlackId = slackId ?? 'defaultSlackId';
   const validChannelId = slackChannelId ?? 'defaultSlackId';
   const validUserAccountId = user?.id?.toString() ?? 'defaultAccountId';
+  const validSlackNickName = slackNickName ?? '';
+
 
   const slackMutation = useApiMutation({
     url: '/v2/slack/connect',
@@ -40,6 +44,7 @@ export const SlackLoginView = () => {
             slackId: validSlackId,
             userAccountId: validUserAccountId,
             channelId: validChannelId,
+            slackNickName: validSlackNickName
           },
         },
       },

@@ -30,16 +30,20 @@ class SavedSlackMessageService(
   fun find(
     keyId: Long,
     langTags: Set<String>,
+    configId: Long,
   ): List<SavedSlackMessage> {
-    val savedSlackMessages = findByKey(keyId)
+    val savedSlackMessages = findByKey(keyId, configId)
 
     return savedSlackMessages.filter { savedSlackMessage ->
       savedSlackMessage.langTags.any { it in langTags }
     }
   }
 
-  fun findByKey(keyId: Long): List<SavedSlackMessage> {
-    return savedSlackMessageRepository.findByKeyId(keyId)
+  fun findByKey(
+    keyId: Long,
+    configId: Long,
+  ): List<SavedSlackMessage> {
+    return savedSlackMessageRepository.findByKeyIdAndSlackConfigId(keyId, configId)
   }
 
   fun getAllSavedSlackMessages(): List<SavedSlackMessage> {

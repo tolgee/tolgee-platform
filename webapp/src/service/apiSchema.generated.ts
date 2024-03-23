@@ -741,6 +741,14 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -755,14 +763,6 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1322,8 +1322,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1474,17 +1474,17 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     IImportSettings: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     ImportSettingsModel: {
       settings?: components["schemas"]["IImportSettings"];
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -1650,9 +1650,9 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -1795,9 +1795,11 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       username?: string;
       /** Format: int64 */
       projectId: number;
@@ -1805,8 +1807,6 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1836,6 +1836,7 @@ export interface components {
       slackId: string;
       userAccountId: string;
       channelId: string;
+      slackNickName: string;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -2682,19 +2683,19 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
       /** @example btforg */
       slug: string;
       avatar?: components["schemas"]["Avatar"];
@@ -2730,9 +2731,9 @@ export interface components {
       contentDeliveryConfigured: boolean;
     };
     DocItem: {
-      name: string;
       displayName?: string;
       description?: string;
+      name: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -2803,20 +2804,20 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      description?: string;
       baseTranslation?: string;
       translation?: string;
       namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      description?: string;
       baseTranslation?: string;
       translation?: string;
       namespace?: string;
@@ -3354,9 +3355,9 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -3481,9 +3482,11 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       username?: string;
       /** Format: int64 */
       projectId: number;
@@ -3491,8 +3494,6 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
     };
     ApiKeyPermissionsModel: {

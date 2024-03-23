@@ -3335,4 +3335,14 @@
     <changeSet author="huglx (generated)" id="1710445771893-6">
         <dropTable tableName="slack_config_language_tags"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1711021114826-1">
+        <addColumn tableName="saved_slack_message">
+            <column name="lang_tags" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1711052359755-1">
+        <addColumn tableName="slack_subscription">
+            <column name="slack_nick_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

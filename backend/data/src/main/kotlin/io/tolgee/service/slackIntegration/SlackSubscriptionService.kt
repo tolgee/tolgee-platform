@@ -25,10 +25,12 @@ class SlackSubscriptionService(
   fun create(
     userAccount: UserAccount,
     slackId: String,
+    slackNickName: String,
   ): SlackSubscription {
     val slackSubscription = SlackSubscription()
     slackSubscription.slackUserId = slackId
     slackSubscription.userAccount = userAccount
+    slackSubscription.slackNickName = slackNickName
     return slackSubscriptionRepository.save(slackSubscription)
   }
 }

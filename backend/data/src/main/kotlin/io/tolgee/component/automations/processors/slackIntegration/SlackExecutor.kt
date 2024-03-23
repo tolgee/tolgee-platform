@@ -2,6 +2,7 @@ package io.tolgee.component.automations.processors.slackIntegration
 
 import com.slack.api.Slack
 import com.slack.api.methods.kotlin_extension.request.chat.blocks
+import com.slack.api.model.Attachment
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -10,6 +11,7 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
+import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.util.I18n
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
@@ -22,6 +24,7 @@ class SlackExecutor(
   private val permissionService: PermissionService,
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
+  private val slackSubscriptionService: SlackSubscriptionService,
 ) {
   private val slackToken = tolgeeProperties.slack.token
   private val slackClient: Slack = Slack.getInstance()
@@ -30,7 +33,7 @@ class SlackExecutor(
   fun sendMessageOnTranslationSet() {
     val config = slackExecutorHelper.slackConfig
     val messageDto = slackExecutorHelper.createTranslationChangeMessage() ?: return
-    val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag)
+    val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag, config.id)
 
     if (savedMessage.isEmpty()) {
       sendRegularMessageWithSaving(messageDto, config)
@@ -46,10 +49,14 @@ class SlackExecutor(
         return@forEach
       }
 
-      val additionalAttachments =
-        languagesToAdd.mapNotNull { lang ->
-          slackExecutorHelper.createAttachmentForLanguage(lang, messageDto.keyId)
+      val additionalAttachments: MutableList<Attachment> = mutableListOf()
+
+      languagesToAdd.forEach { lang ->
+        val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, messageDto.keyId)
+        attachment?.let {
+          additionalAttachments.add(it)
         }
+      }
 
       val updatedAttachments = messageDto.attachments + additionalAttachments
       val updatedMessageDto = messageDto.copy(attachments = updatedAttachments)
@@ -76,8 +83,9 @@ class SlackExecutor(
     errorMessage: Message,
     slackChannelId: String,
     slackId: String,
+    slackNickName: String,
   ) {
-    val blocks = createErrorBlocks(errorMessage, getRedirectUrl(slackChannelId, slackId))
+    val blocks = createErrorBlocks(errorMessage, getRedirectUrl(slackChannelId, slackId, slackNickName))
 
     slackClient.methods(slackToken).chatPostMessage { request ->
       request.channel(slackChannelId)
@@ -88,6 +96,7 @@ class SlackExecutor(
   fun sendRedirectUrl(
     slackChannelId: String,
     slackId: String,
+    slackNickName: String,
   ) {
     slackClient.methods(slackToken).chatPostMessage {
       it.channel(slackChannelId)
@@ -104,7 +113,7 @@ class SlackExecutor(
             button {
               text(i18n.translate("connect-button-text"), emoji = true)
               value("connect_slack")
-              url(getRedirectUrl(slackChannelId, slackId))
+              url(getRedirectUrl(slackChannelId, slackId, slackNickName))
               actionId("button_connect_slack")
               style("primary")
             }
@@ -160,13 +169,22 @@ class SlackExecutor(
     slackConfig: SlackConfig,
     data: SlackRequest,
   ) {
-    slackExecutorHelper = SlackExecutorHelper(slackConfig, data, keyService, permissionService)
+    slackExecutorHelper =
+      SlackExecutorHelper(
+        slackConfig,
+        data,
+        keyService,
+        permissionService,
+        slackSubscriptionService,
+        i18n,
+      )
   }
 
   private fun findSavedMessageOrNull(
     keyId: Long,
     langTags: Set<String>,
-  ) = savedSlackMessageService.find(keyId, langTags)
+    configId: Long,
+  ) = savedSlackMessageService.find(keyId, langTags, configId)
 
   private fun saveMessage(
     messageDto: SavedMessageDto,
@@ -187,7 +205,8 @@ class SlackExecutor(
   private fun getRedirectUrl(
     slackChannelId: String,
     slackId: String,
-  ) = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId"
+    slackNickName: String,
+  ) = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId&nickName=$slackNickName"
 
   fun createErrorBlocks(
     errorMessageType: Message,

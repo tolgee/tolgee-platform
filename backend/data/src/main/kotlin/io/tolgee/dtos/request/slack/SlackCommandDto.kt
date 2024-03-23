@@ -6,7 +6,7 @@ data class SlackCommandDto(
   var command: String = "",
   var channel_name: String? = "",
   var user_id: String = "",
-  var userName: String?,
+  var user_name: String?,
   var text: String = "",
   var trigger_id: String? = "",
 )
