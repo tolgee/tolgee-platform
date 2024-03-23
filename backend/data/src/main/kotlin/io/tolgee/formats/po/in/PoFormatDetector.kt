@@ -5,6 +5,7 @@ import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor.Companion.JAVA_PLACEHOLDER_REGEX
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
+import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class PoFormatDetector() {
   companion object {
@@ -35,6 +36,13 @@ class PoFormatDetector() {
             FormatDetectionUtil.regexFactor(
               PHP_PLACEHOLDER_REGEX,
               1.05,
+            ),
+          ),
+        ImportFormat.PO_RUBY to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              RubyToIcuPlaceholderConvertor.RUBY_PLACEHOLDER_REGEX,
+              0.7,
             ),
           ),
 //        ImportFormat.PO_PYTHON to

@@ -5,6 +5,7 @@ import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.ICU_DETE
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFromPossibleFormats
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class YamlImportFormatDetector {
@@ -39,6 +40,14 @@ class YamlImportFormatDetector {
         ImportFormat.YAML_ICU to
           arrayOf(
             FormatDetectionUtil.regexFactor(ICU_DETECTION_REGEX),
+          ),
+        ImportFormat.YAML_PHP to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              PHP_PLACEHOLDER_REGEX,
+              // java is less probable than php
+              0.7,
+            ),
           ),
       )
   }

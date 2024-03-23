@@ -4,8 +4,10 @@ import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.ICU_DETECTION_REGEX
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFromPossibleFormats
 import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
+import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class JsonImportFormatDetector {
   companion object {
@@ -28,6 +30,20 @@ class JsonImportFormatDetector {
         ImportFormat.JSON_ICU to
           arrayOf(
             FormatDetectionUtil.regexFactor(ICU_DETECTION_REGEX),
+          ),
+        ImportFormat.JSON_RUBY to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              RubyToIcuPlaceholderConvertor.RUBY_PLACEHOLDER_REGEX,
+              0.7,
+            ),
+          ),
+        ImportFormat.JSON_C to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              CToIcuPlaceholderConvertor.C_PLACEHOLDER_REGEX,
+              0.6,
+            ),
           ),
       )
   }

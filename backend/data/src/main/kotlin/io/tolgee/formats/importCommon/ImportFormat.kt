@@ -33,11 +33,26 @@ enum class ImportFormat(
         toIcuPlaceholderConvertorFactory = { PhpToIcuPlaceholderConvertor() },
       ),
   ),
+  JSON_RUBY(
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = false,
+        toIcuPlaceholderConvertorFactory = { RubyToIcuPlaceholderConvertor() },
+      ),
+  ),
+  JSON_C(
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = false,
+        toIcuPlaceholderConvertorFactory = { CToIcuPlaceholderConvertor() },
+      ),
+  ),
 
   PO_PHP(messageConvertorOrNull = PoToIcuMessageConvertor { CToIcuPlaceholderConvertor() }),
   PO_C(messageConvertorOrNull = PoToIcuMessageConvertor { PhpToIcuPlaceholderConvertor() }),
   PO_JAVA(messageConvertorOrNull = PoToIcuMessageConvertor { JavaToIcuPlaceholderConvertor() }),
   PO_ICU(messageConvertorOrNull = PoToIcuMessageConvertor(paramConvertorFactory = null)),
+  PO_RUBY(messageConvertorOrNull = PoToIcuMessageConvertor { RubyToIcuPlaceholderConvertor() }),
 //  PO_PYTHON(messageConvertorOrNull = BasePoToIcuMessageConvertor { PythonToIcuPlaceholderConvertor() }),
 
   STRINGS(messageConvertorOrNull = appleConvertor),
@@ -85,6 +100,12 @@ enum class ImportFormat(
         canContainIcu = true,
         toIcuPlaceholderConvertorFactory = null,
       ),
+  ),
+  YAML_PHP(
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor {
+        PhpToIcuPlaceholderConvertor()
+      },
   ),
   YAML_UNKNOWN(
     messageConvertorOrNull =
