@@ -30,7 +30,7 @@ export const FormatSelector: React.FC<Props> = ({ className }) => {
       options.push(
         <CompactMenuItem
           data-cy="export-format-selector-item"
-          key={`${group.name}-${option.name}`}
+          key={JSON.stringify(option)}
           value={option.id}
           onClick={stopAndPrevent(() => {
             fieldHelperProps.setValue(option.id);

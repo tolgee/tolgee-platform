@@ -8,7 +8,7 @@ export const messageFormatTranslation: Record<MessageFormat, ReactNode> = {
   JAVA_STRING_FORMAT: (
     <T keyName="export_form_message_format_java-string-format" />
   ),
-  APPLE_SPRINTF: <T keyName="export_form_message_format_apple-sprintf" />,
   RUBY_SPRINTF: <T keyName="export_form_message_format_ruby-sprintf" />,
   ICU: <T keyName="export_form_message_format_icu" />,
+  APPLE_SPRINTF: <T keyName="export_form_message_format_apple-sprintf" />,
 };

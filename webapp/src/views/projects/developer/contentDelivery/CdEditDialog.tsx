@@ -187,7 +187,7 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                 : initialFormat.defaultSupportArrays || false,
             messageFormat: normalizeSelectedMessageFormat({
               format: initialFormat.id,
-              messageFormat: undefined,
+              messageFormat: data?.messageFormat,
             }),
           }}
           validationSchema={Validation.CONTENT_DELIVERY_FORM}

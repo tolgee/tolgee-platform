@@ -2,7 +2,7 @@ import 'cypress-file-upload';
 import { createKey, deleteProject } from '../../../common/apiCalls/common';
 import {
   createExportableProject,
-  exportSelectFormat,
+  exportSelectMessageFormat,
   exportToggleLanguage,
   visitExport,
 } from '../../../common/export';
@@ -49,7 +49,7 @@ describe('Export Basics', () => {
 
   it('exports with nested structure', () => {
     exportToggleLanguage('English');
-    exportSelectFormat('Structured JSON');
+    exportSelectMessageFormat('Structured JSON');
 
     cy.gcy('export-submit-button').click();
     const fileName = getFileName('json', 'cs');
@@ -62,7 +62,7 @@ describe('Export Basics', () => {
 
   it('the support arrays switch works', () => {
     exportToggleLanguage('English');
-    exportSelectFormat('Structured JSON');
+    exportSelectMessageFormat('Structured JSON');
 
     cy.gcy('export-support_arrays-selector').click();
     cy.gcy('export-submit-button').click();
@@ -80,7 +80,7 @@ describe('Export Basics', () => {
   it('exports one language to xliff', () => {
     exportToggleLanguage('Česky');
 
-    exportSelectFormat('XLIFF');
+    exportSelectMessageFormat('XLIFF');
 
     cy.gcy('export-submit-button').click();
     cy.verifyDownload(getFileName('xliff', 'en'));
