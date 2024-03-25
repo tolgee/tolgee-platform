@@ -2,6 +2,7 @@ package io.tolgee.model.automations
 
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -19,4 +20,7 @@ class AutomationAction(
 
   @ManyToOne
   var webhookConfig: WebhookConfig? = null
+
+  @ManyToOne
+  var slackConfig: SlackConfig? = null
 }

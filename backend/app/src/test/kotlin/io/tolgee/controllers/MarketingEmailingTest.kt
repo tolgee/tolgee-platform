@@ -1,5 +1,8 @@
 package io.tolgee.controllers
 
+import io.tolgee.component.emailContacts.EmailServiceManager
+import io.tolgee.component.emailContacts.MailJetEmailServiceManager
+import io.tolgee.component.emailContacts.SendInBlueEmailServiceManager
 import io.tolgee.configuration.tolgee.SendInBlueProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
@@ -7,13 +10,12 @@ import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
-import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assert
 import io.tolgee.util.GitHubAuthUtil
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -27,9 +29,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.client.RestTemplate
-import sibApi.ContactsApi
-import sibModel.CreateContact
-import sibModel.UpdateContact
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,10 +38,11 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   @Autowired
   @MockBean
-  lateinit var contactsApi: ContactsApi
+  lateinit var mailjetEmailServiceManager: MailJetEmailServiceManager
 
-  lateinit var createContactArgumentCaptor: ArgumentCaptor<CreateContact>
-  lateinit var updateContactArgumentCaptor: ArgumentCaptor<UpdateContact>
+  @Autowired
+  @MockBean
+  lateinit var sendInBlueEmailServiceManager: SendInBlueEmailServiceManager
 
   @MockBean
   @Autowired
@@ -70,11 +70,9 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    Mockito.clearInvocations(contactsApi)
+    Mockito.clearInvocations(mailjetEmailServiceManager)
     tolgeeProperties.frontEndUrl = "https://aaa"
     tolgeeProperties.smtp.from = "aa@aa.com"
-    createContactArgumentCaptor = ArgumentCaptor.forClass(CreateContact::class.java)
-    updateContactArgumentCaptor = ArgumentCaptor.forClass(UpdateContact::class.java)
     emailTestUtil.initMocks()
   }
 
@@ -103,7 +101,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     val dto = SignUpDto(name = testName, password = "aaaaaaaaaa", email = testMail)
     performPost("/api/public/sign_up", dto)
       .andIsOk
-    verify(contactsApi, times(0)).createContact(any())
+    verify(mailjetEmailServiceManager, times(0)).submitNewContact(any(), any())
 
     executeInNewTransaction {
       val user = userAccountService.get(testMail)
@@ -119,7 +117,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     userAccount = user
     performAuthPut("/v2/user", updateRequestDto)
       .andIsOk
-    verifyEmailSentOnUpdate()
+    verifyEmailUpdated()
   }
 
   @Test
@@ -133,12 +131,12 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
         updatedUser
       }
     Thread.sleep(100)
-    verify(contactsApi).updateContact(eq(testMail), any())
-    Mockito.clearInvocations(contactsApi)
+    verify(mailjetEmailServiceManager).updateContact(eq(testMail), any(), any())
+    Mockito.clearInvocations(mailjetEmailServiceManager)
     executeInNewTransaction {
       acceptEmailVerification(updatedUser)
     }
-    verifyEmailSentOnUpdate()
+    verifyEmailUpdated()
   }
 
   @Test
@@ -153,23 +151,38 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
       .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
   }
 
-  private fun verifyEmailSentOnUpdate() {
+  private fun verifyEmailUpdated() {
     Thread.sleep(100)
-    verify(contactsApi).updateContact(eq(testMail), updateContactArgumentCaptor.capture())
-    val attributes = updateContactArgumentCaptor.value.attributes as Map<String, String>
-    assertThat(attributes["NAME"] as String).isEqualTo(updateRequestDto.name)
-    assertThat(attributes["EMAIL"] as String).isEqualTo(updateRequestDto.email)
-    Mockito.clearInvocations(contactsApi)
+    forServiceManagers {
+      val lastInvocation =
+        Mockito.mockingDetails(it).invocations
+          .last { it.method.name == "updateContact" }
+      val invocationNewEmail = lastInvocation.arguments[1]
+      val invocationNewName = lastInvocation.arguments[2]
+      invocationNewName.assert.isEqualTo(updateRequestDto.name)
+      invocationNewEmail.assert.isEqualTo(updateRequestDto.email)
+      Mockito.clearInvocations(it)
+    }
   }
 
   private fun verifyCreateContactCalled(
     email: String = testMail,
     name: String = testName,
   ) {
-    Thread.sleep(100)
-    verify(contactsApi).createContact(createContactArgumentCaptor.capture())
-    assertThat(createContactArgumentCaptor.value.email).isEqualTo(email)
-    val attributes = createContactArgumentCaptor.value.attributes as Map<String, String>
-    assertThat(attributes["NAME"] as String).isEqualTo(name)
+    forServiceManagers {
+      val lastInvocation =
+        Mockito.mockingDetails(it).invocations
+          .last { it.method.name == "submitNewContact" }
+      val invocationEmail = lastInvocation.arguments[1]
+      val invocationName = lastInvocation.arguments[0]
+      invocationName.assert.isEqualTo(name)
+      invocationEmail.assert.isEqualTo(email)
+      Mockito.clearInvocations(it)
+    }
+  }
+
+  private fun forServiceManagers(fn: (EmailServiceManager) -> Unit) {
+    fn(mailjetEmailServiceManager)
+    fn(sendInBlueEmailServiceManager)
   }
 }

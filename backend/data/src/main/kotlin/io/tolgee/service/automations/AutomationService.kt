@@ -5,12 +5,9 @@ import io.tolgee.constants.Caches
 import io.tolgee.dtos.cacheable.automations.AutomationDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
-import io.tolgee.model.automations.Automation
-import io.tolgee.model.automations.AutomationAction
-import io.tolgee.model.automations.AutomationActionType
-import io.tolgee.model.automations.AutomationTrigger
-import io.tolgee.model.automations.AutomationTriggerType
+import io.tolgee.model.automations.*
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
+import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.AutomationRepository
 import jakarta.persistence.EntityManager
@@ -121,6 +118,34 @@ class AutomationService(
   }
 
   @Transactional
+  fun createForSlackIntegration(slackConfig: SlackConfig): Automation {
+    val automation = Automation(slackConfig.project)
+    addSlackSubscriptionTriggersAndActions(slackConfig, automation)
+    slackConfig.automationActions.addAll(automation.actions)
+    return save(automation)
+  }
+
+  @Transactional
+  fun updateForSlackConfig(slackConfig: SlackConfig): Automation {
+    val automation = getAutomationForExistingSlackConfig(slackConfig)
+    updateSlackTriggersAndActions(slackConfig, automation)
+    slackConfig.automationActions.clear()
+    slackConfig.automationActions.addAll(automation.actions)
+    return save(automation)
+  }
+
+  private fun getAutomationForExistingSlackConfig(slackConfig: SlackConfig): Automation {
+    val automations = slackConfig.automationActions.map { it.automation }
+    if (automations.size == 1) {
+      return automations[0]
+    }
+    automations.forEach {
+      delete(it)
+    }
+    return createForSlackIntegration(slackConfig)
+  }
+
+  @Transactional
   fun createForWebhookConfig(webhookConfig: WebhookConfig): Automation {
     val automation = Automation(webhookConfig.project)
     addWebhookTriggersAndActions(webhookConfig, automation)
@@ -168,12 +193,40 @@ class AutomationService(
     )
   }
 
+  private fun addSlackSubscriptionTriggersAndActions(
+    slackConfig: SlackConfig,
+    automation: Automation,
+  ) {
+    automation.triggers.add(
+      AutomationTrigger(automation).apply {
+        this.type = AutomationTriggerType.ACTIVITY
+        this.activityType = null
+        this.debounceDurationInMs = 0
+      },
+    )
+
+    automation.actions.add(
+      AutomationAction(automation).apply {
+        this.type = AutomationActionType.SLACK_SUBSCRIPTION
+        this.slackConfig = slackConfig
+      },
+    )
+  }
+
   private fun updateWebhookTriggersAndActions(
     webhookConfig: WebhookConfig,
     automation: Automation,
   ) {
     deleteTriggersAndActions(automation)
     addWebhookTriggersAndActions(webhookConfig, automation)
+  }
+
+  private fun updateSlackTriggersAndActions(
+    slackConfig: SlackConfig,
+    automation: Automation,
+  ) {
+    deleteTriggersAndActions(automation)
+    addSlackSubscriptionTriggersAndActions(slackConfig, automation)
   }
 
   @Transactional
@@ -210,6 +263,14 @@ class AutomationService(
       delete(it.automation)
     }
     webhookConfig.automationActions.clear()
+  }
+
+  @Transactional
+  fun deleteForSlackIntegration(slackConfig: SlackConfig) {
+    slackConfig.automationActions.forEach {
+      delete(it.automation)
+    }
+    slackConfig.automationActions.clear()
   }
 
   @Transactional

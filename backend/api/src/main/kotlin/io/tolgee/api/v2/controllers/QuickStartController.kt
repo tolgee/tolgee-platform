@@ -1,5 +1,7 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.hateoas.quickStart.QuickStartModel
 import io.tolgee.hateoas.quickStart.QuickStartModelAssembler
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -16,6 +18,7 @@ class QuickStartController(
   private val quickStartService: QuickStartService,
   private val quickStartModelAssembler: QuickStartModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
+  private val businessEventPublisher: BusinessEventPublisher,
 ) {
   @PutMapping("/steps/{step}/complete")
   fun completeGuideStep(
@@ -24,6 +27,12 @@ class QuickStartController(
     val entity =
       quickStartService.completeStep(authenticationFacade.authenticatedUser, step)
         ?: throw NotFoundException()
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "QUICK_START_STEP_COMPLETED",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
     return quickStartModelAssembler.toModel(entity)
   }
 
@@ -32,6 +41,12 @@ class QuickStartController(
     @PathVariable finished: Boolean,
   ): QuickStartModel {
     val entity = quickStartService.setFinishState(authenticationFacade.authenticatedUser, finished)
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "QUICK_START_FINISHED",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
     return quickStartModelAssembler.toModel(entity)
   }
 

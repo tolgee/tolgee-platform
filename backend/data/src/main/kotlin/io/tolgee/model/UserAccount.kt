@@ -2,18 +2,9 @@ package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.OrderBy
+import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackSubscription
+import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
@@ -87,6 +78,12 @@ data class UserAccount(
   @Column(name = "password_changed", nullable = false)
   @ColumnDefault("true")
   var passwordChanged: Boolean = true
+
+  @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
+  var slackSubscription: MutableList<SlackSubscription>? = mutableListOf()
+
+  @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
+  var slackConfig: MutableSet<SlackConfig>? = null
 
   constructor(
     id: Long?,

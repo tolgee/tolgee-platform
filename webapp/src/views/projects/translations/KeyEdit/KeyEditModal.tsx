@@ -10,19 +10,21 @@ import {
 import { useTranslate, T, TFnType } from '@tolgee/react';
 import { Formik } from 'formik';
 import { Button } from '@mui/material';
+import { getFirstPluralParameter } from '@tginternal/editor';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { KeyGeneral } from './KeyGeneral';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { KeyAdvanced } from './KeyAdvanced';
 import { KeyContext } from './KeyContext';
 import { KeyFormType } from './types';
 import { KeyCustomValues } from './KeyCustomValues';
 import { DeletableKeyWithTranslationsModelType } from '../context/types';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import ConfirmationDialog from 'tg.component/common/ConfirmationDialog';
 
 type TabsType = 'general' | 'advanced' | 'context' | 'customValues';
 
@@ -73,6 +75,7 @@ export const KeyEditModal: React.FC<Props> = ({
   const [tab, setTab] = useState<TabsType>(initialTab);
   const { updateKey } = useTranslationsActions();
   const keyId = data.keyId;
+  const [warningOpen, setWarningOpen] = useState(false);
 
   const keyInfoLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/{id}',
@@ -101,6 +104,15 @@ export const KeyEditModal: React.FC<Props> = ({
   const disabledLangs =
     disabledLangsLoadable.data?._embedded?.languages?.map((l) => l.id) || [];
 
+  const extractedArgName = useMemo(() => {
+    // try to extract parameter name from base language translation
+    if (project.baseLanguage?.tag) {
+      return getFirstPluralParameter(
+        data.translations?.[project.baseLanguage.tag]?.text ?? ''
+      );
+    }
+  }, [data]);
+
   const initialValues = {
     name: data.keyName,
     namespace: data.keyNamespace ?? '',
@@ -108,7 +120,10 @@ export const KeyEditModal: React.FC<Props> = ({
     tags: data.keyTags.map((t) => t.name),
     disabledLangs,
     isPlural: data.keyIsPlural,
-    pluralParameter: data.keyPluralArgName || 'value',
+    pluralParameter:
+      (data.keyIsPlural ? data.keyPluralArgName : undefined) ||
+      extractedArgName ||
+      'value',
     custom: JSON.stringify(customValues ?? {}, null, 2),
   } satisfies KeyFormType;
 
@@ -132,6 +147,7 @@ export const KeyEditModal: React.FC<Props> = ({
                   isPlural: values.isPlural,
                   pluralArgName: values.pluralParameter,
                   custom,
+                  warnOnDataLoss: !warningOpen,
                 },
               },
             },
@@ -139,6 +155,8 @@ export const KeyEditModal: React.FC<Props> = ({
               onError(e) {
                 if (e.STANDARD_VALIDATION) {
                   helpers.setErrors(e.STANDARD_VALIDATION);
+                } else if (e.code === 'plural_forms_data_loss') {
+                  setWarningOpen(true);
                 } else {
                   e.handleError?.();
                 }
@@ -212,6 +230,7 @@ export const KeyEditModal: React.FC<Props> = ({
                 <KeyCustomValues />
               ) : null}
             </StyledDialogContent>
+
             <DialogActions>
               <Button
                 data-cy="translations-cell-cancel-button"
@@ -231,6 +250,14 @@ export const KeyEditModal: React.FC<Props> = ({
                 <T keyName="global_form_save" />
               </LoadingButton>
             </DialogActions>
+            {warningOpen && (
+              <ConfirmationDialog
+                title={t('key_edit_modal_force_plural_change_title')}
+                message={t('key_edit_modal_force_plural_change_message')}
+                onCancel={() => setWarningOpen(false)}
+                onConfirm={() => submitForm()}
+              />
+            )}
           </Dialog>
         );
       }}

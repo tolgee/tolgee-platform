@@ -130,7 +130,11 @@ class KeyComplexEditHelper(
     if (isIsPluralChanged) {
       key.isPlural = dto.isPlural!!
       key.pluralArgName = dto.pluralArgName ?: key.pluralArgName
-      translationService.onKeyIsPluralChanged(mapOf(key.id to newPluralArgName), dto.isPlural!!)
+      translationService.onKeyIsPluralChanged(
+        mapOf(key.id to newPluralArgName),
+        dto.isPlural!!,
+        throwOnDataLoss = dto.warnOnDataLoss ?: false,
+      )
       keyService.save(key)
     }
 
@@ -158,6 +162,7 @@ class KeyComplexEditHelper(
 
   private fun doUpdateTags() {
     if (dtoTags !== null && areTagsModified) {
+      activityHolder.businessEventData["usesTags"] = "true"
       key.project.checkKeysEditPermission()
       tagService.updateTags(key, dtoTags)
     }

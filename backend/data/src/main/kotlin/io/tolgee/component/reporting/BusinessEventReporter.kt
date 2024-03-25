@@ -54,6 +54,11 @@ class BusinessEventReporter(
       id.toString(),
       data.eventName,
       mapOf(
+        "${'$'}groups" to
+          mapOf(
+            "project" to data.projectDto?.id,
+            "organization" to data.organizationId,
+          ),
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
       ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry,

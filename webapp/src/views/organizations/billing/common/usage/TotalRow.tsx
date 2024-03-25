@@ -14,7 +14,7 @@ export const TotalRow: FC<{ total: number; appliedStripeCredits: number }> = ({
   return (
     <TableRow>
       <TableCell
-        colSpan={3}
+        colSpan={2}
         sx={{
           borderBottom: 'none',
         }}
@@ -27,7 +27,7 @@ export const TotalRow: FC<{ total: number; appliedStripeCredits: number }> = ({
           borderBottom: 'none',
         }}
       >
-        {formatMoney(total - appliedStripeCredits)}
+        <b>{formatMoney(total - appliedStripeCredits)}</b>
       </TableCell>
     </TableRow>
   );

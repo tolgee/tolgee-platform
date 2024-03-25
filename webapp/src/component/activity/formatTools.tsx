@@ -64,3 +64,21 @@ export const formatDiff = ({
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }
 };
+
+export function valueToText(value: any) {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    value === null ||
+    value === undefined
+  ) {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+}

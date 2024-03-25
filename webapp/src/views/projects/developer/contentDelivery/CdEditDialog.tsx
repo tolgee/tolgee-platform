@@ -173,7 +173,7 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
             states: data?.filterState ?? EXPORT_DEFAULT_STATES,
             languages: data?.languages ?? allowedTags,
             format: initialFormat.id,
-            namespaces: allNamespaces ?? [],
+            namespaces: data?.filterNamespace ?? allNamespaces ?? [],
             autoPublish: data?.autoPublish ?? true,
             nested: initialFormat.canBeStructured
               ? data?.structureDelimiter === '.'

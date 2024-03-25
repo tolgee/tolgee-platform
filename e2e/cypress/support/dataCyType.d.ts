@@ -170,6 +170,7 @@ declare namespace DataCy {
         "global-base-view-title" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
+        "global-confirmation-dialog" |
         "global-confirmation-hard-mode-text-field" |
         "global-editor" |
         "global-empty-list" |

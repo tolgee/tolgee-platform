@@ -51,6 +51,13 @@ data class ComplexEditKeyDto(
         "If isPlural is false, this value will be ignored.",
   )
   val pluralArgName: String? = null,
+  @Schema(
+    description =
+      "If true, it will fail with 400 (with code plural_forms_data_loss) " +
+        "if plural is disabled and there are plural forms, " +
+        "which would be lost by the action. You can get rid of this warning by setting this value to false.",
+  )
+  val warnOnDataLoss: Boolean? = false,
   @Schema(description = "Custom values of the key. If not provided, custom values won't be modified")
   val custom: Map<String, Any?>? = null,
 ) : WithRelatedKeysInOrder {

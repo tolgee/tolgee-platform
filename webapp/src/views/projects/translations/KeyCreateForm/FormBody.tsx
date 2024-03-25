@@ -215,7 +215,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
 
         <PluralFormCheckbox
           isPluralName="isPlural"
-          pluralParameterName="pluralArgName"
+          pluralParameterName="pluralParameter"
         />
 
         <Field key={baseLang.tag} name="baseValue">
