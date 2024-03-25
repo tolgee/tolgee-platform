@@ -6,10 +6,6 @@ export type MessageFormat = NonNullable<
   components['schemas']['ExportParams']['messageFormat']
 >;
 
-export type ExportFormat = NonNullable<
-  components['schemas']['ExportParams']['format']
->;
-
 export interface FormatItem {
   id: string;
   name: ReactNode;
@@ -44,7 +40,8 @@ export const formatGroups: FormatGroup[] = [
         format: 'JSON',
         matchByExportParams: (params) =>
           params.format === 'JSON' &&
-          params.structureDelimiter === '' &&
+          (params.structureDelimiter === '' ||
+            params.structureDelimiter == null) &&
           !params.supportArrays,
       },
     ],
@@ -105,14 +102,22 @@ export const formatGroups: FormatGroup[] = [
         supportedMessageFormats: ['ICU', 'JAVA_STRING_FORMAT'],
       },
       {
-        id: 'yaml',
+        id: 'generic_flat_yaml',
         extension: 'yaml',
         name: <T keyName="export-format-flat-yaml" />,
         format: 'YAML',
-        matchByExportParams: (params) =>
-          params.format === 'YAML' &&
-          params.structureDelimiter === '' &&
-          !params.supportArrays,
+        defaultStructureDelimiter: '',
+        structured: false,
+        showSupportArrays: false,
+        defaultSupportArrays: false,
+        matchByExportParams: (params) => {
+          return (
+            params.format === 'YAML' &&
+            (params.structureDelimiter === '' ||
+              params.structureDelimiter == null) &&
+            !params.supportArrays
+          );
+        },
         supportedMessageFormats: [
           'ICU',
           'JAVA_STRING_FORMAT',

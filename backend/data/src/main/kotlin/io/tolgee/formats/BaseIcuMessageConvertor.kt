@@ -73,7 +73,6 @@ class BaseIcuMessageConvertor(
       singleResult.toString(),
       null,
       null,
-      warnings,
       firstArgName = firstArgName,
     )
   }
@@ -113,7 +112,6 @@ class BaseIcuMessageConvertor(
       null,
       result,
       pluralArgName,
-      warnings,
       firstArgName = firstArgName,
     )
   }
