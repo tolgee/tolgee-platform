@@ -25,6 +25,13 @@ class SlackConfigService(
     return slackConfigRepository.findById(configId).orElseThrow { NotFoundException() }
   }
 
+  fun get(
+    slackId: String,
+    channelId: String,
+  ): List<SlackConfig> {
+    return slackConfigRepository.findBySlackIdAndChannelId(slackId, channelId)
+  }
+
   @Transactional
   fun delete(
     projectId: Long,

@@ -53,12 +53,8 @@ class SlackIntegrationController(
     val matchResult = regex.matchEntire(payload.text)
 
     if (matchResult == null) {
-      slackExecutor.sendErrorMessage(
-        Message.SLACK_INVALID_COMMAND,
-        payload.channel_id,
-        payload.user_id,
-        payload.user_name ?: "",
-      )
+      sendError(payload, Message.SLACK_INVALID_COMMAND)
+
       return null
     }
 
@@ -67,22 +63,31 @@ class SlackIntegrationController(
     val optionsMap = parseOptions(optionsString)
 
     return when (command) {
-      "login" -> return login(payload.user_id, payload.channel_id, payload.user_name ?: "")
+      "login" -> login(payload.user_id, payload.channel_id, payload.user_name ?: "")
 
-      "subscribe" -> return handleSubscribe(payload, projectId, languageTag, optionsMap)
+      "subscribe" -> handleSubscribe(payload, projectId, languageTag, optionsMap)
 
-      "unsubscribe" -> return unsubscribe(payload, projectId)
+      "unsubscribe" -> unsubscribe(payload, projectId)
+
+      "subscriptions" -> listOfSubscriptions(payload)
 
       else -> {
-        slackExecutor.sendErrorMessage(
-          Message.SLACK_INVALID_COMMAND,
-          payload.channel_id,
-          payload.user_id,
-          payload.user_name ?: "",
-        )
+        sendError(payload, Message.SLACK_INVALID_COMMAND)
         null
       }
     }
+  }
+
+  private fun listOfSubscriptions(payload: SlackCommandDto): SlackMessageDto? {
+    val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
+
+    if (slackSubscription == null) {
+      sendError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
+      return null
+    }
+
+    slackExecutor.sendListOfSubscriptions(payload.user_id, payload.channel_id)
+    return null
   }
 
   @PostMapping("/connect")
@@ -116,12 +121,7 @@ class SlackIntegrationController(
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
     if (projectId.isEmpty()) {
-      slackExecutor.sendErrorMessage(
-        Message.SLACK_INVALID_COMMAND,
-        payload.channel_id,
-        payload.user_id,
-        payload.user_name ?: "",
-      )
+      sendError(payload, Message.SLACK_INVALID_COMMAND)
       return null
     }
 
@@ -133,15 +133,11 @@ class SlackIntegrationController(
             try {
               EventName.valueOf(value.uppercase())
             } catch (e: IllegalArgumentException) {
-              return SlackMessageDto("Invalid command")
+              sendError(payload, Message.SLACK_INVALID_COMMAND)
+              return null
             }
         else -> {
-          slackExecutor.sendErrorMessage(
-            Message.SLACK_INVALID_COMMAND,
-            payload.channel_id,
-            payload.user_id,
-            payload.user_name ?: "",
-          )
+          sendError(payload, Message.SLACK_INVALID_COMMAND)
           return null
         }
       }
@@ -235,12 +231,8 @@ class SlackIntegrationController(
     val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
 
     if (slackSubscription == null) {
-      slackExecutor.sendErrorMessage(
-        Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT,
-        payload.channel_id,
-        payload.user_id,
-        payload.user_name ?: "",
-      )
+      sendError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
+
       return ValidationResult(false)
     }
 
@@ -254,6 +246,18 @@ class SlackIntegrationController(
     } else {
       ValidationResult(false)
     }
+  }
+
+  private fun sendError(
+    payload: SlackCommandDto,
+    message: Message,
+  ) {
+    slackExecutor.sendErrorMessage(
+      message,
+      payload.channel_id,
+      payload.user_id,
+      payload.user_name ?: "",
+    )
   }
 
   fun parseOptions(optionsString: String): Map<String, String> {

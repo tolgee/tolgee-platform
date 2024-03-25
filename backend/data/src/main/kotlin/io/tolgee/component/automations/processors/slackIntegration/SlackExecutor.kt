@@ -11,6 +11,7 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
+import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
@@ -27,6 +28,7 @@ class SlackExecutor(
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
   private val slackSubscriptionService: SlackSubscriptionService,
+  private val slackConfigService: SlackConfigService,
 ) : Logging {
   private val slackToken = tolgeeProperties.slack.token
   private val slackClient: Slack = Slack.getInstance()
@@ -226,8 +228,10 @@ class SlackExecutor(
         when (errorMessageType) {
           Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT ->
             i18n.translate("slack-not-connected-message")
+
           Message.SLACK_INVALID_COMMAND ->
             i18n.translate("command-not-recognized")
+
           else ->
             i18n.translate("unknown-error-occurred")
         },
@@ -247,6 +251,7 @@ class SlackExecutor(
           }
         }
       }
+
       Message.SLACK_INVALID_COMMAND -> {
         section {
           markdownText(i18n.translate("check-command-solutions"))
@@ -257,7 +262,50 @@ class SlackExecutor(
           }
         }
       }
+
       else -> {}
+    }
+  }
+
+  fun sendListOfSubscriptions(
+    userId: String,
+    channelId: String,
+  ) {
+    val configList = slackConfigService.get(userId, channelId)
+    val blocks =
+      withBlocks {
+        header {
+          text("Subscription Details", emoji = true)
+        }
+        divider()
+
+        configList.forEach { config ->
+          section {
+            markdownText("*Project Name:* ${config.project.name}\n*Project ID:* ${config.project.id}")
+          }
+          if (config.isGlobalSubscription) {
+            section {
+              markdownText("*Global Subscription:* Yes")
+            }
+          }
+          if (config.languageTags.isNotEmpty()) {
+            val subscribedLanguages = config.languageTags.joinToString(separator = "\n") { "- $it :$it: " }
+            section {
+              markdownText("*Subscribed Languages:*\n$subscribedLanguages")
+            }
+          }
+          divider()
+        }
+      }
+
+    val response =
+      slackClient.methods(slackToken).chatPostMessage { request ->
+        request.channel(channelId)
+          .blocks(blocks)
+      }
+
+    if (!response.isOk) {
+      logger.info(response.error)
     }
   }
 }

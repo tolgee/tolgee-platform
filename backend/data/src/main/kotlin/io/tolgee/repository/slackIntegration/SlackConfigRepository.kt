@@ -10,4 +10,9 @@ interface SlackConfigRepository : JpaRepository<SlackConfig, Long> {
     id: Long,
     channelId: String,
   ): SlackConfig?
+
+  fun findBySlackIdAndChannelId(
+    slackId: String,
+    channelId: String,
+  ): List<SlackConfig>
 }
