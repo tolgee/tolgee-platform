@@ -86,7 +86,7 @@ class TextToAndroidXmlConvertorTest {
   }
 
   @Test
-  fun `multiple newlines are not quoted`()  {
+  fun `multiple newlines are not quoted`() {
     "a\n\na".assertSingleTextNode("a\\n\\na")
   }
 
