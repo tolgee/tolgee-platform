@@ -201,7 +201,7 @@ class TextToAndroidXmlConvertor(
     escapeNewLines: Boolean,
   ): String {
     return this
-      .replace(escapeCharRegexWithoutUtfEscapes, "\\\\")
+      .replace(escapeCharRegexWithoutUtfEscapes, """\\\\""")
       .replace("\"", "\\\"")
       .let {
         if (quoteMoreWhitespaces) {
