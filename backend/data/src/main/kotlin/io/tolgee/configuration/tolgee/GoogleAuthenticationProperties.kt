@@ -20,6 +20,7 @@ class GoogleAuthenticationProperties {
   @DocProperty(
     description =
       "The registration can be limited to users of a Google Workspace domain. " +
+        "Multiple Google Workspace domains can be separated by a comma `,`. " +
         "If nothing is set, anyone can log in with their Google account.",
   )
   var workspaceDomain: String? = null
