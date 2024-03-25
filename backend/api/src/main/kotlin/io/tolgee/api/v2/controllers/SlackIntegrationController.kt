@@ -24,6 +24,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.I18n
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -42,6 +43,7 @@ class SlackIntegrationController(
   private val keyService: KeyService,
   private val activityHolder: ActivityHolder,
   private val objectMapper: ObjectMapper,
+  private val i18n: I18n,
 ) {
   @PostMapping
   @UseDefaultPermissions
@@ -86,6 +88,10 @@ class SlackIntegrationController(
       return null
     }
 
+    if (slackConfigService.get(payload.user_id, payload.channel_id).isEmpty()) {
+      return SlackMessageDto(i18n.translate("not_subscribed_yet"))
+    }
+
     slackExecutor.sendListOfSubscriptions(payload.user_id, payload.channel_id)
     return null
   }
@@ -107,7 +113,7 @@ class SlackIntegrationController(
     slackNickName: String,
   ): SlackMessageDto? {
     if (slackSubscriptionService.ifSlackConnected(userId)) {
-      return SlackMessageDto(text = "You are already logged in.")
+      return SlackMessageDto(text = i18n.translate("already_logged_in"))
     }
 
     slackExecutor.sendRedirectUrl(channelId, userId, slackNickName)
@@ -170,10 +176,10 @@ class SlackIntegrationController(
     try {
       slackConfigService.create(slackConfigDto)
     } catch (e: Exception) {
-      return SlackMessageDto(text = "Error")
+      sendError(payload, Message.UNEXPECTED_ERROR_SLACK)
     }
 
-    return SlackMessageDto(text = "Subscribed")
+    return SlackMessageDto(text = i18n.translate("subscribed_successfully"))
   }
 
   private fun unsubscribe(
