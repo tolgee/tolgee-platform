@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.po.out
 
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.formats.po.PoSupportedMessageFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
 import io.tolgee.model.enums.TranslationState
@@ -342,11 +342,10 @@ class PoFileExporterTest {
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
     return PoFileExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = ExportParams().also { it.messageFormat = ExportMessageFormat.PHP_SPRINTF },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       baseLanguage = baseLanguageMock,
       baseTranslationsProvider = { listOf() },
-      poSupportedMessageFormat = PoSupportedMessageFormat.PHP,
     )
   }
 }

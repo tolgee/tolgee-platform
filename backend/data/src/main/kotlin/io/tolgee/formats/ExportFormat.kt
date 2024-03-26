@@ -2,6 +2,7 @@ package io.tolgee.formats
 
 enum class ExportFormat(val extension: String, val mediaType: String) {
   JSON("json", "application/json"),
+  JSON_TOLGEE("json", "application/json"),
   XLIFF("xliff", "application/x-xliff+xml"),
   PO("po", "text/x-gettext-translation"),
   APPLE_STRINGS_STRINGSDICT("", ""),
@@ -9,4 +10,6 @@ enum class ExportFormat(val extension: String, val mediaType: String) {
   ANDROID_XML("xml", "application/xml"),
   FLUTTER_ARB("arb", "application/json"),
   PROPERTIES("properties", "text/plain"),
+  YAML_RUBY("yaml", "application/x-yaml"),
+  YAML("yaml", "application/x-yaml"),
 }

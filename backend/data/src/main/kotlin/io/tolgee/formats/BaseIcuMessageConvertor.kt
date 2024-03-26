@@ -5,7 +5,7 @@ import io.tolgee.constants.Message
 
 class BaseIcuMessageConvertor(
   private val message: String,
-  private val argumentConvertor: FromIcuParamConvertor,
+  private val argumentConvertor: FromIcuPlaceholderConvertor,
   private val keepEscaping: Boolean = false,
   private val forceIsPlural: Boolean? = null,
 ) {
@@ -73,7 +73,6 @@ class BaseIcuMessageConvertor(
       singleResult.toString(),
       null,
       null,
-      warnings,
       firstArgName = firstArgName,
     )
   }
@@ -113,7 +112,6 @@ class BaseIcuMessageConvertor(
       null,
       result,
       pluralArgName,
-      warnings,
       firstArgName = firstArgName,
     )
   }
@@ -170,8 +168,7 @@ class BaseIcuMessageConvertor(
     }
     when (node.argType) {
       MessagePattern.ArgType.SIMPLE, MessagePattern.ArgType.NONE -> {
-        val isInPlural = form != null
-        addToResult(argumentConvertor.convert(node, isInPlural), form)
+        addToResult(argumentConvertor.convert(node), form)
       }
 
       MessagePattern.ArgType.PLURAL -> {

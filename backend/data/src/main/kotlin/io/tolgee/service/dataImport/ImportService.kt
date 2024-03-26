@@ -93,7 +93,7 @@ class ImportService(
     importRepository.save(import)
     Sentry.addBreadcrumb("Import ID: ${import.id}")
 
-    self.saveFilesToFileStorage(import.id, files)
+    self.saveFilesToFileStorage(import.id, files, params.storeFilesToFileStorage)
 
     val fileProcessor =
       CoreImportFilesProcessor(
@@ -160,9 +160,12 @@ class ImportService(
 
   @Transactional
   fun selectNamespace(
-    file: ImportFile,
+    projectId: Long,
+    authorId: Long,
+    fileId: Long,
     namespace: String?,
   ) {
+    val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
     val import = file.import
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
@@ -380,20 +383,25 @@ class ImportService(
     this.importTranslationRepository.saveAll(translations)
   }
 
-  fun findFile(fileId: Long): ImportFile? {
-    return importFileRepository.findById(fileId).orElse(null)
+  fun findFile(
+    projectId: Long,
+    authorId: Long,
+    fileId: Long,
+  ): ImportFile? {
+    return importFileRepository.finByProjectAuthorAndId(projectId, authorId, fileId)
   }
 
   fun getFileIssues(
+    projectId: Long,
+    authorId: Long,
     fileId: Long,
     pageable: Pageable,
   ): Page<ImportFileIssueView> {
-    return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
+    val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
+    return importFileIssueRepository.findAllByFileIdView(file.id, pageable)
   }
 
   fun saveAllKeys(keys: Iterable<ImportKey>): MutableList<ImportKey> = this.importKeyRepository.saveAll(keys)
-
-  fun saveKey(entity: ImportKey): ImportKey = this.importKeyRepository.save(entity)
 
   fun saveAllFileIssues(issues: Iterable<ImportFileIssue>) {
     this.importFileIssueRepository.saveAll(issues)
@@ -415,8 +423,9 @@ class ImportService(
   fun saveFilesToFileStorage(
     importId: Long,
     files: List<ImportFileDto>,
+    storeFilesToFileStorage: Boolean,
   ) {
-    if (tolgeeProperties.import.storeFilesForDebugging) {
+    if (tolgeeProperties.import.storeFilesForDebugging && storeFilesToFileStorage) {
       files.forEach {
         fileStorage.storeFile(getFileStoragePath(importId, it.name), it.data)
       }

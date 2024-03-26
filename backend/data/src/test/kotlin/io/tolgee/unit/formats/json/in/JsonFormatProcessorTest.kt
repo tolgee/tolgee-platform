@@ -3,6 +3,7 @@ package io.tolgee.unit.formats.json.`in`
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -150,6 +151,27 @@ class JsonFormatProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
+  }
+
+  @Test
+  fun `placeholder conversion setting application works`() {
+    PlaceholderConversionTestHelper.testFile(
+      "en.json",
+      "src/test/resources/import/json/java.json",
+      assertBeforeSettingsApplication =
+        listOf(
+          "%D this is java {1, number}",
+          "%D this is java",
+        ),
+      assertAfterDisablingConversion =
+        listOf(
+          "%D this is java %d",
+        ),
+      assertAfterReEnablingConversion =
+        listOf(
+          "%D this is java {1, number}",
+        ),
+    )
   }
 
   private fun mockPlaceholderConversionTestFile(

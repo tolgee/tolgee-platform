@@ -3,6 +3,7 @@ package io.tolgee.unit.formats.po.`in`
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.po.`in`.PoFileProcessor
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -31,7 +32,7 @@ class PoFileProcessorTest {
       .isEqualTo(
         "{0, plural,\n" +
           "one {Eine Seite gelesen wurde.}\n" +
-          "other {{0, number} Seiten gelesen wurden.}\n" +
+          "other {# Seiten gelesen wurden.}\n" +
           "}",
       )
     assertThat(mockUtil.fileProcessorContext.translations.values.toList()[2][0].text)
@@ -84,7 +85,7 @@ class PoFileProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {Hallo %d '{'icuParam'}'}
           other {Hallo %d '{'icuParam'}'}
           }
@@ -106,7 +107,7 @@ class PoFileProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {0, plural,
+          {value, plural,
           one {Hallo %d '{'icuParam'}'}
           other {Hallo %d '{'icuParam'}'}
           }
@@ -130,12 +131,35 @@ class PoFileProcessorTest {
         hasText(
           """
           {0, plural,
-          one {Hallo {0, number} '{'icuParam'}'}
-          other {Hallo {0, number} '{'icuParam'}'}
+          one {Hallo # '{'icuParam'}'}
+          other {Hallo # '{'icuParam'}'}
           }
           """.trimIndent(),
         )
       }
+  }
+
+  @Test
+  fun `placeholder conversion setting application works`() {
+    PlaceholderConversionTestHelper.testFile(
+      "en.po",
+      "src/test/resources/import/po/example_params.po",
+      assertBeforeSettingsApplication =
+        listOf(
+          "Hi {0, number} '{'icuParam'}'",
+          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
+        ),
+      assertAfterDisablingConversion =
+        listOf(
+          "Hi %d '{'icuParam'}'",
+          "{value, plural,\none {Hallo %d '{'icuParam'}'}\nother {Hallo %d '{'icuParam'}'}\n}",
+        ),
+      assertAfterReEnablingConversion =
+        listOf(
+          "Hi {0, number} '{'icuParam'}'",
+          "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
+        ),
+    )
   }
 
   private fun mockPlaceholderConversionTestFile(

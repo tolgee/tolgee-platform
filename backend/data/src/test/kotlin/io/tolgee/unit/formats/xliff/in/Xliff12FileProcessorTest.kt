@@ -5,6 +5,7 @@ import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.testing.assert
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -186,6 +187,27 @@ class Xliff12FileProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
+  }
+
+  @Test
+  fun `placeholder conversion setting application works`() {
+    PlaceholderConversionTestHelper.testFile(
+      "en.json",
+      "src/test/resources/import/json/java.json",
+      assertBeforeSettingsApplication =
+        listOf(
+          "%D this is java {1, number}",
+          "%D this is java",
+        ),
+      assertAfterDisablingConversion =
+        listOf(
+          "%D this is java %d",
+        ),
+      assertAfterReEnablingConversion =
+        listOf(
+          "%D this is java {1, number}",
+        ),
+    )
   }
 
   private fun mockPlaceholderConversionTestFile(

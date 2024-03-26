@@ -1,0 +1,17 @@
+# Author: Urbanecm
+# Author: Veritaslibero
+# Author: Walter Klosse
+# Author: Want
+# Author: YjM
+# Author: Zbycz
+---
+relations: "{count, plural, one {# relace} few {# relace} many {# relace} other {# relací}"
+redactions:
+  edit:
+    heading: Upravit redakci
+    title: Upravit redakci
+  index:
+    empty: Žádné opravy k ukázání.
+    heading: Seznam oprav
+    title: Seznam oprav {hello}
+some_text_with_params: 'Toto je text s parametry: {param1} a {param2}'

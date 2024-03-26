@@ -4,9 +4,18 @@ import org.springframework.http.HttpStatus
 import java.io.Serializable
 
 open class BadRequestException : ErrorException {
-  constructor(message: io.tolgee.constants.Message, params: List<Serializable?>?) : super(message, params)
-  constructor(message: io.tolgee.constants.Message) : super(message)
-  constructor(code: String, params: List<Serializable?>? = null) : super(code, params)
+  constructor(message: io.tolgee.constants.Message, params: List<Serializable?>?, cause: Exception? = null) : super(
+    message,
+    params,
+    cause,
+  )
+
+  constructor(message: io.tolgee.constants.Message, cause: Exception? = null) : super(message, cause = cause)
+  constructor(code: String, params: List<Serializable?>? = null, cause: Exception? = null) : super(
+    code,
+    params,
+    cause,
+  )
 
   override val httpStatus: HttpStatus
     get() = HttpStatus.BAD_REQUEST

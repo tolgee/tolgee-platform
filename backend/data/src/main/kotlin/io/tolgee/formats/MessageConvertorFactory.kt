@@ -4,13 +4,13 @@ class MessageConvertorFactory(
   private val message: String,
   private val forceIsPlural: Boolean? = null,
   private val isProjectIcuPlaceholdersEnabled: Boolean = false,
-  private val paramConvertorFactory: () -> FromIcuParamConvertor,
+  private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
 ) {
   fun create(): BaseIcuMessageConvertor {
     if (!isProjectIcuPlaceholdersEnabled) {
       return BaseIcuMessageConvertor(
         message = message,
-        argumentConvertor = NoOpFromIcuParamConvertor(),
+        argumentConvertor = NoOpFromIcuPlaceholderConvertor(),
         forceIsPlural = forceIsPlural,
       )
     }
