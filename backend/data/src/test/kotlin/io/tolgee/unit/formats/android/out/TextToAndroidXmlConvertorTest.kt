@@ -57,7 +57,12 @@ class TextToAndroidXmlConvertorTest {
 
   @Test
   fun `all possible spaces are quoted`() {
-    "a\n\t   \u0020 \u2008 \u2003a".assertSingleTextNode("a\"\\n\t   \u0020 \u2008 \u2003\"a")
+    "a\n\t   \u0020 \u2008 \u2003a".assertSingleTextNode("a\\n\"\t   \u0020 \u2008 \u2003\"a")
+  }
+
+  @Test
+  fun `it doesn't re-escape UTF symbols`() {
+    "\\u0020\\u2008\\u2003".assertSingleTextNode("\\u0020\\u2008\\u2003")
   }
 
   @Test
@@ -72,6 +77,17 @@ class TextToAndroidXmlConvertorTest {
   fun `new lines are escaped in cdata string`() {
     val nodes = "\n\n".convertedNodes(isWrappedWithCdata = true)
     nodes.getSingleNode().assertSingleCdataNodeText().isEqualTo("\\n\\n")
+  }
+
+  @Test
+  fun `wrapping with CDATA works for invalid XML`() {
+    val nodes = "<b> a ".convertedNodes(isWrappedWithCdata = true)
+    nodes.getSingleNode().assertSingleCdataNodeText().isEqualTo("<b> a ")
+  }
+
+  @Test
+  fun `multiple newlines are not quoted`() {
+    "a\n\na".assertSingleTextNode("a\\n\\na")
   }
 
   private fun Node.assertTextContent(text: String) {

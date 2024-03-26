@@ -10,5 +10,7 @@ object AndroidParsingConstants {
       "br", "div", "p", "a",
     )
 
-  val spaces = setOf(' ', '\n', '\t', '\u0020', '\u2008', '\u2003')
+  val spacesWithoutNewLines = setOf(' ', '\t', '\u0020', '\u2008', '\u2003')
+
+  val spaces = spacesWithoutNewLines + '\n'
 }

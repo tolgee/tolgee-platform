@@ -25,7 +25,7 @@ class TextToAndroidXmlConvertor(
 
   fun convert(): ContentToAppend {
     try {
-      if (containsXmlAndPlaceholders || value.isWrappedCdata) {
+      if (value.isWrappedCdata || containsXmlAndPlaceholders) {
         return contentWrappedInCdata
       }
 
@@ -177,12 +177,18 @@ class TextToAndroidXmlConvertor(
   companion object {
     private val documentBuilder: DocumentBuilder by lazy { DocumentBuilderFactory.newInstance().newDocumentBuilder() }
 
-    val spacesRegex = """([${AndroidParsingConstants.spaces.joinToString("")}]{2,})""".toRegex()
+    fun getSpacesRegex(spaces: Iterable<Char>) = """([${spaces.joinToString("")}]{2,})""".toRegex()
+
+    val spacesRegex = getSpacesRegex(AndroidParsingConstants.spaces)
+    val spacesRegexWithoutNewlines = getSpacesRegex(AndroidParsingConstants.spacesWithoutNewLines)
+
     private val xmlTransformer by lazy {
       val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
       transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
       transformer
     }
+
+    private val escapeCharRegexWithoutUtfEscapes = "\\\\(?!u[0-9a-fA-F]{4})".toRegex()
   }
 
   private fun String.escape(
@@ -195,11 +201,15 @@ class TextToAndroidXmlConvertor(
     escapeNewLines: Boolean,
   ): String {
     return this
-      .replace("\\", "\\\\")
+      .replace(escapeCharRegexWithoutUtfEscapes, """\\\\""")
       .replace("\"", "\\\"")
       .let {
         if (quoteMoreWhitespaces) {
-          it.replace(spacesRegex, "\"$1\"")
+          if (escapeNewLines) {
+            it.replace(spacesRegexWithoutNewlines, "\"$1\"")
+          } else {
+            it.replace(spacesRegex, "\"$1\"")
+          }
         } else {
           it
         }
