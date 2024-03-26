@@ -21,7 +21,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
   const project = useProject();
 
   const theme = useTheme();
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isSmOrLower = useMediaQuery(
     `@media(max-width: ${899 + rightPanelWidth}px)`
   );

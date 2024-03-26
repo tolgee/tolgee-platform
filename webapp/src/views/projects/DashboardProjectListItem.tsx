@@ -122,7 +122,7 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
     [PARAMS.PROJECT_ID]: p.id,
   });
   const history = useHistory();
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isCompact = useMediaQuery(
     `@media(max-width: ${rightPanelWidth + 800}px)`
   );

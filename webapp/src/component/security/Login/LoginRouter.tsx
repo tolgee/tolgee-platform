@@ -6,18 +6,19 @@ import { LINKS } from 'tg.constants/links';
 import { LoginView } from './LoginView';
 import { EmailVerificationHandler } from './EmailVerificationHandler';
 import { OAuthRedirectionHandler } from './OAuthRedirectionHandler';
+import { PublicOnlyRoute } from 'tg.component/common/PublicOnlyRoute';
 
 interface LoginRouterProps {}
 
 const LoginRouter: FunctionComponent<LoginRouterProps> = (props) => {
   return (
     <Switch>
-      <Route exact path={LINKS.LOGIN.template}>
+      <PublicOnlyRoute exact path={LINKS.LOGIN.template}>
         <LoginView />
-      </Route>
-      <Route path={LINKS.OAUTH_RESPONSE.template}>
+      </PublicOnlyRoute>
+      <PublicOnlyRoute path={LINKS.OAUTH_RESPONSE.template}>
         <OAuthRedirectionHandler />
-      </Route>
+      </PublicOnlyRoute>
       <Route path={LINKS.EMAIL_VERIFICATION.template}>
         <EmailVerificationHandler />
       </Route>

@@ -15,13 +15,17 @@ export const BaseProjectView: React.FC<Props> = ({
   navigation,
   ...otherProps
 }) => {
-  const project = useProject();
+  const project = useProject() as ReturnType<typeof useProject> | undefined;
 
   const history = useHistory();
 
   const handleOrganizationChange = () => {
     history.push(LINKS.PROJECTS.build());
   };
+
+  if (!project) {
+    return <BaseView {...otherProps}></BaseView>;
+  }
 
   const prefixNavigation: NavigationItem[] = [
     [<OrganizationSwitch key={0} onSelect={handleOrganizationChange} />],

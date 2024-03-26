@@ -33,7 +33,9 @@ export const StorageList = () => {
 
   const canManage = satisfiesPermission('content-delivery.manage');
 
-  const serverConfiguration = useGlobalContext((c) => c.serverConfiguration);
+  const serverConfiguration = useGlobalContext(
+    (c) => c.initialData.serverConfiguration
+  );
   const contentDeliveryConfigured =
     serverConfiguration.contentDeliveryConfigured;
 

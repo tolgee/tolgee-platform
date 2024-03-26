@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Box, Paper } from '@mui/material';
-import GlobalError from './common/GlobalError';
+import GlobalErrorPage from './common/GlobalErrorPage';
 
 export default class ErrorBoundary extends React.Component<
   {
@@ -29,7 +29,7 @@ export default class ErrorBoundary extends React.Component<
         <Container maxWidth={dev ? 'lg' : 'sm'}>
           <Box mt={5}>
             <Paper>
-              <GlobalError error={this.state.error} />
+              <GlobalErrorPage error={this.state.error} />
             </Paper>
           </Box>
         </Container>

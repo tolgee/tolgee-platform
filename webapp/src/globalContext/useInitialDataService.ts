@@ -1,18 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-
-import { AppState } from 'tg.store/index';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { useTolgee } from '@tolgee/react';
-import { useOnUpdate } from 'tg.hooks/useOnUpdate';
-import { globalActions } from 'tg.store/global/GlobalActions';
 
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
 type AnnouncementDto = components['schemas']['AnnouncementDto'];
 type QuickStartModel = components['schemas']['QuickStartModel'];
+type InitialDataModel = components['schemas']['InitialDataModel'];
 
 export const useInitialDataService = () => {
   const [organizationLoading, setOrganizationLoading] = useState(false);
@@ -21,51 +16,41 @@ export const useInitialDataService = () => {
   const [organization, setOrganization] = useState<
     PrivateOrganizationModel | undefined
   >(undefined);
-  const security = useSelector((state: AppState) => state.global.security);
   const [announcement, setAnnouncement] = useState<AnnouncementDto | null>();
   const [quickStart, setQuickStart] = useState<QuickStartModel | undefined>();
-  const initialData = useApiQuery({
+  const [initialData, setInitialData] = useState<InitialDataModel>();
+  const initialDataLoadable = useApiQuery({
     url: '/v2/public/initial-data',
     method: 'get',
     options: {
-      refetchOnMount: false,
       cacheTime: Infinity,
       keepPreviousData: true,
       staleTime: Infinity,
       onSuccess(data) {
         setQuickStart(data.preferredOrganization?.quickStart);
         setAnnouncement(data.announcement);
+        setInitialData(data);
       },
+    },
+    fetchOptions: {
+      disableAuthRedirect: true,
+      disable404Redirect: true,
+      disableErrorNotification: true,
+      disableAutoErrorHandle: true,
     },
   });
 
   useEffect(() => {
-    const data = initialData.data;
-    if (data) {
+    // once initial data are loaded for first time
+    if (initialData) {
       // set organization data only if missing
-      setOrganization((org) => (org ? org : data.preferredOrganization));
-      setAnnouncement(data.announcement);
-      if (data.languageTag) {
+      setOrganization((org) => (org ? org : initialData.preferredOrganization));
+      if (initialData.languageTag) {
         // switch ui language, once user is signed in
-        tolgee.changeLanguage(data.languageTag);
+        tolgee.changeLanguage(initialData.languageTag);
       }
-      const invitationCode = InvitationCodeService.getCode();
-      globalActions.updateSecurity.dispatch({
-        allowPrivate:
-          !data?.serverConfiguration?.authentication || Boolean(data.userInfo),
-        allowRegistration:
-          data.serverConfiguration.allowRegistrations ||
-          Boolean(invitationCode), // if user has invitation code, registration is allowed
-      });
     }
-  }, [Boolean(initialData.data)]);
-
-  useEffect(() => {
-    if (initialData.data) {
-      setAnnouncement(initialData.data.announcement);
-      setQuickStart(initialData.data.preferredOrganization?.quickStart);
-    }
-  }, [initialData.data]);
+  }, [Boolean(initialData)]);
 
   const preferredOrganizationLoadable = useApiMutation({
     url: '/v2/preferred-organization',
@@ -151,7 +136,7 @@ export const useInitialDataService = () => {
   };
 
   const preferredOrganization =
-    organization ?? initialData.data?.preferredOrganization;
+    organization ?? initialData?.preferredOrganization;
 
   const updatePreferredOrganization = async (organizationId: number) => {
     if (organizationId !== preferredOrganization?.id) {
@@ -174,7 +159,12 @@ export const useInitialDataService = () => {
   const refetchInitialData = () => {
     setQuickStart(undefined);
     setOrganization(undefined);
-    return initialData.refetch();
+    return initialDataLoadable.refetch();
+  };
+
+  const invalidateInitialData = () => {
+    setInitialData(undefined);
+    return refetchInitialData();
   };
 
   const dismissAnnouncement = () => {
@@ -189,37 +179,38 @@ export const useInitialDataService = () => {
     );
   };
 
-  useOnUpdate(() => {
-    refetchInitialData();
-  }, [security.jwtToken]);
-
   const isFetching =
-    initialData.isFetching ||
+    initialDataLoadable.isFetching ||
     setPreferredOrganization.isLoading ||
     preferredOrganizationLoadable.isLoading ||
     dismissAnnouncementLoadable.isLoading ||
     organizationLoading;
 
-  if (initialData.error) {
-    throw initialData.error;
+  if (initialDataLoadable.error) {
+    throw initialDataLoadable.error;
   }
 
-  return {
-    data: {
-      ...initialData.data!,
-      preferredOrganization: preferredOrganization
-        ? { ...preferredOrganization, quickStart }
-        : undefined,
-      announcement,
-    },
-    isFetching,
-    isLoading: initialData.isLoading,
+  const state = initialData
+    ? {
+        ...initialData!,
+        preferredOrganization: preferredOrganization
+          ? { ...preferredOrganization, quickStart }
+          : undefined,
+        announcement,
+        isFetching,
+      }
+    : undefined;
 
-    refetchInitialData,
-    updatePreferredOrganization,
-    dismissAnnouncement,
-    completeGuideStep,
-    finishGuide,
-    setQuickStartOpen,
+  return {
+    state,
+    actions: {
+      refetchInitialData,
+      invalidateInitialData,
+      updatePreferredOrganization,
+      dismissAnnouncement,
+      completeGuideStep,
+      finishGuide,
+      setQuickStartOpen,
+    },
   };
 };

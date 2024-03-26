@@ -1,9 +1,10 @@
 import { Button, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { LINKS } from 'tg.constants/links';
 
-import { GlobalError as GlobalErrorError } from 'tg.error/GlobalError';
-import { globalActions } from 'tg.store/global/GlobalActions';
+import { GlobalError } from 'tg.error/GlobalError';
+import { tokenService } from 'tg.service/TokenService';
 
 const StyledImage = styled('img')`
   filter: grayscale(50%);
@@ -12,7 +13,11 @@ const StyledImage = styled('img')`
   width: 500px;
 `;
 
-export default function GlobalError(props: { error: GlobalErrorError }) {
+type Props = {
+  error: GlobalError;
+};
+
+export default function GlobalErrorPage({ error }: Props) {
   const dev = process.env.NODE_ENV === 'development';
 
   return (
@@ -32,9 +37,9 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
         </Box>
       )}
 
-      {props.error.publicInfo && (
+      {error.publicInfo && (
         <Box mb={5}>
-          <Typography variant="h4">{props.error.publicInfo}</Typography>
+          <Typography variant="h4">{error.publicInfo}</Typography>
         </Box>
       )}
 
@@ -44,8 +49,8 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
           variant="outlined"
           color="primary"
           onClick={() => {
-            globalActions.logout.dispatch();
-            location.reload();
+            tokenService.disposeAllTokens();
+            location.href = LINKS.LOGIN.build();
           }}
         >
           Start over!
@@ -58,16 +63,16 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
       </Typography>
       {dev && (
         <Box mt={5}>
-          {props.error.debugInfo && (
+          {error.debugInfo && (
             <>
               <Typography variant="h5">Debug information</Typography>
-              <pre>{props.error.debugInfo}</pre>
+              <pre>{error.debugInfo}</pre>
             </>
           )}
           <Typography variant="h5">Stack trace</Typography>
-          <pre>{props.error.stack}</pre>
+          <pre>{error.stack}</pre>
 
-          {props.error.e && <pre>{props.error.e && props.error.e.stack}</pre>}
+          {error.e && <pre>{error.e && error.e.stack}</pre>}
         </Box>
       )}
     </Box>

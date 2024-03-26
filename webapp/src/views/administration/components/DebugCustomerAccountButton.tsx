@@ -3,13 +3,15 @@ import { useHistory } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { LINKS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
-import { globalActions } from 'tg.store/global/GlobalActions';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 export const DebugCustomerAccountButton = (props: { userId: number }) => {
   const debugAccount = useApiMutation({
     url: '/v2/administration/users/{userId}/generate-token',
     method: 'get',
   });
+
+  const { debugCustomerAccount } = useGlobalActions();
 
   const history = useHistory();
 
@@ -24,7 +26,7 @@ export const DebugCustomerAccountButton = (props: { userId: number }) => {
           { path: { userId: props.userId } },
           {
             onSuccess: (r) => {
-              globalActions.debugCustomerAccount.dispatch(r);
+              debugCustomerAccount(r);
               history.push(LINKS.PROJECTS.build());
             },
           }

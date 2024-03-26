@@ -11,6 +11,7 @@ import { AdministrationView } from 'tg.views/administration/AdministrationView';
 import { OrganizationBillingRedirect } from './security/OrganizationRedirectHandler';
 import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 import { HelpMenu } from './HelpMenu';
+import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
@@ -65,11 +66,11 @@ export const RootRouter = () => (
     <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
       <PasswordResetSetView />
     </Route>
-    <Route exact path={LINKS.SIGN_UP.template}>
+    <PublicOnlyRoute exact path={LINKS.SIGN_UP.template}>
       <RecaptchaProvider>
         <SignUpView />
       </RecaptchaProvider>
-    </Route>
+    </PublicOnlyRoute>
     <Route path={LINKS.LOGIN.template}>
       <LoginRouter />
     </Route>

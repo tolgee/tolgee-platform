@@ -1,14 +1,14 @@
 import { default as React } from 'react';
 import { Route } from 'react-router-dom';
 
-import { RedirectUnsignedUser } from './RedirectUnsignedUser';
+import { RedirectSignedUser } from './RedirectSignedUser';
 
 type Props = React.ComponentProps<typeof Route>;
 
-export const PrivateRoute: React.FC<Props> = (props) => {
+export const PublicOnlyRoute: React.FC<Props> = (props) => {
   return (
     <Route {...props}>
-      <RedirectUnsignedUser>{props.children}</RedirectUnsignedUser>
+      <RedirectSignedUser>{props.children}</RedirectSignedUser>
     </Route>
   );
 };

@@ -25,8 +25,8 @@ const StyledContainer = styled('div')`
 
 export const FloatingToolsPanel = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
-  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
+  const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
+  const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
   const keyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const languageTag = useTranslationsSelector((c) => c.cursor?.language);
   const languages = useTranslationsSelector((c) => c.languages);

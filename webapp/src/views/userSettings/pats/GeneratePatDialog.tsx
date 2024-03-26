@@ -1,10 +1,10 @@
 import { default as React, FunctionComponent } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -15,11 +15,12 @@ export const GeneratePatDialog: FunctionComponent<{
   onGenerated: (pat: components['schemas']['RevealedPatModel']) => void;
 }> = (props) => {
   const expirationDateOptions = useExpirationDateOptions();
+  const history = useHistory();
 
   const { t } = useTranslate();
 
   const onDialogClose = () => {
-    redirect(LINKS.USER_PATS);
+    history.push(LINKS.USER_PATS.build());
   };
 
   const generateMutation = useApiMutation({
