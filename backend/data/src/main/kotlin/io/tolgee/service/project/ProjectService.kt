@@ -27,6 +27,7 @@ import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.LanguageService
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
@@ -78,6 +79,10 @@ class ProjectService(
   @set:Autowired
   @set:Lazy
   lateinit var languageService: LanguageService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var namespaceService: NamespaceService
 
   @set:Autowired
   @set:Lazy
@@ -174,6 +179,18 @@ class ProjectService(
     project.name = dto.name
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders
+
+    if (dto.baseNamespaceId != null) {
+      var namespace =
+        project.namespaces.find { it.id == dto.baseNamespaceId }
+          ?: throw BadRequestException(Message.NAMESPACE_NOT_FROM_PROJECT)
+      project.baseNamespace = namespace
+    } else {
+      if (project.baseNamespace != null) {
+        namespaceService.deleteUnusedNamespaces(listOf(project.baseNamespace!!))
+      }
+      project.baseNamespace = null
+    }
 
     dto.baseLanguageId?.let {
       val language =

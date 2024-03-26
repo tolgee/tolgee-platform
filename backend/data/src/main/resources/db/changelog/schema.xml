@@ -3167,4 +3167,21 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-1">
+        <addColumn tableName="project">
+            <column name="base_namespace_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-2">
+        <addUniqueConstraint columnNames="base_namespace_id" constraintName="UC_PROJECTBASE_NAMESPACE_ID_COL" tableName="project"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-3">
+        <addForeignKeyConstraint baseColumnNames="base_namespace_id" baseTableName="project" constraintName="FKg8lw0aumxlk4u9o24306j6asi" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="namespace" validate="true"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-4">
+        <dropColumn columnName="format" tableName="import_file"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-5">
+        <dropColumn columnName="root_key_is_language_tag" tableName="content_delivery_config"/>
+    </changeSet>
 </databaseChangeLog>

@@ -97,6 +97,10 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var namespaces: MutableList<Namespace> = mutableListOf()
 
+  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
+  @ActivityLoggedProp
+  var baseNamespace: Namespace? = null
+
   @ActivityLoggedProp
   override var avatarHash: String? = null
 
