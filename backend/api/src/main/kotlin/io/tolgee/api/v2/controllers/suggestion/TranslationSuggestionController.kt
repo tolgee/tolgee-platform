@@ -63,8 +63,9 @@ class TranslationSuggestionController(
   @PostMapping("/machine-translations-streaming", produces = ["application/x-ndjson"])
   @Operation(
     summary =
-      "Suggests machine translations from enabled services (streaming).\n" +
-        "If an error occurs when any of the services is used," +
+      "Suggests machine translations from enabled services (streaming)",
+    description =
+      "If an error occurs when any of the services is used," +
         " the error information is returned as a part of the result item, while the response has 200 status code.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
@@ -80,9 +81,8 @@ class TranslationSuggestionController(
 
   @PostMapping("/translation-memory")
   @Operation(
-    summary =
-      "Suggests machine translations from translation memory." +
-        "\n\nThe result is always sorted by similarity, so sorting is not supported.",
+    summary = "Suggests machine translations from translation memory",
+    description = "The result is always sorted by similarity, so sorting is not supported.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
