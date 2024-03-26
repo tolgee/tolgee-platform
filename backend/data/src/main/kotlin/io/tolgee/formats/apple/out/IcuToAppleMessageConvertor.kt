@@ -10,7 +10,7 @@ class IcuToAppleMessageConvertor(
 ) {
   fun convert(): PossiblePluralConversionResult {
     return MessageConvertorFactory(message, forceIsPlural, isProjectIcuPlaceholdersEnabled) {
-      AppleFromIcuParamConvertor()
+      AppleFromIcuPlaceholderConvertor()
     }.create().convert()
   }
 }

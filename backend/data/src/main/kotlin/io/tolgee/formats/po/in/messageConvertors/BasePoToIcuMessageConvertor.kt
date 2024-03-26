@@ -4,12 +4,12 @@ import com.ibm.icu.text.PluralRules
 import com.ibm.icu.util.ULocale
 import io.tolgee.formats.FormsToIcuPluralConvertor
 import io.tolgee.formats.MessageConvertorResult
-import io.tolgee.formats.ToIcuParamConvertor
+import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertMessage
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
 
-class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcuParamConvertor) {
+class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcuPlaceholderConvertor) {
   fun convert(
     rawData: Any?,
     languageTag: String,
@@ -65,6 +65,12 @@ class BasePoToIcuMessageConvertor(private val paramConvertorFactory: () -> ToIcu
     convertPlaceholders: Boolean,
     isProjectIcuEnabled: Boolean,
   ): String {
-    return convertMessage(message, isInPlural, convertPlaceholders, isProjectIcuEnabled, paramConvertorFactory)
+    return convertMessage(
+      message,
+      isInPlural,
+      convertPlaceholders,
+      isProjectIcuEnabled,
+      convertorFactory = paramConvertorFactory,
+    )
   }
 }

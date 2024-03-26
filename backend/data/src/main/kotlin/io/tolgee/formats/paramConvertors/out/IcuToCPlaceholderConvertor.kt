@@ -1,11 +1,11 @@
-package io.tolgee.formats.po.out.php
+package io.tolgee.formats.paramConvertors.out
 
 import com.ibm.icu.text.MessagePattern
-import io.tolgee.formats.FromIcuParamConvertor
+import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
 import io.tolgee.formats.escapePercentSign
 
-class IcuToPhpParamConvertor : FromIcuParamConvertor {
+class IcuToCPlaceholderConvertor : FromIcuPlaceholderConvertor {
   private var argIndex = -1
   private var wasNumberedArg = false
 

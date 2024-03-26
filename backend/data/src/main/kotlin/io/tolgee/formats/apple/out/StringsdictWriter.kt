@@ -1,6 +1,6 @@
 package io.tolgee.formats.apple.out
 
-import io.tolgee.formats.apple.`in`.AppleToIcuParamConvertor.Companion.APPLE_PLACEHOLDER_REGEX
+import io.tolgee.formats.apple.`in`.AppleToIcuPlaceholderConvertor.Companion.APPLE_PLACEHOLDER_REGEX
 import org.dom4j.Document
 import org.dom4j.DocumentHelper
 import org.dom4j.Element

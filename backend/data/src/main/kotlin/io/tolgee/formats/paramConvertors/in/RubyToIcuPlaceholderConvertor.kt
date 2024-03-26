@@ -1,23 +1,22 @@
-package io.tolgee.formats.po.`in`.paramConvertors
+package io.tolgee.formats.paramConvertors.`in`
 
-import io.tolgee.formats.ToIcuParamConvertor
+import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.convertFloatToIcu
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.po.`in`.CLikeParameterParser
 import io.tolgee.formats.usesUnsupportedFeature
 
-class CToIcuParamConvertor : ToIcuParamConvertor {
+class RubyToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = CLikeParameterParser()
   private var index = 0
 
   override val regex: Regex
-    get() = C_PARAM_REGEX
+    get() = RUBY_PLACEHOLDER_REGEX
 
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
   ): String {
-    index++
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 
     if (usesUnsupportedFeature(parsed)) {
@@ -28,31 +27,33 @@ class CToIcuParamConvertor : ToIcuParamConvertor {
       return "%"
     }
 
-    val zeroIndexedArgNum = parsed.argNum?.toIntOrNull()?.minus(1)
-    val name = zeroIndexedArgNum?.toString() ?: ((index - 1).toString())
+    index++
+    val zeroIndexedArgNum = parsed.argNum?.toIntOrNull()?.minus(1)?.toString()
+    val name = parsed.argName ?: zeroIndexedArgNum ?: ((index - 1).toString())
 
     when (parsed.specifier) {
+      null -> return "{$name}"
       "s" -> return "{$name}"
       "d" -> return "{$name, number}"
       "e" -> return "{$name, number, scientific}"
-      "f" -> return convertFloatToIcu(parsed, name) ?: parsed.fullMatch.escapeIcu(isInPlural)
+      "f" -> return convertFloatToIcu(parsed, name) ?: matchResult.value.escapeIcu(isInPlural)
     }
 
     return matchResult.value.escapeIcu(isInPlural)
   }
 
   companion object {
-    val C_PARAM_REGEX =
-      """
-      (?x)(
-      %
-      (?:(?<argnum>\d+)${"\\$"})?
-      (?<flags>[-+\s0\#]+)?
-      (?<width>\d+)?
-      (?:\.(?<precision>\d+))?
-      (?<length>hh|h|l|ll|j|z|t|L)?
-      (?<specifier>[diuoxXfFeEgGaAcspn%])
-      )
-      """.trimIndent().toRegex()
+    val RUBY_PLACEHOLDER_REGEX =
+"""
+(?x)(
+%
+(?:(?<argnum>\d+)?${"\\$"}|<(?<argname>\w+)>)?
+(?<flags>[+\-\s0\#*]+)?
+(?<width>\d+)?
+(?:\.(?<precision>\d+))?
+(?<specifier>[bBdiouxXeEfgGaAcps%])|
+%\{(?<argname2>\w+)}
+)
+""".trimIndent().toRegex()
   }
 }

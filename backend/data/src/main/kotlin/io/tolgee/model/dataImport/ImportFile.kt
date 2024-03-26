@@ -1,5 +1,6 @@
 package io.tolgee.model.dataImport
 
+import io.tolgee.formats.ImportMessageFormat
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
@@ -7,6 +8,8 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.Size
@@ -33,6 +36,10 @@ class ImportFile(
 
   @ColumnDefault("false")
   var needsParamConversion = false
+
+  @Enumerated(EnumType.STRING)
+  @ColumnDefault("UNKNOWN")
+  var format: ImportMessageFormat = ImportMessageFormat.UNKNOWN
 
   fun addIssue(
     type: FileIssueType,

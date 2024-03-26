@@ -127,7 +127,8 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     performProjectAuthPut(path, mapOf("namespace" to "new-ns")).andIsOk
 
     executeInNewTransaction {
-      val file = importService.findFile(testData.defaultNsFile.id)!!
+      val file =
+        importService.findFile(projectId = project.id, authorId = userAccount!!.id, testData.defaultNsFile.id)!!
       assertThat(file.namespace)
         .isEqualTo("new-ns")
       val importLanguage =

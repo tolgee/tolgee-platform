@@ -63,7 +63,7 @@ class AndroidToIcuMessageConvertor : ImportMessageConvertor {
       convertPlaceholders = convertPlaceholders,
       isProjectIcuEnabled = isProjectIcuEnabled,
     ) {
-      JavaToIcuParamConvertor()
+      JavaToIcuPlaceholderConvertor()
     }
   }
 }

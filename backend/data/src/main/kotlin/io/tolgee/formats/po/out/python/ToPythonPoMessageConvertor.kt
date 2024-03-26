@@ -1,5 +1,6 @@
 package io.tolgee.formats.po.out.python
 
+import io.tolgee.formats.paramConvertors.out.IcuToPythonPlaceholderConvertor
 import io.tolgee.formats.po.out.BaseIcuMessageToPoConvertor
 import io.tolgee.formats.po.out.ToPoConversionResult
 import io.tolgee.formats.po.out.ToPoMessageConvertor
@@ -14,7 +15,7 @@ class ToPythonPoMessageConvertor(
     BaseIcuMessageToPoConvertor(
       message = message,
       languageTag = languageTag,
-      argumentConverter = PythonFromIcuParamConvertor(),
+      placeholderConvertor = IcuToPythonPlaceholderConvertor(),
       forceIsPlural = forceIsPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     )

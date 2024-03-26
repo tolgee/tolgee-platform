@@ -1,0 +1,17 @@
+# Author: Urbanecm
+# Author: Veritaslibero
+# Author: Walter Klosse
+# Author: Want
+# Author: YjM
+# Author: Zbycz
+---
+relations: "%d relací"
+redactions:
+  edit:
+    heading: Upravit redakci
+    title: Upravit redakci
+  index:
+    empty: Žádné opravy k ukázání.
+    heading: Seznam oprav
+    title: Seznam oprav %s
+some_text_with_params: 'Toto je text s parametry: %s %d'
