@@ -78,6 +78,7 @@ declare namespace DataCy {
         "avatar-upload-button" |
         "avatar-upload-file-input" |
         "base-language-select" |
+        "base-namespace-select" |
         "batch-operation-copy-source-select" |
         "batch-operation-copy-source-select-item" |
         "batch-operation-dialog-cancel-job" |
@@ -136,7 +137,6 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
-        "create-project-language-add-button" |
         "dashboard-projects-list-item" |
         "delete-user-button" |
         "developer-menu-content-delivery" |

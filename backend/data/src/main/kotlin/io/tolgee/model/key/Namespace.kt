@@ -18,7 +18,7 @@ import org.hibernate.validator.constraints.Length
 @ActivityLoggedEntity
 @ActivityReturnsExistence
 @Table(
-  uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "namespace_name_project")],
+  uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name", "base"], name = "namespace_name_project")],
   indexes = [Index(columnList = "name")],
 )
 class Namespace(
@@ -29,4 +29,5 @@ class Namespace(
   var name: String = "",
   @ManyToOne
   var project: Project,
+  var base: Boolean = false
 ) : StandardAuditModel()

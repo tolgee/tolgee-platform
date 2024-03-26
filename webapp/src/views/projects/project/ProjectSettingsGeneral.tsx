@@ -13,11 +13,14 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { FieldLabel } from 'tg.component/FormField';
 import { Box, styled } from '@mui/material';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
+import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
+import { BaseNamespaceSelect } from './components/BaseNamespaceSelect';
 
 type FormValues = {
   name: string;
   description: string | undefined;
   baseLanguageId: number | undefined;
+  baseNamespaceId: number | undefined;
 };
 
 const StyledContainer = styled('div')`
@@ -46,14 +49,27 @@ const LanguageSelect = () => {
   );
 };
 
+const NamespaceSelect = () => {
+  const { namespaces } = useProjectNamespaces();
+  return (
+    <BaseNamespaceSelect
+      label={<T keyName="project_settings_base_namespace" />}
+      name="baseNamespaceId"
+      namespaces={namespaces}
+    />
+  );
+};
+
 export const ProjectSettingsGeneral = () => {
   const project = useProject();
+  const { baseNamespace, namespaceUpdate } = useProjectNamespaces();
   const { leave, isLeaving } = useLeaveProject();
 
   const initialValues = {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
     description: project.description ?? '',
+    baseNamespaceId: baseNamespace?.id ?? 0,
   } satisfies FormValues;
 
   const updateLoadable = useApiMutation({
@@ -62,29 +78,52 @@ export const ProjectSettingsGeneral = () => {
     invalidatePrefix: '/v2/projects',
   });
 
-  const handleEdit = (values: FormValues) => {
+  const updateProjectSettings = (
+    values: Pick<FormValues, 'name' | 'description' | 'baseLanguageId'>
+  ) => {
     const data = {
       ...values,
       description: values.description || undefined,
     };
-    updateLoadable.mutate(
-      {
-        path: { projectId: project.id },
-        content: {
-          'application/json': {
-            ...data,
-            icuPlaceholders: project.icuPlaceholders,
-          },
+    return updateLoadable.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          ...data,
+          icuPlaceholders: project.icuPlaceholders,
         },
       },
-      {
-        onSuccess() {
-          messageService.success(
-            <T keyName="project_successfully_edited_message" />
-          );
-        },
-      }
-    );
+    });
+  };
+
+  const updateNamespaceSetting = async (
+    values: Pick<FormValues, 'baseNamespaceId'>
+  ) => {
+    if (baseNamespace?.id) {
+      const data = { base: false };
+      await namespaceUpdate.mutateAsync({
+        path: { projectId: project.id, id: baseNamespace?.id },
+        content: { 'application/json': data },
+      });
+    }
+
+    if (values.baseNamespaceId === 0) {
+      return;
+    }
+
+    const data = { base: true };
+    await namespaceUpdate.mutateAsync({
+      path: { projectId: project.id, id: values.baseNamespaceId! },
+      content: { 'application/json': data },
+    });
+  };
+
+  const handleEdit = async (values: FormValues) => {
+    await Promise.all([
+      updateProjectSettings(values),
+      updateNamespaceSetting(values),
+    ]);
+    messageService.success(<T keyName="project_successfully_edited_message" />);
   };
 
   return (
@@ -139,6 +178,7 @@ export const ProjectSettingsGeneral = () => {
           <ProjectLanguagesProvider>
             <LanguageSelect />
           </ProjectLanguagesProvider>
+          <NamespaceSelect />
         </Box>
       </StandardForm>
     </StyledContainer>

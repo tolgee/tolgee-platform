@@ -25,6 +25,7 @@ import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -69,10 +70,10 @@ class NamespaceController(
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
     val namespaces =
       namespaceService.getAllInProject(projectHolder.project.id)
-        .map { it.id as Long? to it.name as String? }.toMutableList()
+        .map { it.id as Long? to it.name as String? to it.base as Boolean? }.toMutableList()
     val isDefaultUsed = namespaceService.isDefaultUsed(projectHolder.project.id)
     if (isDefaultUsed) {
-      namespaces.add(0, null to null)
+      namespaces.add(Pair(Pair(0, null), false))
     }
     return usedNamespaceModelAssembler.toCollectionModel(namespaces)
   }
