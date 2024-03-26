@@ -1,3 +1,10 @@
+## [3.53.1](https://github.com/tolgee/tolgee-platform/compare/v3.53.0...v3.53.1) (2024-03-26)
+
+
+### Bug Fixes
+
+* Android Import/Export fixes ([#2213](https://github.com/tolgee/tolgee-platform/issues/2213)) ([7b3caf7](https://github.com/tolgee/tolgee-platform/commit/7b3caf781e72d9a68fb8bd5d6ec13657c67ac57b))
+
 # [3.53.0](https://github.com/tolgee/tolgee-platform/compare/v3.52.0...v3.53.0) (2024-03-21)
 
 
