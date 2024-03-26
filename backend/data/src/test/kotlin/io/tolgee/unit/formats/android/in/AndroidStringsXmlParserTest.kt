@@ -41,6 +41,18 @@ class AndroidStringsXmlParserTest {
       .assertParsedTo("<b>text</b><br/> <b>a a a</b> <b></b>", false)
   }
 
+  @Test
+  fun `correctly unescapes amp XML entity`() {
+    "I am just a text! &amp;"
+      .assertParsedTo("I am just a text! &", false)
+  }
+
+  @Test
+  fun `doesnt unescape amp XML entity in XML context`() {
+    "I am just a text! <b>&amp;</b>"
+      .assertParsedTo("I am just a text! <b>&amp;</b>", false)
+  }
+
   private fun getReader(data: String): XMLEventReader {
     val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
     return inputFactory.createXMLEventReader(data.byteInputStream())

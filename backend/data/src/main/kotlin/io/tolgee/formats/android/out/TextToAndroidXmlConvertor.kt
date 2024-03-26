@@ -188,7 +188,7 @@ class TextToAndroidXmlConvertor(
       transformer
     }
 
-    private val escapeCharRegexWithoutUtfEscapes = "\\\\(?!u[0-9a-fA-F]{4})".toRegex()
+    val escapeCharRegexWithoutUtfEscapes = "\\\\(?!u[0-9a-fA-F]{4})".toRegex()
   }
 
   private fun String.escape(

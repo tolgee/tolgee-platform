@@ -35,6 +35,16 @@ class AndroidStringsUnescaperTest {
     "\\\" \\' \\n \\t \\\\".assertUnescaped("\" ' \n \t \\")
   }
 
+  @Test
+  fun `unescapes all except unicode chars`() {
+    "1\\% text \\’ \\u1090 \\!".assertUnescaped("1% text ’ \\u1090 !")
+  }
+
+  @Test
+  fun `unescapes apos`() {
+    "So funktioniert\\'s".assertUnescaped("So funktioniert's")
+  }
+
   private fun String.assertUnescaped(
     expected: String,
     isFirst: Boolean = true,

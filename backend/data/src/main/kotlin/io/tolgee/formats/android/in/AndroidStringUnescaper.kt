@@ -4,7 +4,7 @@ import io.tolgee.formats.android.AndroidParsingConstants
 
 class AndroidStringUnescaper(private val string: String, private val isFirst: Boolean, private val isLast: Boolean) {
   companion object {
-    private val toUnescape = mapOf('n' to '\n', '\'' to '\'', '"' to '"', 't' to '\t')
+    private val toUnescape = mapOf('n' to "\n", '\'' to "\'", '"' to "\"", 't' to "\t", 'u' to "\\u")
     private val spacesToTrim = AndroidParsingConstants.spaces
   }
 
@@ -56,7 +56,6 @@ class AndroidStringUnescaper(private val string: String, private val isFirst: Bo
             if (char in toUnescape.keys) {
               result.append(toUnescape[char])
             } else {
-              result.append('\\')
               result.append(char)
             }
             state = State.NORMAL
