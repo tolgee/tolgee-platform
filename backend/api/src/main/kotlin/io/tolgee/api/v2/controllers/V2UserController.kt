@@ -95,7 +95,6 @@ class V2UserController(
     userAccountService.updatePassword(authenticationFacade.authenticatedUserEntity, dto!!)
     return JwtAuthenticationResponse(
       jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
-      authenticationFacade.authenticatedUser.id,
     )
   }
 
@@ -152,6 +151,6 @@ class V2UserController(
     }
 
     val jwt = jwtService.emitToken(entity.id, true)
-    return ResponseEntity.ok(JwtAuthenticationResponse(jwt, entity.id))
+    return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
   }
 }

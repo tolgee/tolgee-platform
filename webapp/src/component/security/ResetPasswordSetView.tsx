@@ -102,7 +102,6 @@ const PasswordResetSetView: FunctionComponent = () => {
                   </Box>
                 </>
               }
-              //@ts-ignore
               onSubmit={(v: ValueType) => {
                 passwordResetSet.mutate(
                   {

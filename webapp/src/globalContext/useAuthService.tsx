@@ -126,15 +126,12 @@ export const useAuthService = (
     }
   }
 
-  async function handleAfterLogin({
-    accessToken,
-    userId,
-  }: JwtAuthenticationResponse) {
+  async function handleAfterLogin({ accessToken }: JwtAuthenticationResponse) {
     // don't re-render the page yet
     tokenService.setToken(accessToken!);
     await handleAcceptInvitation();
     // now set the JWT, when we are already redirecting
-    setUserId(userId);
+    setUserId(tokenService.getUserId(accessToken));
     setJwtToken(accessToken!);
   }
 
@@ -144,7 +141,6 @@ export const useAuthService = (
     ),
     jwtToken,
     adminToken,
-    userId,
     superTokenNeeded: superTokenAfter.length > 0,
     loginLoadable,
     signupLoadable,

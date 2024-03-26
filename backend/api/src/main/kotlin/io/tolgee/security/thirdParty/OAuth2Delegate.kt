@@ -118,7 +118,7 @@ class OAuth2Delegate(
             newUserAccount
           }
         val jwt = jwtService.emitToken(user.id)
-        return JwtAuthenticationResponse(jwt, user.id)
+        return JwtAuthenticationResponse(jwt)
       }
       if (response == null) {
         logger.error("Error getting token from third party server. Response is null.")

@@ -92,7 +92,7 @@ class GoogleOAuthDelegate(
             newUserAccount
           }
         val jwt = jwtService.emitToken(user.id)
-        return JwtAuthenticationResponse(jwt, user.id)
+        return JwtAuthenticationResponse(jwt)
       }
       if (response == null) {
         throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
