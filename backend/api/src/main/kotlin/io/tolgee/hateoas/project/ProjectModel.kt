@@ -3,6 +3,7 @@ package io.tolgee.hateoas.project
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.Avatar
 import io.tolgee.hateoas.language.LanguageModel
+import io.tolgee.hateoas.key.namespace.NamespaceModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.permission.ComputedPermissionModel
 import io.tolgee.hateoas.permission.PermissionModel
@@ -20,6 +21,7 @@ open class ProjectModel(
   val avatar: Avatar?,
   val organizationOwner: SimpleOrganizationModel?,
   val baseLanguage: LanguageModel?,
+  val baseNamespace: NamespaceModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")
   val directPermission: PermissionModel?,
