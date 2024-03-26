@@ -64,7 +64,7 @@ describe('Content delivery', () => {
     );
   });
 
-  it.only('updates content delivery config with proper export params ', () => {
+  it('updates content delivery config with proper export params ', () => {
     function openEditDialog() {
       gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
         .findDcy('content-delivery-item-type')
