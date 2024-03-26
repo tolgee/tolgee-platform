@@ -1,3 +1,11 @@
+# [3.54.0](https://github.com/tolgee/tolgee-platform/compare/v3.53.1...v3.54.0) (2024-03-26)
+
+
+### Features
+
+* Add Ruby YAML support ([#2183](https://github.com/tolgee/tolgee-platform/issues/2183)) ([118ecf7](https://github.com/tolgee/tolgee-platform/commit/118ecf76710683a5ff889b38866be7e1abf7b693))
+* improve routing and redirects ([#2210](https://github.com/tolgee/tolgee-platform/issues/2210)) ([74aa4aa](https://github.com/tolgee/tolgee-platform/commit/74aa4aa443ee238779534556daffb74db6c50234))
+
 ## [3.53.1](https://github.com/tolgee/tolgee-platform/compare/v3.53.0...v3.53.1) (2024-03-26)
 
 
