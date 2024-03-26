@@ -56,6 +56,15 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
     name: String,
   ): Namespace?
 
+  @Query(
+    """
+    from Namespace n where n.base = true and n.project.id = :projectId
+  """,
+  )
+  fun findBaseNamespaceByProjectId(
+    projectId: Long,
+  ): Namespace?
+
   @Modifying
   @Query(
     """

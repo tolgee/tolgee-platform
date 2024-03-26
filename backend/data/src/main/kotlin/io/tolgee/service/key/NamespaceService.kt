@@ -143,14 +143,36 @@ class NamespaceService(
     return namespaceRepository.findOneByProjectIdAndId(projectId, namespaceId)
   }
 
+  fun findBaseNamespace(
+    projectId: Long,
+  ): Namespace? {
+    return namespaceRepository.findBaseNamespaceByProjectId(projectId)
+  }
+
   fun update(
     namespace: Namespace,
     dto: UpdateNamespaceDto,
   ) {
-    this.find(dto.name, namespace.project.id)?.let {
-      throw BadRequestException(Message.NAMESPACE_EXISTS)
+    if (dto.name == null && dto.base == null) {
+      throw BadRequestException(Message.REQUIRED_ONE_FIELD_AT_LEAST)
     }
-    namespace.name = dto.name!!
+
+    if (dto.name != null) {
+      this.find(dto.name, namespace.project.id)?.let {
+        throw BadRequestException(Message.NAMESPACE_EXISTS)
+      }
+      namespace.name = dto.name ?: namespace.name
+    }
+
+    if (dto.base != null) {
+      this.findBaseNamespace(namespace.project.id)?.let {
+        if (it.id != namespace.id) {
+          throw BadRequestException(Message.BASE_NAMESPACE_EXISTS)
+        }
+      }
+      namespace.base = dto.base ?: namespace.base
+    }
+
     return save(namespace)
   }
 

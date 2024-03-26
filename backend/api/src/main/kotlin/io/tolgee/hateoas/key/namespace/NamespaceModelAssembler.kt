@@ -14,5 +14,6 @@ class NamespaceModelAssembler : RepresentationModelAssemblerSupport<Namespace, N
     NamespaceModel(
       id = entity.id,
       name = entity.name,
+      base = entity.base,
     )
 }

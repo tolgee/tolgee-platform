@@ -12,4 +12,6 @@ open class NamespaceModel(
   val id: Long,
   @Schema(description = "", example = "homepage")
   val name: String,
+  @Schema(description = "", example = "false")
+  val base: Boolean,
 ) : RepresentationModel<NamespaceModel>(), Serializable

@@ -12,4 +12,6 @@ open class UsedNamespaceModel(
   val id: Long?,
   @Schema(description = "Name of namespace. Null if default.", example = "homepage")
   val name: String?,
+  @Schema(description = "Base of namespace. false if default.", example = "false")
+  val base: Boolean?,
 ) : RepresentationModel<UsedNamespaceModel>(), Serializable

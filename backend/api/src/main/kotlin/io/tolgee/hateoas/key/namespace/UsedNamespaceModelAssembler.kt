@@ -5,13 +5,14 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class UsedNamespaceModelAssembler : RepresentationModelAssemblerSupport<Pair<Long?, String?>, UsedNamespaceModel>(
+class UsedNamespaceModelAssembler : RepresentationModelAssemblerSupport<Pair<Pair<Long?, String?>, Boolean?>, UsedNamespaceModel>(
   NamespaceController::class.java,
   UsedNamespaceModel::class.java,
 ) {
-  override fun toModel(entity: Pair<Long?, String?>) =
+  override fun toModel(entity: Pair<Pair<Long?, String?>, Boolean?>) =
     UsedNamespaceModel(
-      id = entity.first,
-      name = entity.second,
+      id = entity.first.first,
+      name = entity.first.second,
+      base = entity.second,
     )
 }

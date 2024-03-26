@@ -3155,4 +3155,11 @@
     <changeSet author="jenik (generated)" id="1710826031205-1">
         <modifyDataType columnName="description" newDataType="varchar(2000)" tableName="project"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1710826031205-2">
+        <addColumn tableName="namespace">
+            <column defaultValueBoolean="false" name="base" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
