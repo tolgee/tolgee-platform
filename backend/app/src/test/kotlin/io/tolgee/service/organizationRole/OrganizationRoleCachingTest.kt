@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.service
+package io.tolgee.service.organizationRole
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.constants.Caches
@@ -133,7 +133,7 @@ class OrganizationRoleCachingTest : AbstractSpringTest() {
     organizationId: Long,
     userId: Long,
   ): UserOrganizationRoleDto? =
-    cacheManager.getCache(Caches.ORGANIZATION_ROLES)!!.get(listOf(organizationId, userId))
+    cacheManager.getCache(Caches.ORGANIZATION_ROLES)!!.get(arrayListOf(organizationId, userId))
       ?.get() as UserOrganizationRoleDto?
 
   private fun assertCacheEvicted(
