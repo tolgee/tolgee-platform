@@ -36,15 +36,20 @@ class AndroidStringsXmlParserTest {
   }
 
   @Test
+  fun `CDATA block is unescaped`() {
+    """<![CDATA[<a href=\"Cool\">text</a>]]>""".assertParsedTo("<a href=\"Cool\">text</a>", true)
+  }
+
+  @Test
   fun `correctly handles spaces between tags`() {
     "   <b> text </b><br/>  <b> a a a </b> <b></b> "
       .assertParsedTo("<b>text</b><br/> <b>a a a</b> <b></b>", false)
   }
 
   @Test
-  fun `correctly unescapes amp XML entity`() {
-    "I am just a text! &amp;"
-      .assertParsedTo("I am just a text! &", false)
+  fun `doesn't escape XML to entities for pure text`() {
+    "I am just a text! &amp; &lt; &gt; &apos;"
+      .assertParsedTo("I am just a text! & < > '", false)
   }
 
   @Test
