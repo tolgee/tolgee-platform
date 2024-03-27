@@ -54,6 +54,10 @@ class AdnroidXmlFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="i_am_array_english">This is english!</string>
+    |  <plurals name="plural_with_placeholders">
+    |    <item quantity="one">%s dog</item>
+    |    <item quantity="other">%s dogs</item>
+    |  </plurals>
     |</resources>
     |
       """.trimMargin(),
@@ -235,6 +239,13 @@ class AdnroidXmlFileExporterTest {
           keyName = "i_am_array_english",
           text = "This is english!",
         )
+        add(
+          languageTag = "en",
+          keyName = "plural with placeholders",
+          text = "{count, plural, one {{0} dog} other {{0} dogs}}",
+        ) {
+          key.isPlural = true
+        }
       }
     return getExporter(built.translations)
   }

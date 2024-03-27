@@ -7,18 +7,17 @@ class MessageConvertorFactory(
   private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
 ) {
   fun create(): BaseIcuMessageConvertor {
-    if (!isProjectIcuPlaceholdersEnabled) {
-      return BaseIcuMessageConvertor(
-        message = message,
-        argumentConvertor = NoOpFromIcuPlaceholderConvertor(),
-        forceIsPlural = forceIsPlural,
-      )
-    }
-
     return BaseIcuMessageConvertor(
       message = message,
-      argumentConvertor = paramConvertorFactory(),
+      argumentConvertorFactory = getParamConvertorFactory(),
       forceIsPlural = forceIsPlural,
     )
   }
+
+  private fun getParamConvertorFactory() =
+    if (isProjectIcuPlaceholdersEnabled) {
+      paramConvertorFactory
+    } else {
+      { NoOpFromIcuPlaceholderConvertor() }
+    }
 }

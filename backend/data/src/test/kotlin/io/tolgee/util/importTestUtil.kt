@@ -99,14 +99,9 @@ data class ImportTranslationInContextAssertions(
     this.translation.text!!.let {
       BaseIcuMessageConvertor(
         it,
-        NoOpFromIcuPlaceholderConvertor(),
+        { NoOpFromIcuPlaceholderConvertor() },
       ).convert()
     }
-
-  fun assertHasExactPluralForms(forms: Set<String>): ImportTranslationInContextAssertions {
-    this.getPossiblePlural().formsResult!!.keys.assert.isEqualTo(forms)
-    return this
-  }
 
   fun isPluralOptimized(): ImportTranslationInContextAssertions {
     assertTextNotNull()
