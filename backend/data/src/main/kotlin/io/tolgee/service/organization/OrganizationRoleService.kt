@@ -297,6 +297,6 @@ class OrganizationRoleService(
     userId: Long,
   ) {
     val cache = cacheManager.getCache(Caches.ORGANIZATION_ROLES)
-    cache?.evict(listOf(organizationId, userId))
+    cache?.evict(arrayListOf(organizationId, userId))
   }
 }

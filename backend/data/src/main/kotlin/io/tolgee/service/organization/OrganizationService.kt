@@ -214,7 +214,7 @@ class OrganizationService(
     val organization = this.find(id) ?: throw NotFoundException()
 
     // Evict slug-based cache entry
-    cache?.evict(listOf("slug", organization.slug))
+    cache?.evict(arrayListOf("slug", organization.slug))
 
     val newSlug = editDto.slug ?: organization.slug
     if (newSlug != organization.slug && !validateSlugUniqueness(newSlug)) {
