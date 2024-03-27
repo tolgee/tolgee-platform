@@ -16,9 +16,6 @@ export const useInitialDataService = () => {
   const [organization, setOrganization] = useState<
     PrivateOrganizationModel | undefined
   >(undefined);
-  const [announcement, setAnnouncement] = useState<AnnouncementDto | null>();
-  const [quickStart, setQuickStart] = useState<QuickStartModel | undefined>();
-  const [initialData, setInitialData] = useState<InitialDataModel>();
   const initialDataLoadable = useApiQuery({
     url: '/v2/public/initial-data',
     method: 'get',
@@ -33,12 +30,19 @@ export const useInitialDataService = () => {
       },
     },
     fetchOptions: {
-      disableAuthRedirect: true,
       disable404Redirect: true,
-      disableErrorNotification: true,
-      disableAutoErrorHandle: true,
     },
   });
+
+  const [announcement, setAnnouncement] = useState<AnnouncementDto | undefined>(
+    initialDataLoadable.data?.announcement
+  );
+  const [quickStart, setQuickStart] = useState<QuickStartModel | undefined>(
+    initialDataLoadable.data?.preferredOrganization?.quickStart
+  );
+  const [initialData, setInitialData] = useState<InitialDataModel | undefined>(
+    initialDataLoadable.data
+  );
 
   useEffect(() => {
     // once initial data are loaded for first time
@@ -168,7 +172,7 @@ export const useInitialDataService = () => {
   };
 
   const dismissAnnouncement = () => {
-    setAnnouncement(null);
+    setAnnouncement(undefined);
     dismissAnnouncementLoadable.mutate(
       {},
       {
