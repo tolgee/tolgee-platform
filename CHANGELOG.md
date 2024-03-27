@@ -1,3 +1,10 @@
+## [3.54.1](https://github.com/tolgee/tolgee-platform/compare/v3.54.0...v3.54.1) (2024-03-27)
+
+
+### Bug Fixes
+
+* quick start not opening when floating ([#2220](https://github.com/tolgee/tolgee-platform/issues/2220)) ([e4412d0](https://github.com/tolgee/tolgee-platform/commit/e4412d02f6991f9119353d10cfa3964070b9d162))
+
 # [3.54.0](https://github.com/tolgee/tolgee-platform/compare/v3.53.1...v3.54.0) (2024-03-26)
 
 
