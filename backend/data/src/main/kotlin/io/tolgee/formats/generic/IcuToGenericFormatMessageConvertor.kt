@@ -43,7 +43,7 @@ class IcuToGenericFormatMessageConvertor(
     message ?: return null
     return BaseIcuMessageConvertor(
       message = message,
-      argumentConvertor = paramConvertorFactory(),
+      argumentConvertorFactory = paramConvertorFactory,
       forceIsPlural = forceIsPlural,
       keepEscaping = isProjectIcuPlaceholdersEnabled,
     ).convert()

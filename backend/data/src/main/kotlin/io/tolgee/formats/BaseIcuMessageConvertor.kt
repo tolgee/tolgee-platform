@@ -5,7 +5,7 @@ import io.tolgee.constants.Message
 
 class BaseIcuMessageConvertor(
   private val message: String,
-  private val argumentConvertor: FromIcuPlaceholderConvertor,
+  private val argumentConvertorFactory: () -> FromIcuPlaceholderConvertor,
   private val keepEscaping: Boolean = false,
   private val forceIsPlural: Boolean? = null,
 ) {
@@ -137,7 +137,7 @@ class BaseIcuMessageConvertor(
 
       is MessagePatternUtil.MessageContentsNode -> {
         if (node.type == MessagePatternUtil.MessageContentsNode.Type.REPLACE_NUMBER) {
-          addToResult(argumentConvertor.convertReplaceNumber(node, pluralArgName), form)
+          addToResult(getFormPlaceholderConvertor(form).convertReplaceNumber(node, pluralArgName), form)
         }
       }
 
@@ -150,12 +150,13 @@ class BaseIcuMessageConvertor(
     node: MessagePatternUtil.TextNode,
     form: String?,
   ) {
+    val formPlaceholderConvertor = getFormPlaceholderConvertor(form)
     if (keepEscaping) {
-      val convertedPatternString = argumentConvertor.convertText(node.patternString)
+      val convertedPatternString = formPlaceholderConvertor.convertText(node.patternString)
       addToResult(convertedPatternString, form)
       return
     }
-    val convertedText = argumentConvertor.convertText(node.text)
+    val convertedText = formPlaceholderConvertor.convertText(node.text)
     addToResult(convertedText, form)
   }
 
@@ -168,7 +169,7 @@ class BaseIcuMessageConvertor(
     }
     when (node.argType) {
       MessagePattern.ArgType.SIMPLE, MessagePattern.ArgType.NONE -> {
-        addToResult(argumentConvertor.convert(node), form)
+        addToResult(getFormPlaceholderConvertor(form).convert(node), form)
       }
 
       MessagePattern.ArgType.PLURAL -> {
@@ -195,6 +196,13 @@ class BaseIcuMessageConvertor(
         warnings.add(Message.ADVANCED_PARAMS_NOT_SUPPORTED to listOf(node.patternString))
       }
     }
+  }
+
+  private val formArgumentConvertor =
+    mutableMapOf<String?, FromIcuPlaceholderConvertor>()
+
+  private fun getFormPlaceholderConvertor(form: String?): FromIcuPlaceholderConvertor {
+    return formArgumentConvertor.computeIfAbsent(form) { argumentConvertorFactory() }
   }
 
   private fun handlePlural(node: MessagePatternUtil.ArgNode) {

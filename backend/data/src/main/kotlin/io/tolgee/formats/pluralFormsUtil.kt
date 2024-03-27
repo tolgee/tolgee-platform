@@ -69,7 +69,7 @@ fun getPluralFormsReplacingReplaceParam(
   replacement: String,
 ): PluralForms? {
   val noOpConvertor = NoOpFromIcuPlaceholderConvertor()
-  val convertor =
+  val convertor = {
     object : FromIcuPlaceholderConvertor {
       override fun convert(node: MessagePatternUtil.ArgNode): String {
         return noOpConvertor.convert(node)
@@ -86,6 +86,7 @@ fun getPluralFormsReplacingReplaceParam(
         return replacement
       }
     }
+  }
   val converted =
     BaseIcuMessageConvertor(
       string,
@@ -180,7 +181,7 @@ fun <T> Map<T, String?>.convertToIcuPlurals(newPluralArgName: String?): ConvertT
 private fun convertIcuStringNoOp(string: String) =
   BaseIcuMessageConvertor(
     string,
-    NoOpFromIcuPlaceholderConvertor(),
+    { NoOpFromIcuPlaceholderConvertor() },
     keepEscaping = true,
   ).convert()
 

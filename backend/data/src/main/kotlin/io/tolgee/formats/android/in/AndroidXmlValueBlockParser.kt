@@ -46,6 +46,14 @@ class AndroidXmlValueBlockParser {
 
   val result by lazy {
     transform()
+
+    val singleTextResult = getSingleTextResult()
+    if (singleTextResult != null) {
+      // we just need to bypass the xml escaping, since if the text doesn't contain XML, we handle it as a text,
+      // which can contain characters like &, <, >
+      return@lazy AndroidStringValue(singleTextResult, false)
+    }
+
     val children = rootModel.children
     val text = children.joinToString("") { it.toXmlString() }
     val singleChild = getRootSingleChild()
@@ -59,6 +67,14 @@ class AndroidXmlValueBlockParser {
       unescapeText(node)
     }
     removeEmptyTextNodes()
+  }
+
+  private fun getSingleTextResult(): String? {
+    val onlyTextChild = rootModel.children.singleOrNull()
+    if (onlyTextChild !is ModelCharacters || onlyTextChild.isCdata) {
+      return null
+    }
+    return onlyTextChild.characters
   }
 
   private fun removeEmptyTextNodes() {
