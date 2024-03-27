@@ -1,3 +1,10 @@
+## [3.54.2](https://github.com/tolgee/tolgee-platform/compare/v3.54.1...v3.54.2) (2024-03-27)
+
+
+### Bug Fixes
+
+* Android unescaping & ampersand handling ([#2218](https://github.com/tolgee/tolgee-platform/issues/2218)) ([18c8c49](https://github.com/tolgee/tolgee-platform/commit/18c8c491ed4fea433bea07a1b167b88123c9b36b))
+
 ## [3.54.1](https://github.com/tolgee/tolgee-platform/compare/v3.54.0...v3.54.1) (2024-03-27)
 
 
