@@ -190,10 +190,6 @@ export const useInitialDataService = () => {
     dismissAnnouncementLoadable.isLoading ||
     organizationLoading;
 
-  if (initialDataLoadable.error) {
-    throw initialDataLoadable.error;
-  }
-
   const state = initialData
     ? {
         ...initialData!,

@@ -3,13 +3,21 @@ export type Config = {
   method?: string;
   statusCode: number;
   body?: any;
+  times?: number;
 };
 
-export function simulateError({ method, endpoint, statusCode, body }: Config) {
+export function simulateError({
+  method,
+  endpoint,
+  statusCode,
+  body,
+  ...rest
+}: Config) {
   cy.intercept(
     {
       method: method,
       url: `*${endpoint}*`,
+      ...rest,
     },
     { statusCode, body }
   );
