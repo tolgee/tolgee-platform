@@ -35,8 +35,8 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
     const actions = {
       setGlobalError,
       ...auth.actions,
-      ...quickStart.actions,
       ...initialData.actions,
+      ...quickStart.actions,
       ...organizationUsage.actions,
       ...layout.actions,
       ...confirmationDialog.actions,
