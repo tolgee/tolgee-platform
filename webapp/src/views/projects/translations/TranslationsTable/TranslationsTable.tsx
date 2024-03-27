@@ -23,7 +23,7 @@ const ARROW_SIZE = 50;
 const StyledContainer = styled('div')`
   position: relative;
   display: grid;
-  margin: 10px 0px 0px -0px;
+  margin: 0px;
   border-left: 0px;
   border-right: 0px;
   background: ${({ theme }) => theme.palette.background.default};

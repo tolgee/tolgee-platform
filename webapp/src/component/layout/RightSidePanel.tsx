@@ -48,7 +48,11 @@ export const RightSidePanel = ({
   useResizeObserver({
     ref: containerRef,
     onResize({ width = 0 }) {
-      setRightPanelWidth(width);
+      if (!floating && open) {
+        setRightPanelWidth(width);
+      } else {
+        setRightPanelWidth(0);
+      }
     },
   });
   useEffect(() => {
