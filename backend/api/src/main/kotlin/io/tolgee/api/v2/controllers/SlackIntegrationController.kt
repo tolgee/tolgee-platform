@@ -51,8 +51,7 @@ class SlackIntegrationController(
   fun slackCommand(
     @ModelAttribute payload: SlackCommandDto,
   ): SlackMessageDto? {
-    val regex = """^(\w+)(?:\s+(\d+))?(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
-    val matchResult = regex.matchEntire(payload.text)
+    val matchResult = commandRegex.matchEntire(payload.text)
 
     if (matchResult == null) {
       sendError(payload, Message.SLACK_INVALID_COMMAND)
@@ -267,7 +266,6 @@ class SlackIntegrationController(
   }
 
   fun parseOptions(optionsString: String): Map<String, String> {
-    val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
     val optionsMap = mutableMapOf<String, String>()
 
     optionsRegex.findAll(optionsString).forEach { match ->
@@ -276,6 +274,11 @@ class SlackIntegrationController(
     }
 
     return optionsMap
+  }
+
+  companion object {
+    val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
+    val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
   }
 
   data class ValidationResult(
