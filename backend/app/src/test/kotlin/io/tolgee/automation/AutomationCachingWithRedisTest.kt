@@ -5,10 +5,12 @@
 package io.tolgee.automation
 
 import io.tolgee.fixtures.RedisRunner
+import io.tolgee.testing.ContextRecreatingTest
 import org.junit.jupiter.api.AfterAll
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ContextConfiguration
 
 @SpringBootTest(
@@ -19,6 +21,8 @@ import org.springframework.test.context.ContextConfiguration
   ],
 )
 @ContextConfiguration(initializers = [AutomationCachingWithRedisTest.Companion.Initializer::class])
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextRecreatingTest
 class AutomationCachingWithRedisTest : AutomationCachingTest() {
   companion object {
     val redisRunner = RedisRunner()
