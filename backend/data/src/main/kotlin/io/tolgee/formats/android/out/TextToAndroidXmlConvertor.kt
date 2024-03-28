@@ -1,5 +1,6 @@
 package io.tolgee.formats.android.out
 
+import io.tolgee.formats.MobileStringEscaper
 import io.tolgee.formats.android.AndroidParsingConstants
 import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
@@ -177,18 +178,11 @@ class TextToAndroidXmlConvertor(
   companion object {
     private val documentBuilder: DocumentBuilder by lazy { DocumentBuilderFactory.newInstance().newDocumentBuilder() }
 
-    fun getSpacesRegex(spaces: Iterable<Char>) = """([${spaces.joinToString("")}]{2,})""".toRegex()
-
-    val spacesRegex = getSpacesRegex(AndroidParsingConstants.spaces)
-    val spacesRegexWithoutNewlines = getSpacesRegex(AndroidParsingConstants.spacesWithoutNewLines)
-
     private val xmlTransformer by lazy {
       val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
       transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
       transformer
     }
-
-    val escapeCharRegexWithoutUtfEscapes = "\\\\(?!u[0-9a-fA-F]{4})".toRegex()
   }
 
   private fun String.escape(
@@ -200,40 +194,15 @@ class TextToAndroidXmlConvertor(
     quoteMoreWhitespaces: Boolean,
     escapeNewLines: Boolean,
   ): String {
-    return this
-      .replace(escapeCharRegexWithoutUtfEscapes, """\\\\""")
-      .replace("\"", "\\\"")
-      .let {
-        if (quoteMoreWhitespaces) {
-          if (escapeNewLines) {
-            it.replace(spacesRegexWithoutNewlines, "\"$1\"")
-          } else {
-            it.replace(spacesRegex, "\"$1\"")
-          }
-        } else {
-          it
-        }
-      }.let {
-        if (escapeNewLines) {
-          it.replace("\n", "\\n")
-        } else {
-          it
-        }
-      }
-      .let {
-        if (!keepPercentSignEscaped) {
-          it.replace("%%", "%")
-        } else {
-          it
-        }
-      }
-      .let {
-        if (escapeApos) {
-          it.replace("'", "\\'")
-        } else {
-          it
-        }
-      }
+    return MobileStringEscaper(
+      string = this,
+      escapeApos = escapeApos,
+      keepPercentSignEscaped = keepPercentSignEscaped,
+      quoteMoreWhitespaces = quoteMoreWhitespaces,
+      escapeNewLines = escapeNewLines,
+      utfSymbolCharacter = 'u',
+      escapeQuotes = true,
+    ).escape()
   }
 
   data class ContentToAppend(val text: String? = null, val children: Collection<Node>? = null)

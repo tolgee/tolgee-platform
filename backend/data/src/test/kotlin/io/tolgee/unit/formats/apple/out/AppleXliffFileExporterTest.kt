@@ -43,6 +43,10 @@ class AppleXliffFileExporterTest {
     |        <source xml:space="preserve">Namespaced</source>
     |        <target xml:space="preserve">Namespaced</target>
     |      </trans-unit>
+    |      <trans-unit id="escaping_singular">
+    |        <source xml:space="preserve">{count, plural, one {# day} other {# days}}</source>
+    |        <target xml:space="preserve">To je ale den \n \U0032</target>
+    |      </trans-unit>
     |    </body>
     |  </file>
     |  <file datatype="plaintext" original="homepage.strings" source-language="tag" target-language="cs">
@@ -125,6 +129,26 @@ class AppleXliffFileExporterTest {
     |        <target xml:space="preserve">%lld dnů</target>
     |      </trans-unit>
     |      <trans-unit id="/key6:dict/property:dict/other:dict/:string">
+    |        <source xml:space="preserve">%lld days</source>
+    |        <target xml:space="preserve">%lld dnů</target>
+    |      </trans-unit>
+    |      <trans-unit id="/escaping_plural:dict/NSStringLocalizedFormatKey:dict/:string">
+    |        <source xml:space="preserve">%#@property@</source>
+    |        <target xml:space="preserve">%#@property@</target>
+    |      </trans-unit>
+    |      <trans-unit id="/escaping_plural:dict/property:dict/one:dict/:string">
+    |        <source xml:space="preserve">%lld day</source>
+    |        <target xml:space="preserve">%lld den \n \U0032</target>
+    |      </trans-unit>
+    |      <trans-unit id="/escaping_plural:dict/property:dict/few:dict/:string">
+    |        <source xml:space="preserve">%lld days</source>
+    |        <target xml:space="preserve">dny</target>
+    |      </trans-unit>
+    |      <trans-unit id="/escaping_plural:dict/property:dict/many:dict/:string">
+    |        <source xml:space="preserve">%lld days</source>
+    |        <target xml:space="preserve">%lld dnů</target>
+    |      </trans-unit>
+    |      <trans-unit id="/escaping_plural:dict/property:dict/other:dict/:string">
     |        <source xml:space="preserve">%lld days</source>
     |        <target xml:space="preserve">%lld dnů</target>
     |      </trans-unit>
@@ -356,6 +380,23 @@ class AppleXliffFileExporterTest {
         ) {
           key.isPlural = true
           key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.stringsdict")
+        }
+        add(
+          languageTag = "cs",
+          keyName = "escaping_plural",
+          text = "{count, plural, one {# den \\n \\u0032} few {dny} other {# dnů}}",
+          baseText = "{count, plural, one {# day} other {# days}}",
+        ) {
+          key.isPlural = true
+          key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.stringsdict")
+        }
+        add(
+          languageTag = "cs",
+          keyName = "escaping_singular",
+          text = "To je ale den \\n \\u0032",
+          baseText = "{count, plural, one {# day} other {# days}}",
+        ) {
+          key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.strings")
         }
       }
     return getExporter(built.translations, built.baseTranslations)

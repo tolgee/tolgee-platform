@@ -1,5 +1,6 @@
 package io.tolgee.formats.xliff.out
 
+import io.tolgee.formats.MobileStringEscaper
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -56,13 +57,13 @@ class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlC
 
       element("source") {
         attr("xml:space", "preserve")
-        appendXmlIfEnabledOrText(transUnit.source)
+        appendXmlIfEnabledOrText(transUnit.source?.escaped())
       }
 
       if (transUnit.target != null) {
         element("target") {
           attr("xml:space", "preserve")
-          appendXmlIfEnabledOrText(transUnit.target)
+          appendXmlIfEnabledOrText(transUnit.target?.escaped())
         }
       }
 
@@ -73,6 +74,18 @@ class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlC
         }
       }
     }
+  }
+
+  private fun String.escaped(): String {
+    return MobileStringEscaper(
+      string = this,
+      escapeApos = false,
+      keepPercentSignEscaped = true,
+      quoteMoreWhitespaces = false,
+      escapeNewLines = false,
+      escapeQuotes = false,
+      utfSymbolCharacter = 'U',
+    ).escape()
   }
 
   private fun Element.appendXmlIfEnabledOrText(content: String?) {

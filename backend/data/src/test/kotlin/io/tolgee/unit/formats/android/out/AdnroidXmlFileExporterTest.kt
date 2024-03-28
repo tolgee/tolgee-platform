@@ -21,7 +21,7 @@ class AdnroidXmlFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="key1">Ahoj! I%d, %s, %e, %f</string>
-    |  <string name="percent_no_placeholders">I am just a percent % sign!</string>
+    |  <string name="percent_no_placeholders">I am just a percent \% sign!</string>
     |  <string name="percent_and_paceholders">I am not just a percent %s %% sign!</string>
     |  <string name="percent_and_paceholders_and_tags"><![CDATA[I am not just a percent <b>%s</b> %% sign!]]></string>
     |  <string name="forced_CDATA"><![CDATA[Forced CDATA <b>Hey!</b> sign!]]></string>
