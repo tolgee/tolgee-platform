@@ -1,3 +1,10 @@
+## [3.54.6](https://github.com/tolgee/tolgee-platform/compare/v3.54.5...v3.54.6) (2024-03-28)
+
+
+### Bug Fixes
+
+* Android iOS escaping ([#2228](https://github.com/tolgee/tolgee-platform/issues/2228)) ([dea6a16](https://github.com/tolgee/tolgee-platform/commit/dea6a16d6715ada22078a5b937fb6aeb835dd0c7))
+
 ## [3.54.5](https://github.com/tolgee/tolgee-platform/compare/v3.54.4...v3.54.5) (2024-03-28)
 
 
