@@ -5,7 +5,7 @@ import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.ICU_DETE
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFromPossibleFormats
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
-import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class YamlImportFormatDetector {
@@ -25,12 +25,12 @@ class YamlImportFormatDetector {
       mapOf(
         ImportFormat.YAML_JAVA to
           arrayOf(
-            FormatDetectionUtil.regexFactor(JavaToIcuPlaceholderConvertor.JAVA_PLACEHOLDER_REGEX),
+            FormatDetectionUtil.regexFactor(JavaToIcuPlaceholderConvertor.JAVA_DETECTION_REGEX),
           ),
         ImportFormat.YAML_RUBY to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              RubyToIcuPlaceholderConvertor.RUBY_PLACEHOLDER_REGEX,
+              RubyToIcuPlaceholderConvertor.RUBY_DETECTION_REGEX,
               // Ruby is much more specific than java, so we can lower it's weights.
               // If the format is candidate for RUBY and JAVA at the same time, it will be detected as JAVA
               0.9,
@@ -44,7 +44,7 @@ class YamlImportFormatDetector {
         ImportFormat.YAML_PHP to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              PHP_PLACEHOLDER_REGEX,
+              PhpToIcuPlaceholderConvertor.PHP_DETECTION_REGEX,
               // java is less probable than php
               0.7,
             ),

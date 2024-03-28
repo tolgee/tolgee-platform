@@ -30,5 +30,18 @@ class CToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       (?<specifier>[diuoxXfFeEgGaAcspn%])
       )
       """.trimIndent().toRegex()
+
+    val C_DETECTION_REGEX =
+      """
+      (?x)(
+      %
+      (?:(?<argnum>\d+)${"\\$"})?
+      (?<flags>[-+0\#]+)?
+      (?<width>\d+)?
+      (?:\.(?<precision>\d+))?
+      (?<length>hh|h|l|ll|j|z|t|L)?
+      (?<specifier>[diuoxXfFeEgGaAcspn%])
+      )
+      """.trimIndent().toRegex()
   }
 }

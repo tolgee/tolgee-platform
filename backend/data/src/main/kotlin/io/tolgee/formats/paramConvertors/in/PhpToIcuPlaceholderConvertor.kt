@@ -29,5 +29,17 @@ class PhpToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       (?<specifier>[bcdeEfFgGhHosuxX%])
       )
       """.trimIndent().toRegex()
+
+    val PHP_DETECTION_REGEX =
+      """
+      (?x)(
+      %
+      (?:(?<argnum>\d+)${"\\$"})?
+      (?<flags>[\-+0']+)?
+      (?<width>\d+)?
+      (?:\.(?<precision>\d+))?
+      (?<specifier>[bcdeEfFgGhHosuxX%])
+      )
+      """.trimIndent().toRegex()
   }
 }

@@ -52,10 +52,13 @@ object FormatDetectionUtil {
     possibleFormats: Map<ImportFormat, Array<Factor>>,
     data: Any?,
   ): ImportFormat? {
-    return possibleFormats.asSequence().map { (format, factors) ->
-      val score = factors.sumOf { it.matcher(data) * it.weight }
-      format to score
-    }.filter { it.second != 0.0 }.maxByOrNull { it.second }?.first
+    val scores =
+      possibleFormats.map { (format, factors) ->
+        val score = factors.sumOf { it.matcher(data) * it.weight }
+        format to score
+      }
+
+    return scores.filter { it.second != 0.0 }.maxByOrNull { it.second }?.first
   }
 
   data class Factor(val weight: Double, val matcher: (Any?) -> Double)
