@@ -66,6 +66,11 @@ class TextToAndroidXmlConvertorTest {
   }
 
   @Test
+  fun `converts capital U to lower`() {
+    "\\U0020".assertSingleTextNode("\\u0020")
+  }
+
+  @Test
   fun `escapes in text nodes`() {
     val nodes = "'\"  <b></b>\n\n   \u0020\u2008\u2003".convertedNodes().toList()
     nodes[0].textContent.assert.isEqualTo("\\'\\\"\"  \"")

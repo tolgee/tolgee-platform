@@ -188,7 +188,7 @@ class TextToAndroidXmlConvertor(
       transformer
     }
 
-    val escapeCharRegexWithoutUtfEscapes = "\\\\(?!u[0-9a-fA-F]{4})".toRegex()
+    val escapeCharRegexWithoutUtfEscapes = """\\(?![uU]([0-9a-fA-F]{4}))""".toRegex()
   }
 
   private fun String.escape(
@@ -200,40 +200,13 @@ class TextToAndroidXmlConvertor(
     quoteMoreWhitespaces: Boolean,
     escapeNewLines: Boolean,
   ): String {
-    return this
-      .replace(escapeCharRegexWithoutUtfEscapes, """\\\\""")
-      .replace("\"", "\\\"")
-      .let {
-        if (quoteMoreWhitespaces) {
-          if (escapeNewLines) {
-            it.replace(spacesRegexWithoutNewlines, "\"$1\"")
-          } else {
-            it.replace(spacesRegex, "\"$1\"")
-          }
-        } else {
-          it
-        }
-      }.let {
-        if (escapeNewLines) {
-          it.replace("\n", "\\n")
-        } else {
-          it
-        }
-      }
-      .let {
-        if (!keepPercentSignEscaped) {
-          it.replace("%%", "%")
-        } else {
-          it
-        }
-      }
-      .let {
-        if (escapeApos) {
-          it.replace("'", "\\'")
-        } else {
-          it
-        }
-      }
+    return AndroidStringsEscaper(
+      string = this,
+      escapeApos = escapeApos,
+      keepPercentSignEscaped = keepPercentSignEscaped,
+      quoteMoreWhitespaces = quoteMoreWhitespaces,
+      escapeNewLines = escapeNewLines,
+    ).escape()
   }
 
   data class ContentToAppend(val text: String? = null, val children: Collection<Node>? = null)
