@@ -1,3 +1,10 @@
+## [3.54.5](https://github.com/tolgee/tolgee-platform/compare/v3.54.4...v3.54.5) (2024-03-28)
+
+
+### Bug Fixes
+
+* Sprintf format detection ([#2227](https://github.com/tolgee/tolgee-platform/issues/2227)) ([5e81397](https://github.com/tolgee/tolgee-platform/commit/5e81397973f9631fb405d1b09dc7ea957ae9c28c))
+
 ## [3.54.4](https://github.com/tolgee/tolgee-platform/compare/v3.54.3...v3.54.4) (2024-03-28)
 
 
