@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   useGlobalActions,
   useGlobalContext,
@@ -57,6 +57,11 @@ export function TopBanner() {
       setTopBannerHeight(height);
     },
   });
+
+  useEffect(() => {
+    const height = bannerRef.current?.offsetHeight;
+    setTopBannerHeight(height ?? 0);
+  }, [announcement]);
 
   if (!announcement) {
     return null;

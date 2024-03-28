@@ -41,6 +41,17 @@ describe('Error handling', () => {
   it('Handles 401 by logout', () => {
     simulateError({
       method: 'get',
+      endpoint: 'initial-data',
+      statusCode: 401,
+      times: 2,
+    });
+    cy.visit(`${HOST}`);
+    cy.url().should('include', '/login');
+  });
+
+  it('Handles 401 by logout on specific endpoint', () => {
+    simulateError({
+      method: 'get',
       endpoint: 'projects-with-stats',
       statusCode: 401,
     });

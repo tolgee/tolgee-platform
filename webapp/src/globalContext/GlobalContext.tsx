@@ -12,6 +12,7 @@ import type { GlobalError } from 'tg.error/GlobalError';
 import { useConfirmationDialogService } from './useConfirmationDialogService';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useMessageService } from './useMessageService';
+import { GlobalErrorView } from 'tg.component/common/GlobalErrorView';
 
 export const [GlobalContext, useGlobalActions, useGlobalContext] =
   createProvider(() => {
@@ -46,7 +47,11 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
     globalContext.actions = actions;
 
     if (!initialData.state) {
-      return <FullPageLoading />;
+      return globalError ? (
+        <GlobalErrorView error={globalError} />
+      ) : (
+        <FullPageLoading />
+      );
     }
 
     const contextData = {

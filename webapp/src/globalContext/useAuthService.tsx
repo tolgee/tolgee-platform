@@ -182,7 +182,7 @@ export const useAuthService = (
       await handleAfterLogin(response!);
     },
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
-      const response = await signupLoadable.mutateAsync(
+      signupLoadable.mutate(
         {
           content: { 'application/json': { ...data, invitationCode } },
         },
@@ -190,17 +190,17 @@ export const useAuthService = (
           onError: (error) => {
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
+            } else {
+              error.handleError?.();
             }
           },
           onSuccess(data) {
             setInvitationCode(undefined);
+            handleAfterLogin(data);
             messageService.success(<T keyName="sign_up_success_message" />);
           },
         }
       );
-      if (response) {
-        await handleAfterLogin(response);
-      }
     },
     handleAfterLogin,
     redirectAfterLogin() {

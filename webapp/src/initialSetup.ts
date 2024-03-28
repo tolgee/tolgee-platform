@@ -1,7 +1,10 @@
 import { LanguageStorageMiddleware, TolgeePlugin } from '@tolgee/react';
 import { QueryClient } from 'react-query';
+import { components } from 'tg.service/apiSchema.generated';
 import { apiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
 import { tokenService } from 'tg.service/TokenService';
+
+type InitialDataModel = components['schemas']['InitialDataModel'];
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,11 +22,25 @@ const LANGUAGE_KEY = '__tolgee_currentLanguage';
 // so user get consistent experience even when he's signed out
 const storageMiddleware: LanguageStorageMiddleware = {
   async getLanguage() {
-    const response = await queryClient.fetchQuery([], () =>
-      apiSchemaHttpService.schemaRequest('/v2/public/initial-data', 'get')({})
-    );
+    let initialData: InitialDataModel | undefined = undefined;
+    try {
+      initialData = await queryClient.fetchQuery(
+        ['/v2/public/initial-data', null, null],
+        () =>
+          apiSchemaHttpService.schemaRequest(
+            '/v2/public/initial-data',
+            'get'
+          )({})
+      );
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
+
     return (
-      response.languageTag || localStorage.getItem(LANGUAGE_KEY) || undefined
+      initialData?.languageTag ||
+      localStorage.getItem(LANGUAGE_KEY) ||
+      undefined
     );
   },
   async setLanguage(languageTag) {
