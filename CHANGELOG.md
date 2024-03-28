@@ -1,3 +1,10 @@
+## [3.54.3](https://github.com/tolgee/tolgee-platform/compare/v3.54.2...v3.54.3) (2024-03-28)
+
+
+### Bug Fixes
+
+* Redis Caches not evicted properly ([#2224](https://github.com/tolgee/tolgee-platform/issues/2224)) ([98003be](https://github.com/tolgee/tolgee-platform/commit/98003be00752ef6ca0cbbc583c4cf74c70512b63))
+
 ## [3.54.2](https://github.com/tolgee/tolgee-platform/compare/v3.54.1...v3.54.2) (2024-03-27)
 
 
