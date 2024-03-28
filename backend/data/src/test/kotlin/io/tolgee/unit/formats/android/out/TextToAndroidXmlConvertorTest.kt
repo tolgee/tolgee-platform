@@ -31,13 +31,33 @@ class TextToAndroidXmlConvertorTest {
   }
 
   @Test
+  fun `escaped newline is not double escaped text node`() {
+    "\\n \\n".assertSingleTextNode().isEqualTo("\\n \\n")
+  }
+
+  @Test
+  fun `it's possible to escape escape char before newline`() {
+    "\\\\n \\\\n".assertSingleTextNode().isEqualTo("\\\\n \\\\n")
+  }
+
+  @Test
+  fun `trailing spaces are handled`() {
+    "%s     ".assertSingleTextNode().isEqualTo("%s\"     \"")
+  }
+
+  @Test
+  fun `trailing percents are handled`() {
+    "%s %%".assertSingleTextNode().isEqualTo("%s %%")
+  }
+
+  @Test
   fun `unsupported tags are converted to CDATA nodes`() {
     var nodes =
       "What a <unsupported attr=\"https://example.com\">link ' %% \" </unsupported>."
         .convertedNodes().toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
-      "<unsupported attr=\\\"https://example.com\\\">link \\' % \\\" " +
+      "<unsupported attr=\\\"https://example.com\\\">link \\' \\% \\\" " +
         "</unsupported>",
     )
     nodes[2].assertTextContent(".")
@@ -68,6 +88,11 @@ class TextToAndroidXmlConvertorTest {
   @Test
   fun `converts capital U to lower`() {
     "\\U0020".assertSingleTextNode("\\u0020")
+  }
+
+  @Test
+  fun `percent signs are escaped`() {
+    "I am just a %% sign".assertSingleTextNode("I am just a \\% sign")
   }
 
   @Test

@@ -177,18 +177,11 @@ class TextToAndroidXmlConvertor(
   companion object {
     private val documentBuilder: DocumentBuilder by lazy { DocumentBuilderFactory.newInstance().newDocumentBuilder() }
 
-    fun getSpacesRegex(spaces: Iterable<Char>) = """([${spaces.joinToString("")}]{2,})""".toRegex()
-
-    val spacesRegex = getSpacesRegex(AndroidParsingConstants.spaces)
-    val spacesRegexWithoutNewlines = getSpacesRegex(AndroidParsingConstants.spacesWithoutNewLines)
-
     private val xmlTransformer by lazy {
       val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
       transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
       transformer
     }
-
-    val escapeCharRegexWithoutUtfEscapes = """\\(?![uU]([0-9a-fA-F]{4}))""".toRegex()
   }
 
   private fun String.escape(

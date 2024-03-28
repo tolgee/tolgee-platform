@@ -17,12 +17,14 @@ class AndroidStringsEscaper(
     SPACES,
     ESCAPE,
     PERCENT,
+    UTF_SYMBOL,
   }
 
   private val stringBuilder = StringBuilder()
   private var state = State.DEFAULT
   private val spaces = StringBuilder()
   private val percents = StringBuilder()
+  private val utfSymbol = StringBuilder()
 
   fun escape(): String {
     string.forEach { char ->
@@ -69,9 +71,28 @@ class AndroidStringsEscaper(
       }
 
       State.ESCAPE -> {
-        stringBuilder.append("\\\\")
-        if (char != '\\') stringBuilder.append(char)
-        state = State.DEFAULT
+        when (char) {
+          in arrayOf('U', 'u') -> {
+            state = State.UTF_SYMBOL
+            utfSymbol.append(char)
+          }
+
+          '\\' -> {
+            stringBuilder.append("\\\\")
+            state = State.DEFAULT
+          }
+
+          'n' -> {
+            stringBuilder.append("\\n")
+            state = State.DEFAULT
+          }
+
+          else -> {
+            stringBuilder.append("\\\\")
+            state = State.DEFAULT
+            handleChar(char)
+          }
+        }
       }
 
       State.SPACES -> {
@@ -79,6 +100,23 @@ class AndroidStringsEscaper(
           spaces.append(char)
         } else {
           handleSpacesEnd(char)
+        }
+      }
+
+      State.UTF_SYMBOL -> {
+        if (char in '0'..'9' || char in 'a'..'f' || char in 'A'..'F') {
+          utfSymbol.append(char)
+          if (utfSymbol.length == 5) {
+            val hex = utfSymbol.drop(1)
+            stringBuilder.append("\\u$hex")
+            utfSymbol.clear()
+            state = State.DEFAULT
+          }
+        } else {
+          stringBuilder.append("\\$utfSymbol")
+          utfSymbol.clear()
+          state = State.DEFAULT
+          handleChar(char)
         }
       }
 
@@ -94,12 +132,13 @@ class AndroidStringsEscaper(
 
   private fun handlePercentEnd(char: Char?) {
     if (!keepPercentSignEscaped) {
-      val unescaped = percents.toString().replace("%%", "%")
+      val unescaped = percents.toString().replace("%%", "\\%")
       stringBuilder.append(unescaped)
     } else {
       stringBuilder.append(percents)
     }
     state = State.DEFAULT
+    percents.clear()
     if (char != null) {
       handleChar(char)
     }
@@ -109,7 +148,7 @@ class AndroidStringsEscaper(
     if (quoteMoreWhitespaces && spaces.length > 1) {
       stringBuilder.append("\"$spaces\"")
     } else {
-      stringBuilder.append(spaces.first())
+      stringBuilder.append(spaces)
     }
     spaces.clear()
     state = State.DEFAULT
