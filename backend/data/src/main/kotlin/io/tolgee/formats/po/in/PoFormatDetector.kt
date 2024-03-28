@@ -3,8 +3,8 @@ package io.tolgee.formats.po.`in`
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
-import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor.Companion.JAVA_PLACEHOLDER_REGEX
-import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
+import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor.Companion.JAVA_DETECTION_REGEX
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class PoFormatDetector() {
@@ -13,12 +13,14 @@ class PoFormatDetector() {
       mapOf(
         ImportFormat.PO_C to
           arrayOf(
-            FormatDetectionUtil.regexFactor(CToIcuPlaceholderConvertor.C_PLACEHOLDER_REGEX),
+            FormatDetectionUtil.regexFactor(
+              CToIcuPlaceholderConvertor.C_DETECTION_REGEX,
+            ),
           ),
         ImportFormat.PO_JAVA to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              JAVA_PLACEHOLDER_REGEX,
+              JAVA_DETECTION_REGEX,
               // gettext is not very popular in java world
               0.95,
             ),
@@ -26,7 +28,7 @@ class PoFormatDetector() {
         ImportFormat.PO_ICU to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              PHP_PLACEHOLDER_REGEX,
+              FormatDetectionUtil.ICU_DETECTION_REGEX,
               // gettext is not very popular in java world
               0.95,
             ),
@@ -34,14 +36,14 @@ class PoFormatDetector() {
         ImportFormat.PO_PHP to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              PHP_PLACEHOLDER_REGEX,
+              PhpToIcuPlaceholderConvertor.PHP_DETECTION_REGEX,
               1.05,
             ),
           ),
         ImportFormat.PO_RUBY to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              RubyToIcuPlaceholderConvertor.RUBY_PLACEHOLDER_REGEX,
+              RubyToIcuPlaceholderConvertor.RUBY_DETECTION_REGEX,
               0.7,
             ),
           ),

@@ -11,7 +11,7 @@ class PropertiesImportFormatDetector {
       mapOf(
         ImportFormat.PROPERTIES_JAVA to
           arrayOf(
-            FormatDetectionUtil.regexFactor(JavaToIcuPlaceholderConvertor.JAVA_PLACEHOLDER_REGEX),
+            FormatDetectionUtil.regexFactor(JavaToIcuPlaceholderConvertor.JAVA_DETECTION_REGEX),
           ),
         ImportFormat.PROPERTIES_ICU to
           arrayOf(

@@ -35,5 +35,18 @@ class RubyToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       %\{(?<argname2>\w+)}
       )
       """.trimIndent().toRegex()
+
+    val RUBY_DETECTION_REGEX =
+      """
+      (?x)(
+      %
+      (?:(?<argnum>\d+)?${"\\$"}|<(?<argname>\w+)>)?
+      (?<flags>[+\-0\#*]+)?
+      (?<width>\d+)?
+      (?:\.(?<precision>\d+))?
+      (?<specifier>[bBdiouxXeEfgGaAcps%])|
+      %\{(?<argname2>\w+)}
+      )
+      """.trimIndent().toRegex()
   }
 }

@@ -6,7 +6,7 @@ import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFr
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
-import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor.Companion.PHP_PLACEHOLDER_REGEX
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class JsonImportFormatDetector {
@@ -16,7 +16,7 @@ class JsonImportFormatDetector {
         ImportFormat.JSON_JAVA to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              JavaToIcuPlaceholderConvertor.JAVA_PLACEHOLDER_REGEX,
+              JavaToIcuPlaceholderConvertor.JAVA_DETECTION_REGEX,
               // java is less probable than php
               0.9,
             ),
@@ -24,7 +24,7 @@ class JsonImportFormatDetector {
         ImportFormat.JSON_PHP to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              PHP_PLACEHOLDER_REGEX,
+              PhpToIcuPlaceholderConvertor.PHP_DETECTION_REGEX,
             ),
           ),
         ImportFormat.JSON_ICU to
@@ -34,14 +34,14 @@ class JsonImportFormatDetector {
         ImportFormat.JSON_RUBY to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              RubyToIcuPlaceholderConvertor.RUBY_PLACEHOLDER_REGEX,
+              RubyToIcuPlaceholderConvertor.RUBY_DETECTION_REGEX,
               0.7,
             ),
           ),
         ImportFormat.JSON_C to
           arrayOf(
             FormatDetectionUtil.regexFactor(
-              CToIcuPlaceholderConvertor.C_PLACEHOLDER_REGEX,
+              CToIcuPlaceholderConvertor.C_DETECTION_REGEX,
               0.6,
             ),
           ),
