@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress';
-import { GLOBAL_RETRIES } from './cypress/common/constants';
+import { GLOBAL_RETRIES } from './cypress/common/globalRetries';
 
 export default defineConfig({
   scrollBehavior: 'center',
