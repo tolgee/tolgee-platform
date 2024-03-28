@@ -36,10 +36,15 @@ class SlackConfigService(
   fun delete(
     projectId: Long,
     channelId: String,
-  ) {
-    val config = get(projectId, channelId) ?: return
-    automationService.deleteForSlackIntegration(config)
-    slackConfigRepository.delete(config)
+  ): Boolean {
+    try {
+      val config = get(projectId, channelId) ?: return false
+      automationService.deleteForSlackIntegration(config)
+      slackConfigRepository.delete(config)
+    } catch (e: NotFoundException) {
+      return false
+    }
+    return true
   }
 
   fun create(slackConfigDto: SlackConfigDto): SlackConfig {

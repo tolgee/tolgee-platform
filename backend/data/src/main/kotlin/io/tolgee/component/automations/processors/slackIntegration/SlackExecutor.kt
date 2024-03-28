@@ -243,6 +243,9 @@ class SlackExecutor(
           Message.SLACK_INVALID_COMMAND ->
             i18n.translate("command-not-recognized")
 
+          Message.SLACK_NOT_SUBSCRIBED_YET ->
+            i18n.translate("not-subscribed-yet-message")
+
           else ->
             i18n.translate("unknown-error-occurred")
         },
@@ -266,6 +269,17 @@ class SlackExecutor(
       Message.SLACK_INVALID_COMMAND -> {
         section {
           markdownText(i18n.translate("check-command-solutions"))
+        }
+        actions {
+          button {
+            text(i18n.translate("view-help-button-text"), emoji = true)
+          }
+        }
+      }
+
+      Message.SLACK_NOT_SUBSCRIBED_YET -> {
+        section {
+          markdownText(i18n.translate("not-subscribed-solution"))
         }
         actions {
           button {

@@ -88,7 +88,8 @@ class SlackIntegrationController(
     }
 
     if (slackConfigService.get(payload.user_id, payload.channel_id).isEmpty()) {
-      return SlackMessageDto(i18n.translate("not_subscribed_yet"))
+      sendError(payload, Message.SLACK_NOT_SUBSCRIBED_YET)
+      return null
     }
 
     slackExecutor.sendListOfSubscriptions(payload.user_id, payload.channel_id)
@@ -190,10 +191,13 @@ class SlackIntegrationController(
       return null
     }
 
-    slackConfigService.delete(validationResult.project.id, payload.channel_id)
+    if (!slackConfigService.delete(validationResult.project.id, payload.channel_id)) {
+      sendError(payload, Message.SLACK_NOT_SUBSCRIBED_YET)
+      return null
+    }
 
     return SlackMessageDto(
-      text = "unsubscribed",
+      i18n.translate("unsubscribed-successfully"),
     )
   }
 
