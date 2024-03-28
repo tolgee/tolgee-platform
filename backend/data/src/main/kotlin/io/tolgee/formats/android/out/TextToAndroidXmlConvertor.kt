@@ -1,5 +1,6 @@
 package io.tolgee.formats.android.out
 
+import io.tolgee.formats.MobileStringEscaper
 import io.tolgee.formats.android.AndroidParsingConstants
 import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
@@ -193,12 +194,14 @@ class TextToAndroidXmlConvertor(
     quoteMoreWhitespaces: Boolean,
     escapeNewLines: Boolean,
   ): String {
-    return AndroidStringsEscaper(
+    return MobileStringEscaper(
       string = this,
       escapeApos = escapeApos,
       keepPercentSignEscaped = keepPercentSignEscaped,
       quoteMoreWhitespaces = quoteMoreWhitespaces,
       escapeNewLines = escapeNewLines,
+      utfSymbolCharacter = 'u',
+      escapeQuotes = true,
     ).escape()
   }
 

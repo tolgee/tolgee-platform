@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 class StringsStringsdictFileExporterTest {
   @Test
-  fun `exports`() {
+  fun exports() {
     val exporter = getExporter()
 
     val data = getExported(exporter)
@@ -102,6 +102,14 @@ class StringsStringsdictFileExporterTest {
       """.trimMargin(),
     )
     data.assertFile(
+      "cs.lproj/Localizable.strings",
+      """
+    |"escaping_singular" = "To je ale den \n \U0032";
+    |
+    |
+      """.trimMargin(),
+    )
+    data.assertFile(
       "cs.lproj/Localizable.stringsdict",
       """
     |<?xml version="1.0" encoding="UTF-8"?>
@@ -121,6 +129,24 @@ class StringsStringsdictFileExporterTest {
     |        <string>lld</string>
     |        <key>one</key>
     |        <string>%lld den</string>
+    |        <key>few</key>
+    |        <string>dny</string>
+    |        <key>other</key>
+    |        <string>%lld dnů</string>
+    |      </dict>
+    |    </dict>
+    |    <key>escaping_plural</key>
+    |    <dict>
+    |      <key>NSStringLocalizedFormatKey</key>
+    |      <string>%#@format@</string>
+    |      <key>format</key>
+    |      <dict>
+    |        <key>NSStringFormatSpecTypeKey</key>
+    |        <string>NSStringPluralRuleType</string>
+    |        <key>NSStringFormatValueTypeKey</key>
+    |        <string>lld</string>
+    |        <key>one</key>
+    |        <string>%lld den \n \U0032</string>
     |        <key>few</key>
     |        <string>dny</string>
     |        <key>other</key>
@@ -307,6 +333,20 @@ class StringsStringsdictFileExporterTest {
           "{count, plural, one {# den} few {dny} other {# dnů}}",
           TranslationState.TRANSLATED,
           ExportKeyView(1, "key", isPlural = true),
+          "cs",
+        ),
+        ExportTranslationView(
+          1,
+          "{count, plural, one {# den \\n \\u0032} few {dny} other {# dnů}}",
+          TranslationState.TRANSLATED,
+          ExportKeyView(1, "escaping_plural", isPlural = true),
+          "cs",
+        ),
+        ExportTranslationView(
+          1,
+          "To je ale den \\n \\u0032",
+          TranslationState.TRANSLATED,
+          ExportKeyView(1, "escaping_singular"),
           "cs",
         ),
       ),

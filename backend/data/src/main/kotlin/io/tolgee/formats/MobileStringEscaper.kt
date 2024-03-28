@@ -1,8 +1,8 @@
-package io.tolgee.formats.android.out
+package io.tolgee.formats
 
 import io.tolgee.formats.android.AndroidParsingConstants
 
-class AndroidStringsEscaper(
+class MobileStringEscaper(
   private val string: String,
   private val escapeApos: Boolean,
   private val keepPercentSignEscaped: Boolean,
@@ -11,6 +11,9 @@ class AndroidStringsEscaper(
    */
   private val quoteMoreWhitespaces: Boolean,
   private val escapeNewLines: Boolean,
+  private val escapeQuotes: Boolean,
+  // Android need 'u' and iOS 'U'
+  private val utfSymbolCharacter: Char,
 ) {
   private enum class State {
     DEFAULT,
@@ -55,7 +58,7 @@ class AndroidStringsEscaper(
             percents.append(char)
           }
 
-          '"' -> stringBuilder.append("\\\"")
+          '"' -> if (escapeQuotes) stringBuilder.append("\\\"") else stringBuilder.append(char)
 
           '\'' -> if (escapeApos) stringBuilder.append("\\'") else stringBuilder.append(char)
           in relevantSpaces -> {
@@ -108,7 +111,7 @@ class AndroidStringsEscaper(
           utfSymbol.append(char)
           if (utfSymbol.length == 5) {
             val hex = utfSymbol.drop(1)
-            stringBuilder.append("\\u$hex")
+            stringBuilder.append("\\$utfSymbolCharacter$hex")
             utfSymbol.clear()
             state = State.DEFAULT
           }

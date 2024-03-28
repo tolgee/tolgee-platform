@@ -1,5 +1,6 @@
 package io.tolgee.formats.apple.out
 
+import io.tolgee.formats.MobileStringEscaper
 import io.tolgee.formats.paramConvertors.`in`.AppleToIcuPlaceholderConvertor.Companion.APPLE_PLACEHOLDER_REGEX
 import org.dom4j.Document
 import org.dom4j.DocumentHelper
@@ -65,7 +66,7 @@ class StringsdictWriter {
       dictFormatElement.add(keyQuantityElement)
 
       val stringQuantityElement = DocumentHelper.createElement("string")
-      stringQuantityElement.text = translation
+      stringQuantityElement.text = translation.escaped()
       dictFormatElement.add(stringQuantityElement)
     }
   }
@@ -117,6 +118,18 @@ class StringsdictWriter {
       }
     }
     return matches.asSequence().sortedByDescending { it.value }.map { it.key }.toList()
+  }
+
+  private fun String.escaped(): String {
+    return MobileStringEscaper(
+      string = this,
+      escapeApos = false,
+      keepPercentSignEscaped = true,
+      quoteMoreWhitespaces = false,
+      escapeNewLines = false,
+      escapeQuotes = false,
+      utfSymbolCharacter = 'U',
+    ).escape()
   }
 
   val result: InputStream
