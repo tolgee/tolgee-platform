@@ -1,3 +1,10 @@
+## [3.54.4](https://github.com/tolgee/tolgee-platform/compare/v3.54.3...v3.54.4) (2024-03-28)
+
+
+### Bug Fixes
+
+* autoredirect when token expired + signup error ([#2223](https://github.com/tolgee/tolgee-platform/issues/2223)) ([b18956e](https://github.com/tolgee/tolgee-platform/commit/b18956eb03cdabfa41d64bb0ccb6ce9ee3e9ca9b))
+
 ## [3.54.3](https://github.com/tolgee/tolgee-platform/compare/v3.54.2...v3.54.3) (2024-03-28)
 
 
