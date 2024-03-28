@@ -310,9 +310,8 @@ When null, resulting file will be a flat key-value object.
 
   @GetMapping(value = ["/{translationId:[0-9]+}/history"])
   @Operation(
-    summary = """Returns history of specific translation. 
-
-Sorting is not supported for supported. It is automatically sorted from newest to oldest.""",
+    summary = """Returns history of specific translation.""",
+    description = """Sorting is not supported for supported. It is automatically sorted from newest to oldest.""",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
