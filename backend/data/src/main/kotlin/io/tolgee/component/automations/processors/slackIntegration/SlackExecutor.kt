@@ -188,6 +188,7 @@ class SlackExecutor(
         permissionService,
         slackSubscriptionService,
         i18n,
+        tolgeeProperties,
       )
   }
 

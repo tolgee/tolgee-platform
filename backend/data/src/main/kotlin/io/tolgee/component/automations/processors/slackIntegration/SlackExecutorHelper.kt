@@ -2,15 +2,15 @@ package io.tolgee.component.automations.processors.slackIntegration
 
 import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
+import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.SectionBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import com.slack.api.model.kotlin_extension.view.blocks
 import com.slack.api.model.view.View
 import com.slack.api.model.view.Views.view
 import com.slack.api.model.view.Views.viewTitle
-import io.tolgee.activity.data.PropertyModification
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.Language
-import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.EventName
@@ -29,6 +29,7 @@ class SlackExecutorHelper(
   val permissionService: PermissionService,
   private val slackSubscriptionService: SlackSubscriptionService,
   private val i18n: I18n,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   fun buildSuccessView(): View {
     return view { thisView ->
@@ -85,6 +86,8 @@ class SlackExecutorHelper(
         langTags.add(language.tag)
       }
     }
+
+    attachments.add(createRedirectButton())
 
     if (attachments.isEmpty() || blocksHeader.isEmpty()) {
       return null
@@ -210,6 +213,7 @@ class SlackExecutorHelper(
     val langTags = mutableSetOf(modifiedLangTag)
 
     addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
+    attachments.add(createRedirectButton())
 
     return if (headerBlock.isEmpty()) {
       null
@@ -263,18 +267,6 @@ class SlackExecutorHelper(
     }
   }
 
-  private fun SectionBlockBuilder.modificationSection(
-    entityType: String,
-    property: String,
-    modification: PropertyModification,
-    translation: Translation?,
-  ) {
-    val oldValue = modification.old?.toString() ?: "None"
-    val newValue = modification.new?.toString() ?: "None"
-    val langInfo = translation?.language?.let { "*Language:* ${it.name} ${it.flagEmoji}" } ?: ""
-    markdownText("*$entityType $property* $langInfo \n  ~$oldValue~ -> $newValue")
-  }
-
   private fun SectionBlockBuilder.languageInfoSection(
     baseLanguage: Language,
     language: Language,
@@ -302,13 +294,6 @@ class SlackExecutorHelper(
         langTag,
       ) && baseLanguage.tag != langTag
 
-  private fun shouldSkipEvent(
-    isBaseLanguageChangedEvent: Boolean,
-    isBaseLanguage: Boolean,
-  ): Boolean {
-    return (isBaseLanguageChangedEvent && !isBaseLanguage) || (!isBaseLanguageChangedEvent && isBaseLanguage)
-  }
-
   private fun shouldProcessEvent(
     modifiedLangTag: String,
     baseLanguageTag: String,
@@ -318,18 +303,6 @@ class SlackExecutorHelper(
 
     return isAllEvent || (isBaseLanguageChangedEvent && modifiedLangTag == baseLanguageTag)
   }
-
-  private fun shouldSkipInput(
-    translation: Translation?,
-    langTags: Set<String>,
-  ) = translation?.language == null ||
-    (slackConfig.isGlobalSubscription && (langTags.isEmpty() || !langTags.contains(translation.language.tag)))
-
-  private fun hasPermissions(
-    projectId: Long,
-    userAccountId: Long,
-  ): Boolean =
-    permissionService.getProjectPermissionScopes(projectId, userAccountId)?.contains(Scope.TRANSLATIONS_EDIT) == true
 
   fun createAttachmentForLanguage(
     langTag: String,
@@ -390,5 +363,28 @@ class SlackExecutorHelper(
       .blocks(blocksBody)
       .fallback("New key added to Tolgee project")
       .build()
+  }
+
+  private fun createRedirectButton() =
+    Attachment.builder()
+      .blocks(
+        withBlocks {
+          actions {
+            redirectOnPlatformButton()
+          }
+        },
+      )
+      .color("#EC407A")
+      .build()
+
+  private fun ActionsBlockBuilder.redirectOnPlatformButton() {
+    val tolgeeUrl = "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/translations"
+
+    button {
+      text(i18n.translate("tolgee_redirect_button_text"), emoji = true)
+      value("redirect")
+      url(tolgeeUrl)
+      actionId("button_redirect_to_tolgee")
+    }
   }
 }
