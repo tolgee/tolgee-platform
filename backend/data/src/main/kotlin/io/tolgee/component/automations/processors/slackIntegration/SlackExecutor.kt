@@ -62,8 +62,9 @@ class SlackExecutor(
         }
       }
 
-      val updatedAttachments = messageDto.attachments + additionalAttachments
-      val updatedMessageDto = messageDto.copy(attachments = updatedAttachments)
+      val updatedAttachments = additionalAttachments + messageDto.attachments
+      val updatedLanguages = messageDto.langTag + languagesToAdd
+      val updatedMessageDto = messageDto.copy(attachments = updatedAttachments, langTag = updatedLanguages)
 
       updateMessage(savedMsg, config, updatedMessageDto)
     }
@@ -154,7 +155,9 @@ class SlackExecutor(
           .attachments(messageDto.attachments)
       }
 
-    if (!response.isOk) {
+    if (response.isOk) {
+      updateLangTagsMessage(savedMessage.id, messageDto.langTag)
+    } else {
       logger.info(response.error)
     }
   }
@@ -212,6 +215,13 @@ class SlackExecutor(
           langTags = messageDto.langTag,
         ),
     )
+  }
+
+  private fun updateLangTagsMessage(
+    id: Long,
+    langTags: Set<String>,
+  ) {
+    savedSlackMessageService.update(id, langTags)
   }
 
   private fun getRedirectUrl(

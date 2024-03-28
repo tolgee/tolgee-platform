@@ -16,5 +16,5 @@ class SavedSlackMessage(
   val keyId: Long,
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  val langTags: Set<String>,
+  var langTags: Set<String>,
 ) : StandardAuditModel()

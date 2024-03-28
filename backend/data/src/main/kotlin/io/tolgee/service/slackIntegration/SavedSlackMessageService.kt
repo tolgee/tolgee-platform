@@ -23,6 +23,17 @@ class SavedSlackMessageService(
     return savedSlackMessageRepository.save(savedSlackMessage)
   }
 
+  fun update(
+    id: Long,
+    langTags: Set<String>,
+  ): SavedSlackMessage? {
+    val savedMessage = savedSlackMessageRepository.findById(id).orElse(null) ?: return null
+    savedMessage.langTags = langTags
+
+    // Сохраняем изменения
+    return savedSlackMessageRepository.save(savedMessage)
+  }
+
   fun find(id: Long): SavedSlackMessage? {
     return savedSlackMessageRepository.findById(id).orElse(null)
   }
