@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.constants.Message
-import io.tolgee.constants.SlackEventActions
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackConnectionDto
 import io.tolgee.dtos.request.slack.SlackEventDto
@@ -72,11 +71,18 @@ class SlackIntegrationController(
 
       "subscriptions" -> listOfSubscriptions(payload)
 
+      "help" -> help(payload.channel_id)
+
       else -> {
         sendError(payload, Message.SLACK_INVALID_COMMAND)
         null
       }
     }
+  }
+
+  private fun help(channelId: String): SlackMessageDto? {
+    slackExecutor.sendHelpMessage(channelId)
+    return null
   }
 
   private fun listOfSubscriptions(payload: SlackCommandDto): SlackMessageDto? {
@@ -210,24 +216,11 @@ class SlackIntegrationController(
     val event: SlackEventDto = objectMapper.readValue(decodedPayload)
 
     event.actions.forEach { action ->
-      val parameters = action.actionId.substringAfter(SlackEventActions.TRANSLATE_VALUE.name + "/")
-      if (parameters == action.actionId) {
+      if (action.value != "help_btn") {
         return@forEach
+      } else {
+        slackExecutor.sendHelpMessage(event.channel.id)
       }
-
-      val regex = "(\\d+)/([a-zA-Z-]+)".toRegex()
-      val matchResult = regex.find(parameters) ?: return@forEach
-
-      val (keyId, langName) = matchResult.destructured
-      val key = keyService.get(keyId.toLong())
-      val translation =
-        mapOf(
-          langName to action.value,
-        )
-
-      activityHolder.activityRevision.projectId = key.project.id
-      translationService.setForKey(key, translation)
-      slackExecutor.sendSuccessModal(event.triggerId)
     }
 
     return null
@@ -241,11 +234,17 @@ class SlackIntegrationController(
 
     if (slackSubscription == null) {
       sendError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
-
       return ValidationResult(false)
     }
 
-    val project = projectService.find(projectId.toLong()) ?: return ValidationResult(false)
+    val id = projectId.toLongOrNull()
+
+    if (id == null) {
+      sendError(payload, Message.SLACK_INVALID_COMMAND)
+      return ValidationResult(false)
+    }
+
+    val project = projectService.find(id) ?: return ValidationResult(false)
     val userAccount = slackSubscription.userAccount ?: return ValidationResult(false)
 
     return if (permissionService.getProjectPermissionScopes(project.id, userAccount.id)

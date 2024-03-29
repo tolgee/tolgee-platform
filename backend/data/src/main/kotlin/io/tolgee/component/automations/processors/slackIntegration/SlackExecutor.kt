@@ -3,6 +3,7 @@ package io.tolgee.component.automations.processors.slackIntegration
 import com.slack.api.Slack
 import com.slack.api.methods.kotlin_extension.request.chat.blocks
 import com.slack.api.model.Attachment
+import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -271,9 +272,7 @@ class SlackExecutor(
           markdownText(i18n.translate("check-command-solutions"))
         }
         actions {
-          button {
-            text(i18n.translate("view-help-button-text"), emoji = true)
-          }
+          helpButton()
         }
       }
 
@@ -282,13 +281,18 @@ class SlackExecutor(
           markdownText(i18n.translate("not-subscribed-solution"))
         }
         actions {
-          button {
-            text(i18n.translate("view-help-button-text"), emoji = true)
-          }
+          helpButton()
         }
       }
 
       else -> {}
+    }
+  }
+
+  private fun ActionsBlockBuilder.helpButton() {
+    button {
+      value("help_btn")
+      text(i18n.translate("view-help-button-text"), emoji = true)
     }
   }
 
@@ -333,4 +337,84 @@ class SlackExecutor(
       logger.info(response.error)
     }
   }
+
+  fun sendHelpMessage(channelId: String) {
+    val response =
+      slackClient.methods(slackToken).chatPostMessage { request ->
+        request.channel(channelId)
+          .blocks(helpBlocks())
+      }
+
+    if (!response.isOk) {
+      logger.info(response.error)
+    }
+  }
+
+  private fun helpBlocks() =
+    withBlocks {
+      section {
+        markdownText(i18n.translate("help-intro"))
+      }
+      divider()
+      section {
+        markdownText(i18n.translate("help-subscribe"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-subscribe-command"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-subscribe-events"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-subscribe-all-event"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-subscribe-new-key-event"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-subscribe-base-changed-event"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-subscribe-translation-change-event"))
+      }
+
+      divider()
+      section {
+        markdownText(i18n.translate("help-unsubscribe"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-unsubscribe-command"))
+      }
+
+      divider()
+      section {
+        markdownText(i18n.translate("help-show-subscriptions"))
+      }
+      section {
+        markdownText(i18n.translate("help-show-subscriptions-command"))
+      }
+
+      divider()
+      section {
+        markdownText(i18n.translate("help-connect-tolgee"))
+      }
+      section {
+        markdownText(i18n.translate("help-connect-tolgee-command"))
+      }
+
+      divider()
+      section {
+        markdownText(i18n.translate("help-disconnect-tolgee"))
+      }
+      section {
+        markdownText(i18n.translate("help-disconnect-tolgee-command"))
+      }
+    }
 }
