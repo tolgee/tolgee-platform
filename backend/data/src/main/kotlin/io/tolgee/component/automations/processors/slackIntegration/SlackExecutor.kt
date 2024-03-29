@@ -78,13 +78,6 @@ class SlackExecutor(
     sendRegularMessageWithSaving(messageDto, config)
   }
 
-  fun sendSuccessModal(triggerId: String) {
-    slackClient.methods(slackToken).viewsOpen {
-      it.triggerId(triggerId)
-        .view(slackExecutorHelper.buildSuccessView())
-    }
-  }
-
   fun sendErrorMessage(
     errorMessage: Message,
     slackChannelId: String,

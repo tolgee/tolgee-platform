@@ -2,7 +2,6 @@ package io.tolgee.api.v2.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackCommandDto
@@ -16,13 +15,11 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
-import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.I18n
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -38,9 +35,6 @@ class SlackIntegrationController(
   private val slackExecutor: SlackExecutor,
   private val permissionService: PermissionService,
   private val userAccountService: UserAccountService,
-  private val translationService: TranslationService,
-  private val keyService: KeyService,
-  private val activityHolder: ActivityHolder,
   private val objectMapper: ObjectMapper,
   private val i18n: I18n,
 ) {
