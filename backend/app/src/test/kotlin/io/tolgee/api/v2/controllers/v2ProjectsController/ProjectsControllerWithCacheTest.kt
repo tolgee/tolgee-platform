@@ -11,4 +11,4 @@ import org.springframework.boot.test.context.SpringBootTest
   ],
 )
 @AutoConfigureMockMvc
-class V2ProjectsControllerWithCacheTest : V2ProjectsControllerTest()
+class ProjectsControllerWithCacheTest : ProjectsControllerTest()

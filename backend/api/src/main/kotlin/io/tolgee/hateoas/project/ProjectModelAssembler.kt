@@ -1,6 +1,6 @@
 package io.tolgee.hateoas.project
 
-import io.tolgee.api.v2.controllers.V2ProjectsController
+import io.tolgee.api.v2.controllers.ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -29,11 +29,11 @@ class ProjectModelAssembler(
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
 ) : RepresentationModelAssemblerSupport<ProjectWithLanguagesView, ProjectModel>(
-    V2ProjectsController::class.java,
+    ProjectsController::class.java,
     ProjectModel::class.java,
   ) {
   override fun toModel(view: ProjectWithLanguagesView): ProjectModel {
-    val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
+    val link = linkTo<ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage =
       view.baseLanguage ?: let {
         projectService.getOrAssignBaseLanguage(view.id)

@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/projects/") {
+class ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesn't transfer to organization when not permitted`() {

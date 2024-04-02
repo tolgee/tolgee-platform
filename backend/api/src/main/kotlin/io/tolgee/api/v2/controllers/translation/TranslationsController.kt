@@ -102,7 +102,8 @@ class TranslationsController(
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
-    summary = "Returns all translations for specified languages",
+    summary = "Get all translations",
+    description = "Returns all translations for specified languages",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -171,7 +172,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("")
-  @Operation(summary = "Sets translations for existing key")
+  @Operation(summary = "Get for key", description = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
@@ -183,7 +184,10 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PostMapping("")
-  @Operation(summary = "Sets translations for existing or not existing key.")
+  @Operation(
+    summary = "Create key or update translations",
+    description = "Sets translations for existing key or creates new key and sets the translations to it.",
+  )
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
@@ -196,7 +200,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
-  @Operation(summary = "Sets translation state")
+  @Operation(summary = "Set translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
@@ -220,7 +224,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = [""])
-  @Operation(summary = "Returns translations in project")
+  @Operation(summary = "Get translations in project")
   @UseDefaultPermissions // Security: check done internally
   @AllowApiAccess
   @Transactional
@@ -254,7 +258,10 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["select-all"])
-  @Operation(summary = "Get select all keys")
+  @Operation(
+    summary = "Get select all keys",
+    description = "Returns all keys for current filter values. Useful for select all functionality.",
+  )
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
   fun getSelectAllKeyIds(
@@ -279,7 +286,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
-  @Operation(summary = """Removes "auto translated" indication""")
+  @Operation(summary = "Dismiss auto-translated", description = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
@@ -294,7 +301,12 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
-  @Operation(summary = """Set's "outdated" indication""")
+  @Operation(
+    summary = "Set outdated value",
+    description =
+      """Set's "outdated" flag indicating the base translation """ +
+        """was changed without updating current translation.""",
+  )
   @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
@@ -310,7 +322,7 @@ When null, resulting file will be a flat key-value object.
 
   @GetMapping(value = ["/{translationId:[0-9]+}/history"])
   @Operation(
-    summary = """Returns history of specific translation.""",
+    summary = """Get translation history""",
     description = """Sorting is not supported for supported. It is automatically sorted from newest to oldest.""",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])

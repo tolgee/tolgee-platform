@@ -8,6 +8,8 @@ import io.swagger.v3.oas.models.Paths
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
+import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.security.authentication.AllowApiAccess
 import org.springdoc.core.models.GroupedOpenApi
@@ -21,10 +23,6 @@ private const val BILLING_EXCLUSION = "/v2/**/billing/**"
 
 @Configuration
 class OpenApiConfiguration {
-  companion object {
-    private const val PROJECT_ID_PARAMETER = "projectId"
-  }
-
   @Bean
   fun openAPI(): OpenAPI? {
     return OpenAPI()
@@ -141,9 +139,7 @@ class OpenApiConfiguration {
           val oldPathItem = pathEntry.value
           oldPathItem.readOperations().forEach { operation ->
             val isParameterConsumed =
-              operation?.parameters?.any {
-                it.name == PROJECT_ID_PARAMETER
-              } == true
+              isProjectIdConsumed(operation)
             val pathContainsProjectId = pathEntry.key.contains("{$PROJECT_ID_PARAMETER}")
             val parameterIsMissingAtAll = !pathContainsProjectId && !isParameterConsumed
             val otherMethodPathContainsProjectId =
@@ -162,19 +158,7 @@ class OpenApiConfiguration {
             }
 
             if (!isParameterConsumed && pathContainsProjectId) {
-              val param =
-                Parameter().apply {
-                  name(PROJECT_ID_PARAMETER)
-                  `in` = "path"
-                  required = true
-                  allowEmptyValue = false
-                  schema = IntegerSchema().apply { format = "int64" }
-                }
-              operation.parameters?.apply {
-                add(param)
-              } ?: let {
-                operation.parameters = mutableListOf(param)
-              }
+              addProjectIdPathParam(operation)
             }
 
             operation.parameters?.removeIf {
@@ -195,6 +179,27 @@ class OpenApiConfiguration {
         openApi.paths = newPaths
       }.handleLinks()
       .build()
+  }
+
+  private fun isProjectIdConsumed(operation: Operation) =
+    operation?.parameters?.any {
+      it.name == PROJECT_ID_PARAMETER
+    } == true
+
+  private fun addProjectIdPathParam(operation: Operation) {
+    val param =
+      Parameter().apply {
+        name(PROJECT_ID_PARAMETER)
+        `in` = "path"
+        required = true
+        allowEmptyValue = false
+        schema = IntegerSchema().apply { format = "int64" }
+      }
+    operation.parameters?.apply {
+      add(param)
+    } ?: let {
+      operation.parameters = mutableListOf(param)
+    }
   }
 
   fun apiKeyGroupForPaths(
@@ -222,11 +227,19 @@ class OpenApiConfiguration {
               val containsProjectIdParam =
                 pathEntry.key
                   .contains("{$PROJECT_ID_PARAMETER}")
-              if (!pathEntry.key.matches("^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex())) {
-                if (!containsProjectIdParam) {
-                  operation.parameters.removeIf { it.name == PROJECT_ID_PARAMETER && it.`in` != "query" }
+              val isProjectPath = pathEntry.key.matches(PROJECTS_PATH_REGEX)
+              if (isProjectPath && containsProjectIdParam) {
+                if (!isProjectIdConsumed(operation)) {
+                  addProjectIdPathParam(operation)
                 }
                 operations.add(operation)
+                val successResponse = operation.responses?.get("200")
+                val content = successResponse?.content
+                val anyContent = content?.get("*/*")
+                if (anyContent != null) {
+                  content["application/json"] = anyContent
+                  content.remove("*/*")
+                }
               }
             }
           }
@@ -247,7 +260,33 @@ class OpenApiConfiguration {
       .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
         operationHandlers[operation.operationId] = handlerMethod
         operation
-      }.handleLinks().build()
+      }.addOpenApiCustomizer {
+        it.components.securitySchemes = it.components.securitySchemes ?: mutableMapOf()
+
+        it.components.securitySchemes[API_KEY_IN_HEADER] =
+          SecurityScheme()
+            .type(SecurityScheme.Type.APIKEY)
+            .`in`(SecurityScheme.In.HEADER)
+            .name(API_KEY_HEADER_NAME)
+
+        it.components.securitySchemes[API_KEY_IN_QUERY_PARAM] =
+          SecurityScheme()
+            .type(SecurityScheme.Type.APIKEY)
+            .`in`(SecurityScheme.In.QUERY)
+            .name("ak")
+
+        it.components.securitySchemes[JWT_TOKEN] =
+          SecurityScheme()
+            .type(SecurityScheme.Type.HTTP)
+            .scheme("bearer")
+            .bearerFormat("JWT")
+
+        it.security = it.security ?: mutableListOf()
+        it.security.add(
+          SecurityRequirement().addList(API_KEY_IN_HEADER).addList(API_KEY_IN_QUERY_PARAM).addList(JWT_TOKEN),
+        )
+      }
+      .handleLinks().build()
   }
 
   private fun GroupedOpenApi.Builder.handleLinks(): GroupedOpenApi.Builder {
@@ -271,5 +310,13 @@ class OpenApiConfiguration {
       this.trace -> PathItem.HttpMethod.TRACE
       else -> null
     }
+  }
+
+  companion object {
+    private const val PROJECT_ID_PARAMETER = "projectId"
+    private val PROJECTS_PATH_REGEX = "^/(?:api|v2)/projects?/.*".toRegex()
+    val API_KEY_IN_HEADER = "API Key in header"
+    val JWT_TOKEN = "JWT Token"
+    val API_KEY_IN_QUERY_PARAM = "API Key in query param"
   }
 }

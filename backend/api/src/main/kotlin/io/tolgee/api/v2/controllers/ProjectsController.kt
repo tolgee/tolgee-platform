@@ -74,7 +74,7 @@ import org.springframework.web.multipart.MultipartFile
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
 @Tag(name = "Projects")
-class V2ProjectsController(
+class ProjectsController(
   private val projectService: ProjectService,
   private val projectHolder: ProjectHolder,
   private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
@@ -94,7 +94,7 @@ class V2ProjectsController(
   private val projectWithStatsFacade: ProjectWithStatsFacade,
   private val autoTranslationSettingsModelAssembler: AutoTranslationSettingsModelAssembler,
 ) {
-  @Operation(summary = "Returns all projects where current user has any permission")
+  @Operation(summary = "Get all permitted", description = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @IsGlobalRoute
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
@@ -106,7 +106,10 @@ class V2ProjectsController(
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
   }
 
-  @Operation(summary = "Returns all projects (including statistics) where current user has any permission")
+  @Operation(
+    summary = "Get all with stats",
+    description = "Returns all projects (including statistics) where current user has any permission",
+  )
   @GetMapping("/with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
   @IsGlobalRoute
   fun getAllWithStatistics(
@@ -118,7 +121,7 @@ class V2ProjectsController(
   }
 
   @GetMapping("/{projectId}")
-  @Operation(summary = "Returns project by id")
+  @Operation(summary = "Get one project")
   @UseDefaultPermissions
   @AllowApiAccess
   fun get(
@@ -130,7 +133,10 @@ class V2ProjectsController(
   }
 
   @GetMapping("/{projectId}/users")
-  @Operation(summary = "Returns project all users, who have permission to access project")
+  @Operation(
+    summary = "Users with project access",
+    description = "Returns all project users, who have permission to access project",
+  )
   @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
   @RequiresSuperAuthentication
   @AllowApiAccess
@@ -145,7 +151,7 @@ class V2ProjectsController(
   }
 
   @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(summary = "Uploads organizations avatar")
+  @Operation(summary = "Upload project avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @AllowApiAccess
@@ -159,7 +165,7 @@ class V2ProjectsController(
   }
 
   @DeleteMapping("/{projectId:[0-9]+}/avatar")
-  @Operation(summary = "Deletes organization avatar")
+  @Operation(summary = "Delete project avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @AllowApiAccess
@@ -171,7 +177,7 @@ class V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
-  @Operation(summary = "Sets user's direct permission")
+  @Operation(summary = "Set direct permission to user")
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
   fun setUsersPermissions(
@@ -189,7 +195,10 @@ class V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-by-organization")
-  @Operation(summary = "Removes user's explicit project permission. User will have base permissions from organization.")
+  @Operation(
+    summary = "Remove explicit project permission",
+    description = "Removes user's explicit project permission. User will have base permissions from organization.",
+  )
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
   fun setOrganizationBase(
@@ -203,7 +212,7 @@ class V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/revoke-access")
-  @Operation(summary = "Revokes user's access")
+  @Operation(summary = "Revoke project access")
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
   fun revokePermission(
@@ -217,7 +226,7 @@ class V2ProjectsController(
   }
 
   @PostMapping(value = [""])
-  @Operation(summary = "Creates project with specified languages")
+  @Operation(summary = "Create project", description = "Creates a new project with languages and initial settings.")
   @RequestActivity(ActivityType.CREATE_PROJECT)
   @IsGlobalRoute
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
@@ -230,7 +239,7 @@ class V2ProjectsController(
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 
-  @Operation(summary = "Modifies project")
+  @Operation(summary = "Update project settings")
   @PutMapping(value = ["/{projectId}"])
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
@@ -245,7 +254,7 @@ class V2ProjectsController(
   }
 
   @DeleteMapping(value = ["/{projectId}"])
-  @Operation(summary = "Deletes project by id")
+  @Operation(summary = "Delete project")
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @RequiresSuperAuthentication
   @AllowApiAccess
@@ -256,7 +265,7 @@ class V2ProjectsController(
   }
 
   @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-organization/{organizationId:[0-9]+}"])
-  @Operation(summary = "Transfers project's ownership to organization")
+  @Operation(summary = "Transfer project", description = "Transfers project's ownership to organization")
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   @RequiresSuperAuthentication
   fun transferProjectToOrganization(
@@ -276,7 +285,7 @@ class V2ProjectsController(
   }
 
   @GetMapping(value = ["/{projectId:[0-9]+}/transfer-options"])
-  @Operation(summary = "Returns transfer option")
+  @Operation(summary = "Get transfer option")
   @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
   fun getTransferOptions(
     @RequestParam search: String? = "",
@@ -302,7 +311,7 @@ class V2ProjectsController(
   }
 
   @GetMapping("{projectId:[0-9]+}/invitations")
-  @Operation(summary = "Returns all invitations to project")
+  @Operation(summary = "Get project invitations")
   @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
   @RequiresSuperAuthentication
   @AllowApiAccess
@@ -315,7 +324,9 @@ class V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/per-language-auto-translation-settings")
-  @Operation(summary = "Sets per-language auto translation settings for project")
+  @Operation(
+    summary = "Set per-language auto-translation settings",
+  )
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   @AllowApiAccess
   fun setPerLanguageAutoTranslationSettings(
@@ -326,7 +337,7 @@ class V2ProjectsController(
   }
 
   @GetMapping("/{projectId}/per-language-auto-translation-settings")
-  @Operation(summary = "Returns per-language auto translation settings for project")
+  @Operation(summary = "Get per-language auto-translation settings")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getPerLanguageAutoTranslationSettings(): CollectionModel<AutoTranslationConfigModel> {
@@ -336,8 +347,9 @@ class V2ProjectsController(
 
   @PutMapping("/{projectId}/auto-translation-settings")
   @Operation(
-    summary =
-      "Sets default auto translation settings for project " +
+    summary = "Set default auto translation settings for project",
+    description =
+      "Sets default auto-translation settings for project " +
         "(deprecated: use per language config with null language id)",
     deprecated = true,
   )
@@ -352,7 +364,8 @@ class V2ProjectsController(
 
   @GetMapping("/{projectId}/auto-translation-settings")
   @Operation(
-    summary =
+    summary = "Get default auto-translation settings for project",
+    description =
       "Returns default auto translation settings for project " +
         "(deprecated: use per language config with null language id)",
     deprecated = true,

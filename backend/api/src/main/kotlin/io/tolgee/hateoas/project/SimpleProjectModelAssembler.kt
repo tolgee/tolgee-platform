@@ -1,7 +1,7 @@
 package io.tolgee.hateoas.project
 
 import io.tolgee.api.ISimpleProject
-import io.tolgee.api.v2.controllers.V2ProjectsController
+import io.tolgee.api.v2.controllers.ProjectsController
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.service.AvatarService
@@ -15,7 +15,7 @@ class SimpleProjectModelAssembler(
   private val avatarService: AvatarService,
   private val languageService: LanguageService,
 ) : RepresentationModelAssemblerSupport<ISimpleProject, SimpleProjectModel>(
-    V2ProjectsController::class.java,
+    ProjectsController::class.java,
     SimpleProjectModel::class.java,
   ) {
   override fun toModel(project: ISimpleProject): SimpleProjectModel {

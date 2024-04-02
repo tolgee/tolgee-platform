@@ -39,7 +39,10 @@ class ImportSettingsController(
   private val authenticationFacade: AuthenticationFacade,
 ) {
   @GetMapping("")
-  @Operation(description = "Returns import settings for the authenticated user and the project.")
+  @Operation(
+    summary = "Get Import Settings",
+    description = "Returns import settings for the authenticated user and the project.",
+  )
   @AllowApiAccess
   @UseDefaultPermissions
   fun get(): ImportSettingsModel {
@@ -49,7 +52,10 @@ class ImportSettingsController(
   }
 
   @PutMapping("")
-  @Operation(description = "Stores import settings for the authenticated user and the project.")
+  @Operation(
+    summary = "Set Import Settings",
+    description = "Stores import settings for the authenticated user and the project.",
+  )
   @AllowApiAccess
   @UseDefaultPermissions
   fun store(

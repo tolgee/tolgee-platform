@@ -32,7 +32,7 @@ class BigMetaController(
   private val keyWithBaseTranslationModelAssembler: KeyWithBaseTranslationModelAssembler,
 ) : Logging {
   @PostMapping("/big-meta")
-  @Operation(summary = "Stores a bigMeta for a project")
+  @Operation(summary = "Store Big Meta", description = "Stores a bigMeta for a project")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun store(
@@ -43,7 +43,7 @@ class BigMetaController(
   }
 
   @GetMapping("/keys/{id}/big-meta")
-  @Operation(summary = "Returns a bigMeta for given key")
+  @Operation(summary = "Get Big Meta for key")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getBigMeta(

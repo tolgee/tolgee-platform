@@ -74,7 +74,10 @@ class TranslationCommentController(
   private val translationModelAssembler: TranslationModelAssembler,
 ) {
   @GetMapping(value = ["{translationId}/comments"])
-  @Operation(summary = "Returns translation comments of translation")
+  @Operation(
+    summary = "Get translation comments",
+    description = "Returns translation comments of translation",
+  )
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAll(
@@ -90,7 +93,9 @@ class TranslationCommentController(
   }
 
   @GetMapping(value = ["{translationId}/comments/{commentId}"])
-  @Operation(summary = "Returns single translation comment")
+  @Operation(
+    summary = "Get one translation comment",
+  )
   @UseDefaultPermissions
   @AllowApiAccess
   fun get(
@@ -103,7 +108,7 @@ class TranslationCommentController(
   }
 
   @PutMapping(value = ["{translationId}/comments/{commentId}"])
-  @Operation(summary = "Updates single translation comment")
+  @Operation(summary = "Update translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_EDIT)
   @UseDefaultPermissions // Security: Permission check done inside; users should be able to edit their comments
   @AllowApiAccess
@@ -122,7 +127,7 @@ class TranslationCommentController(
   }
 
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
-  @Operation(summary = "Sets state of translation comment")
+  @Operation(summary = "Set state of translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_SET_STATE])
   @AllowApiAccess
@@ -138,7 +143,7 @@ class TranslationCommentController(
 
   @DeleteMapping(value = ["{translationId}/comments/{commentId}"])
   // the permissions are checked in the body! We need to enable authors to delete their comments
-  @Operation(summary = "Deletes the translation comment")
+  @Operation(summary = "Delete translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_DELETE)
   @UseDefaultPermissions // Security: Permission check done inside; users should be able to delete their comments
   @AllowApiAccess
@@ -166,7 +171,10 @@ class TranslationCommentController(
 
   @PostMapping(value = ["/create-comment"])
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
+  @Operation(
+    summary = "Create translation comment",
+    description = "Creates a translation comment. Empty translation is stored, when not exists.",
+  )
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_ADD])
   @AllowApiAccess
@@ -202,7 +210,7 @@ class TranslationCommentController(
 
   @PostMapping(value = ["{translationId}/comments"])
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Creates a translation comment")
+  @Operation(summary = "Create translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_ADD])
   @AllowApiAccess

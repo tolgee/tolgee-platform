@@ -52,7 +52,10 @@ class TagsController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<Tag>,
 ) : IController {
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
-  @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it is created")
+  @Operation(
+    summary = "Tag key",
+    description = "Tags a key with tag. If tag with provided name doesn't exist, it is created",
+  )
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
@@ -68,7 +71,7 @@ class TagsController(
   }
 
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
-  @Operation(summary = "Removes tag with provided id from key with provided id")
+  @Operation(summary = "Remove tag", description = "Removes tag with provided id from key with provided id")
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
@@ -84,7 +87,7 @@ class TagsController(
   }
 
   @GetMapping(value = ["tags"])
-  @Operation(summary = "Returns project tags")
+  @Operation(summary = "Get tags")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAll(

@@ -90,7 +90,7 @@ class KeyController(
   private val languageModelAssembler: LanguageModelAssembler,
 ) : IController {
   @PostMapping(value = ["/create", ""])
-  @Operation(summary = "Creates new key")
+  @Operation(summary = "Create new key")
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.CREATE_KEY)
   @RequiresProjectPermissions([Scope.KEYS_CREATE])
@@ -109,7 +109,10 @@ class KeyController(
   }
 
   @PutMapping(value = ["/{id}/complex-update"])
-  @Operation(summary = "More")
+  @Operation(
+    summary = "Edit key and related data",
+    description = "Edits key name, translations, tags, screenshots, and other data",
+  )
   @UseDefaultPermissions // Security: key permissions are checked separately in method body
   @AllowApiAccess
   fun complexEdit(
@@ -122,7 +125,7 @@ class KeyController(
   }
 
   @PutMapping(value = ["/{id}"])
-  @Operation(summary = "Edits key name")
+  @Operation(summary = "Edit key name")
   @RequestActivity(ActivityType.KEY_NAME_EDIT)
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
@@ -141,7 +144,7 @@ class KeyController(
 
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
   @Transactional
-  @Operation(summary = "Deletes one or multiple keys by their IDs")
+  @Operation(summary = "Delete one or multiple keys")
   @RequestActivity(ActivityType.KEY_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
@@ -154,7 +157,7 @@ class KeyController(
 
   @GetMapping(value = [""])
   @Transactional
-  @Operation(summary = "Returns all keys in the project")
+  @Operation(summary = "Get all keys")
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
   fun getAll(
@@ -168,7 +171,7 @@ class KeyController(
 
   @GetMapping(value = ["{id}"])
   @Transactional
-  @Operation(summary = "Returns single key")
+  @Operation(summary = "Get one key")
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
   fun get(
@@ -181,7 +184,12 @@ class KeyController(
 
   @DeleteMapping(value = [""])
   @Transactional
-  @Operation(summary = "Deletes one or multiple keys by their IDs in request body")
+  @Operation(
+    summary = "Delete one or multiple keys (post)",
+    description =
+      "Delete one or multiple keys by their IDs in request body. Useful for larger requests" +
+        " esxceeding allowed URL length.",
+  )
   @RequestActivity(ActivityType.KEY_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
@@ -194,7 +202,8 @@ class KeyController(
 
   @PostMapping("/import")
   @Operation(
-    summary =
+    summary = "Import keys",
+    description =
       "Imports new keys with translations. If key already exists, its translations and tags" +
         " are not updated.",
   )
@@ -214,7 +223,10 @@ class KeyController(
   }
 
   @PostMapping("/import-resolvable")
-  @Operation(summary = "Import's new keys with translations. Translations can be updated, when specified.")
+  @Operation(
+    summary = "Import keys (resolvable)",
+    description = "Import's new keys with translations. Translations can be updated, when specified.",
+  )
   @RequestActivity(ActivityType.IMPORT)
   @UseDefaultPermissions // Security: permissions are handled in service
   @AllowApiAccess
@@ -239,7 +251,8 @@ class KeyController(
 
   @GetMapping("/search")
   @Operation(
-    summary =
+    summary = "Search for keys",
+    description =
       "This endpoint helps you to find desired key by keyName, " +
         "base translation or translation in specified language.",
   )
@@ -266,7 +279,8 @@ class KeyController(
 
   @PostMapping("/info")
   @Operation(
-    summary =
+    summary = "Get key info",
+    description =
       "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
         "If key is not found, it's not included in the response.",
   )
@@ -284,7 +298,10 @@ class KeyController(
   @GetMapping("/{id}/disabled-languages")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
-  @Operation(summary = "Returns languages, in which key is disabled")
+  @Operation(
+    summary = "Get disabled languages",
+    description = "Returns languages, in which key is disabled",
+  )
   fun getDisabledLanguages(
     @PathVariable id: Long,
   ): CollectionModel<LanguageModel> {
@@ -295,7 +312,10 @@ class KeyController(
   @PutMapping("/{id}/disabled-languages")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
-  @Operation(summary = "Sets languages, in which key is disabled")
+  @Operation(
+    summary = "Set disabled languages",
+    description = "Sets languages, in which key is disabled",
+  )
   fun setDisabledLanguages(
     @PathVariable id: Long,
     @RequestBody @Valid

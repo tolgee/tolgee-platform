@@ -1,13 +1,13 @@
 package io.tolgee.hateoas.project.stats
 
-import io.tolgee.api.v2.controllers.V2ProjectsController
+import io.tolgee.api.v2.controllers.ProjectsController
 import io.tolgee.model.LanguageStats
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
 class LanguageStatsModelAssembler : RepresentationModelAssemblerSupport<LanguageStats, LanguageStatsModel>(
-  V2ProjectsController::class.java,
+  ProjectsController::class.java,
   LanguageStatsModel::class.java,
 ) {
   override fun toModel(it: LanguageStats): LanguageStatsModel {

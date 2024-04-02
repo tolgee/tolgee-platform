@@ -50,7 +50,7 @@ class NamespaceController(
   private val usedNamespaceModelAssembler: UsedNamespaceModelAssembler,
 ) : IController {
   @GetMapping(value = ["namespaces"])
-  @Operation(summary = "Returns all project namespaces")
+  @Operation(summary = "Get namespaces")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAllNamespaces(
@@ -63,7 +63,10 @@ class NamespaceController(
   }
 
   @GetMapping(value = ["used-namespaces"])
-  @Operation(summary = "Returns all used project namespaces. Response contains default (null) namespace if used.")
+  @Operation(
+    summary = "Get used namespaces",
+    description = "Returns all used project namespaces. Response contains default (null) namespace if used.",
+  )
   @UseDefaultPermissions
   @AllowApiAccess
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
@@ -93,7 +96,7 @@ class NamespaceController(
   }
 
   @GetMapping(value = ["/namespace-by-name/{name}"])
-  @Operation(summary = "Returns information about a namespace by its name")
+  @Operation(summary = "Get namespace by name", description = "Returns information about a namespace by its name")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getByName(

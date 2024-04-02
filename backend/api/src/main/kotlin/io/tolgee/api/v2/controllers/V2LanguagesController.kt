@@ -62,7 +62,7 @@ class V2LanguagesController(
   private val projectHolder: ProjectHolder,
 ) : IController {
   @PostMapping(value = [""])
-  @Operation(summary = "Creates language")
+  @Operation(summary = "Create language")
   @RequestActivity(ActivityType.CREATE_LANGUAGE)
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
@@ -77,7 +77,7 @@ class V2LanguagesController(
     return languageModelAssembler.toModel(LanguageDto.fromEntity(language, project.baseLanguage?.id))
   }
 
-  @Operation(summary = "Edits language")
+  @Operation(summary = "Update language")
   @PutMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.EDIT_LANGUAGE)
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
@@ -93,7 +93,7 @@ class V2LanguagesController(
   }
 
   @GetMapping(value = [""])
-  @Operation(summary = "Returns all project languages", tags = ["Languages"])
+  @Operation(summary = "Get all languages", tags = ["Languages"])
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAll(
@@ -105,7 +105,7 @@ class V2LanguagesController(
   }
 
   @GetMapping(value = ["/{languageId}"])
-  @Operation(summary = "Returns specific language")
+  @Operation(summary = "Get one language")
   @UseDefaultPermissions
   @AllowApiAccess
   fun get(
@@ -115,7 +115,7 @@ class V2LanguagesController(
     return languageModelAssembler.toModel(languageView)
   }
 
-  @Operation(summary = "Deletes specific language")
+  @Operation(summary = "Delete specific language")
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])

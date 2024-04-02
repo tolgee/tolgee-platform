@@ -45,7 +45,7 @@ class V2ExportController(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) {
   @GetMapping(value = [""])
-  @Operation(summary = "Exports data")
+  @Operation(summary = "Export data")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun export(
@@ -64,8 +64,8 @@ class V2ExportController(
 
   @PostMapping(value = [""])
   @Operation(
-    summary = """Exports data (post). Useful when providing params exceeding allowed query size.
-  """,
+    summary = "Export data (post)",
+    description = """Exports data (post). Useful when exceeding allowed URL size.""",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess

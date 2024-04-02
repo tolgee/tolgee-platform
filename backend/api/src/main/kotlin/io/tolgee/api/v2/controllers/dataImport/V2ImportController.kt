@@ -108,7 +108,7 @@ class V2ImportController(
   }
 
   @PutMapping("/apply")
-  @Operation(description = "Imports the data prepared in previous step")
+  @Operation(summary = "Apply import", description = "Imports the data prepared in previous step")
   @RequestActivity(ActivityType.IMPORT)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
@@ -122,7 +122,11 @@ class V2ImportController(
   }
 
   @PutMapping("/apply-streaming", produces = [MediaType.APPLICATION_NDJSON_VALUE])
-  @Operation(description = "Imports the data prepared in previous step. Streams current status.")
+  @Operation(
+    summary = "Apply import (streaming)",
+    description =
+      "Imports the data prepared in previous step. Streams current status.",
+  )
   @RequestActivity(ActivityType.IMPORT)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
