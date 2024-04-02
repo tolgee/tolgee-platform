@@ -28,11 +28,6 @@ class SlackSubscriptionProcessor(
     val config = action.slackConfig ?: return
     slackExecutor.setHelper(data = data, slackConfig = config)
 
-    // Checks if the saved(by user) onEvent matches the current activity type.
-    if (!checkSavedEvent(config, activityModel.type)) {
-      return
-    }
-
     when (activityModel.type) {
       ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded()
       ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE -> slackExecutor.sendMessageOnTranslationSet()

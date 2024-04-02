@@ -27,9 +27,6 @@ class SlackConfig(
   @Type(JsonBinaryType::class)
   var languageTags: MutableSet<String> = hashSetOf()
 
-  @ColumnDefault("1")
-  var visibilityOptions: VisibilityOptions = VisibilityOptions.ONLY_ME
-
   @ColumnDefault("0")
   var onEvent: EventName = EventName.ALL
 
@@ -40,4 +37,7 @@ class SlackConfig(
   @ColumnDefault("false")
   @Column(nullable = true)
   var isGlobalSubscription: Boolean = false
+
+  @OneToMany(mappedBy = "slackConfig", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
+  var preferences: MutableSet<SlackConfigPreference> = mutableSetOf()
 }

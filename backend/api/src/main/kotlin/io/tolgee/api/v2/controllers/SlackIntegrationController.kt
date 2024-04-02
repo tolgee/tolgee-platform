@@ -21,6 +21,8 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.util.I18n
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -37,7 +39,7 @@ class SlackIntegrationController(
   private val userAccountService: UserAccountService,
   private val objectMapper: ObjectMapper,
   private val i18n: I18n,
-) {
+) : Logging {
   @PostMapping
   @UseDefaultPermissions
   @AllowApiAccess
@@ -176,6 +178,7 @@ class SlackIntegrationController(
     try {
       slackConfigService.create(slackConfigDto)
     } catch (e: Exception) {
+      logger.info(e.message)
       sendError(payload, Message.UNEXPECTED_ERROR_SLACK)
     }
 

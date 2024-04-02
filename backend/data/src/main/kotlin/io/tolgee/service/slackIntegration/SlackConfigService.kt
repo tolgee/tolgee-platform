@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 class SlackConfigService(
   private val automationService: AutomationService,
   private val slackConfigRepository: SlackConfigRepository,
+  private val slackConfigPreferenceService: SlackConfigPreferenceService,
 ) {
   fun get(
     projectId: Long,
@@ -54,21 +55,17 @@ class SlackConfigService(
         userAccount = slackConfigDto.userAccount,
         channelId = slackConfigDto.channelId,
       ).apply {
-        languageTags =
-          if (!slackConfigDto.languageTag.isNullOrBlank()) {
-            mutableSetOf(slackConfigDto.languageTag)
-          } else {
-            mutableSetOf()
-          }
-        visibilityOptions = visibilityOptions
         slackId = slackConfigDto.slackId
         onEvent = slackConfigDto.onEvent ?: EventName.ALL
-        isGlobalSubscription = slackConfigDto.languageTag?.isEmpty() ?: true
+        isGlobalSubscription = slackConfigDto.languageTag.isNullOrBlank()
       }
 
     val existingConfigs = get(slackConfig.project.id, slackConfig.channelId)
     return if (existingConfigs == null) {
       slackConfigRepository.save(slackConfig)
+      if (!slackConfig.isGlobalSubscription) {
+        addPreferenceToConfig(slackConfig, slackConfigDto.languageTag!!, slackConfigDto.onEvent ?: EventName.ALL)
+      }
       automationService.createForSlackIntegration(slackConfig)
       slackConfig
     } else {
@@ -82,16 +79,28 @@ class SlackConfigService(
       slackConfig.onEvent = eventName
     }
 
-    slackConfigDto.languageTag.let { tag ->
-      if (!tag.isNullOrBlank()) {
-        slackConfig.languageTags.add(tag)
-      } else {
-        slackConfig.isGlobalSubscription = true
-      }
+    if (slackConfigDto.languageTag.isNullOrBlank()) {
+      slackConfig.isGlobalSubscription = true
+    } else {
+      addPreferenceToConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
     }
 
     automationService.updateForSlackConfig(slackConfig)
     slackConfigRepository.save(slackConfig)
     return slackConfig
+  }
+
+  private fun addPreferenceToConfig(
+    slackConfig: SlackConfig,
+    langTag: String,
+    onEvent: EventName,
+  ) {
+    val pref =
+      slackConfigPreferenceService.create(
+        slackConfig,
+        langTag,
+        onEvent,
+      )
+    slackConfig.preferences.add(pref)
   }
 }

@@ -240,8 +240,9 @@ class SlackExecutor(
           Message.SLACK_NOT_SUBSCRIBED_YET ->
             i18n.translate("not-subscribed-yet-message")
 
-          else ->
+          else -> {
             i18n.translate("unknown-error-occurred")
+          }
         },
       )
     }
@@ -310,10 +311,9 @@ class SlackExecutor(
               markdownText("*Global Subscription:* Yes")
             }
           }
-          if (config.languageTags.isNotEmpty()) {
-            val subscribedLanguages = config.languageTags.joinToString(separator = "\n") { "- $it :$it: " }
+          config.preferences.forEach {
             section {
-              markdownText("*Subscribed Languages:*\n$subscribedLanguages")
+              markdownText("*Subscribed Languages:*\n- ${it.languageTag} :${it.languageTag}: on ${it.onEvent.name}")
             }
           }
           divider()

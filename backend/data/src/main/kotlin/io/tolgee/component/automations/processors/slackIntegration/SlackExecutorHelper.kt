@@ -5,16 +5,13 @@ import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.SectionBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
-import com.slack.api.model.kotlin_extension.view.blocks
-import com.slack.api.model.view.View
-import com.slack.api.model.view.Views.view
-import com.slack.api.model.view.Views.viewTitle
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackConfigPreference
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
@@ -31,20 +28,6 @@ class SlackExecutorHelper(
   private val i18n: I18n,
   private val tolgeeProperties: TolgeeProperties,
 ) {
-  fun buildSuccessView(): View {
-    return view { thisView ->
-      thisView
-        .callbackId("callback")
-        .type("modal")
-        .title(viewTitle { it.type("plain_text").text("Result").emoji(true) })
-        .blocks {
-          section {
-            markdownText("*New translation was added!*")
-          }
-        }
-    }
-  }
-
   fun createKeyAddMessage(): SavedMessageDto? {
     val activities = data.activityData ?: return null
     val attachments = mutableListOf<Attachment>()
@@ -52,7 +35,6 @@ class SlackExecutorHelper(
     var keyId: Long = 0
     var blocksHeader: List<LayoutBlock> = listOf()
     val baseLanguage = slackConfig.project.baseLanguage ?: return null
-
     // Extracting Key and Translation Information
     val modifiedEntities = activities.modifiedEntities ?: return null
     modifiedEntities.forEach modifiedEntities@{ (entityType, modifiedEntityList) ->
@@ -62,8 +44,16 @@ class SlackExecutorHelper(
             keyId = modifiedEntity.entityId
             val key = keyService.get(keyId)
             blocksHeader = buildKeyInfoBlock(key, i18n.translate("new-key-text"))
-
             key.translations.forEach translations@{ translation ->
+              if (!shouldProcessEvent(
+                  translation.language.tag,
+                  baseLanguage.tag,
+                  EventName.NEW_KEY,
+                )
+              ) {
+                return@translations
+              }
+
               val attachment = createAttachmentForLanguage(translation) ?: return@translations
 
               attachments.add(attachment)
@@ -73,9 +63,16 @@ class SlackExecutorHelper(
         }
       }
     }
-
     slackConfig.project.languages.forEach { language ->
       if (!langTags.contains(language.tag)) {
+        if (!shouldProcessEvent(
+            language.tag,
+            baseLanguage.tag,
+            EventName.NEW_KEY,
+          )
+        ) {
+          return@forEach
+        }
         val blocks = buildBlocksNoTranslation(baseLanguage, language)
         attachments.add(
           Attachment.builder()
@@ -84,6 +81,15 @@ class SlackExecutorHelper(
             .build(),
         )
         langTags.add(language.tag)
+      }
+    }
+
+    if (!langTags.contains(baseLanguage.tag) && langTags.isNotEmpty()) {
+      baseLanguage.translations?.find { it.key.id == keyId }?.let { baseTranslation ->
+        val attachment = createAttachmentForLanguage(baseTranslation) ?: return@let
+
+        attachments.add(attachment)
+        langTags.add(baseLanguage.tag)
       }
     }
 
@@ -105,7 +111,7 @@ class SlackExecutorHelper(
     language: Language,
   ) = withBlocks {
     if (shouldSkipModification(
-        slackConfig.languageTags,
+        slackConfig.preferences,
         language.tag,
         baseLanguage,
         slackConfig.isGlobalSubscription,
@@ -136,7 +142,7 @@ class SlackExecutorHelper(
     baseLanguage: Language,
   ) = withBlocks {
     if (shouldSkipModification(
-        slackConfig.languageTags,
+        slackConfig.preferences,
         translation.language.tag,
         baseLanguage,
         slackConfig.isGlobalSubscription,
@@ -199,7 +205,7 @@ class SlackExecutorHelper(
     val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return null
     val modifiedLangTag = translation.language.tag
 
-    if (!shouldProcessEvent(modifiedLangTag, baseLanguageTag)) return null
+    if (!shouldProcessEvent(modifiedLangTag, baseLanguageTag, EventName.TRANSLATION_CHANGED)) return null
 
     val langName =
       if (translation.language.tag == baseLanguageTag) {
@@ -284,24 +290,56 @@ class SlackExecutorHelper(
   }
 
   private fun shouldSkipModification(
-    savedLanguageTags: Set<String>,
+    preferences: Set<SlackConfigPreference>,
     langTag: String,
     baseLanguage: Language,
     globalSubscription: Boolean,
-  ): Boolean =
-    !globalSubscription &&
-      !savedLanguageTags.contains(
-        langTag,
-      ) && baseLanguage.tag != langTag
+  ): Boolean {
+    val languageTagsSet = preferences.map { it.languageTag }.toSet()
+    return !globalSubscription &&
+      !languageTagsSet.contains(langTag) &&
+      baseLanguage.tag != langTag
+  }
 
   private fun shouldProcessEvent(
     modifiedLangTag: String,
     baseLanguageTag: String,
+    event: EventName,
   ): Boolean {
-    val isBaseLanguageChangedEvent = slackConfig.onEvent == EventName.BASE_CHANGED
-    val isAllEvent = slackConfig.onEvent == EventName.ALL
+    val isBaseChanged = modifiedLangTag == baseLanguageTag
 
-    return isAllEvent || (isBaseLanguageChangedEvent && modifiedLangTag == baseLanguageTag)
+    val eventHandlingPreferences =
+      if (slackConfig.isGlobalSubscription) {
+        Triple(
+          slackConfig.onEvent == EventName.ALL,
+          slackConfig.onEvent == EventName.BASE_CHANGED && isBaseChanged,
+          slackConfig.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
+        )
+      } else {
+        slackConfig.preferences.find { it.languageTag == modifiedLangTag }?.let { pref ->
+          Triple(
+            pref.onEvent == EventName.ALL,
+            pref.onEvent == EventName.BASE_CHANGED && isBaseChanged,
+            pref.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
+          )
+        } ?: return false // Возвращаем false, если настройки для языка не найдены.
+      }
+
+    return when (event) {
+      EventName.TRANSLATION_CHANGED -> {
+        val (isAllEvent, isBaseLanguageChangedEvent, isTranslationChangedEvent) = eventHandlingPreferences
+        isAllEvent || isBaseLanguageChangedEvent || isTranslationChangedEvent
+      }
+      EventName.NEW_KEY -> {
+        if (slackConfig.isGlobalSubscription) {
+          slackConfig.onEvent == event || slackConfig.onEvent == EventName.ALL
+        } else {
+          val pref = slackConfig.preferences.find { it.languageTag == modifiedLangTag } ?: return false
+          pref.onEvent == EventName.NEW_KEY || pref.onEvent == EventName.ALL
+        }
+      }
+      else -> false
+    }
   }
 
   fun createAttachmentForLanguage(
@@ -313,8 +351,7 @@ class SlackExecutorHelper(
         val translation = foundKey.translations.find { it.language.tag == langTag }
         val baseLanguage = slackConfig.project.baseLanguage ?: return null
 
-        val savedLanguageTags = slackConfig.languageTags
-        if (shouldSkipModification(savedLanguageTags, langTag, baseLanguage, slackConfig.isGlobalSubscription)) {
+        if (shouldSkipModification(slackConfig.preferences, langTag, baseLanguage, slackConfig.isGlobalSubscription)) {
           return null
         }
 
@@ -340,7 +377,7 @@ class SlackExecutorHelper(
   private fun createAttachmentForLanguage(translation: Translation): Attachment? {
     val baseLanguage = slackConfig.project.baseLanguage ?: return null
 
-    val savedLanguageTags = slackConfig.languageTags
+    val savedLanguageTags = slackConfig.preferences
     if (shouldSkipModification(
         savedLanguageTags,
         translation.language.tag,
