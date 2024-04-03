@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/")
-@Tag(name = "Advanced permissions")
+@Tag(name = "Advanced permissions (EE)")
 class AdvancedPermissionController(
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val eePermissionService: EePermissionService,

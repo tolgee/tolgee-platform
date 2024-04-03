@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/invitations")
-@Tag(name = "User invitations to project or organization")
+@Tag(name = "Invitations", description = "These endpoints manage inviting new users to projects or organizations")
 class V2InvitationController(
   private val invitationService: InvitationService,
   private val securityService: SecurityService,

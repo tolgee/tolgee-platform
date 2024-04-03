@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -36,7 +36,12 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
     "/v2/administration",
   ],
 )
-@OpenApiTag(name = "Admin", description = "Server administration")
+@Tag(
+  name = "Server Administration",
+  description =
+    "**Only for self-hosted instances** \n\n" +
+      "Managees global Tolgee Platform instance data e.g., user accounts and organizations.",
+)
 class AdministrationController(
   private val organizationService: OrganizationService,
   private val pagedOrganizationResourcesAssembler: PagedResourcesAssembler<OrganizationView>,

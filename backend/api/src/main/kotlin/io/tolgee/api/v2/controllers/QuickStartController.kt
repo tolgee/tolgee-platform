@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.hateoas.quickStart.QuickStartModel
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/quick-start")
+@Tag(name = "Quick start")
 class QuickStartController(
   private val quickStartService: QuickStartService,
   private val quickStartModelAssembler: QuickStartModelAssembler,

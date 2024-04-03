@@ -6,6 +6,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.HideFromPublicOpenApiDocs
 import io.tolgee.dtos.request.GenerateSlugDto
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
@@ -37,6 +38,7 @@ class SlugController(
 
   @GetMapping("/validate-project/{slug}")
   @Operation(summary = "Validate project address part")
+  @HideFromPublicOpenApiDocs
   fun validateProjectSlug(
     @PathVariable("slug") slug: String,
   ): Boolean {
@@ -54,6 +56,7 @@ class SlugController(
 
   @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Generate project address part")
+  @HideFromPublicOpenApiDocs
   fun generateProjectSlug(
     @RequestBody @Valid
     dto: GenerateSlugDto,

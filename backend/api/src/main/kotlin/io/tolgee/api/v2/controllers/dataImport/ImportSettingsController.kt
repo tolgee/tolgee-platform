@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController
   description =
     "These endpoints enable you to store default settings for import. " +
       "These settings are only used in the UI of Tolgee platform. " +
-      "It's not the default for importing via API endpoints. " +
+      "It's also the default for stateful importing via `/v2/projects/{projectId}/import/*` API endpoints. " +
       "The settings are stored per user and per project.",
 )
 class ImportSettingsController(

@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.HideFromPublicOpenApiDocs
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/public/business-events"])
 @Tag(name = "Business events reporting")
+@HideFromPublicOpenApiDocs
 class BusinessEventController(
   private val businessEventPublisher: BusinessEventPublisher,
   private val securityService: SecurityService,

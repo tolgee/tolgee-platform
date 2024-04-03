@@ -25,7 +25,12 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = ["/v2/projects/{projectId:\\d+}", "/v2/projects"],
 )
-@Tag(name = "Big Meta data about the keys in project")
+@Tag(
+  name = "Big Meta",
+  description =
+    "Handles big meta (context) for translation keys. Tolgee automatically stores " +
+      "contextual data about keys to provide this information to Tolgee AI translator.",
+)
 class BigMetaController(
   private val bigMetaService: BigMetaService,
   private val projectHolder: ProjectHolder,
