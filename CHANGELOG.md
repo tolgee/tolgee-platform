@@ -1,3 +1,10 @@
+## [3.54.7](https://github.com/tolgee/tolgee-platform/compare/v3.54.6...v3.54.7) (2024-04-03)
+
+
+### Bug Fixes
+
+* show chat with premium support ([#2215](https://github.com/tolgee/tolgee-platform/issues/2215)) ([5960423](https://github.com/tolgee/tolgee-platform/commit/5960423292036cb467b894bcc04db8a0c888fe8f))
+
 ## [3.54.6](https://github.com/tolgee/tolgee-platform/compare/v3.54.5...v3.54.6) (2024-03-28)
 
 
