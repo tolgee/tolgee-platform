@@ -30,6 +30,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.ProjectWithLanguagesView
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
@@ -74,6 +75,7 @@ import org.springframework.web.multipart.MultipartFile
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
 @Tag(name = "Projects")
+@OpenApiOrderExtension(-100)
 class ProjectsController(
   private val projectService: ProjectService,
   private val projectHolder: ProjectHolder,
@@ -98,6 +100,7 @@ class ProjectsController(
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @IsGlobalRoute
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
+  @OpenApiOrderExtension(-100)
   fun getAll(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,

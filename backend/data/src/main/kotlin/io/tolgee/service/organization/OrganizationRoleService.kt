@@ -164,7 +164,8 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ): OrganizationRoleType {
-    return self.findType(userId, organizationId) ?: throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
+    return self.findType(userId, organizationId)
+      ?: throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
   }
 
   fun getType(organizationId: Long): OrganizationRoleType {

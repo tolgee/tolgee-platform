@@ -6,8 +6,8 @@ import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
-import io.tolgee.api.HideFromPublicOpenApiDocs
 import io.tolgee.configuration.openApi.OpenApiGroupBuilder.Companion.PROJECT_ID_PARAMETER
+import io.tolgee.openApiDocs.HideFromPublicOpenApiDocs
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

@@ -3,11 +3,11 @@ package io.tolgee.api.v2.controllers
 import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.api.HideFromPublicOpenApiDocs
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.openApiDocs.HideFromPublicOpenApiDocs
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging

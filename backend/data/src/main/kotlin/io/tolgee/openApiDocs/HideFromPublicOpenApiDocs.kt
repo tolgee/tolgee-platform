@@ -1,3 +1,3 @@
-package io.tolgee.api
+package io.tolgee.openApiDocs
 
 annotation class HideFromPublicOpenApiDocs()

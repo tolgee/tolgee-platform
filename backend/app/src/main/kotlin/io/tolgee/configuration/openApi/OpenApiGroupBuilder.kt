@@ -1,8 +1,10 @@
 package io.tolgee.configuration.openApi
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.Paths
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authentication.AllowApiAccess
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.web.method.HandlerMethod
@@ -31,7 +33,56 @@ class OpenApiGroupBuilder(
 
     OpenApiSecurityHelper(this).handleSecurity()
 
+    addOrderExtensions()
+
     return@lazy builder.build()
+  }
+
+  private fun addOrderExtensions() {
+    addTagOrders()
+    addMethodOrders()
+  }
+
+  private fun addMethodOrders() {
+    customizeOperations { operation, handlerMethod, _ ->
+      val orderAnnotation = handlerMethod.getMethodAnnotation(OpenApiOrderExtension::class.java)
+      if (orderAnnotation != null) {
+        operation.addExtension("x-order", orderAnnotation.order)
+      }
+      operation
+    }
+  }
+
+  private fun addTagOrders() {
+    builder.addOpenApiCustomizer { openApi ->
+      val declaringClasses =
+        operationHandlers.mapNotNull {
+          it.value.method.declaringClass
+        }.toSet()
+
+      val tagOrders =
+        declaringClasses.mapNotNull { clazz ->
+          val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@mapNotNull null
+          val tagAnnotation = clazz.getAnnotation(Tag::class.java) ?: return@mapNotNull null
+          tagAnnotation.name to orderAnnotation.order
+        }.toMap()
+
+      val tagsMap = openApi.tags.associateBy { it.name }.toMutableMap()
+      tagOrders.forEach { (tagName, order) ->
+        val tag =
+          tagsMap.computeIfAbsent(tagName) {
+            val tag = io.swagger.v3.oas.models.tags.Tag().name(tagName)
+            openApi.tags.add(tag)
+            tag
+          }
+        tag.addExtension("x-order", order)
+      }
+
+      openApi.tags.forEach {
+        val order = tagOrders[it.name] ?: return@forEach
+        it.addExtension("x-order", order)
+      }
+    }
   }
 
   private fun extractOperationHandlers() {

@@ -6,8 +6,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.api.HideFromPublicOpenApiDocs
 import io.tolgee.dtos.request.GenerateSlugDto
+import io.tolgee.openApiDocs.HideFromPublicOpenApiDocs
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import jakarta.validation.Valid
