@@ -128,8 +128,11 @@ export const HelpMenu = () => {
     return null;
   }
 
+  const enabledFeatures = preferredOrganization.enabledFeatures;
+
   const hasStandardSupport =
-    preferredOrganization.enabledFeatures.includes('STANDARD_SUPPORT');
+    enabledFeatures.includes('STANDARD_SUPPORT') ||
+    enabledFeatures.includes('PREMIUM_SUPPORT');
 
   const displayChat = token && user && hasStandardSupport;
 
