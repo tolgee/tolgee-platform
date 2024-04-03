@@ -410,4 +410,11 @@ class SlackExecutor(
         markdownText(i18n.translate("help-disconnect-tolgee-command"))
       }
     }
+
+  fun sendMessageOnImport() {
+    val config = slackExecutorHelper.slackConfig
+    val messageDto = slackExecutorHelper.createImportMessage() ?: return
+
+    sendRegularMessageWithSaving(messageDto, config)
+  }
 }

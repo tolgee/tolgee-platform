@@ -63,6 +63,8 @@ class SlackExecutorHelper(
         }
       }
     }
+
+    // TODO move to function
     slackConfig.project.languages.forEach { language ->
       if (!langTags.contains(language.tag)) {
         if (!shouldProcessEvent(
@@ -95,7 +97,7 @@ class SlackExecutorHelper(
 
     attachments.add(createRedirectButton())
 
-    if (attachments.isEmpty() || blocksHeader.isEmpty()) {
+    if (langTags.isEmpty()) {
       return null
     }
     return SavedMessageDto(
@@ -178,6 +180,24 @@ class SlackExecutorHelper(
     }
   }
 
+  fun createImportMessage(): SavedMessageDto? {
+    val importedCount = data.activityData?.counts?.get("Key") ?: return null
+
+    return SavedMessageDto(
+      blocks = buildImportBlocks(importedCount),
+      attachments = listOf(createRedirectButton()),
+      0L,
+      setOf(),
+    )
+  }
+
+  private fun buildImportBlocks(count: Long) =
+    withBlocks {
+      section {
+        authorHeadSection(i18n.translate("imported-text") + " $count keys")
+      }
+    }
+
   fun createTranslationChangeMessage(): SavedMessageDto? {
     var result: SavedMessageDto? = null
 
@@ -221,7 +241,7 @@ class SlackExecutorHelper(
     addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
     attachments.add(createRedirectButton())
 
-    return if (headerBlock.isEmpty()) {
+    return if (langTags.isEmpty()) {
       null
     } else {
       SavedMessageDto(
@@ -287,6 +307,11 @@ class SlackExecutorHelper(
       }
 
     markdownText("$flagEmoji *$languageName* $ifBase")
+  }
+
+  private fun SectionBlockBuilder.authorHeadSection(head: String) {
+    val nickname = slackSubscriptionService.getBySlackId(slackConfig.slackId)?.slackNickName ?: return
+    markdownText("@$nickname $head")
   }
 
   private fun shouldSkipModification(
