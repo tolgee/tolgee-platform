@@ -17,8 +17,8 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
     const [topNamespace, setTopNamespace] = useState<
       NsBannerRecord | undefined
     >(undefined);
-    const topBarHeight = useGlobalContext((c) => c.topBarHeight);
-    const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
+    const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+    const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
     const [floatingBannerHeight, setFloatingBannerHeight] = useState(0);
 
     const nsElements = useRef<Record<number, HTMLElement | undefined>>({});

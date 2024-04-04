@@ -1,6 +1,5 @@
 import React from 'react';
-import { Container, Box, Paper } from '@mui/material';
-import GlobalError from './common/GlobalError';
+import { GlobalErrorView } from './common/GlobalErrorView';
 
 export default class ErrorBoundary extends React.Component<
   {
@@ -22,18 +21,8 @@ export default class ErrorBoundary extends React.Component<
   }
 
   render() {
-    const dev = process.env.NODE_ENV === 'development';
-
     if (this.state.hasError) {
-      return (
-        <Container maxWidth={dev ? 'lg' : 'sm'}>
-          <Box mt={5}>
-            <Paper>
-              <GlobalError error={this.state.error} />
-            </Paper>
-          </Box>
-        </Container>
-      );
+      return <GlobalErrorView error={this.state.error} />;
     }
 
     return this.props.children;

@@ -3,6 +3,7 @@ import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { dismissMenu } from './shared';
 import Chainable = Cypress.Chainable;
+import { components } from '../../../webapp/src/service/apiSchema.generated';
 
 export function createExportableProject(): Chainable<ProjectDTO> {
   return login().then(() => {
@@ -53,12 +54,33 @@ export const exportSelectFormat = (format: string) => {
   cy.gcy('export-format-selector-item').contains(format).click();
 };
 
+export const exportSelectMessageFormat = (format: string) => {
+  cy.gcy('export-message-format-selector').click();
+  cy.gcy('export-message-format-selector-item').contains(format).click();
+};
+
 export const testExportFormats = (
   interceptFn: () => ReturnType<typeof cy.intercept>,
   submitFn: () => void,
   clearCheckboxesAfter: boolean,
   afterFn: (test: FormatTest) => void
 ) => {
+  const testFormatWithMessageFormats = (
+    supportedMessageFormats: SupportedMessageFormat[],
+    test: FormatTest
+  ) => {
+    supportedMessageFormats.forEach((messageFormat) => {
+      testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+        ...test,
+        messageFormat,
+        expectedParams: {
+          ...test.expectedParams,
+          messageFormat: messageFormatParamMap[messageFormat],
+        },
+      });
+    });
+  };
+
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
     format: 'JSON',
     expectedParams: {
@@ -69,6 +91,7 @@ export const testExportFormats = (
 
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
     format: 'Structured JSON',
+    messageFormat: 'Java String.format',
     expectedParams: {
       format: 'JSON',
       structureDelimiter: '.',
@@ -76,53 +99,65 @@ export const testExportFormats = (
     },
   });
 
-  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-    format: 'Structured JSON',
-    clickCheckboxes: ['export-support_arrays-selector'] as DataCy.Value[],
-    expectedParams: {
-      format: 'JSON',
-      structureDelimiter: '.',
-      supportArrays: true,
-    },
-  });
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
+      format: 'Structured JSON',
+      expectedParams: {
+        format: 'JSON',
+        structureDelimiter: '.',
+        supportArrays: false,
+      },
+    }
+  );
 
-  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-    format: 'XLIFF',
-    expectedParams: {
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
       format: 'XLIFF',
-    },
-  });
+      expectedParams: {
+        format: 'XLIFF',
+      },
+    }
+  );
 
-  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    {
+      format: 'Flat YAML',
+      expectedParams: {
+        format: 'YAML',
+      },
+    }
+  );
+
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    {
+      format: 'Structured YAML',
+      expectedParams: {
+        format: 'YAML',
+      },
+    }
+  );
+
+  testFormatWithMessageFormats(['ICU', 'Java String.format'], {
     format: '.properties',
     expectedParams: {
       format: 'PROPERTIES',
     },
   });
 
-  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-    format: 'PHP .po',
-    expectedParams: {
-      format: 'PO',
-      messageFormat: 'PHP_SPRINTF',
-    },
-  });
-
-  // testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-  //   format: 'Python .po',
-  //   expectedParams: {
-  //     format: 'PO',
-  //     messageFormat: 'PYTHON_SPRINTF',
-  //   },
-  // });
-
-  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-    format: 'C/C++ .po',
-    expectedParams: {
-      format: 'PO',
-      messageFormat: 'C_SPRINTF',
-    },
-  });
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
+      format: 'Gettext (.po)',
+      expectedParams: {
+        format: 'PO',
+        messageFormat: 'PHP_SPRINTF',
+      },
+    }
+  );
 
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
     format: 'Apple .strings & .stringsdict',
@@ -151,6 +186,14 @@ export const testExportFormats = (
       format: 'FLUTTER_ARB',
     },
   });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'Ruby on Rails .yaml',
+    expectedParams: {
+      messageFormat: 'RUBY_SPRINTF',
+      format: 'YAML_RUBY',
+    },
+  });
 };
 
 const testFormat = (
@@ -165,6 +208,7 @@ const testFormat = (
   const alias = `exportFormRequest_${paramsJson}`;
   interceptFn().as(alias);
   exportSelectFormat(test.format);
+  test.messageFormat && exportSelectMessageFormat(test.messageFormat);
   clickCheckboxes(test);
   submitFn();
   cy.wait(`@${alias}`).then((interception) => {
@@ -184,13 +228,26 @@ function clickCheckboxes(test: FormatTest) {
   }
 }
 
-type FormatTest = {
+export type FormatTest = {
   format: string;
   clickCheckboxes?: DataCy.Value[];
+  messageFormat?: SupportedMessageFormat;
   expectedParams: {
-    messageFormat?: string;
+    messageFormat?: components['schemas']['ExportParams']['messageFormat'];
     format: string;
     structureDelimiter?: string;
     supportArrays?: boolean;
   };
 };
+
+const messageFormatParamMap = {
+  ICU: 'ICU' as MessageFormat,
+  'PHP Sprintf': 'PHP_SPRINTF' as MessageFormat,
+  'C Sprintf': 'C_SPRINTF' as MessageFormat,
+  'Java String.format': 'JAVA_STRING_FORMAT' as MessageFormat,
+  'Ruby Sprintf': 'RUBY_SPRINTF' as MessageFormat,
+};
+
+type MessageFormat = components['schemas']['ExportParams']['messageFormat'];
+
+type SupportedMessageFormat = keyof typeof messageFormatParamMap;

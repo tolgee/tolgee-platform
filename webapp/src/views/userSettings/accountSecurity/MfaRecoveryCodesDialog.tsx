@@ -10,7 +10,6 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -19,6 +18,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { useHistory } from 'react-router-dom';
 
 type MfaRecoveryDto = components['schemas']['UserMfaRecoveryRequestDto'];
 
@@ -30,8 +30,9 @@ type MfaRecoveryCodesDialogProps = {
 export const MfaRecoveryCodesDialog: FunctionComponent<
   MfaRecoveryCodesDialogProps
 > = ({ password: providedPassword }) => {
+  const history = useHistory();
   const onDialogClose = () => {
-    redirect(LINKS.USER_ACCOUNT_SECURITY);
+    history.push(LINKS.USER_ACCOUNT_SECURITY.build());
   };
 
   const [codes, setCodes] = useState<string[] | null>(null);

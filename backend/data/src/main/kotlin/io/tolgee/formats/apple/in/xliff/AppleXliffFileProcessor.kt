@@ -1,11 +1,11 @@
 package io.tolgee.formats.apple.`in`.xliff
 
 import io.tolgee.formats.ImportFileProcessor
-import io.tolgee.formats.ImportMessageConvertorType
-import io.tolgee.formats.StringWrapper
+import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.APPLE_PLURAL_PROPERTY_CUSTOM_KEY
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -160,19 +160,20 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
   ) {
     if (forms.containsKey("other") && forms["other"] != null) {
       val converted =
-        ImportMessageConvertorType.APPLE_XLIFF.importMessageConvertor!!.convert(
+        messageConvertor.convert(
           rawData = forms,
           languageTag = language,
           convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
           isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
-        ).message
+        )
       context.addTranslation(
         keyName,
         language,
-        converted,
+        converted.message,
         replaceNonPlurals = true,
-        convertedBy = ImportMessageConvertorType.APPLE_XLIFF,
+        convertedBy = importFormat,
         rawData = forms,
+        pluralArgName = converted.pluralArgName,
       )
     }
   }
@@ -183,36 +184,44 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     file: XliffFile,
   ) {
     transUnit.source?.let { source ->
+      val convertedSource = convertMessage(source)
       context.addTranslation(
         transUnitId,
         file.sourceLanguage ?: "unknown source",
-        convertMessage(source),
-        rawData = StringWrapper(source),
-        convertedBy = ImportMessageConvertorType.APPLE_XLIFF,
+        convertedSource.message,
+        pluralArgName = convertedSource.pluralArgName,
+        rawData = source,
+        convertedBy = importFormat,
       )
     }
 
     transUnit.target?.let { target ->
+      val convertedTarget = convertMessage(target)
       context.addTranslation(
         transUnitId,
         file.targetLanguage ?: "unknown target",
-        convertMessage(target),
-        rawData = StringWrapper(target),
-        convertedBy = ImportMessageConvertorType.APPLE_XLIFF,
+        convertedTarget.message,
+        pluralArgName = convertedTarget.pluralArgName,
+        rawData = target,
+        convertedBy = importFormat,
       )
     }
   }
 
-  private fun convertMessage(message: String): String? {
-    return ImportMessageConvertorType.APPLE_XLIFF.importMessageConvertor!!.convert(
+  private fun convertMessage(message: String): MessageConvertorResult {
+    return messageConvertor.convert(
       message,
       "who-knows",
       context.importSettings.convertPlaceholdersToIcu,
       context.projectIcuPlaceholdersEnabled,
-    ).message
+    )
   }
 
   companion object {
+    private val importFormat = ImportFormat.APPLE_XLIFF
+
+    private val messageConvertor = importFormat.messageConvertor
+
     private val XCSTRINGS_PLURAL_FORM_REGEX =
       "^/?(?<keyname>[^:]+)\\|==\\|plural\\.(?<form>[a-z0-9=]+)\$".toRegex()
     private val STRINGSDICT_PLURAL_DEF_REGEX =

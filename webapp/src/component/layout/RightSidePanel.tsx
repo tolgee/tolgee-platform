@@ -6,6 +6,7 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { useDebounce } from 'use-debounce';
+import { useResizeObserver } from 'usehooks-ts';
 
 const StyledPanel = styled(Box)`
   position: fixed;
@@ -39,25 +40,28 @@ export const RightSidePanel = ({
   open,
 }: Props) => {
   const { setRightPanelWidth } = useGlobalActions();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
-  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
+  const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+
+  useResizeObserver({
+    ref: containerRef,
+    onResize({ width = 0 }) {
+      if (!floating && open) {
+        setRightPanelWidth(width);
+      } else {
+        setRightPanelWidth(0);
+      }
+    },
+  });
   useEffect(() => {
     if (!floating && open) {
       setRightPanelWidth(containerRef.current?.offsetWidth || 0);
+    } else {
+      setRightPanelWidth(0);
     }
     return () => setRightPanelWidth(0);
-  }, [floating, open]);
-
-  useEffect(() => {
-    function handler() {
-      setRightPanelWidth(containerRef.current?.offsetWidth || 0);
-    }
-    if (!floating && open) {
-      window.addEventListener('resize', handler);
-      return () => window.removeEventListener('resize', handler);
-    }
   }, [floating, open]);
 
   const [openedDebounced] = useDebounce(open, 100);

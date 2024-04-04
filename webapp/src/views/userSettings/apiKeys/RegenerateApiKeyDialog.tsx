@@ -6,10 +6,9 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
 
@@ -18,8 +17,9 @@ interface Props {
 }
 
 export const RegenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
+  const history = useHistory();
   const onDialogClose = () => {
-    redirect(LINKS.USER_API_KEYS);
+    history.push(LINKS.USER_API_KEYS.build());
   };
 
   const id = useRouteMatch().params[PARAMS.API_KEY_ID];

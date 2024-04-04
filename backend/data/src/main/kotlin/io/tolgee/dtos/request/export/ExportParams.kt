@@ -1,6 +1,18 @@
 package io.tolgee.dtos.request.export
 
 import io.swagger.v3.oas.annotations.Parameter
+import io.tolgee.dtos.ExportParamsDocs
+import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_NOT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_NAMESPACE_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_STATE_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.ZIP_DESCRIPTION
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
@@ -8,43 +20,36 @@ import io.tolgee.model.enums.TranslationState
 
 data class ExportParams(
   @field:Parameter(
-    description = """Languages to be contained in export.
-                
-If null, all languages are exported""",
-    example = "en",
+    description = ExportParamsDocs.LANGUAGES_DESCRIPTION,
+    example = ExportParamsDocs.LANGUAGES_EXAMPLE,
   )
   override var languages: Set<String>? = null,
   @field:Parameter(
-    description = """Format to export to""",
+    description = FORMAT_DESCRIPTION,
   )
   override var format: ExportFormat = ExportFormat.JSON,
   @field:Parameter(
-    description = """Delimiter to structure file content. 
-
-e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
-
-When null, resulting file won't be structured.
-    """,
+    description = STRUCTURE_DELIMITER_DESCRIPTION,
   )
   override var structureDelimiter: Char? = '.',
   @field:Parameter(
-    description = """Filter key IDs to be contained in export""",
+    description = FILTER_KEY_ID_DESCRIPTION,
   )
   override var filterKeyId: List<Long>? = null,
   @field:Parameter(
-    description = """Filter key IDs not to be contained in export""",
+    description = FILTER_KEY_ID_NOT_DESCRIPTION,
   )
   override var filterKeyIdNot: List<Long>? = null,
   @field:Parameter(
-    description = """Filter keys tagged by""",
+    description = FILTER_TAG_DESCRIPTION,
   )
   override var filterTag: String? = null,
   @field:Parameter(
-    description = """Filter keys with prefix""",
+    description = FILTER_KEY_PREFIX_DESCRIPTION,
   )
   override var filterKeyPrefix: String? = null,
   @field:Parameter(
-    description = """Filter translations with state. By default, everything except untranslated is exported.""",
+    description = FILTER_STATE_DESCRIPTION,
   )
   override var filterState: List<TranslationState>? =
     listOf(
@@ -52,23 +57,18 @@ When null, resulting file won't be structured.
       TranslationState.REVIEWED,
     ),
   @field:Parameter(
-    description = """Select one ore multiple namespaces to export""",
+    description = FILTER_NAMESPACE_DESCRIPTION,
   )
   override var filterNamespace: List<String?>? = null,
   @field:Parameter(
-    description = """If false, it doesn't return zip of files, but it returns single file.
-      
-This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response. 
-    """,
+    description = ZIP_DESCRIPTION,
   )
   var zip: Boolean = true,
   @field:Parameter(
-    description = """Message format to be used for export. (applicable for .po)
-      
-e.g. PHP_PO: Hello %s
-    """,
+    description = MESSAGE_FORMAT_DESCRIPTION,
   )
   override var messageFormat: ExportMessageFormat? = null,
 ) : IExportParams {
+  @field:Parameter(description = SUPPORT_ARRAYS_DESCRIPTION)
   override var supportArrays: Boolean = false
 }

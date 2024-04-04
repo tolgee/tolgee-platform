@@ -215,14 +215,67 @@ class StructureModelBuilderTest {
     }
   }
 
-  private fun List<String>.testResult(
+  @Test
+  fun `rootKeyIsLanguageTag works`() {
+    listOf("h", "h[10]").testResult('.', true, rootKeyIsLanguageTag = true) {
+      node("en") {
+        node("h").isEqualTo("text")
+        isObject.containsKeys("h[10]")
+      }
+    }
+  }
+
+  @Test
+  fun `nested plurals work`() {
+    listOf(
+      "h",
+      PluralValue("a", mapOf("one" to "I have one dog", "other" to "I have %d dogs")),
+    ).testResult(
+      '.',
+      true,
+      rootKeyIsLanguageTag = true,
+    ) {
+      node("en") {
+        node("h").isEqualTo("text")
+        node("a") {
+          node("one").isEqualTo("I have one dog")
+          node("other").isEqualTo("I have %d dogs")
+        }
+      }
+    }
+
+    listOf(
+      "h",
+      PluralValue("a", mapOf("one" to "I have one dog", "other" to "I have %d dogs")),
+    ).testResult(
+      '.',
+      true,
+      rootKeyIsLanguageTag = false,
+    ) {
+      node("h").isEqualTo("text")
+      node("a") {
+        node("one").isEqualTo("I have one dog")
+        node("other").isEqualTo("I have %d dogs")
+      }
+    }
+  }
+
+  class PluralValue(val key: String, val pluralForms: Map<String, String>)
+
+  private inline fun List<Any>.testResult(
     delimiter: Char,
     supportArrays: Boolean,
+    rootKeyIsLanguageTag: Boolean = false,
     assertFn: JsonAssert.ConfigurableJsonAssert.() -> Unit = {},
   ): JsonAssert.ConfigurableJsonAssert {
-    val builder = StructureModelBuilder(delimiter, supportArrays)
+    val builder = StructureModelBuilder(delimiter, supportArrays, rootKeyIsLanguageTag)
     this.forEach {
-      builder.addValue(it, "text")
+      (it as? String)?.let { string ->
+        builder.addValue("en", string, "text")
+      }
+      (it as? PluralValue)?.let { pluralValue ->
+        builder.addValue("en", pluralValue.key, pluralValue.pluralForms)
+      }
     }
     val result = builder.result
     val jsonString = jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result)

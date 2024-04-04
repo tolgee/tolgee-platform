@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats
 
 import io.tolgee.formats.BaseIcuMessageConvertor
-import io.tolgee.formats.NoOpFromIcuParamConvertor
+import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -12,7 +12,7 @@ class BaseIcuImportMessageConvertorTest {
       BaseIcuMessageConvertor(
         "Hello! I have {count, plural, other {# dogs} one {# dog} many {# dogs}}. " +
           "Did you know? Here is a number {num, number}",
-        NoOpFromIcuParamConvertor(),
+        { NoOpFromIcuPlaceholderConvertor() },
       ).convert().formsResult!!
     forms["one"].assert.isEqualTo("Hello! I have # dog. Did you know? Here is a number {num, number}")
     forms["many"].assert.isEqualTo("Hello! I have # dogs. Did you know? Here is a number {num, number}")
@@ -25,7 +25,7 @@ class BaseIcuImportMessageConvertorTest {
     val forms =
       BaseIcuMessageConvertor(
         "Hello!",
-        NoOpFromIcuParamConvertor(),
+        { NoOpFromIcuPlaceholderConvertor() },
         forceIsPlural = true,
       ).convert().formsResult!!
     forms["other"].assert.isEqualTo("Hello!")
@@ -36,7 +36,7 @@ class BaseIcuImportMessageConvertorTest {
   fun `works with forced isPlural = false`() {
     BaseIcuMessageConvertor(
       "{num, plural, one {# dog} other {# dogs}}",
-      NoOpFromIcuParamConvertor(),
+      { NoOpFromIcuPlaceholderConvertor() },
       forceIsPlural = false,
     ).convert().singleResult.assert.isEqualTo("{num, plural, one {# dog} other {# dogs}}")
   }

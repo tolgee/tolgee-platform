@@ -45,21 +45,38 @@ export function queryDecode(url: string, forceArray = false) {
   return result;
 }
 
-type Options = {
-  defaultVal?: string | string[];
+type Options<
+  Array extends boolean | undefined,
+  DefaultVal extends StringOrStringArray<Array> | undefined
+> = {
+  defaultVal?: DefaultVal;
   history?: boolean;
-  array?: boolean;
+  array?: Array;
   // clear parameter from url, after unmount
   cleanup?: boolean;
 };
 
-export const useUrlSearchState = (
+type StringOrStringArray<Array extends boolean | undefined> = Array extends true
+  ? string[]
+  : string;
+
+type OrUndefined<
+  Array extends boolean | undefined,
+  DefaultVal extends StringOrStringArray<Array> | undefined
+> = DefaultVal extends StringOrStringArray<Array>
+  ? StringOrStringArray<Array>
+  : undefined;
+
+export function useUrlSearchState<
+  Array extends boolean | undefined = false,
+  DefaultVal extends StringOrStringArray<Array> | undefined = undefined
+>(
   key: string,
-  options?: Options
+  options?: Options<Array, DefaultVal>
 ): [
-  string | string[] | undefined,
-  (value: string | string[] | undefined) => void
-] => {
+  StringOrStringArray<Array> | OrUndefined<Array, DefaultVal>,
+  (value: StringOrStringArray<Array> | undefined) => void
+] {
   const location = useLocation();
   const value = queryDecode(location.search)[key];
   const { replace, push } = useHistory();
@@ -71,12 +88,10 @@ export const useUrlSearchState = (
         JSON.stringify(value) === JSON.stringify(options?.defaultVal)
           ? undefined
           : value;
-      const newSearch = queryEncode({
+      return queryEncode({
         ...data,
         [key]: newValue,
       });
-
-      return newSearch;
     },
     [options?.defaultVal]
   );
@@ -102,11 +117,27 @@ export const useUrlSearchState = (
   }, [setState]);
 
   if (!options?.array) {
-    return [value === undefined ? options?.defaultVal : value, setState];
+    if (Array.isArray(value)) {
+      const safeValue = value[0];
+      return [
+        (safeValue === undefined
+          ? options?.defaultVal ?? ''
+          : safeValue) as any,
+        setState,
+      ];
+    }
+    return [
+      (value === undefined ? options?.defaultVal : value) as any,
+      setState,
+    ];
   } else {
     return [
-      Array.isArray(value) ? value : value !== undefined ? [value] : [],
+      (Array.isArray(value)
+        ? value
+        : value !== undefined
+        ? [value]
+        : []) as any,
       setState,
     ];
   }
-};
+}

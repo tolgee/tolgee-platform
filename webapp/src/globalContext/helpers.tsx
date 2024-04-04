@@ -7,19 +7,20 @@ export type Feature =
 
 export type FeaturesSource = 'EE_LICENSE' | 'ORGANIZATION';
 
-export const useConfig = () => useGlobalContext((v) => v.serverConfiguration);
+export const useConfig = () =>
+  useGlobalContext((c) => c.initialData.serverConfiguration);
 
-export const useUser = () => useGlobalContext((v) => v.userInfo);
+export const useUser = () => useGlobalContext((c) => c.initialData.userInfo);
 
 export const useIsAdmin = () =>
-  useGlobalContext((v) => v.userInfo?.globalServerRole === 'ADMIN');
+  useGlobalContext((c) => c.initialData.userInfo?.globalServerRole === 'ADMIN');
 
 export const usePreferredOrganization = () => {
   const { updatePreferredOrganization } = useGlobalActions();
   const preferredOrganization = useGlobalContext(
-    (c) => c.preferredOrganization!
+    (c) => c.initialData.preferredOrganization
   );
-  const isFetching = useGlobalContext((c) => c.isFetching);
+  const isFetching = useGlobalContext((c) => c.initialData.isFetching);
 
   return {
     preferredOrganization,
@@ -34,7 +35,9 @@ export const useOrganizationUsage = () => {
 
 export const useEnabledFeatures = () => {
   const features =
-    useGlobalContext((c) => c.preferredOrganization?.enabledFeatures) || [];
+    useGlobalContext(
+      (c) => c.initialData.preferredOrganization?.enabledFeatures
+    ) || [];
 
   return {
     features,

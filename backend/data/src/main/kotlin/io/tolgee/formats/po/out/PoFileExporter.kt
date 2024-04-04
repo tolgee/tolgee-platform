@@ -1,9 +1,9 @@
 package io.tolgee.formats.po.out
 
 import io.tolgee.dtos.IExportParams
+import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.getPluralData
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
-import io.tolgee.formats.po.PoSupportedMessageFormat
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
@@ -14,7 +14,6 @@ class PoFileExporter(
   override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
-  private val poSupportedMessageFormat: PoSupportedMessageFormat,
   private val projectIcuPlaceholdersSupport: Boolean = true,
 ) : FileExporter {
   override val fileExtension: String = "po"
@@ -31,19 +30,24 @@ class PoFileExporter(
   private fun prepareResult() {
     translations.forEach { translation ->
       val resultBuilder = getResultStringBuilder(translation)
-      val converted =
-        poSupportedMessageFormat.exportMessageConverter(
-          translation.text!!,
-          translation.languageTag,
-          translation.key.isPlural,
-          projectIcuPlaceholdersSupport,
-        ).convert()
-
+      val converted = convertMessage(translation)
       resultBuilder.appendLine()
       resultBuilder.writeMsgId(translation.key.name)
       resultBuilder.writeMsgIdPlural(translation, converted)
       resultBuilder.writeMsgStr(converted)
     }
+  }
+
+  private fun convertMessage(translation: ExportTranslationView): ToPoConversionResult {
+    return IcuToPoMessageConvertor(
+      message = translation.text ?: "",
+      languageTag = translation.languageTag,
+      placeholderConvertor =
+        exportParams.messageFormat?.paramConvertorFactory?.invoke()
+          ?: NoOpFromIcuPlaceholderConvertor(),
+      forceIsPlural = translation.key.isPlural,
+      projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
+    ).convert()
   }
 
   private fun StringBuilder.writeMsgId(keyName: String) {

@@ -11,10 +11,14 @@ import { TranslationControlsCompact } from './TranslationControlsCompact';
 import { useState } from 'react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { SelectAllCheckbox } from '../BatchOperations/SelectAllCheckbox';
 
 const StyledResultCount = styled('div')`
-  margin-left: 1px;
-  margin-top: ${({ theme }) => theme.spacing(1)};
+  padding: 9px 0px 4px 0px;
+  margin-left: 15px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
 `;
 
 const StyledDialog = styled(Dialog)`
@@ -26,7 +30,7 @@ export const TranslationsHeader = () => {
     defaultVal: 'false',
   });
   const { height: bottomPanelHeight } = useBottomPanel();
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const [dirty, setDirty] = useState(false);
 
   const onDialogOpen = () => {
@@ -62,6 +66,7 @@ export const TranslationsHeader = () => {
       )}
       {dataReady && translationsTotal ? (
         <StyledResultCount>
+          <SelectAllCheckbox />
           <Typography
             color="textSecondary"
             variant="body2"

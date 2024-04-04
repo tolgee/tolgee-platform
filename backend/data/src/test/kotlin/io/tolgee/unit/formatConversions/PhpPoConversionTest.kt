@@ -1,7 +1,9 @@
 package io.tolgee.unit.formatConversions
 
-import io.tolgee.formats.po.`in`.messageConvertors.PoPhpToIcuImportMessageConvertor
-import io.tolgee.formats.po.out.php.ToPhpPoMessageConvertor
+import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
+import io.tolgee.formats.po.`in`.PoToIcuMessageConvertor
+import io.tolgee.formats.po.out.IcuToPoMessageConvertor
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -25,11 +27,17 @@ class PhpPoConversionTest {
 
   private fun testString(string: String) {
     val icuString = convertToIcu(string)
-    val phpString = ToPhpPoMessageConvertor(icuString!!, forceIsPlural = false).convert().singleResult
+    val phpString =
+      IcuToPoMessageConvertor(
+        icuString!!,
+        forceIsPlural = false,
+        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
+      ).convert().singleResult
     phpString.assert
       .describedAs("Input:\n${string}\nICU:\n$icuString\nPhpString:\n$phpString")
       .isEqualTo(string)
   }
 
-  private fun convertToIcu(string: String) = PoPhpToIcuImportMessageConvertor().convert(string, "en").message
+  private fun convertToIcu(string: String) =
+    PoToIcuMessageConvertor { PhpToIcuPlaceholderConvertor() }.convert(string, "en").message
 }

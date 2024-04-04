@@ -1,18 +1,20 @@
-import React, { RefObject, useEffect } from 'react';
+import React, { RefObject } from 'react';
 import { Button, Link as MuiLink, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
-import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { globalActions } from 'tg.store/global/GlobalActions';
-import { AppState } from 'tg.store/index';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { ApiError } from 'tg.service/http/ApiError';
 
 type Credentials = { username: string; password: string };
 type LoginViewCredentialsProps = {
@@ -22,21 +24,14 @@ type LoginViewCredentialsProps = {
 
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
-  const security = useSelector((state: AppState) => state.global.security);
+  const { login } = useGlobalActions();
+  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
-  const authLoading = useSelector(
-    (state: AppState) => state.global.authLoading
+  const registrationAllowed = useGlobalContext(
+    (c) =>
+      c.initialData.serverConfiguration.allowRegistrations ||
+      c.auth.allowRegistration
   );
-
-  const registrationsAllowed =
-    remoteConfig.allowRegistrations || security.allowRegistration;
-
-  useEffect(() => {
-    if (security.loginErrorCode === 'mfa_enabled') {
-      security.loginErrorCode = null;
-      props.onMfaEnabled();
-    }
-  }, [security.loginErrorCode]);
 
   const oAuthServices = useOAuthServices();
 
@@ -47,7 +42,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         <Box mt={2}>
           <Box display="flex" flexDirection="column" alignItems="stretch">
             <LoadingButton
-              loading={authLoading}
+              loading={isLoading}
               variant="contained"
               color="primary"
               type="submit"
@@ -63,7 +58,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
               mt={1}
             >
               <Box>
-                {registrationsAllowed && (
+                {registrationAllowed && (
                   <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
                     <Typography variant="caption">
                       <T keyName="login_sign_up" />
@@ -104,9 +99,15 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         </Box>
       }
       onSubmit={(data) => {
-        props.credentialsRef.current!.username = data.username;
-        props.credentialsRef.current!.password = data.password;
-        globalActions.login.dispatch(data);
+        if (data.username && data.password) {
+          props.credentialsRef.current!.username = data.username;
+          props.credentialsRef.current!.password = data.password;
+          login(data).catch((e: ApiError) => {
+            if (e.code === 'mfa_enabled') {
+              props.onMfaEnabled();
+            }
+          });
+        }
       }}
     >
       <TextField

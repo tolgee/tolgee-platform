@@ -128,7 +128,7 @@ export const TranslationsToolbar: React.FC = () => {
 
   const counterContent = `${index} / ${totalCount}`;
 
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
 
   return (
     <Portal>

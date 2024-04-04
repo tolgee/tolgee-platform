@@ -140,6 +140,7 @@ const getTheme = (mode: PaletteMode) => {
         default: c.background,
         paper: c.backgroundPaper,
       },
+      tooltip: c.tooltip,
       navbar: c.navbar,
       activity: c.activity,
       emphasis: c.emphasis,
@@ -155,6 +156,7 @@ const getTheme = (mode: PaletteMode) => {
       tipsBanner: c.tipsBanner,
       tokens: c.tokens,
       placeholders: c.placeholders,
+      languageChips: c.languageChips,
     },
     mixins: {
       toolbar: {

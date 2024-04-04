@@ -8,7 +8,8 @@ import io.tolgee.formats.path.getPathItems
 
 class StructureModelBuilder(
   private var structureDelimiter: Char?,
-  private var supportJsonArrays: Boolean,
+  private var supportArrays: Boolean,
+  private val rootKeyIsLanguageTag: Boolean = false,
 ) {
   private var model: StructuredModelItem? = null
 
@@ -39,12 +40,43 @@ class StructureModelBuilder(
   }
 
   fun addValue(
+    languageTag: String,
     key: String,
     value: String?,
   ) {
-    val path = getPathItems(key, supportJsonArrays, structureDelimiter)
+    val path = getPathItems(languageTag, key)
+    addValueToPath(path, value)
+  }
+
+  fun addValue(
+    languageTag: String,
+    key: String,
+    pluralForms: Map<String, String>,
+  ) {
+    pluralForms.forEach { (keyword, form) ->
+      val path = getPathItems(languageTag, key) + ObjectPathItem(keyword, keyword)
+      addValueToPath(path, form)
+    }
+  }
+
+  private fun getPathItems(
+    languageTag: String,
+    key: String,
+  ) = getLanguageTagPath(languageTag) + getPathItems(key, supportArrays, structureDelimiter)
+
+  private fun addValueToPath(
+    path: List<PathItem>,
+    value: String?,
+  ) {
     model = model ?: path.first().createNode(null, null)
     addToContent(model!!, path, path, value)
+  }
+
+  private fun getLanguageTagPath(languageTag: String): MutableList<PathItem> {
+    if (rootKeyIsLanguageTag) {
+      return mutableListOf(ObjectPathItem(languageTag, languageTag))
+    }
+    return mutableListOf()
   }
 
   private fun addToContent(
@@ -76,7 +108,7 @@ class StructureModelBuilder(
           }
 
           is ArrayStructuredModelItem -> {
-            throw IllegalStateException("Parent node for object item can never be an array")
+            handleCollisions(pathItem, parentNode, fullPath, value)
           }
         }
       }
@@ -90,7 +122,7 @@ class StructureModelBuilder(
           }
 
           is ObjectStructuredModelItem -> {
-            throw IllegalStateException("Parent node for array item can never be an object")
+            handleCollisions(pathItem, parentNode, fullPath, value)
           }
         }
       }

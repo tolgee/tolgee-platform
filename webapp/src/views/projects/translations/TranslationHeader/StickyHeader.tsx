@@ -56,8 +56,8 @@ type Props = {
 export const StickyHeader: React.FC<Props> = ({ height, children }) => {
   const { setFloatingBannerHeight } = useHeaderNsActions();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
-  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
-  const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
+  const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
+  const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);
 
   useEffect(() => {
     setFloatingBannerHeight(height);

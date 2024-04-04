@@ -22,4 +22,6 @@ abstract class ImportFileProcessor {
     context.languageNameGuesses = result
     result
   }
+
+  val firstLanguageTagGuessOrUnknown get() = languageNameGuesses.firstOrNull() ?: "unknown"
 }

@@ -71,7 +71,7 @@ type Props = {
   onClose: () => void;
   onSelect: (value: OrganizationModel) => void;
   anchorEl: HTMLElement;
-  selected: OrganizationModel;
+  selected: OrganizationModel | undefined;
   onAddNew: () => void;
   ownedOnly?: boolean;
 };
@@ -148,6 +148,10 @@ export const OrganizationPopover: React.FC<Props> = ({
       );
     }
   }, [organizationsLoadable.data]);
+
+  if (!selected) {
+    return null;
+  }
 
   return (
     <>

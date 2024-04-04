@@ -17,7 +17,6 @@ const StyledContainer = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-bottom: 0px;
   border-right: 0px;
-  margin-top: 10px;
   transition: top 0.2s ease-in-out;
   margin-bottom: -20px;
   overflow-y: auto;
@@ -26,8 +25,8 @@ const StyledContainer = styled('div')`
 
 export const FloatingToolsPanel = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
-  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
+  const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
+  const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
   const keyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const languageTag = useTranslationsSelector((c) => c.cursor?.language);
   const languages = useTranslationsSelector((c) => c.languages);

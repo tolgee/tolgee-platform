@@ -33,14 +33,14 @@ type Props = {
 export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
   const { preferredOrganization } = usePreferredOrganization();
   const { usage } = useOrganizationUsage();
-  const isOwner = preferredOrganization.currentUserRole === 'OWNER';
+  const isOwner = preferredOrganization?.currentUserRole === 'OWNER';
   const history = useHistory();
 
   const handleConfirm = () => {
     onClose();
     history.push(
       LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization!.slug,
       })
     );
   };

@@ -6,12 +6,14 @@ export type Props = {
   baseTranslation: string | undefined;
   currentTranslation: string | undefined;
   nested: boolean;
+  enabled: boolean;
 };
 
 export const useMissingPlaceholders = ({
   baseTranslation,
   currentTranslation,
   nested,
+  enabled,
 }: Props) => {
   const project = useProject();
 
@@ -20,8 +22,8 @@ export const useMissingPlaceholders = ({
   }
 
   const basePlaceholders = useMemo(() => {
-    return getPlaceholders(baseTranslation || '', nested) ?? [];
-  }, [baseTranslation, nested]);
+    return (enabled && getPlaceholders(baseTranslation || '', nested)) || [];
+  }, [baseTranslation, nested, enabled]);
 
   const lastValidPlaceholders = useRef<Placeholder[]>();
 

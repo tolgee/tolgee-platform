@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Typography,
-  styled,
-} from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
@@ -20,7 +11,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
 
 import { LanguageItem } from './LanguageItem';
 import {
@@ -30,13 +20,8 @@ import {
   TABLE_LAST_CELL,
   TABLE_TOP_ROW,
 } from './tableStyles';
-import { Add, Close } from '@mui/icons-material';
-
-const StyledButton = styled(IconButton)`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-`;
+import { Add } from '@mui/icons-material';
+import { LanguagesAddDialog } from 'tg.component/languages/LanguagesAddDialog';
 
 export const ProjectLanguages = () => {
   const queryClient = useQueryClient();
@@ -138,25 +123,19 @@ export const ProjectLanguages = () => {
           </StyledLanguageTable>
         </Box>
       </QuickStartHighlight>
-      {addLanguageOpen && (
-        <Dialog open fullWidth onClose={handleClose}>
-          <DialogTitle>{t('create_language_title')}</DialogTitle>
-          <StyledButton onClick={handleClose}>
-            <Close />
-          </StyledButton>
-          <DialogContent
-            sx={{ minHeight: 75, display: 'grid', alignContent: 'center' }}
-          >
-            <CreateSingleLanguage
-              autoFocus={false}
-              onCancel={() => {}}
-              onCreated={() => {
-                handleClose();
-                invalidateUrlPrefix(queryClient, '/v2/project');
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+      {addLanguageOpen && languagesLoadable.data && (
+        <LanguagesAddDialog
+          onClose={handleClose}
+          onCreated={() => {
+            handleClose();
+          }}
+          onChangesMade={() => {
+            invalidateUrlPrefix(queryClient, '/v2/project');
+          }}
+          existingLanguages={
+            languagesLoadable.data._embedded?.languages?.map((l) => l.tag) || []
+          }
+        />
       )}
     </Box>
   );

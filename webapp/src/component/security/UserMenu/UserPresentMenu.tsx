@@ -18,9 +18,9 @@ import { getProgressData } from 'tg.component/billing/utils';
 import { MenuHeader } from './MenuHeader';
 import { OrganizationSwitch } from './OrganizationSwitch';
 import { BillingItem } from './BillingItem';
-import { useLogout } from 'tg.hooks/useLogout';
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -45,6 +45,7 @@ const StyledDivider = styled('div')`
 `;
 
 export const UserPresentMenu: React.FC = () => {
+  const { logout } = useGlobalActions();
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
   const { t } = useTranslate();
@@ -66,8 +67,6 @@ export const UserPresentMenu: React.FC = () => {
     setAnchorEl(null);
   };
 
-  const logout = useLogout();
-
   const handleSelectOrganization = async (organization: OrganizationModel) => {
     setAnchorEl(null);
     await updatePreferredOrganization(organization.id);
@@ -88,7 +87,7 @@ export const UserPresentMenu: React.FC = () => {
     [
       {
         link: LINKS.ORGANIZATION_PROFILE.build({
-          [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
+          [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.slug || '',
         }),
         label: t('user_menu_organization_settings'),
       },
@@ -195,7 +194,7 @@ export const UserPresentMenu: React.FC = () => {
           </MenuItem>
         )}
 
-        <MenuItem onClick={logout} data-cy="user-menu-logout">
+        <MenuItem onClick={() => logout()} data-cy="user-menu-logout">
           <T keyName="user_menu_logout" />
         </MenuItem>
       </StyledPopover>

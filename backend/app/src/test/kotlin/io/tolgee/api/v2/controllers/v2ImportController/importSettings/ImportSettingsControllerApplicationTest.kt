@@ -38,7 +38,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
     performImport(project.id, listOf("example.po" to poFile))
     assertTranslation(
       "%d page read.",
-      "{0, plural,\none {Eine Seite gelesen wurde.}\nother {{0, number} Seiten gelesen wurden.}\n}",
+      "{0, plural,\none {Eine Seite gelesen wurde.}\nother {# Seiten gelesen wurden.}\n}",
     )
     assertTranslation(
       "Welcome back, %1${'$'}s! Your last visit was on %2${'$'}s",
@@ -48,7 +48,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
     applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false)
     assertTranslation(
       "%d page read.",
-      "{0, plural,\none {Eine Seite gelesen wurde.}\nother {%d Seiten gelesen wurden.}\n}",
+      "{value, plural,\none {Eine Seite gelesen wurde.}\nother {%d Seiten gelesen wurden.}\n}",
     )
     assertTranslation(
       "Welcome back, %1${'$'}s! Your last visit was on %2${'$'}s",
@@ -77,7 +77,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
     applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false)
     assertTranslation(
       "dogs_count",
-      "{0, plural,\none {%d dog %s}\nother {%d dogs %s}\n}",
+      "{value, plural,\none {%d dog %s}\nother {%d dogs %s}\n}",
     )
     assertTranslation(
       "string_array[0]",
@@ -116,7 +116,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
     )
     assertTranslation(
       "Order %lld",
-      "{0, plural,\n" +
+      "{value, plural,\n" +
         "zero {Order %lld Ticket}\n" +
         "one {Order %lld Ticket}\n" +
         "other {Order %lld Tickets}\n" +

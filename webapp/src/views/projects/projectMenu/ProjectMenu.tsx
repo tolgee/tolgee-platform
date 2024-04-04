@@ -36,7 +36,7 @@ export const ProjectMenu = ({ id }) => {
 
   const { t } = useTranslate();
 
-  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
+  const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
 
   return (
     <SideMenu>

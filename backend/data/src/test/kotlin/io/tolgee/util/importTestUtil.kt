@@ -3,7 +3,7 @@ package io.tolgee.util
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.formats.BaseIcuMessageConvertor
-import io.tolgee.formats.NoOpFromIcuParamConvertor
+import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.optimizePossiblePlural
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportTranslation
@@ -99,14 +99,9 @@ data class ImportTranslationInContextAssertions(
     this.translation.text!!.let {
       BaseIcuMessageConvertor(
         it,
-        NoOpFromIcuParamConvertor(),
+        { NoOpFromIcuPlaceholderConvertor() },
       ).convert()
     }
-
-  fun assertHasExactPluralForms(forms: Set<String>): ImportTranslationInContextAssertions {
-    this.getPossiblePlural().formsResult!!.keys.assert.isEqualTo(forms)
-    return this
-  }
 
   fun isPluralOptimized(): ImportTranslationInContextAssertions {
     assertTextNotNull()

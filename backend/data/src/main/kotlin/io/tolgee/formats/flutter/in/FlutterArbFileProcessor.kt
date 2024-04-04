@@ -2,8 +2,9 @@ package io.tolgee.formats.flutter.`in`
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.flutter.FLUTTER_ARB_FILE_PLACEHOLDERS_CUSTOM_KEY
-import io.tolgee.formats.optimizePossiblePlural
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class FlutterArbFileProcessor(
@@ -13,7 +14,15 @@ class FlutterArbFileProcessor(
   ImportFileProcessor() {
   override fun process() {
     parsed.translations.forEach { (keyName, item) ->
-      context.addGenericFormatTranslation(keyName, guessedLanguage, item.value.convertMessage())
+      val converted = convertMessage(item.value)
+      context.addTranslation(
+        keyName,
+        guessedLanguage,
+        converted.message,
+        rawData = item.value,
+        convertedBy = ImportFormat.FLUTTER_ARB,
+        pluralArgName = converted.pluralArgName,
+      )
       if (item.description != null) {
         context.addKeyDescription(keyName, item.description)
       }
@@ -27,9 +36,13 @@ class FlutterArbFileProcessor(
     FlutterArbFileParser(context.file.data, objectMapper).parse()
   }
 
-  private fun String?.convertMessage(): String? {
-    this ?: return null
-    return optimizePossiblePlural(this)
+  fun convertMessage(text: String?): MessageConvertorResult {
+    return ImportFormat.FLUTTER_ARB.messageConvertor.convert(
+      rawData = text,
+      languageTag = guessedLanguage,
+      convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+      isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
+    )
   }
 
   private val guessedLanguage: String by lazy {

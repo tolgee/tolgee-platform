@@ -18,7 +18,7 @@ export const SetupLicenceKey = () => {
     method: 'put',
     invalidatePrefix: '/v2/ee-license',
     options: {
-      onSuccess: refetchInitialData,
+      onSuccess: () => refetchInitialData(),
     },
   });
 

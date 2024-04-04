@@ -174,16 +174,11 @@ dependencies {
     implementation(project(':security'))
 }
 
-boolean isCiServer = System.getenv().containsKey("CI")
-boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
+def setTestRetry(test) {
+    boolean isCiServer = System.getenv().containsKey("CI")
+    boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
 
-test {
-    useJUnitPlatform()
-    maxHeapSize = "4096m"
-    testLogging {
-        events = ["passed", "failed", "skipped"]
-    }
-    retry {
+    test.retry {
         if (isCiServer) {
             maxFailures = 20
             maxRetries = 5
@@ -192,11 +187,21 @@ test {
     }
 }
 
+test {
+    useJUnitPlatform()
+    maxHeapSize = "4096m"
+    testLogging {
+        events = ["passed", "failed", "skipped"]
+    }
+    setTestRetry(it)
+}
+
 task runContextRecreatingTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
     maxHeapSize = "4096m"
+    setTestRetry(it)
 }
 
 task runStandardTests(type: Test, group: 'verification') {
@@ -204,6 +209,7 @@ task runStandardTests(type: Test, group: 'verification') {
         excludeTags "contextRecreating", "websocket"
     }
     maxHeapSize = "4096m"
+    setTestRetry(it)
 }
 
 task runWebsocketTests(type: Test, group: 'verification') {
@@ -211,6 +217,7 @@ task runWebsocketTests(type: Test, group: 'verification') {
         includeTags "websocket"
     }
     maxHeapSize = "4096m"
+    setTestRetry(it)
 }
 
 springBoot {

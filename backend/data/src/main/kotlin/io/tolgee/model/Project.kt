@@ -37,6 +37,7 @@ class Project(
   override var name: String = "",
   @field:Size(min = 3, max = 2000)
   @ActivityLoggedProp
+  @Column(length = 2000)
   override var description: String? = null,
   @field:Size(max = 2000)
   @Column(columnDefinition = "text")

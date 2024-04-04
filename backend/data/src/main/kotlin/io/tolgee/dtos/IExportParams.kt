@@ -3,82 +3,76 @@ package io.tolgee.dtos
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_NOT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_NAMESPACE_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_STATE_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
+import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
 
 interface IExportParams {
   @get:Schema(
-    description = """Languages to be contained in export.
-                
-If null, all languages are exported""",
-    example = "en",
+    description = LANGUAGES_DESCRIPTION,
+    example = LANGUAGES_EXAMPLE,
   )
   var languages: Set<String>?
 
   @get:Schema(
-    description = """Format to export to""",
+    description = FORMAT_DESCRIPTION,
   )
   var format: ExportFormat
 
   @get:Schema(
-    description = """Delimiter to structure file content. 
-
-e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
-
-When null, resulting file won't be structured.
-    """,
+    description = STRUCTURE_DELIMITER_DESCRIPTION,
   )
   var structureDelimiter: Char?
 
   @get:Schema(
-    description = """
-      If true, for structured formats (like JSON) arrays are supported. 
-      e.g. Key hello[0] will be exported as {"hello": ["..."]}
-    """,
+    description = SUPPORT_ARRAYS_DESCRIPTION,
   )
   var supportArrays: Boolean
 
   @get:Schema(
-    description = """Filter key IDs to be contained in export""",
+    description = FILTER_KEY_ID_DESCRIPTION,
   )
   var filterKeyId: List<Long>?
 
   @get:Schema(
-    description = """Filter key IDs not to be contained in export""",
+    description = FILTER_KEY_ID_NOT_DESCRIPTION,
   )
   var filterKeyIdNot: List<Long>?
 
   @get:Schema(
-    description = """Filter keys tagged by""",
+    description = FILTER_TAG_DESCRIPTION,
   )
   var filterTag: String?
 
   @get:Schema(
-    description = """Filter keys with prefix""",
+    description = FILTER_KEY_PREFIX_DESCRIPTION,
   )
   var filterKeyPrefix: String?
 
   @get:Schema(
-    description = """Filter translations with state. By default, everything except untranslated is exported.""",
+    description = FILTER_STATE_DESCRIPTION,
   )
   var filterState: List<TranslationState>?
 
   @get:Schema(
-    description = """Select one ore multiple namespaces to export""",
+    description = FILTER_NAMESPACE_DESCRIPTION,
   )
   var filterNamespace: List<String?>?
 
-  @get:Hidden
-  @get:JsonIgnore
-  val shouldContainUntranslated: Boolean
-    get() = this.filterState?.contains(TranslationState.UNTRANSLATED) != false
-
   @get:Schema(
-    description = """Message format to be used for export. (applicable for .po)
-      
-e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s   
-    """,
+    description = MESSAGE_FORMAT_DESCRIPTION,
   )
   var messageFormat: ExportMessageFormat?
 
@@ -95,4 +89,9 @@ e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
     this.messageFormat = other.messageFormat
     this.supportArrays = other.supportArrays
   }
+
+  @get:Hidden
+  @get:JsonIgnore
+  val shouldContainUntranslated: Boolean
+    get() = this.filterState?.contains(TranslationState.UNTRANSLATED) != false
 }

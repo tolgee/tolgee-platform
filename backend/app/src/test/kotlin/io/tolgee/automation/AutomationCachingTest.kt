@@ -120,7 +120,7 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
     activityType: ActivityType? = null,
   ): Cache.ValueWrapper? =
     cacheManager.getCache(Caches.AUTOMATIONS)!!.get(
-      listOf(
+      arrayListOf(
         testData.projectBuilder.self.id,
         automationTriggerType,
         activityType,

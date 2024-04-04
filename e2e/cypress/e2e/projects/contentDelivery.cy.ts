@@ -10,7 +10,7 @@ import { contentDeliveryTestData } from '../../common/apiCalls/testData/testData
 import { login, setContentStorageBypass } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { setFeature } from '../../common/features';
-import { testExportFormats } from '../../common/export';
+import { FormatTest, testExportFormats } from '../../common/export';
 
 describe('Content delivery', () => {
   let projectId: number;
@@ -36,7 +36,7 @@ describe('Content delivery', () => {
       .findDcy('content-delivery-item-publish')
       .click();
     waitForGlobalLoading();
-    assertMessage('Content published sucessfuly!');
+    assertMessage('Content published successfully!');
   });
 
   it('creates content delivery', () => {
@@ -97,6 +97,7 @@ describe('Content delivery', () => {
             .should('be.checked');
         }
         gcy('export-format-selector').should('contain', test.format);
+        testMessageFormatPersists(test);
         dismissMenu();
       }
     );
@@ -163,4 +164,12 @@ function createAzureContentDeliveryConfig(name: string) {
   cy.gcy('content-delivery-add-button').click();
   fillContentDeliveryConfigForm(name);
   cy.gcy('content-delivery-form-save').click();
+}
+
+function testMessageFormatPersists(test: FormatTest) {
+  if (test.messageFormat) {
+    gcy('export-message-format-selector').should('contain', test.messageFormat);
+    return;
+  }
+  gcy('export-message-format-selector').should('not.exist');
 }

@@ -8,17 +8,34 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { LanguageModifyFields } from './LanguageModifyFields';
 
-export const LanguageModifyForm: FC<{
+type LanguageRequest = components['schemas']['LanguageRequest'];
+
+type Props = {
   preferredEmojis: string[];
-  values: components['schemas']['LanguageRequest'];
-  onModified: (values: components['schemas']['LanguageRequest']) => void;
+  values: LanguageRequest;
+  onModified: (values: LanguageRequest) => void;
   onCancel: () => void;
   inDialog?: boolean;
-}> = (props) => {
+  existingTags: string[];
+};
+
+export const LanguageModifyForm: FC<Props> = ({
+  preferredEmojis,
+  values,
+  onModified,
+  onCancel,
+  inDialog,
+  existingTags,
+}) => {
   const Wrapper: FunctionComponent = (wrapperProps) =>
-    props.inDialog ? (
+    inDialog ? (
       <Dialog open={true}>
-        <DialogContent>
+        <DialogContent
+          sx={{
+            width: '85vw',
+            maxWidth: 500,
+          }}
+        >
           <Box mb={2}>{wrapperProps.children}</Box>
         </DialogContent>
       </Dialog>
@@ -32,21 +49,21 @@ export const LanguageModifyForm: FC<{
     <Wrapper>
       <Formik
         initialValues={{
-          ...props.values,
-          flagEmoji: props.values.flagEmoji || '🏳️',
+          ...values,
+          flagEmoji: values.flagEmoji || '🏳️',
         }}
-        validationSchema={Validation.LANGUAGE(t)}
+        validationSchema={Validation.LANGUAGE(t, existingTags)}
         onSubmit={(values) => {
-          props.onModified(values);
+          onModified(values);
         }}
       >
         {(formikProps) => (
           <Box data-cy="language-modify-form">
-            <LanguageModifyFields preferredEmojis={props.preferredEmojis} />
+            <LanguageModifyFields preferredEmojis={preferredEmojis} />
             <Box display="flex" justifyContent="flex-end">
               <Box mr={1}>
                 <Button
-                  onClick={() => props.onCancel()}
+                  onClick={() => onCancel()}
                   data-cy="languages-modify-cancel-button"
                 >
                   <T keyName="global_form_cancel" />

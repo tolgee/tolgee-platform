@@ -29,20 +29,37 @@ fun convertMessage(
   isInPlural: Boolean,
   convertPlaceholders: Boolean,
   isProjectIcuEnabled: Boolean,
-  convertorFactory: () -> ToIcuParamConvertor,
-): String {
-  if (!isProjectIcuEnabled && !isInPlural) return message
-  if (!convertPlaceholders) return message.escapeIcu(true)
+  escapeUnmatched: Boolean = true,
+  convertorFactory: (() -> ToIcuPlaceholderConvertor)?,
+): MessageConvertorResult {
+  if (!isProjectIcuEnabled && !isInPlural) {
+    return message.toConvertorResult()
+  }
+  if (!escapeUnmatched && convertorFactory == null) {
+    return message.toConvertorResult()
+  }
+  if (!convertPlaceholders || convertorFactory == null) {
+    return message.escapeIcu(true).toConvertorResult()
+  }
 
   val convertor = convertorFactory()
-  return message.replaceMatchedAndUnmatched(
-    string = message,
-    regex = convertor.regex,
-    matchedCallback = {
-      convertor.convert(it, isInPlural)
-    },
-    unmatchedCallback = {
-      ForceIcuEscaper(it, isInPlural).escaped
-    },
-  )
+  val converted =
+    message.replaceMatchedAndUnmatched(
+      regex = convertor.regex,
+      matchedCallback = { it ->
+        convertor.convert(it, isInPlural)
+      },
+      unmatchedCallback = {
+        if (escapeUnmatched) {
+          ForceIcuEscaper(it, isInPlural).escaped
+        } else {
+          it
+        }
+      },
+    )
+
+  val pluralArgName = if (isInPlural) convertor.pluralArgName ?: DEFAULT_PLURAL_ARGUMENT_NAME else null
+  return converted.toConvertorResult(pluralArgName)
 }
+
+private fun String?.toConvertorResult(pluralArgName: String? = null) = MessageConvertorResult(this, pluralArgName)

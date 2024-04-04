@@ -50,7 +50,7 @@ export function checkPermissions(projectInfo: ProjectInfo, settings: Settings) {
       // check if there an error
       pageAcessibleWithoutErrors();
 
-      switch (item as keyof MenuItem) {
+      switch (item as MenuItem) {
         case 'project-menu-item-dashboard':
           testDashboard(projectInfo);
           break;

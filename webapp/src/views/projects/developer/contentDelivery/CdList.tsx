@@ -23,7 +23,9 @@ export const CdList = () => {
   const [formOpen, setFormOpen] = useState(false);
   const { t } = useTranslate();
 
-  const serverConfiguration = useGlobalContext((c) => c.serverConfiguration);
+  const serverConfiguration = useGlobalContext(
+    (c) => c.initialData.serverConfiguration
+  );
   const contentDeliveryConfigured =
     serverConfiguration.contentDeliveryConfigured;
 
