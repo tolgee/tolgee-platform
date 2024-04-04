@@ -60,12 +60,12 @@ class SlackIntegrationController(
 
     val optionsMap = parseOptions(optionsString)
 
-    return when (command) {
-      "login" -> login(payload.user_id, payload.channel_id, payload.user_name ?: "")
+    when (command) {
+      "login" -> return login(payload.user_id, payload.channel_id, payload.user_name ?: "")
 
-      "subscribe" -> handleSubscribe(payload, projectId, languageTag, optionsMap)
+      "subscribe" -> return handleSubscribe(payload, projectId, languageTag, optionsMap)
 
-      "unsubscribe" -> unsubscribe(payload, projectId)
+      "unsubscribe" -> return unsubscribe(payload, projectId)
 
       "subscriptions" -> listOfSubscriptions(payload)
 
@@ -73,31 +73,30 @@ class SlackIntegrationController(
 
       else -> {
         sendError(payload, Message.SLACK_INVALID_COMMAND)
-        null
+        return null
       }
     }
-  }
-
-  private fun help(channelId: String): SlackMessageDto? {
-    slackExecutor.sendHelpMessage(channelId)
     return null
   }
 
-  private fun listOfSubscriptions(payload: SlackCommandDto): SlackMessageDto? {
+  private fun help(channelId: String) {
+    slackExecutor.sendHelpMessage(channelId)
+  }
+
+  private fun listOfSubscriptions(payload: SlackCommandDto) {
     val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
 
     if (slackSubscription == null) {
       sendError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
-      return null
+      return
     }
 
     if (slackConfigService.get(payload.user_id, payload.channel_id).isEmpty()) {
       sendError(payload, Message.SLACK_NOT_SUBSCRIBED_YET)
-      return null
+      return
     }
 
     slackExecutor.sendListOfSubscriptions(payload.user_id, payload.channel_id)
-    return null
   }
 
   @PostMapping("/connect")
