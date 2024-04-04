@@ -9,6 +9,7 @@ class ImportAddFilesParams(
         "the delimiter which will be used in names of improted keys.",
   )
   var structureDelimiter: Char? = '.',
+  @field:Parameter(hidden = true, description = "Only for internal use")
   var storeFilesToFileStorage: Boolean = true,
   @field:Parameter(
     description =

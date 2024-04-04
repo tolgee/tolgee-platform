@@ -11,7 +11,6 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { redirectionActions } from 'tg.store/global/RedirectionActions';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 
@@ -26,7 +25,7 @@ type OrganizationBody = components['schemas']['OrganizationDto'];
 export const OrganizationProfileView: FunctionComponent = () => {
   const { t } = useTranslate();
   const leaveOrganization = useLeaveOrganization();
-  const { refetchInitialData } = useGlobalActions();
+  const { invalidateInitialData } = useGlobalActions();
   const history = useHistory();
 
   const match = useRouteMatch();
@@ -69,14 +68,13 @@ export const OrganizationProfileView: FunctionComponent = () => {
       },
       {
         onSuccess: (data) => {
+          invalidateInitialData();
           if (data.slug !== organizationSlug) {
-            redirectionActions.redirect.dispatch(
+            history.replace(
               LINKS.ORGANIZATION_PROFILE.build({
                 [PARAMS.ORGANIZATION_SLUG]: data.slug,
               })
             );
-          } else {
-            organization.refetch();
           }
           messageService.success(<T keyName="organization_updated_message" />);
         },
@@ -99,8 +97,8 @@ export const OrganizationProfileView: FunctionComponent = () => {
               messageService.success(
                 <T keyName="organization_deleted_message" />
               );
-              await refetchInitialData();
               history.push(LINKS.PROJECTS.build());
+              invalidateInitialData();
             },
           }
         ),

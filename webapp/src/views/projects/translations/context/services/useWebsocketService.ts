@@ -13,7 +13,7 @@ export const useWebsocketService = (
 ) => {
   const [eventBlockers, setEventBlockers] = useState(0);
   const project = useProject();
-  const client = useGlobalContext((c) => c.client);
+  const client = useGlobalContext((c) => c.wsClient.client);
 
   function updateTranslations(event: TranslationsModifiedData) {
     const translationUpdates = event.data?.translations?.map((translation) => ({

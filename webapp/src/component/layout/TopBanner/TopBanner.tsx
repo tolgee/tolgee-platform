@@ -7,6 +7,7 @@ import {
 import { useAnnouncement } from './useAnnouncement';
 
 import { Close } from '@mui/icons-material';
+import { useResizeObserver } from 'usehooks-ts';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -43,25 +44,24 @@ const StyledCloseButton = styled('div')`
 `;
 
 export function TopBanner() {
-  const bannerType = useGlobalContext((c) => c.announcement?.type);
-  const { setTopBannerHeight, dismissTopBanner } = useGlobalActions();
+  const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
+  const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
 
   const getAnnouncement = useAnnouncement();
-
-  useEffect(() => {
-    setTopBannerHeight(bannerRef.current?.offsetHeight || 0);
-  }, [bannerType]);
-
-  useEffect(() => {
-    function handler() {
-      setTopBannerHeight(bannerRef.current?.offsetHeight || 0);
-    }
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-
   const announcement = bannerType && getAnnouncement(bannerType);
+
+  useResizeObserver({
+    ref: bannerRef,
+    onResize({ height = 0 }) {
+      setTopBannerHeight(height);
+    },
+  });
+
+  useEffect(() => {
+    const height = bannerRef.current?.offsetHeight;
+    setTopBannerHeight(height ?? 0);
+  }, [announcement]);
 
   if (!announcement) {
     return null;
@@ -74,7 +74,7 @@ export function TopBanner() {
       <StyledCloseButton
         role="button"
         tabIndex={0}
-        onClick={dismissTopBanner}
+        onClick={() => dismissAnnouncement()}
         data-cy="top-banner-dismiss-button"
       >
         <Close />

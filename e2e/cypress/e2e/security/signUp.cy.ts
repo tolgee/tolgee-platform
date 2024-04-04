@@ -106,7 +106,7 @@ context('Sign up', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.wait(['@signUp']);
     setRecaptchaSecretKey('dummy_secret_key');
-    cy.contains('You are robot').should('be.visible');
+    cy.contains('You are a robot').should('be.visible');
   });
 
   it('Signs up', () => {
@@ -197,9 +197,7 @@ context('Sign up', () => {
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
       assertMessage('Log in or sign up first please');
-      cy.intercept('/api/public/authorize_oauth/github**http://**').as(
-        'GithubSignup'
-      );
+      cy.intercept('/api/public/authorize_oauth/github**').as('GithubSignup');
       loginWithFakeGithub();
       cy.wait('@GithubSignup').then((interception) => {
         assert.isTrue(interception.request.url.includes('invitationCode'));

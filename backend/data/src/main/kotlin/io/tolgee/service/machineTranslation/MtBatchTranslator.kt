@@ -54,7 +54,7 @@ class MtBatchTranslator(
       if (context.project.icuPlaceholders) {
         translated.translatedText
       } else {
-        translated.translatedText?.forceEscapePluralForms()
+        translated.translatedText?.forceEscapePluralForms()?.message
       }
 
     return translated

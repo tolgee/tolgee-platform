@@ -2,6 +2,8 @@ package io.tolgee.formats.xliff.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
+import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
@@ -15,7 +17,7 @@ class XliffFileExporter(
   override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
-  val convertMessage: (message: String?, isPlural: Boolean) -> String? = { message, _ -> message },
+  val projectIcuPlaceholdersSupport: Boolean,
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.XLIFF.extension
 
@@ -57,6 +59,20 @@ class XliffFileExporter(
         this.note = translation.key.description
       },
     )
+  }
+
+  private fun convertMessage(
+    text: String?,
+    plural: Boolean,
+  ): String? {
+    return IcuToGenericFormatMessageConvertor(
+      text,
+      plural,
+      projectIcuPlaceholdersSupport,
+      paramConvertorFactory =
+        exportParams.messageFormat?.paramConvertorFactory
+          ?: { NoOpFromIcuPlaceholderConvertor() },
+    ).convert()
   }
 
   private fun getResultXliffFile(translation: ExportTranslationView): XliffFile {

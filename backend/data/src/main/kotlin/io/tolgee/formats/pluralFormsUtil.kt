@@ -68,14 +68,15 @@ fun getPluralFormsReplacingReplaceParam(
   string: String,
   replacement: String,
 ): PluralForms? {
-  val noOpConvertor = NoOpFromIcuParamConvertor()
-  val convertor =
-    object : FromIcuParamConvertor {
-      override fun convert(
-        node: MessagePatternUtil.ArgNode,
-        isInPlural: Boolean,
-      ): String {
-        return noOpConvertor.convert(node, isInPlural)
+  val noOpConvertor = NoOpFromIcuPlaceholderConvertor()
+  val convertor = {
+    object : FromIcuPlaceholderConvertor {
+      override fun convert(node: MessagePatternUtil.ArgNode): String {
+        return noOpConvertor.convert(node)
+      }
+
+      override fun convertText(string: String): String {
+        return noOpConvertor.convertText(string)
       }
 
       override fun convertReplaceNumber(
@@ -85,6 +86,7 @@ fun getPluralFormsReplacingReplaceParam(
         return replacement
       }
     }
+  }
   val converted =
     BaseIcuMessageConvertor(
       string,
@@ -179,7 +181,7 @@ fun <T> Map<T, String?>.convertToIcuPlurals(newPluralArgName: String?): ConvertT
 private fun convertIcuStringNoOp(string: String) =
   BaseIcuMessageConvertor(
     string,
-    NoOpFromIcuParamConvertor(),
+    { NoOpFromIcuPlaceholderConvertor() },
     keepEscaping = true,
   ).convert()
 
@@ -227,10 +229,11 @@ fun <T> normalizePlurals(
  *
  * Returns null if the string is not a plural
  */
-fun String.forceEscapePluralForms(): String? {
+fun String.forceEscapePluralForms(): MessageConvertorResult? {
   val forms = getPluralForms(this)
   val escapedForms = forms?.forms?.mapValues { ForceIcuEscaper(it.value, escapeHash = true).escaped }
-  return escapedForms?.toIcuPluralString(optimize = false, argName = forms.argName)
+  val text = escapedForms?.toIcuPluralString(optimize = false, argName = forms.argName) ?: return null
+  return MessageConvertorResult(text, forms.argName)
 }
 
 /**

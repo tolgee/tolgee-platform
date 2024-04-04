@@ -10,12 +10,10 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { securityService } from 'tg.service/SecurityService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
@@ -23,6 +21,7 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
+import { useHistory } from 'react-router-dom';
 
 type TotpEnableDto = components['schemas']['UserTotpEnableRequestDto'];
 
@@ -35,10 +34,11 @@ const WhiteBox = styled(Box)`
 
 export const EnableMfaDialog: FunctionComponent = () => {
   const [recoveryCodesPw, setRecoveryCodesPw] = useState<string | null>(null);
+  const history = useHistory();
 
   const onDialogClose = () => {
     if (recoveryCodesPw) return;
-    redirect(LINKS.USER_ACCOUNT_SECURITY);
+    history.push(LINKS.USER_ACCOUNT_SECURITY.build());
   };
 
   const secret = useMemo(() => {
@@ -69,7 +69,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
   const user = useUser();
   const message = useMessage();
   const { t } = useTranslate();
-  const { refetchInitialData } = useGlobalActions();
+  const { handleAfterLogin } = useGlobalActions();
 
   useEffect(() => {
     if (user && user.mfaEnabled) onDialogClose();
@@ -80,9 +80,8 @@ export const EnableMfaDialog: FunctionComponent = () => {
     method: 'put',
     options: {
       onSuccess: (r, v) => {
-        securityService.setToken(r.accessToken!);
+        handleAfterLogin(r);
         message.success(<T keyName="account-security-mfa-enabled-success" />);
-        refetchInitialData();
         setRecoveryCodesPw(v.content['application/json'].password);
       },
     },

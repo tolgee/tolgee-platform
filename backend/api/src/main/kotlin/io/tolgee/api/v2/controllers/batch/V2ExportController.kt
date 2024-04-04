@@ -13,6 +13,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
 import io.tolgee.util.StreamingResponseBodyProvider
+import io.tolgee.util.nullIfEmpty
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.http.ContentDisposition
@@ -83,7 +84,10 @@ class V2ExportController(
     mediaType: String,
   ): HttpHeaders {
     val httpHeaders = HttpHeaders()
-    httpHeaders.contentType = MediaType.valueOf(mediaType)
+    mediaType.nullIfEmpty?.let {
+      httpHeaders.contentType = MediaType.valueOf(it)
+    }
+    httpHeaders.accessControlExposeHeaders = listOf("Content-Disposition")
     httpHeaders.contentDisposition =
       ContentDisposition.parse(
         """attachment; filename="$fileName"""",

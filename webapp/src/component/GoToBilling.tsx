@@ -11,7 +11,7 @@ type Props = {
 
 export const GoToBilling = ({ render }: Props) => {
   const billingEnabled = useGlobalContext(
-    (c) => c.serverConfiguration.billing.enabled
+    (c) => c.initialData.serverConfiguration.billing.enabled
   );
   if (!billingEnabled) {
     return null;

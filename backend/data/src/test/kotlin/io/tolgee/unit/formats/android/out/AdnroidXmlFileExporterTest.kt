@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats.android.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
 import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
@@ -20,6 +21,10 @@ class AdnroidXmlFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="key1">Ahoj! I%d, %s, %e, %f</string>
+    |  <string name="percent_no_placeholders">I am just a percent \% sign!</string>
+    |  <string name="percent_and_paceholders">I am not just a percent %s %% sign!</string>
+    |  <string name="percent_and_paceholders_and_tags"><![CDATA[I am not just a percent <b>%s</b> %% sign!]]></string>
+    |  <string name="forced_CDATA"><![CDATA[Forced CDATA <b>Hey!</b> sign!]]></string>
     |  <plurals name="Empty_plural">
     |    <item quantity="one"/>
     |    <item quantity="few"/>
@@ -49,6 +54,10 @@ class AdnroidXmlFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="i_am_array_english">This is english!</string>
+    |  <plurals name="plural_with_placeholders">
+    |    <item quantity="one">%s dog</item>
+    |    <item quantity="other">%s dogs</item>
+    |  </plurals>
     |</resources>
     |
       """.trimMargin(),
@@ -129,6 +138,33 @@ class AdnroidXmlFileExporterTest {
         )
         add(
           languageTag = "cs",
+          keyName = "percent no placeholders",
+          text =
+            "I am just a percent % sign!",
+        )
+        add(
+          languageTag = "cs",
+          keyName = "percent and paceholders",
+          text =
+            "I am not just a percent {name} % sign!",
+        )
+        add(
+          languageTag = "cs",
+          keyName = "percent and paceholders and tags",
+          text =
+            "I am not just a percent <b>{name}</b> % sign!",
+        )
+        add(
+          languageTag = "cs",
+          keyName = "forced CDATA",
+          text =
+            "Forced CDATA <b>Hey!</b> sign!",
+          fn = {
+            key.custom = mapOf(ANDROID_CDATA_CUSTOM_KEY to true)
+          },
+        )
+        add(
+          languageTag = "cs",
           keyName = "Empty plural",
           text = null,
         ) {
@@ -203,6 +239,13 @@ class AdnroidXmlFileExporterTest {
           keyName = "i_am_array_english",
           text = "This is english!",
         )
+        add(
+          languageTag = "en",
+          keyName = "plural with placeholders",
+          text = "{count, plural, one {{0} dog} other {{0} dogs}}",
+        ) {
+          key.isPlural = true
+        }
       }
     return getExporter(built.translations)
   }

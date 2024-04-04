@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.po.out
 
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.formats.po.PoSupportedMessageFormat
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
 import io.tolgee.unit.util.assertFile
@@ -14,7 +14,7 @@ import org.mockito.kotlin.whenever
 class PoMessageFormatsExporterTest {
   @Test
   fun php() {
-    val exporter = getExporter(PoSupportedMessageFormat.PHP)
+    val exporter = getExporter(ExportMessageFormat.PHP_SPRINTF)
     val data = getExported(exporter)
     data.assertFile(
       "cs.po",
@@ -60,7 +60,7 @@ class PoMessageFormatsExporterTest {
 
   @Test
   fun c() {
-    val exporter = getExporter(PoSupportedMessageFormat.C)
+    val exporter = getExporter(ExportMessageFormat.C_SPRINTF)
     val data = getExported(exporter)
     data.assertFile(
       "cs.po",
@@ -75,13 +75,13 @@ class PoMessageFormatsExporterTest {
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
-    |msgstr "%d %s %s"
+    |msgstr "%3${'$'}d %2${'$'}s %1${'$'}s"
     |
       """.trimMargin(),
     )
   }
 
-  private fun getExporter(poSupportedMessageFormat: PoSupportedMessageFormat): PoFileExporter {
+  private fun getExporter(importFormat: ExportMessageFormat): PoFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -95,10 +95,9 @@ class PoMessageFormatsExporterTest {
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
     return PoFileExporter(
       translations = built.translations,
-      exportParams = ExportParams(),
+      exportParams = ExportParams().also { it.messageFormat = importFormat },
       baseLanguage = baseLanguageMock,
       baseTranslationsProvider = { listOf() },
-      poSupportedMessageFormat = poSupportedMessageFormat,
     )
   }
 }

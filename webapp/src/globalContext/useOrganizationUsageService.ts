@@ -40,7 +40,7 @@ export const useOrganizationUsageService = ({
     },
   });
 
-  const updateData = (data: Partial<UsageModel>) =>
+  const updateUsageData = (data: Partial<UsageModel>) =>
     setOrganizationUsage((val) =>
       val
         ? {
@@ -58,7 +58,7 @@ export const useOrganizationUsageService = ({
     setSpendingLimitErrors((v) => v + 1);
   };
 
-  const refetch = () => {
+  const refetchUsage = () => {
     if (usageEnabled) {
       usageLoadable.refetch();
     }
@@ -66,19 +66,21 @@ export const useOrganizationUsageService = ({
 
   useEffect(() => {
     if (planLimitErrors || spendingLimitErrors) {
-      refetch();
+      refetchUsage();
     }
   }, [planLimitErrors, spendingLimitErrors]);
 
   return {
-    data: {
+    state: {
       usage: organizationUsage,
       planLimitErrors,
       spendingLimitErrors,
     },
-    refetch,
-    updateData,
-    incrementPlanLimitErrors,
-    incrementSpendingLimitErrors,
+    actions: {
+      refetchUsage,
+      updateUsageData,
+      incrementPlanLimitErrors,
+      incrementSpendingLimitErrors,
+    },
   };
 };

@@ -16,7 +16,6 @@ import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckB
 import { Select } from 'tg.component/common/form/fields/Select';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -24,6 +23,7 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
 import { ProjectModel } from 'tg.fixtures/permissions';
+import { useHistory } from 'react-router-dom';
 
 interface Value {
   scopes: string[];
@@ -42,12 +42,13 @@ const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));
 
 export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
+  const history = useHistory();
   const onDialogClose = () => {
     if (props.onClose) {
       props.onClose();
       return;
     }
-    redirect(LINKS.USER_API_KEYS);
+    history.push(LINKS.USER_API_KEYS.build());
   };
 
   const { t } = useTranslate();

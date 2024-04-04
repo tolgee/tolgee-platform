@@ -1,20 +1,27 @@
 import { components } from 'tg.service/apiSchema.generated';
+import { ReactNode } from 'react';
+import { T } from '@tolgee/react';
+
+export type MessageFormat = NonNullable<
+  components['schemas']['ExportParams']['messageFormat']
+>;
 
 export interface FormatItem {
   id: string;
-  name: string;
+  name: ReactNode;
   defaultStructureDelimiter?: string;
   showSupportArrays?: boolean;
   defaultSupportArrays?: boolean;
-  canBeStructured?: boolean;
+  structured?: boolean;
   format: components['schemas']['ExportParams']['format'];
-  messageFormat?: components['schemas']['ExportParams']['messageFormat'];
+  messageFormat?: MessageFormat;
   matchByExportParams?: (params: ExportParamsWithoutZip) => boolean;
   extension: string;
+  supportedMessageFormats?: MessageFormat[];
 }
 
 export interface FormatGroup {
-  name: string;
+  name: ReactNode;
   formats: FormatItem[];
 }
 
@@ -25,15 +32,16 @@ export const formatGroups: FormatGroup[] = [
       {
         id: 'native_json',
         extension: 'json',
-        name: 'JSON',
+        name: <T keyName="export-format-flat-json" />,
         defaultStructureDelimiter: '',
-        canBeStructured: false,
+        structured: false,
         showSupportArrays: false,
         defaultSupportArrays: false,
         format: 'JSON',
         matchByExportParams: (params) =>
           params.format === 'JSON' &&
-          params.structureDelimiter === '' &&
+          (params.structureDelimiter === '' ||
+            params.structureDelimiter == null) &&
           !params.supportArrays,
       },
     ],
@@ -44,52 +52,96 @@ export const formatGroups: FormatGroup[] = [
       {
         id: 'generic_xliff',
         extension: 'xliff',
-        name: 'XLIFF',
+        name: <T keyName="export-format-xliff" />,
         format: 'XLIFF',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
       },
       {
         id: 'generic_structured_json',
         extension: 'json',
-        name: 'Structured JSON',
+        name: <T keyName="export-format-structured-json" />,
         defaultStructureDelimiter: '.',
-        canBeStructured: true,
+        structured: true,
         showSupportArrays: true,
         defaultSupportArrays: true,
         format: 'JSON',
         matchByExportParams: (params) =>
           params.format === 'JSON' && params.structureDelimiter === '.',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
+      },
+      {
+        id: 'po',
+        extension: 'po',
+        name: <T keyName="export-format-po" />,
+        format: 'PO',
+        supportedMessageFormats: [
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'JAVA_STRING_FORMAT',
+          'ICU',
+          'RUBY_SPRINTF',
+        ],
       },
       {
         id: 'properties',
         extension: 'properties',
-        name: '.properties',
+        name: <T keyName="export-format-properties" />,
         format: 'PROPERTIES',
+        supportedMessageFormats: ['ICU', 'JAVA_STRING_FORMAT'],
       },
-    ],
-  },
-  {
-    name: 'Gettext (.po)',
-    formats: [
       {
-        id: 'po_php',
-        extension: 'po',
-        name: 'PHP .po',
-        format: 'PO',
-        messageFormat: 'PHP_SPRINTF',
+        id: 'generic_flat_yaml',
+        extension: 'yaml',
+        name: <T keyName="export-format-flat-yaml" />,
+        format: 'YAML',
+        defaultStructureDelimiter: '',
+        structured: false,
+        showSupportArrays: false,
+        defaultSupportArrays: false,
+        matchByExportParams: (params) => {
+          return (
+            params.format === 'YAML' &&
+            (params.structureDelimiter === '' ||
+              params.structureDelimiter == null) &&
+            !params.supportArrays
+          );
+        },
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+        ],
       },
-      // {
-      //   id: 'po_python',
-      //   extension: 'po',
-      //   name: 'Python .po',
-      //   format: 'PO',
-      //   messageFormat: 'PYTHON_SPRINTF',
-      // },
       {
-        id: 'po_c',
-        extension: 'po',
-        name: 'C/C++ .po',
-        format: 'PO',
-        messageFormat: 'C_SPRINTF',
+        id: 'generic_structured_yaml',
+        extension: 'yaml',
+        name: <T keyName="export-format-structured-yaml" />,
+        defaultStructureDelimiter: '.',
+        structured: true,
+        showSupportArrays: true,
+        defaultSupportArrays: true,
+        format: 'YAML',
+        matchByExportParams: (params) =>
+          params.format === 'YAML' && params.structureDelimiter === '.',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+        ],
       },
     ],
   },
@@ -99,13 +151,13 @@ export const formatGroups: FormatGroup[] = [
       {
         id: 'apple_strings',
         extension: 'strings',
-        name: 'Apple .strings & .stringsdict',
+        name: <T keyName="export-format-apple-strings" />,
         format: 'APPLE_STRINGS_STRINGSDICT',
       },
       {
         id: 'apple_xliff',
         extension: 'xliff',
-        name: 'Apple .xliff',
+        name: <T keyName="export-format-apple-xliff" />,
         format: 'APPLE_XLIFF',
       },
     ],
@@ -116,7 +168,7 @@ export const formatGroups: FormatGroup[] = [
       {
         id: 'android_xml',
         extension: 'xml',
-        name: 'Android .xml',
+        name: <T keyName="export-format-android-xml" />,
         format: 'ANDROID_XML',
       },
     ],
@@ -127,8 +179,20 @@ export const formatGroups: FormatGroup[] = [
       {
         id: 'flutter_arb',
         extension: 'arb',
-        name: 'Flutter .arb',
+        name: <T keyName="export-format-flutter-arb" />,
         format: 'FLUTTER_ARB',
+      },
+    ],
+  },
+  {
+    name: 'Ruby on Rails',
+    formats: [
+      {
+        id: 'ruby_yaml',
+        extension: 'yaml',
+        messageFormat: 'RUBY_SPRINTF',
+        name: <T keyName="export-format-ruby-yaml" />,
+        format: 'YAML_RUBY',
       },
     ],
   },
@@ -147,9 +211,8 @@ export const findByExportParams = (params: ExportParamsWithoutZip) => {
           if (f.matchByExportParams === undefined) {
             return (
               f.format === params.format &&
-              ((f.messageFormat === undefined &&
-                params.messageFormat === null) ||
-                f.messageFormat === params.messageFormat)
+              (f.messageFormat == params.messageFormat ||
+                f.messageFormat == null)
             );
           }
           return f.matchByExportParams(params);
@@ -168,4 +231,22 @@ export const getFormatById = (id: string): FormatItem => {
     }
   }
   return formatGroups[0].formats[0];
+};
+
+export const normalizeSelectedMessageFormat = (params: {
+  format: string;
+  messageFormat: MessageFormat | undefined;
+}) => {
+  const supportedFormats = getFormatById(params.format).supportedMessageFormats;
+  if (
+    supportedFormats &&
+    (params.messageFormat == null ||
+      !supportedFormats.includes(params.messageFormat))
+  ) {
+    return supportedFormats[0];
+  }
+  if (params.messageFormat == null && !supportedFormats) {
+    return undefined;
+  }
+  return params.messageFormat;
 };

@@ -75,7 +75,8 @@ export const Usage: FC = () => {
     firstRender.current = false;
   }, [planLimitErrors]);
 
-  const isOrganizationOwner = preferredOrganization.currentUserRole === 'OWNER';
+  const isOrganizationOwner =
+    preferredOrganization?.currentUserRole === 'OWNER';
 
   const { usage } = useOrganizationUsage();
 

@@ -3364,4 +3364,19 @@
     <changeSet author="huglx (generated)" id="1711839779407-3">
         <addForeignKeyConstraint baseColumnNames="slack_config_id" baseTableName="slack_config_preference" constraintName="FKqovqhafhdqn838r4rtperon2n" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="slack_config" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1710826031205-1">
+        <modifyDataType columnName="description" newDataType="varchar(2000)" tableName="project"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1710929291452-1">
+        <addColumn tableName="import_file">
+            <column defaultValue="UNKNOWN" name="format" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1711108627911-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="root_key_is_language_tag" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

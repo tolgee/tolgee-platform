@@ -20,7 +20,6 @@ type LanguageModel = components['schemas']['LanguageModel'];
 const StyledContainer = styled('div')`
   display: flex;
   position: relative;
-  margin: 10px 0px 0px 0px;
   border-left: 0px;
   border-right: 0px;
   background: ${({ theme }) => theme.palette.background.default};

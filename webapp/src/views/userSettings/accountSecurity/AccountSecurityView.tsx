@@ -1,30 +1,29 @@
 import { FunctionComponent } from 'react';
-import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router-dom';
-
 import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
+
 import { LINKS } from 'tg.constants/links';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
-import { AppState } from 'tg.store/index';
 import { Alert } from 'tg.component/common/Alert';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { BaseUserSettingsView } from '../BaseUserSettingsView';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
+import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { ChangePassword } from './ChangePassword';
 import { MfaSettings } from './MfaSettings';
 import { EnableMfaDialog } from './EnableMfaDialog';
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
-import { globalActions } from 'tg.store/global/GlobalActions';
 
 export const AccountSecurityView: FunctionComponent = () => {
   const { t } = useTranslate();
   const user = useUser();
   const config = useConfig();
-  const loadable = useSelector(
-    (state: AppState) => state.global.loadables.resetPasswordRequest
-  );
+  const resetResetLoadable = useApiMutation({
+    url: '/api/public/reset_password_request',
+    method: 'post',
+  });
 
   const isManaged = user?.accountType === 'MANAGED';
   const isThirdParty = user?.accountType === 'THIRD_PARTY';
@@ -49,8 +48,10 @@ export const AccountSecurityView: FunctionComponent = () => {
           <T keyName="account-security-set-password-third-party-info" />
         </Typography>
         <Box>
-          {!!loadable.error && <Alert severity="error">{loadable.error}</Alert>}
-          {loadable.loaded && (
+          {!!resetResetLoadable.error && (
+            <Alert severity="error">{resetResetLoadable.error}</Alert>
+          )}
+          {resetResetLoadable.isSuccess && (
             <Alert
               severity="success"
               data-cy="account-security-set-password-instructions-sent"
@@ -63,11 +64,16 @@ export const AccountSecurityView: FunctionComponent = () => {
             color="primary"
             type="submit"
             variant="contained"
-            loading={loadable.loading}
+            loading={resetResetLoadable.isLoading}
             onClick={() =>
-              globalActions.loadableActions.resetPasswordRequest.dispatch(
-                user!.username
-              )
+              resetResetLoadable.mutate({
+                content: {
+                  'application/json': {
+                    email: user!.username,
+                    callbackUrl: LINKS.RESET_PASSWORD.buildWithOrigin(),
+                  },
+                },
+              })
             }
           >
             <T keyName="account-security-set-password" />

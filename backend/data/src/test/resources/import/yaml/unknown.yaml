@@ -1,0 +1,10 @@
+# Author: Urbanecm
+# Author: Veritaslibero
+# Author: Walter Klosse
+# Author: Want
+# Author: YjM
+# Author: Zbycz
+---
+not-valid-bcp47-tag!:
+  relations:
+    part_of_relations: "Some text without params"

@@ -243,6 +243,7 @@ jobs:
           SKIP_INSTALL_E2E_DEPS: true
           E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
           E2E_JOB_INDEX: ${{matrix.job_index}}
+          CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
 
       - uses: actions/upload-artifact@v3
         if: failure()

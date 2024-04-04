@@ -33,8 +33,10 @@ import {
   findByExportParams,
   formatGroups,
   getFormatById,
+  normalizeSelectedMessageFormat,
 } from '../../export/components/formatGroups';
 import { SupportArraysSelector } from '../../export/components/SupportArraysSelector';
+import { MessageFormatSelector } from '../../export/components/MessageFormatSelector';
 
 type ContentDeliveryConfigModel =
   components['schemas']['ContentDeliveryConfigModel'];
@@ -175,7 +177,7 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
             format: initialFormat.id,
             namespaces: data?.filterNamespace ?? allNamespaces ?? [],
             autoPublish: data?.autoPublish ?? true,
-            nested: initialFormat.canBeStructured
+            nested: initialFormat.structured
               ? data?.structureDelimiter === '.'
               : false,
             contentStorageId: data?.storage?.id,
@@ -183,6 +185,10 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
               data?.supportArrays !== undefined
                 ? data.supportArrays
                 : initialFormat.defaultSupportArrays || false,
+            messageFormat: normalizeSelectedMessageFormat({
+              format: initialFormat.id,
+              messageFormat: data?.messageFormat,
+            }),
           }}
           validationSchema={Validation.CONTENT_DELIVERY_FORM}
           validateOnBlur={false}
@@ -199,7 +205,7 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                       format: format.format,
                       filterState: values.states,
                       languages: values.languages,
-                      structureDelimiter: format.canBeStructured
+                      structureDelimiter: format.structured
                         ? format.defaultStructureDelimiter
                         : '',
                       filterNamespace: undefinedIfAllNamespaces(
@@ -209,7 +215,10 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                       autoPublish: values.autoPublish,
                       contentStorageId: values.contentStorageId,
                       supportArrays: values.supportArrays || false,
-                      messageFormat: format.messageFormat,
+                      messageFormat:
+                        // strict message format is prioritized
+                        format.messageFormat ??
+                        normalizeSelectedMessageFormat(values),
                     },
                   },
                 },
@@ -235,7 +244,7 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                       format: format.format,
                       filterState: values.states,
                       languages: values.languages,
-                      structureDelimiter: format.canBeStructured
+                      structureDelimiter: format.structured
                         ? format.defaultStructureDelimiter
                         : '',
                       filterNamespace: undefinedIfAllNamespaces(
@@ -245,7 +254,10 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                       autoPublish: values.autoPublish,
                       contentStorageId: values.contentStorageId,
                       supportArrays: values.supportArrays || false,
-                      messageFormat: format.messageFormat,
+                      messageFormat:
+                        // strict message format is prioritized
+                        format.messageFormat ??
+                        normalizeSelectedMessageFormat(values),
                     },
                   },
                 },
@@ -289,9 +301,8 @@ export const CdEditDialog = ({ onClose, data }: Props) => {
                     languages={allowedLanguages}
                   />
                   <FormatSelector className="format" />
-                  <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
-                    <NsSelector className="ns" namespaces={allNamespaces} />
-                  </Box>
+                  <NsSelector className="ns" namespaces={allNamespaces} />
+                  <MessageFormatSelector className="messageFormat" />
                   {Boolean(
                     storagesLoadable.data?._embedded?.contentStorages?.length
                   ) && (

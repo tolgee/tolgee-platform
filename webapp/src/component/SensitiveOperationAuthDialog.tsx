@@ -1,4 +1,3 @@
-import { useSelector } from 'react-redux';
 import {
   Box,
   Dialog,
@@ -8,36 +7,28 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
-import { AppState } from 'tg.store/index';
 import { useUser } from 'tg.globalContext/helpers';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { globalActions } from 'tg.store/global/GlobalActions';
 import { StandardForm } from './common/form/StandardForm';
 import { TextField } from './common/form/fields/TextField';
 import { useLoadingRegister } from './GlobalLoading';
-
-type Value = { otp?: string; password?: string };
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { components } from 'tg.service/apiSchema.generated';
+type SuperTokenRequest = components['schemas']['SuperTokenRequest'];
 
 export const SensitiveOperationAuthDialog = () => {
-  const afterActions = useSelector(
-    (s: AppState) => s.global.requestSuperJwtAfterActions
-  );
+  const { superTokenRequestCancel, superTokenRequestSuccess } =
+    useGlobalActions();
+  const dialogOpen = useGlobalContext((c) => c.auth.superTokenNeeded);
   const user = useUser();
-
-  const dialogOpen = afterActions.length > 0;
 
   const superTokenMutation = useApiMutation({
     url: '/v2/user/generate-super-token',
     method: 'post',
-    options: {
-      onSuccess(res) {
-        const onSuccessCallbacks = afterActions.map(
-          (action) => action.onSuccess
-        );
-        globalActions.successSuperJwtRequest.dispatch(res.accessToken!);
-        onSuccessCallbacks.forEach((fn) => fn());
-      },
-    },
+
     fetchOptions: {
       disableAutoErrorHandle: true,
     },
@@ -48,10 +39,7 @@ export const SensitiveOperationAuthDialog = () => {
   useLoadingRegister(dialogOpen && !superTokenMutation.isLoading);
 
   const onCancel = () => {
-    afterActions.forEach((action) => {
-      action.onCancel();
-    });
-    globalActions.cancelSuperJwtRequest.dispatch();
+    superTokenRequestCancel();
   };
 
   return (
@@ -68,9 +56,16 @@ export const SensitiveOperationAuthDialog = () => {
           submitButtonInner={<T keyName="sensitive-auth-submit-button" />}
           saveActionLoadable={superTokenMutation}
           onCancel={onCancel}
-          initialValues={{ otp: '', password: '' } as Value}
-          onSubmit={(v: Value) => {
-            superTokenMutation.mutate({ content: { 'application/json': v } });
+          initialValues={{ otp: '', password: '' } satisfies SuperTokenRequest}
+          onSubmit={(values: SuperTokenRequest) => {
+            superTokenMutation.mutate(
+              { content: { 'application/json': values } },
+              {
+                onSuccess(res) {
+                  superTokenRequestSuccess(res.accessToken!);
+                },
+              }
+            );
           }}
         >
           <Box mb={2}>

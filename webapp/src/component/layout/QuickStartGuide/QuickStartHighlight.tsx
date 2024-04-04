@@ -99,7 +99,7 @@ export const QuickStartHighlight = ({
   borderRadius = 'inherit',
 }: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
 
   const itemActive = useGlobalContext(
     (c) => c.quickStartGuide.active === itemKey

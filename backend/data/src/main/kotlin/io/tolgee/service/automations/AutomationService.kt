@@ -58,7 +58,7 @@ class AutomationService(
 
     if (automation.id > 0) {
       automation.triggers.forEach {
-        getCache().evict(listOf(automation.project.id, it.type, it.activityType))
+        getCache().evict(arrayListOf(automation.project.id, it.type, it.activityType))
       }
     }
     return automation
@@ -67,7 +67,7 @@ class AutomationService(
   @Transactional
   fun delete(automation: Automation) {
     automation.triggers.forEach {
-      getCache().evict(listOf(automation.project.id, it.type, it.activityType))
+      getCache().evict(arrayListOf(automation.project.id, it.type, it.activityType))
     }
     automationRepository.delete(automation)
   }

@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.properties.`in`
 
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.testing.assert
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -21,6 +22,11 @@ class PropertiesFileProcessorTest {
     mockUtil = FileProcessorContextMockUtil()
   }
 
+  // This is how to generate the test:
+  // 1. run the test in debug mode
+  // 2. copy the result of calling:
+  // io.tolgee.unit.util.generateTestsForImportResult(mockUtil.fileProcessorContext)
+  // from the debug window
   @Test
   fun `basic cases`() {
     mockUtil.mockIt(
@@ -149,6 +155,23 @@ class PropertiesFileProcessorTest {
       custom.assert.isNull()
       description.assert.isNull()
     }
+  }
+
+  @Test
+  fun `placeholder conversion does nothing`() {
+    PlaceholderConversionTestHelper.testFile(
+      "en.properties",
+      "src/test/resources/import/properties/example_params.properties",
+      assertBeforeSettingsApplication =
+        listOf(
+          "Hello {icuPara} '{escaped}',",
+          "{count, plural,\none {Hello one # {icuParam}}\nother {Hello other {icuParam} '{escaped}'}\n}",
+        ),
+      assertAfterDisablingConversion =
+        listOf(),
+      assertAfterReEnablingConversion =
+        listOf(),
+    )
   }
 
   private fun mockPlaceholderConversionTestFile(

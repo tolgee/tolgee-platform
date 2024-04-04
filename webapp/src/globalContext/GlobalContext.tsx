@@ -1,98 +1,68 @@
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { createProvider } from 'tg.fixtures/createProvider';
-import { components } from 'tg.service/apiSchema.generated';
-import { AppState } from 'tg.store/index';
-import { WebsocketClient } from 'tg.websocket-client/WebsocketClient';
 
 import { useOrganizationUsageService } from './useOrganizationUsageService';
 import { useInitialDataService } from './useInitialDataService';
 import { globalContext } from './globalActions';
-import { useQuickStartGuide } from './useQuickStartGuide';
+import { useQuickStartGuideService } from './useQuickStartGuideService';
+import { useAuthService } from './useAuthService';
+import { useLayoutService } from './useLayoutService';
+import { useWebsocketService } from './useWsClientService';
+import { useState } from 'react';
+import type { GlobalError } from 'tg.error/GlobalError';
+import { useConfirmationDialogService } from './useConfirmationDialogService';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { useMessageService } from './useMessageService';
+import { GlobalErrorView } from 'tg.component/common/GlobalErrorView';
 
-type UsageModel = components['schemas']['PublicUsageModel'];
-
-export const TOP_BAR_HEIGHT = 52;
-
-export const [GlobalProvider, useGlobalActions, useGlobalContext] =
+export const [GlobalContext, useGlobalActions, useGlobalContext] =
   createProvider(() => {
-    const [clientConnected, setClientConnected] = useState<boolean>();
-    const [client, setClient] = useState<ReturnType<typeof WebsocketClient>>();
+    const [globalError, setGlobalError] = useState<GlobalError>();
     const initialData = useInitialDataService();
-    const [topBannerHeight, setTopBannerHeight] = useState(0);
-    const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
-    const [rightPanelWidth, setRightPanelWidth] = useState(0);
-    const [topBarHidden, setTopBarHidden] = useState(false);
-    const [quickStartState, quickStartActions] =
-      useQuickStartGuide(initialData);
+    const auth = useAuthService(initialData);
+    const quickStart = useQuickStartGuideService(initialData);
 
-    const jwtToken = useSelector(
-      (state: AppState) => state.global.security.jwtToken
-    );
-
-    useEffect(() => {
-      if (jwtToken) {
-        const newClient = WebsocketClient({
-          authentication: { jwtToken: jwtToken },
-          serverUrl: import.meta.env.VITE_APP_API_URL,
-          onConnected: () => setClientConnected(true),
-          onConnectionClose: () => setClientConnected(false),
-        });
-        setClient(newClient);
-        return () => {
-          newClient.disconnect();
-        };
-      }
-    }, [jwtToken]);
+    const wsClient = useWebsocketService(auth.state.jwtToken);
 
     const organizationUsage = useOrganizationUsageService({
-      organization: initialData.data.preferredOrganization,
-      enabled: Boolean(initialData.data?.serverConfiguration?.billing.enabled),
+      organization: initialData.state?.preferredOrganization,
+      enabled: Boolean(initialData.state?.serverConfiguration?.billing.enabled),
     });
 
+    const layout = useLayoutService();
+    const confirmationDialog = useConfirmationDialogService();
+
+    const messages = useMessageService();
+
     const actions = {
-      ...quickStartActions,
-      updatePreferredOrganization: (organizationId: number) => {
-        return initialData.updatePreferredOrganization(organizationId);
-      },
-      refetchInitialData: () => {
-        return initialData.refetchInitialData();
-      },
-      refetchUsage: () => {
-        return organizationUsage.refetch();
-      },
-      updateUsage: (usage: Partial<UsageModel>) => {
-        return organizationUsage.updateData(usage);
-      },
-      incrementPlanLimitErrors: () => {
-        return organizationUsage.incrementPlanLimitErrors();
-      },
-      incrementSpendingLimitErrors: () => {
-        return organizationUsage.incrementSpendingLimitErrors();
-      },
-      setTopBannerHeight,
-      setTopSubBannerHeight,
-      dismissTopBanner: () => {
-        return initialData.dismissAnnouncement();
-      },
-      setRightPanelWidth,
-      setTopBarHidden,
+      setGlobalError,
+      ...auth.actions,
+      ...initialData.actions,
+      ...quickStart.actions,
+      ...organizationUsage.actions,
+      ...layout.actions,
+      ...confirmationDialog.actions,
+      ...messages.actions,
     };
 
     globalContext.actions = actions;
 
+    if (!initialData.state) {
+      return globalError ? (
+        <GlobalErrorView error={globalError} />
+      ) : (
+        <FullPageLoading />
+      );
+    }
+
     const contextData = {
-      ...initialData.data!,
-      isFetching: initialData.isFetching,
-      isLoading: initialData.isLoading,
-      organizationUsage: organizationUsage.data,
-      client,
-      clientConnected,
-      topBannerHeight,
-      topSubBannerHeight,
-      rightPanelWidth,
-      topBarHeight: topBarHidden ? 0 : TOP_BAR_HEIGHT,
-      quickStartGuide: quickStartState,
+      globalError,
+      auth: auth.state,
+      initialData: initialData.state,
+      organizationUsage: organizationUsage.state,
+      layout: layout.state,
+      quickStartGuide: quickStart.state,
+      confirmationDialog: confirmationDialog.state,
+      wsClient,
     };
 
     return [contextData, actions];

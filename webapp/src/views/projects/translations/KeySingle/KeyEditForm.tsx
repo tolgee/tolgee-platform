@@ -274,7 +274,7 @@ export const KeyEditForm: React.FC = () => {
         </StyledActions>
       </StyledContainer>
       {toolsPanelOpen && (
-        <Box ml="-1px" mt="15px">
+        <Box ml="-1px" mt="25px">
           <FloatingToolsPanel />
         </Box>
       )}

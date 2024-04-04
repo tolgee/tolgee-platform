@@ -741,14 +741,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -795,6 +787,14 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1323,7 +1323,6 @@ export interface components {
       endpoint: string;
       signingRegion: string;
       enabled?: boolean;
-      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1360,25 +1359,29 @@ export interface components {
       /** @description Format to export to */
       format:
         | "JSON"
+        | "JSON_TOLGEE"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
         | "ANDROID_XML"
         | "FLUTTER_ARB"
-        | "PROPERTIES";
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML";
       /**
        * @description Delimiter to structure file content.
        *
        * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
        *
-       * When null, resulting file won't be structured.
+       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+       * specific formats like `YAML_RUBY` don't honor this parameter.
        */
       structureDelimiter?: string;
       /**
-       * @description
-       *       If true, for structured formats (like JSON) arrays are supported.
-       *       e.g. Key hello[0] will be exported as {"hello": ["..."]}
+       * @description If true, for structured formats (like JSON) arrays are supported.
+       *
+       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
        */
       supportArrays: boolean;
       /** @description Filter key IDs to be contained in export */
@@ -1389,16 +1392,25 @@ export interface components {
       filterTag?: string;
       /** @description Filter keys with prefix */
       filterKeyPrefix?: string;
-      /** @description Filter translations with state. By default, everything except untranslated is exported. */
+      /** @description Filter translations with state. By default, all states except untranslated is exported. */
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Select one ore multiple namespaces to export */
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. */
       filterNamespace?: string[];
       /**
-       * @description Message format to be used for export. (applicable for .po)
+       * @description Message format to be used for export.
        *
-       * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+       *
+       * This property is honored only for generic formats like JSON or YAML.
+       * For specific formats like `YAML_RUBY` it's ignored.
        */
-      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
+      messageFormat?:
+        | "C_SPRINTF"
+        | "PHP_SPRINTF"
+        | "JAVA_STRING_FORMAT"
+        | "APPLE_SPRINTF"
+        | "RUBY_SPRINTF"
+        | "ICU";
     };
     ContentDeliveryConfigModel: {
       /** Format: int64 */
@@ -1420,19 +1432,23 @@ export interface components {
       /** @description Format to export to */
       format:
         | "JSON"
+        | "JSON_TOLGEE"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
         | "ANDROID_XML"
         | "FLUTTER_ARB"
-        | "PROPERTIES";
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML";
       /**
        * @description Delimiter to structure file content.
        *
        * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
        *
-       * When null, resulting file won't be structured.
+       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+       * specific formats like `YAML_RUBY` don't honor this parameter.
        */
       structureDelimiter?: string;
       /** @description Filter key IDs to be contained in export */
@@ -1443,20 +1459,29 @@ export interface components {
       filterTag?: string;
       /** @description Filter keys with prefix */
       filterKeyPrefix?: string;
-      /** @description Filter translations with state. By default, everything except untranslated is exported. */
+      /** @description Filter translations with state. By default, all states except untranslated is exported. */
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Select one ore multiple namespaces to export */
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. */
       filterNamespace?: string[];
       /**
-       * @description Message format to be used for export. (applicable for .po)
+       * @description Message format to be used for export.
        *
-       * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+       *
+       * This property is honored only for generic formats like JSON or YAML.
+       * For specific formats like `YAML_RUBY` it's ignored.
        */
-      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
+      messageFormat?:
+        | "C_SPRINTF"
+        | "PHP_SPRINTF"
+        | "JAVA_STRING_FORMAT"
+        | "APPLE_SPRINTF"
+        | "RUBY_SPRINTF"
+        | "ICU";
       /**
-       * @description
-       *       If true, for structured formats (like JSON) arrays are supported.
-       *       e.g. Key hello[0] will be exported as {"hello": ["..."]}
+       * @description If true, for structured formats (like JSON) arrays are supported.
+       *
+       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
        */
       supportArrays: boolean;
     };
@@ -1653,14 +1678,15 @@ export interface components {
       description: string;
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1795,19 +1821,18 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      description: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
       username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
+      projectName: string;
+      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2329,19 +2354,23 @@ export interface components {
       /** @description Format to export to */
       format:
         | "JSON"
+        | "JSON_TOLGEE"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
         | "ANDROID_XML"
         | "FLUTTER_ARB"
-        | "PROPERTIES";
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML";
       /**
        * @description Delimiter to structure file content.
        *
        * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
        *
-       * When null, resulting file won't be structured.
+       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+       * specific formats like `YAML_RUBY` don't honor this parameter.
        */
       structureDelimiter?: string;
       /** @description Filter key IDs to be contained in export */
@@ -2352,21 +2381,30 @@ export interface components {
       filterTag?: string;
       /** @description Filter keys with prefix */
       filterKeyPrefix?: string;
-      /** @description Filter translations with state. By default, everything except untranslated is exported. */
+      /** @description Filter translations with state. By default, all states except untranslated is exported. */
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Select one ore multiple namespaces to export */
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. */
       filterNamespace?: string[];
       zip: boolean;
       /**
-       * @description Message format to be used for export. (applicable for .po)
+       * @description Message format to be used for export.
        *
-       * e.g. PHP_PO: Hello %s, PYTHON_PO: Hello %(name)s
+       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+       *
+       * This property is honored only for generic formats like JSON or YAML.
+       * For specific formats like `YAML_RUBY` it's ignored.
        */
-      messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
+      messageFormat?:
+        | "C_SPRINTF"
+        | "PHP_SPRINTF"
+        | "JAVA_STRING_FORMAT"
+        | "APPLE_SPRINTF"
+        | "RUBY_SPRINTF"
+        | "ICU";
       /**
-       * @description
-       *       If true, for structured formats (like JSON) arrays are supported.
-       *       e.g. Key hello[0] will be exported as {"hello": ["..."]}
+       * @description If true, for structured formats (like JSON) arrays are supported.
+       *
+       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
        */
       supportArrays: boolean;
     };
@@ -2689,7 +2727,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
@@ -2699,6 +2738,7 @@ export interface components {
       /** @example btforg */
       slug: string;
       avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2804,23 +2844,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
+      description?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
+      description?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3355,17 +3395,17 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      description: string;
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3482,19 +3522,20 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
-      description: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
+      description: string;
       username?: string;
+      /** Format: int64 */
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
+      projectName: string;
+      userFullName?: string;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -7599,7 +7640,6 @@ export interface operations {
       query: {
         /** When importing structured JSONs, you can set the delimiter which will be used in names of improted keys. */
         structureDelimiter?: string;
-        storeFilesToFileStorage?: boolean;
         /** If true, for structured formats (like JSON) arrays are supported. e.g. Array object like {"hello": ["item1", "item2"]} will be imported as keys hello[0] = "item1" and hello[1] = "item2". */
         supportArrays?: boolean;
       };
@@ -7671,19 +7711,23 @@ export interface operations {
         /** Format to export to */
         format?:
           | "JSON"
+          | "JSON_TOLGEE"
           | "XLIFF"
           | "PO"
           | "APPLE_STRINGS_STRINGSDICT"
           | "APPLE_XLIFF"
           | "ANDROID_XML"
           | "FLUTTER_ARB"
-          | "PROPERTIES";
+          | "PROPERTIES"
+          | "YAML_RUBY"
+          | "YAML";
         /**
          * Delimiter to structure file content.
          *
          * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
          *
-         * When null, resulting file won't be structured.
+         * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+         * specific formats like `YAML_RUBY` don't honor this parameter.
          */
         structureDelimiter?: string;
         /** Filter key IDs to be contained in export */
@@ -7694,14 +7738,14 @@ export interface operations {
         filterTag?: string;
         /** Filter keys with prefix */
         filterKeyPrefix?: string;
-        /** Filter translations with state. By default, everything except untranslated is exported. */
+        /** Filter translations with state. By default, all states except untranslated is exported. */
         filterState?: (
           | "UNTRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "DISABLED"
         )[];
-        /** Select one ore multiple namespaces to export */
+        /** Filter translations with namespace. By default, all namespaces everything are exported. */
         filterNamespace?: string[];
         /**
          * If false, it doesn't return zip of files, but it returns single file.
@@ -7710,11 +7754,25 @@ export interface operations {
          */
         zip?: boolean;
         /**
-         * Message format to be used for export. (applicable for .po)
+         * Message format to be used for export.
          *
-         * e.g. PHP_PO: Hello %s
+         * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+         *
+         * This property is honored only for generic formats like JSON or YAML.
+         * For specific formats like `YAML_RUBY` it's ignored.
          */
-        messageFormat?: "C_SPRINTF" | "PHP_SPRINTF";
+        messageFormat?:
+          | "C_SPRINTF"
+          | "PHP_SPRINTF"
+          | "JAVA_STRING_FORMAT"
+          | "APPLE_SPRINTF"
+          | "RUBY_SPRINTF"
+          | "ICU";
+        /**
+         * If true, for structured formats (like JSON) arrays are supported.
+         *
+         * e.g. Key hello[0] will be exported as {"hello": ["..."]}
+         */
         supportArrays?: boolean;
       };
       path: {

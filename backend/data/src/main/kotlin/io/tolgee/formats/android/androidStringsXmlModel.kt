@@ -5,7 +5,7 @@ class AndroidStringsXmlModel {
 }
 
 class StringUnit : AndroidXmlNode {
-  var value: String? = null
+  var value: AndroidStringValue? = null
 }
 
 class StringArrayUnit : AndroidXmlNode {
@@ -13,12 +13,14 @@ class StringArrayUnit : AndroidXmlNode {
 }
 
 class StringArrayItem(
-  var value: String? = null,
+  var value: AndroidStringValue? = null,
   var index: Int? = null,
 ) : AndroidXmlNode
 
 class PluralUnit : AndroidXmlNode {
-  val items = mutableMapOf<String, String>()
+  val items = mutableMapOf<String, AndroidStringValue>()
 }
+
+data class AndroidStringValue(val string: String, val isWrappedCdata: Boolean)
 
 interface AndroidXmlNode

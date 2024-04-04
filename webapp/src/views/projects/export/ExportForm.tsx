@@ -16,7 +16,14 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { SupportArraysSelector } from './components/SupportArraysSelector';
-import { formatGroups, getFormatById } from './components/formatGroups';
+import {
+  formatGroups,
+  getFormatById,
+  MessageFormat,
+  normalizeSelectedMessageFormat,
+} from './components/formatGroups';
+import { downloadExported } from './downloadExported';
+import { MessageFormatSelector } from './components/MessageFormatSelector';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -28,6 +35,7 @@ const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
   'REVIEWED',
 ]);
 
+// noinspection CssUnusedSymbol
 const StyledForm = styled('form')`
   display: grid;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
@@ -38,7 +46,7 @@ const StyledForm = styled('form')`
   grid-template-areas:
     'states  states'
     'langs   format'
-    'ns      ns    '
+    'ns      messageFormat'
     'options submit';
 
   & .states {
@@ -51,6 +59,10 @@ const StyledForm = styled('form')`
 
   & .format {
     grid-area: format;
+  }
+
+  & .messageFormat {
+    grid-area: messageFormat;
   }
 
   & .submit {
@@ -74,7 +86,7 @@ export const ExportForm = () => {
     url: '/v2/projects/{projectId}/export',
     method: 'post',
     fetchOptions: {
-      asBlob: true,
+      rawResponse: true,
     },
   });
 
@@ -138,6 +150,16 @@ export const ExportForm = () => {
     defaultVal: defaultFormat.id,
   });
 
+  const [messageFormat, setUrlMessageFormat] = useUrlSearchState(
+    'messageFormat',
+    {
+      defaultVal: normalizeSelectedMessageFormat({
+        format: urlFormat,
+        messageFormat: undefined,
+      }),
+    }
+  );
+
   const [nested, setNested] = useUrlSearchState('nested', {
     defaultVal: 'false',
   });
@@ -164,6 +186,7 @@ export const ExportForm = () => {
           (urlFormat
             ? getFormatById(urlFormat as string).defaultSupportArrays
             : defaultFormat.defaultSupportArrays) || false,
+        messageFormat: (messageFormat ?? 'ICU') as MessageFormat | undefined,
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -180,6 +203,7 @@ export const ExportForm = () => {
         setLanguages(sortLanguages(values.languages));
         setUrlFormat(values.format);
         setNested(String(values.nested));
+        setUrlMessageFormat(values.messageFormat);
         return errors;
       }}
       validateOnBlur={false}
@@ -194,36 +218,28 @@ export const ExportForm = () => {
                 format: format.format,
                 filterState: values.states,
                 languages: values.languages,
-                structureDelimiter: format.canBeStructured
+                structureDelimiter: format.structured
                   ? format.defaultStructureDelimiter
                   : '',
                 filterNamespace: values.namespaces,
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
                 supportArrays: values.supportArrays || false,
-                messageFormat: format.messageFormat,
+                messageFormat:
+                  // strict message format is prioritized
+                  format.messageFormat ??
+                  normalizeSelectedMessageFormat(values),
               },
             },
           },
           {
-            onSuccess(data) {
-              const url = URL.createObjectURL(data as any as Blob);
-              const a = document.createElement('a');
-              const onlyPossibleLanguageString =
-                values.languages.length === 1 ? `_${values.languages[0]}` : '';
-              a.href = url;
-              const dateStr = '_' + new Date().toISOString().split('T')[0];
-              if (data.type === 'application/zip') {
-                a.download = project.name + dateStr + '.zip';
-              } else {
-                a.download =
-                  project.name +
-                  onlyPossibleLanguageString +
-                  dateStr +
-                  '.' +
-                  format.extension;
-              }
-              a.click();
+            async onSuccess(response) {
+              return downloadExported(
+                response as unknown as Response,
+                values.languages,
+                format,
+                project.name
+              );
             },
             onSettled() {
               actions.setSubmitting(false);
@@ -250,6 +266,7 @@ export const ExportForm = () => {
                 </StyledOptions>
               </>
             )}
+            <MessageFormatSelector className="messageFormat" />
             <NsSelector className="ns" namespaces={allNamespaces} />
             <div className="submit">
               <LoadingButton

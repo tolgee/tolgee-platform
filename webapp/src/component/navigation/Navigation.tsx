@@ -42,7 +42,7 @@ type Props = {
 
 export const Navigation: React.FC<Props> = ({ path }) => {
   const theme = useTheme();
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const smallScreen = useMediaQuery(
     `@media (max-width: ${800 + rightPanelWidth}px)`
   );

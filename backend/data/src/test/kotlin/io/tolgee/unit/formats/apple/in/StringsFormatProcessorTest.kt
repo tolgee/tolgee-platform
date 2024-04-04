@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.apple.`in`
 
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.testing.assert
+import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -87,10 +88,30 @@ class StringsFormatProcessorTest {
     projectIcuPlaceholdersEnabled: Boolean,
   ) {
     mockUtil.mockIt(
-      "values-en/Localizable.string",
+      "values-en/Localizable.strings",
       "src/test/resources/import/apple/Localizable_params.strings",
       convertPlaceholders,
       projectIcuPlaceholdersEnabled,
+    )
+  }
+
+  @Test
+  fun `placeholder conversion setting application works`() {
+    PlaceholderConversionTestHelper.testFile(
+      "values-en/Localizable.strings",
+      "src/test/resources/import/apple/Localizable_params.strings",
+      assertBeforeSettingsApplication =
+        listOf(
+          "Hello, {0} '{'meto'}'",
+        ),
+      assertAfterDisablingConversion =
+        listOf(
+          "Hello, %@ '{'meto'}'",
+        ),
+      assertAfterReEnablingConversion =
+        listOf(
+          "Hello, {0} '{'meto'}'",
+        ),
     )
   }
 

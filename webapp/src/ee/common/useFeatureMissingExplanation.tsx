@@ -3,15 +3,15 @@ import { LINKS } from 'tg.constants/links';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export function useFeatureMissingExplanation() {
-  const subscription = useGlobalContext((c) => c.eeSubscription);
+  const subscription = useGlobalContext((c) => c.initialData.eeSubscription);
   const isAdmin = useGlobalContext(
-    (c) => c.userInfo?.globalServerRole === 'ADMIN'
+    (c) => c.initialData.userInfo?.globalServerRole === 'ADMIN'
   );
   const billingEnabled = useGlobalContext(
-    (c) => c.serverConfiguration.billing.enabled
+    (c) => c.initialData.serverConfiguration.billing.enabled
   );
   const isOrganizationOwner = useGlobalContext(
-    (c) => c.preferredOrganization?.currentUserRole === 'OWNER'
+    (c) => c.initialData.preferredOrganization?.currentUserRole === 'OWNER'
   );
 
   const { t } = useTranslate();

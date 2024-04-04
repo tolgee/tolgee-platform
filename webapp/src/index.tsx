@@ -10,9 +10,9 @@ import {
 import { FormatIcu } from '@tolgee/format-icu';
 import ReactDOM from 'react-dom';
 import { QueryClientProvider } from 'react-query';
-import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query/devtools';
-import { Provider } from 'react-redux';
+
+import { BrowserRouter } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
@@ -20,21 +20,15 @@ import 'regenerator-runtime/runtime';
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
 import { BottomPanelProvider } from 'tg.component/bottomPanel/BottomPanelContext';
-import { GlobalProvider } from 'tg.globalContext/GlobalContext';
+import { GlobalContext } from 'tg.globalContext/GlobalContext';
 import { App } from './component/App';
 import ErrorBoundary from './component/ErrorBoundary';
 import { FullPageLoading } from './component/common/FullPageLoading';
 import { ThemeProvider } from './ThemeProvider';
 
 import reportWebVitals from './reportWebVitals';
-import { dispatchService } from './service/DispatchService';
-import configureStore from './store';
 import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
-
-const store = configureStore();
-
-dispatchService.store = store;
 
 const tolgee = Tolgee()
   .use(DevTools())
@@ -71,24 +65,22 @@ const MainWrapper = () => {
               options={{ useSuspense: false }}
             >
               <BrowserRouter>
-                <Provider store={store}>
-                  <QueryClientProvider client={queryClient}>
-                    {/* @ts-ignore */}
-                    <ErrorBoundary>
-                      <SnackbarProvider data-cy="global-snackbars">
-                        <GlobalProvider>
-                          <BottomPanelProvider>
-                            <MuiLocalizationProvider>
-                              <App />
-                            </MuiLocalizationProvider>
+                <QueryClientProvider client={queryClient}>
+                  {/* @ts-ignore */}
+                  <ErrorBoundary>
+                    <SnackbarProvider data-cy="global-snackbars">
+                      <GlobalContext>
+                        <BottomPanelProvider>
+                          <MuiLocalizationProvider>
+                            <App />
                             <GlobalErrorModal />
-                          </BottomPanelProvider>
-                        </GlobalProvider>
-                      </SnackbarProvider>
-                    </ErrorBoundary>
-                    <ReactQueryDevtools />
-                  </QueryClientProvider>
-                </Provider>
+                          </MuiLocalizationProvider>
+                        </BottomPanelProvider>
+                      </GlobalContext>
+                    </SnackbarProvider>
+                  </ErrorBoundary>
+                  <ReactQueryDevtools />
+                </QueryClientProvider>
               </BrowserRouter>
             </TolgeeProvider>
           </Suspense>

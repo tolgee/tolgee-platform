@@ -1,5 +1,7 @@
 package io.tolgee.formats.apple.out
 
+import io.tolgee.formats.MobileStringEscaper
+
 class StringsWriter {
   private val content = StringBuilder()
 
@@ -12,17 +14,23 @@ class StringsWriter {
       val escaped = escapeComment(it)
       content.append("/* $escaped */\n")
     }
-    content.append("\"${escaped(key)}\" = \"${escaped(value)}\";\n\n")
+    content.append("\"${key.escaped()}\" = \"${value.escaped()}\";\n\n")
   }
 
   private fun escapeComment(s: String): String {
     return s.replace("*/", "*\\/")
   }
 
-  private fun escaped(string: String): String {
-    return string
-      .replace("\\", "\\\\")
-      .replace("\"", "\\\"")
+  private fun String.escaped(): String {
+    return MobileStringEscaper(
+      string = this,
+      escapeApos = false,
+      keepPercentSignEscaped = true,
+      quoteMoreWhitespaces = false,
+      escapeNewLines = false,
+      escapeQuotes = true,
+      utfSymbolCharacter = 'U',
+    ).escape()
   }
 
   val result: String

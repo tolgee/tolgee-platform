@@ -1,7 +1,7 @@
 package io.tolgee.unit.formats.xliff.out
 
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
@@ -43,16 +43,17 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
     assertThat(files).hasSize(2)
-    var fileContent = files["de.xlf"]!!.bufferedReader().readText()
+    var fileContent = files["de.xliff"]!!.bufferedReader().readText()
     var transUnit = assertHasTransUnitAndReturn(fileContent, "en", "de")
     assertThat(transUnit.attribute("id").value).isEqualTo("A key")
     assertThat(transUnit.selectNodes("./source")[0].text).isEqualTo("")
     assertThat(transUnit.selectNodes("./target")[0].text).isEqualTo("Z translation")
 
-    fileContent = files["en.xlf"]!!.bufferedReader().readText()
+    fileContent = files["en.xliff"]!!.bufferedReader().readText()
     transUnit = assertHasTransUnitAndReturn(fileContent, "en", "en")
     assertThat(transUnit.attribute("id").value).isEqualTo("Z key")
     assertThat(transUnit.selectNodes("./source")[0].text).isEqualTo("A translation")
@@ -84,10 +85,11 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
     assertThat(files).hasSize(2)
-    val fileContent = files["de.xlf"]!!.bufferedReader().readText()
+    val fileContent = files["de.xliff"]!!.bufferedReader().readText()
     val document = fileContent.parseToDocument()
     val valid = document.selectNodes("//trans-unit[@id = 'html_key']/source/p")[0]
     assertThat(valid.text).isEqualTo("Sweat jesus, this is HTML!")
@@ -113,9 +115,10 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = { listOf() },
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
-    val fileContent = files["en.xlf"]!!.bufferedReader().readText()
+    val fileContent = files["en.xliff"]!!.bufferedReader().readText()
     fileContent.contains(
       "<note xml:space=\"preserve\">Omg!\n" +
         "  This is really.    \n" +
@@ -201,6 +204,7 @@ class XliffFileExporterTest {
         exportParams = params,
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
+        projectIcuPlaceholdersSupport = true,
       ).produceFiles()
 
     val validator: Validator
@@ -220,13 +224,13 @@ class XliffFileExporterTest {
 
     assertThat(files).hasSize(2)
 
-    // de.xlf is invalid because of a missing a "source" element inside the "trans-unit". Should throw a SAXParseException.
-    files["de.xlf"].use { invalidFileContent ->
+    // de.xliff is invalid because of a missing a "source" element inside the "trans-unit". Should throw a SAXParseException.
+    files["de.xliff"].use { invalidFileContent ->
       validator.validate(StreamSource(invalidFileContent))
     }
 
-    // en.xlf is valid
-    files["en.xlf"].use { validFileContent ->
+    // en.xliff is valid
+    files["en.xliff"].use { validFileContent ->
       validator.validate(StreamSource(validFileContent))
     }
   }
@@ -236,7 +240,7 @@ class XliffFileExporterTest {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.xlf",
+      "cs.xliff",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
@@ -285,7 +289,7 @@ class XliffFileExporterTest {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "cs.xlf",
+      "cs.xliff",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
@@ -329,22 +333,55 @@ class XliffFileExporterTest {
     return getExporter(built.translations, true)
   }
 
+  @Test
+  fun `respects message format prop`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "I will be first '{'icuParam'}' {hello, number}",
+        )
+      }
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = ExportParams(messageFormat = ExportMessageFormat.RUBY_SPRINTF),
+      )
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.xliff",
+      """
+    |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    |  <file datatype="plaintext" original="" source-language="en" target-language="cs">
+    |    <header>
+    |      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    |    </header>
+    |    <body>
+    |      <trans-unit id="item">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">I will be first '{'icuParam'}' %&lt;hello&gt;d</target>
+    |      </trans-unit>
+    |    </body>
+    |  </file>
+    |</xliff>
+    |
+      """.trimMargin(),
+    )
+  }
+
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    exportParams: ExportParams = ExportParams(),
   ): XliffFileExporter {
     return XliffFileExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = exportParams,
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
-      convertMessage = { message, isPlural ->
-        IcuToGenericFormatMessageConvertor(
-          message,
-          isPlural,
-          isProjectIcuPlaceholdersEnabled,
-        ).convert()
-      },
+      projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
     )
   }
 }

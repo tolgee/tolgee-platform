@@ -1,3 +1,116 @@
+## [3.54.7](https://github.com/tolgee/tolgee-platform/compare/v3.54.6...v3.54.7) (2024-04-03)
+
+
+### Bug Fixes
+
+* show chat with premium support ([#2215](https://github.com/tolgee/tolgee-platform/issues/2215)) ([5960423](https://github.com/tolgee/tolgee-platform/commit/5960423292036cb467b894bcc04db8a0c888fe8f))
+
+## [3.54.6](https://github.com/tolgee/tolgee-platform/compare/v3.54.5...v3.54.6) (2024-03-28)
+
+
+### Bug Fixes
+
+* Android iOS escaping ([#2228](https://github.com/tolgee/tolgee-platform/issues/2228)) ([dea6a16](https://github.com/tolgee/tolgee-platform/commit/dea6a16d6715ada22078a5b937fb6aeb835dd0c7))
+
+## [3.54.5](https://github.com/tolgee/tolgee-platform/compare/v3.54.4...v3.54.5) (2024-03-28)
+
+
+### Bug Fixes
+
+* Sprintf format detection ([#2227](https://github.com/tolgee/tolgee-platform/issues/2227)) ([5e81397](https://github.com/tolgee/tolgee-platform/commit/5e81397973f9631fb405d1b09dc7ea957ae9c28c))
+
+## [3.54.4](https://github.com/tolgee/tolgee-platform/compare/v3.54.3...v3.54.4) (2024-03-28)
+
+
+### Bug Fixes
+
+* autoredirect when token expired + signup error ([#2223](https://github.com/tolgee/tolgee-platform/issues/2223)) ([b18956e](https://github.com/tolgee/tolgee-platform/commit/b18956eb03cdabfa41d64bb0ccb6ce9ee3e9ca9b))
+
+## [3.54.3](https://github.com/tolgee/tolgee-platform/compare/v3.54.2...v3.54.3) (2024-03-28)
+
+
+### Bug Fixes
+
+* Redis Caches not evicted properly ([#2224](https://github.com/tolgee/tolgee-platform/issues/2224)) ([98003be](https://github.com/tolgee/tolgee-platform/commit/98003be00752ef6ca0cbbc583c4cf74c70512b63))
+
+## [3.54.2](https://github.com/tolgee/tolgee-platform/compare/v3.54.1...v3.54.2) (2024-03-27)
+
+
+### Bug Fixes
+
+* Android unescaping & ampersand handling ([#2218](https://github.com/tolgee/tolgee-platform/issues/2218)) ([18c8c49](https://github.com/tolgee/tolgee-platform/commit/18c8c491ed4fea433bea07a1b167b88123c9b36b))
+
+## [3.54.1](https://github.com/tolgee/tolgee-platform/compare/v3.54.0...v3.54.1) (2024-03-27)
+
+
+### Bug Fixes
+
+* quick start not opening when floating ([#2220](https://github.com/tolgee/tolgee-platform/issues/2220)) ([e4412d0](https://github.com/tolgee/tolgee-platform/commit/e4412d02f6991f9119353d10cfa3964070b9d162))
+
+# [3.54.0](https://github.com/tolgee/tolgee-platform/compare/v3.53.1...v3.54.0) (2024-03-26)
+
+
+### Features
+
+* Add Ruby YAML support ([#2183](https://github.com/tolgee/tolgee-platform/issues/2183)) ([118ecf7](https://github.com/tolgee/tolgee-platform/commit/118ecf76710683a5ff889b38866be7e1abf7b693))
+* improve routing and redirects ([#2210](https://github.com/tolgee/tolgee-platform/issues/2210)) ([74aa4aa](https://github.com/tolgee/tolgee-platform/commit/74aa4aa443ee238779534556daffb74db6c50234))
+
+## [3.53.1](https://github.com/tolgee/tolgee-platform/compare/v3.53.0...v3.53.1) (2024-03-26)
+
+
+### Bug Fixes
+
+* Android Import/Export fixes ([#2213](https://github.com/tolgee/tolgee-platform/issues/2213)) ([7b3caf7](https://github.com/tolgee/tolgee-platform/commit/7b3caf781e72d9a68fb8bd5d6ec13657c67ac57b))
+
+# [3.53.0](https://github.com/tolgee/tolgee-platform/compare/v3.52.0...v3.53.0) (2024-03-21)
+
+
+### Features
+
+* add select all checkbox to top ([#2204](https://github.com/tolgee/tolgee-platform/issues/2204)) ([d277693](https://github.com/tolgee/tolgee-platform/commit/d277693f4fe7a32dd18d6ec34ae3cd8f363eb91b))
+
+# [3.52.0](https://github.com/tolgee/tolgee-platform/compare/v3.51.1...v3.52.0) (2024-03-21)
+
+
+### Features
+
+* new language adding ([#2200](https://github.com/tolgee/tolgee-platform/issues/2200)) ([989eb67](https://github.com/tolgee/tolgee-platform/commit/989eb6737c3e62680977cf956f6631594826653d))
+
+## [3.51.1](https://github.com/tolgee/tolgee-platform/compare/v3.51.0...v3.51.1) (2024-03-19)
+
+
+### Bug Fixes
+
+* Android Import/Export escaping ([#2192](https://github.com/tolgee/tolgee-platform/issues/2192)) ([9e54529](https://github.com/tolgee/tolgee-platform/commit/9e5452988964d51301a1de9873115c902f7106db))
+
+# [3.51.0](https://github.com/tolgee/tolgee-platform/compare/v3.50.2...v3.51.0) (2024-03-19)
+
+
+### Features
+
+* support for tags with attributes & tooltips in editor ([#2194](https://github.com/tolgee/tolgee-platform/issues/2194)) ([ba82cf6](https://github.com/tolgee/tolgee-platform/commit/ba82cf648b16ce4f8918e3294d17f104ba57228d))
+
+## [3.50.2](https://github.com/tolgee/tolgee-platform/compare/v3.50.1...v3.50.2) (2024-03-19)
+
+
+### Bug Fixes
+
+* Error on project description longer than 255 chars ([#2195](https://github.com/tolgee/tolgee-platform/issues/2195)) ([f06ba24](https://github.com/tolgee/tolgee-platform/commit/f06ba24e679a95e5c0f46fa00cee184ab20fb231))
+
+## [3.50.1](https://github.com/tolgee/tolgee-platform/compare/v3.50.0...v3.50.1) (2024-03-15)
+
+
+### Bug Fixes
+
+* Apple export to stringsdict and export UI fixes ([#2191](https://github.com/tolgee/tolgee-platform/issues/2191)) ([1741dea](https://github.com/tolgee/tolgee-platform/commit/1741deab1ef652e09d9fd28a321715faf06b2947))
+
+# [3.50.0](https://github.com/tolgee/tolgee-platform/compare/v3.49.12...v3.50.0) (2024-03-15)
+
+
+### Features
+
+* add help menu ([#2190](https://github.com/tolgee/tolgee-platform/issues/2190)) ([34daec1](https://github.com/tolgee/tolgee-platform/commit/34daec16910e488bd24ddce55a4411960325772f))
+
 ## [3.49.12](https://github.com/tolgee/tolgee-platform/compare/v3.49.11...v3.49.12) (2024-03-13)
 
 

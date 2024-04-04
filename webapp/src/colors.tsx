@@ -35,6 +35,11 @@ export type Emphasis = {
   A700: string;
 };
 
+export type Tooltip = {
+  background: string;
+  text: string;
+};
+
 export type Editor = {
   function: string;
   other: string;
@@ -117,6 +122,10 @@ export type QuickStart = {
   finishCircle: string;
 };
 
+export type LanguageChips = {
+  background: string;
+};
+
 const getTokensByMode = (mode: 'light' | 'dark') => {
   const result = {} as Record<keyof typeof ALL_TOKENS, string>;
   Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
@@ -181,7 +190,7 @@ export const colors = {
     tooltip: {
       background: '#ffffff',
       text: '#111111',
-    },
+    } satisfies Tooltip,
     info: '#009B85',
     topBanner: {
       background: '#BEF4E9',
@@ -212,6 +221,9 @@ export const colors = {
     tipsBanner: {
       background: '#FDECF280',
     },
+    languageChips: {
+      background: '#F6F6F8',
+    } satisfies LanguageChips,
     tokens: getTokensByMode('light'),
     placeholders: {
       variable: {
@@ -302,7 +314,7 @@ export const colors = {
     tooltip: {
       background: '#394556',
       text: '#efefef',
-    },
+    } satisfies Tooltip,
     info: '#6db2a4',
     topBanner: {
       background: '#008371',
@@ -332,6 +344,9 @@ export const colors = {
     tipsBanner: {
       background: '#29242580',
     },
+    languageChips: {
+      background: '#243245',
+    } satisfies LanguageChips,
     tokens: getTokensByMode('dark'),
     placeholders: {
       variable: {

@@ -37,7 +37,7 @@ class CoreImportFilesProcessor(
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
-  private val importDataManager by lazy {
+  val importDataManager by lazy {
     ImportDataManager(
       applicationContext = applicationContext,
       import = import,

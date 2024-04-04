@@ -3,7 +3,6 @@ package io.tolgee.unit.formats.properties.out
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
@@ -150,13 +149,7 @@ class PropertiesFileExporterTest {
     return PropertiesFileExporter(
       translations = translations,
       exportParams = ExportParams(),
-      convertMessage = { message, isPlural ->
-        IcuToGenericFormatMessageConvertor(
-          message,
-          isPlural,
-          isProjectIcuPlaceholdersEnabled,
-        ).convert()
-      },
+      projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
     )
   }
 }
