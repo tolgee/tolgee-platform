@@ -8,10 +8,11 @@ import org.springframework.context.ApplicationContext
 class ProjectActivityViewByRevisionProvider(
   private val applicationContext: ApplicationContext,
   private val revisionId: Long,
+  private val onlyCountInListAbove: Int = 0,
 ) {
   fun get(): ProjectActivityView? {
     val revisions = getProjectActivityRevisions(revisionId)
-    val views = ActivityViewByRevisionsProvider(applicationContext, revisions).get()
+    val views = ActivityViewByRevisionsProvider(applicationContext, revisions, onlyCountInListAbove).get()
     return views.firstOrNull()
   }
 
