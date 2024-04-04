@@ -126,10 +126,10 @@ class SlackExecutor(
       it.channel(slackChannelId)
         .blocks {
           section {
-            markdownText("Success! :tada: The operation was completed successfully.")
+            markdownText(i18n.translate("success_login_message"))
           }
           context {
-            plainText("Now you can use other commands")
+            plainText(i18n.translate("success_login_context"))
           }
         }
     }

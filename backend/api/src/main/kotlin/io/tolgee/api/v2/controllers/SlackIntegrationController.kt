@@ -14,6 +14,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -39,6 +40,7 @@ class SlackIntegrationController(
   private val userAccountService: UserAccountService,
   private val objectMapper: ObjectMapper,
   private val i18n: I18n,
+  private val authenticationFacade: AuthenticationFacade,
 ) : Logging {
   @PostMapping
   @UseDefaultPermissions
@@ -103,6 +105,10 @@ class SlackIntegrationController(
   fun connectSlack(
     @RequestBody payload: SlackConnectionDto,
   ) {
+    if (payload.userAccountId.toLongOrNull() == authenticationFacade.authenticatedUser.id) {
+      throw Exception()
+    }
+
     val user = userAccountService.get(payload.userAccountId.toLong())
     slackSubscriptionService.create(user, payload.slackId, payload.slackNickName)
 
@@ -213,7 +219,7 @@ class SlackIntegrationController(
     val event: SlackEventDto = objectMapper.readValue(decodedPayload)
 
     event.actions.forEach { action ->
-      if (action.value != "help_btn") {
+      if (action.value == "help_btn") {
         return@forEach
       } else {
         slackExecutor.sendHelpMessage(event.channel.id)

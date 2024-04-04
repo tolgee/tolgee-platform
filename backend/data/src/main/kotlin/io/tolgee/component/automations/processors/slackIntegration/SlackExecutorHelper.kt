@@ -100,6 +100,7 @@ class SlackExecutorHelper(
     if (langTags.isEmpty()) {
       return null
     }
+
     return SavedMessageDto(
       blocks = blocksHeader,
       attachments = attachments,
