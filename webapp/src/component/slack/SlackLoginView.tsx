@@ -1,5 +1,5 @@
 import { Button, useMediaQuery } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { SPLIT_CONTENT_BREAK_POINT } from 'tg.component/security/SplitContent';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -46,7 +46,7 @@ export const SlackLoginView = () => {
       },
       {
         onSuccess: () => {
-          messaging.success(<T keyName="" />);
+          // TODO: show success message
           history.push(LINKS.ROOT.build());
         },
       }
