@@ -2722,8 +2722,6 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */

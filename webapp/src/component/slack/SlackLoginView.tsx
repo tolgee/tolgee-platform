@@ -1,10 +1,7 @@
-import {Alert, Button, useMediaQuery} from '@mui/material';
+import {Button, useMediaQuery} from '@mui/material';
 import {T, useTranslate} from '@tolgee/react';
-import {useSelector} from 'react-redux';
 import {CompactView} from 'tg.component/layout/CompactView';
 import {SPLIT_CONTENT_BREAK_POINT} from 'tg.component/security/SplitContent';
-import {AppState} from 'tg.store/index';
-import {TranslatedError} from 'tg.translationTools/TranslatedError';
 import {useApiMutation} from 'tg.service/http/useQueryApi';
 import {useHistory, useLocation} from 'react-router-dom';
 import {useUser} from 'tg.globalContext/helpers';
@@ -30,7 +27,6 @@ export const SlackLoginView = () => {
   const validUserAccountId = user?.id?.toString() ?? 'defaultAccountId';
   const validSlackNickName = slackNickName ?? '';
 
-
   const slackMutation = useApiMutation({
     url: '/v2/slack/connect',
     method: 'post',
@@ -44,7 +40,7 @@ export const SlackLoginView = () => {
             slackId: validSlackId,
             userAccountId: validUserAccountId,
             channelId: validChannelId,
-            slackNickName: validSlackNickName
+            slackNickName: validSlackNickName,
           },
         },
       },
@@ -57,8 +53,6 @@ export const SlackLoginView = () => {
     );
   };
 
-  const security = useSelector((state: AppState) => state.global.security);
-
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
   return (
@@ -66,21 +60,6 @@ export const SlackLoginView = () => {
       maxWidth={isSmall ? 430 : 964}
       windowTitle={t('login_title')}
       title="Slack integration"
-      alerts={
-        <>
-          {security.loginErrorCode && (
-            <Alert severity="error">
-              <TranslatedError code={security.loginErrorCode} />
-            </Alert>
-          )}
-          {error && (
-            <Alert severity="warning">
-              Please make sure all required fields (Slack ID, Slack Channel ID,
-              User) are provided.
-            </Alert>
-          )}
-        </>
-      }
       content={
         <>
           <h1>Connect Slack to Tolgee</h1> {}

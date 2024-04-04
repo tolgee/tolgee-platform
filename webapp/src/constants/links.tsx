@@ -341,9 +341,6 @@ export class LINKS {
    * Slack
    */
 
-  static SLACK = Link.ofRoot('slack')
-  static SLACK_LOGIN = Link.ofParent(
-    LINKS.SLACK,
-    'login'
-  )
+  static SLACK = Link.ofRoot('slack');
+  static SLACK_LOGIN = Link.ofParent(LINKS.SLACK, 'login');
 }
