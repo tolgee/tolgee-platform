@@ -28,14 +28,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
-@Tag(name = "Projects")
+@Tag(name = "Machine Translation Settings")
 class MachineTranslationSettingsController(
   private val projectHolder: ProjectHolder,
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val mtServiceConfigService: MtServiceConfigService,
 ) {
   @GetMapping("/{projectId}/machine-translation-service-settings")
-  @Operation(summary = "Returns machine translation settings for project")
+  @Operation(summary = "Get machine translation settings")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
@@ -44,7 +44,7 @@ class MachineTranslationSettingsController(
   }
 
   @PutMapping("/{projectId}/machine-translation-service-settings")
-  @Operation(summary = "Sets machine translation settings for project")
+  @Operation(summary = "Sets machine translation settings")
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   @AllowApiAccess
   fun setMachineTranslationSettings(
@@ -55,7 +55,12 @@ class MachineTranslationSettingsController(
   }
 
   @GetMapping("/{projectId}/machine-translation-language-info")
-  @Operation(summary = "Returns info about formality and ")
+  @Operation(
+    summary = "Machine translation info",
+    description =
+      "Get enabled services " +
+        "and configured formality for each language",
+  )
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   @AllowApiAccess
   fun getMachineTranslationLanguageInfo(): CollectionModel<LanguageInfoModel> {

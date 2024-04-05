@@ -162,7 +162,7 @@ class ResolvingKeyImporter(
       }
 
     val images = imageUploadService.find(uploadedImagesIds)
-    checkImageUploadermissions(images)
+    checkImageUploadPermissions(images)
 
     val createdScreenshots =
       images.associate {
@@ -213,13 +213,13 @@ class ResolvingKeyImporter(
       }.toMap()
   }
 
-  private fun checkImageUploadermissions(images: List<UploadedImage>) {
+  private fun checkImageUploadPermissions(images: List<UploadedImage>) {
     if (images.isNotEmpty()) {
       securityService.checkScreenshotsUploadPermission(projectEntity.id)
     }
     images.forEach { image ->
       if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException()
+        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
       }
     }
   }

@@ -11,6 +11,7 @@ import io.tolgee.hateoas.key.namespace.UsedNamespaceModel
 import io.tolgee.hateoas.key.namespace.UsedNamespaceModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Namespace
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController
   ],
 )
 @Tag(name = "Namespaces", description = "Manipulates key namespaces")
+@OpenApiOrderExtension(7)
 class NamespaceController(
   private val namespaceService: NamespaceService,
   private val projectHolder: ProjectHolder,
@@ -50,9 +52,10 @@ class NamespaceController(
   private val usedNamespaceModelAssembler: UsedNamespaceModelAssembler,
 ) : IController {
   @GetMapping(value = ["namespaces"])
-  @Operation(summary = "Returns all project namespaces")
+  @Operation(summary = "Get namespaces")
   @UseDefaultPermissions
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
   fun getAllNamespaces(
     @ParameterObject
     @SortDefault("id")
@@ -63,9 +66,13 @@ class NamespaceController(
   }
 
   @GetMapping(value = ["used-namespaces"])
-  @Operation(summary = "Returns all used project namespaces. Response contains default (null) namespace if used.")
+  @Operation(
+    summary = "Get used namespaces",
+    description = "Returns all used project namespaces. Response contains default (null) namespace if used.",
+  )
   @UseDefaultPermissions
   @AllowApiAccess
+  @OpenApiOrderExtension(2)
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
     val namespaces =
       namespaceService.getAllInProject(projectHolder.project.id)
@@ -82,6 +89,7 @@ class NamespaceController(
   @RequestActivity(ActivityType.NAMESPACE_EDIT)
   @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
   @AllowApiAccess
+  @OpenApiOrderExtension(4)
   fun update(
     @PathVariable id: Long,
     @RequestBody @Valid
@@ -93,9 +101,10 @@ class NamespaceController(
   }
 
   @GetMapping(value = ["/namespace-by-name/{name}"])
-  @Operation(summary = "Returns information about a namespace by its name")
+  @Operation(summary = "Get namespace by name", description = "Returns information about a namespace by its name")
   @UseDefaultPermissions
   @AllowApiAccess
+  @OpenApiOrderExtension(3)
   fun getByName(
     @PathVariable name: String,
   ): NamespaceModel {

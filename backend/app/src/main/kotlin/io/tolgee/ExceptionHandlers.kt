@@ -132,6 +132,28 @@ class ExceptionHandlers {
       ),
     ],
   )
+  @ApiResponse(
+    responseCode = "403",
+    content = [
+      Content(
+        schema =
+          Schema(
+            example = """{"code": "operation_not_permitted", "params": ["translations.edit"]}""",
+          ),
+      ),
+    ],
+  )
+  @ApiResponse(
+    responseCode = "401",
+    content = [
+      Content(
+        schema =
+          Schema(
+            example = """{"code": "unauthenticated"}""",
+          ),
+      ),
+    ],
+  )
   @ExceptionHandler(ErrorException::class)
   fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(ex.errorResponseBody, ex.httpStatus)

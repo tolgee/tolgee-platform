@@ -6,6 +6,7 @@ package io.tolgee.service.key
 
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.dtos.CreateScreenshotResult
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
@@ -153,7 +154,7 @@ class ScreenshotService(
           ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
 
       if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException()
+        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
       }
 
       val info =

@@ -7,7 +7,6 @@ package io.tolgee.api.v2.controllers.dataImport
 import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
@@ -22,6 +21,8 @@ import io.tolgee.hateoas.dataImport.ImportLanguageModelAssembler
 import io.tolgee.hateoas.dataImport.ImportNamespaceModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ImportLanguageView
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -60,10 +61,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/import", "/v2/projects/import"])
-@Tag(
-  name = "Import",
-  description = "These endpoints handle multi-step data import",
-)
+@ImportDocsTag
+@OpenApiOrderExtension(5)
 class V2ImportController(
   private val importService: ImportService,
   private val authenticationFacade: AuthenticationFacade,
@@ -78,6 +77,7 @@ class V2ImportController(
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
   fun addFiles(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams,
@@ -108,10 +108,11 @@ class V2ImportController(
   }
 
   @PutMapping("/apply")
-  @Operation(description = "Imports the data prepared in previous step")
+  @Operation(summary = "Apply import", description = "Imports the data prepared in previous step")
   @RequestActivity(ActivityType.IMPORT)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @OpenApiOrderExtension(2)
   fun applyImport(
     @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
     @RequestParam(defaultValue = "NO_FORCE")
@@ -122,10 +123,15 @@ class V2ImportController(
   }
 
   @PutMapping("/apply-streaming", produces = [MediaType.APPLICATION_NDJSON_VALUE])
-  @Operation(description = "Imports the data prepared in previous step. Streams current status.")
+  @Operation(
+    summary = "Apply import (streaming)",
+    description =
+      "Imports the data prepared in previous step. Streams current status.",
+  )
   @RequestActivity(ActivityType.IMPORT)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @OpenApiHideFromPublicDocs
   fun applyImportStreaming(
     @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
     @RequestParam(defaultValue = "NO_FORCE")
@@ -183,6 +189,7 @@ class V2ImportController(
   @Operation(description = "Deletes prepared import data.", summary = "Delete")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @OpenApiOrderExtension(3)
   fun cancelImport() {
     this.importService.deleteImport(projectHolder.project.id, authenticationFacade.authenticatedUser.id)
   }

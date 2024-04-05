@@ -43,7 +43,7 @@ class V2ImageUploadController(
   private val authenticationFacade: AuthenticationFacade,
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(summary = "Uploads an image for later use")
+  @Operation(summary = "Upload an image for later use")
   @ResponseStatus(HttpStatus.CREATED)
   @RequestBody(content = [Content(encoding = [Encoding(name = "info", contentType = "application/json")])])
   @AllowApiAccess
@@ -57,7 +57,7 @@ class V2ImageUploadController(
   }
 
   @DeleteMapping("/{ids}")
-  @Operation(summary = "Deletes uploaded images")
+  @Operation(summary = "Delete uploaded images")
   @AllowApiAccess
   fun delete(
     @PathVariable ids: Set<Long>,

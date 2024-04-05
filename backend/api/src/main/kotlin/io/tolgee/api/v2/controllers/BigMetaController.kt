@@ -25,14 +25,19 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = ["/v2/projects/{projectId:\\d+}", "/v2/projects"],
 )
-@Tag(name = "Big Meta data about the keys in project")
+@Tag(
+  name = "Big Meta",
+  description =
+    "Handles big meta (context) for translation keys. Tolgee automatically stores " +
+      "contextual data about keys to provide this information to Tolgee AI translator.",
+)
 class BigMetaController(
   private val bigMetaService: BigMetaService,
   private val projectHolder: ProjectHolder,
   private val keyWithBaseTranslationModelAssembler: KeyWithBaseTranslationModelAssembler,
 ) : Logging {
   @PostMapping("/big-meta")
-  @Operation(summary = "Stores a bigMeta for a project")
+  @Operation(summary = "Store Big Meta", description = "Stores a bigMeta for a project")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun store(
@@ -43,7 +48,7 @@ class BigMetaController(
   }
 
   @GetMapping("/keys/{id}/big-meta")
-  @Operation(summary = "Returns a bigMeta for given key")
+  @Operation(summary = "Get Big Meta for key")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getBigMeta(

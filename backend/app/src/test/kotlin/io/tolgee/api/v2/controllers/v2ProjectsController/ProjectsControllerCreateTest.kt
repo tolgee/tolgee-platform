@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
+class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   private val languageDTO =
     LanguageRequest(
       "English",

@@ -7,6 +7,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.GenerateSlugDto
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import jakarta.validation.Valid
@@ -28,7 +29,7 @@ class SlugController(
   private val projectService: ProjectService,
 ) {
   @GetMapping("/validate-organization/{slug}")
-  @Operation(summary = "Validate organization address part")
+  @Operation(summary = "Validate organization slug")
   fun validateOrganizationSlug(
     @PathVariable("slug") slug: String,
   ): Boolean {
@@ -36,7 +37,8 @@ class SlugController(
   }
 
   @GetMapping("/validate-project/{slug}")
-  @Operation(summary = "Validate project address part")
+  @Operation(summary = "Validate project slug")
+  @OpenApiHideFromPublicDocs
   fun validateProjectSlug(
     @PathVariable("slug") slug: String,
   ): Boolean {
@@ -44,7 +46,7 @@ class SlugController(
   }
 
   @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
-  @Operation(summary = "Generate organization address part")
+  @Operation(summary = "Generate organization slug")
   fun generateOrganizationSlug(
     @RequestBody @Valid
     dto: GenerateSlugDto,
@@ -53,7 +55,8 @@ class SlugController(
   }
 
   @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
-  @Operation(summary = "Generate project address part")
+  @Operation(summary = "Generate project slug")
+  @OpenApiHideFromPublicDocs
   fun generateProjectSlug(
     @RequestBody @Valid
     dto: GenerateSlugDto,

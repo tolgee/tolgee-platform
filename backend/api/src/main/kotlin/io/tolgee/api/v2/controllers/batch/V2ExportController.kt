@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -37,6 +38,7 @@ import java.util.zip.ZipOutputStream
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/export", "/v2/projects/export"])
 @Tag(name = "Export")
 @Suppress("MVCPathVariableInspection")
+@OpenApiOrderExtension(4)
 class V2ExportController(
   private val exportService: ExportService,
   private val projectHolder: ProjectHolder,
@@ -45,7 +47,7 @@ class V2ExportController(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) {
   @GetMapping(value = [""])
-  @Operation(summary = "Exports data")
+  @Operation(summary = "Export data")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun export(
@@ -64,8 +66,8 @@ class V2ExportController(
 
   @PostMapping(value = [""])
   @Operation(
-    summary = """Exports data (post). Useful when providing params exceeding allowed query size.
-  """,
+    summary = "Export data (post)",
+    description = """Exports data (post). Useful when exceeding allowed URL size.""",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess

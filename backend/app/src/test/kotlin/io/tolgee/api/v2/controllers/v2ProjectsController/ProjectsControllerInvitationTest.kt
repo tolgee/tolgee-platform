@@ -33,7 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects/") {
+class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects/") {
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"
     private const val INVITED_NAME = "Franta"
