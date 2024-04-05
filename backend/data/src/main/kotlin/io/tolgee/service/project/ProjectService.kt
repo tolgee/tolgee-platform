@@ -27,10 +27,10 @@ import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationService

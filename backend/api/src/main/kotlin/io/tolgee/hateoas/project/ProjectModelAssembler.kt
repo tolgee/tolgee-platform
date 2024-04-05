@@ -4,8 +4,8 @@ import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.cacheable.LanguageDto
-import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.key.namespace.NamespaceModelAssembler
+import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
@@ -40,9 +40,10 @@ class ProjectModelAssembler(
       view.baseLanguage ?: let {
         projectService.getOrAssignBaseLanguage(view.id)
       }
-    val defaultNamespace = view.defaultNamespace?.let {
-      namespaceModelAssembler.toModel(it)
-    }
+    val defaultNamespace =
+      view.defaultNamespace?.let {
+        namespaceModelAssembler.toModel(it)
+      }
 
     val computedPermissions = getComputedPermissions(view)
 

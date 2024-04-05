@@ -1,10 +1,10 @@
 package io.tolgee.model.views
 
 import io.tolgee.model.Language
-import io.tolgee.model.key.Namespace
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.key.Namespace
 
 open class ProjectWithLanguagesView(
   override val id: Long,
