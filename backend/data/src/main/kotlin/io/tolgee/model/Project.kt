@@ -84,7 +84,7 @@ class Project(
   @ManyToOne(optional = true)
   lateinit var organizationOwner: Organization
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   @ActivityLoggedProp
   var baseLanguage: Language? = null
 
@@ -97,7 +97,7 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var namespaces: MutableList<Namespace> = mutableListOf()
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   @ActivityLoggedProp
   var defaultNamespace: Namespace? = null
 
