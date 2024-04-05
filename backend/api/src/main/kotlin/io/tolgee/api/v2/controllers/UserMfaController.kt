@@ -25,7 +25,10 @@ class UserMfaController(
   private val jwtService: JwtService,
 ) {
   @PutMapping("/totp")
-  @Operation(summary = "Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
+  @Operation(
+    summary = "Enable TOTP",
+    description = "Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.",
+  )
   fun enableMfa(
     @RequestBody @Valid
     dto: UserTotpEnableRequestDto,
@@ -37,7 +40,10 @@ class UserMfaController(
   }
 
   @DeleteMapping("/totp")
-  @Operation(summary = "Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
+  @Operation(
+    summary = "Disable TOTP",
+    description = "Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.",
+  )
   fun disableMfa(
     @RequestBody @Valid
     dto: UserTotpDisableRequestDto,
@@ -49,7 +55,7 @@ class UserMfaController(
   }
 
   @PutMapping("/recovery")
-  @Operation(summary = "Regenerates multi-factor authentication recovery codes")
+  @Operation(summary = "Regenerate Codes", description = "Regenerates multi-factor authentication recovery codes")
   fun regenerateRecoveryCodes(
     @RequestBody @Valid
     dto: UserMfaRecoveryRequestDto,

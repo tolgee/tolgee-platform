@@ -7,7 +7,7 @@ import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.openApiDocs.HideFromPublicOpenApiDocs
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/public/business-events"])
 @Tag(name = "Business events reporting")
-@HideFromPublicOpenApiDocs
+@OpenApiHideFromPublicDocs
 class BusinessEventController(
   private val businessEventPublisher: BusinessEventPublisher,
   private val securityService: SecurityService,

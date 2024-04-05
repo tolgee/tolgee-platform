@@ -11,6 +11,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -44,6 +45,7 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
   ],
 )
 @OpenApiTag(name = "Tags", description = "Manipulates key tags")
+@OpenApiOrderExtension(6)
 class TagsController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,

@@ -34,6 +34,8 @@ import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -85,6 +87,7 @@ import java.util.concurrent.TimeUnit
     Tag(name = "Translations", description = "Operations related to translations in project"),
   ],
 )
+@OpenApiOrderExtension(4)
 class TranslationsController(
   private val projectHolder: ProjectHolder,
   private val translationService: TranslationService,
@@ -122,6 +125,7 @@ class TranslationsController(
   )
   @UseDefaultPermissions // Security: check performed in the handler
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
   fun getAllTranslations(
     @Parameter(
       description =
@@ -176,6 +180,7 @@ When null, resulting file will be a flat key-value object.
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
+  @OpenApiOrderExtension(2)
   fun setTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
@@ -192,6 +197,7 @@ When null, resulting file will be a flat key-value object.
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @Transactional
+  @OpenApiOrderExtension(3)
   fun createOrUpdateTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
@@ -228,6 +234,7 @@ When null, resulting file will be a flat key-value object.
   @UseDefaultPermissions // Security: check done internally
   @AllowApiAccess
   @Transactional
+  @OpenApiOrderExtension(5)
   fun getTranslations(
     @ParameterObject
     @ModelAttribute("translationFilters")
@@ -264,6 +271,7 @@ When null, resulting file will be a flat key-value object.
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
+  @OpenApiHideFromPublicDocs
   fun getSelectAllKeyIds(
     @ParameterObject
     @ModelAttribute("translationFilters")

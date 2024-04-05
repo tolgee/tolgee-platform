@@ -1,7 +1,7 @@
 package io.tolgee.hateoas.project
 
-import io.tolgee.api.v2.controllers.ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
+import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler

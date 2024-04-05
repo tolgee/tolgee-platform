@@ -7,7 +7,7 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.tolgee.configuration.openApi.OpenApiGroupBuilder.Companion.PROJECT_ID_PARAMETER
-import io.tolgee.openApiDocs.HideFromPublicOpenApiDocs
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -87,7 +87,7 @@ class OpenApiConfiguration {
   @Bean
   fun allPublicApi(): GroupedOpenApi? {
     return publicApiGroupForPaths(
-      paths = arrayOf("/v2/**", "/v2/**"),
+      paths = arrayOf("/v2/**", "/api/**"),
       excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
       name = "Public API (All)",
     )
@@ -201,7 +201,7 @@ class OpenApiConfiguration {
           operation.addProjectIdPathParam()
         }
 
-        if (handler.isHidden()) {
+        if (handler.isHidden(path)) {
           return@customizeOperations null
         }
 
@@ -210,13 +210,15 @@ class OpenApiConfiguration {
     }.result
   }
 
-  fun HandlerMethod.isHidden(): Boolean {
-    val methodIsHidden = method.getAnnotation(HideFromPublicOpenApiDocs::class.java) != null
+  fun HandlerMethod.isHidden(path: String): Boolean {
+    val annotation = method.getAnnotation(OpenApiHideFromPublicDocs::class.java)
+
+    val methodIsHidden = annotation != null && (annotation.path == "" || annotation.path == path)
     if (methodIsHidden) {
       return true
     }
 
-    return method.declaringClass.getAnnotation(HideFromPublicOpenApiDocs::class.java) != null
+    return method.declaringClass.getAnnotation(OpenApiHideFromPublicDocs::class.java) != null
   }
 
   companion object {

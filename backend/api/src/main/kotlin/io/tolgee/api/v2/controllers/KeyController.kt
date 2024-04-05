@@ -33,6 +33,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -72,7 +74,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/keys",
   ],
 )
-@Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
+@Tag(name = "Localization keys", description = "Manipulates localization keys, their translations and metadata")
+@OpenApiOrderExtension(3)
 class KeyController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
@@ -95,6 +98,8 @@ class KeyController(
   @RequestActivity(ActivityType.CREATE_KEY)
   @RequiresProjectPermissions([Scope.KEYS_CREATE])
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
+  @OpenApiHideFromPublicDocs(path = "/v2/projects/{projectId}/keys/create")
   fun create(
     @RequestBody @Valid
     dto: CreateKeyDto,
@@ -108,20 +113,33 @@ class KeyController(
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
 
-  @PutMapping(value = ["/{id}/complex-update"])
-  @Operation(
-    summary = "Edit key and related data",
-    description = "Edits key name, translations, tags, screenshots, and other data",
-  )
-  @UseDefaultPermissions // Security: key permissions are checked separately in method body
+  @GetMapping(value = ["{id}"])
+  @Transactional
+  @Operation(summary = "Get one key")
+  @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
-  fun complexEdit(
+  @OpenApiOrderExtension(2)
+  fun get(
     @PathVariable
     id: Long,
-    @RequestBody @Valid
-    dto: ComplexEditKeyDto,
-  ): KeyWithDataModel {
-    return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
+  ): KeyModel {
+    val key = keyService.getView(projectHolder.project.id, id)
+    return keyModelAssembler.toModel(key)
+  }
+
+  @GetMapping(value = [""])
+  @Transactional
+  @Operation(summary = "Get all keys")
+  @RequiresProjectPermissions([Scope.KEYS_VIEW])
+  @AllowApiAccess
+  @OpenApiOrderExtension(3)
+  fun getAll(
+    @ParameterObject
+    @SortDefault("id")
+    pageable: Pageable,
+  ): PagedModel<KeyModel> {
+    val data = keyService.getPaged(projectHolder.project.id, pageable)
+    return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
   }
 
   @PutMapping(value = ["/{id}"])
@@ -129,6 +147,7 @@ class KeyController(
   @RequestActivity(ActivityType.KEY_NAME_EDIT)
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
+  @OpenApiOrderExtension(4)
   fun edit(
     @PathVariable
     id: Long,
@@ -148,6 +167,7 @@ class KeyController(
   @RequestActivity(ActivityType.KEY_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
+  @OpenApiOrderExtension(5)
   fun delete(
     @PathVariable ids: Set<Long>,
   ) {
@@ -155,31 +175,20 @@ class KeyController(
     keyService.deleteMultiple(ids)
   }
 
-  @GetMapping(value = [""])
-  @Transactional
-  @Operation(summary = "Get all keys")
-  @RequiresProjectPermissions([Scope.KEYS_VIEW])
+  @PutMapping(value = ["/{id}/complex-update"])
+  @Operation(
+    summary = "Edit key and related data",
+    description = "Edits key name, translations, tags, screenshots, and other data",
+  )
+  @UseDefaultPermissions // Security: key permissions are checked separately in method body
   @AllowApiAccess
-  fun getAll(
-    @ParameterObject
-    @SortDefault("id")
-    pageable: Pageable,
-  ): PagedModel<KeyModel> {
-    val data = keyService.getPaged(projectHolder.project.id, pageable)
-    return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
-  }
-
-  @GetMapping(value = ["{id}"])
-  @Transactional
-  @Operation(summary = "Get one key")
-  @RequiresProjectPermissions([Scope.KEYS_VIEW])
-  @AllowApiAccess
-  fun get(
+  fun complexEdit(
     @PathVariable
     id: Long,
-  ): KeyModel {
-    val key = keyService.getView(projectHolder.project.id, id)
-    return keyModelAssembler.toModel(key)
+    @RequestBody @Valid
+    dto: ComplexEditKeyDto,
+  ): KeyWithDataModel {
+    return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
   @DeleteMapping(value = [""])

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.key
 
-import io.tolgee.api.v2.controllers.ProjectsController
+import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.hateoas.machineTranslation.LanguageConfigItemModel
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport

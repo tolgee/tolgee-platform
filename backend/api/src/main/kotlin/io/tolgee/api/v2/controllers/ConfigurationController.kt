@@ -27,7 +27,7 @@ class ConfigurationController
     private val versionProvider: VersionProvider,
   ) : IController {
     @GetMapping(value = ["configuration"])
-    @Operation(summary = "Returns server configuration information")
+    @Operation(summary = "Get server configuration")
     fun getPublicConfiguration(): PublicConfigurationDTO {
       val machineTranslationServices =
         PublicConfigurationDTO.MtServicesDTO(

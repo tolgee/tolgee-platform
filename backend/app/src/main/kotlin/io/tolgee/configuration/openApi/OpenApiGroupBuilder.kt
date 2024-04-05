@@ -4,7 +4,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.Paths
+import io.tolgee.openApiDocs.OpenApiCloudExtension
+import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.openApiDocs.OpenApiOrderExtension
+import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AllowApiAccess
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.web.method.HandlerMethod
@@ -33,27 +36,81 @@ class OpenApiGroupBuilder(
 
     OpenApiSecurityHelper(this).handleSecurity()
 
-    addOrderExtensions()
+    addExtensions()
 
     return@lazy builder.build()
   }
 
-  private fun addOrderExtensions() {
+  private fun addExtensions() {
     addTagOrders()
-    addMethodOrders()
+    addMethodExtensions()
   }
 
-  private fun addMethodOrders() {
+  private fun addMethodExtensions() {
     customizeOperations { operation, handlerMethod, _ ->
-      val orderAnnotation = handlerMethod.getMethodAnnotation(OpenApiOrderExtension::class.java)
-      if (orderAnnotation != null) {
-        operation.addExtension("x-order", orderAnnotation.order)
-      }
+      addOperationOrder(handlerMethod, operation)
+      addOperationEeExtension(handlerMethod, operation)
+      addSelfHostedOperationEeExtension(handlerMethod, operation)
+      addCloudOperationEeExtension(handlerMethod, operation)
       operation
     }
   }
 
+  private fun addOperationOrder(
+    handlerMethod: HandlerMethod,
+    operation: Operation,
+  ) {
+    val orderAnnotation = handlerMethod.getMethodAnnotation(OpenApiOrderExtension::class.java)
+    if (orderAnnotation != null) {
+      operation.addExtension("x-order", orderAnnotation.order)
+    }
+  }
+
+  private fun addOperationEeExtension(
+    handlerMethod: HandlerMethod,
+    operation: Operation,
+  ) {
+    val eeExtensionAnnotation =
+      handlerMethod.getMethodAnnotation(OpenApiEeExtension::class.java)
+        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiEeExtension::class.java) ?: null
+    if (eeExtensionAnnotation != null) {
+      operation.addExtension("x-ee", true)
+    }
+  }
+
+  private fun addCloudOperationEeExtension(
+    handlerMethod: HandlerMethod,
+    operation: Operation,
+  ) {
+    val eeExtensionAnnotation =
+      handlerMethod.getMethodAnnotation(OpenApiCloudExtension::class.java)
+        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiCloudExtension::class.java) ?: null
+    if (eeExtensionAnnotation != null) {
+      operation.addExtension("x-cloud", true)
+    }
+  }
+
+  private fun addSelfHostedOperationEeExtension(
+    handlerMethod: HandlerMethod,
+    operation: Operation,
+  ) {
+    val eeExtensionAnnotation =
+      handlerMethod.getMethodAnnotation(OpenApiSelfHostedExtension::class.java)
+        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiSelfHostedExtension::class.java) ?: null
+    if (eeExtensionAnnotation != null) {
+      operation.addExtension("x-self-hosted", true)
+    }
+  }
+
   private fun addTagOrders() {
+    val classTags = mutableMapOf<Class<*>, MutableSet<String>>()
+    customizeOperations { operation, handlerMethod, path ->
+      classTags.computeIfAbsent(handlerMethod.method.declaringClass) { mutableSetOf() }.apply {
+        addAll(operation.tags)
+      }
+      operation
+    }
+
     builder.addOpenApiCustomizer { openApi ->
       val declaringClasses =
         operationHandlers.mapNotNull {
@@ -61,10 +118,15 @@ class OpenApiGroupBuilder(
         }.toSet()
 
       val tagOrders =
-        declaringClasses.mapNotNull { clazz ->
-          val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@mapNotNull null
-          val tagAnnotation = clazz.getAnnotation(Tag::class.java) ?: return@mapNotNull null
-          tagAnnotation.name to orderAnnotation.order
+        declaringClasses.flatMap { clazz ->
+          val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@flatMap listOf()
+          classTags[clazz]?.map { it to orderAnnotation.order } ?: listOf()
+        }.groupBy { it.first }.map {
+          val orders = it.value.map { it.second }.toSet()
+          if (orders.size > 1) {
+            throw RuntimeException("Multiple orders for tag ${it.key}: $orders")
+          }
+          it.key to orders.first()
         }.toMap()
 
       val tagsMap = openApi.tags.associateBy { it.name }.toMutableMap()

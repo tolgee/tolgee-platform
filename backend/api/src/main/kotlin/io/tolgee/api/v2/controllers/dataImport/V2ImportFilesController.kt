@@ -5,7 +5,6 @@
 package io.tolgee.api.v2.controllers.dataImport
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.dataImport.SetFileNamespaceRequest
 import io.tolgee.hateoas.dataImport.ImportFileIssueModel
 import io.tolgee.hateoas.dataImport.ImportFileIssueModelAssembler
@@ -33,10 +32,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/import", "/v2/projects/import"])
-@Tag(
-  name = "Import",
-  description = "These endpoints handle multi-step data import",
-)
+@ImportDocsTag
 class V2ImportFilesController(
   private val importService: ImportService,
   private val authenticationFacade: AuthenticationFacade,

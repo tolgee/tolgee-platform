@@ -12,6 +12,7 @@ import io.tolgee.ee.data.WebhookTestResponse
 import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.webhook.WebhookConfig
+import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -38,7 +39,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/{projectId}/webhook-configs",
   ],
 )
-@Tag(name = "Webhooks configuration (EE)")
+@Tag(name = "Webhooks configuration")
+@OpenApiEeExtension
 class WebhookConfigController(
   private val webhookConfigService: WebhookConfigService,
   private val webhookConfigModelAssembler: WebhookConfigModelAssembler,

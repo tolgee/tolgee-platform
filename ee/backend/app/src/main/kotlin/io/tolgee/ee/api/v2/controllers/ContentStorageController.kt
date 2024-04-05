@@ -13,6 +13,7 @@ import io.tolgee.ee.service.ContentStorageService
 import io.tolgee.hateoas.ee.contentStorage.ContentStorageModel
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -39,7 +40,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/{projectId}/content-storages",
   ],
 )
-@Tag(name = "Content Storages (EE)")
+@Tag(name = "Content Storages")
+@OpenApiEeExtension
 class ContentStorageController(
   private val contentStorageService: ContentStorageService,
   private val projectHolder: ProjectHolder,

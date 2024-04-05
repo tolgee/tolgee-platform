@@ -1,6 +1,6 @@
 package io.tolgee.hateoas.project.stats
 
-import io.tolgee.api.v2.controllers.ProjectsController
+import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.model.LanguageStats
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component

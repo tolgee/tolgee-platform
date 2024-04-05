@@ -10,6 +10,7 @@ import io.tolgee.ee.service.EePermissionService
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
@@ -24,7 +25,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/")
-@Tag(name = "Advanced permissions (EE)")
+@Tag(name = "Advanced permissions")
+@OpenApiEeExtension
 class AdvancedPermissionController(
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val eePermissionService: EePermissionService,
@@ -34,7 +36,10 @@ class AdvancedPermissionController(
 ) {
   @Suppress("MVCPathVariableInspection")
   @PutMapping("projects/{projectId}/users/{userId}/set-permissions")
-  @Operation(summary = "Sets user's direct permission")
+  @Operation(
+    summary = "Set user's project permission",
+    description = "Set user's granular (scope-based) direct project permission",
+  )
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
   fun setUsersPermissions(
@@ -62,12 +67,17 @@ class AdvancedPermissionController(
   }
 
   @PutMapping("organizations/{organizationId:[0-9]+}/set-base-permissions")
-  @Operation(summary = "Sets organization base permission")
+  @Operation(
+    summary = "Set organization base permission",
+    description =
+      "Set default granular (scope-based) permissions for organization users, " +
+        "who don't have direct project permissions set.",
+  )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun setBasePermissions(
     @PathVariable organizationId: Long,
     @Parameter(
-      description = "Granted scopes to all projects for all organization users without direct project permissions set",
+      description = "Granted scopes to all projects for all organization users without direct project permissions set.",
       example = """["translations.view", "translations.edit"]""",
     )
     @RequestParam

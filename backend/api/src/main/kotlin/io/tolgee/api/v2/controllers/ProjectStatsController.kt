@@ -27,7 +27,7 @@ import java.time.LocalDate
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/stats", "/v2/projects/stats"])
-@Tag(name = "Projects")
+@Tag(name = "Project Stats")
 class ProjectStatsController(
   private val projectStatsService: ProjectStatsService,
   private val projectHolder: ProjectHolder,

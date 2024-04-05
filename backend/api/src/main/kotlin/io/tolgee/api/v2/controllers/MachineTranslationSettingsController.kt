@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
-@Tag(name = "Projects")
+@Tag(name = "Machine Translation Settings")
 class MachineTranslationSettingsController(
   private val projectHolder: ProjectHolder,
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,

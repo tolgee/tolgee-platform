@@ -80,7 +80,7 @@ class KeyScreenshotController(
   }
 
   @GetMapping("")
-  @Operation(summary = "Get screenshots for key")
+  @Operation(summary = "Get screenshots")
   @RequiresProjectPermissions([ Scope.SCREENSHOTS_VIEW ])
   @AllowApiAccess
   fun getKeyScreenshots(

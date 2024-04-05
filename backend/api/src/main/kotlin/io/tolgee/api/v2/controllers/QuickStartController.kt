@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
@@ -23,6 +24,7 @@ class QuickStartController(
   private val businessEventPublisher: BusinessEventPublisher,
 ) {
   @PutMapping("/steps/{step}/complete")
+  @Operation(summary = "Complete guide step", description = "Marks guide step as completed")
   fun completeGuideStep(
     @PathVariable("step") step: String,
   ): QuickStartModel {
@@ -39,6 +41,7 @@ class QuickStartController(
   }
 
   @PutMapping("/set-finished/{finished}")
+  @Operation(summary = "Set finished state", description = "Sets finished state of the quick start guide")
   fun setFinishedState(
     @PathVariable finished: Boolean,
   ): QuickStartModel {
@@ -53,6 +56,7 @@ class QuickStartController(
   }
 
   @PutMapping("/set-open/{open}")
+  @Operation(summary = "Set open state", description = "Sets open state of the quick start guide")
   fun setOpenState(
     @PathVariable open: Boolean,
   ): QuickStartModel {

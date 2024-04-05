@@ -1,5 +1,5 @@
 package io.tolgee.openApiDocs
 
 annotation class OpenApiOrderExtension(
-  val order: Int = 0,
+  val order: Int = 100,
 )
