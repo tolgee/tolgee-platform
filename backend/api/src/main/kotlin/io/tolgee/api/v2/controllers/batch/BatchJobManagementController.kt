@@ -81,7 +81,8 @@ class BatchJobManagementController(
   @Operation(
     summary = "Get all running and pending batch operations",
     description =
-      "Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. " +
+      "Returns all running and pending batch operations. " +
+        "Completed batch operations are returned only if they are not older than 1 hour. " +
         "If user doesn't have permission to view all batch operations, only their operations are returned.",
   )
   @UseDefaultPermissions
