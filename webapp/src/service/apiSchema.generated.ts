@@ -766,7 +766,7 @@ export interface components {
       /** Format: int64 */
       baseLanguageId?: number;
       /** Format: int64 */
-      baseNamespaceId?: number;
+      defaultNamespaceId?: number;
       description?: string;
       /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
       icuPlaceholders: boolean;
@@ -945,7 +945,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      baseNamespace?: components["schemas"]["NamespaceModel"];
+      defaultNamespace?: components["schemas"]["NamespaceModel"];
       organizationRole?: "MEMBER" | "OWNER";
       directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
@@ -1871,7 +1871,6 @@ export interface components {
       username?: string;
       /** Format: int64 */
       projectId: number;
-      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
     };
@@ -2956,8 +2955,8 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
       name: string;
@@ -2970,8 +2969,8 @@ export interface components {
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
       name: string;
@@ -3650,7 +3649,6 @@ export interface components {
       username?: string;
       /** Format: int64 */
       projectId: number;
-      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
     };
