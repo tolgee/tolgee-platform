@@ -1015,6 +1015,7 @@
   "projects_empty" : "Žádné projekty",
   "projects_empty_action" : "Přidat projekt",
   "project_settings_base_language" : "Základní jazyk",
+  "project_settings_base_namespace" : "Výchozí namespace",
   "project_settings_button" : "Nastavení",
   "project_settings_danger_zone_title" : "Nebezpečná zóna",
   "project_settings_description_label" : "Popis (markdown)",

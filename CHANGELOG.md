@@ -1,3 +1,10 @@
+# [3.55.0](https://github.com/tolgee/tolgee-platform/compare/v3.54.7...v3.55.0) (2024-04-05)
+
+
+### Features
+
+* Improve generated API docs ([#2217](https://github.com/tolgee/tolgee-platform/issues/2217)) ([5765572](https://github.com/tolgee/tolgee-platform/commit/576557205d5f18ed477b1db30d191893a3233ee2))
+
 ## [3.54.7](https://github.com/tolgee/tolgee-platform/compare/v3.54.6...v3.54.7) (2024-04-03)
 
 
