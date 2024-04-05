@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { SelectAllCheckbox } from '../BatchOperations/SelectAllCheckbox';
+import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 
 const StyledResultCount = styled('div')`
   padding: 9px 0px 4px 0px;
@@ -26,15 +27,25 @@ const StyledDialog = styled(Dialog)`
 `;
 
 export const TranslationsHeader = () => {
-  const [newDialog, setNewDialog] = useUrlSearchState('create', {
+  const [newCreateDialog, setNewCreateDialog] = useUrlSearchState('create', {
     defaultVal: 'false',
   });
+  const [, setNamespace] = useUrlSearchState('ns', {
+    defaultVal: undefined,
+  });
+  const { baseNamespace } = useProjectNamespaces();
   const { height: bottomPanelHeight } = useBottomPanel();
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const [dirty, setDirty] = useState(false);
 
   const onDialogOpen = () => {
-    setNewDialog('true');
+    setNewCreateDialog('true');
+    setNamespace(baseNamespace?.name);
+  };
+
+  const onDialogClose = () => {
+    setNewCreateDialog('false');
+    setNamespace(undefined);
   };
 
   const isSmall = useMediaQuery(
@@ -50,10 +61,10 @@ export const TranslationsHeader = () => {
       confirmation({
         message: <T keyName="translations_new_key_discard_message" />,
         confirmButtonText: <T keyName="translations_new_key_discard_button" />,
-        onConfirm: () => setNewDialog('false'),
+        onConfirm: onDialogClose,
       });
     } else {
-      setNewDialog('false');
+      onDialogClose();
     }
   }
 
@@ -79,7 +90,7 @@ export const TranslationsHeader = () => {
           </Typography>
         </StyledResultCount>
       ) : null}
-      {dataReady && newDialog === 'true' && (
+      {dataReady && newCreateDialog === 'true' && (
         <StyledDialog
           open={true}
           onClose={closeGracefully}
@@ -88,10 +99,7 @@ export const TranslationsHeader = () => {
           keepMounted={false}
           style={{ marginBottom: bottomPanelHeight }}
         >
-          <KeyCreateDialog
-            onClose={() => setNewDialog('false')}
-            onDirtyChange={setDirty}
-          />
+          <KeyCreateDialog onClose={onDialogClose} onDirtyChange={setDirty} />
         </StyledDialog>
       )}
     </>
