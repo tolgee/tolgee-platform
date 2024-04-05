@@ -28,7 +28,6 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
   fun setup() {
     testData = BaseTestData()
     testData.projectBuilder.addGerman()
-    saveAndPrepare()
   }
 
   @Test

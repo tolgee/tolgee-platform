@@ -7,6 +7,7 @@ import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.ExistenceEntityDescription
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityDescribingEntity
+import io.tolgee.model.activity.ActivityDescribingEntity_
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision
@@ -23,6 +24,11 @@ import org.springframework.context.ApplicationContext
 class ActivityViewByRevisionsProvider(
   private val applicationContext: ApplicationContext,
   private val revisions: Collection<ActivityRevision>,
+  /**
+   * For Activities, which have onlyCountInList = true in io.tolgee.activity.data.ActivityType,
+   * this parameter specifies what's the maximum per-entity modification to be included in the list.
+   */
+  private val onlyCountInListAbove: Int = 0,
 ) {
   val userAccountService: UserAccountService =
     applicationContext.getBean(UserAccountService::class.java)
@@ -40,8 +46,8 @@ class ActivityViewByRevisionsProvider(
   private lateinit var modifiedEntities: Map<Long, List<ModifiedEntityView>>
   private lateinit var revisionIds: MutableList<Long>
   private lateinit var counts: MutableMap<Long, MutableMap<String, Long>>
-  private lateinit var allDataReturningEventTypes: List<ActivityType>
-  private lateinit var allRelationData: Map<Long, List<ActivityDescribingEntity>>
+  private lateinit var allDataReturningActivityTypes: List<ActivityType>
+  private lateinit var allRelationData: MutableMap<Long, List<ActivityDescribingEntity>>
   private lateinit var rawModifiedEntities: List<ActivityModifiedEntity>
   private lateinit var entityExistences: Map<Pair<String, Long>, Boolean>
   private lateinit var params: Map<Long, Any?>
@@ -71,11 +77,13 @@ class ActivityViewByRevisionsProvider(
   private fun prepareData() {
     revisionIds = revisions.map { it.id }.toMutableList()
 
-    allDataReturningEventTypes = ActivityType.values().filter { !it.onlyCountsInList }
+    allDataReturningActivityTypes = ActivityType.entries.filter { !it.onlyCountsInList }
 
-    allRelationData = getAllowedRevisionRelations(revisionIds, allDataReturningEventTypes)
+    counts = getCounts()
 
     rawModifiedEntities = getModifiedEntitiesRaw()
+
+    populateRelationData()
 
     entityExistences = getEntityExistences()
 
@@ -84,8 +92,6 @@ class ActivityViewByRevisionsProvider(
     params = getParams()
 
     authors = getAuthors(revisions)
-
-    counts = getCounts()
   }
 
   private fun getParams(): Map<Long, Any?> {
@@ -105,7 +111,7 @@ class ActivityViewByRevisionsProvider(
   }
 
   private fun getCounts(): MutableMap<Long, MutableMap<String, Long>> {
-    val allowedTypes = ActivityType.values().filter { it.onlyCountsInList }
+    val allowedTypes = ActivityType.entries.filter { it.onlyCountsInList }
     val counts: MutableMap<Long, MutableMap<String, Long>> = mutableMapOf()
     activityRevisionRepository.getModifiedEntityTypeCounts(
       revisionIds = revisionIds,
@@ -123,12 +129,71 @@ class ActivityViewByRevisionsProvider(
       revisions.mapNotNull { it.authorId }.toSet(),
     ).associateBy { it.id }
 
-  private fun getAllowedRevisionRelations(
-    revisionIds: List<Long>,
-    allowedTypes: Collection<ActivityType>,
-  ): Map<Long, List<ActivityDescribingEntity>> {
-    return activityRevisionRepository.getRelationsForRevisions(revisionIds, allowedTypes)
-      .groupBy { it.activityRevision.id }
+  private fun populateRelationData() {
+    var missing: Set<Triple<Long, String, Long>> = getInitialMissingRelationData()
+
+    allRelationData = getRelationsForRevisions(missing).groupBy { it.activityRevision.id }.toMutableMap()
+
+    val retrieved = missing.toMutableSet()
+
+    missing = getMissingRelationData()
+
+    while (!retrieved.containsAll(missing)) {
+      allRelationData.putAll(getRelationsForRevisions(missing).groupBy { it.activityRevision.id })
+      retrieved.addAll(missing)
+      missing = getMissingRelationData()
+    }
+  }
+
+  private fun getInitialMissingRelationData() =
+    rawModifiedEntities.asSequence().flatMap {
+      it.describingRelations?.map { dr ->
+        Triple(it.activityRevision.id, dr.value.entityClass, dr.value.entityId)
+      } ?: listOf()
+    }.toMutableSet()
+
+  private fun getMissingRelationData(): Set<Triple<Long, String, Long>> {
+    val missing =
+      allRelationData.entries.flatMap { entry ->
+        entry.value.flatMap { relation ->
+          relation.describingRelations?.values?.map {
+            Triple(
+              entry.key,
+              it.entityClass,
+              it.entityId,
+            )
+          } ?: listOf()
+        }
+      }.toMutableSet()
+
+    missing.removeIf { missingItem ->
+      allRelationData[missingItem.first]?.any {
+        it.entityClass == missingItem.second && it.entityId == missingItem.third
+      } == true
+    }
+
+    return missing
+  }
+
+  private fun getRelationsForRevisions(
+    missing: Set<Triple<Long, String, Long>>,
+  ): MutableList<ActivityDescribingEntity> {
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createQuery(ActivityDescribingEntity::class.java)
+    val root = query.from(ActivityDescribingEntity::class.java)
+    val revision = root.join(ActivityDescribingEntity_.activityRevision)
+
+    missing.map { (revisionId, entityClass, entityId) ->
+      cb.and(
+        cb.equal(revision.get(ActivityRevision_.id), revisionId),
+        cb.equal(root.get(ActivityDescribingEntity_.entityClass), entityClass),
+        cb.equal(root.get(ActivityDescribingEntity_.entityId), entityId),
+      )
+    }.let {
+      query.where(cb.or(*it.toTypedArray()))
+    }
+
+    return entityManager.createQuery(query).resultList
   }
 
   private fun getModifiedEntities(): Map<Long, List<ModifiedEntityView>> {
@@ -191,10 +256,25 @@ class ActivityViewByRevisionsProvider(
     val root = query.from(ActivityModifiedEntity::class.java)
     val revision = root.join(ActivityModifiedEntity_.activityRevision)
 
+    val toExpand = classesToExpand
+
+    val expandFilters =
+      toExpand.map {
+        cb.or(
+          cb.and(
+            revision.get(ActivityRevision_.type).`in`(allDataReturningActivityTypes),
+          ),
+          cb.and(
+            cb.equal(revision.get(ActivityRevision_.id), it.key),
+            root.get(ActivityModifiedEntity_.entityClass).`in`(it.value),
+          ),
+        )
+      }
+
     val whereConditions = mutableListOf<Predicate>()
-    whereConditions.add(revision.get(ActivityRevision_.type).`in`(allDataReturningEventTypes))
+    whereConditions.addAll(expandFilters)
     whereConditions.add(revision.get(ActivityRevision_.id).`in`(revisionIds))
-    ActivityType.values().forEach {
+    ActivityType.entries.forEach {
       it.restrictEntitiesInList?.let { restrictEntitiesInList ->
         val restrictedEntityNames = restrictEntitiesInList.map { it.simpleName }
         whereConditions.add(
@@ -209,6 +289,17 @@ class ActivityViewByRevisionsProvider(
     query.where(cb.and(*whereConditions.toTypedArray()))
     return entityManager.createQuery(query).resultList
   }
+
+  private val classesToExpand: Map<Long, Set<String>>
+    by lazy {
+      counts.mapNotNull { (revisionId, counts) ->
+        val allowedClasses = counts.entries.filter { it.value <= onlyCountInListAbove }.map { it.key }.toSet()
+        if (allowedClasses.isEmpty()) {
+          return@mapNotNull null
+        }
+        revisionId to allowedClasses
+      }.toMap()
+    }
 
   private fun extractCompressedRef(
     value: EntityDescriptionRef,
