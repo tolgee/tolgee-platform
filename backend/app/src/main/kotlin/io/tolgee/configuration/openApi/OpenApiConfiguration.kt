@@ -80,7 +80,7 @@ class OpenApiConfiguration {
     return pakGroupForPaths(
       paths = arrayOf("/v2/**"),
       excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
-      name = "V2 Accessible with Project API key (V2)",
+      name = "Accessible with Project API key (V2)",
     )
   }
 
