@@ -13,7 +13,7 @@ interface ProjectView {
   val slug: String?
   val avatarHash: String?
   val baseLanguage: Language?
-  val baseNamespace: Namespace?
+  val defaultNamespace: Namespace?
   val organizationOwner: Organization
   val organizationRole: OrganizationRoleType?
   val directPermission: Permission?

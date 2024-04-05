@@ -718,7 +718,7 @@ export interface components {
       /** Format: int64 */
       baseLanguageId?: number;
       /** Format: int64 */
-      baseNamespaceId?: number;
+      defaultNamespaceId?: number;
       description?: string;
       /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
       icuPlaceholders: boolean;
@@ -897,7 +897,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      baseNamespace?: components["schemas"]["NamespaceModel"];
+      defaultNamespace?: components["schemas"]["NamespaceModel"];
       organizationRole?: "MEMBER" | "OWNER";
       directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
@@ -1815,17 +1815,17 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
+      scopes: string[];
       username?: string;
       /** Format: int64 */
       projectId: number;
-      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      userFullName?: string;
       description: string;
       projectName: string;
+      userFullName?: string;
       /** Format: int64 */
       id: number;
     };
@@ -2704,9 +2704,9 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
@@ -2816,8 +2816,8 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
       name: string;
@@ -2826,8 +2826,8 @@ export interface components {
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
       name: string;
@@ -3494,17 +3494,17 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
+      scopes: string[];
       username?: string;
       /** Format: int64 */
       projectId: number;
-      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      userFullName?: string;
       description: string;
       projectName: string;
+      userFullName?: string;
       /** Format: int64 */
       id: number;
     };

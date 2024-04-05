@@ -23,7 +23,7 @@ export const useProjectNamespaces = () => {
     return allNamespaces;
   }, [allNamespaces]);
 
-  const baseNamespace = projectDTO.baseNamespace;
+  const defaultNamespace = projectDTO.defaultNamespace;
 
   useEffect(() => {
     // reset namespaces when unmount
@@ -34,6 +34,6 @@ export const useProjectNamespaces = () => {
 
   return {
     allNamespacesWithNone,
-    baseNamespace,
+    defaultNamespace,
   };
 };

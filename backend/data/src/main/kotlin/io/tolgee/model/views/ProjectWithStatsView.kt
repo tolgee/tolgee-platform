@@ -14,7 +14,7 @@ class ProjectWithStatsView(
     view.slug,
     view.avatarHash,
     view.baseLanguage,
-    view.baseNamespace,
+    view.defaultNamespace,
     view.organizationOwner,
     view.organizationRole,
     view.directPermission,

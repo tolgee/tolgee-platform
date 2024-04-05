@@ -33,14 +33,14 @@ export const TranslationsHeader = () => {
   const [, setNamespace] = useUrlSearchState('ns', {
     defaultVal: undefined,
   });
-  const { baseNamespace } = useProjectNamespaces();
+  const { defaultNamespace } = useProjectNamespaces();
   const { height: bottomPanelHeight } = useBottomPanel();
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const [dirty, setDirty] = useState(false);
 
   const onDialogOpen = () => {
     setNewCreateDialog('true');
-    setNamespace(baseNamespace?.name);
+    setNamespace(defaultNamespace?.name);
   };
 
   const onDialogClose = () => {

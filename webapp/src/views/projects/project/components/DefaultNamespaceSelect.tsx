@@ -15,7 +15,7 @@ const NamespaceValue: FC<{
   );
 };
 
-export const BaseNamespaceSelect: FC<{
+export const DefaultNamespaceSelect: FC<{
   namespaces: Partial<components['schemas']['NamespaceModel']>[];
   label?: ReactNode;
   name: string;

@@ -99,7 +99,7 @@ class Project(
 
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   @ActivityLoggedProp
-  var baseNamespace: Namespace? = null
+  var defaultNamespace: Namespace? = null
 
   @ActivityLoggedProp
   override var avatarHash: String? = null

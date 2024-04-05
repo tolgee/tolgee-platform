@@ -21,7 +21,7 @@ open class ProjectModel(
   val avatar: Avatar?,
   val organizationOwner: SimpleOrganizationModel?,
   val baseLanguage: LanguageModel?,
-  val baseNamespace: NamespaceModel?,
+  val defaultNamespace: NamespaceModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")
   val directPermission: PermissionModel?,

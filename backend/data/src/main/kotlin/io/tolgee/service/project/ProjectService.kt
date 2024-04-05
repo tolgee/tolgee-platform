@@ -180,16 +180,16 @@ class ProjectService(
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders
 
-    if (dto.baseNamespaceId != null) {
+    if (dto.defaultNamespaceId != null) {
       var namespace =
-        project.namespaces.find { it.id == dto.baseNamespaceId }
+        project.namespaces.find { it.id == dto.defaultNamespaceId }
           ?: throw BadRequestException(Message.NAMESPACE_NOT_FROM_PROJECT)
-      project.baseNamespace = namespace
+      project.defaultNamespace = namespace
     } else {
-      if (project.baseNamespace != null) {
-        namespaceService.deleteUnusedNamespaces(listOf(project.baseNamespace!!))
+      if (project.defaultNamespace != null) {
+        namespaceService.deleteUnusedNamespaces(listOf(project.defaultNamespace!!))
       }
-      project.baseNamespace = null
+      project.defaultNamespace = null
     }
 
     dto.baseLanguageId?.let {

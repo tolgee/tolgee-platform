@@ -14,13 +14,13 @@ import { FieldLabel } from 'tg.component/FormField';
 import { Box, styled } from '@mui/material';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
-import { BaseNamespaceSelect } from './components/BaseNamespaceSelect';
+import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
 
 type FormValues = {
   name: string;
   description: string | undefined;
   baseLanguageId: number | undefined;
-  baseNamespaceId: number | undefined;
+  defaultNamespaceId: number | undefined;
 };
 
 const StyledContainer = styled('div')`
@@ -52,9 +52,9 @@ const LanguageSelect = () => {
 const NamespaceSelect = () => {
   const { allNamespacesWithNone } = useProjectNamespaces();
   return (
-    <BaseNamespaceSelect
+    <DefaultNamespaceSelect
       label={<T keyName="project_settings_base_namespace" />}
-      name="baseNamespaceId"
+      name="defaultNamespaceId"
       namespaces={allNamespacesWithNone}
     />
   );
@@ -63,13 +63,13 @@ const NamespaceSelect = () => {
 export const ProjectSettingsGeneral = () => {
   const project = useProject();
   const { leave, isLeaving } = useLeaveProject();
-  const { baseNamespace } = useProjectNamespaces();
+  const { defaultNamespace } = useProjectNamespaces();
 
   const initialValues = {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
     description: project.description ?? '',
-    baseNamespaceId: baseNamespace?.id ?? 0,
+    defaultNamespaceId: defaultNamespace?.id ?? 0,
   } satisfies FormValues;
 
   const updateLoadable = useApiMutation({
@@ -82,8 +82,8 @@ export const ProjectSettingsGeneral = () => {
     const data = {
       ...values,
       description: values.description || undefined,
-      baseNamespaceId:
-        values.baseNamespaceId === 0 ? undefined : values.baseNamespaceId,
+      defaultNamespaceId:
+        values.defaultNamespaceId === 0 ? undefined : values.defaultNamespaceId,
     };
     return updateLoadable.mutateAsync({
       path: { projectId: project.id },
