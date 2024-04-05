@@ -9,7 +9,12 @@ const NamespaceValue: FC<{
   namespace?: Partial<components['schemas']['NamespaceModel']>;
 }> = (props) => {
   return (
-    <Box display="inline-flex" justifyContent="center" justifyItems="center">
+    <Box
+      data-cy="namespace-value"
+      display="inline-flex"
+      justifyContent="center"
+      justifyItems="center"
+    >
       {props.namespace?.name ? props.namespace.name : '<none>'}
     </Box>
   );
@@ -32,7 +37,7 @@ export const DefaultNamespaceSelect: FC<{
     <Box>
       <FieldLabel>{props.label}</FieldLabel>
       <Select
-        data-cy="base-namespace-select"
+        data-cy="default-namespace-select"
         sx={{ mt: 0 }}
         name={props.name}
         size="small"
