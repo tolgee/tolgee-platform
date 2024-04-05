@@ -12,7 +12,6 @@ import { useState } from 'react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { SelectAllCheckbox } from '../BatchOperations/SelectAllCheckbox';
-import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 
 const StyledResultCount = styled('div')`
   padding: 9px 0px 4px 0px;
@@ -30,22 +29,16 @@ export const TranslationsHeader = () => {
   const [newCreateDialog, setNewCreateDialog] = useUrlSearchState('create', {
     defaultVal: 'false',
   });
-  const [, setNamespace] = useUrlSearchState('ns', {
-    defaultVal: undefined,
-  });
-  const { defaultNamespace } = useProjectNamespaces();
   const { height: bottomPanelHeight } = useBottomPanel();
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const [dirty, setDirty] = useState(false);
 
   const onDialogOpen = () => {
     setNewCreateDialog('true');
-    setNamespace(defaultNamespace?.name);
   };
 
   const onDialogClose = () => {
     setNewCreateDialog('false');
-    setNamespace(undefined);
   };
 
   const isSmall = useMediaQuery(
