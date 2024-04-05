@@ -65,6 +65,7 @@ describe('Export Basics', () => {
     exportSelectFormat('Structured JSON');
 
     cy.gcy('export-support_arrays-selector').click();
+    cy.waitForDom();
     cy.gcy('export-submit-button').click();
 
     const fileName = getFileName('json', 'cs');
