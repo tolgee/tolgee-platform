@@ -765,6 +765,8 @@ export interface components {
       slug?: string;
       /** Format: int64 */
       baseLanguageId?: number;
+      /** Format: int64 */
+      baseNamespaceId?: number;
       description?: string;
       /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
       icuPlaceholders: boolean;
@@ -861,6 +863,16 @@ export interface components {
       /** @description Whether is base language of project */
       base: boolean;
     };
+    NamespaceModel: {
+      /**
+       * Format: int64
+       * @description The id of namespace
+       * @example 10000048
+       */
+      id: number;
+      /** @example homepage */
+      name: string;
+    };
     /**
      * @description Current user's direct permission
      * @example MANAGE
@@ -933,6 +945,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      baseNamespace?: components["schemas"]["NamespaceModel"];
       organizationRole?: "MEMBER" | "OWNER";
       directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
@@ -1002,16 +1015,6 @@ export interface components {
       };
     };
     UpdateNamespaceDto: {
-      name: string;
-    };
-    NamespaceModel: {
-      /**
-       * Format: int64
-       * @description The id of namespace
-       * @example 10000048
-       */
-      id: number;
-      /** @example homepage */
       name: string;
     };
     MachineTranslationLanguagePropsDto: {
@@ -1716,16 +1719,16 @@ export interface components {
     RevealedPatModel: {
       token: string;
       /** Format: int64 */
-      id: number;
-      description: string;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
+      /** Format: int64 */
+      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1866,8 +1869,6 @@ export interface components {
       userFullName?: string;
       description: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       scopes: string[];
@@ -2244,6 +2245,7 @@ export interface components {
         | "NO_LANGUAGES_PROVIDED"
         | "LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND"
         | "LANGUAGE_NOT_FROM_PROJECT"
+        | "NAMESPACE_NOT_FROM_PROJECT"
         | "CANNOT_DELETE_BASE_LANGUAGE"
         | "KEY_NOT_FROM_PROJECT"
         | "MAX_SCREENSHOTS_EXCEEDED"
@@ -2881,9 +2883,9 @@ export interface components {
       contentDeliveryConfigured: boolean;
     };
     DocItem: {
+      description?: string;
       name: string;
       displayName?: string;
-      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -2954,6 +2956,10 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
+      translation?: string;
+      baseTranslation?: string;
+      namespace?: string;
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
@@ -2964,6 +2970,10 @@ export interface components {
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
+      translation?: string;
+      baseTranslation?: string;
+      namespace?: string;
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
@@ -3506,16 +3516,16 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
-      id: number;
-      description: string;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
+      /** Format: int64 */
+      id: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3638,8 +3648,6 @@ export interface components {
       userFullName?: string;
       description: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       scopes: string[];
