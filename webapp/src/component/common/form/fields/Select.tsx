@@ -13,6 +13,7 @@ interface PGSelectProps {
   name: string;
   label?: ReactNode;
   renderValue?: (v: any) => ReactNode;
+  displayEmpty?: boolean;
 }
 
 type Props = PGSelectProps & FormControlProps;
@@ -26,7 +27,7 @@ const StyledFormControl = styled(FormControl)`
 export const Select: FunctionComponent<Props> = (props) => {
   const [field, meta, helpers] = useField(props.name);
 
-  const { renderValue, ...formControlProps } = props;
+  const { renderValue, displayEmpty, ...formControlProps } = props;
 
   return (
     <StyledFormControl
@@ -49,6 +50,7 @@ export const Select: FunctionComponent<Props> = (props) => {
         label={props.label}
         value={field.value}
         onChange={(e) => helpers.setValue(e.target.value)}
+        displayEmpty={displayEmpty}
         renderValue={
           typeof renderValue === 'function'
             ? renderValue

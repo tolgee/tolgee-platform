@@ -20,7 +20,7 @@ type FormValues = {
   name: string;
   description: string | undefined;
   baseLanguageId: number | undefined;
-  defaultNamespaceId: number | undefined;
+  defaultNamespaceId: number | '';
 };
 
 const StyledContainer = styled('div')`
@@ -69,7 +69,7 @@ export const ProjectSettingsGeneral = () => {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
     description: project.description ?? '',
-    defaultNamespaceId: defaultNamespace?.id ?? 0,
+    defaultNamespaceId: defaultNamespace?.id ?? '',
   } satisfies FormValues;
 
   const updateLoadable = useApiMutation({
@@ -90,6 +90,10 @@ export const ProjectSettingsGeneral = () => {
       content: {
         'application/json': {
           ...data,
+          defaultNamespaceId:
+            data.defaultNamespaceId === ''
+              ? undefined
+              : data.defaultNamespaceId,
           icuPlaceholders: project.icuPlaceholders,
         },
       },

@@ -1,13 +1,22 @@
-import React, { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 import { Box, MenuItem } from '@mui/material';
 
 import { Select } from 'tg.component/common/form/fields/Select';
 import { components } from 'tg.service/apiSchema.generated';
 import { FieldLabel } from 'tg.component/FormField';
+import { useTranslate } from '@tolgee/react';
+
+type NamespaceModel = components['schemas']['NamespaceModel'];
+
+type NamespaceItem = {
+  value: number | '';
+  label: string;
+};
 
 const NamespaceValue: FC<{
-  namespace?: Partial<components['schemas']['NamespaceModel']>;
+  namespace?: NamespaceItem;
 }> = (props) => {
+  const { t } = useTranslate();
   return (
     <Box
       data-cy="namespace-value"
@@ -15,23 +24,22 @@ const NamespaceValue: FC<{
       justifyContent="center"
       justifyItems="center"
     >
-      {props.namespace?.name ? props.namespace.name : '<none>'}
+      {props.namespace?.label ?? t('namespace_default')}
     </Box>
   );
 };
 
 export const DefaultNamespaceSelect: FC<{
-  namespaces: Partial<components['schemas']['NamespaceModel']>[];
+  namespaces: Partial<NamespaceModel>[];
   label?: ReactNode;
   name: string;
-  valueKey?: keyof components['schemas']['NamespaceModel'];
+  valueKey?: keyof NamespaceModel;
 }> = (props) => {
-  const namespacesWithNone = props.namespaces.map((namespace) => {
-    if (!namespace.name) {
-      namespace.name = '<none>';
-    }
-    return namespace;
-  });
+  const { t } = useTranslate();
+  const namespaces = props.namespaces.map(({ id, name }) => ({
+    value: id ?? ('' as const),
+    label: name ?? t('namespace_default'),
+  }));
 
   return (
     <Box>
@@ -41,18 +49,17 @@ export const DefaultNamespaceSelect: FC<{
         sx={{ mt: 0 }}
         name={props.name}
         size="small"
+        displayEmpty={true}
         renderValue={(v) => {
           return (
             <NamespaceValue
-              namespace={namespacesWithNone.find(
-                (namespace) => namespace.id === v
-              )}
+              namespace={namespaces.find((namespace) => namespace.value === v)}
             />
           );
         }}
       >
-        {namespacesWithNone.map((namespace) => (
-          <MenuItem key={namespace.id} value={namespace.id}>
+        {namespaces.map((namespace) => (
+          <MenuItem key={namespace.value} value={namespace.value as any}>
             <NamespaceValue namespace={namespace} />
           </MenuItem>
         ))}
