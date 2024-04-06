@@ -78,7 +78,7 @@ class WebSecurityConfig(
         )
         it.requestMatchers("/api/public/**", "/v2/public/**").permitAll()
         it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
-        it.requestMatchers("/api/**", "/v2/**")
+        it.requestMatchers("/api/**", "/v2/**").authenticated()
         it.anyRequest().permitAll()
       }.headers { headers ->
         headers.xssProtection(Customizer.withDefaults())
