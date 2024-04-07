@@ -461,6 +461,12 @@ export interface paths {
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
   };
+  "/v2/slack/organizations/{organizationId}": {
+    get: operations["getLinkedOrganisations"];
+  };
+  "/v2/slack/organizations/{organizationId}/is-paired": {
+    get: operations["isOrgPaired"];
+  };
   "/v2/public/scope-info/roles": {
     get: operations["getRoles"];
   };
@@ -741,6 +747,14 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -787,14 +801,6 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1322,8 +1328,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1676,17 +1682,17 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1821,19 +1827,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
+      userFullName?: string;
+      projectName: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       scopes: string[];
-      projectName: string;
-      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1847,13 +1853,15 @@ export interface components {
     };
     SlackCommandDto: {
       token?: string;
+      team_id: string;
       channel_id: string;
       command: string;
-      channel_name?: string;
+      channel_name: string;
       user_id: string;
-      userName?: string;
+      user_name: string;
       text: string;
       trigger_id?: string;
+      team_domain: string;
     };
     SlackMessageDto: {
       text: string;
@@ -1863,6 +1871,11 @@ export interface components {
       userAccountId: string;
       channelId: string;
       slackNickName: string;
+      workSpace: string;
+      orgId: string;
+      channelName: string;
+      author: string;
+      workSpaceName: string;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -2201,7 +2214,9 @@ export interface components {
         | "PLURAL_FORMS_DATA_LOSS"
         | "SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT"
         | "SLACK_INVALID_COMMAND"
-        | "SLACK_NOT_SUBSCRIBED_YET";
+        | "SLACK_NOT_SUBSCRIBED_YET"
+        | "SLACK_NOT_LINKED_ORG"
+        | "UNEXPECTED_ERROR_SLACK";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2722,22 +2737,22 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
-      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2770,8 +2785,8 @@ export interface components {
       contentDeliveryConfigured: boolean;
     };
     DocItem: {
-      displayName?: string;
       description?: string;
+      displayName?: string;
       name: string;
     };
     PagedModelProjectModel: {
@@ -2843,23 +2858,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      description?: string;
-      namespace?: string;
       translation?: string;
       baseTranslation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      description?: string;
-      namespace?: string;
       translation?: string;
       baseTranslation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3394,17 +3409,17 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3521,19 +3536,19 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
+      userFullName?: string;
+      projectName: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       scopes: string[];
-      projectName: string;
-      userFullName?: string;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -8650,6 +8665,60 @@ export interface operations {
     parameters: {
       path: {
         slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getLinkedOrganisations: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  isOrgPaired: {
+    parameters: {
+      path: {
+        organizationId: number;
       };
     };
     responses: {

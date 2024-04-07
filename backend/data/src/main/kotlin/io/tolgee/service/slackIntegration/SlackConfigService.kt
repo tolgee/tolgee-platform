@@ -14,6 +14,7 @@ class SlackConfigService(
   private val automationService: AutomationService,
   private val slackConfigRepository: SlackConfigRepository,
   private val slackConfigPreferenceService: SlackConfigPreferenceService,
+  private val orgToWorkspaceLinkService: OrgToWorkspaceLinkService,
 ) {
   fun get(
     projectId: Long,
@@ -48,7 +49,10 @@ class SlackConfigService(
     return true
   }
 
+  @Transactional
   fun create(slackConfigDto: SlackConfigDto): SlackConfig {
+    val orgToWorkspaceLink = orgToWorkspaceLinkService.getByWorkSpace(slackConfigDto.workSpaceId) ?: throw Exception()
+
     val slackConfig =
       SlackConfig(
         project = slackConfigDto.project,
@@ -58,11 +62,15 @@ class SlackConfigService(
         slackId = slackConfigDto.slackId
         onEvent = slackConfigDto.onEvent ?: EventName.ALL
         isGlobalSubscription = slackConfigDto.languageTag.isNullOrBlank()
+        this.orgToWorkspaceLink = orgToWorkspaceLink
       }
 
     val existingConfigs = get(slackConfig.project.id, slackConfig.channelId)
     return if (existingConfigs == null) {
       slackConfigRepository.save(slackConfig)
+      orgToWorkspaceLink.slackSubscription.add(slackConfig)
+      orgToWorkspaceLinkService.save(orgToWorkspaceLink)
+
       if (!slackConfig.isGlobalSubscription) {
         addPreferenceToConfig(slackConfig, slackConfigDto.languageTag!!, slackConfigDto.onEvent ?: EventName.ALL)
       }

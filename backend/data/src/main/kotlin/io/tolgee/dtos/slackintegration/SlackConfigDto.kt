@@ -11,4 +11,5 @@ data class SlackConfigDto(
   val userAccount: UserAccount,
   val languageTag: String? = "",
   val onEvent: EventName?,
+  val workSpaceId: String = "",
 )

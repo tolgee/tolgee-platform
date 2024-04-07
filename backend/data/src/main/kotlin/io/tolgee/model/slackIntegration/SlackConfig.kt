@@ -40,4 +40,7 @@ class SlackConfig(
 
   @OneToMany(mappedBy = "slackConfig", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
   var preferences: MutableSet<SlackConfigPreference> = mutableSetOf()
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  var orgToWorkspaceLink: OrgToWorkspaceLink = OrgToWorkspaceLink()
 }

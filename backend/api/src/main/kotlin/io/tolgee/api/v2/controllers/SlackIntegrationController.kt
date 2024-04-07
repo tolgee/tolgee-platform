@@ -7,8 +7,10 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackConnectionDto
 import io.tolgee.dtos.request.slack.SlackEventDto
+import io.tolgee.dtos.response.OrgToWorkspaceLinkDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
@@ -16,9 +18,11 @@ import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.slackIntegration.OrgToWorkspaceLinkService
 import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.util.I18n
@@ -27,6 +31,7 @@ import io.tolgee.util.logger
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
+import kotlin.jvm.optionals.getOrElse
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -41,6 +46,8 @@ class SlackIntegrationController(
   private val objectMapper: ObjectMapper,
   private val i18n: I18n,
   private val authenticationFacade: AuthenticationFacade,
+  private val orgToWorkspaceLinkService: OrgToWorkspaceLinkService,
+  private val organizationService: OrganizationService,
 ) : Logging {
   @PostMapping
   @UseDefaultPermissions
@@ -61,7 +68,7 @@ class SlackIntegrationController(
     val optionsMap = parseOptions(optionsString)
 
     when (command) {
-      "login" -> return login(payload.user_id, payload.channel_id, payload.user_name ?: "")
+      "login" -> return login(payload)
 
       "subscribe" -> return handleSubscribe(payload, projectId, languageTag, optionsMap)
 
@@ -104,7 +111,21 @@ class SlackIntegrationController(
   fun connectSlack(
     @RequestBody payload: SlackConnectionDto,
   ) {
-    if (payload.userAccountId.toLongOrNull() == authenticationFacade.authenticatedUser.id) {
+    if (payload.workSpace.isNotBlank() && !orgToWorkspaceLinkService.ifWorkSpaceLinked(payload.workSpace)) {
+      val organization = organizationService.get(payload.orgId.toLong())
+      orgToWorkspaceLinkService.save(
+        organization,
+        payload.workSpace,
+        payload.channelName,
+        payload.author,
+        payload.workSpaceName,
+      )
+      slackExecutor.sendSuccessMessage(payload.channelId)
+      slackExecutor.sendRedirectUrl(payload.channelId, payload.slackId, payload.slackNickName)
+      return
+    }
+
+    if (payload.userAccountId.toLongOrNull() != authenticationFacade.authenticatedUser.id) {
       throw Exception()
     }
 
@@ -114,16 +135,24 @@ class SlackIntegrationController(
     slackExecutor.sendSuccessMessage(payload.channelId)
   }
 
-  private fun login(
-    userId: String,
-    channelId: String,
-    slackNickName: String,
-  ): SlackMessageDto? {
-    if (slackSubscriptionService.ifSlackConnected(userId)) {
+  private fun login(payload: SlackCommandDto): SlackMessageDto? {
+    if (!orgToWorkspaceLinkService.ifWorkSpaceLinked(payload.team_id)) {
+      slackExecutor.connectOrganisationButton(
+        payload.channel_id,
+        payload.team_id,
+        payload.user_id,
+        payload.user_name,
+        payload.channel_name,
+        payload.team_domain,
+      )
+      return null
+    }
+
+    if (slackSubscriptionService.ifSlackConnected(payload.user_id)) {
       return SlackMessageDto(text = i18n.translate("already_logged_in"))
     }
 
-    slackExecutor.sendRedirectUrl(channelId, userId, slackNickName)
+    slackExecutor.sendRedirectUrl(payload.channel_id, payload.user_id, payload.user_name)
     return null
   }
 
@@ -178,6 +207,7 @@ class SlackIntegrationController(
         userAccount = validationResult.user,
         languageTag = languageTag,
         onEvent = onEventName,
+        workSpaceId = payload.team_id,
       )
 
     try {
@@ -185,6 +215,7 @@ class SlackIntegrationController(
     } catch (e: Exception) {
       logger.info(e.message)
       sendError(payload, Message.UNEXPECTED_ERROR_SLACK)
+      return null
     }
 
     return SlackMessageDto(text = i18n.translate("subscribed_successfully"))
@@ -218,7 +249,7 @@ class SlackIntegrationController(
     val event: SlackEventDto = objectMapper.readValue(decodedPayload)
 
     event.actions.forEach { action ->
-      if (action.value == "help_btn") {
+      if (action.value != "help_btn") {
         return@forEach
       } else {
         slackExecutor.sendHelpMessage(event.channel.id)
@@ -228,10 +259,43 @@ class SlackIntegrationController(
     return null
   }
 
+  @GetMapping("/organizations/{organizationId}/is-paired")
+  fun isOrgPaired(
+    @PathVariable
+    organizationId: Long,
+  ): Boolean {
+    return !orgToWorkspaceLinkService.findByOrgIdOptional(organizationId).isEmpty
+  }
+
+  @GetMapping("/organizations/{organizationId}")
+  fun getLinkedOrganisations(
+    @PathVariable
+    organizationId: Long,
+  ): OrgToWorkspaceLinkDto {
+    val orgToWorkspaceLink =
+      orgToWorkspaceLinkService.findByOrgIdOptional(
+        organizationId,
+      ).getOrElse { throw NotFoundException() }
+    return OrgToWorkspaceLinkDto.fromEntity(orgToWorkspaceLink)
+  }
+
+  @DeleteMapping("/organizations/{organizationId}")
+  fun deleteOrganisationLink(
+    @PathVariable
+    organizationId: Long,
+  ) {
+    orgToWorkspaceLinkService.delete(organizationId)
+  }
+
   private fun validateRequest(
     payload: SlackCommandDto,
     projectId: String,
   ): ValidationResult {
+    if (!orgToWorkspaceLinkService.ifWorkSpaceLinked(payload.team_id)) {
+      sendError(payload, Message.SLACK_NOT_LINKED_ORG)
+      return ValidationResult(false)
+    }
+
     val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
 
     if (slackSubscription == null) {
@@ -266,7 +330,10 @@ class SlackIntegrationController(
       message,
       payload.channel_id,
       payload.user_id,
-      payload.user_name ?: "",
+      payload.user_name,
+      payload.team_id,
+      payload.channel_name,
+      payload.team_domain,
     )
   }
 

@@ -5,4 +5,9 @@ data class SlackConnectionDto(
   val userAccountId: String = "",
   val channelId: String = "",
   val slackNickName: String = "",
+  val workSpace: String = "",
+  val orgId: String = "",
+  val channelName: String = "",
+  val author: String,
+  val workSpaceName: String,
 )

@@ -83,8 +83,25 @@ class SlackExecutor(
     slackChannelId: String,
     slackId: String,
     slackNickName: String,
+    workSpace: String,
+    channelName: String,
+    teamDomain: String,
   ) {
-    val blocks = createErrorBlocks(errorMessage, getRedirectUrl(slackChannelId, slackId, slackNickName))
+    val url =
+      when (errorMessage) {
+        Message.SLACK_NOT_LINKED_ORG ->
+          getRedirectUrl(
+            slackChannelId,
+            workSpace,
+            slackId,
+            slackChannelId,
+            channelName,
+            teamDomain,
+          )
+        Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> getRedirectUrl(slackChannelId, slackId, slackNickName)
+        else -> ""
+      }
+    val blocks = createErrorBlocks(errorMessage, url)
 
     slackClient.methods(slackToken).chatPostMessage { request ->
       request.channel(slackChannelId)
@@ -113,6 +130,38 @@ class SlackExecutor(
               text(i18n.translate("connect-button-text"), emoji = true)
               value("connect_slack")
               url(getRedirectUrl(slackChannelId, slackId, slackNickName))
+              actionId("button_connect_slack")
+              style("primary")
+            }
+          }
+        }
+    }
+  }
+
+  fun connectOrganisationButton(
+    slackChannelId: String,
+    workSpace: String,
+    userId: String,
+    slackNickName: String,
+    channelName: String,
+    teamDomain: String,
+  ) {
+    slackClient.methods(slackToken).chatPostMessage {
+      it.channel(slackChannelId)
+        .blocks {
+          section {
+            markdownText(i18n.translate("org-not-linked-message"))
+          }
+
+          section {
+            markdownText(i18n.translate("org-not-linked-instruction"))
+          }
+
+          actions {
+            button {
+              text(i18n.translate("connect-button-text"), emoji = true)
+              value("connect_slack")
+              url(getRedirectUrl(slackChannelId, workSpace, userId, slackChannelId, channelName, teamDomain))
               actionId("button_connect_slack")
               style("primary")
             }
@@ -224,6 +273,16 @@ class SlackExecutor(
     slackNickName: String,
   ) = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId&nickName=$slackNickName"
 
+  private fun getRedirectUrl(
+    slackChannelId: String,
+    workSpace: String,
+    slackId: String,
+    slackNickName: String,
+    channelName: String,
+    teamDomain: String,
+  ) =
+    "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId&nickName=$slackNickName&workSpace=$workSpace&channelName=$channelName&domainName=$teamDomain"
+
   fun createErrorBlocks(
     errorMessageType: Message,
     redirectUrl: String,
@@ -240,6 +299,9 @@ class SlackExecutor(
           Message.SLACK_NOT_SUBSCRIBED_YET ->
             i18n.translate("not-subscribed-yet-message")
 
+          Message.SLACK_NOT_LINKED_ORG ->
+            i18n.translate("org-not-linked-message")
+
           else -> {
             i18n.translate("unknown-error-occurred")
           }
@@ -251,6 +313,19 @@ class SlackExecutor(
       Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> {
         section {
           markdownText(i18n.translate("connect-account-instruction"))
+        }
+        actions {
+          button {
+            text(i18n.translate("connect-button-text"), emoji = true)
+            url(redirectUrl)
+            style("primary")
+          }
+        }
+      }
+
+      Message.SLACK_NOT_LINKED_ORG -> {
+        section {
+          markdownText(i18n.translate("org-not-linked-instruction"))
         }
         actions {
           button {
