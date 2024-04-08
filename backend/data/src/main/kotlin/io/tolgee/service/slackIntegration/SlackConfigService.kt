@@ -34,6 +34,10 @@ class SlackConfigService(
     return slackConfigRepository.findBySlackIdAndChannelId(slackId, channelId)
   }
 
+  fun get(slackId: String): List<SlackConfig> {
+    return slackConfigRepository.findBySlackId(slackId)
+  }
+
   @Transactional
   fun delete(
     projectId: Long,
@@ -43,6 +47,24 @@ class SlackConfigService(
       val config = get(projectId, channelId) ?: return false
       automationService.deleteForSlackIntegration(config)
       slackConfigRepository.delete(config)
+    } catch (e: NotFoundException) {
+      return false
+    }
+    return true
+  }
+
+  @Transactional
+  fun deleteAllBySlackId(slackId: String): Boolean {
+    val configs = get(slackId)
+    if (configs.isEmpty()) {
+      return false
+    }
+
+    try {
+      configs.forEach { config ->
+        automationService.deleteForSlackIntegration(config)
+        slackConfigRepository.delete(config)
+      }
     } catch (e: NotFoundException) {
       return false
     }

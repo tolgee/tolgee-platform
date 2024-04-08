@@ -83,12 +83,26 @@ class SlackSlashCommandController(
 
       "help" -> help(payload.channel_id)
 
+      "logout" -> return logout(payload.user_id)
+
       else -> {
         sendError(payload, Message.SLACK_INVALID_COMMAND)
         return null
       }
     }
     return null
+  }
+
+  private fun logout(slackId: String): SlackMessageDto {
+    if (!slackSubscriptionService.delete(slackId)) {
+      return SlackMessageDto(text = "Not logged in")
+    }
+
+    return if (!slackConfigService.deleteAllBySlackId(slackId)) {
+      SlackMessageDto(text = "Cant logout")
+    } else {
+      SlackMessageDto(text = "Logged out")
+    }
   }
 
   private fun help(channelId: String) {

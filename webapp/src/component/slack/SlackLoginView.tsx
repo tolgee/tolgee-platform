@@ -35,7 +35,7 @@ export const SlackLoginView = () => {
   const validSlackWorkSpaceName = slackWorkSpaceName ?? '';
 
   const slackMutation = useApiMutation({
-    url: '/v2/slack/connect',
+    url: '/v2/public/slack/connect',
     method: 'post',
   });
 

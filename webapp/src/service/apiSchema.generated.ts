@@ -278,13 +278,13 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
-  "/v2/slack": {
-    post: operations["slackCommand"];
+  "/v2/public/slack": {
+    post: operations["slashCommand"];
   };
-  "/v2/slack/on-event": {
+  "/v2/public/slack/on-event": {
     post: operations["fetchEvent"];
   };
-  "/v2/slack/connect": {
+  "/v2/public/slack/connect": {
     post: operations["connectSlack"];
   };
   "/v2/public/business-events/report": {
@@ -461,10 +461,11 @@ export interface paths {
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
   };
-  "/v2/slack/organizations/{organizationId}": {
+  "/v2/public/slack/organizations/{organizationId}": {
     get: operations["getLinkedOrganisations"];
+    delete: operations["deleteOrganisationLink"];
   };
-  "/v2/slack/organizations/{organizationId}/is-paired": {
+  "/v2/public/slack/organizations/{organizationId}/is-paired": {
     get: operations["isOrgPaired"];
   };
   "/v2/public/scope-info/roles": {
@@ -1834,9 +1835,9 @@ export interface components {
       projectName: string;
       username?: string;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       scopes: string[];
@@ -2641,6 +2642,11 @@ export interface components {
       /** Format: int64 */
       preferredOrganizationId?: number;
     };
+    OrgToWorkspaceLinkDto: {
+      workspaceName: string;
+      author: string;
+      channelName: string;
+    };
     HierarchyItem: {
       scope:
         | "translations.view"
@@ -2785,8 +2791,8 @@ export interface components {
       contentDeliveryConfigured: boolean;
     };
     DocItem: {
-      description?: string;
       displayName?: string;
+      description?: string;
       name: string;
     };
     PagedModelProjectModel: {
@@ -2862,9 +2868,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      baseTranslation?: string;
       namespace?: string;
+      baseTranslation?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -2872,9 +2878,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      baseTranslation?: string;
       namespace?: string;
+      baseTranslation?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3543,9 +3549,9 @@ export interface components {
       projectName: string;
       username?: string;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       scopes: string[];
@@ -6648,8 +6654,13 @@ export interface operations {
       };
     };
   };
-  slackCommand: {
-    parameters: {};
+  slashCommand: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
     responses: {
       /** OK */
       200: {
@@ -6672,11 +6683,20 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SlackCommandDto"];
+        "application/json": {
+          payload?: components["schemas"]["SlackCommandDto"];
+          body?: string;
+        };
       };
     };
   };
   fetchEvent: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
     responses: {
       /** OK */
       200: {
@@ -6699,7 +6719,10 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": string;
+        "application/json": {
+          body?: string;
+          payload?: string;
+        };
       };
     };
   };
@@ -8698,9 +8721,32 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          "*/*": components["schemas"]["OrgToWorkspaceLinkDto"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  deleteOrganisationLink: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

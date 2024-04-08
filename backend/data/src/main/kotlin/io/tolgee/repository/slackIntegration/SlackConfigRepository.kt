@@ -15,4 +15,6 @@ interface SlackConfigRepository : JpaRepository<SlackConfig, Long> {
     slackId: String,
     channelId: String,
   ): List<SlackConfig>
+
+  fun findBySlackId(slackId: String): List<SlackConfig>
 }
