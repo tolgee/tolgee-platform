@@ -1,6 +1,8 @@
 package io.tolgee.api.v2.controllers
 
+import com.esotericsoftware.minlog.Log
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.SlackRequestValidation
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackCommandDto
@@ -18,7 +20,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
-import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.slackIntegration.OrgToWorkspaceLinkService
 import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
@@ -41,16 +42,24 @@ class SlackSlashCommandController(
   private val slackSubscriptionService: SlackSubscriptionService,
   private val slackExecutor: SlackExecutor,
   private val permissionService: PermissionService,
-  private val userAccountService: UserAccountService,
   private val i18n: I18n,
   private val authenticationFacade: AuthenticationFacade,
   private val orgToWorkspaceLinkService: OrgToWorkspaceLinkService,
   private val organizationService: OrganizationService,
+  private val slackRequestValidation: SlackRequestValidation,
 ) : Logging {
   @PostMapping
   fun slashCommand(
     @ModelAttribute payload: SlackCommandDto,
+    @RequestHeader("X-Slack-Signature") slackSignature: String,
+    @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
+    @RequestBody body: String,
   ): SlackMessageDto? {
+    if (!slackRequestValidation.isValid(slackSignature, timestamp, body)) {
+      Log.info("Error validating request from Slack")
+      throw BadRequestException(Message.UNEXPECTED_ERROR_SLACK)
+    }
+
     val matchResult = commandRegex.matchEntire(payload.text)
 
     if (matchResult == null) {

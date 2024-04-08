@@ -1,11 +1,15 @@
 package io.tolgee.api.v2.controllers
 
+import com.esotericsoftware.minlog.Log
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.SlackRequestValidation
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.dtos.response.SlackMessageDto
+import io.tolgee.exceptions.BadRequestException
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 
@@ -19,11 +23,20 @@ import java.net.URLDecoder
 class SlackEventsController(
   private val objectMapper: ObjectMapper,
   private val slackExecutor: SlackExecutor,
+  private val slackRequestValidation: SlackRequestValidation,
 ) {
   @PostMapping("/on-event")
   fun fetchEvent(
+    @RequestHeader("X-Slack-Signature") slackSignature: String,
+    @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
+    @RequestBody body: String,
     @RequestBody payload: String,
   ): SlackMessageDto? {
+    if (!slackRequestValidation.isValid(slackSignature, timestamp, body)) {
+      Log.info("Error validating request from Slack")
+      throw BadRequestException(Message.UNEXPECTED_ERROR_SLACK)
+    }
+
     val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
     val event: SlackEventDto = objectMapper.readValue(decodedPayload)
 
