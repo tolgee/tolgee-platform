@@ -1,23 +1,20 @@
 package io.tolgee.api.v2.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackConnectionDto
-import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.dtos.response.OrgToWorkspaceLinkDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.slackIntegration.EventName
-import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -28,31 +25,30 @@ import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import java.net.URLDecoder
 import kotlin.jvm.optionals.getOrElse
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/slack"])
-class SlackIntegrationController(
+@RequestMapping(value = ["/v2/public/slack"])
+@Tag(
+  name = "Slack slack commands",
+  description = "Processes Slack slash commands, enabling users to execute specific actions within Slack",
+)
+class SlackSlashCommandController(
   private val projectService: ProjectService,
   private val slackConfigService: SlackConfigService,
   private val slackSubscriptionService: SlackSubscriptionService,
   private val slackExecutor: SlackExecutor,
   private val permissionService: PermissionService,
   private val userAccountService: UserAccountService,
-  private val objectMapper: ObjectMapper,
   private val i18n: I18n,
   private val authenticationFacade: AuthenticationFacade,
   private val orgToWorkspaceLinkService: OrgToWorkspaceLinkService,
   private val organizationService: OrganizationService,
 ) : Logging {
   @PostMapping
-  @UseDefaultPermissions
-  @AllowApiAccess
-  fun slackCommand(
+  fun slashCommand(
     @ModelAttribute payload: SlackCommandDto,
   ): SlackMessageDto? {
     val matchResult = commandRegex.matchEntire(payload.text)
@@ -107,7 +103,6 @@ class SlackIntegrationController(
   }
 
   @PostMapping("/connect")
-  @UseDefaultPermissions
   fun connectSlack(
     @RequestBody payload: SlackConnectionDto,
   ) {
@@ -124,12 +119,8 @@ class SlackIntegrationController(
       slackExecutor.sendRedirectUrl(payload.channelId, payload.slackId, payload.slackNickName)
       return
     }
+    val user = authenticationFacade.authenticatedUserEntityOrNull ?: throw BadRequestException(Message.UNAUTHENTICATED)
 
-    if (payload.userAccountId.toLongOrNull() != authenticationFacade.authenticatedUser.id) {
-      throw Exception()
-    }
-
-    val user = userAccountService.get(payload.userAccountId.toLong())
     slackSubscriptionService.create(user, payload.slackId, payload.slackNickName)
 
     slackExecutor.sendSuccessMessage(payload.channelId)
@@ -238,25 +229,6 @@ class SlackIntegrationController(
     return SlackMessageDto(
       i18n.translate("unsubscribed-successfully"),
     )
-  }
-
-  @PostMapping("/on-event")
-  @Transactional
-  fun fetchEvent(
-    @RequestBody payload: String,
-  ): SlackMessageDto? {
-    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
-    val event: SlackEventDto = objectMapper.readValue(decodedPayload)
-
-    event.actions.forEach { action ->
-      if (action.value != "help_btn") {
-        return@forEach
-      } else {
-        slackExecutor.sendHelpMessage(event.channel.id)
-      }
-    }
-
-    return null
   }
 
   @GetMapping("/organizations/{organizationId}/is-paired")

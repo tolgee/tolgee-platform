@@ -51,7 +51,10 @@ class SlackConfigService(
 
   @Transactional
   fun create(slackConfigDto: SlackConfigDto): SlackConfig {
-    val orgToWorkspaceLink = orgToWorkspaceLinkService.getByWorkSpace(slackConfigDto.workSpaceId) ?: throw Exception()
+    val orgToWorkspaceLink =
+      orgToWorkspaceLinkService.getByWorkSpace(
+        slackConfigDto.workSpaceId,
+      ) ?: throw NotFoundException()
 
     val slackConfig =
       SlackConfig(
