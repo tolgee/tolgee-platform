@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
 import io.tolgee.exceptions.NotFoundException
@@ -41,6 +42,7 @@ import java.util.*
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
 @EntityListeners(Project.Companion.ProjectListener::class)
+@ActivityLoggedEntity
 class Project(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
