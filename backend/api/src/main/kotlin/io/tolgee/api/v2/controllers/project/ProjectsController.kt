@@ -7,7 +7,6 @@ package io.tolgee.api.v2.controllers.project
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
-import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.project.CreateProjectRequest
