@@ -1,7 +1,6 @@
 package io.tolgee.security
 
 import io.tolgee.API_KEY_HEADER_NAME
-import io.tolgee.controllers.AbstractApiKeyTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
@@ -11,19 +10,17 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
+import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
-import io.tolgee.testing.assertions.Assertions
-import io.tolgee.testing.assertions.PakAction
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @AutoConfigureMockMvc
-class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
+class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
   @Autowired
   private lateinit var jwtService: JwtService
 
@@ -34,10 +31,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
 
   @Test
   fun accessWithApiKey_failure() {
-    val mvcResult =
-      mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized).andReturn()
-    Assertions.assertThat(mvcResult).error()
+    mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations")).andIsForbidden
   }
 
   @Test
@@ -56,16 +50,8 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
   @Test
   fun accessWithApiKey_failure_api_path() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.values()), base.project)
-    performAction(
-      PakAction(
-        apiKey = apiKey.key,
-        url = "/v2/projects",
-        expectedStatus = HttpStatus.FORBIDDEN,
-      ),
-    )
-    mvc.perform(MockMvcRequestBuilders.get("/v2/projects"))
-      .andIsUnauthorized
+    val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.entries.toTypedArray()), base.project)
+    mvc.perform(MockMvcRequestBuilders.get("/v2/projects?ak=${apiKey.key}")).andIsForbidden
   }
 
   @Test
