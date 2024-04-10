@@ -77,6 +77,7 @@
   "activity_entity_params.tags" : "tagy",
   "activity_entity_params.target_language_ids" : "cílové jazyky",
   "activity_entity_project" : "Projekt",
+  "activity_entity_project.default_namespace" : "výchozí namespace",
   "activity_entity_project.language" : "základní jazyk",
   "activity_entity_project.name" : "název",
   "activity_entity_screenshot" : "Screenshot",

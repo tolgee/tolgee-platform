@@ -77,6 +77,7 @@
   "activity_entity_params.tags" : "tags",
   "activity_entity_params.target_language_ids" : "målsprog",
   "activity_entity_project" : "Projekt",
+  "activity_entity_project.default_namespace" : "standard navnerum",
   "activity_entity_project.language" : "basis sprog",
   "activity_entity_project.name" : "navn",
   "activity_entity_screenshot" : "Skærmbillede",

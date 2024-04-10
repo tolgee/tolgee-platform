@@ -77,6 +77,7 @@
   "activity_entity_params.tags" : "etichete",
   "activity_entity_params.target_language_ids" : "limbi țintă",
   "activity_entity_project" : "Proiect",
+  "activity_entity_project.default_namespace" : "spațiul de nume implicit",
   "activity_entity_project.language" : "limba de bază",
   "activity_entity_project.name" : "nume",
   "activity_entity_screenshot" : "Captură de ecran",

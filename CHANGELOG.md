@@ -1,3 +1,10 @@
+## [3.55.1](https://github.com/tolgee/tolgee-platform/compare/v3.55.0...v3.55.1) (2024-04-10)
+
+
+### Bug Fixes
+
+* Update Tolgee logo in e-mails ([#2237](https://github.com/tolgee/tolgee-platform/issues/2237)) ([ba1e106](https://github.com/tolgee/tolgee-platform/commit/ba1e10659708f58e275ac4c6c8f662c3bf75c126))
+
 # [3.55.0](https://github.com/tolgee/tolgee-platform/compare/v3.54.7...v3.55.0) (2024-04-05)
 
 
