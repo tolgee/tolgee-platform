@@ -49,7 +49,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   const history = useHistory();
 
   const keyName = useUrlSearch().key as string;
-  const namespace = useUrlSearch().ns as string;
+  const namespace = project.defaultNamespace?.name;
 
   const createKey = useApiMutation({
     url: '/v2/projects/{projectId}/keys/create',

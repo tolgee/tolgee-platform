@@ -95,8 +95,12 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const expirationDateOptions = useExpirationDateOptions();
 
-  const getProject = () => {
-    return projects.data?._embedded?.projects?.[0] || props.project;
+  const getProject = (projectId?: number) => {
+    return (
+      projects.data?._embedded?.projects?.find(
+        (p) => p.id === projectId || projectId === undefined
+      ) || props.project
+    );
   };
 
   const getInitialValues = (project: ProjectModel) => {
@@ -139,7 +143,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                 validationSchema={Validation.CREATE_API_KEY}
               >
                 {(formikProps: FormikProps<Value>) => {
-                  const project = getProject()!;
+                  const project = getProject(formikProps.values.projectId)!;
 
                   const availableScopes = new Set(
                     project.computedPermission.scopes ?? []
@@ -153,7 +157,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                         new Set(formikProps.values.scopes)
                       )
                     );
-                  }, [formikProps.values.projectId]);
+                  }, [project]);
 
                   return (
                     <>

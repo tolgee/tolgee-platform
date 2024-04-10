@@ -216,6 +216,12 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
           );
         },
       },
+      defaultNamespace: {
+        type: 'default_namespace',
+        label(params) {
+          return <T keyName="activity_entity_project.default_namespace" />;
+        },
+      },
     },
   },
   Namespace: {
