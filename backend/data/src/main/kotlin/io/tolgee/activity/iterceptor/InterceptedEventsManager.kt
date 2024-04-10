@@ -21,6 +21,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
+import org.apache.commons.lang3.exception.ExceptionUtils.*
 import org.hibernate.Transaction
 import org.hibernate.action.spi.BeforeTransactionCompletionProcess
 import org.hibernate.collection.spi.AbstractPersistentCollection
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import kotlin.reflect.KCallable
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
@@ -61,7 +63,7 @@ class InterceptedEventsManager(
 
     val ownerField =
       collectionOwner::class.members.find {
-        it.parameters.size == 1 && it.call(collectionOwner) === collection
+        it.parameters.size == 1 && it.callIfInitialized(collectionOwner) === collection
       } ?: return
 
     val provider = getChangesProvider(collectionOwner, ownerField.name) ?: return
@@ -80,6 +82,17 @@ class InterceptedEventsManager(
     activityModifiedEntity.modifications = (newChanges).toMutableMap()
 
     activityModifiedEntity.setEntityDescription(collectionOwner)
+  }
+
+  private fun KCallable<*>.callIfInitialized(instance: Any?): Any? {
+    try {
+      return this.call(instance)
+    } catch (e: Exception) {
+      if (getRootCause(e) is UninitializedPropertyAccessException) {
+        return null
+      }
+      throw e
+    }
   }
 
   fun onFieldModificationsActivity(
