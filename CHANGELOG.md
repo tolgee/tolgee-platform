@@ -1,3 +1,10 @@
+# [3.56.0](https://github.com/tolgee/tolgee-platform/compare/v3.55.1...v3.56.0) (2024-04-10)
+
+
+### Features
+
+* project default namespace ([#2233](https://github.com/tolgee/tolgee-platform/issues/2233)) ([f124efa](https://github.com/tolgee/tolgee-platform/commit/f124efab16102df5a654b3eff29c334ce03fa864))
+
 ## [3.55.1](https://github.com/tolgee/tolgee-platform/compare/v3.55.0...v3.55.1) (2024-04-10)
 
 
