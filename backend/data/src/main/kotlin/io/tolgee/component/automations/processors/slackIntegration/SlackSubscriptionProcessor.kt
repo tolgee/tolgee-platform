@@ -1,6 +1,5 @@
 package io.tolgee.component.automations.processors.slackIntegration
 
-import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
 import io.tolgee.api.IProjectActivityModelAssembler
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class SlackSubscriptionProcessor(
-  private val activityService: ActivityService,
   private val activityModelAssembler: IProjectActivityModelAssembler,
   private val slackExecutor: SlackExecutor,
   private val applicationContext: ApplicationContext,

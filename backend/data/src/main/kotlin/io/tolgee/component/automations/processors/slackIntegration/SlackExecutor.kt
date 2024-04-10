@@ -7,6 +7,8 @@ import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.slack.SlackCommandDto
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.service.key.KeyService
@@ -31,7 +33,7 @@ class SlackExecutor(
   private val slackSubscriptionService: SlackSubscriptionService,
   private val slackConfigService: SlackConfigService,
 ) : Logging {
-  private val slackToken = tolgeeProperties.slack.token
+  // private val serverSlackToken = tolgeeProperties.slack.token
   private val slackClient: Slack = Slack.getInstance()
   private lateinit var slackExecutorHelper: SlackExecutorHelper
 
@@ -80,31 +82,18 @@ class SlackExecutor(
 
   fun sendErrorMessage(
     errorMessage: Message,
-    slackChannelId: String,
-    slackId: String,
-    slackNickName: String,
-    workSpace: String,
-    channelName: String,
-    teamDomain: String,
+    dto: SlackCommandDto,
+    workspace: OrganizationSlackWorkspace?,
   ) {
     val url =
       when (errorMessage) {
-        Message.SLACK_NOT_LINKED_ORG ->
-          getRedirectUrl(
-            slackChannelId,
-            workSpace,
-            slackId,
-            slackChannelId,
-            channelName,
-            teamDomain,
-          )
-        Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> getRedirectUrl(slackChannelId, slackId, slackNickName)
+        Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> getRedirectUrl(dto.channelId, dto.userId, dto.userName)
         else -> ""
       }
     val blocks = createErrorBlocks(errorMessage, url)
 
-    slackClient.methods(slackToken).chatPostMessage { request ->
-      request.channel(slackChannelId)
+    slackClient.methods(workspace?.accessToken ?: serverSlackToken).chatPostMessage { request ->
+      request.channel(dto.channelId)
         .blocks(blocks)
     }
   }
@@ -113,8 +102,9 @@ class SlackExecutor(
     slackChannelId: String,
     slackId: String,
     slackNickName: String,
+    workspace: OrganizationSlackWorkspace?,
   ) {
-    slackClient.methods(slackToken).chatPostMessage {
+    slackClient.methods(workspace?.accessToken ?: serverSlackToken).chatPostMessage {
       it.channel(slackChannelId)
         .blocks {
           section {
@@ -138,40 +128,8 @@ class SlackExecutor(
     }
   }
 
-  fun connectOrganisationButton(
-    slackChannelId: String,
-    workSpace: String,
-    userId: String,
-    slackNickName: String,
-    channelName: String,
-    teamDomain: String,
-  ) {
-    slackClient.methods(slackToken).chatPostMessage {
-      it.channel(slackChannelId)
-        .blocks {
-          section {
-            markdownText(i18n.translate("org-not-linked-message"))
-          }
-
-          section {
-            markdownText(i18n.translate("org-not-linked-instruction"))
-          }
-
-          actions {
-            button {
-              text(i18n.translate("connect-button-text"), emoji = true)
-              value("connect_slack")
-              url(getRedirectUrl(slackChannelId, workSpace, userId, slackChannelId, channelName, teamDomain))
-              actionId("button_connect_slack")
-              style("primary")
-            }
-          }
-        }
-    }
-  }
-
   fun sendSuccessMessage(slackChannelId: String) {
-    slackClient.methods(slackToken).chatPostMessage {
+    slackClient.methods(serverSlackToken).chatPostMessage {
       it.channel(slackChannelId)
         .blocks {
           section {
@@ -190,7 +148,7 @@ class SlackExecutor(
     messageDto: SavedMessageDto,
   ) {
     val response =
-      slackClient.methods(slackToken).chatUpdate { request ->
+      slackClient.methods(serverSlackToken).chatUpdate { request ->
         request
           .channel(config.channelId)
           .ts(savedMessage.messageTs)
@@ -210,7 +168,7 @@ class SlackExecutor(
     config: SlackConfig,
   ) {
     val response =
-      slackClient.methods(slackToken).chatPostMessage { request ->
+      slackClient.methods(serverSlackToken).chatPostMessage { request ->
         request.channel(config.channelId)
           .blocks(messageDto.blocks)
           .attachments(messageDto.attachments)
@@ -273,16 +231,6 @@ class SlackExecutor(
     slackNickName: String,
   ) = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId&nickName=$slackNickName"
 
-  private fun getRedirectUrl(
-    slackChannelId: String,
-    workSpace: String,
-    slackId: String,
-    slackNickName: String,
-    channelName: String,
-    teamDomain: String,
-  ) =
-    "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId&nickName=$slackNickName&workSpace=$workSpace&channelName=$channelName&domainName=$teamDomain"
-
   fun createErrorBlocks(
     errorMessageType: Message,
     redirectUrl: String,
@@ -299,9 +247,6 @@ class SlackExecutor(
           Message.SLACK_NOT_SUBSCRIBED_YET ->
             i18n.translate("not-subscribed-yet-message")
 
-          Message.SLACK_NOT_LINKED_ORG ->
-            i18n.translate("org-not-linked-message")
-
           else -> {
             i18n.translate("unknown-error-occurred")
           }
@@ -313,19 +258,6 @@ class SlackExecutor(
       Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> {
         section {
           markdownText(i18n.translate("connect-account-instruction"))
-        }
-        actions {
-          button {
-            text(i18n.translate("connect-button-text"), emoji = true)
-            url(redirectUrl)
-            style("primary")
-          }
-        }
-      }
-
-      Message.SLACK_NOT_LINKED_ORG -> {
-        section {
-          markdownText(i18n.translate("org-not-linked-instruction"))
         }
         actions {
           button {
@@ -396,7 +328,7 @@ class SlackExecutor(
       }
 
     val response =
-      slackClient.methods(slackToken).chatPostMessage { request ->
+      slackClient.methods(serverSlackToken).chatPostMessage { request ->
         request.channel(channelId)
           .blocks(blocks)
       }
@@ -408,7 +340,7 @@ class SlackExecutor(
 
   fun sendHelpMessage(channelId: String) {
     val response =
-      slackClient.methods(slackToken).chatPostMessage { request ->
+      slackClient.methods(serverSlackToken).chatPostMessage { request ->
         request.channel(channelId)
           .blocks(helpBlocks())
       }
@@ -485,6 +417,10 @@ class SlackExecutor(
         markdownText(i18n.translate("help-disconnect-tolgee-command"))
       }
     }
+
+  private fun SlackConfig.getToken(): String {
+    return this.organizationSlackWorkspace.accessToken ?: serverSlackToken ?: throw SlackNotConfiguredException()
+  }
 
   fun sendMessageOnImport() {
     val config = slackExecutorHelper.slackConfig

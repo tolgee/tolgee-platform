@@ -1,8 +1,18 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.tolgee.model.slackIntegration.OrgToWorkspaceLink
-import jakarta.persistence.*
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
@@ -53,5 +63,5 @@ class Organization(
   override var deletedAt: Date? = null
 
   @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, orphanRemoval = true)
-  var orgToWorkspaceLink: MutableList<OrgToWorkspaceLink> = mutableListOf()
+  var organizationSlackWorkspace: MutableList<OrganizationSlackWorkspace> = mutableListOf()
 }

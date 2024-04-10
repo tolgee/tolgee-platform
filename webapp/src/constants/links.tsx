@@ -257,6 +257,17 @@ export class LINKS {
   );
 
   /**
+   * Slack
+   */
+
+  static ORGANIZATION_SLACK = Link.ofParent(LINKS.ORGANIZATION, 'slack');
+
+  static ORGANIZATION_SLACK_OAUTH_SUCCESS = Link.ofParent(
+    LINKS.ORGANIZATION_SLACK,
+    'oauth-success'
+  );
+
+  /**
    * Project stuff
    */
 

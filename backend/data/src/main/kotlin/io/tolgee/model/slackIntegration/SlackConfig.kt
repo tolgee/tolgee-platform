@@ -5,7 +5,12 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.automations.AutomationAction
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 
@@ -42,5 +47,5 @@ class SlackConfig(
   var preferences: MutableSet<SlackConfigPreference> = mutableSetOf()
 
   @ManyToOne(fetch = FetchType.LAZY)
-  var orgToWorkspaceLink: OrgToWorkspaceLink = OrgToWorkspaceLink()
+  var organizationSlackWorkspace: OrganizationSlackWorkspace = OrganizationSlackWorkspace()
 }

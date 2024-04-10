@@ -7,10 +7,8 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackConnectionDto
 import io.tolgee.dtos.request.slack.SlackEventDto
-import io.tolgee.dtos.response.OrgToWorkspaceLinkDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
@@ -18,20 +16,25 @@ import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
-import io.tolgee.service.slackIntegration.OrgToWorkspaceLinkService
+import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.slackIntegration.SlackSubscriptionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.net.URLDecoder
-import kotlin.jvm.optionals.getOrElse
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -46,8 +49,7 @@ class SlackIntegrationController(
   private val objectMapper: ObjectMapper,
   private val i18n: I18n,
   private val authenticationFacade: AuthenticationFacade,
-  private val orgToWorkspaceLinkService: OrgToWorkspaceLinkService,
-  private val organizationService: OrganizationService,
+  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
 ) : Logging {
   @PostMapping
   @UseDefaultPermissions
@@ -59,7 +61,6 @@ class SlackIntegrationController(
 
     if (matchResult == null) {
       sendError(payload, Message.SLACK_INVALID_COMMAND)
-
       return null
     }
 
@@ -76,7 +77,7 @@ class SlackIntegrationController(
 
       "subscriptions" -> listOfSubscriptions(payload)
 
-      "help" -> help(payload.channel_id)
+      "help" -> help(payload.channelId)
 
       else -> {
         sendError(payload, Message.SLACK_INVALID_COMMAND)
@@ -91,19 +92,19 @@ class SlackIntegrationController(
   }
 
   private fun listOfSubscriptions(payload: SlackCommandDto) {
-    val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
+    val slackSubscription = slackSubscriptionService.getBySlackId(payload.userId)
 
     if (slackSubscription == null) {
       sendError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
       return
     }
 
-    if (slackConfigService.get(payload.user_id, payload.channel_id).isEmpty()) {
+    if (slackConfigService.get(payload.userId, payload.channelId).isEmpty()) {
       sendError(payload, Message.SLACK_NOT_SUBSCRIBED_YET)
       return
     }
 
-    slackExecutor.sendListOfSubscriptions(payload.user_id, payload.channel_id)
+    slackExecutor.sendListOfSubscriptions(payload.userId, payload.channelId)
   }
 
   @PostMapping("/connect")
@@ -111,20 +112,6 @@ class SlackIntegrationController(
   fun connectSlack(
     @RequestBody payload: SlackConnectionDto,
   ) {
-    if (payload.workSpace.isNotBlank() && !orgToWorkspaceLinkService.ifWorkSpaceLinked(payload.workSpace)) {
-      val organization = organizationService.get(payload.orgId.toLong())
-      orgToWorkspaceLinkService.save(
-        organization,
-        payload.workSpace,
-        payload.channelName,
-        payload.author,
-        payload.workSpaceName,
-      )
-      slackExecutor.sendSuccessMessage(payload.channelId)
-      slackExecutor.sendRedirectUrl(payload.channelId, payload.slackId, payload.slackNickName)
-      return
-    }
-
     if (payload.userAccountId.toLongOrNull() != authenticationFacade.authenticatedUser.id) {
       throw Exception()
     }
@@ -136,23 +123,11 @@ class SlackIntegrationController(
   }
 
   private fun login(payload: SlackCommandDto): SlackMessageDto? {
-    if (!orgToWorkspaceLinkService.ifWorkSpaceLinked(payload.team_id)) {
-      slackExecutor.connectOrganisationButton(
-        payload.channel_id,
-        payload.team_id,
-        payload.user_id,
-        payload.user_name,
-        payload.channel_name,
-        payload.team_domain,
-      )
-      return null
-    }
-
-    if (slackSubscriptionService.ifSlackConnected(payload.user_id)) {
+    if (slackSubscriptionService.ifSlackConnected(payload.userId)) {
       return SlackMessageDto(text = i18n.translate("already_logged_in"))
     }
 
-    slackExecutor.sendRedirectUrl(payload.channel_id, payload.user_id, payload.user_name)
+    slackExecutor.sendRedirectUrl(payload.channelId, payload.userId, payload.userName)
     return null
   }
 
@@ -202,12 +177,12 @@ class SlackIntegrationController(
     val slackConfigDto =
       SlackConfigDto(
         project = validationResult.project,
-        slackId = payload.user_id,
-        channelId = payload.channel_id,
+        slackId = payload.userId,
+        channelId = payload.channelId,
         userAccount = validationResult.user,
         languageTag = languageTag,
         onEvent = onEventName,
-        workSpaceId = payload.team_id,
+        slackTeamId = payload.teamId,
       )
 
     try {
@@ -230,7 +205,7 @@ class SlackIntegrationController(
       return null
     }
 
-    if (!slackConfigService.delete(validationResult.project.id, payload.channel_id)) {
+    if (!slackConfigService.delete(validationResult.project.id, payload.channelId)) {
       sendError(payload, Message.SLACK_NOT_SUBSCRIBED_YET)
       return null
     }
@@ -259,44 +234,19 @@ class SlackIntegrationController(
     return null
   }
 
-  @GetMapping("/organizations/{organizationId}/is-paired")
-  fun isOrgPaired(
-    @PathVariable
-    organizationId: Long,
-  ): Boolean {
-    return !orgToWorkspaceLinkService.findByOrgIdOptional(organizationId).isEmpty
-  }
-
-  @GetMapping("/organizations/{organizationId}")
-  fun getLinkedOrganisations(
-    @PathVariable
-    organizationId: Long,
-  ): OrgToWorkspaceLinkDto {
-    val orgToWorkspaceLink =
-      orgToWorkspaceLinkService.findByOrgIdOptional(
-        organizationId,
-      ).getOrElse { throw NotFoundException() }
-    return OrgToWorkspaceLinkDto.fromEntity(orgToWorkspaceLink)
-  }
-
   @DeleteMapping("/organizations/{organizationId}")
   fun deleteOrganisationLink(
     @PathVariable
     organizationId: Long,
   ) {
-    orgToWorkspaceLinkService.delete(organizationId)
+    organizationSlackWorkspaceService.delete(organizationId)
   }
 
   private fun validateRequest(
     payload: SlackCommandDto,
     projectId: String,
   ): ValidationResult {
-    if (!orgToWorkspaceLinkService.ifWorkSpaceLinked(payload.team_id)) {
-      sendError(payload, Message.SLACK_NOT_LINKED_ORG)
-      return ValidationResult(false)
-    }
-
-    val slackSubscription = slackSubscriptionService.getBySlackId(payload.user_id)
+    val slackSubscription = slackSubscriptionService.getBySlackId(payload.userId)
 
     if (slackSubscription == null) {
       sendError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
@@ -326,14 +276,12 @@ class SlackIntegrationController(
     payload: SlackCommandDto,
     message: Message,
   ) {
+    val workspace = organizationSlackWorkspaceService.findBySlackTeamId(payload.teamId)
+
     slackExecutor.sendErrorMessage(
       message,
-      payload.channel_id,
-      payload.user_id,
-      payload.user_name,
-      payload.team_id,
-      payload.channel_name,
-      payload.team_domain,
+      payload,
+      workspace,
     )
   }
 
