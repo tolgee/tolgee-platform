@@ -73,9 +73,11 @@ class SlackExecutor(
 
   fun sendMessageOnKeyAdded() {
     val config = slackExecutorHelper.slackConfig
-    val messageDto = slackExecutorHelper.createKeyAddMessage() ?: return
+    val messagesDto = slackExecutorHelper.createKeyAddMessage()
 
-    sendRegularMessageWithSaving(messageDto, config)
+    messagesDto.forEach { message ->
+      sendRegularMessageWithSaving(message, config)
+    }
   }
 
   fun sendErrorMessage(
@@ -488,8 +490,12 @@ class SlackExecutor(
 
   fun sendMessageOnImport() {
     val config = slackExecutorHelper.slackConfig
-    val messageDto = slackExecutorHelper.createImportMessage() ?: return
-
-    sendRegularMessageWithSaving(messageDto, config)
+    val counts = slackExecutorHelper.data.activityData?.counts?.get("Key") ?: return
+    if (counts >= 10) {
+      val messageDto = slackExecutorHelper.createImportMessage() ?: return
+      sendRegularMessageWithSaving(messageDto, config)
+    } else {
+      sendMessageOnKeyAdded()
+    }
   }
 }

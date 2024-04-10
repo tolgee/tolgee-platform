@@ -29,15 +29,14 @@ class SlackEventsController(
   fun fetchEvent(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
-    @RequestBody body: String,
     @RequestBody payload: String,
   ): SlackMessageDto? {
-    if (!slackRequestValidation.isValid(slackSignature, timestamp, body)) {
+    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
+
+    if (!slackRequestValidation.isValid(slackSignature, timestamp, payload)) {
       Log.info("Error validating request from Slack")
       throw BadRequestException(Message.UNEXPECTED_ERROR_SLACK)
     }
-
-    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
     val event: SlackEventDto = objectMapper.readValue(decodedPayload)
 
     event.actions.forEach { action ->

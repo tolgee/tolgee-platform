@@ -64,7 +64,6 @@ class SlackSlashCommandController(
 
     if (matchResult == null) {
       sendError(payload, Message.SLACK_INVALID_COMMAND)
-
       return null
     }
 

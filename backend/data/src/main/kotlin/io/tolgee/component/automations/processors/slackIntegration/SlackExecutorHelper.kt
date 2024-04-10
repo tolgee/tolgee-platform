@@ -5,6 +5,7 @@ import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.SectionBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
+import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
@@ -28,43 +29,56 @@ class SlackExecutorHelper(
   private val i18n: I18n,
   private val tolgeeProperties: TolgeeProperties,
 ) {
-  fun createKeyAddMessage(): SavedMessageDto? {
-    val activities = data.activityData ?: return null
-    val attachments = mutableListOf<Attachment>()
-    val langTags: MutableSet<String> = mutableSetOf()
-    var keyId: Long = 0
-    var blocksHeader: List<LayoutBlock> = listOf()
-    val baseLanguage = slackConfig.project.baseLanguage ?: return null
-    // Extracting Key and Translation Information
-    val modifiedEntities = activities.modifiedEntities ?: return null
-    modifiedEntities.forEach modifiedEntities@{ (entityType, modifiedEntityList) ->
-      modifiedEntityList.forEach modifiedEntitiesList@{ modifiedEntity ->
+  fun createKeyAddMessage(): List<SavedMessageDto> {
+    val activities = data.activityData ?: return emptyList()
+    val baseLanguage = slackConfig.project.baseLanguage ?: return emptyList()
+
+    val messages: MutableList<SavedMessageDto> = mutableListOf()
+    val modifiedEntities = activities.modifiedEntities ?: return emptyList()
+    modifiedEntities.flatMap { (entityType, modifiedEntityList) ->
+      modifiedEntityList.map modifiedEntitiesList@{ modifiedEntity ->
         when (entityType) {
           "Key" -> {
-            keyId = modifiedEntity.entityId
-            val key = keyService.get(keyId)
-            blocksHeader = buildKeyInfoBlock(key, i18n.translate("new-key-text"))
-            key.translations.forEach translations@{ translation ->
-              if (!shouldProcessEvent(
-                  translation.language.tag,
-                  baseLanguage.tag,
-                  EventName.NEW_KEY,
-                )
-              ) {
-                return@translations
-              }
+            createMessageForModifiedEntity(modifiedEntity, baseLanguage)?.let { messages.add(it) }
+          }
 
-              val attachment = createAttachmentForLanguage(translation) ?: return@translations
-
-              attachments.add(attachment)
-              langTags.add(translation.language.tag)
-            }
+          else -> {
+            return@modifiedEntitiesList
           }
         }
       }
     }
 
-    // TODO move to function
+    return messages
+  }
+
+  private fun createMessageForModifiedEntity(
+    modifiedEntity: IModifiedEntityModel,
+    baseLanguage: Language,
+  ): SavedMessageDto? {
+    val attachments = mutableListOf<Attachment>()
+    val langTags: MutableSet<String> = mutableSetOf()
+    val blocksHeader: List<LayoutBlock>
+
+    val keyId = modifiedEntity.entityId
+    val key = keyService.get(keyId)
+    blocksHeader = buildKeyInfoBlock(key, i18n.translate("new-key-text"))
+    key.translations.forEach translations@{ translation ->
+      if (!shouldProcessEvent(
+          translation.language.tag,
+          baseLanguage.tag,
+          EventName.NEW_KEY,
+        )
+      ) {
+        return@translations
+      }
+
+      val attachment = createAttachmentForLanguage(translation) ?: return@translations
+
+      attachments.add(attachment)
+      langTags.add(translation.language.tag)
+    }
+
     slackConfig.project.languages.forEach { language ->
       if (!langTags.contains(language.tag)) {
         if (!shouldProcessEvent(
