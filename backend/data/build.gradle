@@ -169,7 +169,7 @@ dependencies {
     implementation libs.micrometerPrometheus
     implementation 'org.dom4j:dom4j:2.1.4'
     implementation libs.jacksonKotlin
-    implementation("org.apache.commons:commons-configuration2:2.9.0")
+    implementation("org.apache.commons:commons-configuration2:2.10.1")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
 
     /**
@@ -189,12 +189,14 @@ dependencies {
      */
     implementation(project(':misc'))
 
-
     /**
      * AZURE
      */
-    implementation 'com.azure:azure-storage-blob:12.25.1'
-    implementation 'com.azure:azure-identity:1.10.4'
+    implementation('com.azure:azure-storage-blob:12.25.1') {
+        exclude group: 'io.netty', module: 'netty-codec-http'
+    }
+    implementation('io.netty:netty-codec-http:4.1.108.Final')
+    implementation('com.azure:azure-identity:1.12.0')
 }
 
 test {
