@@ -18,6 +18,14 @@ class SlackConfigPreferenceService(
     return slackConfigPreferenceRepository.save(SlackConfigPreference(slackConfig, langTag, eventName))
   }
 
+  fun update(
+    slackConfigPreference: SlackConfigPreference,
+    eventName: EventName,
+  ): SlackConfigPreference {
+    slackConfigPreference.onEvent = eventName
+    return slackConfigPreferenceRepository.save(slackConfigPreference)
+  }
+
   fun get(id: Long) {
   }
 

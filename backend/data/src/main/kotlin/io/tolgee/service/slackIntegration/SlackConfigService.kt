@@ -115,12 +115,27 @@ class SlackConfigService(
     if (slackConfigDto.languageTag.isNullOrBlank()) {
       slackConfig.isGlobalSubscription = true
     } else {
-      addPreferenceToConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+      if (slackConfig.preferences.isEmpty() ||
+        !slackConfig.preferences.any { it.languageTag == slackConfigDto.languageTag }
+      ) {
+        addPreferenceToConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+      } else {
+        updatePreferenceInConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+      }
     }
 
     automationService.updateForSlackConfig(slackConfig)
     slackConfigRepository.save(slackConfig)
     return slackConfig
+  }
+
+  private fun updatePreferenceInConfig(
+    slackConfig: SlackConfig,
+    languageTag: String,
+    eventName: EventName,
+  ) {
+    val pref = slackConfig.preferences.find { it.languageTag == languageTag } ?: return
+    slackConfigPreferenceService.update(pref, eventName)
   }
 
   private fun addPreferenceToConfig(
