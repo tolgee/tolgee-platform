@@ -1,3 +1,10 @@
+## [3.56.1](https://github.com/tolgee/tolgee-platform/compare/v3.56.0...v3.56.1) (2024-04-11)
+
+
+### Bug Fixes
+
+* Update vulnerable dependencies ([#2238](https://github.com/tolgee/tolgee-platform/issues/2238)) ([cebc8e2](https://github.com/tolgee/tolgee-platform/commit/cebc8e2cc79a155d61249d891d22c1bc870f570c))
+
 # [3.56.0](https://github.com/tolgee/tolgee-platform/compare/v3.55.1...v3.56.0) (2024-04-10)
 
 
