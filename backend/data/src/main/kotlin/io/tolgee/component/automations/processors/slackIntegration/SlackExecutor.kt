@@ -387,6 +387,10 @@ class SlackExecutor(
             section {
               markdownText("*Global Subscription:* Yes")
             }
+
+            section {
+              markdownText("Events: ${config.onEvent}")
+            }
           }
           config.preferences.forEach {
             section {

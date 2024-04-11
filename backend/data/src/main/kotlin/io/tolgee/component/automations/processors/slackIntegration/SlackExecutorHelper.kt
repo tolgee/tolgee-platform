@@ -64,10 +64,8 @@ class SlackExecutorHelper(
     val key = keyService.get(keyId)
     blocksHeader = buildKeyInfoBlock(key, i18n.translate("new-key-text"))
     key.translations.forEach translations@{ translation ->
-      if (!shouldProcessEvent(
+      if (!shouldProcessEventNewKeyAdded(
           translation.language.tag,
-          baseLanguage.tag,
-          EventName.NEW_KEY,
         )
       ) {
         return@translations
@@ -81,10 +79,8 @@ class SlackExecutorHelper(
 
     slackConfig.project.languages.forEach { language ->
       if (!langTags.contains(language.tag)) {
-        if (!shouldProcessEvent(
+        if (!shouldProcessEventNewKeyAdded(
             language.tag,
-            baseLanguage.tag,
-            EventName.NEW_KEY,
           )
         ) {
           return@forEach
@@ -240,7 +236,7 @@ class SlackExecutorHelper(
     val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return null
     val modifiedLangTag = translation.language.tag
 
-    if (!shouldProcessEvent(modifiedLangTag, baseLanguageTag, EventName.TRANSLATION_CHANGED)) return null
+    if (!shouldProcessEventTranslationChanged(modifiedLangTag, baseLanguageTag, modifiedLangTag)) return null
 
     val langName =
       if (translation.language.tag == baseLanguageTag) {
@@ -270,28 +266,37 @@ class SlackExecutorHelper(
 
   private fun addLanguagesIfNeed(
     attachments: MutableList<Attachment>,
-    langTags: MutableSet<String>,
+    addedTags: MutableSet<String>,
     keyId: Long,
     modifiedLangTag: String,
     baseLanguageTag: String,
   ) {
     slackConfig.project.languages.forEach { language ->
-      if (shouldAddLanguage(langTags, modifiedLangTag, language.tag, baseLanguageTag)) {
+      if (!shouldProcessEventTranslationChanged(
+          modifiedLangTag,
+          baseLanguageTag,
+          language.tag,
+        ) && language.tag != baseLanguageTag
+      ) {
+        return@forEach
+      }
+
+      if (shouldAddLanguage(addedTags, modifiedLangTag, language.tag, baseLanguageTag)) {
         createAttachmentForLanguage(language.tag, keyId)?.let { attachment ->
           attachments.add(attachment)
-          langTags.add(language.tag)
+          addedTags.add(language.tag)
         }
       }
     }
   }
 
   private fun shouldAddLanguage(
-    langTags: Set<String>,
+    addedTags: Set<String>,
     modifiedLangTag: String,
     currentLangTag: String,
     baseLanguageTag: String,
   ): Boolean =
-    !langTags.contains(currentLangTag) &&
+    !addedTags.contains(currentLangTag) &&
       (modifiedLangTag == baseLanguageTag || currentLangTag == baseLanguageTag)
 
   private fun findTranslationByKey(translationKey: Long): Translation? =
@@ -341,10 +346,10 @@ class SlackExecutorHelper(
       baseLanguage.tag != langTag
   }
 
-  private fun shouldProcessEvent(
+  private fun shouldProcessEventTranslationChanged(
     modifiedLangTag: String,
     baseLanguageTag: String,
-    event: EventName,
+    currentLangTag: String,
   ): Boolean {
     val isBaseChanged = modifiedLangTag == baseLanguageTag
 
@@ -356,29 +361,42 @@ class SlackExecutorHelper(
           slackConfig.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
         )
       } else {
-        slackConfig.preferences.find { it.languageTag == modifiedLangTag }?.let { pref ->
+        val pref = slackConfig.preferences.find { it.languageTag == currentLangTag }
+        if (pref != null) {
           Triple(
             pref.onEvent == EventName.ALL,
             pref.onEvent == EventName.BASE_CHANGED && isBaseChanged,
             pref.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
           )
-        } ?: return false // Возвращаем false, если настройки для языка не найдены.
-      }
-
-    return when (event) {
-      EventName.TRANSLATION_CHANGED -> {
-        val (isAllEvent, isBaseLanguageChangedEvent, isTranslationChangedEvent) = eventHandlingPreferences
-        isAllEvent || isBaseLanguageChangedEvent || isTranslationChangedEvent
-      }
-      EventName.NEW_KEY -> {
-        if (slackConfig.isGlobalSubscription) {
-          slackConfig.onEvent == event || slackConfig.onEvent == EventName.ALL
         } else {
-          val pref = slackConfig.preferences.find { it.languageTag == modifiedLangTag } ?: return false
-          pref.onEvent == EventName.NEW_KEY || pref.onEvent == EventName.ALL
+          null
         }
       }
-      else -> false
+
+    if (eventHandlingPreferences == null) {
+      if (!isBaseChanged) {
+        return false
+      } else {
+        slackConfig.project.languages.forEach { language ->
+          val pref = slackConfig.preferences.find { it.languageTag == language.tag } ?: return@forEach
+          if (pref.onEvent == EventName.ALL || pref.onEvent == EventName.BASE_CHANGED) {
+            return true
+          }
+        }
+        return false
+      }
+    }
+
+    val (isAllEvent, isBaseLanguageChangedEvent, isTranslationChangedEvent) = eventHandlingPreferences
+    return isAllEvent || isBaseLanguageChangedEvent || isTranslationChangedEvent
+  }
+
+  private fun shouldProcessEventNewKeyAdded(modifiedLangTag: String): Boolean {
+    return if (slackConfig.isGlobalSubscription) {
+      slackConfig.onEvent == EventName.NEW_KEY || slackConfig.onEvent == EventName.ALL
+    } else {
+      val pref = slackConfig.preferences.find { it.languageTag == modifiedLangTag } ?: return false
+      pref.onEvent == EventName.NEW_KEY || pref.onEvent == EventName.ALL
     }
   }
 
