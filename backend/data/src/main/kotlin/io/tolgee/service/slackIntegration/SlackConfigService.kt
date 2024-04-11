@@ -27,11 +27,8 @@ class SlackConfigService(
     return slackConfigRepository.findById(configId).orElseThrow { NotFoundException() }
   }
 
-  fun get(
-    slackId: String,
-    channelId: String,
-  ): List<SlackConfig> {
-    return slackConfigRepository.findBySlackIdAndChannelId(slackId, channelId)
+  fun getAllByChannelId(channelId: String): List<SlackConfig> {
+    return slackConfigRepository.getAllByChannelId(channelId)
   }
 
   @Transactional
@@ -51,7 +48,9 @@ class SlackConfigService(
 
   @Transactional
   fun create(slackConfigDto: SlackConfigDto): SlackConfig {
-    val orgToWorkspaceLink = organizationSlackWorkspaceService.findBySlackTeamId(slackConfigDto.slackTeamId) ?: throw Exception()
+    val orgToWorkspaceLink =
+      organizationSlackWorkspaceService.findBySlackTeamId(slackConfigDto.slackTeamId)
+        ?: throw SlackWorkspaceNotFound()
 
     val slackConfig =
       SlackConfig(
@@ -59,7 +58,6 @@ class SlackConfigService(
         userAccount = slackConfigDto.userAccount,
         channelId = slackConfigDto.channelId,
       ).apply {
-        slackId = slackConfigDto.slackId
         onEvent = slackConfigDto.onEvent ?: EventName.ALL
         isGlobalSubscription = slackConfigDto.languageTag.isNullOrBlank()
         this.organizationSlackWorkspace = orgToWorkspaceLink
@@ -69,7 +67,6 @@ class SlackConfigService(
     return if (existingConfigs == null) {
       slackConfigRepository.save(slackConfig)
       orgToWorkspaceLink.slackSubscriptions.add(slackConfig)
-      organizationSlackWorkspaceService.connect(orgToWorkspaceLink)
 
       if (!slackConfig.isGlobalSubscription) {
         addPreferenceToConfig(slackConfig, slackConfigDto.languageTag!!, slackConfigDto.onEvent ?: EventName.ALL)

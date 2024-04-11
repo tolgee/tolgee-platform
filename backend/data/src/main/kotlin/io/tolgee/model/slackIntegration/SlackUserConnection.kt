@@ -5,11 +5,14 @@ import io.tolgee.model.UserAccount
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 
 @Entity
-class SlackSubscription : StandardAuditModel() {
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["slack_user_id", "user_account_id"])])
+class SlackUserConnection : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
   var userAccount: UserAccount? = null
-  var slackNickName: String = ""
+
   var slackUserId: String = ""
 }

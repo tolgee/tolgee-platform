@@ -8,6 +8,8 @@ import io.tolgee.model.automations.AutomationAction
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
@@ -25,14 +27,11 @@ class SlackConfig(
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true, fetch = FetchType.LAZY)
   var automationActions: MutableList<AutomationAction> = mutableListOf()
 
-  @Column(nullable = false)
-  var slackId: String = ""
-
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var languageTags: MutableSet<String> = hashSetOf()
 
-  @ColumnDefault("0")
+  @Enumerated(EnumType.STRING)
   var onEvent: EventName = EventName.ALL
 
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true, fetch = FetchType.LAZY)

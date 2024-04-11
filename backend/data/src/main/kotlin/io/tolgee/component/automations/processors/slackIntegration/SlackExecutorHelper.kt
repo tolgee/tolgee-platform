@@ -15,7 +15,7 @@ import io.tolgee.model.slackIntegration.SlackConfigPreference
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
-import io.tolgee.service.slackIntegration.SlackSubscriptionService
+import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.util.I18n
 import kotlin.jvm.optionals.getOrElse
 
@@ -24,7 +24,7 @@ class SlackExecutorHelper(
   val data: SlackRequest,
   val keyService: KeyService,
   val permissionService: PermissionService,
-  private val slackSubscriptionService: SlackSubscriptionService,
+  private val slackUserConnectionService: SlackUserConnectionService,
   private val i18n: I18n,
   private val tolgeeProperties: TolgeeProperties,
 ) {
@@ -168,8 +168,8 @@ class SlackExecutorHelper(
     head: String,
   ) = withBlocks {
     section {
-      val nickname = slackSubscriptionService.getBySlackId(slackConfig.slackId)?.slackNickName ?: return@section
-      markdownText("@$nickname $head")
+      // TODO add author
+      markdownText(head)
     }
 
     section {
@@ -311,8 +311,8 @@ class SlackExecutorHelper(
   }
 
   private fun SectionBlockBuilder.authorHeadSection(head: String) {
-    val nickname = slackSubscriptionService.getBySlackId(slackConfig.slackId)?.slackNickName ?: return
-    markdownText("@$nickname $head")
+    // TODO add author
+    markdownText(head)
   }
 
   private fun shouldSkipModification(

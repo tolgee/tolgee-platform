@@ -1,21 +1,29 @@
 package io.tolgee.component.automations.processors.slackIntegration
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.slack.api.Slack
 import com.slack.api.methods.kotlin_extension.request.chat.blocks
 import com.slack.api.model.Attachment
+import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
+import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackCommandDto
+import io.tolgee.dtos.request.slack.SlackConnectionDto
+import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.service.slackIntegration.SlackConfigService
-import io.tolgee.service.slackIntegration.SlackSubscriptionService
+import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -30,14 +38,19 @@ class SlackExecutor(
   private val permissionService: PermissionService,
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
-  private val slackSubscriptionService: SlackSubscriptionService,
+  private val slackUserConnectionService: SlackUserConnectionService,
   private val slackConfigService: SlackConfigService,
+  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
+  private val frontendUrlProvider: FrontendUrlProvider,
+  private val objectMapper: ObjectMapper,
 ) : Logging {
-  // private val serverSlackToken = tolgeeProperties.slack.token
   private val slackClient: Slack = Slack.getInstance()
-  private lateinit var slackExecutorHelper: SlackExecutorHelper
 
-  fun sendMessageOnTranslationSet() {
+  fun sendMessageOnTranslationSet(
+    slackConfig: SlackConfig,
+    request: SlackRequest,
+  ) {
+    val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
     val messageDto = slackExecutorHelper.createTranslationChangeMessage() ?: return
     val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag, config.id)
@@ -73,38 +86,48 @@ class SlackExecutor(
     }
   }
 
-  fun sendMessageOnKeyAdded() {
+  fun sendMessageOnKeyAdded(
+    slackConfig: SlackConfig,
+    request: SlackRequest,
+  ) {
+    val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
     val messageDto = slackExecutorHelper.createKeyAddMessage() ?: return
 
     sendRegularMessageWithSaving(messageDto, config)
   }
 
-  fun sendErrorMessage(
+  fun getErrorMessage(
     errorMessage: Message,
     dto: SlackCommandDto,
     workspace: OrganizationSlackWorkspace?,
-  ) {
+  ): SlackMessageDto {
     val url =
       when (errorMessage) {
-        Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> getRedirectUrl(dto.channelId, dto.userId, dto.userName)
+        Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT -> getRedirectUrl(dto.channel_id, dto.user_id, workspace?.id)
         else -> ""
       }
-    val blocks = createErrorBlocks(errorMessage, url)
 
-    slackClient.methods(workspace?.accessToken ?: serverSlackToken).chatPostMessage { request ->
-      request.channel(dto.channelId)
-        .blocks(blocks)
-    }
+    return createErrorBlocks(errorMessage, url).asSlackMessageDto
   }
+
+  val List<LayoutBlock>.asSlackMessageDto: SlackMessageDto
+    get() {
+      val withoutNulls =
+        jacksonObjectMapper().setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+          .writeValueAsString(this)
+
+      val resultBlocks = objectMapper.readValue<List<Any>>(withoutNulls)
+
+      return SlackMessageDto(blocks = resultBlocks)
+    }
 
   fun sendRedirectUrl(
     slackChannelId: String,
     slackId: String,
-    slackNickName: String,
     workspace: OrganizationSlackWorkspace?,
   ) {
-    slackClient.methods(workspace?.accessToken ?: serverSlackToken).chatPostMessage {
+    slackClient.methods(workspace?.getSlackToken()).chatPostMessage {
       it.channel(slackChannelId)
         .blocks {
           section {
@@ -119,7 +142,7 @@ class SlackExecutor(
             button {
               text(i18n.translate("connect-button-text"), emoji = true)
               value("connect_slack")
-              url(getRedirectUrl(slackChannelId, slackId, slackNickName))
+              url(getRedirectUrl(slackChannelId, slackId, workspace?.id))
               actionId("button_connect_slack")
               style("primary")
             }
@@ -128,9 +151,10 @@ class SlackExecutor(
     }
   }
 
-  fun sendSuccessMessage(slackChannelId: String) {
-    slackClient.methods(serverSlackToken).chatPostMessage {
-      it.channel(slackChannelId)
+  fun sendSuccessMessage(dto: SlackConnectionDto) {
+    val workspace = organizationSlackWorkspaceService.get(dto.workspaceId)
+    slackClient.methods(workspace.getSlackToken()).chatPostMessage {
+      it.channel(dto.channelId)
         .blocks {
           section {
             markdownText(i18n.translate("success_login_message"))
@@ -148,7 +172,7 @@ class SlackExecutor(
     messageDto: SavedMessageDto,
   ) {
     val response =
-      slackClient.methods(serverSlackToken).chatUpdate { request ->
+      slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatUpdate { request ->
         request
           .channel(config.channelId)
           .ts(savedMessage.messageTs)
@@ -168,7 +192,7 @@ class SlackExecutor(
     config: SlackConfig,
   ) {
     val response =
-      slackClient.methods(serverSlackToken).chatPostMessage { request ->
+      slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatPostMessage { request ->
         request.channel(config.channelId)
           .blocks(messageDto.blocks)
           .attachments(messageDto.attachments)
@@ -180,20 +204,19 @@ class SlackExecutor(
     }
   }
 
-  fun setHelper(
+  fun getHelper(
     slackConfig: SlackConfig,
     data: SlackRequest,
-  ) {
-    slackExecutorHelper =
-      SlackExecutorHelper(
-        slackConfig,
-        data,
-        keyService,
-        permissionService,
-        slackSubscriptionService,
-        i18n,
-        tolgeeProperties,
-      )
+  ): SlackExecutorHelper {
+    return SlackExecutorHelper(
+      slackConfig,
+      data,
+      keyService,
+      permissionService,
+      slackUserConnectionService,
+      i18n,
+      tolgeeProperties,
+    )
   }
 
   private fun findSavedMessageOrNull(
@@ -228,8 +251,8 @@ class SlackExecutor(
   private fun getRedirectUrl(
     slackChannelId: String,
     slackId: String,
-    slackNickName: String,
-  ) = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId&nickName=$slackNickName"
+    workspaceId: Long?,
+  ) = "${frontendUrlProvider.url}/slack/login?slackId=$slackId&channelId=$slackChannelId&workspaceId=$workspaceId"
 
   fun createErrorBlocks(
     errorMessageType: Message,
@@ -297,11 +320,12 @@ class SlackExecutor(
     }
   }
 
-  fun sendListOfSubscriptions(
+  fun getListOfSubscriptions(
     userId: String,
     channelId: String,
-  ) {
-    val configList = slackConfigService.get(userId, channelId)
+  ): SlackMessageDto {
+    val configList = slackConfigService.getAllByChannelId(channelId)
+
     val blocks =
       withBlocks {
         header {
@@ -327,105 +351,105 @@ class SlackExecutor(
         }
       }
 
-    val response =
-      slackClient.methods(serverSlackToken).chatPostMessage { request ->
-        request.channel(channelId)
-          .blocks(blocks)
-      }
-
-    if (!response.isOk) {
-      logger.info(response.error)
-    }
+    return blocks.asSlackMessageDto
   }
 
-  fun sendHelpMessage(channelId: String) {
-    val response =
-      slackClient.methods(serverSlackToken).chatPostMessage { request ->
-        request.channel(channelId)
-          .blocks(helpBlocks())
-      }
-
-    if (!response.isOk) {
-      logger.info(response.error)
-    }
+  fun sendHelpMessage(
+    channelId: String,
+    teamId: String,
+  ): SlackMessageDto {
+    return helpBlocks.asSlackMessageDto
   }
 
-  private fun helpBlocks() =
-    withBlocks {
-      section {
-        markdownText(i18n.translate("help-intro"))
-      }
-      divider()
-      section {
-        markdownText(i18n.translate("help-subscribe"))
+  private val helpBlocks
+    get() =
+      withBlocks {
+        section {
+          markdownText(i18n.translate("help-intro"))
+        }
+        divider()
+        section {
+          markdownText(i18n.translate("help-subscribe"))
+        }
+
+        section {
+          markdownText(i18n.translate("help-subscribe-command"))
+        }
+
+        section {
+          markdownText(i18n.translate("help-subscribe-events"))
+        }
+
+        section {
+          markdownText(i18n.translate("help-subscribe-all-event"))
+        }
+
+        section {
+          markdownText(i18n.translate("help-subscribe-new-key-event"))
+        }
+
+        section {
+          markdownText(i18n.translate("help-subscribe-base-changed-event"))
+        }
+
+        section {
+          markdownText(i18n.translate("help-subscribe-translation-change-event"))
+        }
+
+        divider()
+        section {
+          markdownText(i18n.translate("help-unsubscribe"))
+        }
+
+        section {
+          markdownText(i18n.translate("help-unsubscribe-command"))
+        }
+
+        divider()
+        section {
+          markdownText(i18n.translate("help-show-subscriptions"))
+        }
+        section {
+          markdownText(i18n.translate("help-show-subscriptions-command"))
+        }
+
+        divider()
+        section {
+          markdownText(i18n.translate("help-connect-tolgee"))
+        }
+        section {
+          markdownText(i18n.translate("help-connect-tolgee-command"))
+        }
+
+        divider()
+        section {
+          markdownText(i18n.translate("help-disconnect-tolgee"))
+        }
+        section {
+          markdownText(i18n.translate("help-disconnect-tolgee-command"))
+        }
       }
 
-      section {
-        markdownText(i18n.translate("help-subscribe-command"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-subscribe-events"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-subscribe-all-event"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-subscribe-new-key-event"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-subscribe-base-changed-event"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-subscribe-translation-change-event"))
-      }
-
-      divider()
-      section {
-        markdownText(i18n.translate("help-unsubscribe"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-unsubscribe-command"))
-      }
-
-      divider()
-      section {
-        markdownText(i18n.translate("help-show-subscriptions"))
-      }
-      section {
-        markdownText(i18n.translate("help-show-subscriptions-command"))
-      }
-
-      divider()
-      section {
-        markdownText(i18n.translate("help-connect-tolgee"))
-      }
-      section {
-        markdownText(i18n.translate("help-connect-tolgee-command"))
-      }
-
-      divider()
-      section {
-        markdownText(i18n.translate("help-disconnect-tolgee"))
-      }
-      section {
-        markdownText(i18n.translate("help-disconnect-tolgee-command"))
-      }
-    }
-
-  private fun SlackConfig.getToken(): String {
-    return this.organizationSlackWorkspace.accessToken ?: serverSlackToken ?: throw SlackNotConfiguredException()
+  private fun OrganizationSlackWorkspace?.getSlackToken(): String {
+    return this?.accessToken ?: tolgeeProperties.slack.token ?: throw SlackNotConfiguredException()
   }
 
-  fun sendMessageOnImport() {
+  fun sendMessageOnImport(
+    slackConfig: SlackConfig,
+    request: SlackRequest,
+  ) {
+    val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
     val messageDto = slackExecutorHelper.createImportMessage() ?: return
 
     sendRegularMessageWithSaving(messageDto, config)
+  }
+
+  fun getWorkspaceNotFoundError(): SlackMessageDto {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack-workspace-not-connected-to-any-organization"))
+      }
+    }.asSlackMessageDto
   }
 }

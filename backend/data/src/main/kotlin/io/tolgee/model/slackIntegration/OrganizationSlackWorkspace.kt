@@ -13,13 +13,15 @@ import jakarta.persistence.UniqueConstraint
 @Entity
 @Table(
   uniqueConstraints = [
-    UniqueConstraint(columnNames = ["access_token"], name = "organization_slack_workspace_access_token_unique"),
-    UniqueConstraint(columnNames = ["slack_team_id"], name = "organization_slack_workspace_slack_team_id_unique"),
+    UniqueConstraint(
+      columnNames = ["slack_team_id", "organization_id"],
+      name = "organization_slack_workspace_slack_team_id_unique",
+    ),
   ],
 )
 class OrganizationSlackWorkspace : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
-  var organization: Organization? = null
+  lateinit var organization: Organization
 
   @ManyToOne
   lateinit var author: UserAccount

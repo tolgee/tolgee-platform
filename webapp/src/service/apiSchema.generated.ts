@@ -281,11 +281,11 @@ export interface paths {
   "/v2/slack": {
     post: operations["slackCommand"];
   };
+  "/v2/slack/user-login": {
+    post: operations["userLogin"];
+  };
   "/v2/slack/on-event": {
     post: operations["fetchEvent"];
-  };
-  "/v2/slack/connect": {
-    post: operations["connectSlack"];
   };
   "/v2/public/translator/translate": {
     post: operations["translate"];
@@ -626,10 +626,7 @@ export interface paths {
     get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/slack/workspaces": {
-    get: operations["connectWorkspace_1"];
-  };
-  "/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}/disconnect": {
-    get: operations["disconnectWorkspace"];
+    get: operations["getConnectedWorkspaces"];
   };
   "/v2/organizations/{organizationId}/slack/get-connect-url": {
     get: operations["connectToSlack"];
@@ -700,6 +697,9 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
+  };
+  "/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}": {
+    delete: operations["disconnectWorkspace"];
   };
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
@@ -780,10 +780,23 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @description List of languages user can view. If null, all languages view is permitted.
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        * @example 200001,200004
        */
-      viewLanguageIds?: number[];
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -817,23 +830,10 @@ export interface components {
         | "webhooks.manage"
       )[];
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
+      viewLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1361,8 +1361,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1539,17 +1539,17 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     IImportSettings: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
       settings?: components["schemas"]["IImportSettings"];
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -1717,15 +1717,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1862,17 +1862,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
-      username?: string;
-      description: string;
       scopes: string[];
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
+      userFullName?: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1901,14 +1901,9 @@ export interface components {
     };
     SlackConnectionDto: {
       slackId: string;
-      userAccountId: string;
       channelId: string;
-      slackNickName: string;
-      workspace: string;
-      orgId: string;
-      channelName: string;
-      author: string;
-      workSpaceName: string;
+      /** Format: int64 */
+      workspaceId: number;
     };
     ExampleItem: {
       source: string;
@@ -2411,7 +2406,10 @@ export interface components {
         | "SLACK_INVALID_COMMAND"
         | "SLACK_NOT_SUBSCRIBED_YET"
         | "UNEXPECTED_ERROR_SLACK"
-        | "SLACK_CONNECTION_FAILED";
+        | "SLACK_CONNECTION_FAILED"
+        | "SLACK_NOT_CONFIGURED"
+        | "SLACK_WORKSPACE_ALREADY_CONNECTED"
+        | "SLACK_CONNECTION_ERROR";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2868,18 +2866,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2988,20 +2986,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
-      description?: string;
       translation?: string;
+      description?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
-      description?: string;
       translation?: string;
+      description?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3538,15 +3536,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3679,17 +3677,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
-      username?: string;
-      description: string;
       scopes: string[];
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
+      userFullName?: string;
+      projectName: string;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -6817,6 +6815,29 @@ export interface operations {
       };
     };
   };
+  userLogin: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SlackConnectionDto"];
+      };
+    };
+  };
   fetchEvent: {
     responses: {
       /** OK */
@@ -6841,29 +6862,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": string;
-      };
-    };
-  };
-  connectSlack: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SlackConnectionDto"];
       };
     };
   };
@@ -10427,7 +10425,7 @@ export interface operations {
       };
     };
   };
-  connectWorkspace_1: {
+  getConnectedWorkspaces: {
     parameters: {
       path: {
         organizationId: number;
@@ -10440,30 +10438,6 @@ export interface operations {
           "*/*": components["schemas"]["CollectionModelWorkspaceModel"];
         };
       };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  disconnectWorkspace: {
-    parameters: {
-      path: {
-        workspaceId: number;
-        organizationId: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -11081,6 +11055,30 @@ export interface operations {
       path: {
         organizationId: number;
         userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  disconnectWorkspace: {
+    parameters: {
+      path: {
+        workspaceId: number;
+        organizationId: number;
       };
     };
     responses: {

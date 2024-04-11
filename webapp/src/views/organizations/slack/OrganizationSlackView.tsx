@@ -1,12 +1,14 @@
-import React, { FunctionComponent } from 'react';
+import React, { FC, FunctionComponent } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
-import { Button } from '@mui/material';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { Box, Button } from '@mui/material';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../useOrganization';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { OrganizationSlackSuccessHandler } from './OrganizationSlackSuccessHandler';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 export const OrganizationSlackView: FunctionComponent = () => {
   const { t } = useTranslate();
@@ -18,6 +20,15 @@ export const OrganizationSlackView: FunctionComponent = () => {
   const getUrlMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/slack/get-connect-url',
     method: 'get',
+    invalidatePrefix: '/v2/organizations/{organizationId}/',
+  });
+
+  const workspaces = useApiQuery({
+    url: '/v2/organizations/{organizationId}/slack/workspaces',
+    method: 'get',
+    path: {
+      organizationId: organization.id,
+    },
   });
 
   const onConnect = () => {
@@ -57,9 +68,50 @@ export const OrganizationSlackView: FunctionComponent = () => {
         </Button>
       </>
 
+      <PaginatedHateoasList
+        loadable={workspaces}
+        renderItem={(i) => (
+          <Box key={i.id} p={4}>
+            Team: {i.slackTeamName}
+            <DisconnectButton workspaceId={i.id} />
+          </Box>
+        )}
+      />
+
       <PrivateRoute path={LINKS.ORGANIZATION_SLACK.template}>
         <OrganizationSlackSuccessHandler />
       </PrivateRoute>
     </BaseOrganizationSettingsView>
+  );
+};
+
+const DisconnectButton: FC<{ workspaceId: number }> = ({ workspaceId }) => {
+  const organization = useOrganization();
+
+  if (!organization) return null;
+
+  const disconnectMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/organizations/{organizationId}/slack',
+  });
+
+  const onDisconnect = () => {
+    disconnectMutation.mutate({
+      path: {
+        organizationId: organization.id,
+        workspaceId: workspaceId,
+      },
+    });
+  };
+
+  return (
+    <LoadingButton
+      loading={disconnectMutation.isLoading}
+      variant="contained"
+      onClick={onDisconnect}
+    >
+      <T keyName="organization_slack_remove_workspace_connection" />
+    </LoadingButton>
   );
 };

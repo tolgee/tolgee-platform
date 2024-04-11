@@ -33,12 +33,12 @@ class SlackSubscriptionProcessor(
 
     val data = SlackRequest(activityData = activityModel)
     val config = action.slackConfig ?: return
-    slackExecutor.setHelper(data = data, slackConfig = config)
 
     when (activityModel.type) {
-      ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded()
-      ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE -> slackExecutor.sendMessageOnTranslationSet()
-      ActivityType.IMPORT -> slackExecutor.sendMessageOnImport()
+      ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded(config, data)
+      ActivityType.SET_TRANSLATIONS, ActivityType.SET_TRANSLATION_STATE ->
+        slackExecutor.sendMessageOnTranslationSet(config, data)
+      ActivityType.IMPORT -> slackExecutor.sendMessageOnImport(config, data)
       else -> { }
     }
   }

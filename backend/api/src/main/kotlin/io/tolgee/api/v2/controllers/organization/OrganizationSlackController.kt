@@ -21,6 +21,7 @@ import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -73,18 +74,18 @@ class OrganizationSlackController(
 
   @GetMapping("/workspaces")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-  fun connectWorkspace(
+  fun getConnectedWorkspaces(
     @PathVariable organizationId: Long,
   ): CollectionModel<WorkspaceModel> {
     val workspaces = slackWorkspaceService.findAllWorkspaces(organizationId)
     return workspaceModelAssembler.toCollectionModel(workspaces)
   }
 
-  @GetMapping("/workspaces/{workspaceId}/disconnect")
+  @DeleteMapping("/workspaces/{workspaceId}")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun disconnectWorkspace(
     @PathVariable workspaceId: Long,
-    @PathVariable organizationId: String,
+    @PathVariable organizationId: Long,
   ) {
     slackWorkspaceService.disconnect(organizationHolder.organization.id, workspaceId)
   }

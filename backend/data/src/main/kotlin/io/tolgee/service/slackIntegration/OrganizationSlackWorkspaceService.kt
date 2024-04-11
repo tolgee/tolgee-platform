@@ -36,6 +36,14 @@ class OrganizationSlackWorkspaceService(
   }
 
   @Transactional
+  fun findByOrganizationIdAndSlackTeamId(
+    organizationId: Long,
+    teamId: String,
+  ): OrganizationSlackWorkspace? {
+    return organizationSlackWorkspaceRepository.findByOrganizationIdAndSlackTeamId(organizationId, teamId)
+  }
+
+  @Transactional
   fun findAllWorkspaces(organizationId: Long): List<OrganizationSlackWorkspace> {
     return organizationSlackWorkspaceRepository.findAllByOrganizationId(organizationId)
   }
@@ -144,5 +152,9 @@ class OrganizationSlackWorkspaceService(
 
   fun getRedirectUrl(organizationSlug: String): String {
     return "${frontendUrlProvider.url}/organizations/$organizationSlug/slack/oauth2-success"
+  }
+
+  fun get(workspaceId: Long): OrganizationSlackWorkspace {
+    return organizationSlackWorkspaceRepository.find(workspaceId) ?: throw NotFoundException()
   }
 }
