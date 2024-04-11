@@ -37,38 +37,56 @@ class SlackExecutor(
 
   fun sendMessageOnTranslationSet() {
     val config = slackExecutorHelper.slackConfig
-    val messageDto = slackExecutorHelper.createTranslationChangeMessage() ?: return
-    val savedMessage = findSavedMessageOrNull(messageDto.keyId, messageDto.langTag, config.id)
-
-    if (savedMessage.isEmpty()) {
+    val counts = slackExecutorHelper.data.activityData?.counts?.get("Translation") ?: return
+    if (counts >= 10) {
+      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(counts) ?: return
       sendRegularMessageWithSaving(messageDto, config)
       return
     }
 
-    savedMessage.forEach { savedMsg ->
-      val existingLanguages = savedMsg.langTags
-      val newLanguages = messageDto.langTag
+    val messagesDto = slackExecutorHelper.createTranslationChangeMessage()
 
-      val languagesToAdd = existingLanguages - newLanguages
-      if (languagesToAdd == existingLanguages) {
+    messagesDto.forEach { message ->
+      val savedMessage = findSavedMessageOrNull(message.keyId, message.langTag, config.id)
+
+      if (savedMessage.isEmpty()) {
+        sendRegularMessageWithSaving(message, config)
         return@forEach
       }
 
-      val additionalAttachments: MutableList<Attachment> = mutableListOf()
-
-      languagesToAdd.forEach { lang ->
-        val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, messageDto.keyId)
-        attachment?.let {
-          additionalAttachments.add(it)
-        }
+      savedMessage.forEach { savedMsg ->
+        processSavedMessage(savedMsg, message, config)
       }
-
-      val updatedAttachments = additionalAttachments + messageDto.attachments
-      val updatedLanguages = messageDto.langTag + languagesToAdd
-      val updatedMessageDto = messageDto.copy(attachments = updatedAttachments, langTag = updatedLanguages)
-
-      updateMessage(savedMsg, config, updatedMessageDto)
     }
+  }
+
+  private fun processSavedMessage(
+    savedMsg: SavedSlackMessage,
+    message: SavedMessageDto,
+    config: SlackConfig,
+  ) {
+    val existingLanguages = savedMsg.langTags
+    val newLanguages = message.langTag
+
+    val languagesToAdd = existingLanguages - newLanguages
+    if (languagesToAdd == existingLanguages) {
+      return
+    }
+
+    val additionalAttachments: MutableList<Attachment> = mutableListOf()
+
+    languagesToAdd.forEach { lang ->
+      val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, message.keyId)
+      attachment?.let {
+        additionalAttachments.add(it)
+      }
+    }
+
+    val updatedAttachments = additionalAttachments + message.attachments
+    val updatedLanguages = message.langTag + languagesToAdd
+    val updatedMessageDto = message.copy(attachments = updatedAttachments, langTag = updatedLanguages)
+
+    updateMessage(savedMsg, config, updatedMessageDto)
   }
 
   fun sendMessageOnKeyAdded() {
