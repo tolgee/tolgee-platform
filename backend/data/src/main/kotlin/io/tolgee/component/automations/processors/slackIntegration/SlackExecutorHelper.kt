@@ -212,9 +212,9 @@ class SlackExecutorHelper(
   fun createTranslationChangeMessage(): SavedMessageDto? {
     var result: SavedMessageDto? = null
 
-    data.activityData?.modifiedEntities?.forEach modifiedEntities@{ (entityType, modifiedEntityList) ->
+    data.activityData?.modifiedEntities?.forEach modifiedEntities@{ (_, modifiedEntityList) ->
       modifiedEntityList.forEach { modifiedEntity ->
-        modifiedEntity.modifications?.forEach modificationLoop@{ (property, modification) ->
+        modifiedEntity.modifications?.forEach modificationLoop@{ (property, _) ->
           if (property != "text" && property != "state") {
             return@modificationLoop
           }
