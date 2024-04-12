@@ -31,6 +31,7 @@ import io.tolgee.service.security.PatService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
@@ -77,6 +78,7 @@ class TestDataService(
   private val automationService: AutomationService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val languageStatsListener: LanguageStatsListener,
+  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -169,6 +171,15 @@ class TestDataService(
     saveOrganizationRoles(builder)
     saveOrganizationAvatars(builder)
     saveAllMtCreditBuckets(builder)
+    saveSlackWorkspaces(builder)
+  }
+
+  private fun saveSlackWorkspaces(builder: TestDataBuilder) {
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationSlackWorkspaceService.saveAll(
+        organizationBuilder.data.slackWorkspaces.map { it.self },
+      )
+    }
   }
 
   private fun saveOrganizationAvatars(builder: TestDataBuilder) {

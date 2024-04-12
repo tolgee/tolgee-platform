@@ -1,58 +1,40 @@
-import {Button, useMediaQuery} from '@mui/material';
-import {useTranslate} from '@tolgee/react';
-import {CompactView} from 'tg.component/layout/CompactView';
-import {SPLIT_CONTENT_BREAK_POINT} from 'tg.component/security/SplitContent';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {useHistory, useLocation} from 'react-router-dom';
-import {useUser} from 'tg.globalContext/helpers';
-import {LINKS} from 'tg.constants/links';
-import {useMessage} from 'tg.hooks/useSuccessMessage';
+import { Button, useMediaQuery } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+import { CompactView } from 'tg.component/layout/CompactView';
+import { SPLIT_CONTENT_BREAK_POINT } from 'tg.component/security/SplitContent';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useHistory, useLocation } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
 
 export const SlackLoginView = () => {
   const { t } = useTranslate();
   const location = useLocation();
-  const messaging = useMessage();
   const history = useHistory();
 
   const queryParameters = new URLSearchParams(location.search);
   const slackId = queryParameters.get('slackId');
   const slackChannelId = queryParameters.get('channelId');
-  const slackNickName = queryParameters.get('nickName');
-  const slackWorkSpace = queryParameters.get('workSpace');
-  const slackChannelName = queryParameters.get('channelName');
-  const slackWorkSpaceName = queryParameters.get('domainName');
+  const workspaceId = queryParameters.get('workspaceId');
 
-  const user = useUser();
   const error = false;
 
-  const validSlackId = slackId ?? '';
-  const validWorkSpace = slackWorkSpace ?? '';
-  const validChannelId = slackChannelId ?? '';
-  const validUserAccountId = user?.id?.toString() ?? '';
-  const validUserName = user?.name ?? '';
-  const validSlackNickName = slackNickName ?? '';
-  const validSlackChannelName = slackChannelName ?? '';
-  const validSlackWorkSpaceName = slackWorkSpaceName ?? '';
-
   const slackMutation = useApiMutation({
-    url: '/v2/public/slack/connect',
+    url: '/v2/slack/user-login',
     method: 'post',
   });
+
+  if (!slackId || !slackChannelId || !workspaceId) {
+    return <div>Invalid slack login parameters</div>;
+  }
 
   const connectSlack = () => {
     slackMutation.mutate(
       {
         content: {
           'application/json': {
-            slackId: validSlackId,
-            userAccountId: validUserAccountId,
-            channelId: validChannelId,
-            slackNickName: validSlackNickName,
-            workSpace: validWorkSpace,
-            orgId: '1',
-            channelName: validSlackChannelName,
-            author: validUserName,
-            workSpaceName: validSlackWorkSpaceName,
+            slackId: slackId,
+            channelId: slackChannelId,
+            workspaceId: Number.parseInt(workspaceId),
           },
         },
       },

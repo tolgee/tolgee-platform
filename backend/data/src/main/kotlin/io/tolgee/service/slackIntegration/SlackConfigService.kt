@@ -1,8 +1,10 @@
 package io.tolgee.service.slackIntegration
 
+import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.service.automations.AutomationService
@@ -14,7 +16,8 @@ class SlackConfigService(
   private val automationService: AutomationService,
   private val slackConfigRepository: SlackConfigRepository,
   private val slackConfigPreferenceService: SlackConfigPreferenceService,
-  private val orgToWorkspaceLinkService: OrgToWorkspaceLinkService,
+  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
+  private val slackProperties: SlackProperties,
 ) {
   fun get(
     projectId: Long,
@@ -27,15 +30,8 @@ class SlackConfigService(
     return slackConfigRepository.findById(configId).orElseThrow { NotFoundException() }
   }
 
-  fun get(
-    slackId: String,
-    channelId: String,
-  ): List<SlackConfig> {
-    return slackConfigRepository.findBySlackIdAndChannelId(slackId, channelId)
-  }
-
-  fun get(slackId: String): List<SlackConfig> {
-    return slackConfigRepository.findBySlackId(slackId)
+  fun getAllByChannelId(channelId: String): List<SlackConfig> {
+    return slackConfigRepository.getAllByChannelId(channelId)
   }
 
   @Transactional
@@ -54,47 +50,23 @@ class SlackConfigService(
   }
 
   @Transactional
-  fun deleteAllBySlackId(slackId: String): Boolean {
-    val configs = get(slackId)
-    if (configs.isEmpty()) {
-      return false
-    }
-
-    try {
-      configs.forEach { config ->
-        automationService.deleteForSlackIntegration(config)
-        slackConfigRepository.delete(config)
-      }
-    } catch (e: NotFoundException) {
-      return false
-    }
-    return true
-  }
-
-  @Transactional
   fun create(slackConfigDto: SlackConfigDto): SlackConfig {
-    val orgToWorkspaceLink =
-      orgToWorkspaceLinkService.getByWorkSpace(
-        slackConfigDto.workSpaceId,
-      ) ?: throw NotFoundException()
-
+    val workspace = getWorkspace(slackConfigDto.slackTeamId)
     val slackConfig =
       SlackConfig(
         project = slackConfigDto.project,
         userAccount = slackConfigDto.userAccount,
         channelId = slackConfigDto.channelId,
       ).apply {
-        slackId = slackConfigDto.slackId
         onEvent = slackConfigDto.onEvent ?: EventName.ALL
         isGlobalSubscription = slackConfigDto.languageTag.isNullOrBlank()
-        this.orgToWorkspaceLink = orgToWorkspaceLink
+        this.organizationSlackWorkspace = workspace
       }
 
     val existingConfigs = get(slackConfig.project.id, slackConfig.channelId)
     return if (existingConfigs == null) {
       slackConfigRepository.save(slackConfig)
-      orgToWorkspaceLink.slackSubscription.add(slackConfig)
-      orgToWorkspaceLinkService.save(orgToWorkspaceLink)
+      workspace?.slackSubscriptions?.add(slackConfig)
 
       if (!slackConfig.isGlobalSubscription) {
         addPreferenceToConfig(slackConfig, slackConfigDto.languageTag!!, slackConfigDto.onEvent ?: EventName.ALL)
@@ -104,6 +76,14 @@ class SlackConfigService(
     } else {
       update(slackConfigDto)
     }
+  }
+
+  fun getWorkspace(slackTeamId: String): OrganizationSlackWorkspace? {
+    if (slackProperties.token != null) {
+      return null
+    }
+    return organizationSlackWorkspaceService.findBySlackTeamId(slackTeamId)
+      ?: throw SlackWorkspaceNotFound()
   }
 
   fun update(slackConfigDto: SlackConfigDto): SlackConfig {

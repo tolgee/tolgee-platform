@@ -3167,6 +3167,94 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-1">
+        <createTable tableName="organization_slack_workspace">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_slack_workspacePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token" type="VARCHAR(255)"/>
+            <column name="slack_team_id" type="VARCHAR(255)"/>
+            <column name="slack_team_name" type="VARCHAR(255)"/>
+            <column name="author_id" type="BIGINT"/>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-2">
+        <createTable tableName="saved_slack_message">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="saved_slack_messagePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lang_tags" type="JSONB"/>
+            <column name="message_ts" type="VARCHAR(255)"/>
+            <column name="slack_config_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-3">
+        <createTable tableName="slack_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="channel_id" type="VARCHAR(255)"/>
+            <column defaultValueBoolean="false" name="is_global_subscription" type="BOOLEAN"/>
+            <column name="language_tags" type="JSONB"/>
+            <column name="on_event" type="VARCHAR(255)"/>
+            <column name="organization_slack_workspace_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-4">
+        <createTable tableName="slack_config_preference">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_config_preferencePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_tag" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="0" name="on_event" type="SMALLINT"/>
+            <column name="slack_config_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-5">
+        <createTable tableName="slack_user_connection">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_user_connectionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="slack_user_id" type="VARCHAR(255)"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
     <changeSet author="gyeongwoopark (generated)" id="1712299385786-1">
         <addColumn tableName="project">
             <column name="base_namespace_id" type="bigint"/>
@@ -3204,125 +3292,42 @@
     <changeSet author="gyeongwoopark (generated)" id="1712309146235-6">
         <dropColumn columnName="base_namespace_id" tableName="project"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-1">
-        <createTable tableName="org_to_workspace_link">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="org_to_workspace_linkPK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="author" type="VARCHAR(255)"/>
-            <column name="channel_name" type="VARCHAR(255)"/>
-            <column name="work_space" type="VARCHAR(255)"/>
-            <column name="work_space_name" type="VARCHAR(255)"/>
-            <column name="organization_id" type="BIGINT"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-2">
-        <createTable tableName="saved_slack_message">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="saved_slack_messagePK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="key_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="lang_tags" type="JSONB"/>
-            <column name="message_ts" type="VARCHAR(255)"/>
-            <column name="slack_config_id" type="BIGINT"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-3">
-        <createTable tableName="slack_config">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_configPK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="channel_id" type="VARCHAR(255)"/>
-            <column defaultValueBoolean="false" name="is_global_subscription" type="BOOLEAN"/>
-            <column name="language_tags" type="JSONB"/>
-            <column defaultValueNumeric="0" name="on_event" type="SMALLINT"/>
-            <column name="slack_id" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="org_to_workspace_link_id" type="BIGINT"/>
-            <column name="project_id" type="BIGINT"/>
-            <column name="user_account_id" type="BIGINT"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-4">
-        <createTable tableName="slack_config_preference">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_config_preferencePK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="language_tag" type="VARCHAR(255)"/>
-            <column defaultValueNumeric="0" name="on_event" type="SMALLINT"/>
-            <column name="slack_config_id" type="BIGINT"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-5">
-        <createTable tableName="slack_subscription">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="slack_subscriptionPK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="slack_nick_name" type="VARCHAR(255)"/>
-            <column name="slack_user_id" type="VARCHAR(255)"/>
-            <column name="user_account_id" type="BIGINT"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-6">
+    <changeSet author="jenik (generated)" id="1712925098243-7">
         <addColumn tableName="automation_action">
             <column name="slack_config_id" type="bigint"/>
         </addColumn>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-7">
+    <changeSet author="jenik (generated)" id="1712925098243-9">
+        <addUniqueConstraint columnNames="slack_user_id, user_account_id" constraintName="UKf8ohb2ylafg2f9i0pfrb8mwiq" tableName="slack_user_connection"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-10">
+        <addUniqueConstraint columnNames="slack_team_id, organization_id" constraintName="organization_slack_workspace_slack_team_id_unique" tableName="organization_slack_workspace"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-11">
+        <addForeignKeyConstraint baseColumnNames="organization_slack_workspace_id" baseTableName="slack_config" constraintName="FK4e6cq2o917rdl9856a8g3p9i7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization_slack_workspace" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-13">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="slack_user_connection" constraintName="FK6nxjrbgacl11u6dxoda2cud51" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-14">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="organization_slack_workspace" constraintName="FK7u6veu2d9kqffmbu0i20j549d" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-15">
         <addForeignKeyConstraint baseColumnNames="slack_config_id" baseTableName="saved_slack_message" constraintName="FK9g1knh5olpt4b3o1v5dxf8tqb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="slack_config" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-8">
-        <addForeignKeyConstraint baseColumnNames="org_to_workspace_link_id" baseTableName="slack_config" constraintName="FKa41uhtdr9wm1w1tpqx6eopby2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="org_to_workspace_link" validate="true"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-9">
+    <changeSet author="jenik (generated)" id="1712925098243-16">
         <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="slack_config" constraintName="FKdbwg4eia723x05dxak8kpbor4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-10">
-        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="slack_subscription" constraintName="FKdhn7v1yg5xmi1s08xb9u66jhv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-11">
+    <changeSet author="jenik (generated)" id="1712925098243-17">
         <addForeignKeyConstraint baseColumnNames="slack_config_id" baseTableName="automation_action" constraintName="FKi7itqbhkl11obx32m5k0fgpc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="slack_config" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-12">
+    <changeSet author="jenik (generated)" id="1712925098243-18">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_slack_workspace" constraintName="FKmtejc9d98nca9sb99p9exr5ep" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1712925098243-19">
         <addForeignKeyConstraint baseColumnNames="slack_config_id" baseTableName="slack_config_preference" constraintName="FKqovqhafhdqn838r4rtperon2n" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="slack_config" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-13">
+    <changeSet author="jenik (generated)" id="1712925098243-20">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="slack_config" constraintName="FKsgau8dxyxblao9sa16fnka0t1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1712919312369-14">
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="org_to_workspace_link" constraintName="FKxq0l4djro357l8vs3xic6wfv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
 </databaseChangeLog>
