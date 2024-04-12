@@ -1,10 +1,10 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.keys
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.KeyView
@@ -74,8 +74,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/keys",
   ],
 )
-@Tag(name = "Localization keys", description = "Manipulates localization keys, their translations and metadata")
 @OpenApiOrderExtension(3)
+@KeysDocsTag
 class KeyController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
@@ -99,7 +99,12 @@ class KeyController(
   @RequiresProjectPermissions([Scope.KEYS_CREATE])
   @AllowApiAccess
   @OpenApiOrderExtension(1)
-  @OpenApiHideFromPublicDocs(path = "/v2/projects/{projectId}/keys/create")
+  @OpenApiHideFromPublicDocs(
+    paths = [
+      // inconsistent REST path
+      "/v2/projects/{projectId}/keys/create",
+    ],
+  )
   fun create(
     @RequestBody @Valid
     dto: CreateKeyDto,

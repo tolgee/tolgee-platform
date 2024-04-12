@@ -1,5 +1,5 @@
 package io.tolgee.openApiDocs
 
 annotation class OpenApiHideFromPublicDocs(
-  val path: String = "",
+  val paths: Array<String> = [],
 )
