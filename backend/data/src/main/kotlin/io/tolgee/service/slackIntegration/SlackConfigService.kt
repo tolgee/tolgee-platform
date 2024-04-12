@@ -1,8 +1,10 @@
 package io.tolgee.service.slackIntegration
 
+import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.service.automations.AutomationService
@@ -15,6 +17,7 @@ class SlackConfigService(
   private val slackConfigRepository: SlackConfigRepository,
   private val slackConfigPreferenceService: SlackConfigPreferenceService,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
+  private val slackProperties: SlackProperties,
 ) {
   fun get(
     projectId: Long,
@@ -48,10 +51,7 @@ class SlackConfigService(
 
   @Transactional
   fun create(slackConfigDto: SlackConfigDto): SlackConfig {
-    val orgToWorkspaceLink =
-      organizationSlackWorkspaceService.findBySlackTeamId(slackConfigDto.slackTeamId)
-        ?: throw SlackWorkspaceNotFound()
-
+    val workspace = getWorkspace(slackConfigDto.slackTeamId)
     val slackConfig =
       SlackConfig(
         project = slackConfigDto.project,
@@ -60,13 +60,13 @@ class SlackConfigService(
       ).apply {
         onEvent = slackConfigDto.onEvent ?: EventName.ALL
         isGlobalSubscription = slackConfigDto.languageTag.isNullOrBlank()
-        this.organizationSlackWorkspace = orgToWorkspaceLink
+        this.organizationSlackWorkspace = workspace
       }
 
     val existingConfigs = get(slackConfig.project.id, slackConfig.channelId)
     return if (existingConfigs == null) {
       slackConfigRepository.save(slackConfig)
-      orgToWorkspaceLink.slackSubscriptions.add(slackConfig)
+      workspace?.slackSubscriptions?.add(slackConfig)
 
       if (!slackConfig.isGlobalSubscription) {
         addPreferenceToConfig(slackConfig, slackConfigDto.languageTag!!, slackConfigDto.onEvent ?: EventName.ALL)
@@ -76,6 +76,14 @@ class SlackConfigService(
     } else {
       update(slackConfigDto)
     }
+  }
+
+  fun getWorkspace(slackTeamId: String): OrganizationSlackWorkspace? {
+    if (slackProperties.token != null) {
+      return null
+    }
+    return organizationSlackWorkspaceService.findBySlackTeamId(slackTeamId)
+      ?: throw SlackWorkspaceNotFound()
   }
 
   fun update(slackConfigDto: SlackConfigDto): SlackConfig {

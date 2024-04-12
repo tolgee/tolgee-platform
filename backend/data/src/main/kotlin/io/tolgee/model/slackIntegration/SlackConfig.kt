@@ -46,5 +46,5 @@ class SlackConfig(
   var preferences: MutableSet<SlackConfigPreference> = mutableSetOf()
 
   @ManyToOne(fetch = FetchType.LAZY)
-  var organizationSlackWorkspace: OrganizationSlackWorkspace = OrganizationSlackWorkspace()
+  var organizationSlackWorkspace: OrganizationSlackWorkspace? = null
 }
