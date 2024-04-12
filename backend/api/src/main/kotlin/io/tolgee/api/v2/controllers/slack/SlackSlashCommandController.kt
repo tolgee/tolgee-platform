@@ -1,22 +1,21 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.slack
 
-import com.esotericsoftware.minlog.Log
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.slack.api.model.block.LayoutBlock
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.SlackRequestValidation
+import io.tolgee.component.automations.processors.slackIntegration.SlackErrorProvider
+import io.tolgee.component.automations.processors.slackIntegration.SlackExceptionHandler
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
-import io.tolgee.constants.Message
+import io.tolgee.component.automations.processors.slackIntegration.SlackHelpBlocksProvider
+import io.tolgee.component.automations.processors.slackIntegration.asSlackMessageDto
 import io.tolgee.dtos.request.slack.SlackCommandDto
-import io.tolgee.dtos.request.slack.SlackConnectionDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
-import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.slackIntegration.EventName
-import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
@@ -25,11 +24,8 @@ import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.service.slackIntegration.SlackWorkspaceNotFound
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
-import io.tolgee.util.logger
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -49,13 +45,14 @@ class SlackSlashCommandController(
   private val slackUserConnectionService: SlackUserConnectionService,
   private val slackExecutor: SlackExecutor,
   private val permissionService: PermissionService,
-  private val objectMapper: ObjectMapper,
   private val i18n: I18n,
-  private val authenticationFacade: AuthenticationFacade,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
-  private val organizationRoleService: OrganizationRoleService,
   private val slackRequestValidation: SlackRequestValidation,
+  private val slackErrorProvider: SlackErrorProvider,
+  private val slackExceptionHandler: SlackExceptionHandler,
+  private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
 ) : Logging {
+  @Suppress("UastIncorrectHttpHeaderInspection")
   @PostMapping
   fun slackCommand(
     @ModelAttribute payload: SlackCommandDto,
@@ -63,34 +60,38 @@ class SlackSlashCommandController(
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
     @RequestBody body: String,
   ): SlackMessageDto? {
-    if (!slackRequestValidation.isValid(slackSignature, timestamp, body)) {
-      Log.info("Error validating request from Slack")
-      throw BadRequestException(Message.UNEXPECTED_ERROR_SLACK)
-    }
+    return slackExceptionHandler.handle {
+      slackRequestValidation.validate(slackSignature, timestamp, body)
 
-    val matchResult = commandRegex.matchEntire(payload.text) ?: return getError(payload, Message.SLACK_INVALID_COMMAND)
+      val matchResult =
+        commandRegex.matchEntire(payload.text) ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
 
-    val (command, projectId, languageTag, optionsString) = matchResult.destructured
+      val (command, projectId, languageTag, optionsString) = matchResult.destructured
 
-    val optionsMap = parseOptions(optionsString)
+      val optionsMap = parseOptions(optionsString)
 
-    return when (command) {
-      "login" -> login(payload)
+      when (command) {
+        "login" -> login(payload)
 
-      "subscribe" -> handleSubscribe(payload, projectId, languageTag, optionsMap)
+        "subscribe" -> handleSubscribe(payload, projectId.toLongOrThrowInvalidCommand(), languageTag, optionsMap)
 
-      "unsubscribe" -> unsubscribe(payload, projectId)
+        "unsubscribe" -> unsubscribe(payload, projectId.toLongOrThrowInvalidCommand())
 
-      "subscriptions" -> listOfSubscriptions(payload)
+        "subscriptions" -> listOfSubscriptions(payload).asSlackMessageDto
 
-      "help" -> slackExecutor.sendHelpMessage(payload.channel_id, payload.team_id)
+        "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackMessageDto
 
-      "logout" -> logout(payload.user_id)
+        "logout" -> logout(payload.user_id)
 
-      else -> {
-        getError(payload, Message.SLACK_INVALID_COMMAND)
+        else -> {
+          throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+        }
       }
     }
+  }
+
+  private fun String?.toLongOrThrowInvalidCommand(): Long {
+    return this?.toLongOrNull() ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
   }
 
   private fun logout(slackId: String): SlackMessageDto {
@@ -98,19 +99,15 @@ class SlackSlashCommandController(
       return SlackMessageDto(text = "Not logged in")
     }
 
-    return if (!slackConfigService.deleteAllBySlackId(slackId)) {
-      SlackMessageDto(text = "Cant logout")
-    } else {
-      SlackMessageDto(text = "Logged out")
-    }
+    return SlackMessageDto(text = "Logged out")
   }
 
-  private fun listOfSubscriptions(payload: SlackCommandDto): SlackMessageDto {
+  private fun listOfSubscriptions(payload: SlackCommandDto): List<LayoutBlock> {
     slackUserConnectionService.findBySlackId(payload.user_id)
-      ?: return getError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
+      ?: throw SlackErrorException(slackErrorProvider.getUserNotConnectedError(payload))
 
     if (slackConfigService.getAllByChannelId(payload.channel_id).isEmpty()) {
-      return getError(payload, Message.SLACK_NOT_SUBSCRIBED_YET)
+      throw SlackErrorException(slackErrorProvider.getNotSubscribedYetError())
     }
 
     return slackExecutor.getListOfSubscriptions(payload.user_id, payload.channel_id)
@@ -129,14 +126,10 @@ class SlackSlashCommandController(
 
   fun handleSubscribe(
     payload: SlackCommandDto,
-    projectId: String,
+    projectId: Long,
     languageTag: String?,
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
-    if (projectId.isEmpty()) {
-      return getError(payload, Message.SLACK_INVALID_COMMAND)
-    }
-
     var onEvent: EventName? = null
     optionsMap.forEach { (option, value) ->
       when (option) {
@@ -145,13 +138,10 @@ class SlackSlashCommandController(
             try {
               EventName.valueOf(value.uppercase())
             } catch (e: IllegalArgumentException) {
-              getError(payload, Message.SLACK_INVALID_COMMAND)
-              return null
+              throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
             }
-
         else -> {
-          getError(payload, Message.SLACK_INVALID_COMMAND)
-          return null
+          throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
         }
       }
     }
@@ -161,21 +151,19 @@ class SlackSlashCommandController(
 
   private fun subscribe(
     payload: SlackCommandDto,
-    projectId: String,
+    projectId: Long,
     languageTag: String?,
     onEventName: EventName?,
-  ): SlackMessageDto? {
-    val validationResult = validateRequest(payload, projectId)
-    if (!validationResult.success) {
-      return null
-    }
+  ): SlackMessageDto {
+    val user = getUserAccount(payload)
+    checkPermissions(projectId, userAccountId = user.id)
 
     val slackConfigDto =
       SlackConfigDto(
-        project = validationResult.project,
+        project = getProject(projectId),
         slackId = payload.user_id,
         channelId = payload.channel_id,
-        userAccount = validationResult.user,
+        userAccount = user,
         languageTag = languageTag,
         onEvent = onEventName,
         slackTeamId = payload.team_id,
@@ -183,14 +171,8 @@ class SlackSlashCommandController(
 
     try {
       slackConfigService.create(slackConfigDto)
-    } catch (e: Exception) {
-      when (e) {
-        is SlackWorkspaceNotFound -> {
-          return getWorkspaceNotFoundError()
-        }
-      }
-      logger.info(e.message)
-      return getError(payload, Message.UNEXPECTED_ERROR_SLACK)
+    } catch (e: SlackWorkspaceNotFound) {
+      throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
     }
 
     return SlackMessageDto(text = i18n.translate("subscribed_successfully"))
@@ -198,15 +180,13 @@ class SlackSlashCommandController(
 
   private fun unsubscribe(
     payload: SlackCommandDto,
-    projectId: String,
-  ): SlackMessageDto? {
-    val validationResult = validateRequest(payload, projectId)
-    if (!validationResult.success) {
-      return null
-    }
+    projectId: Long,
+  ): SlackMessageDto {
+    val user = getUserAccount(payload)
+    checkPermissions(projectId, user.id)
 
-    if (!slackConfigService.delete(validationResult.project.id, payload.channel_id)) {
-      return getError(payload, Message.SLACK_NOT_SUBSCRIBED_YET)
+    if (!slackConfigService.delete(projectId, payload.channel_id)) {
+      throw SlackErrorException(slackErrorProvider.getNotSubscribedYetError())
     }
 
     return SlackMessageDto(
@@ -214,51 +194,28 @@ class SlackSlashCommandController(
     )
   }
 
-  private fun validateRequest(
-    payload: SlackCommandDto,
-    projectId: String,
-  ): ValidationResult {
-    val slackSubscription = slackUserConnectionService.findBySlackId(payload.user_id)
-
-    if (slackSubscription == null) {
-      getError(payload, Message.SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT)
-      return ValidationResult(false)
-    }
-
-    val id = projectId.toLongOrNull()
-
-    if (id == null) {
-      getError(payload, Message.SLACK_INVALID_COMMAND)
-      return ValidationResult(false)
-    }
-
-    val project = projectService.find(id) ?: return ValidationResult(false)
-    val userAccount = slackSubscription.userAccount ?: return ValidationResult(false)
-
-    return if (permissionService.getProjectPermissionScopes(project.id, userAccount.id)
-        ?.contains(Scope.ACTIVITY_VIEW) == true
+  private fun checkPermissions(
+    projectId: Long,
+    userAccountId: Long,
+  ) {
+    if (
+      permissionService.getProjectPermissionScopes(projectId, userAccountId)
+        ?.contains(Scope.ACTIVITY_VIEW) != true
     ) {
-      ValidationResult(true, user = userAccount, project = project)
-    } else {
-      ValidationResult(false)
+      throw SlackErrorException(slackErrorProvider.getNoPermissionError())
     }
   }
 
-  private fun getError(
-    payload: SlackCommandDto,
-    message: Message,
-  ): SlackMessageDto {
-    val workspace = organizationSlackWorkspaceService.findBySlackTeamId(payload.team_id)
-
-    return slackExecutor.getErrorMessage(
-      message,
-      payload,
-      workspace,
-    )
+  private fun getProject(id: Long): Project {
+    return projectService.find(id) ?: throw SlackErrorException(slackErrorProvider.getProjectNotFoundError())
   }
 
-  private fun getWorkspaceNotFoundError(): SlackMessageDto {
-    return slackExecutor.getWorkspaceNotFoundError()
+  private fun getUserAccount(payload: SlackCommandDto): UserAccount {
+    val slackUserConnection =
+      slackUserConnectionService.findBySlackId(payload.user_id)
+        ?: throw SlackErrorException(slackErrorProvider.getUserNotConnectedError(payload))
+
+    return slackUserConnection.userAccount
   }
 
   fun parseOptions(optionsString: String): Map<String, String> {
@@ -272,26 +229,8 @@ class SlackSlashCommandController(
     return optionsMap
   }
 
-  @PostMapping("/user-login")
-  fun userLogin(
-    @RequestBody payload: SlackConnectionDto,
-  ) {
-    val workspace = organizationSlackWorkspaceService.get(payload.workspaceId)
-
-    organizationRoleService.checkUserCanView(workspace.organization.id)
-
-    slackUserConnectionService.createOrUpdate(authenticationFacade.authenticatedUserEntity, payload.slackId)
-    slackExecutor.sendSuccessMessage(payload)
-  }
-
   companion object {
     val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
     val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
   }
-
-  data class ValidationResult(
-    val success: Boolean,
-    val user: UserAccount = UserAccount(),
-    val project: Project = Project(),
-  )
 }

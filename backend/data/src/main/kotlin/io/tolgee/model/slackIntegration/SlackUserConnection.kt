@@ -12,7 +12,7 @@ import jakarta.persistence.UniqueConstraint
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["slack_user_id", "user_account_id"])])
 class SlackUserConnection : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
-  var userAccount: UserAccount? = null
+  lateinit var userAccount: UserAccount
 
-  var slackUserId: String = ""
+  lateinit var slackUserId: String
 }

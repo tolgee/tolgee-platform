@@ -198,9 +198,9 @@ dependencies {
     /**
      * SLACK SDK
      */
-    implementation 'com.slack.api:slack-api-client:1.37.0'
-    implementation 'com.slack.api:slack-api-model-kotlin-extension:1.37.0'
-    implementation 'com.slack.api:slack-api-client-kotlin-extension:1.37.0'
+    implementation libs.slackApiClient
+    implementation libs.slackApiModelKotlinExtension
+    implementation libs.slackApiClientKotlinExtension
 }
 
 test {

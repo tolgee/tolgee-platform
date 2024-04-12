@@ -67,6 +67,11 @@ dependencies {
     api libs.postHog
     implementation libs.kotlinReflect
     implementation libs.jacksonModuleKotlin
+
+    /**
+     * SLACK SDK
+     */
+    api libs.slackApiClient
 }
 
 sourceSets {

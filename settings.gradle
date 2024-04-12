@@ -69,6 +69,12 @@ dependencyResolutionManagement {
             library('postHog', 'com.posthog.java:posthog:1.1.1')
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.9.12")
             library('mailjet', "com.mailjet:mailjet-client:5.2.5")
+            //    implementation 'com.slack.api:slack-api-client:1.37.0'
+            //    implementation 'com.slack.api:slack-api-model-kotlin-extension:1.37.0'
+            //    implementation 'com.slack.api:slack-api-client-kotlin-extension:1.37.0'
+            library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
+            library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
+            library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
         }
     }
 }

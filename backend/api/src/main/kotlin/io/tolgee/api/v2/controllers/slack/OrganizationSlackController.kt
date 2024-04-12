@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.api.v2.controllers.organization
+package io.tolgee.api.v2.controllers.slack
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag

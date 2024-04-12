@@ -1,16 +1,20 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.slack
 
-import com.esotericsoftware.minlog.Log
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.SlackRequestValidation
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
-import io.tolgee.constants.Message
+import io.tolgee.component.automations.processors.slackIntegration.SlackHelpBlocksProvider
 import io.tolgee.dtos.request.slack.SlackEventDto
-import io.tolgee.dtos.response.SlackMessageDto
-import io.tolgee.exceptions.BadRequestException
-import org.springframework.web.bind.annotation.*
+import io.tolgee.exceptions.SlackErrorException
+import io.tolgee.util.Logging
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.net.URLDecoder
 
 @RestController
@@ -22,31 +26,36 @@ import java.net.URLDecoder
 )
 class SlackEventsController(
   private val objectMapper: ObjectMapper,
-  private val slackExecutor: SlackExecutor,
   private val slackRequestValidation: SlackRequestValidation,
-) {
+  private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
+  private val slackExecutor: SlackExecutor,
+) : Logging {
+  @Suppress("UastIncorrectHttpHeaderInspection")
   @PostMapping("/on-event")
   fun fetchEvent(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
     @RequestBody payload: String,
-  ): SlackMessageDto? {
+  ) {
     val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
 
-    if (!slackRequestValidation.isValid(slackSignature, timestamp, payload)) {
-      Log.info("Error validating request from Slack")
-      throw BadRequestException(Message.UNEXPECTED_ERROR_SLACK)
-    }
+    slackRequestValidation.validate(slackSignature, timestamp, payload)
+
     val event: SlackEventDto = objectMapper.readValue(decodedPayload)
 
-    event.actions.forEach { action ->
-      if (action.value != "help_btn") {
-        return@forEach
-      } else {
-        slackExecutor.sendHelpMessage(event.channel.id, event.team.id)
+    // Since we cannot respond to the event directly, we have to send a message to the channel.
+    // Sometimes Tolgee might be unable to do it, because the token might be missing in Tolgee DB.
+    // In that case we cannot do anything and the event triggering button in Slack just won't work
+    try {
+      val hasHelpBtn =
+        event.actions.any {
+          it.value == "help_btn"
+        }
+      if (hasHelpBtn) {
+        slackExecutor.sendBlocksMessage(event.team.id, event.channel.id, slackHelpBlocksProvider.getHelpBlocks())
       }
+    } catch (e: SlackErrorException) {
+      slackExecutor.sendBlocksMessage(event.team.id, event.channel.id, e.blocks)
     }
-
-    return null
   }
 }

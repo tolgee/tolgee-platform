@@ -50,6 +50,13 @@ class SlackUserConnectionService(
   }
 
   private fun delete(connection: SlackUserConnection) {
-    slackUserConnectionRepository.delete(connection)
+    return slackUserConnectionRepository.delete(connection)
+  }
+
+  @Transactional
+  fun delete(slackId: String): Boolean {
+    val subscription = findBySlackId(slackId) ?: return false
+    slackUserConnectionRepository.delete(subscription)
+    return true
   }
 }

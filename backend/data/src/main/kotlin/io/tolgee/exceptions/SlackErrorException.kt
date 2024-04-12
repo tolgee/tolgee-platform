@@ -1,7 +1,8 @@
-package io.tolgee.api.v2.controllers.slack
+package io.tolgee.exceptions
 
-import io.tolgee.dtos.response.SlackMessageDto
+import com.slack.api.model.block.LayoutBlock
 
 class SlackErrorException(
-  val error: SlackMessageDto,
-) : RuntimeException("Validation error")
+  val blocks: List<LayoutBlock>,
+  message: String = "Error while processing slack command",
+) : BadRequestException(message)
