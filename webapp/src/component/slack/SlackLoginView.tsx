@@ -49,10 +49,10 @@ export const SlackLoginView = () => {
             channelId: validChannelId,
             slackNickName: validSlackNickName,
             workSpace: validWorkSpace,
-            orgId: "1",
+            orgId: '1',
             channelName: validSlackChannelName,
             author: validUserName,
-            workSpaceName: validSlackWorkSpaceName
+            workSpaceName: validSlackWorkSpaceName,
           },
         },
       },

@@ -300,8 +300,9 @@ class SlackExecutor(
     slackNickName: String,
     channelName: String,
     teamDomain: String,
-  ) =
-    "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId&channelId=$slackChannelId&nickName=$slackNickName&workSpace=$workSpace&channelName=$channelName&domainName=$teamDomain"
+  ) = "${tolgeeProperties.frontEndUrl}/slack/login?slackId=$slackId" +
+    "&channelId=$slackChannelId&nickName=$slackNickName&workSpace=$workSpace" +
+    "&channelName=$channelName&domainName=$teamDomain"
 
   fun createErrorBlocks(
     errorMessageType: Message,
