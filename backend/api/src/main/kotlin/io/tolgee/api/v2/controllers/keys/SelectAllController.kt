@@ -20,12 +20,14 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @KeysDocsTag
+@RequestMapping(value = [""])
 class SelectAllController(
   private val projectHolder: ProjectHolder,
   private val translationService: TranslationService,
