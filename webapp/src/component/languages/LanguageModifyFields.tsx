@@ -8,7 +8,7 @@ import { useFormikContext } from 'formik';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { TextField } from '../common/form/fields/TextField';
-import { FlagSelector } from './FlagSelector';
+import { FlagSelector } from './FlagSelector/FlagSelector';
 
 export const LanguageModifyFields: FC<{
   preferredEmojis?: string[];
