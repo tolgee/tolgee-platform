@@ -90,32 +90,29 @@ class SlackExecutor(
     }
   }
 
-  fun sendRedirectUrl(
+  fun getLoginRedirectBlocks(
     slackChannelId: String,
     slackId: String,
     workspace: OrganizationSlackWorkspace?,
-  ) {
-    slackClient.methods(workspace?.getSlackToken()).chatPostMessage {
-      it.channel(slackChannelId)
-        .blocks {
-          section {
-            markdownText(i18n.translate("slack-not-connected-message"))
-          }
+  ): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack-not-connected-message"))
+      }
 
-          section {
-            markdownText(i18n.translate("connect-account-instruction"))
-          }
+      section {
+        markdownText(i18n.translate("connect-account-instruction"))
+      }
 
-          actions {
-            button {
-              text(i18n.translate("connect-button-text"), emoji = true)
-              value("connect_slack")
-              url(slackUserLoginUrlProvider.getUrl(slackChannelId, slackId, workspace?.id))
-              actionId("button_connect_slack")
-              style("primary")
-            }
-          }
+      actions {
+        button {
+          text(i18n.translate("connect-button-text"), emoji = true)
+          value("connect_slack")
+          url(slackUserLoginUrlProvider.getUrl(slackChannelId, slackId, workspace?.id))
+          actionId("button_connect_slack")
+          style("primary")
         }
+      }
     }
   }
 

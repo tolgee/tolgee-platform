@@ -7,7 +7,7 @@ import io.tolgee.component.automations.processors.slackIntegration.SlackErrorPro
 import io.tolgee.component.automations.processors.slackIntegration.SlackExceptionHandler
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.component.automations.processors.slackIntegration.SlackHelpBlocksProvider
-import io.tolgee.component.automations.processors.slackIntegration.asSlackMessageDto
+import io.tolgee.component.automations.processors.slackIntegration.asSlackResponseString
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
@@ -59,7 +59,7 @@ class SlackSlashCommandController(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
     @RequestBody body: String,
-  ): SlackMessageDto? {
+  ): String? {
     return slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)
 
@@ -71,17 +71,23 @@ class SlackSlashCommandController(
       val optionsMap = parseOptions(optionsString)
 
       when (command) {
-        "login" -> login(payload)
+        "login" -> login(payload).asSlackResponseString
 
-        "subscribe" -> handleSubscribe(payload, projectId.toLongOrThrowInvalidCommand(), languageTag, optionsMap)
+        "subscribe" ->
+          handleSubscribe(
+            payload,
+            projectId.toLongOrThrowInvalidCommand(),
+            languageTag,
+            optionsMap,
+          ).asSlackResponseString
 
-        "unsubscribe" -> unsubscribe(payload, projectId.toLongOrThrowInvalidCommand())
+        "unsubscribe" -> unsubscribe(payload, projectId.toLongOrThrowInvalidCommand()).asSlackResponseString
 
-        "subscriptions" -> listOfSubscriptions(payload).asSlackMessageDto
+        "subscriptions" -> listOfSubscriptions(payload).asSlackResponseString
 
-        "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackMessageDto
+        "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackResponseString
 
-        "logout" -> logout(payload.user_id)
+        "logout" -> logout(payload.user_id).asSlackResponseString
 
         else -> {
           throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
@@ -113,15 +119,21 @@ class SlackSlashCommandController(
     return slackExecutor.getListOfSubscriptions(payload.user_id, payload.channel_id)
   }
 
-  private fun login(payload: SlackCommandDto): SlackMessageDto? {
+  private fun login(payload: SlackCommandDto): SlackMessageDto {
     if (slackUserConnectionService.isUserConnected(payload.user_id)) {
       return SlackMessageDto(text = i18n.translate("already_logged_in"))
     }
 
     val workspace = organizationSlackWorkspaceService.findBySlackTeamId(payload.team_id)
 
-    slackExecutor.sendRedirectUrl(payload.channel_id, payload.user_id, workspace)
-    return null
+    return SlackMessageDto(
+      blocks =
+        slackExecutor.getLoginRedirectBlocks(
+          payload.channel_id,
+          payload.user_id,
+          workspace,
+        ),
+    )
   }
 
   fun handleSubscribe(
