@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/") {
+class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/") {
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }
 
   @Test

@@ -14,6 +14,7 @@ import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
@@ -58,7 +59,7 @@ class PublicController(
   private val mfaService: MfaService,
   private val userCredentialsService: UserCredentialsService,
 ) {
-  @Operation(summary = "Generates JWT token")
+  @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
   @RateLimited(5, isAuthentication = true)
   fun authenticateUser(
@@ -74,8 +75,9 @@ class PublicController(
     return JwtAuthenticationResponse(jwt)
   }
 
-  @Operation(summary = "Reset password request")
+  @Operation(summary = "Request password reset")
   @PostMapping("/reset_password_request")
+  @OpenApiHideFromPublicDocs
   fun resetPasswordRequest(
     @RequestBody @Valid
     request: ResetPasswordRequest,
@@ -108,7 +110,8 @@ class PublicController(
   }
 
   @GetMapping("/reset_password_validate/{email}/{code}")
-  @Operation(summary = "Validates key sent by email")
+  @Operation(summary = "Validate password-resetting key")
+  @OpenApiHideFromPublicDocs
   fun resetPasswordValidate(
     @PathVariable("code") code: String,
     @PathVariable("email") email: String,
@@ -117,7 +120,8 @@ class PublicController(
   }
 
   @PostMapping("/reset_password_set")
-  @Operation(summary = "Sets new password with password reset code from e-mail")
+  @Operation(summary = "Set a new password", description = "Checks the password reset code from e-mail")
+  @OpenApiHideFromPublicDocs
   fun resetPasswordSet(
     @RequestBody @Valid
     request: ResetPassword,
@@ -132,12 +136,10 @@ class PublicController(
 
   @PostMapping("/sign_up")
   @Transactional
+  @OpenApiHideFromPublicDocs
   @Operation(
-    summary = """
-Creates new user account.
-
-When E-mail verification is enabled, null is returned. Otherwise JWT token is provided.
-    """,
+    summary = "Create new user account (Sign Up)",
+    description = "When E-mail verification is enabled, null is returned. Otherwise JWT token is provided.",
   )
   fun signUp(
     @RequestBody @Valid
@@ -150,7 +152,11 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   @GetMapping("/verify_email/{userId}/{code}")
-  @Operation(summary = "Sets user account as verified, when code from email is OK")
+  @Operation(
+    summary = "Set user account as verified",
+    description = "It checks whether the code from email is valid",
+  )
+  @OpenApiHideFromPublicDocs
   fun verifyEmail(
     @PathVariable("userId") @NotNull userId: Long,
     @PathVariable("code") @NotBlank code: String,
@@ -160,7 +166,8 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
-  @Operation(summary = "Validates if email is not in use")
+  @Operation(summary = "Validate if email is not in use")
+  @OpenApiHideFromPublicDocs
   fun validateEmail(
     @RequestBody email: TextNode,
   ): Boolean {
@@ -168,7 +175,10 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   @GetMapping("/authorize_oauth/{serviceType}")
-  @Operation(summary = "Authenticates user using third party oAuth service")
+  @Operation(
+    summary = "Authenticate user (third-part, oAuth)",
+    description = "Authenticates user using third party oAuth service",
+  )
   @Transactional
   fun authenticateUser(
     @PathVariable("serviceType") serviceType: String?,

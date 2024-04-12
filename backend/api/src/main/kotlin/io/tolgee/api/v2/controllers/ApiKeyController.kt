@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/v2")
-@Tag(name = "API keys")
+@Tag(name = "API keys", description = "Manage Project API keys")
 class ApiKeyController(
   private val apiKeyService: ApiKeyService,
   private val projectService: ProjectService,

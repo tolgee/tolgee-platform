@@ -30,6 +30,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationService
@@ -78,6 +79,10 @@ class ProjectService(
   @set:Autowired
   @set:Lazy
   lateinit var languageService: LanguageService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var namespaceService: NamespaceService
 
   @set:Autowired
   @set:Lazy
@@ -174,6 +179,19 @@ class ProjectService(
     project.name = dto.name
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders
+
+    if (project.defaultNamespace != null) {
+      namespaceService.deleteUnusedNamespaces(listOf(project.defaultNamespace!!))
+    }
+
+    if (dto.defaultNamespaceId != null) {
+      var namespace =
+        project.namespaces.find { it.id == dto.defaultNamespaceId }
+          ?: throw BadRequestException(Message.NAMESPACE_NOT_FROM_PROJECT)
+      project.defaultNamespace = namespace
+    } else {
+      project.defaultNamespace = null
+    }
 
     dto.baseLanguageId?.let {
       val language =

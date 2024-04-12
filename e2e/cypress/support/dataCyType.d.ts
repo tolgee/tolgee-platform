@@ -137,6 +137,7 @@ declare namespace DataCy {
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
         "dashboard-projects-list-item" |
+        "default-namespace-select" |
         "delete-user-button" |
         "developer-menu-content-delivery" |
         "developer-menu-storage" |
@@ -302,6 +303,7 @@ declare namespace DataCy {
         "mt-language-dialog-primary-radio" |
         "mt-language-dialog-save" |
         "mt-language-dialog-service-label" |
+        "namespace-value" |
         "namespaces-banner-content" |
         "namespaces-banner-menu" |
         "namespaces-banner-menu-button" |

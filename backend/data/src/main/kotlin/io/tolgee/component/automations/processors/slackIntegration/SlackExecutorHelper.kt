@@ -209,21 +209,21 @@ class SlackExecutorHelper(
       }
     }
 
-  fun createTranslationChangeMessage(): SavedMessageDto? {
-    var result: SavedMessageDto? = null
+  private fun buildBlocksTooManyTranslations(count: Long) =
+    withBlocks {
+      section {
+        authorHeadSection(i18n.translate("too-many-translations-text") + " $count translations")
+      }
+    }
+
+  fun createTranslationChangeMessage(): MutableList<SavedMessageDto> {
+    val result: MutableList<SavedMessageDto> = mutableListOf()
 
     data.activityData?.modifiedEntities?.forEach modifiedEntities@{ (_, modifiedEntityList) ->
       modifiedEntityList.forEach { modifiedEntity ->
-        modifiedEntity.modifications?.forEach modificationLoop@{ (property, _) ->
-          if (property != "text" && property != "state") {
-            return@modificationLoop
-          }
-          val translationKey = modifiedEntity.entityId
-          result = processTranslationChange(translationKey)
-          if (result != null) {
-            return@modifiedEntities
-          }
-        }
+        //  modifiedEntity.entityId
+        val translationKey = modifiedEntity.entityId
+        result.add(processTranslationChange(translationKey) ?: return@modifiedEntities)
       }
     }
 
@@ -481,5 +481,14 @@ class SlackExecutorHelper(
       url(tolgeeUrl)
       actionId("button_redirect_to_tolgee")
     }
+  }
+
+  fun createMessageIfTooManyTranslations(counts: Long): SavedMessageDto? {
+    return SavedMessageDto(
+      blocks = buildBlocksTooManyTranslations(counts),
+      attachments = listOf(createRedirectButton()),
+      0L,
+      setOf(),
+    )
   }
 }

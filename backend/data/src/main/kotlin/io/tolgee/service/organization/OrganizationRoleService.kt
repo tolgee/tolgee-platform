@@ -59,7 +59,14 @@ class OrganizationRoleService(
     organizationId: Long,
     isAdmin: Boolean = false,
   ) {
-    if (!isAdmin && !canUserViewStrict(userId, organizationId)) throw PermissionException()
+    if (!isAdmin &&
+      !canUserViewStrict(
+        userId,
+        organizationId,
+      )
+    ) {
+      throw PermissionException(Message.USER_CANNOT_VIEW_THIS_ORGANIZATION)
+    }
   }
 
   fun canUserView(
@@ -107,7 +114,15 @@ class OrganizationRoleService(
     organizationId: Long,
   ) {
     val isServerAdmin = userAccountService.getDto(userId).role == UserAccount.Role.ADMIN
-    if (this.isUserOwner(userId, organizationId) || isServerAdmin) return else throw PermissionException()
+    if (this.isUserOwner(
+        userId,
+        organizationId,
+      ) || isServerAdmin
+    ) {
+      return
+    } else {
+      throw PermissionException(Message.USER_IS_NOT_OWNER_OF_ORGANIZATION)
+    }
   }
 
   fun checkUserIsOwner(organizationId: Long) {
@@ -122,7 +137,7 @@ class OrganizationRoleService(
     if (isUserMemberOrOwner(userId, organizationId) || isServerAdmin) {
       return
     }
-    throw PermissionException()
+    throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
   }
 
   fun isUserMemberOrOwner(
@@ -149,7 +164,8 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ): OrganizationRoleType {
-    return self.findType(userId, organizationId) ?: throw PermissionException()
+    return self.findType(userId, organizationId)
+      ?: throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
   }
 
   fun getType(organizationId: Long): OrganizationRoleType {

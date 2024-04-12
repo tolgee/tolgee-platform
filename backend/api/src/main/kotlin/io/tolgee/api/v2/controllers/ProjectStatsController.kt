@@ -27,7 +27,7 @@ import java.time.LocalDate
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/stats", "/v2/projects/stats"])
-@Tag(name = "Projects")
+@Tag(name = "Project Stats")
 class ProjectStatsController(
   private val projectStatsService: ProjectStatsService,
   private val projectHolder: ProjectHolder,
@@ -35,7 +35,7 @@ class ProjectStatsController(
   private val languageStatsService: LanguageStatsService,
   private val languageStatsModelAssembler: LanguageStatsModelAssembler,
 ) {
-  @Operation(summary = "Returns project stats")
+  @Operation(summary = "Get project stats")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @UseDefaultPermissions
   @AllowApiAccess
@@ -62,7 +62,7 @@ class ProjectStatsController(
     )
   }
 
-  @Operation(summary = "Returns project daily amount of events")
+  @Operation(summary = "Get project daily amount of events")
   @GetMapping("/daily-activity", produces = [MediaTypes.HAL_JSON_VALUE])
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
   @AllowApiAccess

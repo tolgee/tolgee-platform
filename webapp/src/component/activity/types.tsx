@@ -51,6 +51,7 @@ export type FieldTypeEnum =
   | 'text'
   | 'translation_state'
   | 'translation_auto'
+  | 'default_namespace'
   | 'comment_state'
   | 'key_tags'
   | 'language_flag'
