@@ -48,7 +48,7 @@ class ContentDeliveryConfigController(
   private val contentDeliveryUploader: ContentDeliveryUploader,
 ) : IController {
   @PostMapping("")
-  @Operation(description = "Create Content Delivery Config")
+  @Operation(summary = "Create Content Delivery Config")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
   @RequestActivity(ActivityType.CONTENT_DELIVERY_CONFIG_CREATE)
@@ -61,7 +61,7 @@ class ContentDeliveryConfigController(
   }
 
   @PutMapping("/{id}")
-  @Operation(description = "Updates Content Delivery Config")
+  @Operation(summary = "Update Content Delivery Config")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
   @RequestActivity(ActivityType.CONTENT_DELIVERY_CONFIG_UPDATE)
@@ -76,7 +76,7 @@ class ContentDeliveryConfigController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_PUBLISH])
   @GetMapping("")
-  @Operation(description = "List existing Content Delivery Configs")
+  @Operation(summary = "List existing Content Delivery Configs")
   @AllowApiAccess
   fun list(
     @ParameterObject pageable: Pageable,
@@ -87,7 +87,7 @@ class ContentDeliveryConfigController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @DeleteMapping("/{id}")
-  @Operation(description = "Delete Content Delivery Config")
+  @Operation(summary = "Delete Content Delivery Config")
   @AllowApiAccess
   @RequestActivity(ActivityType.CONTENT_DELIVERY_CONFIG_DELETE)
   fun delete(
@@ -98,7 +98,7 @@ class ContentDeliveryConfigController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_PUBLISH])
   @GetMapping("/{id}")
-  @Operation(description = "Get Content Delivery Config")
+  @Operation(summary = "Get one Content Delivery Config")
   @AllowApiAccess
   fun get(
     @PathVariable id: Long,
@@ -108,7 +108,10 @@ class ContentDeliveryConfigController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_PUBLISH])
   @PostMapping("/{id}")
-  @Operation(description = "Publish to Content Delivery")
+  @Operation(
+    summary = "Publish to Content Delivery",
+    description = "Immediately publishes content to the configured Content Delivery",
+  )
   @AllowApiAccess
   fun post(
     @PathVariable id: Long,

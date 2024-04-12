@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerEditTest : AuthorizedControllerTest() {
+class ProjectsControllerEditTest : AuthorizedControllerTest() {
   @Test
   fun `edits project`() {
     val base = dbPopulator.createBase("What a project")

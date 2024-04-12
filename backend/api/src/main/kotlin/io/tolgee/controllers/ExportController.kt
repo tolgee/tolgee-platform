@@ -42,7 +42,7 @@ class ExportController(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
-  @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
+  @Operation(summary = "Export to ZIP of jsons", description = "Exports data as ZIP of jsons", deprecated = true)
   @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
   @AllowApiAccess
   @Deprecated("Use v2 export controller")

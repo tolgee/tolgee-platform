@@ -1,7 +1,7 @@
 package io.tolgee.hateoas.project
 
-import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
+import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
@@ -28,11 +28,11 @@ class ProjectWithStatsModelAssembler(
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
 ) : RepresentationModelAssemblerSupport<ProjectWithStatsView, ProjectWithStatsModel>(
-    V2ProjectsController::class.java,
+    ProjectsController::class.java,
     ProjectWithStatsModel::class.java,
   ) {
   override fun toModel(view: ProjectWithStatsView): ProjectWithStatsModel {
-    val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
+    val link = linkTo<ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage =
       view.baseLanguage ?: let {
         projectService.getOrAssignBaseLanguage(view.id)

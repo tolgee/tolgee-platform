@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
@@ -9,6 +10,7 @@ import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountModel
 import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
+import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
@@ -26,7 +28,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -36,7 +37,13 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
     "/v2/administration",
   ],
 )
-@OpenApiTag(name = "Admin", description = "Server administration")
+@Tag(
+  name = "Server Administration",
+  description =
+    "**Only for self-hosted instances** \n\n" +
+      "Managees global Tolgee Platform instance data e.g., user accounts and organizations.",
+)
+@OpenApiSelfHostedExtension
 class AdministrationController(
   private val organizationService: OrganizationService,
   private val pagedOrganizationResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
@@ -79,7 +86,7 @@ class AdministrationController(
   }
 
   @DeleteMapping(value = ["/users/{userId}"])
-  @Operation(summary = "Deletes an user")
+  @Operation(summary = "Delete user")
   @RequiresSuperAuthentication
   fun deleteUser(
     @PathVariable userId: Long,
@@ -91,7 +98,13 @@ class AdministrationController(
   }
 
   @PutMapping(value = ["/users/{userId}/disable"])
-  @Operation(summary = "Deletes an user")
+  @Operation(
+    summary = "Disable user",
+    description =
+      "Disables user account. User will not be able to log in, " +
+        "but their " +
+        "user data will be preserved, so you can enable the user later using the `enable` endpoint.",
+  )
   @RequiresSuperAuthentication
   fun disableUser(
     @PathVariable userId: Long,
@@ -103,7 +116,7 @@ class AdministrationController(
   }
 
   @PutMapping(value = ["/users/{userId}/enable"])
-  @Operation(summary = "Deletes an user")
+  @Operation(summary = "Enable user", description = "Enables previously disabled user.")
   @RequiresSuperAuthentication
   fun enableUser(
     @PathVariable userId: Long,
@@ -112,7 +125,7 @@ class AdministrationController(
   }
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])
-  @Operation(summary = "")
+  @Operation(summary = "Set Role", description = "Set's the global role on the Tolgee Platform server.")
   @RequiresSuperAuthentication
   fun setRole(
     @PathVariable userId: Long,
@@ -124,7 +137,12 @@ class AdministrationController(
   }
 
   @GetMapping(value = ["/users/{userId:[0-9]+}/generate-token"])
-  @Operation(summary = "Get all server users")
+  @Operation(
+    summary = "Geneate user's JWT token",
+    description =
+      "Generates a JWT token for the user with provided ID. This is useful, when need to debug of the " +
+        "user's account. Or when an operation is required to be executed on behalf of the user.",
+  )
   @RequiresSuperAuthentication
   fun generateUserToken(
     @PathVariable userId: Long,

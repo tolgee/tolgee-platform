@@ -35,7 +35,7 @@ class ProjectActivityController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<ProjectActivityView>,
   private val projectActivityModelAssembler: ProjectActivityModelAssembler,
 ) {
-  @Operation(summary = "Returns project history")
+  @Operation(summary = "Get project activity")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
   @AllowApiAccess

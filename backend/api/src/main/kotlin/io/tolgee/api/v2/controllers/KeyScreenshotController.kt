@@ -58,7 +58,7 @@ class KeyScreenshotController(
   private val screenshotModelAssembler: ScreenshotModelAssembler,
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(summary = "Upload screenshot for specific key")
+  @Operation(summary = "Upload screenshot")
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.SCREENSHOT_ADD)
   @RequestBody(content = [Content(encoding = [Encoding(name = "info", contentType = "application/json")])])
@@ -80,7 +80,7 @@ class KeyScreenshotController(
   }
 
   @GetMapping("")
-  @Operation(summary = "Returns all screenshots for specified key")
+  @Operation(summary = "Get screenshots")
   @RequiresProjectPermissions([ Scope.SCREENSHOTS_VIEW ])
   @AllowApiAccess
   fun getKeyScreenshots(
@@ -92,7 +92,7 @@ class KeyScreenshotController(
   }
 
   @DeleteMapping("/{ids}")
-  @Operation(summary = "Deletes multiple screenshots by ids")
+  @Operation(summary = "Delete screenshots")
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
   @RequiresProjectPermissions([ Scope.SCREENSHOTS_DELETE ])
   @AllowApiAccess

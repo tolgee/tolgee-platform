@@ -1,3 +1,31 @@
+## [3.56.1](https://github.com/tolgee/tolgee-platform/compare/v3.56.0...v3.56.1) (2024-04-11)
+
+
+### Bug Fixes
+
+* Update vulnerable dependencies ([#2238](https://github.com/tolgee/tolgee-platform/issues/2238)) ([cebc8e2](https://github.com/tolgee/tolgee-platform/commit/cebc8e2cc79a155d61249d891d22c1bc870f570c))
+
+# [3.56.0](https://github.com/tolgee/tolgee-platform/compare/v3.55.1...v3.56.0) (2024-04-10)
+
+
+### Features
+
+* project default namespace ([#2233](https://github.com/tolgee/tolgee-platform/issues/2233)) ([f124efa](https://github.com/tolgee/tolgee-platform/commit/f124efab16102df5a654b3eff29c334ce03fa864))
+
+## [3.55.1](https://github.com/tolgee/tolgee-platform/compare/v3.55.0...v3.55.1) (2024-04-10)
+
+
+### Bug Fixes
+
+* Update Tolgee logo in e-mails ([#2237](https://github.com/tolgee/tolgee-platform/issues/2237)) ([ba1e106](https://github.com/tolgee/tolgee-platform/commit/ba1e10659708f58e275ac4c6c8f662c3bf75c126))
+
+# [3.55.0](https://github.com/tolgee/tolgee-platform/compare/v3.54.7...v3.55.0) (2024-04-05)
+
+
+### Features
+
+* Improve generated API docs ([#2217](https://github.com/tolgee/tolgee-platform/issues/2217)) ([5765572](https://github.com/tolgee/tolgee-platform/commit/576557205d5f18ed477b1db30d191893a3233ee2))
+
 ## [3.54.7](https://github.com/tolgee/tolgee-platform/compare/v3.54.6...v3.54.7) (2024-04-03)
 
 

@@ -33,7 +33,7 @@ e.g. Key hello[0] will be exported as {"hello": ["..."]}"""
 
   const val FILTER_NAMESPACE_DESCRIPTION =
     "Filter translations with namespace. " +
-      "By default, all namespaces everything are exported."
+      "By default, all namespaces everything are exported. To export default namespace, use empty string."
 
   const val MESSAGE_FORMAT_DESCRIPTION = """Message format to be used for export.
       

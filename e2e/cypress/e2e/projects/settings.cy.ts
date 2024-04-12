@@ -4,6 +4,8 @@ import {
   login,
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
+import { visitSingleKey } from '../../common/singleKey';
+import { createTranslation } from '../../common/translations';
 
 describe('Projects Basics', () => {
   let projectId: number;
@@ -44,4 +46,80 @@ describe('Projects Basics', () => {
       .contains('Test description')
       .should('be.visible');
   });
+
+  it('update default namespace properly', () => {
+    cy.visit(`${HOST}/projects/${projectId}/translations`);
+    createTranslation({ namespace: 'test_namespace', key: 'test' });
+
+    cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+    setDefaultNamespace('test_namespace');
+
+    cy.visit(`${HOST}/projects/${projectId}/translations`);
+    expectDefaultNamespaceInModalCreation('test_namespace');
+
+    cy.visit(`${HOST}/projects/${projectId}/translations/single`);
+    cy.gcy('search-select').should('contain', 'test_namespace');
+  });
+
+  it('remove default namespace when all keys are removed and selected "none" as a default', () => {
+    cy.visit(`${HOST}/projects/${projectId}/translations`);
+    createTranslation({ namespace: 'test_namespace', key: 'test' });
+
+    cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+    setDefaultNamespace('test_namespace');
+
+    deleteNamespaceByDeletingAllKeys('test');
+
+    cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+    expectDefaultNamespace('test_namespace');
+    setDefaultNamespace('<none>');
+
+    cy.gcy('namespace-value').should('not.contain', 'test_namespace');
+
+    cy.visit(`${HOST}/projects/${projectId}/translations`);
+    expectDefaultNamespaceInModalCreation('<none>');
+  });
+
+  it('remove default namespace when all keys are removed and selected other as a default', () => {
+    cy.visit(`${HOST}/projects/${projectId}/translations`);
+    createTranslation({ namespace: 'test_namespace1', key: 'test1' });
+    createTranslation({ namespace: 'test_namespace2', key: 'test2' });
+
+    cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+    setDefaultNamespace('test_namespace1');
+
+    deleteNamespaceByDeletingAllKeys('test1');
+
+    cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+    expectDefaultNamespace('test_namespace1');
+    setDefaultNamespace('test_namespace2');
+
+    cy.gcy('default-namespace-select').click();
+    cy.gcy('namespace-value').should('not.contain', 'test_namespace1');
+
+    cy.visit(`${HOST}/projects/${projectId}/translations`);
+    expectDefaultNamespaceInModalCreation('test_namespace2');
+  });
+
+  const setDefaultNamespace = (namespace: string) => {
+    cy.gcy('default-namespace-select').click();
+    cy.gcy('namespace-value').filter(`:contains("${namespace}")`).click();
+    cy.contains('button', 'Save').click();
+    expectDefaultNamespace(namespace);
+  };
+
+  const deleteNamespaceByDeletingAllKeys = (key: string) => {
+    visitSingleKey(projectId, key);
+    cy.gcy('translation-edit-delete-button').click();
+    cy.gcy('global-confirmation-confirm').click();
+  };
+
+  const expectDefaultNamespace = (namespace: string) => {
+    cy.gcy('default-namespace-select').should('contain', namespace);
+  };
+
+  const expectDefaultNamespaceInModalCreation = (namespace: string) => {
+    cy.gcy('translations-add-button').click();
+    cy.gcy('search-select').should('contain', namespace);
+  };
 });

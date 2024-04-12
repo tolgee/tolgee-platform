@@ -17,7 +17,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.io.Serializable
 
 @Service
 class SecurityService(
@@ -39,7 +38,7 @@ class SecurityService(
       getProjectPermissionScopes(projectId).isNullOrEmpty() &&
       !isCurrentUserServerAdmin()
     ) {
-      throw PermissionException()
+      throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
   }
 
@@ -81,7 +80,7 @@ class SecurityService(
     if (!allowedScopes.contains(requiredScope)) {
       throw PermissionException(
         Message.OPERATION_NOT_PERMITTED,
-        listOf(requiredScope.value) as List<Serializable>,
+        listOf(requiredScope),
       )
     }
   }
@@ -258,10 +257,11 @@ class SecurityService(
       val availableScopes = apiKeyService.getAvailableScopes(user?.id ?: activeUser.id, project!!)
       val userCanSelectTheScopes = availableScopes.toList().containsAll(scopes)
       if (!userCanSelectTheScopes) {
-        throw PermissionException()
+        val missingScopes = scopes.filter { !availableScopes.contains(it) }
+        throw PermissionException(missingScopes = missingScopes)
       }
     } catch (e: NotFoundException) {
-      throw PermissionException()
+      throw PermissionException(e.msg)
     }
   }
 
@@ -288,7 +288,8 @@ class SecurityService(
   ) {
     checkApiKeyScopes(apiKey) { expandedScopes ->
       if (!expandedScopes.toList().containsAll(scopes)) {
-        throw PermissionException()
+        val missingScopes = scopes.filter { !expandedScopes.contains(it) }
+        throw PermissionException(missingScopes = missingScopes)
       }
     }
   }
@@ -300,7 +301,8 @@ class SecurityService(
     checkApiKeyScopes(apiKey) { expandedScopes ->
       val hasRequiredPermission = scopes.all { expandedScopes.contains(it) }
       if (!hasRequiredPermission) {
-        throw PermissionException()
+        val missingScopes = scopes.filter { !expandedScopes.contains(it) }
+        throw PermissionException(missingScopes = missingScopes)
       }
     }
   }
@@ -318,12 +320,6 @@ class SecurityService(
       checkApiKeyScopes(setOf(Scope.SCREENSHOTS_UPLOAD), authenticationFacade.projectApiKey)
     }
     checkProjectPermission(projectId, Scope.SCREENSHOTS_UPLOAD)
-  }
-
-  fun checkUserIsServerAdmin() {
-    if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
-      throw PermissionException()
-    }
   }
 
   fun getProjectPermissionScopes(
@@ -363,7 +359,7 @@ class SecurityService(
   }
 
   private val activeUser: UserAccountDto
-    get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException()
+    get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
 
   private val activeApiKey: ApiKeyDto?
     get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null

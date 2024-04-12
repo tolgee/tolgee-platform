@@ -10,18 +10,14 @@ import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.dtos.request.organization.OrganizationDto
-import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.hateoas.invitation.OrganizationInvitationModel
-import io.tolgee.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.organization.PublicUsageModel
@@ -32,6 +28,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -40,7 +37,6 @@ import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.InvitationService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
@@ -54,7 +50,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
-import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
@@ -91,8 +86,6 @@ class OrganizationController(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
-  private val invitationService: InvitationService,
-  private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler,
   private val imageUploadService: ImageUploadService,
   private val mtCreditBucketService: MtCreditBucketService,
   private val organizationStatsService: OrganizationStatsService,
@@ -102,9 +95,10 @@ class OrganizationController(
 ) {
   @PostMapping
   @Transactional
-  @Operation(summary = "Creates organization")
+  @Operation(summary = "Create organization")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @IsGlobalRoute
+  @OpenApiOrderExtension(1)
   fun create(
     @RequestBody @Valid
     dto: OrganizationDto,
@@ -123,9 +117,10 @@ class OrganizationController(
   }
 
   @GetMapping("/{id:[0-9]+}")
-  @Operation(summary = "Returns organization by ID")
+  @Operation(summary = "Get one organization")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @OpenApiOrderExtension(2)
   fun get(
     @PathVariable("id") id: Long,
   ): OrganizationModel? {
@@ -135,9 +130,10 @@ class OrganizationController(
   }
 
   @GetMapping("/{slug:.*[a-z].*}")
-  @Operation(summary = "Returns organization by address part")
+  @Operation(summary = "Get organization by slug")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @OpenApiOrderExtension(3)
   fun get(
     @PathVariable("slug") slug: String,
   ): OrganizationModel {
@@ -147,9 +143,13 @@ class OrganizationController(
   }
 
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-  @Operation(summary = "Returns all organizations, which is current user allowed to view")
+  @Operation(
+    summary = "Get all permitted organizations",
+    description = "Returns all organizations, which is current user allowed to view",
+  )
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @IsGlobalRoute
+  @OpenApiOrderExtension(4)
   fun getAll(
     @ParameterObject
     @SortDefault(sort = ["id"])
@@ -161,9 +161,10 @@ class OrganizationController(
   }
 
   @PutMapping("/{id:[0-9]+}")
-  @Operation(summary = "Updates organization data")
+  @Operation(summary = "Update organization data")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
+  @OpenApiOrderExtension(5)
   fun update(
     @PathVariable("id")
     id: Long,
@@ -174,9 +175,10 @@ class OrganizationController(
   }
 
   @DeleteMapping("/{id:[0-9]+}")
-  @Operation(summary = "Deletes organization and all its projects")
+  @Operation(summary = "Delete organization", description = "Deletes organization and all its data including projects")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
+  @OpenApiOrderExtension(6)
   fun delete(
     @PathVariable("id") id: Long,
   ) {
@@ -185,7 +187,12 @@ class OrganizationController(
   }
 
   @GetMapping("/{id:[0-9]+}/users")
-  @Operation(summary = "Returns all users in organization")
+  @Operation(
+    summary = "Get all users in organization",
+    description =
+      "Returns all users in organization. " +
+        "The result also contains users who are only members of projects in the organization.",
+  )
   @RequiresOrganizationRole
   @RequiresSuperAuthentication
   fun getAllUsers(
@@ -209,7 +216,7 @@ class OrganizationController(
   }
 
   @PutMapping("/{id:[0-9]+}/leave")
-  @Operation(summary = "Removes current user from organization")
+  @Operation(summary = "Leave organization", description = "Remove current user from organization")
   @UseDefaultPermissions
   @RequiresSuperAuthentication
   fun leaveOrganization(
@@ -224,7 +231,7 @@ class OrganizationController(
   }
 
   @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")
-  @Operation(summary = "Sets user role (Owner or Member)")
+  @Operation(summary = "Set user role", description = "Sets user role in organization. Owner or Member.")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun setUserRole(
@@ -239,7 +246,7 @@ class OrganizationController(
   }
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
-  @Operation(summary = "Removes user from organization")
+  @Operation(summary = "Remove user from organization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun removeUser(
@@ -249,45 +256,8 @@ class OrganizationController(
     organizationRoleService.removeUser(organizationId, userId)
   }
 
-  @PutMapping("/{id:[0-9]+}/invite")
-  @Operation(summary = "Generates user invitation link for organization")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-  @RequiresSuperAuthentication
-  fun inviteUser(
-    @RequestBody @Valid
-    dto: OrganizationInviteUserDto,
-    @PathVariable("id") id: Long,
-  ): OrganizationInvitationModel {
-    val organization = organizationService.get(id)
-
-    val invitation =
-      invitationService.create(
-        CreateOrganizationInvitationParams(
-          organization = organization,
-          type = dto.roleType,
-          email = dto.email,
-          name = dto.name,
-        ),
-      )
-
-    return organizationInvitationModelAssembler.toModel(invitation)
-  }
-
-  @GetMapping("/{organizationId}/invitations")
-  @Operation(summary = "Returns all invitations to organization")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-  @RequiresSuperAuthentication
-  fun getInvitations(
-    @PathVariable("organizationId") id: Long,
-  ): CollectionModel<OrganizationInvitationModel> {
-    val organization = organizationService.find(id) ?: throw NotFoundException()
-    return invitationService.getForOrganization(organization).let {
-      organizationInvitationModelAssembler.toCollectionModel(it)
-    }
-  }
-
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(summary = "Uploads organizations avatar")
+  @Operation(summary = "Upload organizations avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun uploadAvatar(
@@ -302,7 +272,7 @@ class OrganizationController(
   }
 
   @DeleteMapping("/{id:[0-9]+}/avatar")
-  @Operation(summary = "Deletes organization avatar")
+  @Operation(summary = "Delete organization avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun removeAvatar(
@@ -315,7 +285,10 @@ class OrganizationController(
   }
 
   @PutMapping("/{organizationId:[0-9]+}/set-base-permissions/{permissionType}")
-  @Operation(summary = "Sets organization base permission")
+  @Operation(
+    summary = "Set organization base permission",
+    description = "Sets default (level-based) permission for organization",
+  )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun setBasePermissions(
     @PathVariable organizationId: Long,
@@ -325,7 +298,7 @@ class OrganizationController(
   }
 
   @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
-  @Operation(description = "Returns current organization usage")
+  @Operation(summary = "Get current organization usage")
   @RequiresOrganizationRole
   fun getUsage(
     @PathVariable organizationId: Long,

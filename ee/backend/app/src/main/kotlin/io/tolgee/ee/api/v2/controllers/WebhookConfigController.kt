@@ -12,6 +12,7 @@ import io.tolgee.ee.data.WebhookTestResponse
 import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.webhook.WebhookConfig
+import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -38,7 +39,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/{projectId}/webhook-configs",
   ],
 )
-@Tag(name = "Webhooks configuration (EE)")
+@Tag(name = "Webhooks configuration")
+@OpenApiEeExtension
 class WebhookConfigController(
   private val webhookConfigService: WebhookConfigService,
   private val webhookConfigModelAssembler: WebhookConfigModelAssembler,
@@ -48,7 +50,7 @@ class WebhookConfigController(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping("")
-  @Operation(description = "Creates new webhook configuration")
+  @Operation(summary = "Create new webhook configuration")
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @AllowApiAccess
   @RequestActivity(ActivityType.WEBHOOK_CONFIG_CREATE)
@@ -65,7 +67,7 @@ class WebhookConfigController(
   }
 
   @PutMapping("/{id}")
-  @Operation(description = "Updates webhook configuration")
+  @Operation(summary = "Update webhook configuration")
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @AllowApiAccess
   @RequestActivity(ActivityType.WEBHOOK_CONFIG_UPDATE)
@@ -85,7 +87,7 @@ class WebhookConfigController(
 
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @GetMapping("")
-  @Operation(description = "List webhook configurations")
+  @Operation(summary = "List webhook configurations")
   @AllowApiAccess
   fun list(
     @ParameterObject pageable: Pageable,
@@ -96,7 +98,7 @@ class WebhookConfigController(
 
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @DeleteMapping("/{id}")
-  @Operation(description = "Deletes webhook configuration")
+  @Operation(summary = "Delete webhook configuration")
   @AllowApiAccess
   @RequestActivity(ActivityType.WEBHOOK_CONFIG_DELETE)
   fun delete(
@@ -107,7 +109,7 @@ class WebhookConfigController(
 
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @GetMapping("/{id}")
-  @Operation(description = "Get webhook configuration")
+  @Operation(summary = "Get one webhook configuration")
   @AllowApiAccess
   fun get(
     @PathVariable id: Long,
@@ -117,7 +119,7 @@ class WebhookConfigController(
 
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @PostMapping("/{id}/test")
-  @Operation(description = "Tests webhook configuration")
+  @Operation(summary = "Test webhook configuration", description = "Sends a test request to the webhook")
   @AllowApiAccess
   fun test(
     @PathVariable id: Long,

@@ -28,7 +28,10 @@ class AnnouncementController(
   private val publicBillingConfProvider: PublicBillingConfProvider,
 ) : IController {
   @GetMapping("")
-  @Operation(description = "Get latest announcement")
+  @Operation(
+    summary = "Get announcement",
+    description = "Returns the latest announcement for the currently authenticated user",
+  )
   fun getLatest(): AnnouncementDto? {
     val announcement = getLastAnnouncement()
     val user = authenticationFacade.authenticatedUser
@@ -42,7 +45,10 @@ class AnnouncementController(
   }
 
   @PostMapping("dismiss")
-  @Operation(description = "Dismiss current announcement for current user")
+  @Operation(
+    summary = "Dismiss announcement",
+    description = "Dismisses the latest announcement for the currently authenticated user",
+  )
   fun dismiss() {
     val announcement = getLastAnnouncement()
     val user = authenticationFacade.authenticatedUser

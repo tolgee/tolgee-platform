@@ -14,10 +14,13 @@ export interface paths {
     put: operations["updateUserPassword"];
   };
   "/v2/user/mfa/totp": {
+    /** Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
     put: operations["enableMfa"];
+    /** Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
     delete: operations["disableMfa"];
   };
   "/v2/user/mfa/recovery": {
+    /** Regenerates multi-factor authentication recovery codes */
     put: operations["regenerateRecoveryCodes"];
   };
   "/v2/user/avatar": {
@@ -31,12 +34,15 @@ export interface paths {
     put: operations["setLanguage"];
   };
   "/v2/quick-start/steps/{step}/complete": {
+    /** Marks guide step as completed */
     put: operations["completeGuideStep"];
   };
   "/v2/quick-start/set-open/{open}": {
+    /** Sets open state of the quick start guide */
     put: operations["setOpenState"];
   };
   "/v2/quick-start/set-finished/{finished}": {
+    /** Sets finished state of the quick start guide */
     put: operations["setFinishedState"];
   };
   "/v2/projects/{projectId}": {
@@ -45,20 +51,19 @@ export interface paths {
     delete: operations["deleteProject"];
   };
   "/v2/projects/{projectId}/webhook-configs/{id}": {
-    /** Get webhook configuration */
     get: operations["get_4"];
-    /** Updates webhook configuration */
     put: operations["update"];
-    /** Deletes webhook configuration */
     delete: operations["delete_1"];
   };
   "/v2/projects/{projectId}/users/{userId}/set-permissions": {
+    /** Set user's granular (scope-based) direct project permission */
     put: operations["setUsersPermissions"];
   };
   "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
     put: operations["setUsersPermissions_1"];
   };
   "/v2/projects/{projectId}/users/{userId}/set-by-organization": {
+    /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
     put: operations["setOrganizationBase"];
   };
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
@@ -76,10 +81,13 @@ export interface paths {
     put: operations["setMachineTranslationSettings"];
   };
   "/v2/projects/{projectId}/keys/{id}/disabled-languages": {
+    /** Returns languages, in which key is disabled */
     get: operations["getDisabledLanguages"];
+    /** Sets languages, in which key is disabled */
     put: operations["setDisabledLanguages"];
   };
   "/v2/projects/{projectId}/keys/{id}/complex-update": {
+    /** Edits key name, translations, tags, screenshots, and other data */
     put: operations["complexEdit"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
@@ -90,28 +98,25 @@ export interface paths {
     put: operations["inviteUser"];
   };
   "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
-    /** Get Content Storage */
     get: operations["get_7"];
-    /** Updates Content Storage */
     put: operations["update_3"];
-    /** Delete Content Storage */
     delete: operations["delete_6"];
   };
   "/v2/projects/{projectId}/content-delivery-configs/{id}": {
-    /** Get Content Delivery Config */
     get: operations["get_8"];
-    /** Updates Content Delivery Config */
     put: operations["update_4"];
-    /** Publish to Content Delivery */
+    /** Immediately publishes content to the configured Content Delivery */
     post: operations["post"];
-    /** Delete Content Delivery Config */
     delete: operations["delete_7"];
   };
   "/v2/projects/{projectId}/auto-translation-settings": {
+    /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
     get: operations["getAutoTranslationSettings"];
+    /** Sets default auto-translation settings for project (deprecated: use per language config with null language id) */
     put: operations["setAutoTranslationSettings"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/tags": {
+    /** Tags a key with tag. If tag with provided name doesn't exist, it is created */
     put: operations["tagKey"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
@@ -157,6 +162,7 @@ export interface paths {
     put: operations["store"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
+    /** Stops batch opperation if possible. */
     put: operations["cancel"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
@@ -171,17 +177,22 @@ export interface paths {
     delete: operations["delete_8"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
+    /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
     put: operations["setOutdated"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
+    /** Removes "auto translated" indication */
     put: operations["dismissAutoTranslatedState"];
   };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
+    /** Sets translations for existing key */
     put: operations["setTranslations"];
+    /** Sets translations for existing key or creates new key and sets the translations to it. */
     post: operations["createOrUpdateTranslations"];
   };
   "/v2/projects/{projectId}/transfer-to-organization/{organizationId}": {
+    /** Transfers project's ownership to organization */
     put: operations["transferProjectToOrganization"];
   };
   "/v2/projects/{projectId}/leave": {
@@ -214,30 +225,39 @@ export interface paths {
   };
   "/v2/pats/{id}": {
     get: operations["get_17"];
+    /** Updates Personal Access Token */
     put: operations["update_7"];
+    /** Deletes Personal Access Token */
     delete: operations["delete_10"];
   };
   "/v2/pats/{id}/regenerate": {
+    /** Regenerates Personal Access Token. It generates new token value and updates its time of expiration. */
     put: operations["regenerate"];
   };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
+    /** Sets user role in organization. Owner or Member. */
     put: operations["setUserRole"];
   };
   "/v2/organizations/{organizationId}/set-base-permissions": {
+    /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
     put: operations["setBasePermissions"];
   };
   "/v2/organizations/{organizationId}/set-base-permissions/{permissionType}": {
+    /** Sets default (level-based) permission for organization */
     put: operations["setBasePermissions_1"];
   };
   "/v2/organizations/{id}": {
     get: operations["get_19"];
     put: operations["update_8"];
+    /** Deletes organization and all its data including projects */
     delete: operations["delete_11"];
   };
   "/v2/organizations/{id}/leave": {
+    /** Remove current user from organization */
     put: operations["leaveOrganization"];
   };
   "/v2/organizations/{id}/invite": {
+    /** Generates invitation link for organization, so users can join organization. The invitation can also be sent to an e-mail address. */
     put: operations["inviteUser_1"];
   };
   "/v2/organizations/{id}/avatar": {
@@ -248,9 +268,11 @@ export interface paths {
     put: operations["setLicenseKey"];
   };
   "/v2/ee-license/release-license-key": {
+    /** This will remove the licence key from the instance. */
     put: operations["release"];
   };
   "/v2/ee-license/refresh": {
+    /** This will refresh the subscription information from the license server and update the subscription info. */
     put: operations["refreshSubscription"];
   };
   "/v2/api-keys/{apiKeyId}": {
@@ -261,12 +283,15 @@ export interface paths {
     put: operations["regenerate_1"];
   };
   "/v2/administration/users/{userId}/enable": {
+    /** Enables previously disabled user. */
     put: operations["enableUser"];
   };
   "/v2/administration/users/{userId}/disable": {
+    /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
     put: operations["disableUser"];
   };
   "/v2/administration/users/{userId}/set-role/{role}": {
+    /** Set's the global role on the Tolgee Platform server. */
     put: operations["setRole"];
   };
   "/v2/user/generate-super-token": {
@@ -278,15 +303,6 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
-  "/v2/public/slack": {
-    post: operations["slashCommand"];
-  };
-  "/v2/public/slack/on-event": {
-    post: operations["fetchEvent"];
-  };
-  "/v2/public/slack/connect": {
-    post: operations["connectSlack"];
-  };
   "/v2/public/business-events/report": {
     post: operations["report"];
   };
@@ -294,26 +310,29 @@ export interface paths {
     post: operations["identify"];
   };
   "/v2/projects": {
+    /** Returns all projects where current user has any permission */
     get: operations["getAll"];
+    /** Creates a new project with languages and initial settings. */
     post: operations["createProject"];
   };
   "/v2/projects/{projectId}/webhook-configs": {
-    /** List webhook configurations */
     get: operations["list"];
-    /** Creates new webhook configuration */
     post: operations["create"];
   };
   "/v2/projects/{projectId}/webhook-configs/{id}/test": {
-    /** Tests webhook configuration */
+    /** Sends a test request to the webhook */
     post: operations["test"];
   };
   "/v2/projects/{projectId}/keys/info": {
+    /** Returns information about keys. (KeyData, Screenshots, Translation in specified language)If key is not found, it's not included in the response. */
     post: operations["getInfo"];
   };
   "/v2/projects/{projectId}/keys/import-resolvable": {
+    /** Import's new keys with translations. Translations can be updated, when specified. */
     post: operations["importKeys"];
   };
   "/v2/projects/{projectId}/keys/import": {
+    /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
     post: operations["importKeys_2"];
   };
   "/v2/projects/{projectId}/keys/create": {
@@ -322,12 +341,11 @@ export interface paths {
   "/v2/projects/{projectId}/keys": {
     get: operations["getAll_1"];
     post: operations["create_2"];
+    /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
     delete: operations["delete_4"];
   };
   "/v2/projects/{projectId}/content-storages": {
-    /** List existing Content Storages */
     get: operations["list_1"];
-    /** Create Content Storage */
     post: operations["create_5"];
   };
   "/v2/projects/{projectId}/content-storages/{id}/test": {
@@ -335,13 +353,10 @@ export interface paths {
     post: operations["testExisting"];
   };
   "/v2/projects/{projectId}/content-storages/test": {
-    /** Test Content Storage */
     post: operations["test_1"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
-    /** List existing Content Delivery Configs */
     get: operations["list_2"];
-    /** Create Content Delivery Config */
     post: operations["create_6"];
   };
   "/v2/projects/{projectId}/start-batch-job/untag-keys": {
@@ -383,25 +398,32 @@ export interface paths {
   };
   "/v2/projects/{projectId}/export": {
     get: operations["export"];
+    /** Exports data (post). Useful when exceeding allowed URL size. */
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/big-meta": {
+    /** Stores a bigMeta for a project */
     post: operations["store_2"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
+    /** Returns translation comments of translation */
     get: operations["getAll_5"];
     post: operations["create_7"];
   };
   "/v2/projects/{projectId}/translations/create-comment": {
+    /** Creates a translation comment. Empty translation is stored, when not exists. */
     post: operations["create_9"];
   };
   "/v2/projects/{projectId}/suggest/translation-memory": {
+    /** Suggests machine translations from translation memory. The result is always sorted by similarity, so sorting is not supported. */
     post: operations["suggestTranslationMemory"];
   };
   "/v2/projects/{projectId}/suggest/machine-translations-streaming": {
+    /** Suggests machine translations from enabled services. The results are streamed to the output in ndjson format. If an error occurs when for any service provider used, the error information is returned as a part of the result item, while the response has 200 status code. */
     post: operations["suggestMachineTranslationsStreaming"];
   };
   "/v2/projects/{projectId}/suggest/machine-translations": {
+    /** Suggests machine translations from enabled services */
     post: operations["suggestMachineTranslations"];
   };
   "/v2/projects/{projectId}/languages": {
@@ -417,6 +439,7 @@ export interface paths {
     post: operations["create_11"];
   };
   "/v2/organizations": {
+    /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
     post: operations["create_12"];
   };
@@ -424,6 +447,7 @@ export interface paths {
     post: operations["upload"];
   };
   "/v2/ee-license/prepare-set-license-key": {
+    /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
     post: operations["prepareSetLicenseKey"];
   };
   "/v2/api-keys": {
@@ -431,16 +455,18 @@ export interface paths {
     post: operations["create_13"];
   };
   "/v2/announcement/dismiss": {
-    /** Dismiss current announcement for current user */
+    /** Dismisses the latest announcement for the currently authenticated user */
     post: operations["dismiss"];
   };
   "/api/public/validate_email": {
     post: operations["validateEmail"];
   };
   "/api/public/sign_up": {
+    /** When E-mail verification is enabled, null is returned. Otherwise JWT token is provided. */
     post: operations["signUp"];
   };
   "/api/public/reset_password_set": {
+    /** Checks the password reset code from e-mail */
     post: operations["resetPasswordSet"];
   };
   "/api/public/reset_password_request": {
@@ -461,13 +487,6 @@ export interface paths {
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
   };
-  "/v2/public/slack/organizations/{organizationId}": {
-    get: operations["getLinkedOrganisations"];
-    delete: operations["deleteOrganisationLink"];
-  };
-  "/v2/public/slack/organizations/{organizationId}/is-paired": {
-    get: operations["isOrgPaired"];
-  };
   "/v2/public/scope-info/roles": {
     get: operations["getRoles"];
   };
@@ -475,7 +494,7 @@ export interface paths {
     get: operations["getHierarchy"];
   };
   "/v2/public/initial-data": {
-    /** Returns initial data always required by frontend */
+    /** Returns initial data required by the UI to load */
     get: operations["get_1"];
   };
   "/v2/public/configuration-properties": {
@@ -483,21 +502,26 @@ export interface paths {
     get: operations["get_2"];
   };
   "/v2/projects/{projectId}/users": {
+    /** Returns all project users, who have permission to access project */
     get: operations["getAllUsers"];
   };
   "/v2/projects/{projectId}/used-namespaces": {
+    /** Returns all used project namespaces. Response contains default (null) namespace if used. */
     get: operations["getUsedNamespaces"];
   };
   "/v2/projects/{projectId}/namespaces": {
     get: operations["getAllNamespaces"];
   };
   "/v2/projects/{projectId}/namespace-by-name/{name}": {
+    /** Returns information about a namespace by its name */
     get: operations["getByName"];
   };
   "/v2/projects/{projectId}/machine-translation-language-info": {
+    /** Get enabled services and configured formality for each language */
     get: operations["getMachineTranslationLanguageInfo"];
   };
   "/v2/projects/{projectId}/keys/search": {
+    /** This endpoint helps you to find desired key by keyName, base translation or translation in specified language. */
     get: operations["searchForKey"];
   };
   "/v2/projects/{projectId}/all-keys": {
@@ -510,9 +534,11 @@ export interface paths {
     get: operations["getAll_3"];
   };
   "/v2/projects/{projectId}/my-batch-jobs": {
+    /** List all batch operations started by current user */
     get: operations["myList"];
   };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
+    /** Returns machine translation credit balance for specified project */
     get: operations["getProjectCredits"];
   };
   "/v2/projects/{projectId}/keys/{id}/big-meta": {
@@ -541,7 +567,7 @@ export interface paths {
     get: operations["getAllNamespaces_2"];
   };
   "/v2/projects/{projectId}/current-batch-jobs": {
-    /** Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
+    /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
     get: operations["currentJobs"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
@@ -551,15 +577,19 @@ export interface paths {
     get: operations["list_3"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
+    /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
     get: operations["getTranslationHistory"];
   };
   "/v2/projects/{projectId}/translations/{languages}": {
+    /** Returns all translations for specified languages */
     get: operations["getAllTranslations"];
   };
   "/v2/projects/{projectId}/translations/select-all": {
+    /** Returns all keys for current filter values. Useful for select all functionality. */
     get: operations["getSelectAllKeyIds"];
   };
   "/v2/projects/{projectId}/transfer-options": {
+    /** Returns organizations to which project can be transferred */
     get: operations["getTransferOptions"];
   };
   "/v2/projects/{projectId}/stats/daily-activity": {
@@ -578,40 +608,48 @@ export interface paths {
     get: operations["allByProject"];
   };
   "/v2/projects/with-stats": {
+    /** Returns all projects (including statistics) where current user has any permission */
     get: operations["getAllWithStatistics"];
   };
   "/v2/preferred-organization": {
+    /** Returns preferred organization. If server allows users to create organization, preferred organization is automatically created if user doesn't have access to any organization. */
     get: operations["getPreferred"];
   };
   "/v2/pats/current": {
+    /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
     get: operations["getCurrent"];
   };
   "/v2/organizations/{slug}": {
     get: operations["get_18"];
   };
   "/v2/organizations/{slug}/projects": {
+    /** Returns all organization projects the user has access to */
     get: operations["getAllProjects"];
   };
   "/v2/organizations/{slug}/projects-with-stats": {
+    /** Returns all projects (including statistics) where current user has any permission (except none) */
     get: operations["getAllWithStatistics_1"];
   };
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
   };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
+    /** Returns machine translation credit balance for organization */
     get: operations["getOrganizationCredits"];
   };
   "/v2/organizations/{organizationId}/usage": {
-    /** Returns current organization usage */
     get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
+    /** Returns all projects (including statistics) where current user has any permission (except none) */
     get: operations["getAllWithStatistics_2"];
   };
   "/v2/organizations/{id}/users": {
+    /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
     get: operations["getAllUsers_1"];
   };
   "/v2/organizations/{id}/projects": {
+    /** Returns all organization projects the user has access to */
     get: operations["getAllProjects_1"];
   };
   "/v2/invitations/{code}/accept": {
@@ -630,19 +668,21 @@ export interface paths {
     get: operations["getScopes"];
   };
   "/v2/announcement": {
-    /** Get latest announcement */
+    /** Returns the latest announcement for the currently authenticated user */
     get: operations["getLatest"];
   };
   "/v2/administration/users": {
     get: operations["getUsers"];
   };
   "/v2/administration/users/{userId}/generate-token": {
+    /** Generates a JWT token for the user with provided ID. This is useful, when need to debug of the user's account. Or when an operation is required to be executed on behalf of the user. */
     get: operations["generateUserToken"];
   };
   "/v2/administration/organizations": {
     get: operations["getOrganizations"];
   };
   "/api/public/verify_email/{userId}/{code}": {
+    /** It checks whether the code from email is valid */
     get: operations["verifyEmail"];
   };
   "/api/public/reset_password_validate/{email}/{code}": {
@@ -652,15 +692,18 @@ export interface paths {
     get: operations["getPublicConfiguration"];
   };
   "/api/public/authorize_oauth/{serviceType}": {
+    /** Authenticates user using third party oAuth service */
     get: operations["authenticateUser_1"];
   };
   "/api/project/{projectId}/export/jsonZip": {
+    /** Exports data as ZIP of jsons */
     get: operations["doExportJsonZip"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
     delete: operations["delete_2"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}": {
+    /** Removes tag with provided id from key with provided id */
     delete: operations["removeTag"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}": {
@@ -733,6 +776,8 @@ export interface components {
       slug?: string;
       /** Format: int64 */
       baseLanguageId?: number;
+      /** Format: int64 */
+      defaultNamespaceId?: number;
       description?: string;
       /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
       icuPlaceholders: boolean;
@@ -755,21 +800,6 @@ export interface components {
        * @example 200001,200004
        */
       permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -802,6 +832,21 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -828,6 +873,16 @@ export interface components {
       flagEmoji?: string;
       /** @description Whether is base language of project */
       base: boolean;
+    };
+    NamespaceModel: {
+      /**
+       * Format: int64
+       * @description The id of namespace
+       * @example 10000048
+       */
+      id: number;
+      /** @example homepage */
+      name: string;
     };
     /**
      * @description Current user's direct permission
@@ -901,6 +956,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      defaultNamespace?: components["schemas"]["NamespaceModel"];
       organizationRole?: "MEMBER" | "OWNER";
       directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
@@ -970,16 +1026,6 @@ export interface components {
       };
     };
     UpdateNamespaceDto: {
-      name: string;
-    };
-    NamespaceModel: {
-      /**
-       * Format: int64
-       * @description The id of namespace
-       * @example 10000048
-       */
-      id: number;
-      /** @example homepage */
       name: string;
     };
     MachineTranslationLanguagePropsDto: {
@@ -1402,7 +1448,7 @@ export interface components {
       filterKeyPrefix?: string;
       /** @description Filter translations with state. By default, all states except untranslated is exported. */
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Filter translations with namespace. By default, all namespaces everything are exported. */
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
       filterNamespace?: string[];
       /**
        * @description Message format to be used for export.
@@ -1469,7 +1515,7 @@ export interface components {
       filterKeyPrefix?: string;
       /** @description Filter translations with state. By default, all states except untranslated is exported. */
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Filter translations with namespace. By default, all namespaces everything are exported. */
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
       filterNamespace?: string[];
       /**
        * @description Message format to be used for export.
@@ -1506,14 +1552,7 @@ export interface components {
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
     };
-    IImportSettings: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
-    };
     ImportSettingsModel: {
-      settings?: components["schemas"]["IImportSettings"];
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
@@ -1683,17 +1722,17 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      description: string;
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1828,19 +1867,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      description: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
+      scopes: string[];
+      description: string;
       username?: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1851,32 +1890,6 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
-    };
-    SlackCommandDto: {
-      token?: string;
-      team_id: string;
-      channel_id: string;
-      command: string;
-      channel_name: string;
-      user_id: string;
-      user_name: string;
-      text: string;
-      trigger_id?: string;
-      team_domain: string;
-    };
-    SlackMessageDto: {
-      text: string;
-    };
-    SlackConnectionDto: {
-      slackId: string;
-      userAccountId: string;
-      channelId: string;
-      slackNickName: string;
-      workSpace: string;
-      orgId: string;
-      channelName: string;
-      author: string;
-      workSpaceName: string;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -2076,6 +2089,7 @@ export interface components {
         | "NO_LANGUAGES_PROVIDED"
         | "LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND"
         | "LANGUAGE_NOT_FROM_PROJECT"
+        | "NAMESPACE_NOT_FROM_PROJECT"
         | "CANNOT_DELETE_BASE_LANGUAGE"
         | "KEY_NOT_FROM_PROJECT"
         | "MAX_SCREENSHOTS_EXCEEDED"
@@ -2213,11 +2227,9 @@ export interface components {
         | "CUSTOM_VALUES_JSON_TOO_LONG"
         | "UNSUPPORTED_PO_MESSAGE_FORMAT"
         | "PLURAL_FORMS_DATA_LOSS"
-        | "SLACK_NOT_CONNECTED_TO_YOUR_ACCOUNT"
-        | "SLACK_INVALID_COMMAND"
-        | "SLACK_NOT_SUBSCRIBED_YET"
-        | "SLACK_NOT_LINKED_ORG"
-        | "UNEXPECTED_ERROR_SLACK";
+        | "CURRENT_USER_DOES_NOT_OWN_IMAGE"
+        | "USER_CANNOT_VIEW_THIS_ORGANIZATION"
+        | "USER_IS_NOT_OWNER_OF_ORGANIZATION";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2400,7 +2412,7 @@ export interface components {
       filterKeyPrefix?: string;
       /** @description Filter translations with state. By default, all states except untranslated is exported. */
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Filter translations with namespace. By default, all namespaces everything are exported. */
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
       filterNamespace?: string[];
       zip: boolean;
       /**
@@ -2642,11 +2654,6 @@ export interface components {
       /** Format: int64 */
       preferredOrganizationId?: number;
     };
-    OrgToWorkspaceLinkDto: {
-      workspaceName: string;
-      author: string;
-      channelName: string;
-    };
     HierarchyItem: {
       scope:
         | "translations.view"
@@ -2743,22 +2750,22 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2791,9 +2798,9 @@ export interface components {
       contentDeliveryConfigured: boolean;
     };
     DocItem: {
+      name: string;
       displayName?: string;
       description?: string;
-      name: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -2864,23 +2871,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
       namespace?: string;
-      baseTranslation?: string;
+      description?: string;
       translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
       namespace?: string;
-      baseTranslation?: string;
+      description?: string;
       translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3415,17 +3422,17 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      description: string;
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3542,19 +3549,19 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
-      description: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
+      scopes: string[];
+      description: string;
       username?: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      expiresAt?: number;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -3652,16 +3659,27 @@ export interface components {
 
 export interface operations {
   getInfo_2: {
-    parameters: {};
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3679,11 +3697,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3706,11 +3736,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3738,6 +3780,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -3751,11 +3805,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3773,16 +3839,29 @@ export interface operations {
       };
     };
   };
+  /** Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
   enableMfa: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3800,16 +3879,29 @@ export interface operations {
       };
     };
   };
+  /** Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
   disableMfa: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3827,16 +3919,29 @@ export interface operations {
       };
     };
   };
+  /** Regenerates multi-factor authentication recovery codes */
   regenerateRecoveryCodes: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": string[];
+          "application/json": string[];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3859,11 +3964,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3889,11 +4006,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3921,6 +4050,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -3944,6 +4085,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -3952,6 +4105,7 @@ export interface operations {
       };
     };
   };
+  /** Marks guide step as completed */
   completeGuideStep: {
     parameters: {
       path: {
@@ -3962,11 +4116,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["QuickStartModel"];
+          "application/json": components["schemas"]["QuickStartModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -3979,6 +4145,7 @@ export interface operations {
       };
     };
   };
+  /** Sets open state of the quick start guide */
   setOpenState: {
     parameters: {
       path: {
@@ -3989,11 +4156,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["QuickStartModel"];
+          "application/json": components["schemas"]["QuickStartModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4006,6 +4185,7 @@ export interface operations {
       };
     };
   };
+  /** Sets finished state of the quick start guide */
   setFinishedState: {
     parameters: {
       path: {
@@ -4016,11 +4196,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["QuickStartModel"];
+          "application/json": components["schemas"]["QuickStartModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4043,11 +4235,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectModel"];
+          "application/json": components["schemas"]["ProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4070,11 +4274,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectModel"];
+          "application/json": components["schemas"]["ProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4107,6 +4323,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4115,7 +4343,6 @@ export interface operations {
       };
     };
   };
-  /** Get webhook configuration */
   get_4: {
     parameters: {
       path: {
@@ -4127,11 +4354,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["WebhookConfigModel"];
+          "application/json": components["schemas"]["WebhookConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4144,7 +4383,6 @@ export interface operations {
       };
     };
   };
-  /** Updates webhook configuration */
   update: {
     parameters: {
       path: {
@@ -4156,11 +4394,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["WebhookConfigModel"];
+          "application/json": components["schemas"]["WebhookConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4178,7 +4428,6 @@ export interface operations {
       };
     };
   };
-  /** Deletes webhook configuration */
   delete_1: {
     parameters: {
       path: {
@@ -4195,6 +4444,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4203,6 +4464,7 @@ export interface operations {
       };
     };
   };
+  /** Set user's granular (scope-based) direct project permission */
   setUsersPermissions: {
     parameters: {
       path: {
@@ -4223,6 +4485,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4264,6 +4538,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4272,6 +4558,7 @@ export interface operations {
       };
     };
   };
+  /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
   setOrganizationBase: {
     parameters: {
       path: {
@@ -4284,6 +4571,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4312,6 +4611,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4330,11 +4641,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
+          "application/json": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4357,11 +4680,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
+          "application/json": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4390,11 +4725,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["NamespaceModel"];
+          "application/json": components["schemas"]["NamespaceModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4422,11 +4769,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+          "application/json": components["schemas"]["CollectionModelLanguageConfigItemModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4449,11 +4808,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+          "application/json": components["schemas"]["CollectionModelLanguageConfigItemModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4471,6 +4842,7 @@ export interface operations {
       };
     };
   };
+  /** Returns languages, in which key is disabled */
   getDisabledLanguages: {
     parameters: {
       path: {
@@ -4482,11 +4854,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelLanguageModel"];
+          "application/json": components["schemas"]["CollectionModelLanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4499,6 +4883,7 @@ export interface operations {
       };
     };
   };
+  /** Sets languages, in which key is disabled */
   setDisabledLanguages: {
     parameters: {
       path: {
@@ -4510,11 +4895,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelLanguageModel"];
+          "application/json": components["schemas"]["CollectionModelLanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4532,6 +4929,7 @@ export interface operations {
       };
     };
   };
+  /** Edits key name, translations, tags, screenshots, and other data */
   complexEdit: {
     parameters: {
       path: {
@@ -4543,11 +4941,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["KeyWithDataModel"];
+          "application/json": components["schemas"]["KeyWithDataModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4576,11 +4986,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["KeyModel"];
+          "application/json": components["schemas"]["KeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4604,11 +5026,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["KeyModel"];
+          "application/json": components["schemas"]["KeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4636,11 +5070,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectInvitationModel"];
+          "application/json": components["schemas"]["ProjectInvitationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4658,7 +5104,6 @@ export interface operations {
       };
     };
   };
-  /** Get Content Storage */
   get_7: {
     parameters: {
       path: {
@@ -4670,11 +5115,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ContentStorageModel"];
+          "application/json": components["schemas"]["ContentStorageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4687,7 +5144,6 @@ export interface operations {
       };
     };
   };
-  /** Updates Content Storage */
   update_3: {
     parameters: {
       path: {
@@ -4699,11 +5155,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ContentStorageModel"];
+          "application/json": components["schemas"]["ContentStorageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4721,7 +5189,6 @@ export interface operations {
       };
     };
   };
-  /** Delete Content Storage */
   delete_6: {
     parameters: {
       path: {
@@ -4738,6 +5205,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4746,7 +5225,6 @@ export interface operations {
       };
     };
   };
-  /** Get Content Delivery Config */
   get_8: {
     parameters: {
       path: {
@@ -4758,11 +5236,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ContentDeliveryConfigModel"];
+          "application/json": components["schemas"]["ContentDeliveryConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4775,7 +5265,6 @@ export interface operations {
       };
     };
   };
-  /** Updates Content Delivery Config */
   update_4: {
     parameters: {
       path: {
@@ -4787,11 +5276,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ContentDeliveryConfigModel"];
+          "application/json": components["schemas"]["ContentDeliveryConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4809,7 +5310,7 @@ export interface operations {
       };
     };
   };
-  /** Publish to Content Delivery */
+  /** Immediately publishes content to the configured Content Delivery */
   post: {
     parameters: {
       path: {
@@ -4826,6 +5327,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4834,7 +5347,6 @@ export interface operations {
       };
     };
   };
-  /** Delete Content Delivery Config */
   delete_7: {
     parameters: {
       path: {
@@ -4851,6 +5363,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4859,6 +5383,7 @@ export interface operations {
       };
     };
   };
+  /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
   getAutoTranslationSettings: {
     parameters: {
       path: {
@@ -4869,11 +5394,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["AutoTranslationConfigModel"];
+          "application/json": components["schemas"]["AutoTranslationConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4886,6 +5423,7 @@ export interface operations {
       };
     };
   };
+  /** Sets default auto-translation settings for project (deprecated: use per language config with null language id) */
   setAutoTranslationSettings: {
     parameters: {
       path: {
@@ -4896,11 +5434,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["AutoTranslationConfigModel"];
+          "application/json": components["schemas"]["AutoTranslationConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4918,6 +5468,7 @@ export interface operations {
       };
     };
   };
+  /** Tags a key with tag. If tag with provided name doesn't exist, it is created */
   tagKey: {
     parameters: {
       path: {
@@ -4929,11 +5480,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["TagModel"];
+          "application/json": components["schemas"]["TagModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -4969,6 +5532,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -4991,6 +5566,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5020,6 +5607,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5041,6 +5640,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5071,6 +5682,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5096,6 +5719,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5117,6 +5752,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5158,6 +5805,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5186,6 +5845,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5205,11 +5876,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ImportSettingsModel"];
+          "application/json": components["schemas"]["ImportSettingsModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5233,11 +5916,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ImportSettingsModel"];
+          "application/json": components["schemas"]["ImportSettingsModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5255,6 +5950,7 @@ export interface operations {
       };
     };
   };
+  /** Stops batch opperation if possible. */
   cancel: {
     parameters: {
       path: {
@@ -5267,6 +5963,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5291,11 +5999,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["TranslationModel"];
+          "application/json": components["schemas"]["TranslationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5320,11 +6040,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["TranslationCommentModel"];
+          "application/json": components["schemas"]["TranslationCommentModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5349,11 +6081,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["TranslationCommentModel"];
+          "application/json": components["schemas"]["TranslationCommentModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5377,11 +6121,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["TranslationCommentModel"];
+          "application/json": components["schemas"]["TranslationCommentModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5415,6 +6171,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5423,6 +6191,7 @@ export interface operations {
       };
     };
   };
+  /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
   setOutdated: {
     parameters: {
       path: {
@@ -5435,11 +6204,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["TranslationModel"];
+          "application/json": components["schemas"]["TranslationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5452,6 +6233,7 @@ export interface operations {
       };
     };
   };
+  /** Removes "auto translated" indication */
   dismissAutoTranslatedState: {
     parameters: {
       path: {
@@ -5463,11 +6245,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["TranslationModel"];
+          "application/json": components["schemas"]["TranslationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5544,11 +6338,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["KeysWithTranslationsPageModel"];
+          "application/json": components["schemas"]["KeysWithTranslationsPageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5561,6 +6367,7 @@ export interface operations {
       };
     };
   };
+  /** Sets translations for existing key */
   setTranslations: {
     parameters: {
       path: {
@@ -5571,11 +6378,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["SetTranslationsResponseModel"];
+          "application/json": components["schemas"]["SetTranslationsResponseModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5593,6 +6412,7 @@ export interface operations {
       };
     };
   };
+  /** Sets translations for existing key or creates new key and sets the translations to it. */
   createOrUpdateTranslations: {
     parameters: {
       path: {
@@ -5603,11 +6423,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["SetTranslationsResponseModel"];
+          "application/json": components["schemas"]["SetTranslationsResponseModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5625,6 +6457,7 @@ export interface operations {
       };
     };
   };
+  /** Transfers project's ownership to organization */
   transferProjectToOrganization: {
     parameters: {
       path: {
@@ -5637,6 +6470,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5664,6 +6509,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5683,11 +6540,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageModel"];
+          "application/json": components["schemas"]["LanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5711,11 +6580,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageModel"];
+          "application/json": components["schemas"]["LanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5749,6 +6630,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5768,11 +6661,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageAiPromptCustomizationModel"];
+          "application/json": components["schemas"]["LanguageAiPromptCustomizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5821,6 +6726,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -5839,11 +6756,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectModel"];
+          "application/json": components["schemas"]["ProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5874,11 +6803,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectModel"];
+          "application/json": components["schemas"]["ProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5901,11 +6842,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectAiPromptCustomizationModel"];
+          "application/json": components["schemas"]["ProjectAiPromptCustomizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5928,11 +6881,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectAiPromptCustomizationModel"];
+          "application/json": components["schemas"]["ProjectAiPromptCustomizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5960,11 +6925,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PatModel"];
+          "application/json": components["schemas"]["PatModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -5977,6 +6954,7 @@ export interface operations {
       };
     };
   };
+  /** Updates Personal Access Token */
   update_7: {
     parameters: {
       path: {
@@ -5987,11 +6965,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PatModel"];
+          "application/json": components["schemas"]["PatModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6009,6 +6999,7 @@ export interface operations {
       };
     };
   };
+  /** Deletes Personal Access Token */
   delete_10: {
     parameters: {
       path: {
@@ -6024,6 +7015,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6032,6 +7035,7 @@ export interface operations {
       };
     };
   };
+  /** Regenerates Personal Access Token. It generates new token value and updates its time of expiration. */
   regenerate: {
     parameters: {
       path: {
@@ -6042,11 +7046,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RevealedPatModel"];
+          "application/json": components["schemas"]["RevealedPatModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6064,6 +7080,7 @@ export interface operations {
       };
     };
   };
+  /** Sets user role in organization. Owner or Member. */
   setUserRole: {
     parameters: {
       path: {
@@ -6076,6 +7093,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6093,13 +7122,14 @@ export interface operations {
       };
     };
   };
+  /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
   setBasePermissions: {
     parameters: {
       path: {
         organizationId: number;
       };
       query: {
-        /** Granted scopes to all projects for all organization users without direct project permissions set */
+        /** Granted scopes to all projects for all organization users without direct project permissions set. */
         scopes: string[];
       };
     };
@@ -6112,6 +7142,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6120,6 +7162,7 @@ export interface operations {
       };
     };
   };
+  /** Sets default (level-based) permission for organization */
   setBasePermissions_1: {
     parameters: {
       path: {
@@ -6142,6 +7185,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6160,11 +7215,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6187,11 +7254,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6209,6 +7288,7 @@ export interface operations {
       };
     };
   };
+  /** Deletes organization and all its data including projects */
   delete_11: {
     parameters: {
       path: {
@@ -6224,6 +7304,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6232,6 +7324,7 @@ export interface operations {
       };
     };
   };
+  /** Remove current user from organization */
   leaveOrganization: {
     parameters: {
       path: {
@@ -6247,6 +7340,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6255,6 +7360,7 @@ export interface operations {
       };
     };
   };
+  /** Generates invitation link for organization, so users can join organization. The invitation can also be sent to an e-mail address. */
   inviteUser_1: {
     parameters: {
       path: {
@@ -6265,11 +7371,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationInvitationModel"];
+          "application/json": components["schemas"]["OrganizationInvitationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6297,11 +7415,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6332,11 +7462,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6354,11 +7496,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["EeSubscriptionModel"];
+          "application/json": components["schemas"]["EeSubscriptionModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6376,12 +7530,25 @@ export interface operations {
       };
     };
   };
+  /** This will remove the licence key from the instance. */
   release: {
     responses: {
       /** OK */
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6394,16 +7561,29 @@ export interface operations {
       };
     };
   };
+  /** This will refresh the subscription information from the license server and update the subscription info. */
   refreshSubscription: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["EeSubscriptionModel"];
+          "application/json": components["schemas"]["EeSubscriptionModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6426,11 +7606,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyModel"];
+          "application/json": components["schemas"]["ApiKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6463,6 +7655,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6481,11 +7685,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RevealedApiKeyModel"];
+          "application/json": components["schemas"]["RevealedApiKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6503,6 +7719,7 @@ export interface operations {
       };
     };
   };
+  /** Enables previously disabled user. */
   enableUser: {
     parameters: {
       path: {
@@ -6518,6 +7735,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6526,6 +7755,7 @@ export interface operations {
       };
     };
   };
+  /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
   disableUser: {
     parameters: {
       path: {
@@ -6541,6 +7771,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6549,6 +7791,7 @@ export interface operations {
       };
     };
   };
+  /** Set's the global role on the Tolgee Platform server. */
   setRole: {
     parameters: {
       path: {
@@ -6561,6 +7804,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6578,11 +7833,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6614,6 +7881,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6641,6 +7920,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6654,107 +7945,24 @@ export interface operations {
       };
     };
   };
-  slashCommand: {
-    parameters: {
-      header: {
-        "X-Slack-Signature": string;
-        "X-Slack-Request-Timestamp": string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SlackMessageDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          payload?: components["schemas"]["SlackCommandDto"];
-          body?: string;
-        };
-      };
-    };
-  };
-  fetchEvent: {
-    parameters: {
-      header: {
-        "X-Slack-Signature": string;
-        "X-Slack-Request-Timestamp": string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SlackMessageDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          body?: string;
-          payload?: string;
-        };
-      };
-    };
-  };
-  connectSlack: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SlackConnectionDto"];
-      };
-    };
-  };
   report: {
     responses: {
       /** OK */
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6782,6 +7990,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6795,6 +8015,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all projects where current user has any permission */
   getAll: {
     parameters: {
       query: {
@@ -6820,6 +8041,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -6828,17 +8061,29 @@ export interface operations {
       };
     };
   };
+  /** Creates a new project with languages and initial settings. */
   createProject: {
-    parameters: {};
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ProjectModel"];
+          "application/json": components["schemas"]["ProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6856,7 +8101,6 @@ export interface operations {
       };
     };
   };
-  /** List webhook configurations */
   list: {
     parameters: {
       query: {
@@ -6875,11 +8119,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelWebhookConfigModel"];
+          "application/json": components["schemas"]["PagedModelWebhookConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6892,7 +8148,6 @@ export interface operations {
       };
     };
   };
-  /** Creates new webhook configuration */
   create: {
     parameters: {
       path: {
@@ -6903,11 +8158,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["WebhookConfigModel"];
+          "application/json": components["schemas"]["WebhookConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6925,7 +8192,7 @@ export interface operations {
       };
     };
   };
-  /** Tests webhook configuration */
+  /** Sends a test request to the webhook */
   test: {
     parameters: {
       path: {
@@ -6937,11 +8204,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["WebhookTestResponse"];
+          "application/json": components["schemas"]["WebhookTestResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6954,6 +8233,7 @@ export interface operations {
       };
     };
   };
+  /** Returns information about keys. (KeyData, Screenshots, Translation in specified language)If key is not found, it's not included in the response. */
   getInfo: {
     parameters: {
       path: {
@@ -6964,11 +8244,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelKeyWithDataModel"];
+          "application/json": components["schemas"]["CollectionModelKeyWithDataModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -6986,6 +8278,7 @@ export interface operations {
       };
     };
   };
+  /** Import's new keys with translations. Translations can be updated, when specified. */
   importKeys: {
     parameters: {
       path: {
@@ -6996,11 +8289,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["KeyImportResolvableResultModel"];
+          "application/json": components["schemas"]["KeyImportResolvableResultModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7018,6 +8323,7 @@ export interface operations {
       };
     };
   };
+  /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
   importKeys_2: {
     parameters: {
       path: {
@@ -7029,6 +8335,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7065,6 +8383,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -7096,11 +8426,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelKeyModel"];
+          "application/json": components["schemas"]["PagedModelKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7132,6 +8474,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -7145,6 +8499,7 @@ export interface operations {
       };
     };
   };
+  /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
   delete_4: {
     parameters: {
       path: {
@@ -7156,6 +8511,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7173,7 +8540,6 @@ export interface operations {
       };
     };
   };
-  /** List existing Content Storages */
   list_1: {
     parameters: {
       query: {
@@ -7192,11 +8558,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelContentStorageModel"];
+          "application/json": components["schemas"]["PagedModelContentStorageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7209,7 +8587,6 @@ export interface operations {
       };
     };
   };
-  /** Create Content Storage */
   create_5: {
     parameters: {
       path: {
@@ -7220,11 +8597,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ContentStorageModel"];
+          "application/json": components["schemas"]["ContentStorageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7254,11 +8643,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["StorageTestResult"];
+          "application/json": components["schemas"]["StorageTestResult"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7276,7 +8677,6 @@ export interface operations {
       };
     };
   };
-  /** Test Content Storage */
   test_1: {
     parameters: {
       path: {
@@ -7287,11 +8687,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["StorageTestResult"];
+          "application/json": components["schemas"]["StorageTestResult"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7309,7 +8721,6 @@ export interface operations {
       };
     };
   };
-  /** List existing Content Delivery Configs */
   list_2: {
     parameters: {
       query: {
@@ -7328,11 +8739,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelContentDeliveryConfigModel"];
+          "application/json": components["schemas"]["PagedModelContentDeliveryConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7345,7 +8768,6 @@ export interface operations {
       };
     };
   };
-  /** Create Content Delivery Config */
   create_6: {
     parameters: {
       path: {
@@ -7356,11 +8778,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ContentDeliveryConfigModel"];
+          "application/json": components["schemas"]["ContentDeliveryConfigModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7388,11 +8822,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7420,11 +8866,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7452,11 +8910,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7484,11 +8954,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7517,11 +8999,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7550,11 +9044,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7582,11 +9088,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7615,11 +9133,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7648,11 +9178,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7687,11 +9229,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ImportAddFilesResultModel"];
+          "application/json": components["schemas"]["ImportAddFilesResultModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7723,6 +9277,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7781,7 +9347,7 @@ export interface operations {
           | "REVIEWED"
           | "DISABLED"
         )[];
-        /** Filter translations with namespace. By default, all namespaces everything are exported. */
+        /** Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
         filterNamespace?: string[];
         /**
          * If false, it doesn't return zip of files, but it returns single file.
@@ -7819,11 +9385,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
+          "application/json": components["schemas"]["StreamingResponseBody"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7836,6 +9414,7 @@ export interface operations {
       };
     };
   };
+  /** Exports data (post). Useful when exceeding allowed URL size. */
   exportPost: {
     parameters: {
       path: {
@@ -7846,11 +9425,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
+          "application/json": components["schemas"]["StreamingResponseBody"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7868,6 +9459,7 @@ export interface operations {
       };
     };
   };
+  /** Stores a bigMeta for a project */
   store_2: {
     parameters: {
       path: {
@@ -7879,6 +9471,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7896,6 +9500,7 @@ export interface operations {
       };
     };
   };
+  /** Returns translation comments of translation */
   getAll_5: {
     parameters: {
       path: {
@@ -7915,11 +9520,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelTranslationCommentModel"];
+          "application/json": components["schemas"]["PagedModelTranslationCommentModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -7952,6 +9569,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -7965,6 +9594,7 @@ export interface operations {
       };
     };
   };
+  /** Creates a translation comment. Empty translation is stored, when not exists. */
   create_9: {
     parameters: {
       path: {
@@ -7984,6 +9614,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -7997,6 +9639,7 @@ export interface operations {
       };
     };
   };
+  /** Suggests machine translations from translation memory. The result is always sorted by similarity, so sorting is not supported. */
   suggestTranslationMemory: {
     parameters: {
       query: {
@@ -8015,11 +9658,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelTranslationMemoryItemModel"];
+          "application/json": components["schemas"]["PagedModelTranslationMemoryItemModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8037,6 +9692,7 @@ export interface operations {
       };
     };
   };
+  /** Suggests machine translations from enabled services. The results are streamed to the output in ndjson format. If an error occurs when for any service provider used, the error information is returned as a part of the result item, while the response has 200 status code. */
   suggestMachineTranslationsStreaming: {
     parameters: {
       path: {
@@ -8056,6 +9712,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -8069,6 +9737,7 @@ export interface operations {
       };
     };
   };
+  /** Suggests machine translations from enabled services */
   suggestMachineTranslations: {
     parameters: {
       path: {
@@ -8079,11 +9748,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["SuggestResultModel"];
+          "application/json": components["schemas"]["SuggestResultModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8119,11 +9800,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelLanguageModel"];
+          "application/json": components["schemas"]["PagedModelLanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8146,11 +9839,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageModel"];
+          "application/json": components["schemas"]["LanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8179,11 +9884,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelScreenshotModel"];
+          "application/json": components["schemas"]["CollectionModelScreenshotModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8212,6 +9929,18 @@ export interface operations {
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8248,11 +9977,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelPatModel"];
+          "application/json": components["schemas"]["PagedModelPatModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8279,6 +10020,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -8292,6 +10045,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all organizations, which is current user allowed to view */
   getAll_10: {
     parameters: {
       query: {
@@ -8317,6 +10071,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -8326,16 +10092,27 @@ export interface operations {
     };
   };
   create_12: {
-    parameters: {};
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8354,7 +10131,6 @@ export interface operations {
     };
   };
   upload: {
-    parameters: {};
     responses: {
       /** Created */
       201: {
@@ -8364,6 +10140,18 @@ export interface operations {
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8385,16 +10173,29 @@ export interface operations {
       };
     };
   };
+  /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
   prepareSetLicenseKey: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8423,11 +10224,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelApiKeyModel"];
+          "application/json": components["schemas"]["PagedModelApiKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8445,11 +10258,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RevealedApiKeyModel"];
+          "application/json": components["schemas"]["RevealedApiKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8467,13 +10292,25 @@ export interface operations {
       };
     };
   };
-  /** Dismiss current announcement for current user */
+  /** Dismisses the latest announcement for the currently authenticated user */
   dismiss: {
     responses: {
       /** OK */
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8491,11 +10328,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          "application/json": boolean;
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8513,16 +10362,29 @@ export interface operations {
       };
     };
   };
+  /** When E-mail verification is enabled, null is returned. Otherwise JWT token is provided. */
   signUp: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8540,12 +10402,25 @@ export interface operations {
       };
     };
   };
+  /** Checks the password reset code from e-mail */
   resetPasswordSet: {
     responses: {
       /** OK */
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8573,6 +10448,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -8591,11 +10478,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8618,11 +10517,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelSimpleOrganizationModel"];
+          "application/json": components["schemas"]["CollectionModelSimpleOrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8640,11 +10551,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserPreferencesModel"];
+          "application/json": components["schemas"]["UserPreferencesModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8667,11 +10590,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          "application/json": boolean;
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8694,7 +10629,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          "application/json": boolean;
         };
       };
       /** Bad Request */
@@ -8703,79 +10638,14 @@ export interface operations {
           "*/*": string;
         };
       };
-      /** Not Found */
-      404: {
+      /** Unauthorized */
+      401: {
         content: {
           "*/*": string;
         };
       };
-    };
-  };
-  getLinkedOrganisations: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrgToWorkspaceLinkDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  deleteOrganisationLink: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  isOrgPaired: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8793,7 +10663,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": {
+          "application/json": {
             [key: string]: (
               | "translations.view"
               | "translations.edit"
@@ -8831,6 +10701,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -8849,11 +10731,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["HierarchyItem"];
+          "application/json": components["schemas"]["HierarchyItem"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8866,17 +10760,29 @@ export interface operations {
       };
     };
   };
-  /** Returns initial data always required by frontend */
+  /** Returns initial data required by the UI to load */
   get_1: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["InitialDataModel"];
+          "application/json": components["schemas"]["InitialDataModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8895,11 +10801,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["DocItem"][];
+          "application/json": components["schemas"]["DocItem"][];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8912,6 +10830,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all project users, who have permission to access project */
   getAllUsers: {
     parameters: {
       path: {
@@ -8931,11 +10850,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelUserAccountInProjectModel"];
+          "application/json": components["schemas"]["PagedModelUserAccountInProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8948,6 +10879,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all used project namespaces. Response contains default (null) namespace if used. */
   getUsedNamespaces: {
     parameters: {
       path: {
@@ -8958,11 +10890,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelUsedNamespaceModel"];
+          "application/json": components["schemas"]["CollectionModelUsedNamespaceModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -8993,11 +10937,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelNamespaceModel"];
+          "application/json": components["schemas"]["PagedModelNamespaceModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9010,6 +10966,7 @@ export interface operations {
       };
     };
   };
+  /** Returns information about a namespace by its name */
   getByName: {
     parameters: {
       path: {
@@ -9021,11 +10978,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["NamespaceModel"];
+          "application/json": components["schemas"]["NamespaceModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9038,6 +11007,7 @@ export interface operations {
       };
     };
   };
+  /** Get enabled services and configured formality for each language */
   getMachineTranslationLanguageInfo: {
     parameters: {
       path: {
@@ -9048,11 +11018,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelLanguageInfoModel"];
+          "application/json": components["schemas"]["CollectionModelLanguageInfoModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9065,6 +11047,7 @@ export interface operations {
       };
     };
   };
+  /** This endpoint helps you to find desired key by keyName, base translation or translation in specified language. */
   searchForKey: {
     parameters: {
       query: {
@@ -9087,11 +11070,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelKeySearchSearchResultModel"];
+          "application/json": components["schemas"]["PagedModelKeySearchSearchResultModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9114,11 +11109,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelKeyModel"];
+          "application/json": components["schemas"]["CollectionModelKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9158,6 +11165,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -9185,11 +11204,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelTagModel"];
+          "application/json": components["schemas"]["PagedModelTagModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9202,6 +11233,7 @@ export interface operations {
       };
     };
   };
+  /** List all batch operations started by current user */
   myList: {
     parameters: {
       query: {
@@ -9220,11 +11252,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelBatchJobModel"];
+          "application/json": components["schemas"]["PagedModelBatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9237,6 +11281,7 @@ export interface operations {
       };
     };
   };
+  /** Returns machine translation credit balance for specified project */
   getProjectCredits: {
     parameters: {
       path: {
@@ -9247,11 +11292,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CreditBalanceModel"];
+          "application/json": components["schemas"]["CreditBalanceModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9275,11 +11332,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelKeyWithBaseTranslationModel"];
+          "application/json": components["schemas"]["CollectionModelKeyWithBaseTranslationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9318,11 +11387,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportTranslationModel"];
+          "application/json": components["schemas"]["PagedModelImportTranslationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9347,11 +11428,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ImportLanguageModel"];
+          "application/json": components["schemas"]["ImportLanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9377,6 +11470,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9409,11 +11514,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportFileIssueModel"];
+          "application/json": components["schemas"]["PagedModelImportFileIssueModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9445,11 +11562,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+          "application/json": components["schemas"]["PagedModelImportLanguageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9473,11 +11602,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelImportNamespaceModel"];
+          "application/json": components["schemas"]["CollectionModelImportNamespaceModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9490,7 +11631,7 @@ export interface operations {
       };
     };
   };
-  /** Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
+  /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
   currentJobs: {
     parameters: {
       path: {
@@ -9501,11 +11642,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelBatchJobModel"];
+          "application/json": components["schemas"]["CollectionModelBatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9529,11 +11682,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BatchJobModel"];
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9564,11 +11729,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelBatchJobModel"];
+          "application/json": components["schemas"]["PagedModelBatchJobModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9581,6 +11758,7 @@ export interface operations {
       };
     };
   };
+  /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
   getTranslationHistory: {
     parameters: {
       path: {
@@ -9600,11 +11778,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelTranslationHistoryModel"];
+          "application/json": components["schemas"]["PagedModelTranslationHistoryModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9617,6 +11807,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all translations for specified languages */
   getAllTranslations: {
     parameters: {
       path: {
@@ -9641,11 +11832,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": string;
+          "application/json": string;
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9658,6 +11861,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all keys for current filter values. Useful for select all functionality. */
   getSelectAllKeyIds: {
     parameters: {
       query: {
@@ -9714,11 +11918,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["SelectAllResponse"];
+          "application/json": components["schemas"]["SelectAllResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9731,6 +11947,7 @@ export interface operations {
       };
     };
   };
+  /** Returns organizations to which project can be transferred */
   getTransferOptions: {
     parameters: {
       query: {
@@ -9744,11 +11961,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelProjectTransferOptionModel"];
+          "application/json": components["schemas"]["CollectionModelProjectTransferOptionModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9780,6 +12009,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -9807,6 +12048,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -9825,11 +12078,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelLanguageAiPromptCustomizationModel"];
+          "application/json": components["schemas"]["CollectionModelLanguageAiPromptCustomizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9852,11 +12117,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelProjectInvitationModel"];
+          "application/json": components["schemas"]["CollectionModelProjectInvitationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9882,11 +12159,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelApiKeyModel"];
+          "application/json": components["schemas"]["PagedModelApiKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9899,6 +12188,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all projects (including statistics) where current user has any permission */
   getAllWithStatistics: {
     parameters: {
       query: {
@@ -9924,6 +12214,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -9932,16 +12234,29 @@ export interface operations {
       };
     };
   };
+  /** Returns preferred organization. If server allows users to create organization, preferred organization is automatically created if user doesn't have access to any organization. */
   getPreferred: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PrivateOrganizationModel"];
+          "application/json": components["schemas"]["PrivateOrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9954,17 +12269,29 @@ export interface operations {
       };
     };
   };
+  /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
   getCurrent: {
-    parameters: {};
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PatWithUserModel"];
+          "application/json": components["schemas"]["PatWithUserModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -9987,11 +12314,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10004,6 +12343,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all organization projects the user has access to */
   getAllProjects: {
     parameters: {
       path: {
@@ -10023,11 +12363,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelProjectModel"];
+          "application/json": components["schemas"]["PagedModelProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10040,6 +12392,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all projects (including statistics) where current user has any permission (except none) */
   getAllWithStatistics_1: {
     parameters: {
       query: {
@@ -10068,6 +12421,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10086,11 +12451,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+          "application/json": components["schemas"]["CollectionModelOrganizationInvitationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10103,6 +12480,7 @@ export interface operations {
       };
     };
   };
+  /** Returns machine translation credit balance for organization */
   getOrganizationCredits: {
     parameters: {
       path: {
@@ -10113,11 +12491,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CreditBalanceModel"];
+          "application/json": components["schemas"]["CreditBalanceModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10130,7 +12520,6 @@ export interface operations {
       };
     };
   };
-  /** Returns current organization usage */
   getUsage: {
     parameters: {
       path: {
@@ -10141,11 +12530,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PublicUsageModel"];
+          "application/json": components["schemas"]["PublicUsageModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10158,6 +12559,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all projects (including statistics) where current user has any permission (except none) */
   getAllWithStatistics_2: {
     parameters: {
       query: {
@@ -10186,6 +12588,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10194,6 +12608,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
   getAllUsers_1: {
     parameters: {
       path: {
@@ -10213,11 +12628,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+          "application/json": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10230,6 +12657,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all organization projects the user has access to */
   getAllProjects_1: {
     parameters: {
       path: {
@@ -10249,11 +12677,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelProjectModel"];
+          "application/json": components["schemas"]["PagedModelProjectModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10281,6 +12721,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10294,11 +12746,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["EeSubscriptionModel"];
+          "application/json": components["schemas"]["EeSubscriptionModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10321,11 +12785,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyModel"];
+          "application/json": components["schemas"]["ApiKeyModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10339,16 +12815,27 @@ export interface operations {
     };
   };
   getCurrent_1: {
-    parameters: {};
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyWithLanguagesModel"];
+          "application/json": components["schemas"]["ApiKeyWithLanguagesModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10375,6 +12862,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10383,17 +12882,29 @@ export interface operations {
       };
     };
   };
-  /** Get latest announcement */
+  /** Returns the latest announcement for the currently authenticated user */
   getLatest: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["AnnouncementDto"];
+          "application/json": components["schemas"]["AnnouncementDto"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10422,11 +12933,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelUserAccountModel"];
+          "application/json": components["schemas"]["PagedModelUserAccountModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10439,6 +12962,7 @@ export interface operations {
       };
     };
   };
+  /** Generates a JWT token for the user with provided ID. This is useful, when need to debug of the user's account. Or when an operation is required to be executed on behalf of the user. */
   generateUserToken: {
     parameters: {
       path: {
@@ -10449,11 +12973,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": string;
+          "application/json": string;
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10482,11 +13018,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelOrganizationModel"];
+          "application/json": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10499,6 +13047,7 @@ export interface operations {
       };
     };
   };
+  /** It checks whether the code from email is valid */
   verifyEmail: {
     parameters: {
       path: {
@@ -10510,11 +13059,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10543,6 +13104,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10556,11 +13129,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PublicConfigurationDTO"];
+          "application/json": components["schemas"]["PublicConfigurationDTO"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10573,6 +13158,7 @@ export interface operations {
       };
     };
   };
+  /** Authenticates user using third party oAuth service */
   authenticateUser_1: {
     parameters: {
       path: {
@@ -10588,11 +13174,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10605,6 +13203,7 @@ export interface operations {
       };
     };
   };
+  /** Exports data as ZIP of jsons */
   doExportJsonZip: {
     parameters: {
       path: {
@@ -10620,6 +13219,18 @@ export interface operations {
       };
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10648,6 +13259,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10656,6 +13279,7 @@ export interface operations {
       };
     };
   };
+  /** Removes tag with provided id from key with provided id */
   removeTag: {
     parameters: {
       path: {
@@ -10669,6 +13293,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10698,6 +13334,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10718,6 +13366,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };
@@ -10745,6 +13405,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10768,6 +13440,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
       /** Not Found */
       404: {
         content: {
@@ -10787,6 +13471,18 @@ export interface operations {
       200: unknown;
       /** Bad Request */
       400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
         content: {
           "*/*": string;
         };

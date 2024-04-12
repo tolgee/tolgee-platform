@@ -26,7 +26,10 @@ class MtCreditsController(
   private val organizationService: OrganizationService,
 ) {
   @GetMapping("/projects/{projectId:\\d+}/machine-translation-credit-balance")
-  @Operation(summary = "Returns machine translation credit balance for specified project")
+  @Operation(
+    summary = "Get credit balance for project",
+    description = "Returns machine translation credit balance for specified project",
+  )
   @UseDefaultPermissions
   @AllowApiAccess
   fun getProjectCredits(
@@ -36,7 +39,10 @@ class MtCreditsController(
   }
 
   @GetMapping("/organizations/{organizationId:\\d+}/machine-translation-credit-balance")
-  @Operation(summary = "Returns machine translation credit balance for organization")
+  @Operation(
+    summary = "Get credit balance for organization",
+    description = "Returns machine translation credit balance for organization",
+  )
   @RequiresOrganizationRole
   @AllowApiAccess
   fun getOrganizationCredits(
