@@ -31,7 +31,7 @@ class SlackUserConnectionService(
   ): SlackUserConnection {
     val old = findBySlackId(slackId) ?: return createUnsafe(userAccount, slackId)
 
-    if (old.userAccount?.id == userAccount.id && old.slackUserId == slackId) {
+    if (old.userAccount.id == userAccount.id && old.slackUserId == slackId) {
       return old
     }
 

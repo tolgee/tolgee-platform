@@ -34,9 +34,8 @@ class SlackExecutor(
   private val slackConfigService: SlackConfigService,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
+  private val slackClient: Slack,
 ) : Logging {
-  private val slackClient: Slack = Slack.getInstance()
-
   fun sendMessageOnTranslationSet(
     slackConfig: SlackConfig,
     request: SlackRequest,
