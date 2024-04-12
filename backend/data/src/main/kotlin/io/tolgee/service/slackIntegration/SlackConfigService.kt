@@ -31,6 +31,10 @@ class SlackConfigService(
     return slackConfigRepository.getAllByChannelId(channelId)
   }
 
+  fun get(slackId: String): List<SlackConfig> {
+    return slackConfigRepository.findBySlackId(slackId)
+  }
+
   @Transactional
   fun delete(
     projectId: Long,
@@ -40,6 +44,24 @@ class SlackConfigService(
       val config = get(projectId, channelId) ?: return false
       automationService.deleteForSlackIntegration(config)
       slackConfigRepository.delete(config)
+    } catch (e: NotFoundException) {
+      return false
+    }
+    return true
+  }
+
+  @Transactional
+  fun deleteAllBySlackId(slackId: String): Boolean {
+    val configs = get(slackId)
+    if (configs.isEmpty()) {
+      return false
+    }
+
+    try {
+      configs.forEach { config ->
+        automationService.deleteForSlackIntegration(config)
+        slackConfigRepository.delete(config)
+      }
     } catch (e: NotFoundException) {
       return false
     }
@@ -87,12 +109,27 @@ class SlackConfigService(
     if (slackConfigDto.languageTag.isNullOrBlank()) {
       slackConfig.isGlobalSubscription = true
     } else {
-      addPreferenceToConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+      if (slackConfig.preferences.isEmpty() ||
+        !slackConfig.preferences.any { it.languageTag == slackConfigDto.languageTag }
+      ) {
+        addPreferenceToConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+      } else {
+        updatePreferenceInConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+      }
     }
 
     automationService.updateForSlackConfig(slackConfig)
     slackConfigRepository.save(slackConfig)
     return slackConfig
+  }
+
+  private fun updatePreferenceInConfig(
+    slackConfig: SlackConfig,
+    languageTag: String,
+    eventName: EventName,
+  ) {
+    val pref = slackConfig.preferences.find { it.languageTag == languageTag } ?: return
+    slackConfigPreferenceService.update(pref, eventName)
   }
 
   private fun addPreferenceToConfig(

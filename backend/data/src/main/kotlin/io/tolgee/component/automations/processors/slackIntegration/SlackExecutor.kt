@@ -92,9 +92,11 @@ class SlackExecutor(
   ) {
     val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
-    val messageDto = slackExecutorHelper.createKeyAddMessage() ?: return
+    val messagesDto = slackExecutorHelper.createKeyAddMessage()
 
-    sendRegularMessageWithSaving(messageDto, config)
+    messagesDto.forEach { message ->
+      sendRegularMessageWithSaving(message, config)
+    }
   }
 
   fun getErrorMessage(
@@ -341,6 +343,10 @@ class SlackExecutor(
             section {
               markdownText("*Global Subscription:* Yes")
             }
+
+            section {
+              markdownText("Events: ${config.onEvent}")
+            }
           }
           config.preferences.forEach {
             section {
@@ -440,9 +446,13 @@ class SlackExecutor(
   ) {
     val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
-    val messageDto = slackExecutorHelper.createImportMessage() ?: return
-
-    sendRegularMessageWithSaving(messageDto, config)
+    val counts = slackExecutorHelper.data.activityData?.counts?.get("Key") ?: return
+    if (counts >= 10) {
+      val messageDto = slackExecutorHelper.createImportMessage() ?: return
+      sendRegularMessageWithSaving(messageDto, config)
+    } else {
+      sendMessageOnKeyAdded()
+    }
   }
 
   fun getWorkspaceNotFoundError(): SlackMessageDto {

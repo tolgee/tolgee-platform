@@ -1,14 +1,16 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.slack
 
+import com.esotericsoftware.minlog.Log
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.SlackRequestValidation
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackConnectionDto
-import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
@@ -24,21 +26,22 @@ import io.tolgee.service.slackIntegration.SlackWorkspaceNotFound
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.net.URLDecoder
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/slack"])
-class SlackIntegrationController(
+@RequestMapping(value = ["/v2/public/slack"])
+@Tag(
+  name = "Slack slack commands",
+  description = "Processes Slack slash commands, enabling users to execute specific actions within Slack",
+)
+class SlackSlashCommandController(
   private val projectService: ProjectService,
   private val slackConfigService: SlackConfigService,
   private val slackUserConnectionService: SlackUserConnectionService,
@@ -49,11 +52,20 @@ class SlackIntegrationController(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val organizationRoleService: OrganizationRoleService,
+  private val slackRequestValidation: SlackRequestValidation,
 ) : Logging {
   @PostMapping
   fun slackCommand(
     @ModelAttribute payload: SlackCommandDto,
+    @RequestHeader("X-Slack-Signature") slackSignature: String,
+    @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
+    @RequestBody body: String,
   ): SlackMessageDto? {
+    if (!slackRequestValidation.isValid(slackSignature, timestamp, body)) {
+      Log.info("Error validating request from Slack")
+      throw BadRequestException(Message.UNEXPECTED_ERROR_SLACK)
+    }
+
     val matchResult = commandRegex.matchEntire(payload.text) ?: return getError(payload, Message.SLACK_INVALID_COMMAND)
 
     val (command, projectId, languageTag, optionsString) = matchResult.destructured
@@ -71,9 +83,23 @@ class SlackIntegrationController(
 
       "help" -> slackExecutor.sendHelpMessage(payload.channel_id, payload.team_id)
 
+      "logout" -> logout(payload.user_id)
+
       else -> {
         getError(payload, Message.SLACK_INVALID_COMMAND)
       }
+    }
+  }
+
+  private fun logout(slackId: String): SlackMessageDto {
+    if (!slackUserConnectionService.delete(slackId)) {
+      return SlackMessageDto(text = "Not logged in")
+    }
+
+    return if (!slackConfigService.deleteAllBySlackId(slackId)) {
+      SlackMessageDto(text = "Cant logout")
+    } else {
+      SlackMessageDto(text = "Logged out")
     }
   }
 
@@ -120,6 +146,7 @@ class SlackIntegrationController(
               getError(payload, Message.SLACK_INVALID_COMMAND)
               return null
             }
+
         else -> {
           getError(payload, Message.SLACK_INVALID_COMMAND)
           return null
@@ -183,33 +210,6 @@ class SlackIntegrationController(
     return SlackMessageDto(
       text = i18n.translate("unsubscribed-successfully"),
     )
-  }
-
-  @PostMapping("/on-event")
-  @Transactional
-  fun fetchEvent(
-    @RequestBody payload: String,
-  ): SlackMessageDto? {
-    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
-    val event: SlackEventDto = objectMapper.readValue(decodedPayload)
-
-    event.actions.forEach { action ->
-      if (action.value != "help_btn") {
-        return@forEach
-      } else {
-        slackExecutor.sendHelpMessage(event.channel.id, event.team.id)
-      }
-    }
-
-    return null
-  }
-
-  @DeleteMapping("/organizations/{organizationId}")
-  fun deleteOrganisationLink(
-    @PathVariable
-    organizationId: Long,
-  ) {
-    organizationSlackWorkspaceService.delete(organizationId)
   }
 
   private fun validateRequest(

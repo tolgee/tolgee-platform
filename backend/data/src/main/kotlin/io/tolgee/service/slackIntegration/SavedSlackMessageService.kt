@@ -3,6 +3,7 @@ package io.tolgee.service.slackIntegration
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.repository.slackIntegration.SavedSlackMessageRepository
 import io.tolgee.repository.slackIntegration.SlackConfigRepository
+import jakarta.transaction.Transactional
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -14,6 +15,7 @@ class SavedSlackMessageService(
   private val savedSlackMessageRepository: SavedSlackMessageRepository,
   private val slackConfigRepository: SlackConfigRepository,
 ) {
+  @Transactional
   fun create(savedSlackMessage: SavedSlackMessage): SavedSlackMessage {
     savedSlackMessage.slackConfig.apply {
       this.savedSlackMessage.add(savedSlackMessage)
@@ -23,6 +25,7 @@ class SavedSlackMessageService(
     return savedSlackMessageRepository.save(savedSlackMessage)
   }
 
+  @Transactional
   fun update(
     id: Long,
     langTags: Set<String>,
@@ -30,7 +33,6 @@ class SavedSlackMessageService(
     val savedMessage = savedSlackMessageRepository.findById(id).orElse(null) ?: return null
     savedMessage.langTags = langTags
 
-    // Сохраняем изменения
     return savedSlackMessageRepository.save(savedMessage)
   }
 
