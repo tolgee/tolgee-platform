@@ -10,6 +10,7 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
 import { OrganizationBillingRedirect } from './security/OrganizationRedirectHandler';
 import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
+import { SlackLoginView } from './slack/SlackLoginView';
 import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 
@@ -60,6 +61,9 @@ const RecaptchaProvider: FC = (props) => {
 
 export const RootRouter = () => (
   <Switch>
+    <PrivateRoute exact path={LINKS.SLACK_LOGIN.template}>
+      <SlackLoginView />
+    </PrivateRoute>
     <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
       <PasswordResetView />
     </Route>

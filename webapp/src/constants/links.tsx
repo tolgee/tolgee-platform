@@ -336,4 +336,11 @@ export class LINKS {
   );
   static PROJECT_STORAGE = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'storage');
   static PROJECT_WEBHOOKS = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'webhooks');
+
+  /**
+   * Slack
+   */
+
+  static SLACK = Link.ofRoot('slack');
+  static SLACK_LOGIN = Link.ofParent(LINKS.SLACK, 'login');
 }

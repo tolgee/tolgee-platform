@@ -189,6 +189,7 @@ dependencies {
      */
     implementation(project(':misc'))
 
+
     /**
      * AZURE
      */
@@ -197,6 +198,13 @@ dependencies {
     }
     implementation('io.netty:netty-codec-http:4.1.108.Final')
     implementation('com.azure:azure-identity:1.12.0')
+
+    /**
+     * SLACK SDK
+     */
+    implementation 'com.slack.api:slack-api-client:1.37.0'
+    implementation 'com.slack.api:slack-api-model-kotlin-extension:1.37.0'
+    implementation 'com.slack.api:slack-api-client-kotlin-extension:1.37.0'
 }
 
 test {
