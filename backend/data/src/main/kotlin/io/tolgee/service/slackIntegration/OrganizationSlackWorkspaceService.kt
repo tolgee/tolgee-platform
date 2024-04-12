@@ -158,6 +158,10 @@ class OrganizationSlackWorkspaceService(
     return organizationSlackWorkspaceRepository.find(workspaceId) ?: throw NotFoundException()
   }
 
+  fun find(workspaceId: Long): OrganizationSlackWorkspace? {
+    return organizationSlackWorkspaceRepository.find(workspaceId)
+  }
+
   fun saveAll(organizationSlackWorkspaces: List<OrganizationSlackWorkspace>) {
     organizationSlackWorkspaceRepository.saveAll(organizationSlackWorkspaces)
   }

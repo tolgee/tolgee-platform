@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.dtos.request.slack.SlackConnectionDto
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.organization.OrganizationRoleService
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -26,18 +24,12 @@ class SlackLoginController(
   private val slackUserConnectionService: SlackUserConnectionService,
   private val slackExecutor: SlackExecutor,
   private val authenticationFacade: AuthenticationFacade,
-  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
-  private val organizationRoleService: OrganizationRoleService,
 ) : Logging {
   @PostMapping("/user-login")
   @Operation(summary = "User login", description = "Pairs user account with slack account.")
   fun userLogin(
     @RequestBody payload: SlackConnectionDto,
   ) {
-    val workspace = organizationSlackWorkspaceService.get(payload.workspaceId)
-
-    organizationRoleService.checkUserCanView(workspace.organization.id)
-
     slackUserConnectionService.createOrUpdate(authenticationFacade.authenticatedUserEntity, payload.slackId)
     slackExecutor.sendUserLoginSuccessMessage(payload)
   }

@@ -60,7 +60,7 @@ class SlackExecutor(
       }
 
       savedMessage.forEach { savedMsg ->
-        processSavedMessage(savedMsg, message, config)
+        processSavedMessage(savedMsg, message, config, slackExecutorHelper)
       }
     }
   }
@@ -69,6 +69,7 @@ class SlackExecutor(
     savedMsg: SavedSlackMessage,
     message: SavedMessageDto,
     config: SlackConfig,
+    slackExecutorHelper: SlackExecutorHelper,
   ) {
     val existingLanguages = savedMsg.langTags
     val newLanguages = message.langTag
@@ -134,7 +135,7 @@ class SlackExecutor(
   }
 
   fun sendUserLoginSuccessMessage(dto: SlackConnectionDto) {
-    val workspace = organizationSlackWorkspaceService.get(dto.workspaceId)
+    val workspace = organizationSlackWorkspaceService.find(dto.workspaceId)
     slackClient.methods(workspace.getSlackToken()).chatPostMessage {
       it.channel(dto.channelId)
         .blocks {
