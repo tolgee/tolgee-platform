@@ -182,7 +182,7 @@ class SlackSlashCommandController(
       )
 
     try {
-      slackConfigService.create(slackConfigDto)
+      slackConfigService.createOrUpdate(slackConfigDto)
     } catch (e: SlackWorkspaceNotFound) {
       throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
     }

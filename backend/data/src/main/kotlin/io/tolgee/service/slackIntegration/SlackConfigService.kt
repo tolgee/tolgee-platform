@@ -50,35 +50,36 @@ class SlackConfigService(
   }
 
   @Transactional
-  fun create(slackConfigDto: SlackConfigDto): SlackConfig {
-    val workspace = getWorkspace(slackConfigDto.slackTeamId)
-    val slackConfig =
-      SlackConfig(
-        project = slackConfigDto.project,
-        userAccount = slackConfigDto.userAccount,
-        channelId = slackConfigDto.channelId,
-      ).apply {
-        onEvent = slackConfigDto.onEvent ?: EventName.ALL
-        isGlobalSubscription = slackConfigDto.languageTag.isNullOrBlank()
-        this.organizationSlackWorkspace = workspace
-      }
-
-    val existingConfigs = get(slackConfig.project.id, slackConfig.channelId)
-    return if (existingConfigs == null) {
-      slackConfigRepository.save(slackConfig)
-      workspace?.slackSubscriptions?.add(slackConfig)
-
-      if (!slackConfig.isGlobalSubscription) {
-        addPreferenceToConfig(slackConfig, slackConfigDto.languageTag!!, slackConfigDto.onEvent ?: EventName.ALL)
-      }
-      automationService.createForSlackIntegration(slackConfig)
-      slackConfig
-    } else {
-      update(slackConfigDto)
-    }
+  fun createOrUpdate(slackConfigDto: SlackConfigDto): SlackConfig {
+    val existingConfig =
+      get(slackConfigDto.project.id, slackConfigDto.channelId)
+        ?: return create(slackConfigDto)
+    return update(existingConfig, slackConfigDto)
   }
 
-  fun getWorkspace(slackTeamId: String): OrganizationSlackWorkspace? {
+  private fun create(dto: SlackConfigDto): SlackConfig {
+    val workspace = findWorkspace(dto.slackTeamId)
+    val slackConfig =
+      SlackConfig(
+        project = dto.project,
+        userAccount = dto.userAccount,
+        channelId = dto.channelId,
+      ).apply {
+        onEvent = dto.onEvent ?: EventName.ALL
+        isGlobalSubscription = dto.languageTag.isNullOrBlank()
+        this.organizationSlackWorkspace = workspace
+      }
+    slackConfigRepository.save(slackConfig)
+    workspace?.slackSubscriptions?.add(slackConfig)
+
+    if (!slackConfig.isGlobalSubscription) {
+      addPreferenceToConfig(slackConfig, dto.languageTag!!, dto.onEvent ?: EventName.ALL)
+    }
+    automationService.createForSlackIntegration(slackConfig)
+    return slackConfig
+  }
+
+  fun findWorkspace(slackTeamId: String): OrganizationSlackWorkspace? {
     if (slackProperties.token != null) {
       return null
     }
@@ -86,24 +87,29 @@ class SlackConfigService(
       ?: throw SlackWorkspaceNotFound()
   }
 
-  fun update(slackConfigDto: SlackConfigDto): SlackConfig {
-    val slackConfig = get(slackConfigDto.project.id, slackConfigDto.channelId) ?: throw Exception()
-    slackConfigDto.onEvent?.let { eventName ->
+  fun update(
+    slackConfig: SlackConfig,
+    dto: SlackConfigDto,
+  ): SlackConfig {
+    val workspace = findWorkspace(dto.slackTeamId)
+
+    dto.onEvent?.let { eventName ->
       slackConfig.onEvent = eventName
     }
 
-    if (slackConfigDto.languageTag.isNullOrBlank()) {
+    if (dto.languageTag.isNullOrBlank()) {
       slackConfig.isGlobalSubscription = true
     } else {
       if (slackConfig.preferences.isEmpty() ||
-        !slackConfig.preferences.any { it.languageTag == slackConfigDto.languageTag }
+        !slackConfig.preferences.any { it.languageTag == dto.languageTag }
       ) {
-        addPreferenceToConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+        addPreferenceToConfig(slackConfig, dto.languageTag, dto.onEvent ?: EventName.ALL)
       } else {
-        updatePreferenceInConfig(slackConfig, slackConfigDto.languageTag, slackConfigDto.onEvent ?: EventName.ALL)
+        updatePreferenceInConfig(slackConfig, dto.languageTag, dto.onEvent ?: EventName.ALL)
       }
     }
 
+    slackConfig.organizationSlackWorkspace = workspace
     automationService.updateForSlackConfig(slackConfig)
     slackConfigRepository.save(slackConfig)
     return slackConfig
