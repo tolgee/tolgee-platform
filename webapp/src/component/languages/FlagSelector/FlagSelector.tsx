@@ -1,10 +1,17 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 import { Button, Popover, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { supportedFlags } from '@tginternal/language-util';
 import { useField } from 'formik';
+import countryFlagEmoji from 'country-flag-emoji';
+import { FlagImage } from '../FlagImage';
+import { FlagInfo } from './types';
+import { FlagSelectorContent } from './FlagSelectorContent';
 
-import { FlagImage } from './FlagImage';
+const FLAGS_INFO: FlagInfo[] = [
+  { code: 'empty', emoji: '🏳️', name: 'No flag' },
+  ...countryFlagEmoji.list,
+];
 
 const StyledButton = styled(Button)`
   cursor: pointer;
@@ -17,26 +24,6 @@ const StyledImage = styled(FlagImage)`
   height: 50px;
 `;
 
-const StyledSelector = styled('div')`
-  width: 300px;
-  height: 400px;
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const StyledFlagButton = styled(Button)`
-  padding: ${({ theme }) => theme.spacing(0.5)};
-  min-width: 0px;
-  & > span {
-    height: 29px;
-  }
-`;
-
-const StyledFlagImage = styled(FlagImage)`
-  width: 50px;
-  height: 50px;
-`;
-
 export const FlagSelector: FunctionComponent<{
   preferredEmojis: string[];
   name: string;
@@ -45,7 +32,13 @@ export const FlagSelector: FunctionComponent<{
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const selectedEmoji = field.value || '🏳️';
-  const flags = [...new Set([...props.preferredEmojis, ...supportedFlags])];
+  const flagsInfo = useMemo(() => {
+    const flags = [...new Set([...props.preferredEmojis, ...supportedFlags])];
+    return flags
+      .map((emoji) => FLAGS_INFO.find((f) => f.emoji === emoji))
+      .filter(Boolean) as FlagInfo[];
+  }, [props.preferredEmojis, supportedFlags]);
+
   return (
     <>
       <StyledButton
@@ -57,7 +50,9 @@ export const FlagSelector: FunctionComponent<{
       </StyledButton>
       <Popover
         open={!!anchorEl}
-        onClose={() => setAnchorEl(null)}
+        onClose={() => {
+          setAnchorEl(null);
+        }}
         anchorEl={anchorEl}
         anchorOrigin={{
           vertical: 'bottom',
@@ -68,19 +63,11 @@ export const FlagSelector: FunctionComponent<{
           horizontal: 'left',
         }}
       >
-        <StyledSelector>
-          {flags.map((f) => (
-            <StyledFlagButton
-              key={f}
-              onClick={() => {
-                helpers.setValue(f);
-                setAnchorEl(null);
-              }}
-            >
-              <StyledFlagImage flagEmoji={f} />
-            </StyledFlagButton>
-          ))}
-        </StyledSelector>
+        <FlagSelectorContent
+          flagsInfo={flagsInfo}
+          setAnchorEl={setAnchorEl}
+          onChange={helpers.setValue}
+        />
       </Popover>
     </>
   );

@@ -26,6 +26,7 @@
     "clsx": "^1.1.1",
     "codemirror": "^6.0.1",
     "copy-to-clipboard": "^3.3.1",
+    "country-flag-emoji": "^1.0.3",
     "date-fns": "2.29.2",
     "diff": "^5.0.0",
     "dotenv-flow": "4.0.1",

@@ -2,6 +2,12 @@ import { FC, ImgHTMLAttributes } from 'react';
 import { getSvgNameByEmoji } from '@tginternal/language-util';
 import { styled } from '@mui/material';
 
+export type FlagInfo = {
+  code: string;
+  name: string;
+  emoji: string;
+};
+
 const StyledImg = styled('img')`
   filter: brightness(
     ${({ theme }) => (theme.palette.mode === 'dark' ? 0.9 : 1)}
@@ -18,9 +24,11 @@ export const getFlagPath = (hex: string) => {
   return `/flags/${flagName}.svg`;
 };
 
-export const FlagImage: FC<
-  ImgHTMLAttributes<HTMLImageElement> & { flagEmoji: string }
-> = ({ flagEmoji, ...props }) => {
+type Props = ImgHTMLAttributes<HTMLImageElement> & {
+  flagEmoji: string;
+};
+
+export const FlagImage: FC<Props> = ({ flagEmoji, ...props }) => {
   return (
     <StyledImg
       {...props}
