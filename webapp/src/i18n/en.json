@@ -493,6 +493,7 @@
   "file_issue_type_value_is_empty" : "Value is empty",
   "file_issue_type_value_is_not_string" : "Value is not string",
   "file_too_big" : "File is too big",
+  "flag_selector_search_flag" : "Search flag...",
   "formality_not_supported_by_service" : "Service doesn't support formality",
   "former-user-name" : "Former user",
   "free_self_hosted_seat_limit_exceeded" : "The limit of free user seats on this self-hosted instance was exceeded. Please upgrade your subscription plan to add more users.",

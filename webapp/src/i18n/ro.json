@@ -493,6 +493,7 @@
   "file_issue_type_value_is_empty" : "Valoarea este goală",
   "file_issue_type_value_is_not_string" : "Valoarea nu este un șir de caractere",
   "file_too_big" : "Fișierul este prea mare",
+  "flag_selector_search_flag" : "Căutați steagul...",
   "formality_not_supported_by_service" : "Serviciul nu suportă formalitatea",
   "former-user-name" : "Utilizator anterior",
   "free_self_hosted_seat_limit_exceeded" : "Limita de locuri gratuite pentru utilizatori pe această instanță auto-găzduită a fost depășită. Vă rugăm să faceți upgrade la planul de abonament pentru a adăuga mai mulți utilizatori.",

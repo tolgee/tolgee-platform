@@ -1,3 +1,10 @@
+# [3.57.0](https://github.com/tolgee/tolgee-platform/compare/v3.56.1...v3.57.0) (2024-04-15)
+
+
+### Features
+
+* add search field to the flag selector ([#2242](https://github.com/tolgee/tolgee-platform/issues/2242)) ([fd5e70f](https://github.com/tolgee/tolgee-platform/commit/fd5e70f206b034593e259081fcbef4c1f6713f33))
+
 ## [3.56.1](https://github.com/tolgee/tolgee-platform/compare/v3.56.0...v3.56.1) (2024-04-11)
 
 

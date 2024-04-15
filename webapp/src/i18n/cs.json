@@ -493,6 +493,7 @@
   "file_issue_type_value_is_empty" : "Hodnota je prázdná",
   "file_issue_type_value_is_not_string" : "Hodnota není řetězec",
   "file_too_big" : "Soubor je příliš velký",
+  "flag_selector_search_flag" : "Hledat vlajku...",
   "formality_not_supported_by_service" : "Služba nepodporuje formálnost",
   "former-user-name" : "Bývalý uživatel",
   "free_self_hosted_seat_limit_exceeded" : "Byl překročen limit uživatelů na této self-hostované instanci. Pro přidání dalších uživatelů si prosím upgradujte své předplatné.",
