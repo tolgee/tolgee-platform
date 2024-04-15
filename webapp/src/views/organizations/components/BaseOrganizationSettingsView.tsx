@@ -71,6 +71,12 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_member_privileges'),
     });
+    menuItems.push({
+      link: LINKS.ORGANIZATION_SLACK.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_slack'),
+    });
     if (config.billing.enabled) {
       menuItems.push({
         link: LINKS.ORGANIZATION_SUBSCRIPTIONS.build({

@@ -1,6 +1,5 @@
 package io.tolgee.component.automations.processors.slackIntegration
 
-import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
 import io.tolgee.api.IProjectActivityModelAssembler
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class SlackSubscriptionProcessor(
-  private val activityService: ActivityService,
   private val activityModelAssembler: IProjectActivityModelAssembler,
   private val slackExecutor: SlackExecutor,
   private val applicationContext: ApplicationContext,
@@ -33,11 +31,12 @@ class SlackSubscriptionProcessor(
 
     val data = SlackRequest(activityData = activityModel)
     val config = action.slackConfig ?: return
-    slackExecutor.setHelper(data = data, slackConfig = config)
+
     when (activityModel.type) {
-      ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded()
-      in translationActivities -> slackExecutor.sendMessageOnTranslationSet()
-      ActivityType.IMPORT -> slackExecutor.sendMessageOnImport()
+      ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded(config, data)
+      in translationActivities ->
+        slackExecutor.sendMessageOnTranslationSet(config, data)
+      ActivityType.IMPORT -> slackExecutor.sendMessageOnImport(config, data)
       else -> { }
     }
   }

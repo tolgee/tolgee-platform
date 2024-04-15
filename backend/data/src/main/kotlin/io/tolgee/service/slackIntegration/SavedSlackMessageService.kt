@@ -1,19 +1,19 @@
 package io.tolgee.service.slackIntegration
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.repository.slackIntegration.SavedSlackMessageRepository
 import io.tolgee.repository.slackIntegration.SlackConfigRepository
+import io.tolgee.util.addMinutes
 import jakarta.transaction.Transactional
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.util.*
 
 @Service
 class SavedSlackMessageService(
   private val savedSlackMessageRepository: SavedSlackMessageRepository,
   private val slackConfigRepository: SlackConfigRepository,
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   @Transactional
   fun create(savedSlackMessage: SavedSlackMessage): SavedSlackMessage {
@@ -59,17 +59,9 @@ class SavedSlackMessageService(
     return savedSlackMessageRepository.findByKeyIdAndSlackConfigId(keyId, configId)
   }
 
-  fun getAllSavedSlackMessages(): List<SavedSlackMessage> {
-    return savedSlackMessageRepository.findAll()
-  }
-
-  fun deleteSavedSlackMessage(id: Long) {
-    savedSlackMessageRepository.deleteById(id)
-  }
-
-  @Scheduled(cron = "*/5 * * * * *")
+  @Scheduled(fixedDelay = 60000)
   fun deleteOldMessage() {
-    val cutoff = Date.from(LocalDateTime.now().minusHours(2).atZone(ZoneId.systemDefault()).toInstant())
+    val cutoff = currentDateProvider.date.addMinutes(-120)
     savedSlackMessageRepository.deleteOlderThan(cutoff)
   }
 }

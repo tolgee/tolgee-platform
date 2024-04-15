@@ -7,6 +7,7 @@ import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import org.springframework.core.io.ClassPathResource
 
 class OrganizationBuilder(
@@ -15,6 +16,7 @@ class OrganizationBuilder(
   class DATA {
     var roles: MutableList<OrganizationRoleBuilder> = mutableListOf()
     var avatarFile: ClassPathResource? = null
+    var slackWorkspaces: MutableList<OrganizationSlackWorkspaceBuilder> = mutableListOf()
   }
 
   var defaultOrganizationOfUser: UserAccount? = null
@@ -30,6 +32,8 @@ class OrganizationBuilder(
     ft(builder.self)
     return builder
   }
+
+  fun addSlackWorkspace(ft: FT<OrganizationSlackWorkspace>) = addOperation(data.slackWorkspaces, ft)
 
   override var self: Organization =
     Organization().also {
