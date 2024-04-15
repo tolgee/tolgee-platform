@@ -182,7 +182,7 @@ class SlackExecutor(
     }
   }
 
-  private fun sendRegularMessageWithSaving(
+  fun sendRegularMessageWithSaving(
     messageDto: SavedMessageDto,
     config: SlackConfig,
   ) {
@@ -214,7 +214,7 @@ class SlackExecutor(
     )
   }
 
-  private fun findSavedMessageOrNull(
+  fun findSavedMessageOrNull(
     keyId: Long,
     langTags: Set<String>,
     configId: Long,
