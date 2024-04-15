@@ -14,7 +14,7 @@ import jakarta.persistence.UniqueConstraint
 @Table(
   uniqueConstraints = [
     UniqueConstraint(
-      columnNames = ["slack_team_id", "organization_id"],
+      columnNames = ["slack_team_id"],
       name = "organization_slack_workspace_slack_team_id_unique",
     ),
   ],

@@ -2,12 +2,14 @@ package io.tolgee.api.v2.controllers.slack
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.SlackRequestValidation
 import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
 import io.tolgee.component.automations.processors.slackIntegration.SlackHelpBlocksProvider
 import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.exceptions.SlackErrorException
+import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
@@ -29,33 +31,85 @@ class SlackEventsController(
   private val slackRequestValidation: SlackRequestValidation,
   private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
   private val slackExecutor: SlackExecutor,
+  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
 ) : Logging {
   @Suppress("UastIncorrectHttpHeaderInspection")
   @PostMapping("/on-event")
-  fun fetchEvent(
+  @Operation(
+    summary = "On interactivity event",
+    description =
+      "This is triggered when interactivity event is triggered. " +
+        "E.g., when user clicks button provided in previous messages.",
+  )
+  fun onInteractivityEvent(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
     @RequestBody payload: String,
   ) {
-    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
-
-    slackRequestValidation.validate(slackSignature, timestamp, payload)
-
-    val event: SlackEventDto = objectMapper.readValue(decodedPayload)
+    val event: SlackEventDto = validateAndParsePayload(payload, slackSignature, timestamp)
 
     // Since we cannot respond to the event directly, we have to send a message to the channel.
     // Sometimes Tolgee might be unable to do it, because the token might be missing in Tolgee DB.
     // In that case we cannot do anything and the event triggering button in Slack just won't work
     try {
-      val hasHelpBtn =
-        event.actions.any {
-          it.value == "help_btn"
+      event.actions.forEach {
+        when (it.value) {
+          "help_btn" ->
+            slackExecutor.sendBlocksMessage(
+              event.team.id,
+              event.channel.id,
+              slackHelpBlocksProvider.getHelpBlocks(),
+            )
         }
-      if (hasHelpBtn) {
-        slackExecutor.sendBlocksMessage(event.team.id, event.channel.id, slackHelpBlocksProvider.getHelpBlocks())
       }
     } catch (e: SlackErrorException) {
       slackExecutor.sendBlocksMessage(event.team.id, event.channel.id, e.blocks)
     }
+  }
+
+  @Suppress("UastIncorrectHttpHeaderInspection")
+  @PostMapping("/on-bot-event")
+  @Operation(
+    summary = "On bot event",
+    description =
+      "This is triggered when bot event is triggered. " +
+        "E.g., when app is uninstalled from workspace. \n\n" +
+        "Heads up! The events have to be configured via Slack App configuration in " +
+        "Event Subscription section.",
+  )
+  fun fetchBotEvent(
+    @RequestHeader("X-Slack-Signature") slackSignature: String,
+    @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
+    @RequestBody payload: String,
+  ): Any? {
+    val data: Map<String, Any?> = validateAndParsePayload(payload, slackSignature, timestamp)
+
+    if (data["challenge"] != null) {
+      return data["challenge"]
+    }
+
+    val event = data["event"] as? Map<*, *> ?: return null
+    val eventType = event["type"] ?: return null
+
+    when (eventType) {
+      "app_uninstalled" -> {
+        val teamId = data["team_id"] as? String ?: return null
+        organizationSlackWorkspaceService.deleteWorkspaceWhenUninstalled(teamId)
+      }
+    }
+
+    return null
+  }
+
+  private inline fun <reified T> validateAndParsePayload(
+    payload: String,
+    slackSignature: String,
+    timestamp: String,
+  ): T {
+    val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
+
+    slackRequestValidation.validate(slackSignature, timestamp, payload)
+
+    return objectMapper.readValue(decodedPayload)
   }
 }

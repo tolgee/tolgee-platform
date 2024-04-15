@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface OrganizationSlackWorkspaceRepository : JpaRepository<OrganizationSlackWorkspace, Long> {
-  fun findBySlackTeamId(teamId: String): OrganizationSlackWorkspace?
+  fun findAllBySlackTeamId(teamId: String): OrganizationSlackWorkspace?
 
   fun findAllByOrganizationId(organizationId: Long): List<OrganizationSlackWorkspace>
 
