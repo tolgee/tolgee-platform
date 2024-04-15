@@ -46,7 +46,8 @@ class SelectAllController(
     summary = "Select keys",
     description =
       "Returns all key IDs for specified filter values. " +
-        "This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use.",
+        "This way, you can apply the same filter as in the translation view and get the " +
+        "resulting key IDs for future use.",
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
