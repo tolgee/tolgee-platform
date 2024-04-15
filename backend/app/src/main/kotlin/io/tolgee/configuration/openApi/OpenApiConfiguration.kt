@@ -213,7 +213,7 @@ class OpenApiConfiguration {
   fun HandlerMethod.isHidden(path: String): Boolean {
     val annotation = method.getAnnotation(OpenApiHideFromPublicDocs::class.java)
 
-    val methodIsHidden = annotation != null && (annotation.path == "" || annotation.path == path)
+    val methodIsHidden = annotation != null && (path in annotation.paths)
     if (methodIsHidden) {
       return true
     }

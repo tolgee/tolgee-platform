@@ -18,7 +18,6 @@ import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectTranslationLastModifiedManager
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
-import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
@@ -34,7 +33,6 @@ import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeyWithTranslationsView
-import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -262,35 +260,6 @@ When null, resulting file will be a flat key-value object.
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
-  }
-
-  @GetMapping(value = ["select-all"])
-  @Operation(
-    summary = "Get select all keys",
-    description = "Returns all keys for current filter values. Useful for select all functionality.",
-  )
-  @RequiresProjectPermissions([Scope.KEYS_VIEW])
-  @AllowApiAccess
-  @OpenApiHideFromPublicDocs
-  fun getSelectAllKeyIds(
-    @ParameterObject
-    @ModelAttribute("translationFilters")
-    params: TranslationFilters,
-  ): SelectAllResponse {
-    val languages =
-      languageService.getLanguagesForTranslationsView(
-        params.languages,
-        projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
-      )
-
-    return SelectAllResponse(
-      translationService.getSelectAllKeys(
-        projectId = projectHolder.project.id,
-        params = params,
-        languages = languages,
-      ),
-    )
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
