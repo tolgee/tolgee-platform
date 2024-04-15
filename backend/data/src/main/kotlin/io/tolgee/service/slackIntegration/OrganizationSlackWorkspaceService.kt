@@ -155,7 +155,7 @@ class OrganizationSlackWorkspaceService(
   }
 
   fun get(workspaceId: Long): OrganizationSlackWorkspace {
-    return organizationSlackWorkspaceRepository.find(workspaceId) ?: throw NotFoundException()
+    return organizationSlackWorkspaceRepository.find(workspaceId) ?: throw NotFoundException(Message.SLACK_WORKSPACE_NOT_FOUND)
   }
 
   fun find(workspaceId: Long): OrganizationSlackWorkspace? {

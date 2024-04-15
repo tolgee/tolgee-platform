@@ -6,7 +6,7 @@ import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.slack.SlackConnectionDto
+import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
@@ -134,10 +134,12 @@ class SlackExecutor(
     }
   }
 
-  fun sendUserLoginSuccessMessage(dto: SlackConnectionDto) {
-    val workspace = organizationSlackWorkspaceService.find(dto.workspaceId)
-    slackClient.methods(workspace.getSlackToken()).chatPostMessage {
-      it.channel(dto.channelId)
+  fun sendUserLoginSuccessMessage(
+    token: String,
+    dto: SlackUserLoginDto,
+  ) {
+    slackClient.methods(token).chatPostMessage {
+      it.channel(dto.slackChannelId)
         .blocks {
           section {
             markdownText(i18n.translate("success_login_message"))

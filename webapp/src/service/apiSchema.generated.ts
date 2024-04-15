@@ -524,6 +524,16 @@ export interface paths {
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
   };
+  "/v2/slack/user-login-info": {
+    /**
+     * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
+     *
+     * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
+     *
+     * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
+     */
+    get: operations["getInfo_3"];
+  };
   "/v2/public/scope-info/roles": {
     get: operations["getRoles"];
   };
@@ -699,7 +709,7 @@ export interface paths {
     get: operations["acceptInvitation"];
   };
   "/v2/ee-license/info": {
-    get: operations["getInfo_3"];
+    get: operations["getInfo_4"];
   };
   "/v2/api-keys/{keyId}": {
     get: operations["get_20"];
@@ -1599,10 +1609,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -1772,13 +1782,13 @@ export interface components {
       id: number;
       description: string;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1915,15 +1925,15 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      description: string;
       username?: string;
-      scopes: string[];
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      projectId: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      scopes: string[];
+      /** Format: int64 */
+      projectId: number;
       projectName: string;
       userFullName?: string;
     };
@@ -1936,12 +1946,6 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
-    };
-    SlackConnectionDto: {
-      slackId: string;
-      channelId: string;
-      /** Format: int64 */
-      workspaceId: number;
     };
     ExampleItem: {
       source: string;
@@ -2462,7 +2466,9 @@ export interface components {
         | "SLACK_CONNECTION_ERROR"
         | "CURRENT_USER_DOES_NOT_OWN_IMAGE"
         | "USER_CANNOT_VIEW_THIS_ORGANIZATION"
-        | "USER_IS_NOT_OWNER_OF_ORGANIZATION";
+        | "USER_IS_NOT_OWNER_OF_ORGANIZATION"
+        | "CANNOT_PARSE_ENCRYPTED_SLACK_LOGIN_DATA"
+        | "SLACK_WORKSPACE_NOT_FOUND";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2819,6 +2825,10 @@ export interface components {
       /** Format: int64 */
       preferredOrganizationId?: number;
     };
+    SlackUserInfoModel: {
+      slackName: string;
+      slackId: string;
+    };
     HierarchyItem: {
       scope:
         | "translations.view"
@@ -2924,13 +2934,13 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3039,8 +3049,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      description?: string;
       namespace?: string;
+      description?: string;
       translation?: string;
       baseTranslation?: string;
     };
@@ -3049,8 +3059,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      description?: string;
       namespace?: string;
+      description?: string;
       translation?: string;
       baseTranslation?: string;
     };
@@ -3591,13 +3601,13 @@ export interface components {
       id: number;
       description: string;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3730,15 +3740,15 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      description: string;
       username?: string;
-      scopes: string[];
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      projectId: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      scopes: string[];
+      /** Format: int64 */
+      projectId: number;
       projectName: string;
       userFullName?: string;
     };
@@ -8126,6 +8136,12 @@ export interface operations {
   };
   /** Pairs user account with slack account. */
   userLogin: {
+    parameters: {
+      query: {
+        /** The encrypted data about the desired connection between Slack account and Tolgee account */
+        data: string;
+      };
+    };
     responses: {
       /** OK */
       200: unknown;
@@ -8152,11 +8168,6 @@ export interface operations {
         content: {
           "*/*": string;
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SlackConnectionDto"];
       };
     };
   };
@@ -11298,6 +11309,53 @@ export interface operations {
       };
     };
   };
+  /**
+   * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
+   *
+   * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
+   *
+   * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
+   */
+  getInfo_3: {
+    parameters: {
+      query: {
+        /** The encrypted data */
+        data: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SlackUserInfoModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getRoles: {
     responses: {
       /** OK */
@@ -13459,7 +13517,7 @@ export interface operations {
       };
     };
   };
-  getInfo_3: {
+  getInfo_4: {
     responses: {
       /** OK */
       200: {
