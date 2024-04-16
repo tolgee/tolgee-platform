@@ -38,7 +38,7 @@ class OrganizationSlackWorkspaceService(
 ) : Logging {
   @Transactional
   fun findBySlackTeamId(teamId: String): OrganizationSlackWorkspace? {
-    return organizationSlackWorkspaceRepository.findAllBySlackTeamId(teamId)
+    return organizationSlackWorkspaceRepository.findBySlackTeamId(teamId)
   }
 
   @Transactional
