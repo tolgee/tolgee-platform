@@ -3,14 +3,11 @@ package io.tolgee.api.v2.controllers.slack
 import com.slack.api.model.block.LayoutBlock
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.SlackRequestValidation
-import io.tolgee.component.automations.processors.slackIntegration.SlackErrorProvider
-import io.tolgee.component.automations.processors.slackIntegration.SlackExceptionHandler
-import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
-import io.tolgee.component.automations.processors.slackIntegration.SlackHelpBlocksProvider
-import io.tolgee.component.automations.processors.slackIntegration.asSlackResponseString
+import io.tolgee.component.automations.processors.slackIntegration.*
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -24,13 +21,7 @@ import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.service.slackIntegration.SlackWorkspaceNotFound
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -210,11 +201,15 @@ class SlackSlashCommandController(
     projectId: Long,
     userAccountId: Long,
   ) {
-    if (
-      permissionService.getProjectPermissionScopes(projectId, userAccountId)
-        ?.contains(Scope.ACTIVITY_VIEW) != true
-    ) {
-      throw SlackErrorException(slackErrorProvider.getNoPermissionError())
+    try {
+      if (
+        permissionService.getProjectPermissionScopes(projectId, userAccountId)
+          ?.contains(Scope.ACTIVITY_VIEW) != true
+      ) {
+        throw SlackErrorException(slackErrorProvider.getNoPermissionError())
+      }
+    } catch (e: NotFoundException) {
+      throw SlackErrorException(slackErrorProvider.getProjectNotFoundError())
     }
   }
 
