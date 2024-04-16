@@ -2,6 +2,9 @@ package io.tolgee.service.slackIntegration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.slack.api.Slack
+import com.slack.api.methods.request.apps.AppsUninstallRequest
+import com.slack.api.methods.response.apps.AppsUninstallResponse
 import io.sentry.Sentry
 import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.configuration.tolgee.SlackProperties
@@ -13,6 +16,8 @@ import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.repository.slackIntegration.OrganizationSlackWorkspaceRepository
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -29,18 +34,11 @@ class OrganizationSlackWorkspaceService(
   private val slackProperties: SlackProperties,
   private val objectMapper: ObjectMapper,
   private val frontendUrlProvider: FrontendUrlProvider,
-) {
+  private val slackClient: Slack,
+) : Logging {
   @Transactional
   fun findBySlackTeamId(teamId: String): OrganizationSlackWorkspace? {
     return organizationSlackWorkspaceRepository.findBySlackTeamId(teamId)
-  }
-
-  @Transactional
-  fun findByOrganizationIdAndSlackTeamId(
-    organizationId: Long,
-    teamId: String,
-  ): OrganizationSlackWorkspace? {
-    return organizationSlackWorkspaceRepository.findByOrganizationIdAndSlackTeamId(organizationId, teamId)
   }
 
   @Transactional
@@ -147,7 +145,40 @@ class OrganizationSlackWorkspaceService(
     val organizationSlackWorkspace =
       organizationSlackWorkspaceRepository.findByOrganizationIdAndId(organizationId, workspaceId)
         ?: throw NotFoundException()
+    delete(organizationSlackWorkspace)
+    val uninstall =
+      slackClient.methods().appsUninstall(
+        AppsUninstallRequest.builder()
+          .token(organizationSlackWorkspace.accessToken)
+          .clientId(slackProperties.clientId)
+          .clientSecret(slackProperties.clientSecret)
+          .build(),
+      )
+    logAppUninstallError(organizationSlackWorkspace.id, organizationSlackWorkspace.organization.id, uninstall)
+  }
+
+  private fun delete(organizationSlackWorkspace: OrganizationSlackWorkspace) {
     organizationSlackWorkspaceRepository.delete(organizationSlackWorkspace)
+  }
+
+  private fun logAppUninstallError(
+    workspaceId: Long,
+    organizationId: Long,
+    uninstall: AppsUninstallResponse,
+  ) {
+    if (!uninstall.isOk) {
+      val dummyException = RuntimeException("Error while uninstalling app from the client workspace.")
+      Sentry.addBreadcrumb("WorkspaceId: $workspaceId")
+      Sentry.addBreadcrumb("OrganizationId: $organizationId")
+      Sentry.captureException(dummyException)
+      logger.error(dummyException.message)
+    }
+  }
+
+  @Transactional
+  fun deleteWorkspaceWhenUninstalled(slackTeamId: String) {
+    val workspace = findBySlackTeamId(slackTeamId) ?: return
+    delete(workspace)
   }
 
   fun getRedirectUrl(organizationSlug: String): String {
@@ -155,7 +186,7 @@ class OrganizationSlackWorkspaceService(
   }
 
   fun get(workspaceId: Long): OrganizationSlackWorkspace {
-    return organizationSlackWorkspaceRepository.find(workspaceId) ?: throw NotFoundException()
+    return organizationSlackWorkspaceRepository.find(workspaceId) ?: throw NotFoundException(Message.SLACK_WORKSPACE_NOT_FOUND)
   }
 
   fun find(workspaceId: Long): OrganizationSlackWorkspace? {
