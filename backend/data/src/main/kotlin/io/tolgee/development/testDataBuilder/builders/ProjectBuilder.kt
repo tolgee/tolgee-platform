@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
+import io.tolgee.development.testDataBuilder.builders.slack.SlackConfigBuilder
 import io.tolgee.model.*
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig

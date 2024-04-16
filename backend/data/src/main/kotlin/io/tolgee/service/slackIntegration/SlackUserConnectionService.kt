@@ -22,6 +22,10 @@ class SlackUserConnectionService(
     return slackUserConnectionRepository.findBySlackUserId(slackId)
   }
 
+  fun save(slackUserConnection: SlackUserConnection): SlackUserConnection {
+    return slackUserConnectionRepository.save(slackUserConnection)
+  }
+
   fun isUserConnected(slackId: String) = findBySlackId(slackId) != null
 
   @Transactional
