@@ -3330,4 +3330,15 @@
     <changeSet author="jenik (generated)" id="1712925098243-20">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="slack_config" constraintName="FKsgau8dxyxblao9sa16fnka0t1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1713199074850-3">
+        <createIndex indexName="organization_slack_workspace_VTDA_IX" tableName="organization_slack_workspace" unique="true">
+            <column name="slack_team_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1713199074850-1">
+        <dropUniqueConstraint constraintName="organization_slack_workspace_slack_team_id_unique" tableName="organization_slack_workspace"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1713199074850-2">
+        <addUniqueConstraint columnNames="slack_team_id" constraintName="organization_slack_workspace_slack_team_id_unique" tableName="organization_slack_workspace"/>
+    </changeSet>
 </databaseChangeLog>

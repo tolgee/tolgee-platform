@@ -2,7 +2,7 @@ import { Button, useMediaQuery } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { SPLIT_CONTENT_BREAK_POINT } from 'tg.component/security/SplitContent';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useHistory, useLocation } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 
@@ -12,9 +12,7 @@ export const SlackLoginView = () => {
   const history = useHistory();
 
   const queryParameters = new URLSearchParams(location.search);
-  const slackId = queryParameters.get('slackId');
-  const slackChannelId = queryParameters.get('channelId');
-  const workspaceId = queryParameters.get('workspaceId');
+  const encryptedData = queryParameters.get('data');
 
   const error = false;
 
@@ -23,24 +21,26 @@ export const SlackLoginView = () => {
     method: 'post',
   });
 
-  if (!slackId || !slackChannelId || !workspaceId) {
+  const connectionInfo = useApiQuery({
+    // TODO: Don't know why tsc is unhappy, when it works and the schema is correct
+    url: '/v2/slack/user-login-info',
+    mehod: 'get',
+    query: {
+      data: encryptedData,
+    },
+  });
+
+  if (!encryptedData) {
     return <div>Invalid slack login parameters</div>;
   }
 
   const connectSlack = () => {
     slackMutation.mutate(
-      {
-        content: {
-          'application/json': {
-            slackId: slackId,
-            channelId: slackChannelId,
-            workspaceId: Number.parseInt(workspaceId),
-          },
-        },
-      },
+      { query: { data: encryptedData } },
       {
         onSuccess: () => {
-          // TODO: show success message
+          // TODO: Maybe we can only print success message and tell
+          //  them to continue in slack instead of redirecting them somewhere else
           history.push(LINKS.ROOT.build());
         },
       }
@@ -49,6 +49,7 @@ export const SlackLoginView = () => {
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
+  // TODO: We should keep the top bar, so the user can logout if they are logged to different account by accident
   return (
     <CompactView
       maxWidth={isSmall ? 430 : 964}
@@ -56,7 +57,14 @@ export const SlackLoginView = () => {
       title="Slack integration"
       content={
         <>
-          <h1>Connect Slack to Tolgee</h1> {}
+          <h1>Connect Slack to Tolgee</h1>
+
+          <ul>
+            <li>Slack User Id: {connectionInfo.data?.slackId}</li>
+            <li>Slack User Name: {connectionInfo.data?.slackName}</li>
+            <li>Slack User Name: {connectionInfo.data?.slackRealName}</li>
+          </ul>
+
           <Button
             disabled={error}
             onClick={connectSlack}
