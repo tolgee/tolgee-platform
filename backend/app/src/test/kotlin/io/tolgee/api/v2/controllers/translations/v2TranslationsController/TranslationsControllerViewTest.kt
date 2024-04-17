@@ -115,8 +115,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BATCH_JOBS_VIEW])
-  fun `returns empty translations when api key is missing the scope`() {
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_VIEW])
+  fun `returns empty translations when api key is missing the translations-view scope`() {
     testData.addKeysViewOnlyUser()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
