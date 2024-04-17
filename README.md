@@ -50,7 +50,6 @@ An open-source alternative to Crowdin, Phrase or Lokalise
   - [Vue](https://tolgee.io/integrations/vue)
   - [Svelte](https://tolgee.io/integrations/svelte)
   - [Next.js](https://tolgee.io/integrations/next)
-  - [Gatsby](https://tolgee.io/integrations/gatsby)
   - [More...](https://tolgee.io/integrations/all)
 - [Tolgee platform docs](https://tolgee.io/docs/platform)
   - [Self-hosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
