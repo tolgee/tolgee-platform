@@ -4,7 +4,9 @@ import io.tolgee.component.ContentStorageProvider
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ContentDeliveryConfigRequest
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -40,17 +42,41 @@ class ContentDeliveryConfigService(
   ): ContentDeliveryConfig {
     val project = entityManager.getReference(Project::class.java, projectId)
     checkMultipleConfigsFeature(project)
-    val contentDeliveryConfig = ContentDeliveryConfig(project)
-    contentDeliveryConfig.name = dto.name
-    contentDeliveryConfig.contentStorage = getStorage(projectId, dto.contentStorageId)
-    contentDeliveryConfig.copyPropsFrom(dto)
-    contentDeliveryConfig.slug = generateSlug(projectId)
-    contentDeliveryConfigRepository.save(contentDeliveryConfig)
+    val config = ContentDeliveryConfig(project)
+    config.name = dto.name
+    config.contentStorage = getStorage(projectId, dto.contentStorageId)
+    config.copyPropsFrom(dto)
+    config.slug = getSlugForCreation(projectId, dto)
+    config.pruneBeforePublish = dto.pruneBeforePublish
+    contentDeliveryConfigRepository.save(config)
     if (dto.autoPublish) {
-      automationService.createForContentDelivery(contentDeliveryConfig)
-      contentDeliveryUploader.upload(contentDeliveryConfig.id)
+      automationService.createForContentDelivery(config)
+      contentDeliveryUploader.upload(config.id)
     }
-    return contentDeliveryConfig
+    return config
+  }
+
+  private fun getSlugForCreation(
+    projectId: Long,
+    dto: ContentDeliveryConfigRequest,
+  ): String {
+    val desiredSlug = dto.slug ?: return generateSlug(projectId)
+
+    if (dto.contentStorageId == null) {
+      throw BadRequestException(Message.CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE)
+    }
+
+    validateSlug(desiredSlug)
+
+    return dto.slug ?: generateSlug(projectId)
+  }
+
+  private fun validateSlug(slug: String) {
+    val regex = "^[a-z0-9]+(?:-[a-z0-9]+)*$".toRegex()
+    val matches = regex.matches(slug)
+    if (!matches) {
+      throw BadRequestException(Message.INVALID_SLUG_FORMAT)
+    }
   }
 
   private fun checkMultipleConfigsFeature(
@@ -99,9 +125,34 @@ class ContentDeliveryConfigService(
     val config = get(projectId, id)
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
     config.name = dto.name
+    config.pruneBeforePublish = dto.pruneBeforePublish
     config.copyPropsFrom(dto)
+    handleUpdateSlug(config, dto)
     handleUpdateAutoPublish(dto, config)
     return save(config)
+  }
+
+  private fun handleUpdateSlug(
+    config: ContentDeliveryConfig,
+    dto: ContentDeliveryConfigRequest,
+  ) {
+    val desiredSlug = dto.slug
+    val isUnchanged = desiredSlug == config.slug
+    if (isUnchanged) {
+      return
+    }
+    if (desiredSlug == null) {
+      config.slug = generateSlug(config.project.id)
+      return
+    }
+
+    if (dto.contentStorageId == null) {
+      throw BadRequestException(Message.CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE)
+    }
+
+    validateSlug(desiredSlug)
+
+    config.slug = desiredSlug
   }
 
   private fun handleUpdateAutoPublish(

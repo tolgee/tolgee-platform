@@ -42,6 +42,19 @@ class LocalFileStorage(
     }
   }
 
+  override fun pruneDirectory(path: String) {
+    try {
+      val dir = File(path)
+      if (dir.isDirectory) {
+        dir.listFiles()?.forEach {
+          it.deleteRecursively()
+        }
+      }
+    } catch (e: Exception) {
+      throw FileStoreException("Cannot prune directory: $path", path, e)
+    }
+  }
+
   override fun fileExists(storageFilePath: String): Boolean {
     return getLocalFile(storageFilePath).exists()
   }

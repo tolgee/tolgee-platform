@@ -49,6 +49,9 @@ class ContentDeliveryConfig(
   @ActivityIgnoredProp
   var lastPublished: Date? = null
 
+  @ColumnDefault("false")
+  var pruneBeforePublish = true
+
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   @ActivityLoggedProp

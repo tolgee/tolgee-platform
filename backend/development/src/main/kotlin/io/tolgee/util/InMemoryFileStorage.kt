@@ -42,6 +42,13 @@ class InMemoryFileStorage : FileStorage {
     return files.contains(storageFilePath)
   }
 
+  override fun pruneDirectory(path: String) {
+    val keysToDelete = files.keys.filter { it.startsWith(path.removeSuffix("/") + "/") }
+    keysToDelete.forEach {
+      files.remove(it)
+    }
+  }
+
   fun clear() {
     files.clear()
   }

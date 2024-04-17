@@ -54,6 +54,12 @@ open class AzureBlobFileStorage(
     }
   }
 
+  override fun pruneDirectory(path: String) {
+    client.listBlobsByHierarchy(path).forEach {
+      getBlobClient(it.name).delete()
+    }
+  }
+
   private fun getBlobClient(storageFilePath: String): BlobClient {
     val clientValue = extractClientFromBlobContainerClient()
     return TolgeeBlobClient(clientValue.getBlobAsyncClient(storageFilePath))
