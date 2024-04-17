@@ -14,6 +14,7 @@ import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription
 import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { EnterprisePlan } from './EnterprisePlan';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -151,6 +152,7 @@ export const SelfHostedEeSubscriptions = () => {
             onChange={setPeriod}
           />
         ))}
+        <EnterprisePlan />
       </StyledShopping>
     </>
   );

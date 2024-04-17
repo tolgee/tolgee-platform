@@ -10,6 +10,7 @@ import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance
 import { useEffect, useState } from 'react';
 import { planIsPeriodDependant } from './Plans/PlanPrice';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { EnterprisePlan } from './Plans/EnterprisePlan';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -89,6 +90,7 @@ export const CloudSubscriptions = () => {
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />
+              <EnterprisePlan />
               <Credits />
             </StyledShopping>
           </>
