@@ -1,3 +1,11 @@
+## [3.57.3](https://github.com/tolgee/tolgee-platform/compare/v3.57.2...v3.57.3) (2024-04-17)
+
+
+### Bug Fixes
+
+* preselect only necessary scopes when creating project api key ([#2255](https://github.com/tolgee/tolgee-platform/issues/2255)) ([66c2c52](https://github.com/tolgee/tolgee-platform/commit/66c2c52abd9f1c6f7678742543ff45efbd0dc1d7))
+* unify integrations ([#2252](https://github.com/tolgee/tolgee-platform/issues/2252)) ([c922036](https://github.com/tolgee/tolgee-platform/commit/c9220363799015be66778c8de29d9b78f803e52b))
+
 ## [3.57.2](https://github.com/tolgee/tolgee-platform/compare/v3.57.1...v3.57.2) (2024-04-17)
 
 
