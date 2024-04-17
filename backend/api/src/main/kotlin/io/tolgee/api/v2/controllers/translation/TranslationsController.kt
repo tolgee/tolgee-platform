@@ -229,7 +229,7 @@ When null, resulting file will be a flat key-value object.
 
   @GetMapping(value = [""])
   @Operation(summary = "Get translations in project")
-  @UseDefaultPermissions // Security: check done internally
+  @RequiresProjectPermissions(scopes = [Scope.KEYS_VIEW]) // Security: check done internally
   @AllowApiAccess
   @Transactional
   @OpenApiOrderExtension(5)

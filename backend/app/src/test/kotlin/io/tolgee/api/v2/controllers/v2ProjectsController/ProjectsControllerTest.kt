@@ -22,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-open class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {
     executeInNewTransaction {
