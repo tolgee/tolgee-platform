@@ -1,3 +1,10 @@
+## [3.57.1](https://github.com/tolgee/tolgee-platform/compare/v3.57.0...v3.57.1) (2024-04-17)
+
+
+### Bug Fixes
+
+* chinese flag ([#2250](https://github.com/tolgee/tolgee-platform/issues/2250)) ([71af7c8](https://github.com/tolgee/tolgee-platform/commit/71af7c8b4d400aa2f6f908010e69cb2ad6380454))
+
 # [3.57.0](https://github.com/tolgee/tolgee-platform/compare/v3.56.1...v3.57.0) (2024-04-15)
 
 
