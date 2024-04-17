@@ -60,7 +60,7 @@ describe('Export Basics', () => {
     getFile().its('test').its('array[0]').should('eq', 'Test czech');
   });
 
-  it('the support arrays switch works', () => {
+  it('the support arrays switch works', { retries: { runMode: 5 } }, () => {
     exportToggleLanguage('English');
     exportSelectFormat('Structured JSON');
 

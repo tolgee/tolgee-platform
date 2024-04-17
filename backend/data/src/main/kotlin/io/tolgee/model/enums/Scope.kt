@@ -142,7 +142,7 @@ enum class Scope(
 
     fun expand(scope: Scope): Array<Scope> {
       val hierarchyItems = getScopeHierarchyItems(scope)
-      return hierarchyItems.flatMap { expand(it) }.toTypedArray()
+      return hierarchyItems.flatMap { expand(it) }.toSet().toTypedArray()
     }
 
     /**
@@ -152,7 +152,8 @@ enum class Scope(
      * ADMIN scope, (TRANSLATION_VIEW, KEYS_EDIT, etc.)
      *
      */
-    fun expand(permittedScopes: Array<Scope>): Array<Scope> {
+    fun expand(permittedScopes: Array<Scope>?): Array<Scope> {
+      permittedScopes ?: return arrayOf()
       return permittedScopes.flatMap { expand(it).toList() }.toSet().toTypedArray()
     }
 

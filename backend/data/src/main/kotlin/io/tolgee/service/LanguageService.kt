@@ -223,8 +223,7 @@ class LanguageService(
     projectId: Long,
     userId: Long,
   ): Set<LanguageDto> {
-    val canViewTranslations =
-      permissionService.getProjectPermissionScopes(projectId, userId)?.contains(Scope.TRANSLATIONS_VIEW) == true
+    val canViewTranslations = securityService.currentPermittedScopesContain(Scope.TRANSLATIONS_VIEW)
 
     if (!canViewTranslations) {
       return emptySet()

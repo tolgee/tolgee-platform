@@ -165,11 +165,6 @@ class ApiKeyController(
       )
 
     val computed = permissionData.computedPermissions
-    val scopes =
-      when {
-        apiKeyAuthentication -> authenticationFacade.projectApiKey.scopes.toTypedArray()
-        else -> computed.scopes
-      }
 
     return ApiKeyPermissionsModel(
       projectIdNotNull,
@@ -177,7 +172,7 @@ class ApiKeyController(
       translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
-      scopes = scopes,
+      scopes = securityService.getCurrentPermittedScopes(projectIdNotNull).toTypedArray(),
       project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
     )
   }

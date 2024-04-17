@@ -25,7 +25,7 @@ class ProjectApiKeyAuthRequestPerformer(
   lateinit var apiKeyService: ApiKeyService
 
   val apiKey: ApiKeyDTO by lazy {
-    io.tolgee.dtos.response.ApiKeyDTO.fromEntity(
+    ApiKeyDTO.fromEntity(
       apiKeyService.create(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project),
     )
   }

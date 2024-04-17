@@ -28,7 +28,6 @@ import io.tolgee.hateoas.translations.TranslationHistoryModel
 import io.tolgee.hateoas.translations.TranslationHistoryModelAssembler
 import io.tolgee.hateoas.translations.TranslationModel
 import io.tolgee.hateoas.translations.TranslationModelAssembler
-import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
@@ -47,6 +46,7 @@ import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.beans.propertyeditors.CustomCollectionEditor
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -229,7 +229,7 @@ When null, resulting file will be a flat key-value object.
 
   @GetMapping(value = [""])
   @Operation(summary = "Get translations in project")
-  @UseDefaultPermissions // Security: check done internally
+  @RequiresProjectPermissions(scopes = [Scope.KEYS_VIEW]) // Security: check done internally
   @AllowApiAccess
   @Transactional
   @OpenApiOrderExtension(5)
@@ -252,14 +252,22 @@ When null, resulting file will be a flat key-value object.
       translationService
         .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
-    val keysWithScreenshots = getScreenshots(data.map { it.keyId }.toList())
-
-    if (keysWithScreenshots != null) {
-      data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
-    }
+    addScreenshotsToResponse(data)
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
+  }
+
+  private fun addScreenshotsToResponse(data: Page<KeyWithTranslationsView>) {
+    val canViewScreenshots = securityService.currentPermittedScopesContain(Scope.SCREENSHOTS_VIEW)
+
+    if (!canViewScreenshots) {
+      return
+    }
+
+    val keysWithScreenshots = screenshotService.getScreenshotsForKeys(data.map { it.keyId }.content)
+
+    data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
@@ -315,23 +323,6 @@ When null, resulting file will be a flat key-value object.
     securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(translation.language.id))
     val translations = activityService.getTranslationHistory(translation.id, pageable)
     return historyPagedAssembler.toModel(translations, historyModelAssembler)
-  }
-
-  private fun getScreenshots(keyIds: Collection<Long>): Map<Long, List<Screenshot>>? {
-    if (
-      !authenticationFacade.isProjectApiKeyAuth ||
-      authenticationFacade.projectApiKey.scopes.contains(Scope.SCREENSHOTS_VIEW)
-    ) {
-      return screenshotService.getScreenshotsForKeys(keyIds)
-    }
-    return null
-  }
-
-  private fun checkKeyEditScope() {
-    securityService.checkProjectPermission(
-      projectHolder.project.id,
-      Scope.KEYS_EDIT,
-    )
   }
 
   private fun getSafeSortPageable(pageable: Pageable): Pageable {
