@@ -25,6 +25,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
@@ -154,6 +155,22 @@ class ProjectAuthorizationInterceptorTest {
       .thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
+  }
+
+  @Test
+  fun `rejects access if the user is admin and authorizes with API key`() {
+    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
+
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_VIEW))
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
+
+    Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
   }
 
   @Test
