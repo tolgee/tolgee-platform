@@ -70,12 +70,7 @@ class ProjectAuthorizationInterceptor(
     val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
     logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
 
-    val scopes =
-      if (authenticationFacade.isProjectApiKeyAuth) {
-        authenticationFacade.projectApiKey.scopes.toTypedArray()
-      } else {
-        securityService.getProjectPermissionScopes(project.id, userId) ?: emptyArray()
-      }
+    val scopes = securityService.getCurrentPermittedScopes(project.id)
 
     if (scopes.isEmpty()) {
       if (!isAdmin) {
@@ -92,23 +87,23 @@ class ProjectAuthorizationInterceptor(
       bypassed = true
     }
 
-    requiredScopes?.forEach {
-      if (!scopes.contains(it)) {
-        if (!isAdmin) {
-          logger.debug(
-            "Rejecting access to proj#{} for user#{} - Insufficient permissions",
-            project.id,
-            userId,
-          )
+    val missingScopes = getMissingScopes(requiredScopes, scopes.toSet())
 
-          throw PermissionException(
-            Message.OPERATION_NOT_PERMITTED,
-            requiredScopes.map { s -> s.value },
-          )
-        }
+    if (missingScopes.isNotEmpty()) {
+      if (!isAdmin) {
+        logger.debug(
+          "Rejecting access to proj#{} for user#{} - Insufficient permissions",
+          project.id,
+          userId,
+        )
 
-        bypassed = true
+        throw PermissionException(
+          Message.OPERATION_NOT_PERMITTED,
+          missingScopes.map { it.value },
+        )
       }
+
+      bypassed = true
     }
 
     if (authenticationFacade.isProjectApiKeyAuth) {
@@ -122,24 +117,7 @@ class ProjectAuthorizationInterceptor(
           pak.id,
         )
 
-        throw PermissionException()
-      }
-
-      // Validate scopes set on the key
-      requiredScopes?.forEach {
-        if (!pak.scopes.contains(it)) {
-          logger.debug(
-            "Rejecting access to proj#{} for user#{} via pak#{} - Insufficient permissions granted to PAK",
-            project.id,
-            userId,
-            pak.id,
-          )
-
-          throw PermissionException(
-            Message.OPERATION_NOT_PERMITTED,
-            requiredScopes.map { s -> s.value },
-          )
-        }
+        throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
       }
     }
 
@@ -159,6 +137,15 @@ class ProjectAuthorizationInterceptor(
       ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
 
     return true
+  }
+
+  private fun getMissingScopes(
+    requiredScopes: Array<Scope>?,
+    permittedScopes: Collection<Scope>?,
+  ): Set<Scope> {
+    val permitted = permittedScopes?.toSet() ?: setOf()
+    val required = requiredScopes?.toSet() ?: setOf()
+    return required - permitted
   }
 
   private fun getRequiredScopes(

@@ -27,7 +27,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
     permissionTestUtil.withPermissionsTestData { project, user ->
       performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-      permissionService.getProjectPermissionScopes(project.id, user)
+      permissionService.getProjectPermissionScopesNoApiKey(project.id, user)
         .let { Assertions.assertThat(it).equalsPermissionType(ProjectPermissionType.EDIT) }
     }
   }

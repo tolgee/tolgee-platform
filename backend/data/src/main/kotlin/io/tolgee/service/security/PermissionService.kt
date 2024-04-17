@@ -67,12 +67,12 @@ class PermissionService(
     return cachedPermissionService.find(id)
   }
 
-  fun getProjectPermissionScopes(
+  fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccount: UserAccount,
-  ) = getProjectPermissionScopes(projectId, userAccount.id)
+  ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id)
 
-  fun getProjectPermissionScopes(
+  fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
   ): Array<Scope>? {

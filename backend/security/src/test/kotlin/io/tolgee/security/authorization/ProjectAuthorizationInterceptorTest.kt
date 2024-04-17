@@ -130,13 +130,13 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `it hides the organization if the user cannot see it`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(null)
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andIsNotFound
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-admin")).andIsNotFound
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andIsOk
@@ -144,12 +144,12 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `rejects access if the user does not have the required scope (single scope)`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
@@ -157,17 +157,17 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `rejects access if the user does not have the required scope (multiple scopes)`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsOk
@@ -189,7 +189,7 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `it restricts scopes to the ones set to the API key`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsOk
@@ -203,7 +203,7 @@ class ProjectAuthorizationInterceptorTest {
   @Test
   fun `it does not let scopes on the key work if the authenticated user does not have them`() {
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
@@ -217,7 +217,7 @@ class ProjectAuthorizationInterceptorTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsOk
 
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_VIEW))
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
+    Mockito.`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsForbidden
