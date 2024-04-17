@@ -90,7 +90,7 @@ class ProjectAuthorizationInterceptor(
     val missingScopes = getMissingScopes(requiredScopes, scopes.toSet())
 
     if (missingScopes.isNotEmpty()) {
-      if (!isAdmin) {
+      if (!isAdmin || authenticationFacade.isProjectApiKeyAuth) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - Insufficient permissions",
           project.id,
