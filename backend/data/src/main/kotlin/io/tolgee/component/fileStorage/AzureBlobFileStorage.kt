@@ -8,6 +8,7 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobClient
 import com.azure.storage.blob.BlobContainerAsyncClient
 import com.azure.storage.blob.BlobContainerClient
+import com.azure.storage.blob.models.ListBlobsOptions
 import io.tolgee.exceptions.FileStoreException
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import java.lang.reflect.Field
@@ -55,7 +56,10 @@ open class AzureBlobFileStorage(
   }
 
   override fun pruneDirectory(path: String) {
-    client.listBlobsByHierarchy(path).forEach {
+    val prefix = path.removeSuffix("/") + "/"
+    val options = ListBlobsOptions()
+    options.setPrefix(prefix)
+    client.listBlobs(options, null).forEach {
       getBlobClient(it.name).delete()
     }
   }

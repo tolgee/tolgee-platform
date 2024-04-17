@@ -213,19 +213,23 @@ export class Validation {
     description: Yup.string().nullable().min(3).max(2000),
   });
 
-  static readonly ORGANIZATION_CREATE_OR_EDIT = (
-    t: TFunType,
-    slugInitialValue?: string
-  ) => {
-    const slugSyncValidation = Yup.string()
+  private static slugValidation(min: number, max: number) {
+    return Yup.string()
       .required()
-      .min(3)
-      .max(60)
+      .min(min)
+      .max(max)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
         message: (
           <T keyName="slug_validation_can_contain_just_lowercase_numbers_hyphens" />
         ),
       });
+  }
+
+  static readonly ORGANIZATION_CREATE_OR_EDIT = (
+    t: TFunType,
+    slugInitialValue?: string
+  ) => {
+    const slugSyncValidation = Validation.slugValidation(3, 60);
 
     const slugUniqueDebouncedAsyncValidation = (v) => {
       if (slugInitialValue === v) {
@@ -375,6 +379,12 @@ export class Validation {
     name: Yup.string().required().max(100),
     languages: Yup.array().min(1),
     states: Yup.array().min(1),
+    slug: Yup.string().when('contentStorageId', {
+      is(value?: number) {
+        return !!value;
+      },
+      then: Validation.slugValidation(1, 60),
+    }),
   });
 
   static readonly WEBHOOK_FORM = Yup.object().shape({

@@ -15,6 +15,7 @@ class ContentDeliveryConfigModel(
   val id: Long,
   val name: String,
   val slug: String,
+  val pruneBeforePublish: Boolean,
   val storage: ContentStorageModel?,
   val publicUrl: String?,
   val autoPublish: Boolean,

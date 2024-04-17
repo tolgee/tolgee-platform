@@ -137,10 +137,11 @@ class ContentDeliveryConfigService(
     dto: ContentDeliveryConfigRequest,
   ) {
     val desiredSlug = dto.slug
-    val isUnchanged = desiredSlug == config.slug
+    val isUnchanged = desiredSlug == config.slug && dto.contentStorageId == config.contentStorage?.id
     if (isUnchanged) {
       return
     }
+
     if (desiredSlug == null) {
       config.slug = generateSlug(config.project.id)
       return

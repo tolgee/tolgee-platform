@@ -6,6 +6,7 @@ import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 class ContentDeliveryConfigRequest() : IExportParams {
   @field:NotBlank
@@ -32,6 +33,7 @@ class ContentDeliveryConfigRequest() : IExportParams {
         "Slag has to match following regular expression: `^[a-z0-9]+(?:-[a-z0-9]+)*\$`.\n\n" +
         "If null is provided for update operation, slug will be assigned with generated value.",
   )
+  @field:Size(min = 1, max = 60)
   var slug: String? = null
 
   @Schema(

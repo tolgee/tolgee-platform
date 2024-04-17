@@ -24,6 +24,7 @@ import {
 } from './components/formatGroups';
 import { downloadExported } from './downloadExported';
 import { MessageFormatSelector } from './components/MessageFormatSelector';
+import { useExportHelper } from 'tg.hooks/useExportHelper';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -90,37 +91,10 @@ export const ExportForm = () => {
     },
   });
 
-  const languagesLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { size: 1000 },
-  });
-
-  const namespacesLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/used-namespaces',
-    method: 'get',
-    path: { projectId: project.id },
-    fetchOptions: {
-      disable404Redirect: true,
-    },
-  });
+  const { isFetching, allowedLanguageTags, allNamespaces, allowedLanguages } =
+    useExportHelper();
 
   const { t } = useTranslate();
-
-  const allNamespaces = useMemo(
-    () =>
-      namespacesLoadable.data?._embedded?.namespaces?.map((n) => n.name || ''),
-    [namespacesLoadable.data]
-  );
-
-  const allowedLanguages = useMemo(
-    () =>
-      languagesLoadable.data?._embedded?.languages?.filter((l) =>
-        satisfiesLanguageAccess('translations.view', l.id)
-      ) || [],
-    [languagesLoadable.data]
-  );
 
   const allowedTags = useMemo(
     () => allowedLanguages?.map((l) => l.tag) || [],
@@ -164,7 +138,7 @@ export const ExportForm = () => {
     defaultVal: 'false',
   });
 
-  if (languagesLoadable.isFetching || namespacesLoadable.isFetching) {
+  if (isFetching) {
     return (
       <Box mt={6}>
         <BoxLoading />

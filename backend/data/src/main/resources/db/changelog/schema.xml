@@ -3204,4 +3204,11 @@
     <changeSet author="gyeongwoopark (generated)" id="1712309146235-6">
         <dropColumn columnName="base_namespace_id" tableName="project"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1713361057414-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="prune_before_publish" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
