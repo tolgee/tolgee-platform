@@ -1,3 +1,11 @@
+## [3.57.2](https://github.com/tolgee/tolgee-platform/compare/v3.57.1...v3.57.2) (2024-04-17)
+
+
+### Bug Fixes
+
+* add enterprise plan to platform billing ([#2251](https://github.com/tolgee/tolgee-platform/issues/2251)) ([3ea21b8](https://github.com/tolgee/tolgee-platform/commit/3ea21b83d5b537b3f661fe59ba252d8f1e7a7996))
+* Translation endpoints permission check ([#2254](https://github.com/tolgee/tolgee-platform/issues/2254)) ([f712139](https://github.com/tolgee/tolgee-platform/commit/f71213925d6f80019f841db0ead9baa7488c1821))
+
 ## [3.57.1](https://github.com/tolgee/tolgee-platform/compare/v3.57.0...v3.57.1) (2024-04-17)
 
 
