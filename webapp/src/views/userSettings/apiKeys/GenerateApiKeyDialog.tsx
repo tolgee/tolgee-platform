@@ -25,6 +25,8 @@ import { useExpirationDateOptions } from 'tg.component/common/form/epirationFiel
 import { ProjectModel } from 'tg.fixtures/permissions';
 import { useHistory } from 'react-router-dom';
 
+type Scope = components['schemas']['ComputedPermissionModel']['scopes'][number];
+
 interface Value {
   scopes: string[];
   projectId: number;
@@ -104,10 +106,29 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
   };
 
   const getInitialValues = (project: ProjectModel) => {
+    const projectScoopes = new Set(project.computedPermission.scopes);
+    const preselectedScopes = new Set<Scope>([
+      'keys.view',
+      'keys.create',
+      'keys.edit',
+      'translations.view',
+      'translations.edit',
+      'translations.state-edit',
+      'screenshots.view',
+      'screenshots.upload',
+      'screenshots.delete',
+    ]);
+
+    preselectedScopes.forEach((value) => {
+      if (!projectScoopes.has(value)) {
+        preselectedScopes.delete(value);
+      }
+    });
+
     return {
       projectId: project.id,
       //all scopes checked by default
-      scopes: new Set(project.computedPermission.scopes),
+      scopes: preselectedScopes,
       description: props.initialDescriptionValue || '',
       expiresAt: expirationDateOptions[0].time,
     };
