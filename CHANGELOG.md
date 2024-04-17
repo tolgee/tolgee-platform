@@ -1,3 +1,10 @@
+## [3.57.4](https://github.com/tolgee/tolgee-platform/compare/v3.57.3...v3.57.4) (2024-04-17)
+
+
+### Bug Fixes
+
+* Admin should not bypass auth when using API key ([#2257](https://github.com/tolgee/tolgee-platform/issues/2257)) ([a0d8610](https://github.com/tolgee/tolgee-platform/commit/a0d861028d931f8a54387770eaf3a75031b81234))
+
 ## [3.57.3](https://github.com/tolgee/tolgee-platform/compare/v3.57.2...v3.57.3) (2024-04-17)
 
 
