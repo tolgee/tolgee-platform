@@ -46,7 +46,7 @@ class ContentDeliveryConfigService(
     config.name = dto.name
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
     config.copyPropsFrom(dto)
-    config.slug = getSlugForCreation(projectId, dto)
+    setSlugForCreation(config, dto)
     config.pruneBeforePublish = dto.pruneBeforePublish
     contentDeliveryConfigRepository.save(config)
     if (dto.autoPublish) {
@@ -56,11 +56,16 @@ class ContentDeliveryConfigService(
     return config
   }
 
-  private fun getSlugForCreation(
-    projectId: Long,
+  private fun setSlugForCreation(
+    config: ContentDeliveryConfig,
     dto: ContentDeliveryConfigRequest,
-  ): String {
-    val desiredSlug = dto.slug ?: return generateSlug(projectId)
+  ) {
+    val desiredSlug = dto.slug
+    if (desiredSlug == null) {
+      config.slug = generateSlug()
+      config.customSlug = false
+      return
+    }
 
     if (dto.contentStorageId == null) {
       throw BadRequestException(Message.CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE)
@@ -68,7 +73,10 @@ class ContentDeliveryConfigService(
 
     validateSlug(desiredSlug)
 
-    return dto.slug ?: generateSlug(projectId)
+    config.slug = desiredSlug
+    config.customSlug = true
+
+    return
   }
 
   private fun validateSlug(slug: String) {
@@ -91,11 +99,9 @@ class ContentDeliveryConfigService(
     }
   }
 
-  fun generateSlug(projectId: Long): String {
-    val projectDto = projectService.getDto(projectId)
-
+  fun generateSlug(): String {
     return slugGenerator.generate(random32byteHexString(), 3, 50) {
-      contentDeliveryConfigRepository.isSlugUnique(projectDto.id, it)
+      contentDeliveryConfigRepository.isSlugUnique(it)
     }
   }
 
@@ -123,11 +129,11 @@ class ContentDeliveryConfigService(
   ): ContentDeliveryConfig {
     checkMultipleConfigsFeature(projectService.get(projectId), maxCurrentAllowed = 1)
     val config = get(projectId, id)
+    handleUpdateSlug(config, dto)
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
     config.name = dto.name
     config.pruneBeforePublish = dto.pruneBeforePublish
     config.copyPropsFrom(dto)
-    handleUpdateSlug(config, dto)
     handleUpdateAutoPublish(dto, config)
     return save(config)
   }
@@ -137,23 +143,27 @@ class ContentDeliveryConfigService(
     dto: ContentDeliveryConfigRequest,
   ) {
     val desiredSlug = dto.slug
-    val isUnchanged = desiredSlug == config.slug && dto.contentStorageId == config.contentStorage?.id
-    if (isUnchanged) {
-      return
-    }
+    val wasCustomStorage = config.contentStorage != null
+    val nowCustomStorage = dto.contentStorageId != null
 
     if (desiredSlug == null) {
-      config.slug = generateSlug(config.project.id)
+      config.slug = generateSlug()
+      config.customSlug = false
       return
     }
 
-    if (dto.contentStorageId == null) {
+    val customStorageRemoved = wasCustomStorage && !nowCustomStorage
+    val illegalKeepOfCustomSlug = customStorageRemoved && config.customSlug
+    val illegalUseOfCustomSlug = desiredSlug != config.slug && !nowCustomStorage
+
+    if (illegalUseOfCustomSlug || illegalKeepOfCustomSlug) {
       throw BadRequestException(Message.CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE)
     }
 
     validateSlug(desiredSlug)
 
     config.slug = desiredSlug
+    config.customSlug = true
   }
 
   private fun handleUpdateAutoPublish(

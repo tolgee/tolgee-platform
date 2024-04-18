@@ -89,6 +89,13 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   }
 
   @Test
+  fun testPruneDirectory()  {
+    fileStorage.storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
+    fileStorage.pruneDirectory("test")
+    assertThat(fileStorage.fileExists(testFilePath)).isEqualTo(false)
+  }
+
+  @Test
   fun testFileExists() {
     s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
     assertThat(fileStorage.fileExists(testFilePath)).isTrue

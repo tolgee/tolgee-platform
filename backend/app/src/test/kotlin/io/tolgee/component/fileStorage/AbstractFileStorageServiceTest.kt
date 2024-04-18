@@ -14,6 +14,6 @@ abstract class AbstractFileStorageServiceTest {
   @set:Autowired
   open lateinit var tolgeeProperties: TolgeeProperties
 
-  val testFilePath = "/test/test_sub/text.txt"
+  val testFilePath = "test/test_sub/text.txt"
   val testFileContent = "test"
 }

@@ -230,7 +230,7 @@ class TestDataService(
   private fun saveContentDeliveryConfigs(builder: ProjectBuilder) {
     builder.data.contentDeliveryConfigs.forEach {
       if (it.self.slug.isEmpty()) {
-        it.self.slug = contentDeliveryConfigService.generateSlug(it.projectBuilder.self.id)
+        it.self.slug = contentDeliveryConfigService.generateSlug()
       }
       entityManager.persist(it.self)
     }
