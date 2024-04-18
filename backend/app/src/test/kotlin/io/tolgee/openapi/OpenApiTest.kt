@@ -42,4 +42,13 @@ class OpenApiTest : AbstractControllerTest() {
       node("paths").isObject.containsKey("/v2/projects/languages")
     }
   }
+
+  @Test
+  fun `all public works`() {
+    performGet("/v3/api-docs/Public API (All)").andIsOk.andAssertThatJson {
+      node("paths").isObject
+        .doesNotContainKey("/v2/projects/languages")
+        .containsKey("/v2/projects/{projectId}/languages")
+    }
+  }
 }

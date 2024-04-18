@@ -1,6 +1,5 @@
 package io.tolgee.configuration.openApi
 
-import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.Paths
@@ -38,7 +37,15 @@ class OpenApiGroupBuilder(
 
     addExtensions()
 
+    cleanUnusedModels()
+
     return@lazy builder.build()
+  }
+
+  private fun cleanUnusedModels() {
+    builder.addOpenApiCustomizer {
+      OpenApiUnusedSchemaCleaner(it).clean()
+    }
   }
 
   private fun addExtensions() {

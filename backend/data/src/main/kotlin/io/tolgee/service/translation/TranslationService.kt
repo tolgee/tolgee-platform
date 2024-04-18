@@ -144,6 +144,20 @@ class TranslationService(
     return this.translationRepository.findById(id).orElse(null)
   }
 
+  fun find(
+    projectId: Long,
+    translationId: Long,
+  ): Translation? {
+    return this.translationRepository.find(projectId, translationId)
+  }
+
+  fun get(
+    projectId: Long,
+    translationId: Long,
+  ): Translation {
+    return find(projectId, translationId) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+  }
+
   fun getViewData(
     projectId: Long,
     pageable: Pageable,
