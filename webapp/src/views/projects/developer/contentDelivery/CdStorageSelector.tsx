@@ -1,5 +1,5 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { Field, useField, useFormik, useFormikContext } from 'formik';
+import { Field, useFormikContext } from 'formik';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { useTranslate } from '@tolgee/react';

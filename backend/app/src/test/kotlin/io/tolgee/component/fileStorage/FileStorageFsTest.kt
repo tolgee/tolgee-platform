@@ -19,7 +19,7 @@ class FileStorageFsTest : AbstractFileStorageServiceTest() {
 
   @BeforeEach
   fun beforeMethod() {
-    file = File(tolgeeProperties.fileStorage.fsDataPath + testFilePath)
+    file = File(tolgeeProperties.fileStorage.fsDataPath + "/" + testFilePath)
     file.parentFile.mkdirs()
     file.writeText(testFileContent)
   }

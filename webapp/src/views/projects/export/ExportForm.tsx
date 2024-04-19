@@ -4,7 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { EXPORTABLE_STATES, StateType } from 'tg.constants/translationStates';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StateSelector } from 'tg.views/projects/export/components/StateSelector';
@@ -12,7 +12,6 @@ import { LanguageSelector } from 'tg.views/projects/export/components/LanguageSe
 import { FormatSelector } from 'tg.views/projects/export/components/FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { SupportArraysSelector } from './components/SupportArraysSelector';
@@ -82,7 +81,7 @@ const StyledOptions = styled('div')`
 
 export const ExportForm = () => {
   const project = useProject();
-  const { satisfiesLanguageAccess } = useProjectPermissions();
+
   const exportLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/export',
     method: 'post',
@@ -91,8 +90,7 @@ export const ExportForm = () => {
     },
   });
 
-  const { isFetching, allowedLanguageTags, allNamespaces, allowedLanguages } =
-    useExportHelper();
+  const { isFetching, allNamespaces, allowedLanguages } = useExportHelper();
 
   const { t } = useTranslate();
 

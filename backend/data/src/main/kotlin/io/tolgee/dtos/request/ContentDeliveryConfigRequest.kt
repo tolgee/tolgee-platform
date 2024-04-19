@@ -39,8 +39,8 @@ class ContentDeliveryConfigRequest() : IExportParams {
   @Schema(
     description =
       "Whether the data in the CDN should be pruned before publishing new data.\n\n" +
-        "In some cases, you might want to keep the data in the storage and only replace the files created by following " +
-        "publish operation.",
+        "In some cases, you might want to keep the data in the storage and only replace the " +
+        "files created by following publish operation.",
   )
   var pruneBeforePublish = true
 

@@ -6,13 +6,15 @@ package io.tolgee.component.fileStorage
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 abstract class AbstractFileStorageServiceTest {
-  @set:Autowired
+  @Autowired
   lateinit var fileStorage: FileStorage
 
-  @set:Autowired
-  open lateinit var tolgeeProperties: TolgeeProperties
+  @Autowired
+  lateinit var tolgeeProperties: TolgeeProperties
 
   val testFilePath = "test/test_sub/text.txt"
   val testFileContent = "test"

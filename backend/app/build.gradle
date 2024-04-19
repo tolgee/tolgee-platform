@@ -88,6 +88,7 @@ dependencies {
     testImplementation libs.assertJCore
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation("io.findify:s3mock_2.13:0.2.6")
 
     implementation libs.springmockk
     implementation libs.jsonUnitAssert
@@ -95,6 +96,11 @@ dependencies {
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
     testImplementation libs.sendInBlue
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
+    testImplementation(libs.azureBlob) {
+        exclude group: 'io.netty', module: 'netty-codec-http'
+    }
+    testImplementation('io.netty:netty-codec-http:4.1.108.Final')
+
 
     /**
      * MISC
@@ -168,9 +174,10 @@ dependencies {
 
 
     /**
-     * API module
+     * Security module
      */
     implementation(project(':security'))
+
 }
 
 def setTestRetry(test) {

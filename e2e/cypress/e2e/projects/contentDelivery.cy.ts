@@ -28,7 +28,7 @@ describe('Content delivery', () => {
   afterEach(() => {
     setFeature('MULTIPLE_CONTENT_DELIVERY_CONFIGS', true);
     setContentStorageBypass(false);
-    // contentDeliveryTestData.clean();
+    contentDeliveryTestData.clean();
   });
 
   it('publishes content manually', () => {
@@ -75,7 +75,7 @@ describe('Content delivery', () => {
       .should('have.length', 32);
   });
 
-  it.only('stores prune before publishing', () => {
+  it('stores prune before publishing', () => {
     cy.gcy('content-delivery-add-button').click();
     fillContentDeliveryConfigForm('Pruning');
     cy.gcy('content-delivery-prune-before-publish-checkbox')

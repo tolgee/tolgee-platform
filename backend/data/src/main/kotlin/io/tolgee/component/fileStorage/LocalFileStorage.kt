@@ -67,5 +67,5 @@ class LocalFileStorage(
 
   private fun String.removeLeadingSlash() = this.removePrefix("/")
 
-  private fun String.removeTrailingSlash() = this.removePrefix("/")
+  private fun String.removeTrailingSlash() = this.removeSuffix("/")
 }
