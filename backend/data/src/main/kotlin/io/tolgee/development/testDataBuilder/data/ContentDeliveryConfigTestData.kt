@@ -49,7 +49,7 @@ class ContentDeliveryConfigTestData : BaseTestData() {
   val s3ContentDeliveryConfigWithCustomSlug =
     projectBuilder.addContentDeliveryConfig {
       contentStorage = s3ContentStorage.self
-      name = "S3"
+      name = "Custom Slug"
       slug = "my-slug"
       customSlug = true
     }
