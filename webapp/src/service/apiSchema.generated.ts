@@ -5,12 +5,15 @@
 
 export interface paths {
   "/v2/user": {
+    /** Returns information about currently authenticated user. */
     get: operations["getInfo_2"];
+    /** Updates current user's profile information. */
     put: operations["updateUser"];
     post: operations["updateUserOld"];
     delete: operations["delete"];
   };
   "/v2/user/password": {
+    /** Updates current user's password. Invalidates all previous sessions upon success. */
     put: operations["updateUserPassword"];
   };
   "/v2/user/mfa/totp": {
@@ -295,6 +298,7 @@ export interface paths {
     put: operations["setRole"];
   };
   "/v2/user/generate-super-token": {
+    /** Generates new JWT token permitted to sensitive operations */
     post: operations["getSuperToken"];
   };
   "/v2/slug/generate-project": {
@@ -476,6 +480,7 @@ export interface paths {
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
+    /** Creates new API key with provided scopes */
     post: operations["create_13"];
   };
   "/v2/announcement/dismiss": {
@@ -500,6 +505,7 @@ export interface paths {
     post: operations["authenticateUser"];
   };
   "/v2/user/single-owned-organizations": {
+    /** Returns all organizations owned only by current user */
     get: operations["getAllSingleOwnedOrganizations"];
   };
   "/v2/user-preferences": {
@@ -633,6 +639,7 @@ export interface paths {
     get: operations["getProjectInvitations"];
   };
   "/v2/projects/{projectId}/api-keys": {
+    /** Returns all API keys for specified project */
     get: operations["allByProject"];
   };
   "/v2/projects/with-stats": {
@@ -687,9 +694,11 @@ export interface paths {
     get: operations["getInfo_3"];
   };
   "/v2/api-keys/{keyId}": {
+    /** Returns specific API key info */
     get: operations["get_20"];
   };
   "/v2/api-keys/current": {
+    /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
     get: operations["getCurrent_1"];
   };
   "/v2/api-keys/availableScopes": {
@@ -764,7 +773,6 @@ export interface components {
       large: string;
       thumbnail: string;
     };
-    Links: { [key: string]: components["schemas"]["Link"] };
     PrivateUserAccountModel: {
       /** Format: int64 */
       id: number;
@@ -1596,10 +1604,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -1912,8 +1920,8 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
@@ -2891,16 +2899,16 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
     };
@@ -3688,8 +3696,8 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
@@ -3699,63 +3707,6 @@ export interface components {
       /** Format: int64 */
       projectId: number;
       description: string;
-    };
-    ApiKeyPermissionsModel: {
-      /**
-       * Format: int64
-       * @description The API key's project id or the one provided as query param
-       */
-      projectId: number;
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
-       */
-      scopes: (
-        | "translations.view"
-        | "translations.edit"
-        | "keys.edit"
-        | "screenshots.upload"
-        | "screenshots.delete"
-        | "screenshots.view"
-        | "activity.view"
-        | "languages.edit"
-        | "admin"
-        | "project.edit"
-        | "members.view"
-        | "members.edit"
-        | "translation-comments.add"
-        | "translation-comments.edit"
-        | "translation-comments.set-state"
-        | "translations.state-edit"
-        | "keys.view"
-        | "keys.delete"
-        | "keys.create"
-        | "batch-jobs.view"
-        | "batch-jobs.cancel"
-        | "translations.batch-by-tm"
-        | "translations.batch-machine"
-        | "content-delivery.manage"
-        | "content-delivery.publish"
-        | "webhooks.manage"
-      )[];
-      /** @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      project: components["schemas"]["SimpleProjectModel"];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -3781,20 +3732,11 @@ export interface components {
       /** @description IDs of keys to delete */
       ids: number[];
     };
-    Link: {
-      href?: string;
-      hreflang?: string;
-      title?: string;
-      type?: string;
-      deprecation?: string;
-      profile?: string;
-      name?: string;
-      templated?: boolean;
-    };
   };
 }
 
 export interface operations {
+  /** Returns information about currently authenticated user. */
   getInfo_2: {
     responses: {
       /** OK */
@@ -3829,6 +3771,7 @@ export interface operations {
       };
     };
   };
+  /** Updates current user's profile information. */
   updateUser: {
     responses: {
       /** OK */
@@ -3937,6 +3880,7 @@ export interface operations {
       };
     };
   };
+  /** Updates current user's password. Invalidates all previous sessions upon success. */
   updateUserPassword: {
     responses: {
       /** OK */
@@ -6168,6 +6112,7 @@ export interface operations {
   setState: {
     parameters: {
       path: {
+        translationId: number;
         commentId: number;
         state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
         projectId: number;
@@ -6251,6 +6196,7 @@ export interface operations {
     parameters: {
       path: {
         commentId: number;
+        translationId: number;
         projectId: number;
       };
     };
@@ -6295,6 +6241,7 @@ export interface operations {
   delete_8: {
     parameters: {
       path: {
+        translationId: number;
         commentId: number;
         projectId: number;
       };
@@ -7965,6 +7912,7 @@ export interface operations {
       };
     };
   };
+  /** Generates new JWT token permitted to sensitive operations */
   getSuperToken: {
     responses: {
       /** OK */
@@ -10686,6 +10634,7 @@ export interface operations {
       };
     };
   };
+  /** Creates new API key with provided scopes */
   create_13: {
     responses: {
       /** OK */
@@ -10945,6 +10894,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all organizations owned only by current user */
   getAllSingleOwnedOrganizations: {
     responses: {
       /** OK */
@@ -12665,6 +12615,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all API keys for specified project */
   allByProject: {
     parameters: {
       query: {
@@ -13294,6 +13245,7 @@ export interface operations {
       };
     };
   };
+  /** Returns specific API key info */
   get_20: {
     parameters: {
       path: {
@@ -13333,6 +13285,7 @@ export interface operations {
       };
     };
   };
+  /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
   getCurrent_1: {
     responses: {
       /** OK */
