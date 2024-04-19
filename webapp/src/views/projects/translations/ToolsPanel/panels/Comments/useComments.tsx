@@ -32,9 +32,11 @@ export const useComments = ({ keyId, translation, language }: Props) => {
 
   const [inputValue, setInputValue] = useState('');
 
+  const translationId = translation?.id as number;
+
   const path = {
     projectId: project.id,
-    translationId: translation?.id as number,
+    translationId: translationId,
   };
   const query = { sort: ['createdAt,desc', 'id,desc'], size: 20, page: 0 };
 
@@ -164,7 +166,7 @@ export const useComments = ({ keyId, translation, language }: Props) => {
   const handleDelete = (commentId: number) => {
     deleteComment
       .mutateAsync(
-        { path: { projectId: project.id, commentId } },
+        { path: { projectId: project.id, commentId, translationId } },
         {
           onSuccess() {
             refetchComments();
@@ -184,8 +186,8 @@ export const useComments = ({ keyId, translation, language }: Props) => {
       .mutateAsync(
         {
           path: {
-            projectId: project.id,
-            commentId,
+            ...path,
+            commentId: commentId,
             state,
           },
         },

@@ -36,8 +36,28 @@ interface TranslationCommentRepository : JpaRepository<TranslationComment, Long>
     """
     from TranslationComment tc
     left join fetch tc.author
-    where tc.id = :id
+    where tc.id = :commentId 
+      and tc.translation.id = :translationId
+      and tc.translation.key.project.id = :projectId
   """,
   )
-  fun findWithFetchedAuthor(id: Long): TranslationComment?
+  fun findWithFetchedAuthor(
+    projectId: Long,
+    translationId: Long,
+    commentId: Long,
+  ): TranslationComment?
+
+  @Query(
+    """
+    from TranslationComment tc
+    where tc.id = :commentId 
+      and tc.translation.id = :translationId
+      and tc.translation.key.project.id = :projectId
+  """,
+  )
+  fun find(
+    projectId: Long,
+    translationId: Long,
+    commentId: Long,
+  ): TranslationComment?
 }

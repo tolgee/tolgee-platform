@@ -225,4 +225,14 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     key: Key,
     languageTags: Collection<String>,
   ): List<Translation>
+
+  @Query(
+    """
+    from Translation t where t.key.project.id = :projectId and t.id = :translationId
+  """,
+  )
+  fun find(
+    projectId: Long,
+    translationId: Long,
+  ): Translation?
 }

@@ -5,12 +5,15 @@
 
 export interface paths {
   "/v2/user": {
+    /** Returns information about currently authenticated user. */
     get: operations["getInfo_2"];
+    /** Updates current user's profile information. */
     put: operations["updateUser"];
     post: operations["updateUserOld"];
     delete: operations["delete"];
   };
   "/v2/user/password": {
+    /** Updates current user's password. Invalidates all previous sessions upon success. */
     put: operations["updateUserPassword"];
   };
   "/v2/user/mfa/totp": {
@@ -295,6 +298,7 @@ export interface paths {
     put: operations["setRole"];
   };
   "/v2/user/generate-super-token": {
+    /** Generates new JWT token permitted to sensitive operations */
     post: operations["getSuperToken"];
   };
   "/v2/slug/generate-project": {
@@ -303,8 +307,32 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
-  "/v2/public/business-events/report": {
+  "/v2/public/translator/translate": {
+    post: operations["translate"];
+  };
+  "/v2/public/telemetry/report": {
     post: operations["report"];
+  };
+  "/v2/public/licensing/subscription": {
+    post: operations["getMySubscription"];
+  };
+  "/v2/public/licensing/set-key": {
+    post: operations["onLicenceSetKey"];
+  };
+  "/v2/public/licensing/report-usage": {
+    post: operations["reportUsage"];
+  };
+  "/v2/public/licensing/report-error": {
+    post: operations["reportError"];
+  };
+  "/v2/public/licensing/release-key": {
+    post: operations["releaseKey"];
+  };
+  "/v2/public/licensing/prepare-set-key": {
+    post: operations["prepareSetLicenseKey"];
+  };
+  "/v2/public/business-events/report": {
+    post: operations["report_1"];
   };
   "/v2/public/business-events/identify": {
     post: operations["identify"];
@@ -373,7 +401,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm": {
     /** Pre-translate provided keys to provided languages by TM. */
-    post: operations["translate"];
+    post: operations["translate_1"];
   };
   "/v2/projects/{projectId}/start-batch-job/machine-translate": {
     /** Translate provided keys to provided languages through primary MT provider. */
@@ -448,10 +476,11 @@ export interface paths {
   };
   "/v2/ee-license/prepare-set-license-key": {
     /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-    post: operations["prepareSetLicenseKey"];
+    post: operations["prepareSetLicenseKey_1"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
+    /** Creates new API key with provided scopes */
     post: operations["create_13"];
   };
   "/v2/announcement/dismiss": {
@@ -476,6 +505,7 @@ export interface paths {
     post: operations["authenticateUser"];
   };
   "/v2/user/single-owned-organizations": {
+    /** Returns all organizations owned only by current user */
     get: operations["getAllSingleOwnedOrganizations"];
   };
   "/v2/user-preferences": {
@@ -585,8 +615,12 @@ export interface paths {
     get: operations["getAllTranslations"];
   };
   "/v2/projects/{projectId}/translations/select-all": {
-    /** Returns all keys for current filter values. Useful for select all functionality. */
-    get: operations["getSelectAllKeyIds"];
+    /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+    get: operations["selectKeys"];
+  };
+  "/v2/projects/{projectId}/keys/select": {
+    /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+    get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/transfer-options": {
     /** Returns organizations to which project can be transferred */
@@ -605,6 +639,7 @@ export interface paths {
     get: operations["getProjectInvitations"];
   };
   "/v2/projects/{projectId}/api-keys": {
+    /** Returns all API keys for specified project */
     get: operations["allByProject"];
   };
   "/v2/projects/with-stats": {
@@ -659,9 +694,11 @@ export interface paths {
     get: operations["getInfo_3"];
   };
   "/v2/api-keys/{keyId}": {
+    /** Returns specific API key info */
     get: operations["get_20"];
   };
   "/v2/api-keys/current": {
+    /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
     get: operations["getCurrent_1"];
   };
   "/v2/api-keys/availableScopes": {
@@ -736,7 +773,6 @@ export interface components {
       large: string;
       thumbnail: string;
     };
-    Links: { [key: string]: components["schemas"]["Link"] };
     PrivateUserAccountModel: {
       /** Format: int64 */
       id: number;
@@ -793,14 +829,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -833,15 +861,23 @@ export interface components {
         | "webhooks.manage"
       )[];
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
        * @example 200001,200004
@@ -1724,15 +1760,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1869,17 +1905,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       username?: string;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
+      userFullName?: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1890,6 +1926,168 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    ExampleItem: {
+      source: string;
+      target: string;
+      key: string;
+      keyNamespace?: string;
+    };
+    Metadata: {
+      examples: components["schemas"]["ExampleItem"][];
+      closeItems: components["schemas"]["ExampleItem"][];
+      keyDescription?: string;
+      projectDescription?: string;
+      languageDescription?: string;
+    };
+    TolgeeTranslateParams: {
+      text: string;
+      keyName?: string;
+      sourceTag: string;
+      targetTag: string;
+      metadata?: components["schemas"]["Metadata"];
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      pluralForms?: { [key: string]: string };
+      pluralFormExamples?: { [key: string]: string };
+    };
+    MtResult: {
+      translated?: string;
+      /** Format: int32 */
+      price: number;
+      contextDescription?: string;
+    };
+    TelemetryReportRequest: {
+      instanceId: string;
+      /** Format: int64 */
+      projectsCount: number;
+      /** Format: int64 */
+      translationsCount: number;
+      /** Format: int64 */
+      languagesCount: number;
+      /** Format: int64 */
+      distinctLanguagesCount: number;
+      /** Format: int64 */
+      usersCount: number;
+    };
+    GetMySubscriptionDto: {
+      licenseKey: string;
+      instanceId: string;
+    };
+    PlanIncludedUsageModel: {
+      /** Format: int64 */
+      seats: number;
+      /** Format: int64 */
+      translationSlots: number;
+      /** Format: int64 */
+      translations: number;
+      /** Format: int64 */
+      mtCredits: number;
+    };
+    PlanPricesModel: {
+      perSeat: number;
+      perThousandTranslations?: number;
+      perThousandMtCredits?: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
+    };
+    SelfHostedEePlanModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      public: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+      )[];
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      hasYearlyPrice: boolean;
+      free: boolean;
+    };
+    SelfHostedEeSubscriptionModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      currentPeriodStart?: number;
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
+      /** Format: int64 */
+      createdAt: number;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      licenseKey?: string;
+      estimatedCosts?: number;
+    };
+    SetLicenseKeyLicensingDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+      instanceId: string;
+    };
+    ReportUsageDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
+    ReportErrorDto: {
+      stackTrace: string;
+      licenseKey: string;
+    };
+    ReleaseKeyDto: {
+      licenseKey: string;
+    };
+    PrepareSetLicenseKeyDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
+    AverageProportionalUsageItemModel: {
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    PrepareSetEeLicenceKeyModel: {
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      usage: components["schemas"]["UsageModel"];
+    };
+    SumUsageItemModel: {
+      total: number;
+      /** Format: int64 */
+      unusedQuantity: number;
+      /** Format: int64 */
+      usedQuantity: number;
+      /** Format: int64 */
+      usedQuantityOverPlan: number;
+    };
+    UsageModel: {
+      subscriptionPrice?: number;
+      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
+      appliedStripeCredits?: number;
+      seats: components["schemas"]["AverageProportionalUsageItemModel"];
+      translations: components["schemas"]["AverageProportionalUsageItemModel"];
+      credits?: components["schemas"]["SumUsageItemModel"];
+      total: number;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -2229,7 +2427,8 @@ export interface components {
         | "PLURAL_FORMS_DATA_LOSS"
         | "CURRENT_USER_DOES_NOT_OWN_IMAGE"
         | "USER_CANNOT_VIEW_THIS_ORGANIZATION"
-        | "USER_IS_NOT_OWNER_OF_ORGANIZATION";
+        | "USER_IS_NOT_OWNER_OF_ORGANIZATION"
+        | "PAK_CREATED_FOR_DIFFERENT_PROJECT";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2536,77 +2735,6 @@ export interface components {
       createdAt: string;
       location?: string;
     };
-    AverageProportionalUsageItemModel: {
-      total: number;
-      unusedQuantity: number;
-      usedQuantity: number;
-      usedQuantityOverPlan: number;
-    };
-    PlanIncludedUsageModel: {
-      /** Format: int64 */
-      seats: number;
-      /** Format: int64 */
-      translationSlots: number;
-      /** Format: int64 */
-      translations: number;
-      /** Format: int64 */
-      mtCredits: number;
-    };
-    PlanPricesModel: {
-      perSeat: number;
-      perThousandTranslations?: number;
-      perThousandMtCredits?: number;
-      subscriptionMonthly: number;
-      subscriptionYearly: number;
-    };
-    PrepareSetEeLicenceKeyModel: {
-      plan: components["schemas"]["SelfHostedEePlanModel"];
-      usage: components["schemas"]["UsageModel"];
-    };
-    SelfHostedEePlanModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      public: boolean;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "WEBHOOKS"
-        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
-        | "AI_PROMPT_CUSTOMIZATION"
-      )[];
-      prices: components["schemas"]["PlanPricesModel"];
-      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
-      hasYearlyPrice: boolean;
-      free: boolean;
-    };
-    SumUsageItemModel: {
-      total: number;
-      /** Format: int64 */
-      unusedQuantity: number;
-      /** Format: int64 */
-      usedQuantity: number;
-      /** Format: int64 */
-      usedQuantityOverPlan: number;
-    };
-    UsageModel: {
-      subscriptionPrice?: number;
-      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
-      appliedStripeCredits?: number;
-      seats: components["schemas"]["AverageProportionalUsageItemModel"];
-      translations: components["schemas"]["AverageProportionalUsageItemModel"];
-      credits?: components["schemas"]["SumUsageItemModel"];
-      total: number;
-    };
     CreateApiKeyDto: {
       /** Format: int64 */
       projectId: number;
@@ -2754,10 +2882,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       /**
@@ -2766,6 +2893,7 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2874,9 +3002,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      translation?: string;
       namespace?: string;
       description?: string;
-      translation?: string;
       baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
@@ -2884,9 +3012,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      translation?: string;
       namespace?: string;
       description?: string;
-      translation?: string;
       baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -3424,15 +3552,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3551,74 +3679,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       username?: string;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-    };
-    ApiKeyPermissionsModel: {
-      /**
-       * Format: int64
-       * @description The API key's project id or the one provided as query param
-       */
-      projectId: number;
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
-       */
-      scopes: (
-        | "translations.view"
-        | "translations.edit"
-        | "keys.edit"
-        | "screenshots.upload"
-        | "screenshots.delete"
-        | "screenshots.view"
-        | "activity.view"
-        | "languages.edit"
-        | "admin"
-        | "project.edit"
-        | "members.view"
-        | "members.edit"
-        | "translation-comments.add"
-        | "translation-comments.edit"
-        | "translation-comments.set-state"
-        | "translations.state-edit"
-        | "keys.view"
-        | "keys.delete"
-        | "keys.create"
-        | "batch-jobs.view"
-        | "batch-jobs.cancel"
-        | "translations.batch-by-tm"
-        | "translations.batch-machine"
-        | "content-delivery.manage"
-        | "content-delivery.publish"
-        | "webhooks.manage"
-      )[];
-      /** @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      project: components["schemas"]["SimpleProjectModel"];
+      description: string;
+      userFullName?: string;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -3644,20 +3715,11 @@ export interface components {
       /** @description IDs of keys to delete */
       ids: number[];
     };
-    Link: {
-      href?: string;
-      hreflang?: string;
-      title?: string;
-      type?: string;
-      deprecation?: string;
-      profile?: string;
-      name?: string;
-      templated?: boolean;
-    };
   };
 }
 
 export interface operations {
+  /** Returns information about currently authenticated user. */
   getInfo_2: {
     responses: {
       /** OK */
@@ -3692,6 +3754,7 @@ export interface operations {
       };
     };
   };
+  /** Updates current user's profile information. */
   updateUser: {
     responses: {
       /** OK */
@@ -3800,6 +3863,7 @@ export interface operations {
       };
     };
   };
+  /** Updates current user's password. Invalidates all previous sessions upon success. */
   updateUserPassword: {
     responses: {
       /** OK */
@@ -6031,6 +6095,7 @@ export interface operations {
   setState: {
     parameters: {
       path: {
+        translationId: number;
         commentId: number;
         state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
         projectId: number;
@@ -6114,6 +6179,7 @@ export interface operations {
     parameters: {
       path: {
         commentId: number;
+        translationId: number;
         projectId: number;
       };
     };
@@ -6158,6 +6224,7 @@ export interface operations {
   delete_8: {
     parameters: {
       path: {
+        translationId: number;
         commentId: number;
         projectId: number;
       };
@@ -7828,6 +7895,7 @@ export interface operations {
       };
     };
   };
+  /** Generates new JWT token permitted to sensitive operations */
   getSuperToken: {
     responses: {
       /** OK */
@@ -7945,7 +8013,303 @@ export interface operations {
       };
     };
   };
+  translate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["MtResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TolgeeTranslateParams"];
+      };
+    };
+  };
   report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TelemetryReportRequest"];
+      };
+    };
+  };
+  getMySubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetMySubscriptionDto"];
+      };
+    };
+  };
+  onLicenceSetKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
+      };
+    };
+  };
+  reportUsage: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportUsageDto"];
+      };
+    };
+  };
+  reportError: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportErrorDto"];
+      };
+    };
+  };
+  releaseKey: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReleaseKeyDto"];
+      };
+    };
+  };
+  prepareSetLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
+      };
+    };
+  };
+  report_1: {
     responses: {
       /** OK */
       200: unknown;
@@ -8989,7 +9353,7 @@ export interface operations {
     };
   };
   /** Pre-translate provided keys to provided languages by TM. */
-  translate: {
+  translate_1: {
     parameters: {
       path: {
         projectId: number;
@@ -10174,7 +10538,7 @@ export interface operations {
     };
   };
   /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-  prepareSetLicenseKey: {
+  prepareSetLicenseKey_1: {
     responses: {
       /** OK */
       200: {
@@ -10253,6 +10617,7 @@ export interface operations {
       };
     };
   };
+  /** Creates new API key with provided scopes */
   create_13: {
     responses: {
       /** OK */
@@ -10512,6 +10877,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all organizations owned only by current user */
   getAllSingleOwnedOrganizations: {
     responses: {
       /** OK */
@@ -11861,8 +12227,94 @@ export interface operations {
       };
     };
   };
-  /** Returns all keys for current filter values. Useful for select all functionality. */
-  getSelectAllKeyIds: {
+  /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+  selectKeys: {
+    parameters: {
+      query: {
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
+        filterKeyName?: string[];
+        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
+        filterKeyId?: number[];
+        /** Selects only keys, where translation is missing in any language */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys, where translation is missing in specified language */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /**
+         * Filter namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Selects only keys, where translation in provided langs is in outdated state */
+        filterOutdatedLanguage?: string[];
+        /** Selects only keys, where translation in provided langs is not in outdated state */
+        filterNotOutdatedLanguage?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelectAllResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+  selectKeys_2: {
     parameters: {
       query: {
         /**
@@ -12146,6 +12598,7 @@ export interface operations {
       };
     };
   };
+  /** Returns all API keys for specified project */
   allByProject: {
     parameters: {
       query: {
@@ -12775,6 +13228,7 @@ export interface operations {
       };
     };
   };
+  /** Returns specific API key info */
   get_20: {
     parameters: {
       path: {
@@ -12814,6 +13268,7 @@ export interface operations {
       };
     };
   };
+  /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
   getCurrent_1: {
     responses: {
       /** OK */
