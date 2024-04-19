@@ -1,3 +1,10 @@
+## [3.57.5](https://github.com/tolgee/tolgee-platform/compare/v3.57.4...v3.57.5) (2024-04-19)
+
+
+### Bug Fixes
+
+* OpenApi spec to pass openapi-generator validation ([#2263](https://github.com/tolgee/tolgee-platform/issues/2263)) ([71fca25](https://github.com/tolgee/tolgee-platform/commit/71fca25009ac46e4f4bc89f61c16179cee2bf922))
+
 ## [3.57.4](https://github.com/tolgee/tolgee-platform/compare/v3.57.3...v3.57.4) (2024-04-17)
 
 
