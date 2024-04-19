@@ -22,7 +22,6 @@ import {
 import { arraySplit } from '../../common/splitByParameter';
 
 const StyledContainer = styled('div')`
-  display: grid;
   display: flex;
   flex-direction: column;
   align-items: stretch;
