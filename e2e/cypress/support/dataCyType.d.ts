@@ -127,7 +127,7 @@ declare namespace DataCy {
         "content-delivery-add-button" |
         "content-delivery-auto-publish-checkbox" |
         "content-delivery-delete-button" |
-        "content-delivery-form-custom-sliug" |
+        "content-delivery-form-custom-slug" |
         "content-delivery-form-name" |
         "content-delivery-form-save" |
         "content-delivery-item-edit" |

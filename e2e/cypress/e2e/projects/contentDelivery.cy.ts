@@ -28,7 +28,7 @@ describe('Content delivery', () => {
   afterEach(() => {
     setFeature('MULTIPLE_CONTENT_DELIVERY_CONFIGS', true);
     setContentStorageBypass(false);
-    contentDeliveryTestData.clean();
+    // contentDeliveryTestData.clean();
   });
 
   it('publishes content manually', () => {
@@ -49,6 +49,53 @@ describe('Content delivery', () => {
     assertMessage('Content delivery successfully created!');
   });
 
+  it('show custom slug only for custom storage', () => {
+    cy.gcy('content-delivery-add-button').click();
+    fillContentDeliveryConfigForm('Custom slug');
+    waitForGlobalLoading();
+    gcy('content-delivery-form-custom-slug').should('be.visible');
+    selectContentStorage('Default');
+    gcy('content-delivery-form-custom-slug').should('not.exist');
+    selectContentStorage('Azure');
+    gcy('content-delivery-form-custom-slug').type('my-slug');
+    saveForm();
+    waitForGlobalLoading();
+    openEditDialog('Custom slug');
+    gcy('content-delivery-form-custom-slug')
+      .find('input')
+      .should('have.value', 'my-slug');
+    selectContentStorage('Default');
+    saveForm();
+    openEditDialog('Custom slug');
+    gcy('content-delivery-form-custom-slug').should('not.exist');
+    selectContentStorage('Azure');
+    gcy('content-delivery-form-custom-slug')
+      .find('input')
+      .invoke('val')
+      .should('have.length', 32);
+  });
+
+  it.only('stores prune before publishing', () => {
+    cy.gcy('content-delivery-add-button').click();
+    fillContentDeliveryConfigForm('Pruning');
+    cy.gcy('content-delivery-prune-before-publish-checkbox')
+      .find('input')
+      .should('be.checked')
+      .click();
+    saveForm();
+    waitForGlobalLoading();
+    openEditDialog('Pruning');
+    cy.gcy('content-delivery-prune-before-publish-checkbox')
+      .find('input')
+      .should('not.be.checked')
+      .click();
+    saveForm();
+    openEditDialog('Pruning');
+    cy.gcy('content-delivery-prune-before-publish-checkbox')
+      .find('input')
+      .should('be.checked');
+  });
+
   it('creates content delivery config with proper export params ', () => {
     testExportFormats(
       () => {
@@ -65,15 +112,6 @@ describe('Content delivery', () => {
   });
 
   it('updates content delivery config with proper export params ', () => {
-    function openEditDialog() {
-      gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
-        .findDcy('content-delivery-item-type')
-        .contains('Manual');
-      gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
-        .findDcy('content-delivery-item-edit')
-        .click();
-    }
-
     testExportFormats(
       () => {
         openEditDialog();
@@ -90,6 +128,7 @@ describe('Content delivery', () => {
       (test) => {
         // we need to also test that the saved props are correctly dsplayed, since the logic is not
         // super simple
+        verifyPublishType();
         openEditDialog();
         if (test.expectedParams.supportArrays) {
           cy.gcy('export-support_arrays-selector')
@@ -154,15 +193,23 @@ describe('Content delivery', () => {
   }
 });
 
+function selectContentStorage(storage = 'Azure') {
+  cy.gcy('content-delivery-storage-selector').click();
+  cy.gcy('content-delivery-storage-selector-item').contains(storage).click();
+}
+
 function fillContentDeliveryConfigForm(name: string) {
   cy.gcy('content-delivery-form-name').clear().type(name);
-  cy.gcy('content-delivery-storage-selector').click();
-  cy.gcy('content-delivery-storage-selector-item').contains('Azure').click();
+  selectContentStorage();
 }
 
 function createAzureContentDeliveryConfig(name: string) {
   cy.gcy('content-delivery-add-button').click();
   fillContentDeliveryConfigForm(name);
+  saveForm();
+}
+
+function saveForm() {
   cy.gcy('content-delivery-form-save').click();
 }
 
@@ -172,4 +219,16 @@ function testMessageFormatPersists(test: FormatTest) {
     return;
   }
   gcy('export-message-format-selector').should('not.exist');
+}
+
+function verifyPublishType(name = 'Azure', content: any = 'Manual') {
+  gcyAdvanced({ value: 'content-delivery-list-item', name: name })
+    .findDcy('content-delivery-item-type')
+    .contains(content);
+}
+
+function openEditDialog(name = 'Azure') {
+  gcyAdvanced({ value: 'content-delivery-list-item', name })
+    .findDcy('content-delivery-item-edit')
+    .click();
 }

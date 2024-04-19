@@ -14,8 +14,6 @@ type Props = {
 };
 
 export const CdStorageSelector = ({ items }: Props) => {
-  const { t } = useTranslate();
-
   return (
     <>
       <StorageField items={items} />
@@ -40,7 +38,9 @@ export const CustomSlug = () => {
       label={t('content_delivery_form_custom_slug_label')}
       helperText={t('content_delivery_form_custom_slug_helper_text')}
       variant="standard"
-      data-cy="content-delivery-form-custom-sliug"
+      InputLabelProps={{ shrink: true }}
+      placeholder={t('content_delivery_form_custom_slug_generated_placeholder')}
+      data-cy="content-delivery-form-custom-slug"
     />
   );
 };
@@ -64,7 +64,12 @@ export const StorageField: FC<{
             displayEmpty
             data-cy="content-delivery-storage-selector"
           >
-            <MenuItem value={undefined}>{t('storage_item_default')}</MenuItem>
+            <MenuItem
+              data-cy="content-delivery-storage-selector-item"
+              value={undefined}
+            >
+              {t('storage_item_default')}
+            </MenuItem>
             {items.map((item) => (
               <MenuItem
                 key={item.id}
