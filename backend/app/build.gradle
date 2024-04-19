@@ -92,7 +92,6 @@ dependencies {
     implementation libs.springmockk
     implementation libs.jsonUnitAssert
     testImplementation libs.mockito
-    testImplementation("io.findify:s3mock_2.13:0.2.6")
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
     testImplementation libs.sendInBlue
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"

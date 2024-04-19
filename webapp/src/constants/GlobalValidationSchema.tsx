@@ -215,7 +215,6 @@ export class Validation {
 
   private static slugValidation(min: number, max: number) {
     return Yup.string()
-      .required()
       .min(min)
       .max(max)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
@@ -229,7 +228,7 @@ export class Validation {
     t: TFunType,
     slugInitialValue?: string
   ) => {
-    const slugSyncValidation = Validation.slugValidation(3, 60);
+    const slugSyncValidation = Validation.slugValidation(3, 60).required();
 
     const slugUniqueDebouncedAsyncValidation = (v) => {
       if (slugInitialValue === v) {

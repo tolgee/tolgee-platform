@@ -133,6 +133,7 @@ dependencies {
     testImplementation libs.mockito
     implementation libs.jsonUnitAssert
     testImplementation(project(":testing"))
+    testImplementation("io.findify:s3mock_2.13:0.2.6")
 
     /**
      * Kotlin
@@ -192,11 +193,10 @@ dependencies {
     /**
      * AZURE
      */
-    implementation('com.azure:azure-storage-blob:12.25.1') {
+    implementation("com.azure.spring:spring-cloud-azure-starter-storage-blob:5.11.0") {
         exclude group: 'io.netty', module: 'netty-codec-http'
     }
     implementation('io.netty:netty-codec-http:4.1.108.Final')
-    implementation('com.azure:azure-identity:1.12.0')
 }
 
 test {
@@ -212,6 +212,7 @@ sourceSets {
 dependencyManagement {
     imports {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom("com.azure.spring:spring-cloud-azure-dependencies:5.11.0")
     }
 }
 

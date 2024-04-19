@@ -57,7 +57,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   }
 
   @Test
-  fun `is LocalFileStorage`() {
+  fun `is S3FileStorage`() {
     assertThat(fileStorage is S3FileStorage).isTrue()
   }
 
@@ -89,7 +89,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   }
 
   @Test
-  fun testPruneDirectory()  {
+  fun testPruneDirectory() {
     fileStorage.storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
     fileStorage.pruneDirectory("test")
     assertThat(fileStorage.fileExists(testFilePath)).isEqualTo(false)

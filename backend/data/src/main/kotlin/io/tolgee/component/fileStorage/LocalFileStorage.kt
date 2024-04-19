@@ -44,7 +44,7 @@ class LocalFileStorage(
 
   override fun pruneDirectory(path: String) {
     try {
-      val dir = File(path)
+      val dir = getLocalFile(path)
       if (dir.isDirectory) {
         dir.listFiles()?.forEach {
           it.deleteRecursively()
@@ -60,6 +60,12 @@ class LocalFileStorage(
   }
 
   private fun getLocalFile(storageFilePath: String): File {
-    return File("$localDataPath/$storageFilePath")
+    val dataRoot = localDataPath.removeTrailingSlash()
+    val normalizedFilePath = storageFilePath.removeLeadingSlash()
+    return File("$dataRoot/$normalizedFilePath")
   }
+
+  private fun String.removeLeadingSlash() = this.removePrefix("/")
+
+  private fun String.removeTrailingSlash() = this.removePrefix("/")
 }
