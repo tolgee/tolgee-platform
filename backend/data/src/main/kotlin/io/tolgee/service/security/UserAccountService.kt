@@ -102,7 +102,7 @@ class UserAccountService(
   fun createUser(userAccount: UserAccount): UserAccount {
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
-    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
     return userAccount
   }
 
@@ -114,7 +114,7 @@ class UserAccountService(
     userAccountRepository.saveAndFlush(userAccount)
     userAccount.password = passwordEncoder.encode(rawPassword)
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
-    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
     return userAccount
   }
 
@@ -123,7 +123,7 @@ class UserAccountService(
   fun delete(id: Long) {
     val user = this.get(id)
     delete(user)
-    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
@@ -163,7 +163,7 @@ class UserAccountService(
       entityManager.remove(it)
     }
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
-    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
   @Transactional
@@ -441,7 +441,7 @@ class UserAccountService(
     val user = this.get(userId)
     user.disabledAt = currentDateProvider.date
     this.save(user)
-    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
   @Transactional
@@ -450,7 +450,7 @@ class UserAccountService(
     val user = this.userAccountRepository.findDisabled(userId)
     user.disabledAt = null
     this.save(user)
-    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
   }
 
   fun transferLegacyNoAuthUser() {

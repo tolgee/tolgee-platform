@@ -12,6 +12,6 @@ class OnUserCountChangedListener(
 ) {
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   fun onUserCountChanged(event: OnUserCountChanged) {
-    eeSubscriptionService.checkCountAndReportUsage()
+    eeSubscriptionService.checkCountAndReportUsage(event)
   }
 }
