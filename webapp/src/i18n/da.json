@@ -358,6 +358,7 @@
   "content_delivery_deployment_manual" : "Manuel",
   "content_delivery_description" : "Upload dine lokaliseringsfiler til indholdsopbevaring, så du kan indlæse dem direkte fra din applikation. Udgivelseshandlingen kan tage op til 15 minutter (både automatisk og manuelt), da standardopbevaringen er cached.",
   "content_delivery_form_cancel" : "Annuller",
+  "content_delivery_form_custom_slug_generated_placeholder" : "'<Genereret>'",
   "content_delivery_form_custom_slug_helper_text" : "Hvis ikke angivet, vil slug blive genereret automatisk",
   "content_delivery_form_custom_slug_label" : "Brugerdefineret slug",
   "content_delivery_form_custom_slug_placeholder" : "'<genereret>'",

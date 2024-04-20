@@ -358,6 +358,7 @@
   "content_delivery_deployment_manual" : "Manual",
   "content_delivery_description" : "Upload your localization files to content storage, so you can load them directly from your application. Publish action can take up to 15 minutes (both automatic and manual) as the default storage is cached.",
   "content_delivery_form_cancel" : "Cancel",
+  "content_delivery_form_custom_slug_generated_placeholder" : "'<Generated>'",
   "content_delivery_form_custom_slug_helper_text" : "When not provided, slug will be automatically generated",
   "content_delivery_form_custom_slug_label" : "Custom slug",
   "content_delivery_form_custom_slug_placeholder" : "'<generated>'",

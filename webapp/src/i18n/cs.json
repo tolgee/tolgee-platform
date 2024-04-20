@@ -358,6 +358,7 @@
   "content_delivery_deployment_manual" : "Manuální",
   "content_delivery_description" : "Nahrajte své lokalizační soubory do úložiště obsahu, abyste je mohli přímo načíst ze své aplikace. Akce publikování může trvat až 15 minut (jak pro automatické, tak pro manuální publikování), protože výchozí úložiště je dočasně ukládáno do mezipaměti.",
   "content_delivery_form_cancel" : "Zrušit",
+  "content_delivery_form_custom_slug_generated_placeholder" : "'<Vygenerováno>'",
   "content_delivery_form_custom_slug_helper_text" : "Pokud není poskytnuto, slug bude automaticky vygenerován",
   "content_delivery_form_custom_slug_label" : "Vlastní slug",
   "content_delivery_form_custom_slug_placeholder" : "'<vygenerováno>'",

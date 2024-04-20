@@ -358,6 +358,7 @@
   "content_delivery_deployment_manual" : "Manual",
   "content_delivery_description" : "Încărcați fișierele de localizare în stocarea de conținut, astfel încât să le puteți încărca direct din aplicația dvs. Acțiunea de publicare poate dura până la 15 minute (atât pentru automat, cât și pentru manual), deoarece stocarea implicită este memorată în cache.",
   "content_delivery_form_cancel" : "Anulare",
+  "content_delivery_form_custom_slug_generated_placeholder" : "'<Generat>'",
   "content_delivery_form_custom_slug_helper_text" : "Când nu este furnizat, slug-ul va fi generat automat",
   "content_delivery_form_custom_slug_label" : "Slug personalizat",
   "content_delivery_form_custom_slug_placeholder" : "'<generat>'",

@@ -1,3 +1,15 @@
+# [3.58.0](https://github.com/tolgee/tolgee-platform/compare/v3.57.5...v3.58.0) (2024-04-20)
+
+
+### Bug Fixes
+
+* Update supported languages of MT providers ([#2266](https://github.com/tolgee/tolgee-platform/issues/2266)) ([e66b180](https://github.com/tolgee/tolgee-platform/commit/e66b1808b2770c99011fc1f84c802a71d2eac739))
+
+
+### Features
+
+* Allow multiple Google Workspace domains for user authentication ([#2139](https://github.com/tolgee/tolgee-platform/issues/2139)) ([a01a970](https://github.com/tolgee/tolgee-platform/commit/a01a9703b0ab3652ecdafbee2cf6c0c5a58ebb3d))
+
 ## [3.57.5](https://github.com/tolgee/tolgee-platform/compare/v3.57.4...v3.57.5) (2024-04-19)
 
 
