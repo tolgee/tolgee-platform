@@ -94,7 +94,7 @@ class AwsMtValueProvider(
       "cs",
       "da",
       "fa-AF",
-      "nl ",
+      "nl",
       "en",
       "et",
       "fa",
