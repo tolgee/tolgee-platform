@@ -38,8 +38,8 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
 
   @field:Parameter(
     description =
-      "Selects only keys, where translation is missing in any returned language. " +
-        "It only filters for translations included returned languages.",
+      "Selects only keys for which the translation is missing in any returned language. " +
+        "It only filters for translations included in returned languages.",
   )
   var filterUntranslatedAny: Boolean = false
 
@@ -48,8 +48,8 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
 
   @field:Parameter(
     description =
-      "Selects only keys, where translation is missing in specified language. " +
-        "The specified languages must be included in the returned languages, otherwise this filter doesn't apply.",
+      "Selects only keys where the translation is missing for the specified language. " +
+        "The specified language must be included in the returned languages. Otherwise, this filter doesn't apply.",
     example = "en-US",
   )
   var filterUntranslatedInLang: String? = null
