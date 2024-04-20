@@ -36,14 +36,20 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   @field:Parameter(description = "Selects key with provided ID. Use this param multiple times to fetch more keys.")
   var filterKeyId: List<Long>? = null
 
-  @field:Parameter(description = "Selects only keys, where translation is missing in any language")
+  @field:Parameter(
+    description =
+      "Selects only keys, where translation is missing in any returned language. " +
+        "It only filters for translations included returned languages.",
+  )
   var filterUntranslatedAny: Boolean = false
 
   @field:Parameter(description = "Selects only keys, where translation is provided in any language")
   var filterTranslatedAny: Boolean = false
 
   @field:Parameter(
-    description = "Selects only keys, where translation is missing in specified language",
+    description =
+      "Selects only keys, where translation is missing in specified language. " +
+        "The specified languages must be included in the returned languages, otherwise this filter doesn't apply.",
     example = "en-US",
   )
   var filterUntranslatedInLang: String? = null
