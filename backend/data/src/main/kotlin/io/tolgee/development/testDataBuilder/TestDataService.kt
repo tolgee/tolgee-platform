@@ -209,6 +209,7 @@ class TestDataService(
     saveContentStorages(builder)
     saveContentDeliveryConfigs(builder)
     saveWebhookConfigs(builder)
+    saveSlackConfigs(builder)
     saveAutomations(builder)
     saveImportSettings(builder)
   }
@@ -222,6 +223,12 @@ class TestDataService(
 
   private fun saveWebhookConfigs(builder: ProjectBuilder) {
     builder.data.webhookConfigs.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveSlackConfigs(builder: ProjectBuilder) {
+    builder.data.slackConfigs.forEach {
       entityManager.persist(it.self)
     }
   }

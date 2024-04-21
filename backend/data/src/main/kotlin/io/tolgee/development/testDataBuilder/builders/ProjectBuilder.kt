@@ -52,7 +52,7 @@ class ProjectBuilder(
     var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
     var importSettings: ImportSettings? = null
-    var slackConfig = mutableListOf<SlackConfigBuilder>()
+    var slackConfigs = mutableListOf<SlackConfigBuilder>()
   }
 
   var data = DATA()
@@ -172,7 +172,7 @@ class ProjectBuilder(
 
   fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
 
-  fun addSlackConfig(ft: FT<SlackConfig>) = addOperation(data.slackConfig, ft)
+  fun addSlackConfig(ft: FT<SlackConfig>) = addOperation(data.slackConfigs, ft)
 
   fun setImportSettings(ft: FT<ImportSettings>) {
     data.importSettings = ImportSettings(this.self).apply(ft)
