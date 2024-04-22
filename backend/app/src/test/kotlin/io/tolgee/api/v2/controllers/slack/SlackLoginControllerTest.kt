@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.slack
 
+import io.tolgee.component.automations.processors.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.service.slackIntegration.SlackUserConnectionService
@@ -13,6 +14,9 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var slackUserConnectionService: SlackUserConnectionService
 
+  @Autowired
+  lateinit var slackUserLoginUrlProvider: SlackUserLoginUrlProvider
+
   @BeforeAll
   fun setUp() {
     tolgeeProperties.slack.token = "token"
@@ -22,27 +26,10 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
   fun `user log in`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    performAuthPost(
-      "/v2/slack/user-login",
-      mapOf(
-        "slackId" to testData.slackUserConnection.slackUserId,
-        "channelId" to "TEST",
-        "workspaceId" to testData.slackWorkspace.id,
-      ),
-    ).andIsOk
-  }
 
-  @Test
-  fun `user does not log in and creates new connection`() {
-    Assertions.assertThat(slackUserConnectionService.findBySlackId("TEST1")).isNull()
-    performAuthPost(
-      "/v2/slack/user-login",
-      mapOf(
-        "slackId" to "TEST1",
-        "channelId" to "TEST",
-        "workspaceId" to 1,
-      ),
-    ).andIsOk
+    slackUserLoginUrlProvider.encryptData("ChannelTest", "TEST1", testData.slackWorkspace.id).let {
+      performAuthPost("/v2/slack/user-login?data=$it", mapOf("" to "")).andIsOk
+    }
 
     Assertions.assertThat(slackUserConnectionService.findBySlackId("TEST1")).isNotNull()
   }

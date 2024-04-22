@@ -26,6 +26,15 @@ class SlackUserLoginUrlProvider(
     return "${frontendUrlProvider.url}/slack/login?data=$encryptedData"
   }
 
+  fun encryptData(
+    slackChannelId: String,
+    slackUserId: String,
+    workspaceId: Long?,
+  ): String {
+    val dto = getDto(slackChannelId, slackUserId, workspaceId)
+    return encryptData(dto)
+  }
+
   private fun encryptData(dto: SlackUserLoginDto): String {
     val stringData = objectMapper.writeValueAsString(dto)
     val encrypted = aes.encrypt(stringData.toByteArray())
