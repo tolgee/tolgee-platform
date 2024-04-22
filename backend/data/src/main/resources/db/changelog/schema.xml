@@ -3204,4 +3204,24 @@
     <changeSet author="gyeongwoopark (generated)" id="1712309146235-6">
         <dropColumn columnName="base_namespace_id" tableName="project"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1713361057414-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="prune_before_publish" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1713450518921-1">
+        <dropUniqueConstraint constraintName="UKof8ghdfcmo45f5tkkknt4voiv" tableName="content_delivery_config"/>
+        <sql>
+            create unique index content_delivery_config_unique_slug on content_delivery_config(slug) where content_storage_id is null;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1713453021423-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="custom_slug" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

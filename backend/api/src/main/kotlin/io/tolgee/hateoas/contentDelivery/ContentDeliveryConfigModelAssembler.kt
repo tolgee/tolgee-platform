@@ -20,6 +20,7 @@ class ContentDeliveryConfigModelAssembler(
       id = entity.id,
       name = entity.name,
       slug = entity.slug,
+      pruneBeforePublish = entity.pruneBeforePublish,
       storage = entity.contentStorage?.let { contentStorageModelAssembler.toModel(it) },
       publicUrl = getPublicUrl(entity),
       autoPublish = entity.automationActions.isNotEmpty(),

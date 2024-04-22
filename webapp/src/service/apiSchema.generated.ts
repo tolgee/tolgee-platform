@@ -829,6 +829,11 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -860,11 +865,6 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
       /**
        * @deprecated
        * @description Deprecated (use translateLanguageIds).
@@ -1411,8 +1411,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1439,6 +1439,20 @@ export interface components {
       contentStorageId?: number;
       /** @description If true, data are published to the content delivery automatically after each change. */
       autoPublish: boolean;
+      /**
+       * @description Tolgee uses a custom slug as a directory name for content storage and public content delivery URL. It is only applicable for custom storage. This field needs to be kept null for Tolgee Cloud content storage or global server storage on self-hosted instances.
+       *
+       * Slag has to match following regular expression: `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
+       *
+       * If null is provided for update operation, slug will be assigned with generated value.
+       */
+      slug?: string;
+      /**
+       * @description Whether the data in the CDN should be pruned before publishing new data.
+       *
+       * In some cases, you might want to keep the data in the storage and only replace the files created by following publish operation.
+       */
+      pruneBeforePublish: boolean;
       /**
        * @description Languages to be contained in export.
        *
@@ -1507,6 +1521,7 @@ export interface components {
       id: number;
       name: string;
       slug: string;
+      pruneBeforePublish: boolean;
       storage?: components["schemas"]["ContentStorageModel"];
       publicUrl?: string;
       autoPublish: boolean;
@@ -1761,13 +1776,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1905,17 +1920,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
+      projectName: string;
+      userFullName?: string;
+      username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      username?: string;
-      /** Format: int64 */
       projectId: number;
       description: string;
-      userFullName?: string;
-      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2428,7 +2443,9 @@ export interface components {
         | "CURRENT_USER_DOES_NOT_OWN_IMAGE"
         | "USER_CANNOT_VIEW_THIS_ORGANIZATION"
         | "USER_IS_NOT_OWNER_OF_ORGANIZATION"
-        | "PAK_CREATED_FOR_DIFFERENT_PROJECT";
+        | "PAK_CREATED_FOR_DIFFERENT_PROJECT"
+        | "CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE"
+        | "INVALID_SLUG_FORMAT";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2882,11 +2899,6 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /**
        * @description The role of currently authorized user.
        *
@@ -2894,6 +2906,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3002,20 +3019,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
-      description?: string;
       baseTranslation?: string;
+      translation?: string;
+      description?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
-      description?: string;
       baseTranslation?: string;
+      translation?: string;
+      description?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3553,13 +3570,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -3679,17 +3696,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
+      projectName: string;
+      userFullName?: string;
+      username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      username?: string;
-      /** Format: int64 */
       projectId: number;
       description: string;
-      userFullName?: string;
-      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {

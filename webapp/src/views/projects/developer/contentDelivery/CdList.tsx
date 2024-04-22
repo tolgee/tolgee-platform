@@ -14,7 +14,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { CdNotConfiguredAlert } from '../CdNotConfiguredAlert';
-import { CdEditDialog } from './CdEditDialog';
+import { CdDialog } from './CdDialog';
 import { CdItem } from './CdItem';
 
 export const CdList = () => {
@@ -134,7 +134,7 @@ export const CdList = () => {
             />
           </Box>
         )}
-        {formOpen && <CdEditDialog onClose={() => setFormOpen(false)} />}
+        {formOpen && <CdDialog onClose={() => setFormOpen(false)} />}
       </Box>
     </QuickStartHighlight>
   );

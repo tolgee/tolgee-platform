@@ -192,11 +192,10 @@ dependencies {
     /**
      * AZURE
      */
-    implementation('com.azure:azure-storage-blob:12.25.1') {
+    implementation(libs.azureBlob) {
         exclude group: 'io.netty', module: 'netty-codec-http'
     }
     implementation('io.netty:netty-codec-http:4.1.108.Final')
-    implementation('com.azure:azure-identity:1.12.0')
 }
 
 test {

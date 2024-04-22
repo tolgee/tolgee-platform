@@ -10,7 +10,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 import { CopyUrlItem } from '../CopyUrlItem';
-import { CdEditDialog } from './CdEditDialog';
+import { CdDialog } from './CdDialog';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
 type ContentDeliveryConfigModel =
@@ -124,9 +124,7 @@ export const CdItem = ({ data }: Props) => {
           {t('content_delivery_item_publish')}
         </LoadingButton>
       </Box>
-      {formOpen && (
-        <CdEditDialog onClose={() => setFormOpen(false)} data={data} />
-      )}
+      {formOpen && <CdDialog onClose={() => setFormOpen(false)} data={data} />}
     </StyledContainer>
   );
 };
