@@ -1,9 +1,11 @@
 package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
+import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
+import io.tolgee.model.slackIntegration.SlackUserConnection
 import org.springframework.core.io.ClassPathResource
 
 class UserAccountBuilder(
@@ -17,6 +19,7 @@ class UserAccountBuilder(
     var avatarFile: ClassPathResource? = null
     var userPreferences: UserPreferencesBuilder? = null
     var pats: MutableList<PatBuilder> = mutableListOf()
+    var slackUserConnections: MutableList<SlackUserConnectionBuilder> = mutableListOf()
   }
 
   var data = DATA()
@@ -32,4 +35,6 @@ class UserAccountBuilder(
   }
 
   fun addPat(ft: FT<Pat>) = addOperation(data.pats, ft)
+
+  fun addSlackUserConnection(ft: FT<SlackUserConnection>) = addOperation(data.slackUserConnections, ft)
 }

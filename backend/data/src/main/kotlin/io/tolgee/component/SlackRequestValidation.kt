@@ -17,8 +17,8 @@ class SlackRequestValidation(
   private val slackErrorProvider: SlackErrorProvider,
 ) : Logging {
   companion object {
-    private const val algorithm = "HmacSHA256"
-    private val mac = Mac.getInstance(algorithm)
+    private const val ALGORITHM = "HmacSHA256"
+    private val mac = Mac.getInstance(ALGORITHM)
   }
 
   fun validate(
@@ -37,7 +37,7 @@ class SlackRequestValidation(
     }
 
     try {
-      val secretKeySpec = SecretKeySpec(secret.toByteArray(StandardCharsets.UTF_8), algorithm)
+      val secretKeySpec = SecretKeySpec(secret.toByteArray(StandardCharsets.UTF_8), ALGORITHM)
       mac.init(secretKeySpec)
 
       val mySignature = "v0=" + Hex.encodeHexString(mac.doFinal(baseString.toByteArray(StandardCharsets.UTF_8)))

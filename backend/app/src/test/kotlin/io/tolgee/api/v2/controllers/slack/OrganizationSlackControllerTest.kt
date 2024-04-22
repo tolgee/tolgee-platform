@@ -1,0 +1,121 @@
+package io.tolgee.api.v2.controllers.slack
+
+import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
+import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
+import io.tolgee.testing.AuthorizedControllerTest
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.client.RestTemplate
+
+class OrganizationSlackControllerTest : AuthorizedControllerTest() {
+  @Autowired
+  lateinit var slackWorkspaceService: OrganizationSlackWorkspaceService
+  lateinit var testData: SlackTestData
+
+  @MockBean
+  @Autowired
+  lateinit var restTemplate: RestTemplate
+
+  @Autowired
+  lateinit var slackProperties: SlackProperties
+
+  @BeforeEach
+  fun setUp() {
+    testData = SlackTestData()
+    testDataService.saveTestData(testData.root)
+  }
+
+  @Test
+  fun `get all works`() {
+    performAuthGet(
+      "/v2/organizations/${testData.organization.id}/slack/workspaces",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.workspaces") {
+        node("[0]") {
+          node("id").isEqualTo(testData.slackWorkspace.id)
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `delete one works`() {
+    performAuthDelete(
+      "/v2/organizations/${testData.organization.id}/slack/workspaces/${testData.slackWorkspace.id}",
+    ).andIsOk
+    io.tolgee.testing.assertions.Assertions.assertThat(slackWorkspaceService.find(testData.slackWorkspace.id)).isNull()
+  }
+
+  @Test
+  fun `fail if connect and already have connection`() {
+    slackProperties.clientId = "clientId"
+    slackProperties.clientSecret = "clientSecret"
+    mockSlackRequest()
+
+    performAuthPost(
+      "/v2/organizations/${testData.organization.id}/slack/connect",
+      mapOf(
+        "code" to "testCode",
+      ),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `connection works`() {
+    slackWorkspaceService.delete(testData.slackWorkspace)
+    Assertions.assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id)).isEmpty()
+
+    slackProperties.clientId = "clientId"
+    slackProperties.clientSecret = "clientSecret"
+    mockSlackRequest()
+
+    performAuthPost(
+      "/v2/organizations/${testData.organization.id}/slack/connect",
+      mapOf(
+        "code" to "testCode",
+      ),
+    ).andIsOk
+
+    Assertions.assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id)).isNotEmpty()
+  }
+
+  private fun mockSlackRequest() {
+    val responseString =
+      """
+      {
+          "access_token": "valid_token",
+          "team": {
+              "id": "${testData.slackWorkspace.slackTeamId}",
+              "name": "Test Team"
+          },
+          "error": null
+      }
+      """.trimIndent()
+
+    val response = ResponseEntity(responseString, HttpStatus.OK)
+
+    `when`(
+      restTemplate.exchange(
+        anyString(),
+        any<HttpMethod>(),
+        any(),
+        eq(String::class.java),
+      ),
+    ).thenReturn(response)
+  }
+}

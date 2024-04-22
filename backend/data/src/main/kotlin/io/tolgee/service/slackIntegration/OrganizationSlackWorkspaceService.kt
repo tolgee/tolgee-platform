@@ -120,11 +120,16 @@ class OrganizationSlackWorkspaceService(
     connectToSlackResponse: ConnectToSlackResponse,
     author: UserAccount,
   ): OrganizationSlackWorkspace {
+    val slackTeamId = connectToSlackResponse.team?.id ?: throw IllegalArgumentException("Team is null")
+    if (organizationSlackWorkspaceRepository.findBySlackTeamId(slackTeamId) != null) {
+      throw BadRequestException(Message.SLACK_WORKSPACE_ALREADY_CONNECTED)
+    }
+
     val organizationSlackWorkspace = OrganizationSlackWorkspace()
     organizationSlackWorkspace.organization = organization
     organizationSlackWorkspace.author = author
     organizationSlackWorkspace.slackTeamId =
-      connectToSlackResponse.team?.id ?: throw IllegalArgumentException("Team is null")
+      slackTeamId
     organizationSlackWorkspace.slackTeamName =
       connectToSlackResponse.team.name
     organizationSlackWorkspace.accessToken =
@@ -157,7 +162,7 @@ class OrganizationSlackWorkspaceService(
     logAppUninstallError(organizationSlackWorkspace.id, organizationSlackWorkspace.organization.id, uninstall)
   }
 
-  private fun delete(organizationSlackWorkspace: OrganizationSlackWorkspace) {
+  fun delete(organizationSlackWorkspace: OrganizationSlackWorkspace) {
     organizationSlackWorkspaceRepository.delete(organizationSlackWorkspace)
   }
 
@@ -186,7 +191,9 @@ class OrganizationSlackWorkspaceService(
   }
 
   fun get(workspaceId: Long): OrganizationSlackWorkspace {
-    return organizationSlackWorkspaceRepository.find(workspaceId) ?: throw NotFoundException(Message.SLACK_WORKSPACE_NOT_FOUND)
+    return organizationSlackWorkspaceRepository.find(
+      workspaceId,
+    ) ?: throw NotFoundException(Message.SLACK_WORKSPACE_NOT_FOUND)
   }
 
   fun find(workspaceId: Long): OrganizationSlackWorkspace? {
