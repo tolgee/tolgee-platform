@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.machineTranslation
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.MtServiceType
