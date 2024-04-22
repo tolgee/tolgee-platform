@@ -52,7 +52,7 @@ class ProjectBuilder(
     var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
     var importSettings: ImportSettings? = null
-    var slackConfig = mutableListOf<SlackConfigBuilder>()
+    var slackConfigs = mutableListOf<SlackConfigBuilder>()
   }
 
   var data = DATA()

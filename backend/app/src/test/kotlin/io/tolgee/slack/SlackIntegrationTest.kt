@@ -16,7 +16,6 @@ import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -45,9 +44,6 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     mockedSlackClient = mockSlackClient()
-
-    Thread.sleep(1000)
-    Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
 
     val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
     loginAsUser(testData.user.username)
