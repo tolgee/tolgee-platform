@@ -1,5 +1,6 @@
 package io.tolgee.service.slackIntegration
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.repository.slackIntegration.SavedSlackMessageRepository
@@ -14,15 +15,21 @@ class SavedSlackMessageService(
   private val savedSlackMessageRepository: SavedSlackMessageRepository,
   private val slackConfigRepository: SlackConfigRepository,
   private val currentDateProvider: CurrentDateProvider,
+  private val objectMapper: ObjectMapper,
 ) {
   @Transactional
-  fun create(savedSlackMessage: SavedSlackMessage): SavedSlackMessage {
+  fun save(savedSlackMessage: SavedSlackMessage): SavedSlackMessage {
     savedSlackMessage.slackConfig.apply {
       this.savedSlackMessage.add(savedSlackMessage)
       slackConfigRepository.save(this)
     }
 
     return savedSlackMessageRepository.save(savedSlackMessage)
+  }
+
+  @Transactional
+  fun saveAll(savedSlackMessage: MutableList<SavedSlackMessage>) {
+    savedSlackMessageRepository.saveAll(savedSlackMessage)
   }
 
   @Transactional
@@ -45,11 +52,12 @@ class SavedSlackMessageService(
     langTags: Set<String>,
     configId: Long,
   ): List<SavedSlackMessage> {
-    val savedSlackMessages = findByKey(keyId, configId)
-
-    return savedSlackMessages.filter { savedSlackMessage ->
-      savedSlackMessage.langTags.any { it in langTags }
-    }
+    val tags = objectMapper.writeValueAsString(langTags)
+    return savedSlackMessageRepository.findByKeyIdAndConfigIdAndLangTags(
+      keyId,
+      configId,
+      tags,
+    )
   }
 
   fun findByKey(
@@ -57,6 +65,10 @@ class SavedSlackMessageService(
     configId: Long,
   ): List<SavedSlackMessage> {
     return savedSlackMessageRepository.findByKeyIdAndSlackConfigId(keyId, configId)
+  }
+
+  fun findAll(): List<SavedSlackMessage> {
+    return savedSlackMessageRepository.findAll()
   }
 
   @Scheduled(fixedDelay = 60000)
