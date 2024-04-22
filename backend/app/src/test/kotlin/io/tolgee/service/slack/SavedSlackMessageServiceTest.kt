@@ -5,15 +5,9 @@ import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 class SavedSlackMessageServiceTest : AbstractSpringTest() {
-  @BeforeAll
-  fun setUp() {
-    // createSlackMessage(testData)
-  }
-
   @AfterEach
   fun after() {
     currentDateProvider.forcedDate = null

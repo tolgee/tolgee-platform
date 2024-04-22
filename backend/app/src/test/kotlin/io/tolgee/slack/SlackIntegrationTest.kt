@@ -12,7 +12,6 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
-import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeAll
@@ -30,8 +29,6 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   @MockBean
   lateinit var slackClient: Slack
 
-  @Autowired
-  lateinit var slackConfigService: SlackConfigService
   lateinit var mockedSlackClient: MockedSlackClient
 
   @Autowired
