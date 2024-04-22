@@ -1,3 +1,17 @@
+# [3.59.0](https://github.com/tolgee/tolgee-platform/compare/v3.58.0...v3.59.0) (2024-04-22)
+
+
+### Bug Fixes
+
+* Delete/disable user when over free plan seat limit ([#2267](https://github.com/tolgee/tolgee-platform/issues/2267)) ([4bd59bd](https://github.com/tolgee/tolgee-platform/commit/4bd59bd94e8958c495d60d980dd3849aedf6b756)), closes [#2219](https://github.com/tolgee/tolgee-platform/issues/2219)
+* improve translation filters API docs ([#2268](https://github.com/tolgee/tolgee-platform/issues/2268)) ([77fe20a](https://github.com/tolgee/tolgee-platform/commit/77fe20ad20067b161e1168261eb170f1074b6dfa)), closes [#2229](https://github.com/tolgee/tolgee-platform/issues/2229)
+
+
+### Features
+
+* Expose supported machine translation providers info ([#2269](https://github.com/tolgee/tolgee-platform/issues/2269)) ([ccdbcbe](https://github.com/tolgee/tolgee-platform/commit/ccdbcbe8cef888b9477fbc6baddab1161450b092))
+* Pruning Content Delivery & custom slug for Content Storages ([#2256](https://github.com/tolgee/tolgee-platform/issues/2256)) ([f6e6d90](https://github.com/tolgee/tolgee-platform/commit/f6e6d9091c31c636667b7ce9459cf0abb755fc0b))
+
 # [3.58.0](https://github.com/tolgee/tolgee-platform/compare/v3.57.5...v3.58.0) (2024-04-20)
 
 
