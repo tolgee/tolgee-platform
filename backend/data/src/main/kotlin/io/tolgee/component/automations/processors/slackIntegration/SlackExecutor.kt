@@ -227,7 +227,7 @@ class SlackExecutor(
     ts: String,
     config: SlackConfig,
   ) {
-    savedSlackMessageService.create(
+    savedSlackMessageService.save(
       savedSlackMessage =
         SavedSlackMessage(
           messageTs = ts,

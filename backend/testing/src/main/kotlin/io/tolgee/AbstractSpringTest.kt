@@ -1,7 +1,6 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.ninjasquad.springmockk.clear
 import io.tolgee.activity.ActivityService
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
@@ -10,21 +9,11 @@ import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.*
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
-import io.tolgee.repository.EmailVerificationRepository
-import io.tolgee.repository.KeyRepository
-import io.tolgee.repository.OrganizationRepository
-import io.tolgee.repository.OrganizationRoleRepository
-import io.tolgee.repository.ProjectRepository
+import io.tolgee.repository.*
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
@@ -42,12 +31,8 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.ApiKeyService
-import io.tolgee.service.security.MfaService
-import io.tolgee.service.security.PatService
-import io.tolgee.service.security.PermissionService
-import io.tolgee.service.security.UserAccountService
-import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.service.security.*
+import io.tolgee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
@@ -223,6 +208,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var allCachesProvider: AllCachesProvider
+
+  @Autowired
+  lateinit var savedSlackMessageService: SavedSlackMessageService
 
   @BeforeEach
   fun clearCaches() {

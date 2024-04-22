@@ -77,6 +77,30 @@ class SlackTestData() {
           this.project = projectBuilder.self
           this.userAccount = userAccountBuilder.self
           isGlobalSubscription = true
+        }.build config@{
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 0L
+            this.langTags = mutableSetOf("en", "fr")
+          }
+
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 0L
+            this.langTags = mutableSetOf("fr", "cz")
+          }
+
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 1L
+            this.langTags = mutableSetOf("cz", "ru")
+          }
+
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 52L
+            this.langTags = mutableSetOf("fr", "cz")
+          }
         }.self
 
       automation =
