@@ -1,3 +1,10 @@
+## [3.59.1](https://github.com/tolgee/tolgee-platform/compare/v3.59.0...v3.59.1) (2024-04-23)
+
+
+### Bug Fixes
+
+* API docs -> set translations operation ([#2276](https://github.com/tolgee/tolgee-platform/issues/2276)) ([2ed11b5](https://github.com/tolgee/tolgee-platform/commit/2ed11b5f567abc42543c2ad051706aaea656a364)), closes [#2275](https://github.com/tolgee/tolgee-platform/issues/2275)
+
 # [3.59.0](https://github.com/tolgee/tolgee-platform/compare/v3.58.0...v3.59.0) (2024-04-22)
 
 
