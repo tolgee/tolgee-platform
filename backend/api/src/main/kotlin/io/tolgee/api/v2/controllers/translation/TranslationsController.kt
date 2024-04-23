@@ -174,7 +174,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("")
-  @Operation(summary = "Get for key", description = "Sets translations for existing key")
+  @Operation(summary = "Update translations for existing key", description = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
