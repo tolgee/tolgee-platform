@@ -1,3 +1,10 @@
+## [3.59.3](https://github.com/tolgee/tolgee-platform/compare/v3.59.2...v3.59.3) (2024-04-24)
+
+
+### Bug Fixes
+
+* mt credits rename button ([#2279](https://github.com/tolgee/tolgee-platform/issues/2279)) ([03f0fd3](https://github.com/tolgee/tolgee-platform/commit/03f0fd3b9a7f51ba751e2d8225369f004060c594))
+
 ## [3.59.2](https://github.com/tolgee/tolgee-platform/compare/v3.59.1...v3.59.2) (2024-04-24)
 
 
