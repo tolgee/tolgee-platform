@@ -95,7 +95,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
             <GoToBilling
               render={(linkProps) => (
                 <Button size="small" variant="outlined" {...linkProps}>
-                  {t('machine_translation_buy_more_credit')}
+                  {t('machine_translation_upgrade_plan')}
                 </Button>
               )}
             />
