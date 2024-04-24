@@ -1,3 +1,10 @@
+## [3.59.2](https://github.com/tolgee/tolgee-platform/compare/v3.59.1...v3.59.2) (2024-04-24)
+
+
+### Bug Fixes
+
+* portuguese flag ([#2277](https://github.com/tolgee/tolgee-platform/issues/2277)) ([2d2ca96](https://github.com/tolgee/tolgee-platform/commit/2d2ca96695d4074019cacfb18ded51d6bbc9bd41))
+
 ## [3.59.1](https://github.com/tolgee/tolgee-platform/compare/v3.59.0...v3.59.1) (2024-04-23)
 
 
