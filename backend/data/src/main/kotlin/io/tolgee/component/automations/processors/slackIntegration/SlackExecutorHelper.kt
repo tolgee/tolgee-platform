@@ -4,6 +4,7 @@ import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.SectionBlockBuilder
+import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -178,16 +179,33 @@ class SlackExecutorHelper(
     head: String,
   ) = withBlocks {
     section {
-      // TODO add author
       markdownText(head)
     }
 
-    section {
-      markdownText("*Key:* ${key.name}")
+    val columnFields = mutableListOf<Pair<String, String?>>()
+    columnFields.add("Key" to key.name)
+    key.keyMeta?.tags?.let { tags ->
+      val tagNames = tags.joinToString(", ") { it.name }
+      if (tagNames.isNotBlank()) {
+        columnFields.add("Tags" to tagNames)
+      }
     }
+    columnFields.add("Namespace" to key.namespace?.name)
+    columnFields.add("Description" to key.keyMeta?.description)
 
+    field(columnFields)
+  }
+
+  fun LayoutBlockDsl.field(keyValue: List<Pair<String, String?>>) {
     section {
-      markdownText("*Key namespace:* ${key.namespace ?: "None"}")
+      val filtered = keyValue.filter { it.second != null && it.second!!.isNotEmpty() }
+
+      if (filtered.isEmpty()) return@section
+      fields {
+        filtered.forEach { (key, value) ->
+          markdownText("*$key* \n$value")
+        }
+      }
     }
   }
 
