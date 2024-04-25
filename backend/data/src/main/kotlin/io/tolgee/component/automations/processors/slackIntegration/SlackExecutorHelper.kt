@@ -29,6 +29,7 @@ class SlackExecutorHelper(
   private val slackUserConnectionService: SlackUserConnectionService,
   private val i18n: I18n,
   private val tolgeeProperties: TolgeeProperties,
+  private val author: String?,
 ) {
   fun createKeyAddMessage(): List<SavedMessageDto> {
     val activities = data.activityData ?: return emptyList()
@@ -179,7 +180,8 @@ class SlackExecutorHelper(
     head: String,
   ) = withBlocks {
     section {
-      markdownText(head)
+      val authorMention = author?.let { "@$it " } ?: data.activityData?.author?.name
+      markdownText(authorMention + head)
     }
 
     val columnFields = mutableListOf<Pair<String, String?>>()

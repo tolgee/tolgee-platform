@@ -65,6 +65,20 @@ class SlackExecutor(
     }
   }
 
+  fun getSlackNickName(author: String?): String? {
+    val response =
+      slackClient.methods(tolgeeProperties.slack.token).usersLookupByEmail { req ->
+        req.email(author)
+      }
+
+    return if (response.isOk) {
+      response.user?.name
+    } else {
+      logger.info(response.error)
+      null
+    }
+  }
+
   private fun processSavedMessage(
     savedMsg: SavedSlackMessage,
     message: SavedMessageDto,
@@ -213,6 +227,7 @@ class SlackExecutor(
       slackUserConnectionService,
       i18n,
       tolgeeProperties,
+      getSlackNickName(data.activityData?.author?.name ?: ""),
     )
   }
 
