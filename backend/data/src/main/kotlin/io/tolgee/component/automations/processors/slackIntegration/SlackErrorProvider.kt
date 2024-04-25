@@ -3,6 +3,7 @@ package io.tolgee.component.automations.processors.slackIntegration
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.util.I18n
@@ -13,6 +14,7 @@ class SlackErrorProvider(
   private val i18n: I18n,
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   fun getUserNotConnectedError(payload: SlackCommandDto): List<LayoutBlock> {
     val workspace = organizationSlackWorkspaceService.findBySlackTeamId(payload.team_id)
@@ -97,6 +99,14 @@ class SlackErrorProvider(
     return withBlocks {
       section {
         markdownText(i18n.translate("slack-workspace-not-connected-to-any-organization"))
+      }
+
+      actions {
+        button {
+          text(i18n.translate("connect-workspace-button-text"), emoji = true)
+          url(tolgeeProperties.frontEndUrl + "")
+          style("primary")
+        }
       }
     }
   }

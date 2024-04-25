@@ -120,7 +120,7 @@ class OrganizationSlackWorkspaceService(
     connectToSlackResponse: ConnectToSlackResponse,
     author: UserAccount,
   ): OrganizationSlackWorkspace {
-    val slackTeamId = connectToSlackResponse.team?.id ?: throw IllegalArgumentException("Team is null")
+    val slackTeamId = connectToSlackResponse.team?.id ?: throw BadRequestException("Team is null")
     if (organizationSlackWorkspaceRepository.findBySlackTeamId(slackTeamId) != null) {
       throw BadRequestException(Message.SLACK_WORKSPACE_ALREADY_CONNECTED)
     }
