@@ -15,6 +15,7 @@ import io.tolgee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -40,6 +41,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
     loginAsUser(testData.user.username)
+
+    Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
     waitForNotThrowing(timeout = 3000) {
       modifyTranslationData(testData.projectBuilder.self.id, langTag)
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
@@ -64,7 +67,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   }
 
   @Test
-  fun `Doesn't send a message if the subscription isn't global and modified language isn't in the preferred languages`() {
+  fun `Doesn't send a message if the subscription isn't global and modified language isn't in preferred languages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     mockedSlackClient = mockSlackClient()
