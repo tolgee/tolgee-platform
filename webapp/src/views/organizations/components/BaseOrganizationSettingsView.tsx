@@ -72,10 +72,10 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       label: t('organization_menu_member_privileges'),
     });
     menuItems.push({
-      link: LINKS.ORGANIZATION_SLACK.build({
+      link: LINKS.ORGANIZATION_APPS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
-      label: t('organization_menu_slack'),
+      label: t('organization_menu_apps'),
     });
     if (config.billing.enabled) {
       menuItems.push({

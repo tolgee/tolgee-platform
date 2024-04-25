@@ -99,6 +99,8 @@ export class LINKS {
   static GO_TO_CLOUD_BILLING = Link.ofRoot('billing');
   static GO_TO_SELF_HOSTED_BILLING = Link.ofRoot('billing-self-hosted');
 
+  static GO_TO_PREFERRED_ORGANIZATION = Link.ofRoot('preferred-organization');
+
   /**
    * Authenticated user stuff
    */
@@ -260,11 +262,11 @@ export class LINKS {
    * Slack
    */
 
-  static ORGANIZATION_SLACK = Link.ofParent(LINKS.ORGANIZATION, 'slack');
+  static ORGANIZATION_APPS = Link.ofParent(LINKS.ORGANIZATION, 'apps');
 
-  static ORGANIZATION_SLACK_OAUTH_SUCCESS = Link.ofParent(
-    LINKS.ORGANIZATION_SLACK,
-    'oauth-success'
+  static ORGANIZATION_APPS_SLACK_OAUTH_SUCCESS = Link.ofParent(
+    LINKS.ORGANIZATION_APPS,
+    'slack-oauth2-success'
   );
 
   /**
@@ -353,5 +355,6 @@ export class LINKS {
    */
 
   static SLACK = Link.ofRoot('slack');
-  static SLACK_LOGIN = Link.ofParent(LINKS.SLACK, 'login');
+  static SLACK_CONNECT = Link.ofParent(LINKS.SLACK, 'connect');
+  static SLACK_CONNECTED = Link.ofParent(LINKS.SLACK, 'connected');
 }

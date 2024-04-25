@@ -1,9 +1,13 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { T } from '@tolgee/react';
+
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useOrganization } from '../useOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { messageService } from 'tg.service/MessageService';
+
+import { useOrganization } from '../../useOrganization';
 
 export const OrganizationSlackSuccessHandler: FunctionComponent = () => {
   const search = useUrlSearch();
@@ -13,7 +17,7 @@ export const OrganizationSlackSuccessHandler: FunctionComponent = () => {
 
   const redirect = () => {
     history.push(
-      LINKS.ORGANIZATION_SLACK.build({
+      LINKS.ORGANIZATION_APPS.build({
         [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
       })
     );
@@ -23,21 +27,30 @@ export const OrganizationSlackSuccessHandler: FunctionComponent = () => {
     url: '/v2/organizations/{organizationId}/slack/connect',
     method: 'post',
     invalidatePrefix: '/v2/organizations/{organizationId}/slack',
-    options: {
-      onSettled: redirect,
-    },
   });
 
   useEffect(() => {
     if (!organization || !search['code'] || Array.isArray(search['code'])) {
       return;
     }
-    connectMutation.mutate({
-      path: { organizationId: organization.id },
-      content: {
-        'application/json': { code: search['code'] },
+    connectMutation.mutate(
+      {
+        path: { organizationId: organization.id },
+        content: {
+          'application/json': { code: search['code'] },
+        },
       },
-    });
+      {
+        onSuccess() {
+          messageService.success(
+            <T keyName="slack_organization_connect_success" />
+          );
+        },
+        onSettled() {
+          redirect();
+        },
+      }
+    );
   }, [search['code']]);
 
   return <></>;

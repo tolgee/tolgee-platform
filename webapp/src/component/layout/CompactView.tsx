@@ -68,7 +68,7 @@ type Props = {
   windowTitle: string;
   backLink?: string | (() => void);
   alerts?: React.ReactNode;
-  title: React.ReactNode;
+  title?: React.ReactNode;
   content: React.ReactNode;
   maxWidth?: number;
 };
@@ -108,9 +108,11 @@ export const CompactView: React.FC<Props> = ({
             )}
           </StyledVerticalSpace>
           <StyledContent>
-            <Typography color="textSecondary" variant="h5">
-              {title}
-            </Typography>
+            {title && (
+              <Typography color="textSecondary" variant="h5">
+                {title}
+              </Typography>
+            )}
             <div>{content}</div>
           </StyledContent>
           <StyledVerticalSpace />
