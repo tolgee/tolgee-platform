@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 class SlackConfigServiceTest : AbstractSpringTest() {
   @Test
-  fun `one delete`() {
+  fun `deletes configs`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     slackConfigService.delete(testData.projectBuilder.self.id, testData.slackConfig.channelId)
@@ -17,7 +17,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `create new config`() {
+  fun `creates new config`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val slackConfigDto =

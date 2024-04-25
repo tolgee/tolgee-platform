@@ -14,7 +14,7 @@ class SavedSlackMessageServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `correct delete old messages`() {
+  fun `deletes old messages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(125)
@@ -24,7 +24,7 @@ class SavedSlackMessageServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `correct find messages`() {
+  fun `finds messages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     var result = savedSlackMessageService.find(0L, setOf("fr"), testData.slackConfig.id)

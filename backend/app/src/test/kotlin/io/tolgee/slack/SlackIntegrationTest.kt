@@ -14,7 +14,6 @@ import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -33,12 +32,6 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   @Autowired
   lateinit var slackMessageService: SavedSlackMessageService
 
-  @BeforeAll
-  fun setUp() {
-    // slackProperties.token = "fakeToken"
-    // tolgeeProperties.slack.token = "fakeToken"
-  }
-
   @Test
   fun `sends message to correct channel after translation changed`() {
     val testData = SlackTestData()
@@ -47,7 +40,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
     loginAsUser(testData.user.username)
-    waitForNotThrowing {
+    waitForNotThrowing(timeout = 3000) {
       modifyTranslationData(testData.projectBuilder.self.id, langTag)
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
       val request = mockedSlackClient.chatPostMessageRequests.single()
@@ -62,7 +55,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     mockedSlackClient = mockSlackClient()
 
     loginAsUser(testData.user.username)
-    waitForNotThrowing {
+    waitForNotThrowing(timeout = 3000) {
       addKeyToProject(testData.projectBuilder.self.id)
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
       val request = mockedSlackClient.chatPostMessageRequests.single()
@@ -71,7 +64,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   }
 
   @Test
-  fun `Don't send a message if the subscription isn't global and modified language isn't in the preferred languages`() {
+  fun `Doesn't send a message if the subscription isn't global and modified language isn't in the preferred languages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     mockedSlackClient = mockSlackClient()
@@ -99,7 +92,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   }
 
   @Test
-  fun `Don't send a message if the event isn't in subscribed by user`() {
+  fun `Doesn't send a message if the event isn't in subscribed by user`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     mockedSlackClient = mockSlackClient()
