@@ -6,4 +6,4 @@ class SlackUserInfoModel(
   val slackId: String,
   val slackRealName: String?,
   val slackAvatar: String,
-  )
+)

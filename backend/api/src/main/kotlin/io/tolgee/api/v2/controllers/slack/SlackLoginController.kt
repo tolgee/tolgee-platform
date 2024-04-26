@@ -75,9 +75,13 @@ class SlackLoginController(
     val teamInfo = slackClient.methods(token).teamInfo(TeamInfoRequest.builder().token(token).build())
     val userInfo = slackClient.methods(token).usersInfo(UsersInfoRequest.builder().user(decrypted.slackUserId).build())
 
-
     if (!teamInfo.isOk || !userInfo.isOk) {
-      val errResponse = if (!teamInfo.isOk) {teamInfo } else {userInfo}
+      val errResponse =
+        if (!teamInfo.isOk) {
+          teamInfo
+        } else {
+          userInfo
+        }
       if (errResponse.error == "missing_scope") {
         throw BadRequestException(Message.SLACK_MISSING_SCOPE, listOf(errResponse.needed))
       }
@@ -89,7 +93,8 @@ class SlackLoginController(
       slackId = userInfo.user.id,
       slackName = userInfo.user.name,
       slackRealName = userInfo.user.realName,
-      slackAvatar = userInfo.user.profile.image72,)
+      slackAvatar = userInfo.user.profile.image72,
+    )
   }
 
   /**
