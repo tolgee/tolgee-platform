@@ -99,6 +99,7 @@ class SlackExecutorHelper(
       attachments = attachments,
       keyId = keyId,
       langTag = langTags,
+      true,
     )
   }
 
@@ -199,6 +200,7 @@ class SlackExecutorHelper(
       attachments = listOf(createRedirectButton()),
       0L,
       setOf(),
+      false,
     )
   }
 
@@ -260,6 +262,7 @@ class SlackExecutorHelper(
         attachments = attachments,
         keyId = key.id,
         langTag = langTags,
+        false,
       )
     }
   }
@@ -489,6 +492,7 @@ class SlackExecutorHelper(
       attachments = listOf(createRedirectButton()),
       0L,
       setOf(),
+      false,
     )
   }
 }

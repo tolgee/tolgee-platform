@@ -60,6 +60,9 @@ class SlackExecutor(
       }
 
       savedMessage.forEach { savedMsg ->
+        if (savedMsg.createdKeyBlocks) {
+          message.blocks = emptyList()
+        }
         processSavedMessage(savedMsg, message, config, slackExecutorHelper)
       }
     }
@@ -187,8 +190,11 @@ class SlackExecutor(
         request
           .channel(config.channelId)
           .ts(savedMessage.messageTs)
-          .blocks(messageDto.blocks)
           .attachments(messageDto.attachments)
+        if (messageDto.blocks.isNotEmpty()) {
+          request.blocks(messageDto.blocks)
+        }
+        request
       }
 
     if (response.isOk) {
@@ -248,6 +254,7 @@ class SlackExecutor(
           slackConfig = config,
           keyId = messageDto.keyId,
           langTags = messageDto.langTag,
+          messageDto.createdKeyBlocks,
         ),
     )
   }

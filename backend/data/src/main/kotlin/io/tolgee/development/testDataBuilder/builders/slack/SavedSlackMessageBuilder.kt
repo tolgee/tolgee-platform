@@ -6,5 +6,5 @@ import io.tolgee.model.slackIntegration.SavedSlackMessage
 class SavedSlackMessageBuilder(
   slackConfigBuilder: SlackConfigBuilder,
 ) : EntityDataBuilder<SavedSlackMessage, SavedSlackMessageBuilder> {
-  override var self = SavedSlackMessage("", slackConfigBuilder.self, 0, setOf())
+  override var self = SavedSlackMessage("", slackConfigBuilder.self, 0, setOf(), false)
 }

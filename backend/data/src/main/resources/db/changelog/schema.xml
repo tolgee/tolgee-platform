@@ -3341,4 +3341,11 @@
     <changeSet author="jenik (generated)" id="1713199074850-2">
         <addUniqueConstraint columnNames="slack_team_id" constraintName="organization_slack_workspace_slack_team_id_unique" tableName="organization_slack_workspace"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1714125336700-1">
+        <addColumn tableName="saved_slack_message">
+            <column name="created_key_blocks" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
