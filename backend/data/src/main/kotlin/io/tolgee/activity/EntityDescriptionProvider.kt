@@ -43,7 +43,7 @@ class EntityDescriptionProvider(
 
   private fun getAnnotation(entity: EntityWithId): ActivityEntityDescribingPaths? {
     if (entity is HibernateProxy) {
-      return entity::class.superclasses.firstNotNullOf { it.findAnnotation<ActivityEntityDescribingPaths>() }
+      return entity::class.superclasses.firstNotNullOfOrNull { it.findAnnotation<ActivityEntityDescribingPaths>() }
     }
     return entity::class.findAnnotation<ActivityEntityDescribingPaths>()
   }
