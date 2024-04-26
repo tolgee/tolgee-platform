@@ -71,7 +71,7 @@ class ActivityViewByRevisionsProvider(
   private fun prepareData() {
     revisionIds = revisions.map { it.id }.toMutableList()
 
-    allDataReturningEventTypes = ActivityType.values().filter { !it.onlyCountsInList }
+    allDataReturningEventTypes = ActivityType.entries.filter { !it.onlyCountsInList }
 
     allRelationData = getAllowedRevisionRelations(revisionIds, allDataReturningEventTypes)
 
@@ -105,7 +105,7 @@ class ActivityViewByRevisionsProvider(
   }
 
   private fun getCounts(): MutableMap<Long, MutableMap<String, Long>> {
-    val allowedTypes = ActivityType.values().filter { it.onlyCountsInList }
+    val allowedTypes = ActivityType.entries.filter { it.onlyCountsInList }
     val counts: MutableMap<Long, MutableMap<String, Long>> = mutableMapOf()
     activityRevisionRepository.getModifiedEntityTypeCounts(
       revisionIds = revisionIds,
@@ -194,7 +194,7 @@ class ActivityViewByRevisionsProvider(
     val whereConditions = mutableListOf<Predicate>()
     whereConditions.add(revision.get(ActivityRevision_.type).`in`(allDataReturningEventTypes))
     whereConditions.add(revision.get(ActivityRevision_.id).`in`(revisionIds))
-    ActivityType.values().forEach {
+    ActivityType.entries.forEach {
       it.restrictEntitiesInList?.let { restrictEntitiesInList ->
         val restrictedEntityNames = restrictEntitiesInList.map { it.simpleName }
         whereConditions.add(
