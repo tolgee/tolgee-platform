@@ -49,14 +49,11 @@ class SavedSlackMessageService(
 
   fun find(
     keyId: Long,
-    langTags: Set<String>,
     configId: Long,
   ): List<SavedSlackMessage> {
-    val tags = objectMapper.writeValueAsString(langTags)
-    return savedSlackMessageRepository.findByKeyIdAndConfigIdAndLangTags(
+    return savedSlackMessageRepository.findByKeyIdAndSlackConfigId(
       keyId,
       configId,
-      tags,
     )
   }
 

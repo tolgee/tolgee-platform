@@ -4,6 +4,7 @@ import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.SectionBlockBuilder
+import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -28,6 +29,7 @@ class SlackExecutorHelper(
   private val slackUserConnectionService: SlackUserConnectionService,
   private val i18n: I18n,
   private val tolgeeProperties: TolgeeProperties,
+  private val author: String?,
 ) {
   fun createKeyAddMessage(): List<SavedMessageDto> {
     val activities = data.activityData ?: return emptyList()
@@ -77,25 +79,6 @@ class SlackExecutorHelper(
       langTags.add(translation.language.tag)
     }
 
-    slackConfig.project.languages.forEach { language ->
-      if (!langTags.contains(language.tag)) {
-        if (!shouldProcessEventNewKeyAdded(
-            language.tag,
-          )
-        ) {
-          return@forEach
-        }
-        val blocks = buildBlocksNoTranslation(baseLanguage, language)
-        attachments.add(
-          Attachment.builder()
-            .color("#BCC2CB")
-            .blocks(blocks)
-            .build(),
-        )
-        langTags.add(language.tag)
-      }
-    }
-
     if (!langTags.contains(baseLanguage.tag) && langTags.isNotEmpty()) {
       baseLanguage.translations?.find { it.key.id == keyId }?.let { baseTranslation ->
         val attachment = createAttachmentForLanguage(baseTranslation) ?: return@let
@@ -116,6 +99,7 @@ class SlackExecutorHelper(
       attachments = attachments,
       keyId = keyId,
       langTag = langTags,
+      true,
     )
   }
 
@@ -178,16 +162,33 @@ class SlackExecutorHelper(
     head: String,
   ) = withBlocks {
     section {
-      // TODO add author
-      markdownText(head)
+      authorHeadSection(head)
     }
 
-    section {
-      markdownText("*Key:* ${key.name}")
+    val columnFields = mutableListOf<Pair<String, String?>>()
+    columnFields.add("Key" to key.name)
+    key.keyMeta?.tags?.let { tags ->
+      val tagNames = tags.joinToString(", ") { it.name }
+      if (tagNames.isNotBlank()) {
+        columnFields.add("Tags" to tagNames)
+      }
     }
+    columnFields.add("Namespace" to key.namespace?.name)
+    columnFields.add("Description" to key.keyMeta?.description)
 
+    field(columnFields)
+  }
+
+  fun LayoutBlockDsl.field(keyValue: List<Pair<String, String?>>) {
     section {
-      markdownText("*Key namespace:* ${key.namespace ?: "None"}")
+      val filtered = keyValue.filter { it.second != null && it.second!!.isNotEmpty() }
+
+      if (filtered.isEmpty()) return@section
+      fields {
+        filtered.forEach { (key, value) ->
+          markdownText("*$key* \n$value")
+        }
+      }
     }
   }
 
@@ -199,6 +200,7 @@ class SlackExecutorHelper(
       attachments = listOf(createRedirectButton()),
       0L,
       setOf(),
+      false,
     )
   }
 
@@ -240,12 +242,12 @@ class SlackExecutorHelper(
 
     val langName =
       if (translation.language.tag == baseLanguageTag) {
-        "(base language)"
+        "base language"
       } else {
-        "(${translation.language.name})"
+        translation.language.name
       }
 
-    val headerBlock = buildKeyInfoBlock(key, i18n.translate("new-translation-text") + langName)
+    val headerBlock = buildKeyInfoBlock(key, i18n.translate("new-translation-text").format(langName))
     val attachments = mutableListOf(createAttachmentForLanguage(translation) ?: return null)
     val langTags = mutableSetOf(modifiedLangTag)
 
@@ -260,6 +262,7 @@ class SlackExecutorHelper(
         attachments = attachments,
         keyId = key.id,
         langTag = langTags,
+        false,
       )
     }
   }
@@ -330,8 +333,8 @@ class SlackExecutorHelper(
   }
 
   private fun SectionBlockBuilder.authorHeadSection(head: String) {
-    // TODO add author
-    markdownText(head)
+    val authorMention = author?.let { "@$it " } ?: data.activityData?.author?.name
+    markdownText(authorMention + head)
   }
 
   private fun shouldSkipModification(
@@ -489,6 +492,7 @@ class SlackExecutorHelper(
       attachments = listOf(createRedirectButton()),
       0L,
       setOf(),
+      false,
     )
   }
 }

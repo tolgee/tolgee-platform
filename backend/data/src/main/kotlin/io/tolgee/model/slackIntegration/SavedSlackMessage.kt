@@ -17,4 +17,5 @@ class SavedSlackMessage(
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var langTags: Set<String>,
+  var createdKeyBlocks: Boolean,
 ) : StandardAuditModel()

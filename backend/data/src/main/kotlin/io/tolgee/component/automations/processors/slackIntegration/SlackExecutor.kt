@@ -52,7 +52,7 @@ class SlackExecutor(
     val messagesDto = slackExecutorHelper.createTranslationChangeMessage()
 
     messagesDto.forEach { message ->
-      val savedMessage = findSavedMessageOrNull(message.keyId, message.langTag, config.id)
+      val savedMessage = findSavedMessageOrNull(message.keyId, config.id)
 
       if (savedMessage.isEmpty()) {
         sendRegularMessageWithSaving(message, config)
@@ -60,8 +60,25 @@ class SlackExecutor(
       }
 
       savedMessage.forEach { savedMsg ->
+        if (savedMsg.createdKeyBlocks) {
+          message.blocks = emptyList()
+        }
         processSavedMessage(savedMsg, message, config, slackExecutorHelper)
       }
+    }
+  }
+
+  fun getSlackNickName(author: String?): String? {
+    val response =
+      slackClient.methods(tolgeeProperties.slack.token).usersLookupByEmail { req ->
+        req.email(author)
+      }
+
+    return if (response.isOk) {
+      response.user?.name
+    } else {
+      logger.info(response.error)
+      null
     }
   }
 
@@ -173,8 +190,11 @@ class SlackExecutor(
         request
           .channel(config.channelId)
           .ts(savedMessage.messageTs)
-          .blocks(messageDto.blocks)
           .attachments(messageDto.attachments)
+        if (messageDto.blocks.isNotEmpty()) {
+          request.blocks(messageDto.blocks)
+        }
+        request
       }
 
     if (response.isOk) {
@@ -213,14 +233,14 @@ class SlackExecutor(
       slackUserConnectionService,
       i18n,
       tolgeeProperties,
+      getSlackNickName(data.activityData?.author?.name ?: ""),
     )
   }
 
   private fun findSavedMessageOrNull(
     keyId: Long,
-    langTags: Set<String>,
     configId: Long,
-  ) = savedSlackMessageService.find(keyId, langTags, configId)
+  ) = savedSlackMessageService.find(keyId, configId)
 
   private fun saveMessage(
     messageDto: SavedMessageDto,
@@ -234,6 +254,7 @@ class SlackExecutor(
           slackConfig = config,
           keyId = messageDto.keyId,
           langTags = messageDto.langTag,
+          messageDto.createdKeyBlocks,
         ),
     )
   }
