@@ -3,12 +3,16 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
+import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ApiKeyPresentMode
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
@@ -18,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import kotlin.system.measureTimeMillis
 
@@ -367,5 +372,66 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     performProjectAuthGet("/translations?search=commented_key").andIsOk.andAssertThatJson {
       node("""_embedded.keys[0].translations.de.unresolvedCommentCount""").isEqualTo(2)
     }
+  }
+
+  @ProjectJWTAuthTestMethod()
+  @Test
+  fun `filters by activity revision`() {
+    prepareImportData()
+
+    performProjectAuthGet("/translations").assertTotalElements(307)
+    performProjectAuthGet("/translations?filterRevisionId=${getLastRevision()!!.id}").assertTotalElements(306)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by activity revision when key affected directly`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthPost("keys", CreateKeyDto(name = "super_key"))
+    performProjectAuthGet("/translations?filterRevisionId=${getLastRevision()!!.id}").assertTotalElements(1)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by activity revision when key is referenced`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "A key",
+        null,
+        mutableMapOf("en" to "English"),
+      ),
+    ).andIsOk
+    performProjectAuthGet("/translations?filterRevisionId=${getLastRevision()!!.id}").assertTotalElements(1)
+  }
+
+  private fun ResultActions.assertTotalElements(elements: Int) {
+    andIsOk.andPrettyPrint.andAssertThatJson {
+      node("page.totalElements").isEqualTo(elements)
+    }
+  }
+
+  private fun prepareImportData() {
+    val testData = ImportTestData()
+    testData.addManyTranslations()
+    testData.setAllResolved()
+    testData.setAllOverride()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.userAccount
+    projectSupplier = { testData.project }
+
+    performProjectAuthPut("/import/apply").andIsOk
+  }
+
+  fun getLastRevision(): ActivityRevision? {
+    return entityManager.createQuery(
+      """
+        from ActivityRevision ar order by ar.id desc limit 1
+      """.trimMargin(),
+      ActivityRevision::class.java,
+    ).singleResult
   }
 }

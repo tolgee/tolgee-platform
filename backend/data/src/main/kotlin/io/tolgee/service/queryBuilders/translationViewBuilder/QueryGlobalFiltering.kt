@@ -1,6 +1,11 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.model.activity.ActivityDescribingEntity
+import io.tolgee.model.activity.ActivityDescribingEntity_
+import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.activity.ActivityModifiedEntity_
+import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
@@ -24,6 +29,7 @@ class QueryGlobalFiltering(
     filterHasScreenshot()
     filterHasNoScreenshot()
     filterSearch()
+    filterRevisionId()
   }
 
   private fun filterSearch() {
@@ -114,6 +120,39 @@ class QueryGlobalFiltering(
       val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
       queryBase.whereConditions.add(tagsJoin.get(Tag_.name).`in`(params.filterTag))
+    }
+  }
+
+  private fun filterRevisionId() {
+    if (!params.filterRevisionId.isNullOrEmpty()) {
+      val modifiedEntitySubquery = queryBase.query.subquery(Long::class.java)
+      val meRoot = modifiedEntitySubquery.from(ActivityModifiedEntity::class.java)
+      modifiedEntitySubquery.select(meRoot.get(ActivityModifiedEntity_.entityId))
+      modifiedEntitySubquery.where(
+        cb.and(
+          cb.equal(meRoot.get(ActivityModifiedEntity_.entityClass), "Key"),
+          meRoot.get(ActivityModifiedEntity_.activityRevision).get(ActivityRevision_.id).`in`(params.filterRevisionId),
+        ),
+      )
+
+      val describingEntitySubquery = queryBase.query.subquery(Long::class.java)
+      val deRoot = describingEntitySubquery.from(ActivityDescribingEntity::class.java)
+      describingEntitySubquery.select(deRoot.get(ActivityDescribingEntity_.entityId))
+      describingEntitySubquery.where(
+        cb.and(
+          cb.equal(deRoot.get(ActivityDescribingEntity_.entityClass), "Key"),
+          deRoot.get(
+            ActivityDescribingEntity_.activityRevision,
+          ).get(ActivityRevision_.id).`in`(params.filterRevisionId),
+        ),
+      )
+
+      queryBase.whereConditions.add(
+        cb.or(
+          queryBase.root.get(Key_.id).`in`(modifiedEntitySubquery),
+          queryBase.root.get(Key_.id).`in`(describingEntitySubquery),
+        ),
+      )
     }
   }
 }
