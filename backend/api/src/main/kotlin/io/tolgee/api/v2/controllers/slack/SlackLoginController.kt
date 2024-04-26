@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.slack
 
 import com.slack.api.Slack
+import com.slack.api.methods.request.team.TeamInfoRequest
 import com.slack.api.methods.request.users.UsersInfoRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -71,19 +72,28 @@ class SlackLoginController(
   ): SlackUserInfoModel {
     val decrypted = slackUserLoginUrlProvider.decryptData(data)
     val token = getToken(decrypted.workspaceId)
-    val info = slackClient.methods(token).usersInfo(UsersInfoRequest.builder().user(decrypted.slackUserId).build())
+    val teamInfo = slackClient.methods(token).teamInfo(TeamInfoRequest.builder().token(token).build())
+    val userInfo = slackClient.methods(token).usersInfo(UsersInfoRequest.builder().user(decrypted.slackUserId).build())
 
-    if (!info.isOk) {
-      if (info.error == "missing_scope") {
-        throw BadRequestException(Message.SLACK_MISSING_SCOPE, listOf(info.needed))
+    if (!teamInfo.isOk || !userInfo.isOk) {
+      val errResponse =
+        if (!teamInfo.isOk) {
+          teamInfo
+        } else {
+          userInfo
+        }
+      if (errResponse.error == "missing_scope") {
+        throw BadRequestException(Message.SLACK_MISSING_SCOPE, listOf(errResponse.needed))
       }
-      throw BadRequestException(Message.CANNOT_FETCH_USER_DETAILS_FROM_SLACK, listOf(info.error))
+      throw BadRequestException(Message.CANNOT_FETCH_USER_DETAILS_FROM_SLACK, listOf(errResponse.error))
     }
 
     return SlackUserInfoModel(
-      slackId = info.user.id,
-      slackName = info.user.name,
-      slackRealName = info.user.realName,
+      teamName = teamInfo.team.name,
+      slackId = userInfo.user.id,
+      slackName = userInfo.user.name,
+      slackRealName = userInfo.user.realName,
+      slackAvatar = userInfo.user.profile.image72,
     )
   }
 

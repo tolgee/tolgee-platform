@@ -16,7 +16,7 @@ import { OrganizationBillingView } from './billing/OrganizationBillingView';
 import { OrganizationInvoicesView } from './billing/Invoices/OrganizationInvoicesView';
 import { OrganizationSubscriptionsView } from './billing/Subscriptions/OrganizationSubscriptionsView';
 import { OrganizationBillingTestClockHelperView } from './billing/Subscriptions/OrganizationBillingTestClockHelperView';
-import { OrganizationSlackView } from './slack/OrganizationSlackView';
+import { OrganizationAppsView } from './apps/OrganizationAppsView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -64,8 +64,8 @@ const SpecificOrganizationRouter = () => {
               )}
             </>
           )}
-          <PrivateRoute path={LINKS.ORGANIZATION_SLACK.template}>
-            <OrganizationSlackView />
+          <PrivateRoute path={LINKS.ORGANIZATION_APPS.template}>
+            <OrganizationAppsView />
           </PrivateRoute>
         </>
       ) : (

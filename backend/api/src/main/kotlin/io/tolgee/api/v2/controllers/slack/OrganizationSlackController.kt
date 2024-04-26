@@ -50,7 +50,7 @@ class OrganizationSlackController(
     return ConnectToSlackUrlModel(
       "https://slack.com/oauth/v2/authorize" +
         "?client_id=${slackProperties.clientId}" +
-        "&scope=channels:read,chat:write,commands,users:read&user_scope=" +
+        "&scope=channels:read,chat:write,commands,users:read,team:read&user_scope=" +
         "&redirect_uri=${slackWorkspaceService.getRedirectUrl(organization.slug)}",
     )
   }
