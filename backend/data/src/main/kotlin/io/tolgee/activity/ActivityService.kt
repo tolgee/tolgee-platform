@@ -138,7 +138,7 @@ class ActivityService(
     projectId: Long,
     revisionId: Long,
     pageable: Pageable,
-    filterEntityClass: List<String>,
+    filterEntityClass: List<String>?,
   ): Page<ModifiedEntityView> {
     val provider =
       ModificationsByRevisionsProvider(applicationContext, projectId, listOf(revisionId), pageable, filterEntityClass)

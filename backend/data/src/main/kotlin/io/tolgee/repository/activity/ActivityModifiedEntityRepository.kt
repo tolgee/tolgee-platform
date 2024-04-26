@@ -36,14 +36,14 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
         where ame.activityRevision.projectId = :projectId 
         and ame.activityRevision.id in :revisionIds
         and cast(empty_json(ame.modifications) as boolean) = false 
-        and ame.entityClass in :filterEntityClass
+        and (:filterEntityClass is null or ame.entityClass in :filterEntityClass)
         order by ame.activityRevision.id, ame.entityClass, ame.entityId
     """,
   )
   fun getModifiedEntities(
     projectId: Long,
     revisionIds: List<Long>,
-    filterEntityClass: List<String>,
+    filterEntityClass: List<String>?,
     pageable: Pageable,
   ): Page<ActivityModifiedEntity>
 }

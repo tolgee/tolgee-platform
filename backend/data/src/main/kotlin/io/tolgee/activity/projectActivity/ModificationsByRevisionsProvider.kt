@@ -16,7 +16,7 @@ class ModificationsByRevisionsProvider(
   private val projectId: Long,
   private val revisionIds: List<Long>,
   private val pageable: Pageable,
-  private val filterEntityClass: List<String>,
+  private val filterEntityClass: List<String>?,
 ) {
   val userAccountService: UserAccountService =
     applicationContext.getBean(UserAccountService::class.java)

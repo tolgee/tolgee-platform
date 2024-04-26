@@ -65,8 +65,8 @@ class ProjectActivityController(
       description = "Filters results by specific entity class",
       examples = [ExampleObject(value = "Key"), ExampleObject(value = "Translation")],
     )
-    @RequestParam
-    filterEntityClass: List<String>,
+    @RequestParam(required = false)
+    filterEntityClass: List<String>?,
   ): PagedModel<ModifiedEntityModel> {
     val page =
       activityService.getRevisionModifications(
