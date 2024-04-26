@@ -79,25 +79,6 @@ class SlackExecutorHelper(
       langTags.add(translation.language.tag)
     }
 
-    slackConfig.project.languages.forEach { language ->
-      if (!langTags.contains(language.tag)) {
-        if (!shouldProcessEventNewKeyAdded(
-            language.tag,
-          )
-        ) {
-          return@forEach
-        }
-        val blocks = buildBlocksNoTranslation(baseLanguage, language)
-        attachments.add(
-          Attachment.builder()
-            .color("#BCC2CB")
-            .blocks(blocks)
-            .build(),
-        )
-        langTags.add(language.tag)
-      }
-    }
-
     if (!langTags.contains(baseLanguage.tag) && langTags.isNotEmpty()) {
       baseLanguage.translations?.find { it.key.id == keyId }?.let { baseTranslation ->
         val attachment = createAttachmentForLanguage(baseTranslation) ?: return@let
@@ -180,8 +161,7 @@ class SlackExecutorHelper(
     head: String,
   ) = withBlocks {
     section {
-      val authorMention = author?.let { "@$it " } ?: data.activityData?.author?.name
-      markdownText(authorMention + head)
+      authorHeadSection(head)
     }
 
     val columnFields = mutableListOf<Pair<String, String?>>()
@@ -260,12 +240,12 @@ class SlackExecutorHelper(
 
     val langName =
       if (translation.language.tag == baseLanguageTag) {
-        "(base language)"
+        "base language"
       } else {
-        "(${translation.language.name})"
+        translation.language.name
       }
 
-    val headerBlock = buildKeyInfoBlock(key, i18n.translate("new-translation-text") + langName)
+    val headerBlock = buildKeyInfoBlock(key, i18n.translate("new-translation-text").format(langName))
     val attachments = mutableListOf(createAttachmentForLanguage(translation) ?: return null)
     val langTags = mutableSetOf(modifiedLangTag)
 
@@ -350,8 +330,8 @@ class SlackExecutorHelper(
   }
 
   private fun SectionBlockBuilder.authorHeadSection(head: String) {
-    // TODO add author
-    markdownText(head)
+    val authorMention = author?.let { "@$it " } ?: data.activityData?.author?.name
+    markdownText(authorMention + head)
   }
 
   private fun shouldSkipModification(
