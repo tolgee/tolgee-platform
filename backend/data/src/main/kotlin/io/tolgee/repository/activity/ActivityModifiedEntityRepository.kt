@@ -29,4 +29,21 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     pageable: Pageable,
     ignoredActivityTypes: List<ActivityType>,
   ): Page<TranslationHistoryView>
+
+  @Query(
+    """
+      from ActivityModifiedEntity ame
+        where ame.activityRevision.projectId = :projectId 
+        and ame.activityRevision.id in :revisionIds
+        and cast(empty_json(ame.modifications) as boolean) = false 
+        and ame.entityClass in :filterEntityClass
+        order by ame.activityRevision.id, ame.entityClass, ame.entityId
+    """,
+  )
+  fun getModifiedEntities(
+    projectId: Long,
+    revisionIds: List<Long>,
+    filterEntityClass: List<String>,
+    pageable: Pageable,
+  ): Page<ActivityModifiedEntity>
 }

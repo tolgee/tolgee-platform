@@ -3341,4 +3341,16 @@
     <changeSet author="jenik (generated)" id="1713199074850-2">
         <addUniqueConstraint columnNames="slack_team_id" constraintName="organization_slack_workspace_slack_team_id_unique" tableName="organization_slack_workspace"/>
     </changeSet>
+    <changeSet id="jenik" author="1713199074851-1">
+        <sql>
+            CREATE OR REPLACE FUNCTION empty_json(j jsonb) RETURNS boolean AS '
+            BEGIN
+            RETURN j = ''{}''::jsonb;
+            END;
+            ' LANGUAGE plpgsql IMMUTABLE;
+        </sql>
+        <sql>
+            CREATE INDEX empty_modifications ON activity_modified_entity (empty_json(modifications));
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -1,6 +1,6 @@
 package io.tolgee.websocket
 
-import io.tolgee.activity.projectActivityView.RelationDescriptionExtractor
+import io.tolgee.activity.projectActivity.RelationDescriptionExtractor
 import io.tolgee.batch.OnBatchJobCompleted
 import io.tolgee.batch.WebsocketProgressInfo
 import io.tolgee.batch.events.OnBatchJobCancelled
