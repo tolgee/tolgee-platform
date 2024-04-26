@@ -4,10 +4,10 @@ import { AvatarImg } from './AvatarImg';
 
 const SIZE = 24;
 
-const StyledContainer = styled('div')`
+const StyledContainer = styled('div')<{ size: number }>`
   display: flex;
-  width: ${SIZE};
-  height: ${SIZE};
+  width: ${(props) => props.size}px;
+  height: ${(props) => props.size}px;
   color: black;
   align-items: center;
   justify-content: center;
@@ -19,11 +19,15 @@ const StyledContainer = styled('div')`
   filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2));
 `;
 
-export const UserAvatar: React.FC = () => {
+type Props = {
+  size?: number;
+};
+
+export const UserAvatar: React.FC<Props> = ({ size = SIZE }) => {
   const user = useUser();
 
   return (
-    <StyledContainer>
+    <StyledContainer size={size}>
       {user && (
         <AvatarImg
           owner={{
@@ -32,7 +36,7 @@ export const UserAvatar: React.FC = () => {
             name: user.name,
             type: 'USER',
           }}
-          size={SIZE}
+          size={size}
         />
       )}
     </StyledContainer>

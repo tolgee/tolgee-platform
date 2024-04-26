@@ -187,7 +187,7 @@ class OrganizationSlackWorkspaceService(
   }
 
   fun getRedirectUrl(organizationSlug: String): String {
-    return "${frontendUrlProvider.url}/organizations/$organizationSlug/slack/oauth2-success"
+    return "${frontendUrlProvider.url}/organizations/$organizationSlug/apps/slack-oauth2-success"
   }
 
   fun get(workspaceId: Long): OrganizationSlackWorkspace {

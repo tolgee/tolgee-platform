@@ -23,7 +23,7 @@ class SlackUserLoginUrlProvider(
   ): String {
     val dto = getDto(slackChannelId, slackUserId, workspaceId)
     val encryptedData = encryptData(dto)
-    return "${frontendUrlProvider.url}/slack/login?data=$encryptedData"
+    return "${frontendUrlProvider.url}/slack/connect?data=$encryptedData"
   }
 
   fun encryptData(
