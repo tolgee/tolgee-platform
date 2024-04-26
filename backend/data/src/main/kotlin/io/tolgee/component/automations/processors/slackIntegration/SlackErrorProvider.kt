@@ -104,7 +104,7 @@ class SlackErrorProvider(
       actions {
         button {
           text(i18n.translate("connect-workspace-button-text"), emoji = true)
-          url(tolgeeProperties.frontEndUrl + "")
+          url(tolgeeProperties.frontEndUrl + "/preferred-organization?path=apps")
           style("primary")
         }
       }
