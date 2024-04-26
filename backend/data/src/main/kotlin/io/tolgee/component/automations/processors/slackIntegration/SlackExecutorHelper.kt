@@ -66,10 +66,7 @@ class SlackExecutorHelper(
     val key = keyService.get(keyId)
     blocksHeader = buildKeyInfoBlock(key, i18n.translate("new-key-text"))
     key.translations.forEach translations@{ translation ->
-      if (!shouldProcessEventNewKeyAdded(
-          translation.language.tag,
-        )
-      ) {
+      if (!shouldProcessEventNewKeyAdded(translation.language.tag, baseLanguage.tag)) {
         return@translations
       }
 
@@ -394,11 +391,14 @@ class SlackExecutorHelper(
     return isAllEvent || isBaseLanguageChangedEvent || isTranslationChangedEvent
   }
 
-  private fun shouldProcessEventNewKeyAdded(modifiedLangTag: String): Boolean {
+  private fun shouldProcessEventNewKeyAdded(
+    modifiedLangTag: String,
+    tag: String,
+  ): Boolean {
     return if (slackConfig.isGlobalSubscription) {
       slackConfig.onEvent == EventName.NEW_KEY || slackConfig.onEvent == EventName.ALL
     } else {
-      val pref = slackConfig.preferences.find { it.languageTag == modifiedLangTag } ?: return false
+      val pref = slackConfig.preferences.find { it.languageTag == modifiedLangTag } ?: return modifiedLangTag == tag
       pref.onEvent == EventName.NEW_KEY || pref.onEvent == EventName.ALL
     }
   }
