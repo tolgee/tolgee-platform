@@ -27,20 +27,8 @@ class SavedSlackMessageServiceTest : AbstractSpringTest() {
   fun `finds messages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    var result = savedSlackMessageService.find(0L, setOf("fr"), testData.slackConfig.id)
+    val result = savedSlackMessageService.find(0L, testData.slackConfig.id)
 
     Assertions.assertThat(result).hasSize(2)
-
-    result = savedSlackMessageService.find(1L, setOf("cz"), testData.slackConfig.id)
-
-    Assertions.assertThat(result).hasSize(1)
-
-    result = savedSlackMessageService.find(52L, setOf("fr", "cz"), testData.slackConfig.id)
-
-    Assertions.assertThat(result).hasSize(1)
-
-    result = savedSlackMessageService.find(1415L, setOf("fr", "cz"), testData.slackConfig.id)
-
-    Assertions.assertThat(result).hasSize(0)
   }
 }

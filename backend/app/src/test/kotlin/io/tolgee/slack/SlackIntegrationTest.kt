@@ -4,7 +4,9 @@ import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
 import com.slack.api.methods.MethodsClient
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.methods.request.users.UsersLookupByEmailRequest
 import com.slack.api.methods.response.chat.ChatPostMessageResponse
+import com.slack.api.methods.response.users.UsersLookupByEmailResponse
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
@@ -13,6 +15,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.testing.assert
+import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.Logging
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -45,10 +48,10 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
     waitForNotThrowing(timeout = 3000) {
       modifyTranslationData(testData.projectBuilder.self.id, langTag)
-      mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
       val request = mockedSlackClient.chatPostMessageRequests.single()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
     }
+    Assertions.assertThat(slackMessageService.findByKey(testData.key.id, testData.slackConfig.id)).hasSize(1)
   }
 
   @Test
@@ -129,11 +132,20 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     whenever(mockPostMessageResponse.isOk).thenReturn(true)
     whenever(mockPostMessageResponse.ts).thenReturn("ts")
 
+    val mockUsersResponse = mock<UsersLookupByEmailResponse>()
+    whenever(mockUsersResponse.isOk).thenReturn(true)
+
     whenever(
       methodsClientMock.chatPostMessage(
         any<RequestConfigurator<ChatPostMessageRequest.ChatPostMessageRequestBuilder>>(),
       ),
     ).thenReturn(mockPostMessageResponse)
+
+    whenever(
+      methodsClientMock.usersLookupByEmail(
+        any<RequestConfigurator<UsersLookupByEmailRequest.UsersLookupByEmailRequestBuilder>>(),
+      ),
+    ).thenReturn(mockUsersResponse)
 
     return MockedSlackClient(methodsClientMock)
   }
