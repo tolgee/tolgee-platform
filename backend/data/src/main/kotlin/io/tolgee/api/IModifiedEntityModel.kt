@@ -4,6 +4,7 @@ import io.tolgee.activity.data.ExistenceEntityDescription
 import io.tolgee.activity.data.PropertyModification
 
 interface IModifiedEntityModel {
+  val entityClass: String
   val entityId: Long
   val description: Map<String, Any?>?
   var modifications: Map<String, PropertyModification>?

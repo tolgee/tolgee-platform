@@ -2,10 +2,8 @@ package io.tolgee.model.views.activity
 
 import io.tolgee.activity.data.ExistenceEntityDescription
 import io.tolgee.activity.data.PropertyModification
-import io.tolgee.model.activity.ActivityRevision
 
 data class ModifiedEntityView(
-  val activityRevision: ActivityRevision,
   val entityClass: String,
   val entityId: Long,
   val exists: Boolean?,

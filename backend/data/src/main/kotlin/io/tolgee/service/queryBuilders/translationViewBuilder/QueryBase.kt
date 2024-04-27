@@ -33,7 +33,7 @@ import jakarta.persistence.criteria.Subquery
 class QueryBase<T>(
   private val cb: CriteriaBuilder,
   private val projectId: Long,
-  private val query: CriteriaQuery<T>,
+  val query: CriteriaQuery<T>,
   private val languages: Set<LanguageDto>,
   params: TranslationFilters,
   private var isKeyIdsQuery: Boolean = false,

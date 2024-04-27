@@ -1,7 +1,7 @@
 package io.tolgee.component.automations.processors.slackIntegration
 
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
+import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
 import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.component.automations.AutomationProcessor
 import io.tolgee.model.automations.AutomationAction

@@ -1,13 +1,8 @@
-package io.tolgee.activity.projectActivityView
+package io.tolgee.activity.projectActivity
 
-import io.sentry.Sentry
-import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.activity.data.EntityDescriptionRef
-import io.tolgee.activity.data.ExistenceEntityDescription
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityDescribingEntity
-import io.tolgee.model.activity.ActivityDescribingEntity_
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision
@@ -16,7 +11,6 @@ import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.security.UserAccountService
-import io.tolgee.util.EntityUtil
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
@@ -38,9 +32,6 @@ class ActivityViewByRevisionsProvider(
 
   private val entityManager: EntityManager =
     applicationContext.getBean(EntityManager::class.java)
-
-  private val entityUtil: EntityUtil =
-    applicationContext.getBean(EntityUtil::class.java)
 
   private lateinit var authors: Map<Long, UserAccount>
   private lateinit var modifiedEntities: Map<Long, List<ModifiedEntityView>>
@@ -83,7 +74,7 @@ class ActivityViewByRevisionsProvider(
 
     rawModifiedEntities = getModifiedEntitiesRaw()
 
-    populateRelationData()
+    allRelationData = RelationDataProvider(entityManager, rawModifiedEntities).provide()
 
     entityExistences = getEntityExistences()
 
@@ -129,125 +120,19 @@ class ActivityViewByRevisionsProvider(
       revisions.mapNotNull { it.authorId }.toSet(),
     ).associateBy { it.id }
 
-  private fun populateRelationData() {
-    var missing: Set<Triple<Long, String, Long>> = getInitialMissingRelationData()
-
-    allRelationData = getRelationsForRevisions(missing).groupBy { it.activityRevision.id }.toMutableMap()
-
-    val retrieved = missing.toMutableSet()
-
-    missing = getMissingRelationData()
-
-    while (!retrieved.containsAll(missing)) {
-      allRelationData.putAll(getRelationsForRevisions(missing).groupBy { it.activityRevision.id })
-      retrieved.addAll(missing)
-      missing = getMissingRelationData()
-    }
-  }
-
-  private fun getInitialMissingRelationData() =
-    rawModifiedEntities.asSequence().flatMap {
-      it.describingRelations?.map { dr ->
-        Triple(it.activityRevision.id, dr.value.entityClass, dr.value.entityId)
-      } ?: listOf()
-    }.toMutableSet()
-
-  private fun getMissingRelationData(): Set<Triple<Long, String, Long>> {
-    val missing =
-      allRelationData.entries.flatMap { entry ->
-        entry.value.flatMap { relation ->
-          relation.describingRelations?.values?.map {
-            Triple(
-              entry.key,
-              it.entityClass,
-              it.entityId,
-            )
-          } ?: listOf()
-        }
-      }.toMutableSet()
-
-    missing.removeIf { missingItem ->
-      allRelationData[missingItem.first]?.any {
-        it.entityClass == missingItem.second && it.entityId == missingItem.third
-      } == true
-    }
-
-    return missing
-  }
-
-  private fun getRelationsForRevisions(
-    missing: Set<Triple<Long, String, Long>>,
-  ): MutableList<ActivityDescribingEntity> {
-    val cb = entityManager.criteriaBuilder
-    val query = cb.createQuery(ActivityDescribingEntity::class.java)
-    val root = query.from(ActivityDescribingEntity::class.java)
-    val revision = root.join(ActivityDescribingEntity_.activityRevision)
-
-    missing.map { (revisionId, entityClass, entityId) ->
-      cb.and(
-        cb.equal(revision.get(ActivityRevision_.id), revisionId),
-        cb.equal(root.get(ActivityDescribingEntity_.entityClass), entityClass),
-        cb.equal(root.get(ActivityDescribingEntity_.entityId), entityId),
-      )
-    }.let {
-      query.where(cb.or(*it.toTypedArray()))
-    }
-
-    return entityManager.createQuery(query).resultList
-  }
-
   private fun getModifiedEntities(): Map<Long, List<ModifiedEntityView>> {
-    return rawModifiedEntities.map { modifiedEntity ->
-      val relations =
-        modifiedEntity.describingRelations
-          ?.mapNotNull relationsOfEntityMap@{ relationEntry ->
-            relationEntry.key to
-              extractCompressedRef(
-                relationEntry.value,
-                allRelationData[modifiedEntity.activityRevision.id] ?: let {
-                  Sentry.captureException(
-                    IllegalStateException("No relation data for revision ${modifiedEntity.activityRevision.id}"),
-                  )
-                  return@relationsOfEntityMap null
-                },
-              )
-          }?.toMap()
-      ModifiedEntityView(
-        activityRevision = modifiedEntity.activityRevision,
-        entityClass = modifiedEntity.entityClass,
-        entityId = modifiedEntity.entityId,
-        exists = entityExistences[modifiedEntity.entityClass to modifiedEntity.entityId],
-        modifications = modifiedEntity.modifications,
-        description = modifiedEntity.describingData,
-        describingRelations = relations,
-      )
-    }.groupBy { it.activityRevision.id }
+    val factory = ModifiedEntityViewFactory(entityExistences, allRelationData)
+    return rawModifiedEntities
+      .groupBy { it.activityRevision.id }
+      .mapValues { (_, modifiedEntities) ->
+        modifiedEntities.map { modifiedEntity ->
+          factory.create(modifiedEntity)
+        }
+      }
   }
 
   private fun getEntityExistences(): Map<Pair<String, Long>, Boolean> {
-    val modifiedEntityClassIdPairs = rawModifiedEntities.map { it.entityClass to it.entityId }
-    val relationsClassIdPairs = allRelationData.flatMap { (_, data) -> data.map { it.entityClass to it.entityId } }
-    val entities = (modifiedEntityClassIdPairs + relationsClassIdPairs).toHashSet()
-
-    return entities
-      .groupBy { (entityClass, _) -> entityClass }
-      .mapNotNull { (entityClassName, classIdPairs) ->
-        val entityClass = entityUtil.getRealEntityClass(entityClassName)
-        val annotation = entityClass?.getAnnotation(ActivityReturnsExistence::class.java)
-        if (annotation != null) {
-          val cb = entityManager.criteriaBuilder
-          val query = cb.createQuery(Long::class.java)
-          val root = query.from(entityClass)
-          val ids = classIdPairs.map { it.second }
-          query.select(root.get("id"))
-          query.where(root.get<Boolean?>("id").`in`(ids))
-          val existingIds = entityManager.createQuery(query).resultList
-          return@mapNotNull (entityClassName to ids.map { it to existingIds.contains(it) })
-        }
-        return@mapNotNull null
-      }
-      .flatMap { (entityClassName, existingIds) -> existingIds.map { (entityClassName to it.first) to it.second } }
-      .toMap()
+    return EntityExistenceProvider(applicationContext, rawModifiedEntities, allRelationData).provide()
   }
 
   private fun getModifiedEntitiesRaw(): List<ActivityModifiedEntity> {
@@ -300,24 +185,4 @@ class ActivityViewByRevisionsProvider(
         revisionId to allowedClasses
       }.toMap()
     }
-
-  private fun extractCompressedRef(
-    value: EntityDescriptionRef,
-    describingEntities: List<ActivityDescribingEntity>,
-  ): ExistenceEntityDescription {
-    val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
-
-    val relations =
-      entity?.describingRelations
-        ?.map { it.key to extractCompressedRef(it.value, describingEntities) }
-        ?.toMap()
-
-    return ExistenceEntityDescription(
-      entityClass = value.entityClass,
-      entityId = value.entityId,
-      exists = entityExistences[value.entityClass to value.entityId],
-      data = entity?.data ?: mapOf(),
-      relations = relations ?: mapOf(),
-    )
-  }
 }
