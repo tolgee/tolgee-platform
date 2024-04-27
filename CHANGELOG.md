@@ -1,3 +1,10 @@
+## [3.59.4](https://github.com/tolgee/tolgee-platform/compare/v3.59.3...v3.59.4) (2024-04-27)
+
+
+### Bug Fixes
+
+* Activity relation storing ([#2285](https://github.com/tolgee/tolgee-platform/issues/2285)) ([d503bde](https://github.com/tolgee/tolgee-platform/commit/d503bdeaffa8d46cd731d1722a15a4ac3d52a8e9))
+
 ## [3.59.3](https://github.com/tolgee/tolgee-platform/compare/v3.59.2...v3.59.3) (2024-04-24)
 
 
