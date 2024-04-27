@@ -15,6 +15,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -108,7 +109,8 @@ class BatchJobManagementController(
   }
 
   @PutMapping(value = ["batch-jobs/{id}/cancel"])
-  @Operation(summary = "Stop batch operation", description = "Stops batch opperation if possible.")
+  @Operation(summary = "Stop batch operation", description = "Stops batch operation if possible.")
+  @RateLimited(limit = 10, refillDurationInMs = 300_000, pathVariablesToDiscriminate = 0)
   @UseDefaultPermissions // Security: permission checked internally
   @AllowApiAccess
   fun cancel(
