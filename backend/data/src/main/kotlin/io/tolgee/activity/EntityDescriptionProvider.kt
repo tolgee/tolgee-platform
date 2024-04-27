@@ -6,9 +6,11 @@ import io.tolgee.activity.data.EntityDescription
 import io.tolgee.activity.data.EntityDescriptionWithRelations
 import io.tolgee.model.EntityWithId
 import io.tolgee.util.EntityUtil
+import org.hibernate.proxy.HibernateProxy
 import org.springframework.stereotype.Component
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.superclasses
 
 @Component
 class EntityDescriptionProvider(
@@ -19,7 +21,7 @@ class EntityDescriptionProvider(
 
     val relations = mutableMapOf<String, EntityDescriptionWithRelations>()
 
-    entity::class.findAnnotation<ActivityEntityDescribingPaths>()?.paths?.forEach pathsForEach@{ path ->
+    getAnnotation(entity)?.paths?.forEach pathsForEach@{ path ->
       var realDescribingEntity: Any = entity
       path.split(".").forEach { pathItem ->
         val member = realDescribingEntity::class.members.find { it.name == pathItem }
@@ -37,6 +39,13 @@ class EntityDescriptionProvider(
       description.data,
       relations,
     )
+  }
+
+  private fun getAnnotation(entity: EntityWithId): ActivityEntityDescribingPaths? {
+    if (entity is HibernateProxy) {
+      return entity::class.superclasses.firstNotNullOfOrNull { it.findAnnotation<ActivityEntityDescribingPaths>() }
+    }
+    return entity::class.findAnnotation<ActivityEntityDescribingPaths>()
   }
 
   fun getDescription(entity: EntityWithId): EntityDescription? {
