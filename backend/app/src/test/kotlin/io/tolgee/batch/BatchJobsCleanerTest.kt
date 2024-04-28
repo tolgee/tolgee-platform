@@ -44,6 +44,7 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
   @Test
   fun `fixes the batch job state`() {
     val cancelledJob = createCancelledJob()
+    val failedJob = createFailedJob()
     val successBatchJob = createSuccessBatchJob()
     val noExecutionBatchJob = createNoExecutionBatchJob()
     val runningJob = createRunningJob()
@@ -52,6 +53,7 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
 
     waitForNotThrowing(timeout = 2000, pollTime = 100) {
       batchJobService.getJobDto(cancelledJob.id).status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+      batchJobService.getJobDto(failedJob.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
       batchJobService.getJobDto(successBatchJob.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
       batchJobService.getJobDto(noExecutionBatchJob.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
       batchJobService.getJobDto(runningJob.id).status.assert.isEqualTo(BatchJobStatus.RUNNING)
@@ -103,8 +105,18 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
       BatchJobStatus.RUNNING,
       setOf(
         BatchJobChunkExecutionStatus.CANCELLED,
-        BatchJobChunkExecutionStatus.FAILED,
         BatchJobChunkExecutionStatus.SUCCESS,
+      ),
+    )
+
+  private fun createFailedJob() =
+    stuckBatchJobTestUtil.createBatchJobWithExecutionStatuses(
+      testData.project,
+      BatchJobStatus.RUNNING,
+      setOf(
+        BatchJobChunkExecutionStatus.CANCELLED,
+        BatchJobChunkExecutionStatus.SUCCESS,
+        BatchJobChunkExecutionStatus.FAILED,
       ),
     )
 }
