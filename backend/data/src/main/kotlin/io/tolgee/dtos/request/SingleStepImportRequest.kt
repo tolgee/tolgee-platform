@@ -12,7 +12,7 @@ class SingleStepImportRequest : IImportAddFilesParams, IImportSettings {
   @field:Parameter(
     description =
       "When importing structured JSONs, you can set " +
-        "the delimiter which will be used in names of improted keys.",
+        "the delimiter which will be used in names of imported keys.",
   )
   override var structureDelimiter: Char? = '.'
 
