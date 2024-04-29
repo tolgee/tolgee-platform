@@ -142,6 +142,7 @@ describe('Projects Basics', () => {
   };
 
   const deleteNamespaceByDeletingAllKeys = (key: string) => {
+    visitSingleKey({ projectId, key });
     cy.gcy('translation-edit-delete-button').click();
     cy.gcy('global-confirmation-confirm').click();
   };
