@@ -7,7 +7,7 @@ export const SingleKeyView = () => {
   const project = useProject();
   const keyId = Number(useUrlSearch().id as string);
   const keyName = useUrlSearch().key as string;
-  const keyNamespace = project.defaultNamespace?.name;
+  const keyNamespace = useUrlSearch().ns as string;
 
   return (
     <TranslationsContextProvider
