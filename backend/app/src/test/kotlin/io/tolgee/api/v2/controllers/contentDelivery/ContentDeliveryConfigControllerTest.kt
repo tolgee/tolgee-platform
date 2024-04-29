@@ -305,6 +305,28 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not regenerate slug when not using custom storage`() {
+    val slug = testData.defaultServerContentDeliveryConfig.self.slug
+    performProjectAuthPut(
+      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}",
+      mapOf("name" to "S3 new"),
+    ).andIsOk.andAssertThatJson {
+      node("slug").isEqualTo(slug)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `throws when custom slug is used with default storage`() {
+    val slug = testData.defaultServerContentDeliveryConfig.self.slug
+    performProjectAuthPut(
+      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}",
+      mapOf("name" to "S3 new", "slug" to "hello"),
+    ).andIsBadRequest
+  }
+
   private fun createWithCustomSlug() =
     performProjectAuthPost(
       "content-delivery-configs",
