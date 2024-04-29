@@ -12,9 +12,9 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     """
       SELECT DISTINCT new io.tolgee.model.Permission${'$'}PermissionWithLanguageIdsWrapper(
         p,
-        array_agg(vl.id) OVER (PARTITION BY p.id),
-        array_agg(tl.id) OVER (PARTITION BY p.id),
-        array_agg(sl.id) OVER (PARTITION BY p.id)
+        listagg(str(vl.id), ','),
+        listagg(str(tl.id), ','),
+        listagg(str(sl.id), ',')
       )
       FROM Permission p 
       LEFT JOIN p.viewLanguages vl
@@ -24,6 +24,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
         ((:projectId is null and p.project.id is null) or p.project.id = :projectId) and 
         ((:userId is null and p.user.id is null) or p.user.id = :userId) and 
         ((:organizationId is null and p.organization.id is null) or p.organization.id = :organizationId)
+      GROUP BY p
   """,
   )
   fun findOneByProjectIdAndUserIdAndOrganizationId(

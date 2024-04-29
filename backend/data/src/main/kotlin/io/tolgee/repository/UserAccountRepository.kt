@@ -209,9 +209,9 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         p.id,
         org_r.type,
         perm_org,
-        array_agg(vl_org.id) OVER (PARTITION BY perm_org.id),
+        listagg(str(vl_org.id), ','),
         perm,
-        array_agg(vl.id) OVER (PARTITION BY perm.id),
+        listagg(str(vl.id), ','),
         np_global,
         np_project
       )
@@ -236,6 +236,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
           (perm._scopes IS NOT NULL AND cast(perm._scopes as string) != '{}') OR perm.type IS NOT NULL OR
           (perm_org._scopes IS NOT NULL AND cast(perm_org._scopes as string) != '{}') OR perm_org.type IS NOT NULL
         )
+      GROUP BY ua.id, p.id, org_r.type, perm_org, perm, np_global, np_project
     """,
   )
   fun findAllUserProjectMetadataViews(projectId: Long): List<UserProjectMetadataView>

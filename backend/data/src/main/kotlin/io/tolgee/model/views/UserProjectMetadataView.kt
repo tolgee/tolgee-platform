@@ -35,6 +35,7 @@ class UserProjectMetadataView(
 
   val basePermissions =
     basePermissions?.let {
+      println(basePermissions)
       Permission.PermissionWithLanguageIdsWrapper(
         basePermissions,
         fetchedBaseViewLanguages,

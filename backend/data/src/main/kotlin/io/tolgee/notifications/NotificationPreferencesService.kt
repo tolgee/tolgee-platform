@@ -54,7 +54,7 @@ class NotificationPreferencesService(
     project: Long,
   ): NotificationPreferencesDto {
     // If the user cannot see the project, the project "does not exist".
-    val scopes = securityService.getProjectPermissionScopes(project, user) ?: emptyArray()
+    val scopes = securityService.getProjectPermissionScopesNoApiKey(project, user) ?: emptyArray()
     if (scopes.isEmpty()) throw NotFoundException()
 
     val entity =
@@ -99,7 +99,7 @@ class NotificationPreferencesService(
     dto: NotificationPreferencesDto,
   ): NotificationPreferences {
     // If the user cannot see the project, the project "does not exist".
-    val scopes = securityService.getProjectPermissionScopes(project.id, user.id) ?: emptyArray()
+    val scopes = securityService.getProjectPermissionScopesNoApiKey(project.id, user.id) ?: emptyArray()
     if (scopes.isEmpty()) throw NotFoundException()
 
     return doSetPreferencesOfUser(user, project, dto)

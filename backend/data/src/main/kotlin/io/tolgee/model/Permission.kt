@@ -200,18 +200,21 @@ class Permission(
     fetchedStateChangeLanguageIds: Any?,
   ) {
     init {
-      permission.fetchedViewLanguageIds = (fetchedViewLanguageIds as? Array<*>)
-        ?.mapNotNull { e -> e as? Long }
+      permission.fetchedViewLanguageIds = (fetchedViewLanguageIds as? String)
+        ?.split(',')
+        ?.map { e -> e.toLong() }
         ?.toSet()
         ?: emptySet()
 
-      permission.fetchedTranslateLanguageIds = (fetchedTranslateLanguageIds as? Array<*>)
-        ?.mapNotNull { e -> e as? Long }
+      permission.fetchedTranslateLanguageIds = (fetchedTranslateLanguageIds as? String)
+        ?.split(',')
+        ?.map { e -> e.toLong() }
         ?.toSet()
         ?: emptySet()
 
-      permission.fetchedStateChangeLanguageIds = (fetchedStateChangeLanguageIds as? Array<*>)
-        ?.mapNotNull { e -> e as? Long }
+      permission.fetchedStateChangeLanguageIds = (fetchedStateChangeLanguageIds as? String)
+        ?.split(',')
+        ?.map { e -> e.toLong() }
         ?.toSet()
         ?: emptySet()
     }
