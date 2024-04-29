@@ -12,7 +12,10 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.security.UserAccountService
 import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 import org.springframework.context.ApplicationContext
 
 class ActivityViewByRevisionsProvider(
@@ -141,23 +144,10 @@ class ActivityViewByRevisionsProvider(
     val root = query.from(ActivityModifiedEntity::class.java)
     val revision = root.join(ActivityModifiedEntity_.activityRevision)
 
-    val toExpand = classesToExpand
-
-    val expandFilters =
-      toExpand.map {
-        cb.or(
-          cb.and(
-            revision.get(ActivityRevision_.type).`in`(allDataReturningActivityTypes),
-          ),
-          cb.and(
-            cb.equal(revision.get(ActivityRevision_.id), it.key),
-            root.get(ActivityModifiedEntity_.entityClass).`in`(it.value),
-          ),
-        )
-      }
+    val filter = getClassesToExpandFilter(cb, revision, root)
 
     val whereConditions = mutableListOf<Predicate>()
-    whereConditions.addAll(expandFilters)
+    whereConditions.add(filter)
     whereConditions.add(revision.get(ActivityRevision_.id).`in`(revisionIds))
     ActivityType.entries.forEach {
       it.restrictEntitiesInList?.let { restrictEntitiesInList ->
@@ -173,6 +163,36 @@ class ActivityViewByRevisionsProvider(
 
     query.where(cb.and(*whereConditions.toTypedArray()))
     return entityManager.createQuery(query).resultList
+  }
+
+  private fun getClassesToExpandFilter(
+    cb: CriteriaBuilder,
+    revision: Join<ActivityModifiedEntity, ActivityRevision>,
+    root: Root<ActivityModifiedEntity>,
+  ): Predicate {
+    val toExpand = classesToExpand
+
+    val expandFilters =
+      toExpand.map {
+        cb.and(
+          cb.equal(revision.get(ActivityRevision_.id), it.key),
+          root.get(ActivityModifiedEntity_.entityClass).`in`(it.value),
+        )
+      }
+
+    val allActivityTypeFilter = revision.get(ActivityRevision_.type).`in`(allDataReturningActivityTypes)
+
+    if (expandFilters.isEmpty()) {
+      return allActivityTypeFilter
+    }
+
+    val filter =
+      cb.or(
+        cb.and(*expandFilters.toTypedArray()),
+        allActivityTypeFilter,
+      )
+
+    return filter
   }
 
   private val classesToExpand: Map<Long, Set<String>>
