@@ -1,3 +1,11 @@
+## [3.59.5](https://github.com/tolgee/tolgee-platform/compare/v3.59.4...v3.59.5) (2024-04-29)
+
+
+### Bug Fixes
+
+* Prevent slug regenerating for server content storage ([#2288](https://github.com/tolgee/tolgee-platform/issues/2288)) ([0a8372f](https://github.com/tolgee/tolgee-platform/commit/0a8372f91acb7c7446254d814148e9ebd40b8d0f))
+* Stuck job handling and cancellation ([#2286](https://github.com/tolgee/tolgee-platform/issues/2286)) ([b157214](https://github.com/tolgee/tolgee-platform/commit/b15721417363279da06bf7a0b4f5894f2c11ddbc))
+
 ## [3.59.4](https://github.com/tolgee/tolgee-platform/compare/v3.59.3...v3.59.4) (2024-04-27)
 
 
