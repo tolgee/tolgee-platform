@@ -559,6 +559,9 @@ export interface paths {
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
   };
+  "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
+    get: operations["getModifiedEntitiesByRevision"];
+  };
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
   };
@@ -834,14 +837,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -888,6 +883,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1594,10 +1597,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -1910,17 +1913,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
       /** Format: int64 */
       projectId: number;
+      username?: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      username?: string;
       description: string;
+      projectName: string;
+      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2828,7 +2831,6 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
@@ -2840,6 +2842,7 @@ export interface components {
       currentUserRole?: "MEMBER" | "OWNER";
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2948,20 +2951,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
-      description?: string;
+      translation?: string;
       namespace?: string;
+      description?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
-      description?: string;
+      translation?: string;
       namespace?: string;
+      description?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3009,6 +3012,7 @@ export interface components {
       exists?: boolean;
     };
     ModifiedEntityModel: {
+      entityClass: string;
       /** Format: int64 */
       entityId: number;
       description?: { [key: string]: { [key: string]: unknown } };
@@ -3019,6 +3023,16 @@ export interface components {
         [key: string]: components["schemas"]["ExistenceEntityDescription"];
       };
       exists?: boolean;
+    };
+    PagedModelModifiedEntityModel: {
+      _embedded?: {
+        modifiedEntities?: components["schemas"]["ModifiedEntityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PropertyModification: {
+      old?: { [key: string]: unknown };
+      new?: { [key: string]: unknown };
     };
     PagedModelProjectActivityModel: {
       _embedded?: {
@@ -3089,10 +3103,6 @@ export interface components {
       meta?: { [key: string]: { [key: string]: unknown } };
       counts?: { [key: string]: number };
       params?: { [key: string]: unknown };
-    };
-    PropertyModification: {
-      old?: { [key: string]: unknown };
-      new?: { [key: string]: unknown };
     };
     PagedModelTagModel: {
       _embedded?: {
@@ -3639,17 +3649,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
       scopes: string[];
       /** Format: int64 */
       projectId: number;
+      username?: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      username?: string;
       description: string;
+      projectName: string;
+      userFullName?: string;
     };
     ApiKeyPermissionsModel: {
       /**
@@ -6411,6 +6421,8 @@ export interface operations {
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
         filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -11490,6 +11502,56 @@ export interface operations {
       };
     };
   };
+  getModifiedEntitiesByRevision: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filters results by specific entity class */
+        filterEntityClass?: string[];
+      };
+      path: {
+        revisionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelModifiedEntityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getActivity: {
     parameters: {
       query: {
@@ -12261,6 +12323,8 @@ export interface operations {
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
         filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
       };
       path: {
         projectId: number;
