@@ -31,6 +31,26 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `large operation data only contain counts`() {
+    performProjectAuthPut("/import/apply").andIsOk
+    performProjectAuthGet("activity")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.activities") {
+          isArray.hasSize(1)
+          node("[0]") {
+            node("modifiedEntities").isNull()
+            node("counts") {
+              node("Key").isEqualTo(1)
+              node("KeyMeta").isEqualTo(1)
+              node("Translation").isEqualTo(305)
+            }
+          }
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns modified entities with pagination`() {
     performProjectAuthPut("/import/apply").andIsOk
     val revision = getLastRevision()
