@@ -49,7 +49,7 @@ class PatController(
   private val patWithUserModelAssembler: PatWithUserModelAssembler,
 ) : IController {
   @GetMapping(value = [""])
-  @Operation(summary = "Get all Personal Access Tokens")
+  @Operation(summary = "Get PAKs")
   fun getAll(
     @ParameterObject pageable: Pageable,
   ): PagedModel<PatModel> {
@@ -60,7 +60,7 @@ class PatController(
   }
 
   @GetMapping(value = ["/{id:[0-9]+}"])
-  @Operation(summary = "Get Personal Access Token")
+  @Operation(summary = "Get one PAK")
   fun get(
     @PathVariable id: Long,
   ): PatModel {
@@ -69,7 +69,7 @@ class PatController(
   }
 
   @PostMapping(value = [""])
-  @Operation(summary = "Creates new Personal Access Token")
+  @Operation(summary = "Create PAK")
   @ResponseStatus(HttpStatus.CREATED)
   @RequiresSuperAuthentication
   fun create(
@@ -81,7 +81,8 @@ class PatController(
 
   @PutMapping(value = ["/{id:[0-9]+}/regenerate"])
   @Operation(
-    summary =
+    summary = "Regenerate PAK",
+    description =
       "Regenerates Personal Access Token. " +
         "It generates new token value and updates its time of expiration.",
   )
@@ -96,7 +97,7 @@ class PatController(
   }
 
   @PutMapping(value = ["/{id:[0-9]+}"])
-  @Operation(summary = "Updates Personal Access Token")
+  @Operation(summary = "Update PAK", description = "Updates Personal Access Token")
   @RequiresSuperAuthentication
   fun update(
     @RequestBody @Valid
@@ -108,7 +109,7 @@ class PatController(
   }
 
   @DeleteMapping(value = ["/{id:[0-9]+}"])
-  @Operation(summary = "Deletes Personal Access Token")
+  @Operation(summary = "Delete PAK", description = "Deletes Personal Access Token")
   @RequiresSuperAuthentication
   fun delete(
     @PathVariable id: Long,
@@ -118,7 +119,12 @@ class PatController(
   }
 
   @GetMapping(path = ["/current"])
-  @Operation(summary = "Returns current Personal Access Token info")
+  @Operation(
+    summary = "Return current PAK",
+    description =
+      "Returns current Personal Access Token. If the request is not authenticated with a Personal Access " +
+        "Token, it will return 400 response status.",
+  )
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   fun getCurrent(): PatWithUserModel {
     if (!authenticationFacade.isPersonalAccessTokenAuth) {

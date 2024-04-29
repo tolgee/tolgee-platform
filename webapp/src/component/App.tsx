@@ -1,6 +1,4 @@
 import React, { FC, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Redirect } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
 import {
@@ -8,51 +6,29 @@ import {
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { GlobalError } from '../error/GlobalError';
-import { AppState } from '../store';
-import { globalActions } from '../store/global/GlobalActions';
 import ConfirmationDialog from './common/ConfirmationDialog';
-import SnackBar from './common/SnackBar';
-import { Chatwoot } from './Chatwoot';
 import { PlanLimitPopover } from './billing/PlanLimitPopover';
 import { RootRouter } from './RootRouter';
 import { MandatoryDataProvider } from './MandatoryDataProvider';
 import { SensitiveOperationAuthDialog } from './SensitiveOperationAuthDialog';
 import { Ga4Tag } from './Ga4Tag';
 import { SpendingLimitExceededPopover } from './billing/SpendingLimitExceeded';
-import { redirectionActions } from 'tg.store/global/RedirectionActions';
-import { errorActions } from 'tg.store/global/ErrorActions';
-
-const Redirection = () => {
-  const redirectionState = useSelector((state: AppState) => state.redirection);
-
-  useEffect(() => {
-    if (redirectionState.to) {
-      redirectionActions.redirectDone.dispatch();
-    }
-  });
-
-  if (redirectionState.to) {
-    return <Redirect to={redirectionState.to} />;
-  }
-
-  return null;
-};
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { globalContext } from 'tg.globalContext/globalActions';
 
 const GlobalConfirmation = () => {
-  const state = useSelector(
-    (state: AppState) => state.global.confirmationDialog
-  );
+  const state = useGlobalContext((c) => c.confirmationDialog);
 
   const [wasDisplayed, setWasDisplayed] = useState(false);
 
   const onCancel = () => {
     state?.onCancel?.();
-    globalActions.closeConfirmation.dispatch();
+    globalContext.actions?.closeConfirmation();
   };
 
   const onConfirm = () => {
     state?.onConfirm?.();
-    globalActions.closeConfirmation.dispatch();
+    globalContext.actions?.closeConfirmation();
   };
 
   useEffect(() => {
@@ -117,20 +93,17 @@ const Head: FC = () => {
 };
 export class App extends React.Component {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    errorActions.globalError.dispatch(error as GlobalError);
+    globalContext.actions?.setGlobalError(error as GlobalError);
     throw error;
   }
   render() {
     return (
       <>
         <Head />
-        <Redirection />
-        <Chatwoot />
-        <Ga4Tag />
-        <SensitiveOperationAuthDialog />
         <MandatoryDataProvider>
+          <SensitiveOperationAuthDialog />
+          <Ga4Tag />
           <RootRouter />
-          <SnackBar />
           <GlobalConfirmation />
           <GlobalLimitPopover />
         </MandatoryDataProvider>

@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -108,6 +109,17 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testData.addKeysViewOnlyUser()
     testDataService.saveTestData(testData.root)
     userAccount = testData.keysOnlyUser
+    performProjectAuthGet("/translations?sort=id").andIsOk.andAssertThatJson {
+      node("_embedded.keys[2].translations.de").isAbsent()
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_VIEW])
+  fun `returns empty translations when api key is missing the translations-view scope`() {
+    testData.addKeysViewOnlyUser()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
     performProjectAuthGet("/translations?sort=id").andIsOk.andAssertThatJson {
       node("_embedded.keys[2].translations.de").isAbsent()
     }
@@ -239,6 +251,26 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
       }
   }
 
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BATCH_JOBS_VIEW])
+  @Test
+  fun `checks keys view scope (missing scope)`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations").andIsForbidden
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  @Test
+  fun `returns no screenshots when screenshot view scope is missing`() {
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations").andPrettyPrint.andAssertThatJson {
+      node("_embedded.keys[3].screenshots").isNull()
+      node("_embedded.keys[3].screenshotCount").isEqualTo(2)
+    }
+  }
+
   @ProjectApiKeyAuthTestMethod(apiKeyPresentType = ApiKeyPresentMode.QUERY_PARAM)
   @Test
   fun `works with API key in query`() {
@@ -328,6 +360,18 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     }
     performProjectAuthGet("/translations/en,de").andIsOk.andAssertThatJson {
       node("en.hello.i.am.scoped").isEqualTo("yupee!")
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  @Test
+  fun `returns correct plural values`() {
+    testData.addPlural()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+      node("_embedded.keys[2].keyIsPlural").isEqualTo(true)
+      node("_embedded.keys[2].keyPluralArgName").isEqualTo("count")
     }
   }
 

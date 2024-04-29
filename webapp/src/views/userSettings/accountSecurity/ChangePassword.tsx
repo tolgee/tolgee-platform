@@ -10,13 +10,14 @@ import { NewPasswordLabel } from 'tg.component/security/SetPasswordField';
 import { useUser } from 'tg.globalContext/helpers';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { messageService } from 'tg.service/MessageService';
-import { securityService } from 'tg.service/SecurityService';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const PasswordFieldWithValidation = React.lazy(
   () => import('tg.component/security/PasswordFieldWithValidation')
 );
 
 export const ChangePassword: FunctionComponent = () => {
+  const { handleAfterLogin } = useGlobalActions();
   const user = useUser();
 
   const { t } = useTranslate();
@@ -34,7 +35,7 @@ export const ChangePassword: FunctionComponent = () => {
       { content: { 'application/json': v } },
       {
         onSuccess(r) {
-          securityService.setToken(r.accessToken!);
+          handleAfterLogin(r);
           messageService.success(<T keyName="password-updated" />);
         },
       }

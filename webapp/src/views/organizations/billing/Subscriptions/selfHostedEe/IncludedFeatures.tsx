@@ -1,9 +1,10 @@
 import { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { T } from '@tolgee/react';
-import { Box, Typography, styled } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 import { PlanFeature } from './PlanFeature';
 import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';
+import { IncludedUsage, Usage } from './IncludedUsage';
 
 const StyledListWrapper = styled(Box)`
   display: grid;
@@ -14,7 +15,8 @@ const StyledListWrapper = styled(Box)`
 
 export const IncludedFeatures: FC<{
   features: components['schemas']['EeSubscriptionModel']['enabledFeatures'];
-}> = ({ features }) => {
+  includedUsage?: Usage;
+}> = ({ features, includedUsage }) => {
   const translateFeature = useFeatureTranslation();
 
   return (
@@ -28,6 +30,7 @@ export const IncludedFeatures: FC<{
         <T keyName="billing_subscriptions_plan_includes_title" />
       </Typography>
       <StyledListWrapper>
+        {includedUsage && <IncludedUsage included={includedUsage} />}
         {features.map((feature) => (
           <PlanFeature key={feature} name={translateFeature(feature)} />
         ))}

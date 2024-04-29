@@ -4,6 +4,8 @@ import * as Yup from 'yup';
 import { components } from 'tg.service/apiSchema.generated';
 import { organizationService } from '../service/OrganizationService';
 import { signUpService } from '../service/SignUpService';
+import { checkParamNameIsValid } from '@tginternal/editor';
+import { validateObject } from 'tg.fixtures/validateObject';
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -148,10 +150,15 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = (t: TFunType) =>
+  static readonly LANGUAGE_TAG = (t: TFunType, existingTags?: string[]) =>
     Yup.string()
       .required()
       .max(20)
+      .test({
+        name: 'language-tag-exists',
+        test: (value) => !existingTags?.includes(value!),
+        message: t('validation_language_tag_exists'),
+      })
       .matches(/^[^,]*$/, {
         // @tolgee-key validation_cannot_contain_coma
         message: t('validation_cannot_contain_coma'),
@@ -159,11 +166,11 @@ export class Validation {
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = (t: TFunType) =>
+  static readonly LANGUAGE = (t: TFunType, existingTags?: string[]) =>
     Yup.object().shape({
       name: Validation.LANGUAGE_NAME,
       originalName: Validation.LANGUAGE_ORIGINAL_NAME,
-      tag: Validation.LANGUAGE_TAG(t),
+      tag: Validation.LANGUAGE_TAG(t, existingTags),
       flagEmoji: Validation.LANGUAGE_FLAG_EMOJI,
     });
 
@@ -188,7 +195,7 @@ export class Validation {
         .required()
         // @tolgee-key project_creation_add_at_least_one_language
         .min(1, t('project_creation_add_at_least_one_language'))
-        .of(Validation.LANGUAGE(t).nullable())
+        .of(Validation.LANGUAGE(t, []).nullable())
         .test(
           'language-repeated',
           // @tolgee-key create_project_validation_language_repeated
@@ -206,19 +213,22 @@ export class Validation {
     description: Yup.string().nullable().min(3).max(2000),
   });
 
-  static readonly ORGANIZATION_CREATE_OR_EDIT = (
-    t: TFunType,
-    slugInitialValue?: string
-  ) => {
-    const slugSyncValidation = Yup.string()
-      .required()
-      .min(3)
-      .max(60)
+  private static slugValidation(min: number, max: number) {
+    return Yup.string()
+      .min(min)
+      .max(max)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
         message: (
           <T keyName="slug_validation_can_contain_just_lowercase_numbers_hyphens" />
         ),
       });
+  }
+
+  static readonly ORGANIZATION_CREATE_OR_EDIT = (
+    t: TFunType,
+    slugInitialValue?: string
+  ) => {
+    const slugSyncValidation = Validation.slugValidation(3, 60).required();
 
     const slugUniqueDebouncedAsyncValidation = (v) => {
       if (slugInitialValue === v) {
@@ -315,7 +325,10 @@ export class Validation {
 
   static readonly EE_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
-    stripeProductId: Yup.string().required(),
+    stripeProductId: Yup.string().when('free', {
+      is: false,
+      then: Yup.string().required(),
+    }),
     forOrganizationIds: Yup.array().when('public', {
       is: false,
       then: Yup.array().min(1),
@@ -365,11 +378,41 @@ export class Validation {
     name: Yup.string().required().max(100),
     languages: Yup.array().min(1),
     states: Yup.array().min(1),
+    slug: Yup.string().when('contentStorageId', {
+      is(value?: number) {
+        return !!value;
+      },
+      then: Validation.slugValidation(1, 60),
+    }),
   });
 
   static readonly WEBHOOK_FORM = Yup.object().shape({
     url: Yup.string().required().max(255),
   });
+
+  static readonly NEW_KEY_FORM = (t: TFnType) =>
+    Yup.object().shape({
+      name: Yup.string().required(),
+      pluralParameter: Yup.string().when('isPlural', {
+        is: true,
+        then: Yup.string().test(
+          'invalid-plural-parameter',
+          // @tolgee-key validation_invalid_plural_parameter
+          t('validation_invalid_plural_parameter'),
+          (value) => checkParamNameIsValid(value ?? '')
+        ),
+      }),
+    });
+
+  static readonly KEY_SETTINGS_FORM = (t: TFnType) =>
+    Yup.object().shape({
+      custom: Yup.string().test(
+        'invalid-custom-values',
+        // @tolgee-key validation_invalid_plural_parameter
+        t('validation_invalid_custom_values'),
+        validateObject
+      ),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

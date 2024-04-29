@@ -3,14 +3,17 @@ package io.tolgee.activity
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.reporting.SdkInfoProvider
+import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.support.ScopeNotActiveException
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
+import org.springframework.web.servlet.ModelAndView
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -19,6 +22,10 @@ import java.util.*
 class ActivityHandlerInterceptor(
   private val activityHolder: ActivityHolder,
   private val sdkInfoProvider: SdkInfoProvider,
+  @Lazy
+  private val activityService: ActivityService,
+  @Lazy
+  private val authenticationFacade: AuthenticationFacade,
 ) : HandlerInterceptor {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -46,8 +53,21 @@ class ActivityHandlerInterceptor(
     return true
   }
 
+  override fun postHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+    modelAndView: ModelAndView?,
+  ) {
+    val activityRevision = activityHolder.activityRevision
+    if (activityRevision.id == 0L && activityHolder.activity?.saveWithoutModification == true) {
+      activityRevision.authorId = authenticationFacade.authenticatedUserOrNull?.id
+      activityService.storeActivityData(activityRevision, activityHolder.modifiedEntities)
+    }
+  }
+
   private fun assignSdkInfo(request: HttpServletRequest) {
-    activityHolder.sdkInfo = sdkInfoProvider.getSdkInfo(request)
+    sdkInfoProvider.getSdkInfo(request)?.let { activityHolder.businessEventData.putAll(it) }
   }
 
   fun assignUtmData(request: HttpServletRequest) {

@@ -33,12 +33,7 @@ describe('Error handling', () => {
   });
 
   it('Handles 404 by redirect', () => {
-    simulateError({
-      method: 'get',
-      endpoint: 'facebook',
-      statusCode: 404,
-    });
-    cy.visit(`${HOST}/organizations/facebook/profile`);
+    cy.visit(`${HOST}/organizations/not-existant/profile`);
     assertMessage('Not found');
     cy.url().should('include', '/projects');
   });
@@ -46,10 +41,21 @@ describe('Error handling', () => {
   it('Handles 401 by logout', () => {
     simulateError({
       method: 'get',
-      endpoint: 'facebook',
+      endpoint: 'initial-data',
+      statusCode: 401,
+      times: 2,
+    });
+    cy.visit(`${HOST}`);
+    cy.url().should('include', '/login');
+  });
+
+  it('Handles 401 by logout on specific endpoint', () => {
+    simulateError({
+      method: 'get',
+      endpoint: 'projects-with-stats',
       statusCode: 401,
     });
-    cy.visit(`${HOST}/organizations/facebook/profile`);
+    cy.visit(`${HOST}`);
     cy.url().should('include', '/login');
   });
 

@@ -127,10 +127,10 @@ export const ProjectTotals: React.FC<{
   const locale = useCurrentLanguage();
 
   const billingEnabled = useGlobalContext(
-    (c) => c.serverConfiguration.billing.enabled
+    (c) => c.initialData.serverConfiguration.billing.enabled
   );
   const isOrganizationOwner = useGlobalContext(
-    (c) => c.preferredOrganization?.currentUserRole === 'OWNER'
+    (c) => c.initialData.preferredOrganization?.currentUserRole === 'OWNER'
   );
   const { preferredOrganization } = usePreferredOrganization();
   const canGoToBilling = billingEnabled && isOrganizationOwner;
@@ -174,7 +174,7 @@ export const ProjectTotals: React.FC<{
   const redirectToBilling = () => {
     history.push(
       LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.id,
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.id || '',
       })
     );
   };

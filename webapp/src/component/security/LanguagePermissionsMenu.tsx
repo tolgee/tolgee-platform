@@ -5,11 +5,11 @@ import { useTranslate } from '@tolgee/react';
 
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { SearchSelectMulti } from 'tg.component/searchSelect/SearchSelectMulti';
-import { CompactMenuItem } from 'tg.views/projects/translations/Filters/FiltersComponents';
 import { StyledInputContent } from 'tg.component/searchSelect/SearchStyled';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { LanguageModel } from 'tg.component/PermissionsSettings/types';
 import { isAllLanguages } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
+import { CompactMenuItem } from 'tg.component/ListComponents';
 
 const StyledButton = styled(Button)`
   padding: 0px;

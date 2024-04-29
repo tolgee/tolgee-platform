@@ -13,9 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest
 class OpenApiTest : AbstractControllerTest() {
   @Test
   fun `accessible with api key is generated`() {
-    performGet("/v3/api-docs/Accessible with API key").andIsOk.andAssertThatJson {
+    performGet("/v3/api-docs/Accessible with Project API key (All)").andIsOk.andAssertThatJson {
       node("paths./v2/projects/keys/{keyId}/tags.put.summary")
-        .isEqualTo("Tags a key with tag. If tag with provided name doesn't exist, it is created")
+        .isEqualTo("Tag key")
     }
   }
 
@@ -24,7 +24,7 @@ class OpenApiTest : AbstractControllerTest() {
     performGet("/v3/api-docs/All Internal - for Tolgee Web application")
       .andIsOk.andPrettyPrint.andAssertThatJson {
         node("paths./v2/projects/{projectId}/keys/{keyId}/tags.put.summary")
-          .isEqualTo("Tags a key with tag. If tag with provided name doesn't exist, it is created")
+          .isEqualTo("Tag key")
       }
   }
 
@@ -38,8 +38,17 @@ class OpenApiTest : AbstractControllerTest() {
 
   @Test
   fun `accessible with api key has languages endpoint`() {
-    performGet("/v3/api-docs/Accessible with API key").andIsOk.andAssertThatJson {
+    performGet("/v3/api-docs/Accessible with Project API key (All)").andIsOk.andAssertThatJson {
       node("paths").isObject.containsKey("/v2/projects/languages")
+    }
+  }
+
+  @Test
+  fun `all public works`() {
+    performGet("/v3/api-docs/Public API (All)").andIsOk.andAssertThatJson {
+      node("paths").isObject
+        .doesNotContainKey("/v2/projects/languages")
+        .containsKey("/v2/projects/{projectId}/languages")
     }
   }
 }

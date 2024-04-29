@@ -88,14 +88,19 @@ dependencies {
     testImplementation libs.assertJCore
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation("io.findify:s3mock_2.13:0.2.6")
 
     implementation libs.springmockk
     implementation libs.jsonUnitAssert
     testImplementation libs.mockito
-    testImplementation("io.findify:s3mock_2.13:0.2.6")
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
     testImplementation libs.sendInBlue
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
+    testImplementation(libs.azureBlob) {
+        exclude group: 'io.netty', module: 'netty-codec-http'
+    }
+    testImplementation('io.netty:netty-codec-http:4.1.108.Final')
+
 
     /**
      * MISC
@@ -169,21 +174,17 @@ dependencies {
 
 
     /**
-     * API module
+     * Security module
      */
     implementation(project(':security'))
+
 }
 
-boolean isCiServer = System.getenv().containsKey("CI")
-boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
+def setTestRetry(test) {
+    boolean isCiServer = System.getenv().containsKey("CI")
+    boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
 
-test {
-    useJUnitPlatform()
-    maxHeapSize = "4096m"
-    testLogging {
-        events = ["passed", "failed", "skipped"]
-    }
-    retry {
+    test.retry {
         if (isCiServer) {
             maxFailures = 20
             maxRetries = 5
@@ -192,11 +193,21 @@ test {
     }
 }
 
+test {
+    useJUnitPlatform()
+    maxHeapSize = "4096m"
+    testLogging {
+        events = ["passed", "failed", "skipped"]
+    }
+    setTestRetry(it)
+}
+
 task runContextRecreatingTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
     maxHeapSize = "4096m"
+    setTestRetry(it)
 }
 
 task runStandardTests(type: Test, group: 'verification') {
@@ -204,6 +215,7 @@ task runStandardTests(type: Test, group: 'verification') {
         excludeTags "contextRecreating", "websocket"
     }
     maxHeapSize = "4096m"
+    setTestRetry(it)
 }
 
 task runWebsocketTests(type: Test, group: 'verification') {
@@ -211,6 +223,7 @@ task runWebsocketTests(type: Test, group: 'verification') {
         includeTags "websocket"
     }
     maxHeapSize = "4096m"
+    setTestRetry(it)
 }
 
 springBoot {
@@ -226,7 +239,6 @@ bootJar {
     manifest {
         attributes('Implementation-Version': project.version)
     }
-    onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 }
 
 def unpackTarget = "build/dependency"
@@ -246,11 +258,6 @@ task addVersionFile(type: Task) {
         file.write(project.version.toString())
     }
 }
-
-project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootBuildInfo").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

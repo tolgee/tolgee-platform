@@ -96,7 +96,7 @@ class LanguageService(
     projectId: Long,
     userId: Long,
   ): Set<LanguageDto> {
-    val all = getProjectLanguages(projectId)
+    val all = self.getProjectLanguages(projectId)
     val viewLanguageIds =
       permissionService.getProjectPermissionData(
         projectId,
@@ -110,7 +110,11 @@ class LanguageService(
         all.filter { viewLanguageIds.contains(it.id) }
       }
 
-    return permitted.sortedBy { it.id }.take(2).toSet()
+    return permitted
+      .sortedBy { it.id }
+      // base first
+      .sortedBy { if (it.base) 0 else 1 }
+      .take(2).toSet()
   }
 
   @Transactional
@@ -219,8 +223,7 @@ class LanguageService(
     projectId: Long,
     userId: Long,
   ): Set<LanguageDto> {
-    val canViewTranslations =
-      permissionService.getProjectPermissionScopes(projectId, userId)?.contains(Scope.TRANSLATIONS_VIEW) == true
+    val canViewTranslations = securityService.currentPermittedScopesContain(Scope.TRANSLATIONS_VIEW)
 
     if (!canViewTranslations) {
       return emptySet()

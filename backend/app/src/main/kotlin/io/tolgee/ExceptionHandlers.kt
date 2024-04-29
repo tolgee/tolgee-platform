@@ -132,6 +132,28 @@ class ExceptionHandlers {
       ),
     ],
   )
+  @ApiResponse(
+    responseCode = "403",
+    content = [
+      Content(
+        schema =
+          Schema(
+            example = """{"code": "operation_not_permitted", "params": ["translations.edit"]}""",
+          ),
+      ),
+    ],
+  )
+  @ApiResponse(
+    responseCode = "401",
+    content = [
+      Content(
+        schema =
+          Schema(
+            example = """{"code": "unauthenticated"}""",
+          ),
+      ),
+    ],
+  )
   @ExceptionHandler(ErrorException::class)
   fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(ex.errorResponseBody, ex.httpStatus)
@@ -139,6 +161,7 @@ class ExceptionHandlers {
 
   @ExceptionHandler(EntityNotFoundException::class)
   fun handleServerError(ex: EntityNotFoundException?): ResponseEntity<ErrorResponseBody> {
+    logger.debug("Entity not found", ex)
     return ResponseEntity(ErrorResponseBody(Message.RESOURCE_NOT_FOUND.code, null), HttpStatus.NOT_FOUND)
   }
 
@@ -155,7 +178,8 @@ class ExceptionHandlers {
   )
   @ExceptionHandler(NotFoundException::class)
   fun handleNotFound(ex: NotFoundException): ResponseEntity<ErrorResponseBody> {
-    return ResponseEntity(ErrorResponseBody(ex.msg!!.code, null), HttpStatus.NOT_FOUND)
+    logger.debug(ex.message, ex)
+    return ResponseEntity(ErrorResponseBody(ex.msg.code, null), HttpStatus.NOT_FOUND)
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException::class)

@@ -1,22 +1,22 @@
 import React, { FunctionComponent, useEffect } from 'react';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import Box from '@mui/material/Box';
-import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useConfig, useUser } from 'tg.globalContext/helpers';
-import { AppState } from 'tg.store/index';
+import { useConfig } from 'tg.globalContext/helpers';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { NewPasswordLabel } from './SetPasswordField';
-import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { DashboardPage } from '../layout/DashboardPage';
-import { useLogout } from 'tg.hooks/useLogout';
-import { globalActions } from 'tg.store/global/GlobalActions';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { messageService } from 'tg.service/MessageService';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const PasswordFieldWithValidation = React.lazy(
   () => import('tg.component/security/PasswordFieldWithValidation')
@@ -29,56 +29,55 @@ type ValueType = {
 const PasswordResetSetView: FunctionComponent = () => {
   const { t } = useTranslate();
   const match = useRouteMatch();
-  const user = useUser();
   const encodedData = match.params[PARAMS.ENCODED_EMAIL_AND_CODE];
   const [code, email] = atob(encodedData).split(',');
 
-  const logout = useLogout();
+  const { logout } = useGlobalActions();
   const history = useHistory();
 
-  useEffect(() => {
-    globalActions.resetPasswordValidate.dispatch(email, code);
-  }, []);
+  const passwordResetValidate = useApiQuery({
+    url: '/api/public/reset_password_validate/{email}/{code}',
+    method: 'get',
+    path: {
+      code,
+      email,
+    },
+    options: {
+      onError(error) {
+        messageService.error(<TranslatedError code={error.code!} />);
+        history.replace(LINKS.LOGIN.build());
+      },
+    },
+  });
 
-  const passwordResetSetLoading = useSelector(
-    (state: AppState) => state.global.passwordResetSetLoading
-  );
-  const passwordResetSetError = useSelector(
-    (state: AppState) => state.global.passwordResetSetError
-  );
-  const passwordResetSetValidated = useSelector(
-    (state: AppState) => state.global.passwordResetSetValidated
-  );
-  const success = useSelector(
-    (state: AppState) => state.global.passwordResetSetSucceed
-  );
+  const passwordResetSet = useApiMutation({
+    url: '/api/public/reset_password_set',
+    method: 'post',
+  });
 
-  const security = useSelector((state: AppState) => state.global.security);
   const remoteConfig = useConfig();
 
-  if (
+  const shouldRedirect =
     !remoteConfig.authentication ||
-    (security.allowPrivate && user && user.accountType !== 'THIRD_PARTY') ||
     !remoteConfig.passwordResettable ||
-    success
-  ) {
-    logout();
-    history.push(LINKS.AFTER_LOGIN.build());
-  }
+    passwordResetSet.isSuccess;
 
-  if (passwordResetSetError && !passwordResetSetValidated) {
-    history.push(LINKS.AFTER_LOGIN.build());
+  useEffect(() => {
+    if (shouldRedirect) {
+      logout().then(() => {
+        history.replace(LINKS.LOGIN.build());
+      });
+    }
+  }, [shouldRedirect]);
+
+  if (shouldRedirect) {
+    return <FullPageLoading />;
   }
 
   return (
     <DashboardPage>
-      {passwordResetSetValidated && (
+      {passwordResetValidate.isSuccess && (
         <CompactView
-          alerts={
-            passwordResetSetError && (
-              <Alert severity="error">{passwordResetSetError}</Alert>
-            )
-          }
           windowTitle={t('reset_password_set_title')}
           title={t('reset_password_set_title')}
           maxWidth={650}
@@ -95,7 +94,7 @@ const PasswordResetSetView: FunctionComponent = () => {
                         color="primary"
                         type="submit"
                         variant="contained"
-                        loading={passwordResetSetLoading}
+                        loading={passwordResetSet.isLoading}
                       >
                         Save new password
                       </LoadingButton>
@@ -103,12 +102,24 @@ const PasswordResetSetView: FunctionComponent = () => {
                   </Box>
                 </>
               }
-              //@ts-ignore
               onSubmit={(v: ValueType) => {
-                globalActions.resetPasswordSet.dispatch(
-                  email,
-                  code,
-                  v.password
+                passwordResetSet.mutate(
+                  {
+                    content: {
+                      'application/json': {
+                        email,
+                        code,
+                        password: v.password,
+                      },
+                    },
+                  },
+                  {
+                    onSuccess() {
+                      messageService.success(
+                        <T keyName="password_reset_message" />
+                      );
+                    },
+                  }
                 );
               }}
             >

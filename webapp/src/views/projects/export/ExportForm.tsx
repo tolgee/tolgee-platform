@@ -4,21 +4,26 @@ import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { EXPORTABLE_STATES, StateType } from 'tg.constants/translationStates';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StateSelector } from 'tg.views/projects/export/components/StateSelector';
 import { LanguageSelector } from 'tg.views/projects/export/components/LanguageSelector';
-import {
-  FORMATS,
-  FormatSelector,
-} from 'tg.views/projects/export/components/FormatSelector';
+import { FormatSelector } from 'tg.views/projects/export/components/FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
-import { NestedSelector } from 'tg.views/projects/export/components/NestedSelector';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { SupportArraysSelector } from './components/SupportArraysSelector';
+import {
+  formatGroups,
+  getFormatById,
+  MessageFormat,
+  normalizeSelectedMessageFormat,
+} from './components/formatGroups';
+import { downloadExported } from './downloadExported';
+import { MessageFormatSelector } from './components/MessageFormatSelector';
+import { useExportHelper } from 'tg.hooks/useExportHelper';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -30,8 +35,7 @@ const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
   'REVIEWED',
 ]);
 
-const EXPORT_DEFAULT_FORMAT: (typeof FORMATS)[number] = 'JSON';
-
+// noinspection CssUnusedSymbol
 const StyledForm = styled('form')`
   display: grid;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
@@ -42,21 +46,30 @@ const StyledForm = styled('form')`
   grid-template-areas:
     'states  states'
     'langs   format'
-    'ns      ns    '
+    'ns      messageFormat'
     'options submit';
+
   & .states {
     grid-area: states;
   }
+
   & .langs {
     grid-area: langs;
   }
+
   & .format {
     grid-area: format;
   }
+
+  & .messageFormat {
+    grid-area: messageFormat;
+  }
+
   & .submit {
     grid-area: submit;
     justify-self: end;
   }
+
   & .ns {
     grid-area: ns;
   }
@@ -68,46 +81,18 @@ const StyledOptions = styled('div')`
 
 export const ExportForm = () => {
   const project = useProject();
-  const { satisfiesLanguageAccess } = useProjectPermissions();
+
   const exportLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/export',
     method: 'post',
     fetchOptions: {
-      asBlob: true,
+      rawResponse: true,
     },
   });
 
-  const languagesLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { size: 1000 },
-  });
-
-  const namespacesLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/used-namespaces',
-    method: 'get',
-    path: { projectId: project.id },
-    fetchOptions: {
-      disable404Redirect: true,
-    },
-  });
+  const { isFetching, allNamespaces, allowedLanguages } = useExportHelper();
 
   const { t } = useTranslate();
-
-  const allNamespaces = useMemo(
-    () =>
-      namespacesLoadable.data?._embedded?.namespaces?.map((n) => n.name || ''),
-    [namespacesLoadable.data]
-  );
-
-  const allowedLanguages = useMemo(
-    () =>
-      languagesLoadable.data?._embedded?.languages?.filter((l) =>
-        satisfiesLanguageAccess('translations.view', l.id)
-      ) || [],
-    [languagesLoadable.data]
-  );
 
   const allowedTags = useMemo(
     () => allowedLanguages?.map((l) => l.tag) || [],
@@ -131,15 +116,27 @@ export const ExportForm = () => {
     allowedTags.includes(l)
   );
 
-  const [format, setFormat] = useUrlSearchState('format', {
-    defaultVal: EXPORT_DEFAULT_FORMAT,
+  const defaultFormat = formatGroups[0].formats[0];
+
+  const [urlFormat, setUrlFormat] = useUrlSearchState('format', {
+    defaultVal: defaultFormat.id,
   });
+
+  const [messageFormat, setUrlMessageFormat] = useUrlSearchState(
+    'messageFormat',
+    {
+      defaultVal: normalizeSelectedMessageFormat({
+        format: urlFormat,
+        messageFormat: undefined,
+      }),
+    }
+  );
 
   const [nested, setNested] = useUrlSearchState('nested', {
     defaultVal: 'false',
   });
 
-  if (languagesLoadable.isFetching || namespacesLoadable.isFetching) {
+  if (isFetching) {
     return (
       <Box mt={6}>
         <BoxLoading />
@@ -154,9 +151,14 @@ export const ExportForm = () => {
           ? states
           : EXPORT_DEFAULT_STATES) as StateType[],
         languages: (languages?.length ? selectedTags : allowedTags) as string[],
-        format: (format || EXPORT_DEFAULT_FORMAT) as (typeof FORMATS)[number],
+        format: (urlFormat as string) || defaultFormat.id,
         namespaces: allNamespaces || [],
         nested: nested === 'true',
+        supportArrays:
+          (urlFormat
+            ? getFormatById(urlFormat as string).defaultSupportArrays
+            : defaultFormat.defaultSupportArrays) || false,
+        messageFormat: (messageFormat ?? 'ICU') as MessageFormat | undefined,
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -171,42 +173,45 @@ export const ExportForm = () => {
         // store values in url
         setStates(sortStates(values.states));
         setLanguages(sortLanguages(values.languages));
-        setFormat(values.format);
+        setUrlFormat(values.format);
         setNested(String(values.nested));
-
+        setUrlMessageFormat(values.messageFormat);
         return errors;
       }}
       validateOnBlur={false}
       enableReinitialize={false}
       onSubmit={(values, actions) => {
+        const format = getFormatById(values.format);
         exportLoadable.mutate(
           {
             path: { projectId: project.id },
             content: {
               'application/json': {
-                format: values.format,
+                format: format.format,
                 filterState: values.states,
                 languages: values.languages,
-                structureDelimiter: values.nested ? '.' : '',
+                structureDelimiter: format.structured
+                  ? format.defaultStructureDelimiter
+                  : '',
                 filterNamespace: values.namespaces,
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
+                supportArrays: values.supportArrays || false,
+                messageFormat:
+                  // strict message format is prioritized
+                  format.messageFormat ??
+                  normalizeSelectedMessageFormat(values),
               },
             },
           },
           {
-            onSuccess(data) {
-              const url = URL.createObjectURL(data as any as Blob);
-              const a = document.createElement('a');
-              a.href = url;
-              if (data.type === 'application/zip') {
-                a.download = project.name + '.zip';
-              } else if (data.type === 'application/json') {
-                a.download = values.languages[0] + '.json';
-              } else if (data.type === 'application/x-xliff+xml') {
-                a.download = values.languages[0] + '.xliff';
-              }
-              a.click();
+            async onSuccess(response) {
+              return downloadExported(
+                response as unknown as Response,
+                values.languages,
+                format,
+                project.name
+              );
             },
             onSettled() {
               actions.setSubmitting(false);
@@ -226,11 +231,14 @@ export const ExportForm = () => {
             <StateSelector className="states" />
             <LanguageSelector className="langs" languages={allowedLanguages} />
             <FormatSelector className="format" />
-            {values.format === 'JSON' && (
-              <StyledOptions className="options">
-                <NestedSelector />
-              </StyledOptions>
+            {getFormatById(values.format).defaultSupportArrays && (
+              <>
+                <StyledOptions className="options">
+                  <SupportArraysSelector />
+                </StyledOptions>
+              </>
             )}
+            <MessageFormatSelector className="messageFormat" />
             <NsSelector className="ns" namespaces={allNamespaces} />
             <div className="submit">
               <LoadingButton

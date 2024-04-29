@@ -22,6 +22,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.invocation.Invocation
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
@@ -212,14 +213,19 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun verifyContentDeliveryPublish() {
-    waitForNotThrowing {
+    waitForNotThrowing(timeout = 2000) {
       verify(fileStorageMock, times(1)).storeFile(any(), any())
-      val fileStorageInvocations = Mockito.mockingDetails(fileStorageMock).invocations
-      fileStorageInvocations.size.assert.isEqualTo(1)
-      val purgingInvocations = Mockito.mockingDetails(fileStorageMock).invocations
-      purgingInvocations.size.assert.isEqualTo(1)
+      val storeFileInvocations =
+        fileStorageInvocations.filter { it.method.name == "storeFile" }
+      storeFileInvocations.assert.hasSize(1)
+      val pruneDirectoryInvocations =
+        fileStorageInvocations.filter { it.method.name == "pruneDirectory" }
+      pruneDirectoryInvocations.assert.hasSize(1)
     }
   }
+
+  private val fileStorageInvocations: MutableCollection<Invocation>
+    get() = Mockito.mockingDetails(fileStorageMock).invocations
 
   private fun modifyTranslationData() {
     performProjectAuthPost(

@@ -1,4 +1,3 @@
-import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Box, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
@@ -6,14 +5,13 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useConfig } from 'tg.globalContext/helpers';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 
 import { UserMenu } from '../../security/UserMenu/UserMenu';
 import { AdminInfo } from './AdminInfo';
 import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
 import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
-import { AppState } from 'tg.store/index';
 import { NotificationBell } from 'tg.component/layout/TopBar/NotificationBell';
 
 export const TOP_BAR_HEIGHT = 52;
@@ -75,11 +73,9 @@ export const TopBar: React.FC<Props> = ({
 }) => {
   const config = useConfig();
 
-  const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
-  const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
-  const userLogged = useSelector(
-    (state: AppState) => state.global.security.allowPrivate
-  );
+  const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);
+  const topBannerSize = useGlobalContext((c) => c.layout.topBannerHeight);
+  const user = useUser();
 
   const theme = useTheme();
 
@@ -125,8 +121,8 @@ export const TopBar: React.FC<Props> = ({
           />
         </Box>
         <QuickStartTopBarButton />
-        {!userLogged && <LanguageMenu />}
-        {userLogged && (
+        {!user && <LanguageMenu />}
+        {user && (
           <>
             <NotificationBell />
             <UserMenu />

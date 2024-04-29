@@ -11,6 +11,7 @@ import {
   BatchJobStatus,
 } from 'tg.views/projects/translations/BatchOperations/types';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
 
 type BatchJobUpdateModel = {
   totalItems: number;
@@ -26,8 +27,8 @@ type Props = {
 export const [ProjectContext, useProjectActions, useProjectContext] =
   createProvider(({ id }: Props) => {
     const [knownJobs, setKnownJobs] = useState<number[]>([]);
-    const client = useGlobalContext((c) => c.client);
-    const connected = useGlobalContext((c) => c.clientConnected);
+    const client = useGlobalContext((c) => c.wsClient.client);
+    const connected = useGlobalContext((c) => c.wsClient.clientConnected);
 
     const project = useApiQuery({
       url: '/v2/projects/{projectId}',
@@ -135,7 +136,7 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
     useGlobalLoading(isLoading);
 
     if (isLoading) {
-      return null;
+      return <DashboardPage />;
     }
 
     if (project.error || settings.error) {

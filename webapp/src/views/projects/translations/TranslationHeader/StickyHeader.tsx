@@ -6,7 +6,6 @@ import {
   useHeaderNsContext,
 } from '../context/HeaderNsContext';
 import { NamespaceContent } from '../Namespace/NamespaceContent';
-import { useColumnsContext } from '../context/ColumnsContext';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
@@ -32,7 +31,6 @@ const StyledNs = styled('div')`
   top: calc(100% + 1px);
   padding: ${({ theme }) => theme.spacing(0, 2, 2, 2)};
   overflow: hidden;
-  width: 100%;
   display: flex;
   justify-content: flex-start;
 `;
@@ -56,14 +54,13 @@ type Props = {
 };
 
 export const StickyHeader: React.FC<Props> = ({ height, children }) => {
-  const { setTopBarHeight } = useHeaderNsActions();
+  const { setFloatingBannerHeight } = useHeaderNsActions();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
-  const columnSizes = useColumnsContext((c) => c.columnSizes);
-  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
-  const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
+  const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
+  const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);
 
   useEffect(() => {
-    setTopBarHeight(height + (topBarHidden ? 0 : 50));
+    setFloatingBannerHeight(height);
   }, [topBarHidden]);
 
   return (
@@ -81,9 +78,9 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
         {topNamespace !== undefined && (
           <StyledNs data-cy="translations-namespace-banner">
             <NamespaceContent
-              maxWidth={columnSizes[0]}
               namespace={topNamespace}
               sticky={true}
+              maxWidth={undefined}
             />
           </StyledNs>
         )}

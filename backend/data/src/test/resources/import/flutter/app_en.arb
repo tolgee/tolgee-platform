@@ -1,0 +1,20 @@
+{
+  "@@locale": "en",
+  "helloWorld": "Hello World!",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  "dogsCount": "I have {count, plural, one {one dog} other {{count} dogs}}.",
+  "@dogsCount": {
+    "description": "The conventional newborn programmer greeting",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
+      }
+    }
+  },
+  "simpleDogCount": "Dogs count: {count}"
+}

@@ -39,7 +39,7 @@ export const StorageFormS3 = ({
 }: Props) => {
   const { t } = useTranslate();
 
-  const isEdit = data?.azureContentStorageConfig;
+  const isEdit = data?.id !== undefined;
   const keepAsIsPlaceholder = isEdit
     ? `<${t('storage_form_keep_as_is')}>`
     : undefined;

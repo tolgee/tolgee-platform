@@ -19,10 +19,12 @@ import io.tolgee.hateoas.apiKey.ApiKeyPermissionsModel
 import io.tolgee.hateoas.apiKey.ApiKeyWithLanguagesModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModelAssembler
+import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.model.ApiKey
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
@@ -52,7 +54,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/v2")
-@Tag(name = "API keys")
+@Tag(name = "API keys", description = "Manage Project API keys")
 class ApiKeyController(
   private val apiKeyService: ApiKeyService,
   private val projectService: ProjectService,
@@ -64,10 +66,12 @@ class ApiKeyController(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>,
   private val permissionService: PermissionService,
+  private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
 ) {
   @PostMapping(path = ["/api-keys"])
-  @Operation(summary = "Creates new API key with provided scopes")
+  @Operation(summary = "Crete API key", description = "Creates new API key with provided scopes")
   @RequiresSuperAuthentication
+  @OpenApiOrderExtension(1)
   fun create(
     @RequestBody @Valid
     dto: CreateApiKeyDto,
@@ -87,18 +91,9 @@ class ApiKeyController(
     }
   }
 
-  @Operation(summary = "Returns user's api keys")
-  @GetMapping(path = ["/api-keys"])
-  fun allByUser(
-    pageable: Pageable,
-    @RequestParam filterProjectId: Long?,
-  ): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
-      .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
-  }
-
-  @Operation(summary = "Returns specific API key info")
+  @Operation(summary = "Get one API key", description = "Returns specific API key info")
   @GetMapping(path = ["/api-keys/{keyId:[0-9]+}"])
+  @OpenApiOrderExtension(2)
   fun get(
     @PathVariable keyId: Long,
   ): ApiKeyModel {
@@ -110,8 +105,14 @@ class ApiKeyController(
   }
 
   @GetMapping(path = ["/api-keys/current"])
-  @Operation(summary = "Returns current API key info")
+  @Operation(
+    summary = "Get current API key info",
+    description =
+      "Returns info the API key which user currently authenticated with. " +
+        "Otherwise responds with 400 status code.",
+  )
   @AllowApiAccess(AuthTokenType.ONLY_PAK)
+  @OpenApiOrderExtension(3)
   fun getCurrent(): ApiKeyWithLanguagesModel {
     if (!authenticationFacade.isProjectApiKeyAuth) {
       throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
@@ -134,8 +135,59 @@ class ApiKeyController(
     )
   }
 
+  @Operation(summary = "Get all user's API keys")
+  @GetMapping(path = ["/api-keys"])
+  @OpenApiOrderExtension(4)
+  fun allByUser(
+    pageable: Pageable,
+    @RequestParam filterProjectId: Long?,
+  ): PagedModel<ApiKeyModel> {
+    return apiKeyService.getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
+      .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
+  }
+
+  @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])
+  @Operation(summary = "Get all project API keys", description = "Returns all API keys for specified project")
+  @RequiresProjectPermissions([Scope.ADMIN])
+  @OpenApiOrderExtension(5)
+  fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
+    return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
+      .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
+  }
+
+  @PutMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
+  @Operation(summary = "Update API key")
+  @RequiresSuperAuthentication
+  @OpenApiOrderExtension(6)
+  fun update(
+    @RequestBody @Valid
+    dto: V2EditApiKeyDto,
+    @PathVariable apiKeyId: Long,
+  ): ApiKeyModel {
+    val apiKey = apiKeyService.get(apiKeyId)
+    checkOwner(apiKey)
+    securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
+    apiKey.scopesEnum = dto.scopes.toMutableSet()
+    return apiKeyService.editApiKey(apiKey, dto).let { apiKeyModelAssembler.toModel(it) }
+  }
+
+  @DeleteMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
+  @Operation(summary = "Delete API key")
+  @RequiresSuperAuthentication
+  @OpenApiOrderExtension(7)
+  fun delete(
+    @PathVariable apiKeyId: Long,
+  ) {
+    val apiKey = apiKeyService.findOptional(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
+    checkOwner(apiKey)
+    apiKeyService.deleteApiKey(apiKey)
+  }
+
   @GetMapping(path = ["/api-keys/current-permissions"])
-  @Operation(summary = "Returns current PAK or PAT permissions for current user, api-key and project")
+  @Operation(
+    summary = "Get current permission info",
+    description = "Returns current PAK or PAT permissions for current user, api-key and project",
+  )
   @AllowApiAccess()
   fun getCurrentPermissions(
     @RequestParam
@@ -163,11 +215,6 @@ class ApiKeyController(
       )
 
     val computed = permissionData.computedPermissions
-    val scopes =
-      when {
-        apiKeyAuthentication -> authenticationFacade.projectApiKey.scopes.toTypedArray()
-        else -> computed.scopes
-      }
 
     return ApiKeyPermissionsModel(
       projectIdNotNull,
@@ -175,7 +222,8 @@ class ApiKeyController(
       translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
-      scopes = scopes,
+      scopes = securityService.getCurrentPermittedScopes(projectIdNotNull).toTypedArray(),
+      project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
     )
   }
 
@@ -184,29 +232,6 @@ class ApiKeyController(
       return null
     }
     return this.toSet()
-  }
-
-  @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])
-  @Operation(summary = "Returns all API keys for project")
-  @RequiresProjectPermissions([Scope.ADMIN])
-  fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
-      .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
-  }
-
-  @PutMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
-  @Operation(summary = "Edits existing API key")
-  @RequiresSuperAuthentication
-  fun update(
-    @RequestBody @Valid
-    dto: V2EditApiKeyDto,
-    @PathVariable apiKeyId: Long,
-  ): ApiKeyModel {
-    val apiKey = apiKeyService.get(apiKeyId)
-    checkOwner(apiKey)
-    securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
-    apiKey.scopesEnum = dto.scopes.toMutableSet()
-    return apiKeyService.editApiKey(apiKey, dto).let { apiKeyModelAssembler.toModel(it) }
   }
 
   @PutMapping(value = ["/api-keys/{apiKeyId:[0-9]+}/regenerate"])
@@ -222,17 +247,6 @@ class ApiKeyController(
     checkOwner(apiKeyId)
     val regenerated = apiKeyService.regenerate(apiKeyId, dto.expiresAt)
     return revealedApiKeyModelAssembler.toModel(regenerated)
-  }
-
-  @DeleteMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
-  @Operation(summary = "Deletes API key")
-  @RequiresSuperAuthentication
-  fun delete(
-    @PathVariable apiKeyId: Long,
-  ) {
-    val apiKey = apiKeyService.findOptional(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
-    checkOwner(apiKey)
-    apiKeyService.deleteApiKey(apiKey)
   }
 
   private fun checkOwner(id: Long) {

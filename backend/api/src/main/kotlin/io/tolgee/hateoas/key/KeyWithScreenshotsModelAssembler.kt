@@ -31,6 +31,9 @@ class KeyWithScreenshotsModelAssembler(
       tags = entity.keyMeta?.tags?.map { tagModelAssembler.toModel(it) }?.toSet() ?: setOf(),
       screenshots = screenshots.map { screenshotModelAssembler.toModel(it) },
       description = entity.keyMeta?.description,
+      isPlural = entity.isPlural,
+      pluralArgName = entity.pluralArgName,
+      custom = entity.keyMeta?.custom ?: mapOf(),
     )
   }
 }

@@ -5,5 +5,6 @@ data class KeyForMt(
   val name: String,
   val namespace: String?,
   val description: String?,
-  val baseTranslation: String?,
+  var baseTranslation: String?,
+  var isPlural: Boolean,
 )

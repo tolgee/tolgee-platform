@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.contentDelivery.ContentStorageRequest
@@ -11,6 +13,7 @@ import io.tolgee.ee.service.ContentStorageService
 import io.tolgee.hateoas.ee.contentStorage.ContentStorageModel
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -37,7 +40,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/{projectId}/content-storages",
   ],
 )
-@Tag(name = "Content Storages management (EE)")
+@Tag(name = "Content Storages")
+@OpenApiEeExtension
 class ContentStorageController(
   private val contentStorageService: ContentStorageService,
   private val projectHolder: ProjectHolder,
@@ -46,8 +50,9 @@ class ContentStorageController(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping("")
-  @Operation(description = "Create Content Storage")
+  @Operation(summary = "Create Content Storage")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
+  @RequestActivity(ActivityType.CONTENT_STORAGE_CREATE)
   @AllowApiAccess
   fun create(
     @Valid @RequestBody
@@ -62,9 +67,10 @@ class ContentStorageController(
   }
 
   @PutMapping("/{contentStorageId}")
-  @Operation(description = "Updates Content Storage")
+  @Operation(summary = "Update Content Storage")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
+  @RequestActivity(ActivityType.CONTENT_STORAGE_UPDATE)
   fun update(
     @PathVariable contentStorageId: Long,
     @Valid @RequestBody
@@ -80,7 +86,7 @@ class ContentStorageController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @GetMapping("")
-  @Operation(description = "List existing Content Storages")
+  @Operation(summary = "List Content Storages")
   @AllowApiAccess
   fun list(
     @ParameterObject pageable: Pageable,
@@ -91,7 +97,8 @@ class ContentStorageController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @DeleteMapping("/{contentStorageId}")
-  @Operation(description = "Delete Content Storage")
+  @Operation(summary = "Delete Content Storage")
+  @RequestActivity(ActivityType.CONTENT_STORAGE_DELETE)
   @AllowApiAccess
   fun delete(
     @PathVariable contentStorageId: Long,
@@ -101,7 +108,7 @@ class ContentStorageController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @GetMapping("/{contentStorageId}")
-  @Operation(description = "Get Content Storage")
+  @Operation(summary = "Get Content Storage")
   @AllowApiAccess
   fun get(
     @PathVariable contentStorageId: Long,
@@ -112,7 +119,7 @@ class ContentStorageController(
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @PostMapping("/test")
-  @Operation(description = "Test Content Storage")
+  @Operation(summary = "Test Content Storage settings")
   @AllowApiAccess
   fun test(
     @Valid @RequestBody
@@ -128,6 +135,7 @@ class ContentStorageController(
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @PostMapping("/{id}/test")
   @Operation(
+    summary = "Test existing Content Storage",
     description =
       "Tests existing Content Storage with new configuration." +
         " (Uses existing secrets, if nulls provided)",

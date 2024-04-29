@@ -1,18 +1,14 @@
 import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { AppState } from 'tg.store/index';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const WebsocketPreview = () => {
   const config = useConfig();
   const project = useProject();
-  const jwtToken = useSelector(
-    (state: AppState) => state.global.security.jwtToken
-  );
-  const client = useGlobalContext((c) => c.client);
+  const jwtToken = useGlobalContext((c) => c.auth.jwtToken);
+  const client = useGlobalContext((c) => c.wsClient.client);
 
   useEffect(() => {
     if (jwtToken && client) {

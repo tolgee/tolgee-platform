@@ -41,7 +41,10 @@ class OrganizationProjectController(
   private val projectWithStatsFacade: ProjectWithStatsFacade,
 ) {
   @GetMapping("/{id:[0-9]+}/projects")
-  @Operation(summary = "Returns all organization projects the user has access to")
+  @Operation(
+    summary = "Get all accessible projects (by ID)",
+    description = "Returns all organization projects the user has access to",
+  )
   @UseDefaultPermissions
   fun getAllProjects(
     @PathVariable("id") id: Long,
@@ -57,7 +60,10 @@ class OrganizationProjectController(
   }
 
   @GetMapping("/{slug:.*[a-z].*}/projects")
-  @Operation(summary = "Returns all organization projects the user has access to")
+  @Operation(
+    summary = "Get all accessible projects (by slug)",
+    description = "Returns all organization projects the user has access to",
+  )
   @UseDefaultPermissions
   fun getAllProjects(
     @PathVariable("slug") slug: String,
@@ -70,7 +76,8 @@ class OrganizationProjectController(
   }
 
   @Operation(
-    summary =
+    summary = "Get all projects with stats",
+    description =
       "Returns all projects (including statistics)" +
         " where current user has any permission (except none)",
   )
@@ -86,7 +93,8 @@ class OrganizationProjectController(
   }
 
   @Operation(
-    summary =
+    summary = "Get all projects with stats",
+    description =
       "Returns all projects (including statistics) " +
         "where current user has any permission (except none)",
   )

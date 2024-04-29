@@ -13,13 +13,10 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
   @Query(
     """
     select count(c) = 0 from ContentDeliveryConfig c
-    where c.project.id = :projectId and c.slug = :slug
+    where c.slug = :slug
     """,
   )
-  fun isSlugUnique(
-    projectId: Long,
-    slug: String,
-  ): Boolean
+  fun isSlugUnique(slug: String): Boolean
 
   @Query(
     """

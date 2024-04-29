@@ -111,8 +111,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     expectedType: ProjectPermissionType,
   ) {
     assertThat(invitationService.getForProject(project)).hasSize(0)
-    assertThat(permissionService.getProjectPermissionScopes(project.id, newUser)).isNotNull
-    val type = permissionService.getProjectPermissionScopes(project.id, newUser)!!
+    assertThat(permissionService.getProjectPermissionScopesNoApiKey(project.id, newUser)).isNotNull
+    val type = permissionService.getProjectPermissionScopesNoApiKey(project.id, newUser)!!
     type.assert.equalsPermissionType(expectedType)
   }
 

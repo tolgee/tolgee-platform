@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -24,6 +25,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
@@ -70,6 +72,7 @@ class ProjectAuthorizationInterceptorTest {
       requestContextService,
       Mockito.mock(ProjectHolder::class.java),
       Mockito.mock(OrganizationHolder::class.java),
+      Mockito.mock(ActivityHolder::class.java, Mockito.RETURNS_DEEP_STUBS),
     )
 
   private val mockMvc =
@@ -96,6 +99,7 @@ class ProjectAuthorizationInterceptorTest {
 
     Mockito.`when`(apiKey.projectId).thenReturn(1337L)
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
   }
 
   @AfterEach
@@ -128,45 +132,61 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `it hides the organization if the user cannot see it`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(null)
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(emptySet())
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andIsNotFound
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-admin")).andIsNotFound
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_VIEW))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andIsOk
   }
 
   @Test
   fun `rejects access if the user does not have the required scope (single scope)`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_VIEW))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_CREATE))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
   }
 
   @Test
+  fun `rejects access if the user is admin and authorizes with API key`() {
+    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
+
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_VIEW))
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
+
+    Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
+  }
+
+  @Test
   fun `rejects access if the user does not have the required scope (multiple scopes)`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_CREATE))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.MEMBERS_EDIT))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
 
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsOk
   }
@@ -186,23 +206,20 @@ class ProjectAuthorizationInterceptorTest {
   }
 
   @Test
-  fun `it restricts scopes to the ones set to the API key`() {
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
+  fun `it restricts scopes (multiple scopes)`() {
+    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
+
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsOk
-
-    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
-    Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
-
-    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
   }
 
   @Test
   fun `it does not let scopes on the key work if the authenticated user does not have them`() {
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_CREATE))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
   }
@@ -211,12 +228,13 @@ class ProjectAuthorizationInterceptorTest {
   fun `permissions work as intended when using implicit project id`() {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsOk
 
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_VIEW))
-    Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
-      .thenReturn(arrayOf(Scope.KEYS_VIEW))
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+      .thenReturn(setOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsForbidden
 

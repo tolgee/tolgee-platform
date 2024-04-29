@@ -4,6 +4,9 @@ import { Reference } from '../types';
 import { CommentReference } from './CommentReference';
 import { KeyReference } from './KeyReference';
 import { LanguageReference } from './LanguageReference';
+import { ContentDeliveryReference } from './ContentDeliveryReference';
+import { ContentStorageReference } from './ContentStorageReference';
+import { WebhookConfigReference } from './WebhookConfigReference';
 
 const StyledReferences = styled(Box)`
   display: flex;
@@ -69,6 +72,12 @@ const getReference = (reference: Reference) => {
       return <KeyReference data={reference} />;
     case 'language':
       return <LanguageReference data={reference} />;
+    case 'content_delivery_config':
+      return <ContentDeliveryReference data={reference} />;
+    case 'content_storage':
+      return <ContentStorageReference data={reference} />;
+    case 'webhook_config':
+      return <WebhookConfigReference data={reference} />;
     default:
       return null;
   }

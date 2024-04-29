@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
@@ -17,6 +18,7 @@ class BusinessEventReporter(
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
+  private val entityManager: EntityManager,
 ) {
   @Lazy
   @Autowired
@@ -54,6 +56,11 @@ class BusinessEventReporter(
       id.toString(),
       data.eventName,
       mapOf(
+        "${'$'}groups" to
+          mapOf(
+            "project" to data.projectDto?.id,
+            "organization" to data.organizationId,
+          ),
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
       ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry,
@@ -104,12 +111,27 @@ class BusinessEventReporter(
     val projectDto = data.projectDto ?: data.projectId?.let { projectService.findDto(it) }
     val organizationId = data.organizationId ?: projectDto?.organizationOwnerId
     val organizationName = data.organizationName ?: organizationId?.let { organizationService.get(it).name }
-    val userAccountDto = data.userAccountDto ?: data.userAccountId?.let { userAccountService.findDto(it) }
+    val userAccountId = data.userAccountId ?: findOwnerUserByOrganizationId(organizationId)
+    val userAccountDto = data.userAccountDto ?: userAccountId?.let { userAccountService.findDto(it) }
     return data.copy(
       projectDto = projectDto,
       organizationId = organizationId,
       organizationName = organizationName,
       userAccountDto = userAccountDto,
     )
+  }
+
+  private fun findOwnerUserByOrganizationId(organizationId: Long?): Long? {
+    organizationId ?: return null
+    return entityManager.createQuery(
+      """
+      select u.id from UserAccount u 
+      join u.organizationRoles orl on orl.organization.id = :organizationId
+      where orl.type = io.tolgee.model.enums.OrganizationRoleType.OWNER
+      order by u.id
+      limit 1
+    """,
+      Long::class.java,
+    ).setParameter("organizationId", organizationId).resultList.firstOrNull()
   }
 }

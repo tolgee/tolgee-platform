@@ -5,7 +5,6 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.views.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.views.ProjectActivityViewByRevisionProvider
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -28,7 +27,6 @@ class ActivityService(
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
-  private val currentDateProvider: CurrentDateProvider,
   private val objectMapper: ObjectMapper,
   private val jdbcTemplate: JdbcTemplate,
 ) : Logging {
@@ -40,7 +38,7 @@ class ActivityService(
     // let's keep the persistent context small
     entityManager.flushAndClear()
 
-    val mergedActivityRevision = persistAcitivyRevision(activityRevision)
+    val mergedActivityRevision = persistActivityRevision(activityRevision)
 
     persistedDescribingRelations(mergedActivityRevision)
     mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
@@ -92,7 +90,7 @@ class ActivityService(
     return pgObject
   }
 
-  private fun persistAcitivyRevision(activityRevision: ActivityRevision): ActivityRevision {
+  private fun persistActivityRevision(activityRevision: ActivityRevision): ActivityRevision {
     return if (activityRevision.id == 0L) {
       entityManager.persist(activityRevision)
       entityManager.flushAndClear()

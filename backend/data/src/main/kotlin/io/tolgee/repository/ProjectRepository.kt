@@ -15,10 +15,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   companion object {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
-        bl as baseLanguage, o as organizationOwner,
-        role.type as organizationRole, p as directPermission
+        bl as baseLanguage, dn as defaultNamespace, o as organizationOwner,
+        role.type as organizationRole, p as directPermission, r.icuPlaceholders as icuPlaceholders
         from Project r
         left join r.baseLanguage bl
+        left join r.defaultNamespace dn
         left join Permission p on p.project = r and p.user.id = :userAccountId
         left join Organization o on r.organizationOwner = o
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId

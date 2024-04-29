@@ -9,6 +9,8 @@ import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslation
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.formats.convertToIcuPlurals
+import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
@@ -49,6 +51,8 @@ class ResolvingKeyImporter(
 
   private val errors = mutableListOf<List<Serializable?>>()
   private var importedKeys: List<Key> = emptyList()
+  private val updatedTranslationIds = mutableListOf<Long>()
+  private val isPluralChangedForKeys = mutableMapOf<Long, String>()
 
   operator fun invoke(): KeyImportResolvableResult {
     importedKeys = tryImport()
@@ -61,38 +65,95 @@ class ResolvingKeyImporter(
   private fun tryImport(): List<Key> {
     checkLanguagePermissions(keysToImport)
 
-    return keysToImport.map keys@{ keyToImport ->
-      val key = getOrCreateKey(keyToImport)
+    val result =
+      keysToImport.map keys@{ keyToImport ->
+        val (key, isKeyNew) = getOrCreateKey(keyToImport)
+        val isExistingKeyPlural = key.isPlural
+        val translationsToModify = mutableListOf<TranslationToModify>()
 
-      keyToImport.mapLanguageAsKey().forEach translations@{ (language, resolvable) ->
-        language ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-        val existingTranslation = getExistingTranslation(key, language.tag)
+        keyToImport.mapLanguageAsKey().forEach translations@{ (language, resolvable) ->
+          language ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
-        val isEmpty = existingTranslation !== null && existingTranslation.text.isNullOrEmpty()
+          val existingTranslation = getExistingTranslation(key, language.tag)
 
-        val isNew = existingTranslation == null
+          val isEmpty = existingTranslation !== null && existingTranslation.text.isNullOrEmpty()
 
-        val translationExists = !isEmpty && !isNew
+          val isNew = existingTranslation == null
 
-        if (validate(translationExists, resolvable, key, language.tag)) return@translations
+          val translationExists = !isEmpty && !isNew
 
-        if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
-          translationService.setTranslation(existingTranslation!!, resolvable.text)
-          return@translations
+          if (validate(translationExists, resolvable, key, language.tag)) return@translations
+
+          if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
+            translationsToModify.add(TranslationToModify(existingTranslation!!, resolvable.text, false))
+            return@translations
+          }
+
+          if (isNew) {
+            val translation =
+              Translation(resolvable.text).apply {
+                this.key = key
+                this.language = entityManager.getReference(Language::class.java, language.id)
+              }
+            translationsToModify.add(TranslationToModify(translation, resolvable.text, true))
+          }
         }
 
-        if (isNew) {
-          val translation =
-            Translation(resolvable.text).apply {
-              this.key = key
-              this.language = entityManager.getReference(Language::class.java, language.id)
-            }
-          translationService.save(translation)
-        }
+        handlePluralizationAndSave(isExistingKeyPlural, translationsToModify, key)
+        key
       }
-      key
+
+    translationService.onKeyIsPluralChanged(isPluralChangedForKeys, true, updatedTranslationIds)
+
+    return result
+  }
+
+  private fun handlePluralizationAndSave(
+    isExistingKeyPlural: Boolean,
+    translationsToModify: MutableList<TranslationToModify>,
+    key: Key,
+  ) {
+    val translationsToModifyMap = translationsToModify.associateWith { it.text }
+
+    // when existing key is plural, we are converting all to plurals
+    if (isExistingKeyPlural) {
+      translationsToModifyMap.convertToIcuPlurals(null).convertedStrings.forEach {
+        it.key.text = it.value
+      }
+      translationsToModify.save()
+      return
+    }
+
+    val convertedToPlurals =
+      translationsToModifyMap.convertToPluralIfAnyIsPlural()
+
+    // if anything from the new translations is plural, we are converting the key to plural
+    if (convertedToPlurals != null) {
+      key.isPlural = true
+      keyService.save(key)
+      translationsToModify.forEach { translation ->
+        translation.text = convertedToPlurals.convertedStrings[translation]
+      }
+      // now we have to also handle translations of keys,
+      // which are already existing in the database
+      isPluralChangedForKeys[key.id] = convertedToPlurals.argName
+    }
+
+    translationsToModify.save()
+  }
+
+  private fun List<TranslationToModify>.save() {
+    this.forEach {
+      translationService.setTranslation(it.translation, it.text)
+      updatedTranslationIds.add(it.translation.id)
     }
   }
+
+  class TranslationToModify(
+    val translation: Translation,
+    var text: String?,
+    val isNew: Boolean,
+  )
 
   private fun importScreenshots(): Map<Long, Screenshot> {
     val uploadedImagesIds =
@@ -101,7 +162,7 @@ class ResolvingKeyImporter(
       }
 
     val images = imageUploadService.find(uploadedImagesIds)
-    checkImageUploadermissions(images)
+    checkImageUploadPermissions(images)
 
     val createdScreenshots =
       images.associate {
@@ -127,7 +188,7 @@ class ResolvingKeyImporter(
         val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
 
         screenshotService.addReference(
-          key = key,
+          key = key.first,
           screenshot = screenshotResult.screenshot,
           info = info,
           originalDimension = screenshotResult.originalDimension,
@@ -136,7 +197,7 @@ class ResolvingKeyImporter(
 
         val toDelete =
           allReferences.filter { reference ->
-            reference.key.id == key.id &&
+            reference.key.id == key.first.id &&
               reference.screenshot.location == screenshotResult.screenshot.location
           }
 
@@ -152,13 +213,13 @@ class ResolvingKeyImporter(
       }.toMap()
   }
 
-  private fun checkImageUploadermissions(images: List<UploadedImage>) {
+  private fun checkImageUploadPermissions(images: List<UploadedImage>) {
     if (images.isNotEmpty()) {
       securityService.checkScreenshotsUploadPermission(projectEntity.id)
     }
     images.forEach { image ->
       if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException()
+        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
       }
     }
   }
@@ -211,15 +272,21 @@ class ResolvingKeyImporter(
       languages[languageTag] to value
     }
 
-  private fun getOrCreateKey(keyToImport: ImportKeysResolvableItemDto) =
-    existingKeys.computeIfAbsent(keyToImport.namespace to keyToImport.name) {
-      securityService.checkProjectPermission(projectEntity.id, Scope.KEYS_CREATE)
-      keyService.createWithoutExistenceCheck(
-        name = keyToImport.name,
-        namespace = keyToImport.namespace,
-        project = projectEntity,
-      )
-    }
+  private fun getOrCreateKey(keyToImport: ImportKeysResolvableItemDto): Pair<Key, Boolean> {
+    var isNew = false
+    val key =
+      existingKeys.computeIfAbsent(keyToImport.namespace to keyToImport.name) {
+        isNew = true
+        securityService.checkProjectPermission(projectEntity.id, Scope.KEYS_CREATE)
+        keyService.createWithoutExistenceCheck(
+          project = projectEntity,
+          name = keyToImport.name,
+          namespace = keyToImport.namespace,
+          isPlural = false,
+        )
+      }
+    return key to isNew
+  }
 
   private fun getAllByNamespaceAndName(
     projectId: Long,

@@ -12,6 +12,7 @@ import io.tolgee.hateoas.aiPtomptCustomization.LanguageAiPromptCustomizationMode
 import io.tolgee.hateoas.aiPtomptCustomization.ProjectAiPromptCustomizationModel
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -29,7 +30,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v2/")
 @Suppress("MVCPathVariableInspection")
-@Tag(name = "AI Prompt customization")
+@Tag(name = "AI Customization")
+@OpenApiEeExtension
 class AiPromptCustomizationController(
   private val projectHolder: ProjectHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,

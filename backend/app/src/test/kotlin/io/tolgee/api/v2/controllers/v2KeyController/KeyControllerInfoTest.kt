@@ -52,6 +52,12 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
       ).andIsOk.andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(22)
+          node("[0]") {
+            node("custom") {
+              isObject.hasSize(1)
+              node("key").isEqualTo("value")
+            }
+          }
           node("[20]") {
             node("namespace").isEqualTo("namespace-1")
             node("name").isEqualTo("key-1")

@@ -4,6 +4,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.key.Namespace
 
 open class ProjectWithLanguagesView(
   override val id: Long,
@@ -12,9 +13,11 @@ open class ProjectWithLanguagesView(
   override val slug: String?,
   override val avatarHash: String?,
   override val baseLanguage: Language?,
+  override val defaultNamespace: Namespace?,
   override val organizationOwner: Organization,
   override val organizationRole: OrganizationRoleType?,
   override val directPermission: Permission?,
+  override var icuPlaceholders: Boolean,
   val permittedLanguageIds: List<Long>?,
 ) : ProjectView {
   companion object {
@@ -29,10 +32,12 @@ open class ProjectWithLanguagesView(
         slug = view.slug,
         avatarHash = view.avatarHash,
         baseLanguage = view.baseLanguage,
+        defaultNamespace = view.defaultNamespace,
         organizationOwner = view.organizationOwner,
         organizationRole = view.organizationRole,
         directPermission = view.directPermission,
         permittedLanguageIds = permittedLanguageIds,
+        icuPlaceholders = view.icuPlaceholders,
       )
     }
   }

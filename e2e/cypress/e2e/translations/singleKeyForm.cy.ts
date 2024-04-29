@@ -64,20 +64,20 @@ describe('Single key form', () => {
     // changing langs in translations list should influnece
     // default language in localstorage
     visitTranslations(projectId);
-    languageIsSelected('cs');
-    languageIsSelected('en');
+    languageIsSelected('Czech');
+    languageIsSelected('English');
     toggleLang('Czech');
 
     // translation single view should take settings from localstorage
     // but't not modify them
     visitSingleKey(projectId, 'A key');
-    languageIsSelected('en');
-    languageIsNotSelected('cs');
+    languageIsSelected('English');
+    languageIsNotSelected('Czech');
     toggleLang('Czech');
 
     visitTranslations(projectId);
-    languageIsSelected('en');
-    languageIsNotSelected('cs');
+    languageIsSelected('English');
+    languageIsNotSelected('Czech');
   });
 
   function languageIsSelected(lang: string) {

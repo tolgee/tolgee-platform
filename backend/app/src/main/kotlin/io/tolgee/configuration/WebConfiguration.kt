@@ -14,6 +14,7 @@ import jakarta.servlet.MultipartConfigElement
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.http.CacheControl
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -67,6 +68,7 @@ class WebConfiguration(
   }
 
   @Bean
+  @Primary
   fun objectMapper(): ObjectMapper {
     return jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   }

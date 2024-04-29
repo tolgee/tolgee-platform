@@ -3,16 +3,16 @@ import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 export const EditPatDialog: FunctionComponent = () => {
+  const history = useHistory();
   const onDialogClose = () => {
-    redirect(LINKS.USER_PATS);
+    history.push(LINKS.USER_PATS.build());
   };
 
   const id = useRouteMatch().params[PARAMS.PAT_ID];

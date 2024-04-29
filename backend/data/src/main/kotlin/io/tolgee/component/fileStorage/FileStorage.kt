@@ -14,6 +14,8 @@ interface FileStorage {
 
   fun fileExists(storageFilePath: String): Boolean
 
+  fun pruneDirectory(path: String)
+
   fun test() {
     try {
       this.storeFile("test", "test".toByteArray())

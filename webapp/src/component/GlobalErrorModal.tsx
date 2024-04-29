@@ -1,10 +1,11 @@
 import { Dialog, DialogContent, IconButton, styled } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { useSelector } from 'react-redux';
-import { AppState } from 'tg.store/index';
 
-import GlobalError from './common/GlobalError';
-import { errorActions } from 'tg.store/global/ErrorActions';
+import GlobalErrorPage from './common/GlobalErrorPage';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 
 const CloseIcon = styled('div')`
   position: absolute;
@@ -15,10 +16,11 @@ const CloseIcon = styled('div')`
 `;
 
 export const GlobalErrorModal = () => {
-  const error = useSelector((state: AppState) => state.error.error);
+  const error = useGlobalContext((c) => c.globalError);
+  const { setGlobalError } = useGlobalActions();
 
   const handleClose = () => {
-    errorActions.globalError.dispatch(null);
+    setGlobalError(undefined);
   };
 
   return error ? (
@@ -30,7 +32,7 @@ export const GlobalErrorModal = () => {
       </CloseIcon>
 
       <DialogContent>
-        <GlobalError error={error} />
+        <GlobalErrorPage error={error} />
       </DialogContent>
     </Dialog>
   ) : null;

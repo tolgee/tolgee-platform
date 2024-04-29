@@ -50,7 +50,10 @@ class TranslationSuggestionController(
   private val machineTranslationSuggestionFacade: MachineTranslationSuggestionFacade,
 ) {
   @PostMapping("/machine-translations")
-  @Operation(summary = "Suggests machine translations from enabled services")
+  @Operation(
+    summary = "Get machine translation suggestions",
+    description = "Suggests machine translations from enabled services",
+  )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun suggestMachineTranslations(
@@ -63,8 +66,10 @@ class TranslationSuggestionController(
   @PostMapping("/machine-translations-streaming", produces = ["application/x-ndjson"])
   @Operation(
     summary =
-      "Suggests machine translations from enabled services (streaming).\n" +
-        "If an error occurs when any of the services is used," +
+      "Get machine translation suggestions (streaming)",
+    description =
+      "Suggests machine translations from enabled services. The results are streamed to the output in ndjson format. " +
+        "If an error occurs when for any service provider used," +
         " the error information is returned as a part of the result item, while the response has 200 status code.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
@@ -80,9 +85,10 @@ class TranslationSuggestionController(
 
   @PostMapping("/translation-memory")
   @Operation(
-    summary =
-      "Suggests machine translations from translation memory." +
-        "\n\nThe result is always sorted by similarity, so sorting is not supported.",
+    summary = "Get suggestions from translation memory",
+    description =
+      "Suggests machine translations from translation memory. " +
+        "The result is always sorted by similarity, so sorting is not supported.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
@@ -96,7 +102,14 @@ class TranslationSuggestionController(
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 
     val data =
-      dto.baseText?.let { baseText -> translationMemoryService.suggest(baseText, targetLanguage, pageable) }
+      dto.baseText?.let { baseText ->
+        translationMemoryService.suggest(
+          baseText,
+          isPlural = dto.isPlural ?: false,
+          targetLanguage,
+          pageable,
+        )
+      }
         ?: let {
           val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
           val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }

@@ -25,10 +25,20 @@ class ContentDeliveryUploader(
     val storage = getStorage(config)
     val files = exportService.export(config.project.id, config)
     val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
+    pruneIfNeeded(config, storage)
     storeToStorage(withFullPaths, storage)
     purgeCacheIfConfigured(config, files.keys)
     config.lastPublished = currentDateProvider.date
     contentDeliveryConfigService.save(config)
+  }
+
+  private fun pruneIfNeeded(
+    config: ContentDeliveryConfig,
+    storage: FileStorage,
+  ) {
+    if (config.pruneBeforePublish) {
+      storage.pruneDirectory(config.slug)
+    }
   }
 
   private fun purgeCacheIfConfigured(

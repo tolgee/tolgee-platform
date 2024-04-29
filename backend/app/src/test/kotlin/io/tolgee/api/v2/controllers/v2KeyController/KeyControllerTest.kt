@@ -67,6 +67,21 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `returns single key`() {
+    saveTestDataAndPrepare()
+    val keyId = testData.keyWithReferences.id
+    performProjectAuthGet("keys/$keyId")
+      .andIsOk.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo("key_with_referecnces")
+        node("namespace").isNull()
+        node("description").isNull()
+        node("custom").isObject.containsKeys("custom")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `does not create key when not valid`() {
     saveTestDataAndPrepare()
 

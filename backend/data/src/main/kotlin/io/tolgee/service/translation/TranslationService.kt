@@ -8,6 +8,12 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.PluralForms
+import io.tolgee.formats.StringIsNotPluralException
+import io.tolgee.formats.convertToIcuPlural
+import io.tolgee.formats.getPluralForms
+import io.tolgee.formats.normalizePlurals
+import io.tolgee.formats.optimizePluralForms
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
@@ -26,6 +32,7 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -34,6 +41,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.Serializable
 import java.util.*
 
 @Service
@@ -136,6 +144,20 @@ class TranslationService(
     return this.translationRepository.findById(id).orElse(null)
   }
 
+  fun find(
+    projectId: Long,
+    translationId: Long,
+  ): Translation? {
+    return this.translationRepository.find(projectId, translationId)
+  }
+
+  fun get(
+    projectId: Long,
+    translationId: Long,
+  ): Translation {
+    return find(projectId, translationId) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+  }
+
   fun getViewData(
     projectId: Long,
     pageable: Pageable,
@@ -151,16 +173,6 @@ class TranslationService(
     languages: Set<LanguageDto>,
   ): List<Long> {
     return translationViewDataProvider.getSelectAllKeys(projectId, languages, params)
-  }
-
-  fun setTranslation(
-    key: Key,
-    languageTag: String?,
-    text: String?,
-  ): Translation? {
-    val language =
-      languageService.getByTag(languageTag!!, key.project)
-    return setTranslation(key, entityManager.getReference(Language::class.java, language.id), text)
   }
 
   fun setTranslation(
@@ -205,6 +217,8 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
+    val normalized =
+      validateAndNormalizePlurals(translations, key.isPlural, key.pluralArgName)
     val languages = languageService.findEntitiesByTags(translations.keys, key.project.id)
     val oldTranslations =
       getKeyTranslations(languages, key.project, key).associate {
@@ -216,7 +230,7 @@ class TranslationService(
 
     return setForKey(
       key,
-      translations.map { languageByTagFromLanguages(it.key, languages) to it.value }
+      normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
       oldTranslations,
     ).mapKeys { it.key.tag }
@@ -248,7 +262,7 @@ class TranslationService(
     val result =
       translations.entries.associate { (language, value) ->
         language to setTranslation(key, language, value)
-      }.filterValues { it != null }.mapValues { it.value }
+      }.mapValues { it.value }
 
     applicationEventPublisher.publishEvent(
       OnTranslationsSet(
@@ -328,10 +342,9 @@ class TranslationService(
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.getOrAssignBaseLanguage(key.project.id)?.let {
+    projectService.getOrAssignBaseLanguage(key.project.id).let {
       return find(key, it).orElse(null)
     }
-    return null
   }
 
   fun getTranslationMemoryValue(
@@ -356,11 +369,18 @@ class TranslationService(
 
     val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
 
-    return getTranslationMemorySuggestions(baseTranslationText, key, targetLanguage, pageable)
+    return getTranslationMemorySuggestions(
+      baseTranslationText,
+      isPlural = key.isPlural,
+      key,
+      targetLanguage,
+      pageable,
+    )
   }
 
   fun getTranslationMemorySuggestions(
     sourceTranslationText: String,
+    isPlural: Boolean,
     key: Key?,
     targetLanguage: LanguageDto,
     pageable: Pageable,
@@ -370,6 +390,7 @@ class TranslationService(
     }
     return translationRepository.getTranslateMemorySuggestions(
       baseTranslationText = sourceTranslationText,
+      isPlural = isPlural,
       key = key,
       targetLanguageId = targetLanguage.id,
       pageable = pageable,
@@ -521,5 +542,82 @@ class TranslationService(
         "key_id IN (SELECT id FROM key WHERE project_id = :projectId) or " +
         "language_id IN (SELECT id FROM language WHERE project_id = :projectId)",
     ).setParameter("projectId", projectId).executeUpdate()
+  }
+
+  fun onKeyIsPluralChanged(
+    keyIdToArgNameMap: Map<Long, String?>,
+    newIsPlural: Boolean,
+    ignoreTranslationsForMigration: MutableList<Long> = mutableListOf(),
+    throwOnDataLoss: Boolean = false,
+  ) {
+    val translations =
+      translationRepository
+        .getAllByKeyIdInExcluding(keyIdToArgNameMap.keys, ignoreTranslationsForMigration.nullIfEmpty())
+    translations.forEach { handleIsPluralChanged(it, newIsPlural, keyIdToArgNameMap[it.key.id], throwOnDataLoss) }
+    saveAll(translations)
+  }
+
+  private fun handleIsPluralChanged(
+    it: Translation,
+    newIsPlural: Boolean,
+    newPluralArgName: String?,
+    throwOnDataLoss: Boolean,
+  ) {
+    it.text = getNewText(it.text, newIsPlural, newPluralArgName, throwOnDataLoss)
+  }
+
+  /**
+   * @param newIsPlural - if true, we are converting value to plural,
+   * if not, we are converting it from plural
+   */
+  private fun getNewText(
+    text: String?,
+    newIsPlural: Boolean,
+    newPluralArgName: String?,
+    throwOnDataLoss: Boolean,
+  ): String? {
+    if (newIsPlural) {
+      return text.convertToIcuPlural(newPluralArgName)
+    }
+    val forms = getPluralForms(text)
+    if (throwOnDataLoss) {
+      throwOnDataLoss(forms, text)
+    }
+    return forms?.forms?.get("other") ?: text
+  }
+
+  private fun throwOnDataLoss(
+    forms: PluralForms?,
+    text: String? = null,
+  ) {
+    forms ?: return
+    val keys = optimizePluralForms(forms.forms).keys
+    if (keys.size > 1) {
+      throw BadRequestException(Message.PLURAL_FORMS_DATA_LOSS, listOf(text))
+    }
+  }
+
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    isKeyPlural: Boolean,
+    pluralArgName: String?,
+  ): Map<T, String?> {
+    if (isKeyPlural) {
+      return validateAndNormalizePlurals(texts, pluralArgName)
+    }
+
+    return texts
+  }
+
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    pluralArgName: String?,
+  ): Map<T, String?> {
+    @Suppress("UNCHECKED_CAST")
+    return try {
+      normalizePlurals(texts, pluralArgName)
+    } catch (e: StringIsNotPluralException) {
+      throw BadRequestException(Message.INVALID_PLURAL_FORM, listOf(e.invalidStrings) as List<Serializable?>)
+    }
   }
 }

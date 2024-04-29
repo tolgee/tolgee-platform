@@ -2,8 +2,6 @@ import { FunctionComponent } from 'react';
 import { Box, styled } from '@mui/material';
 
 import { TopBar } from './TopBar/TopBar';
-import { useSelector } from 'react-redux';
-import { AppState } from 'tg.store/index';
 import { TopBanner } from './TopBanner/TopBanner';
 import { TopSpacer } from './TopSpacer';
 import {
@@ -50,16 +48,15 @@ export const DashboardPage: FunctionComponent<Props> = ({
   isAdminAccess = false,
   fixedContent,
 }) => {
-  const security = useSelector((state: AppState) => state.global.security);
+  const isDebuggingCustomerAccount = useGlobalContext(
+    (c) => Boolean(c.auth.jwtToken) && Boolean(c.auth.adminToken)
+  );
 
-  const isDebuggingCustomerAccount =
-    !!security.adminJwtToken && !!security.jwtToken;
-
-  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
 
   const { setQuickStartOpen } = useGlobalActions();
   const quickStartEnabled = useGlobalContext(
-    (c) => c.quickStartGuide.enabled && c.userInfo
+    (c) => c.quickStartGuide.enabled && c.initialData.userInfo
   );
   const quickStartOpen = useGlobalContext((c) =>
     Boolean(c.quickStartGuide.open)

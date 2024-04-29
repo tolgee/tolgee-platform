@@ -18,13 +18,16 @@ import io.tolgee.ee.data.ReportUsageDto
 import io.tolgee.ee.data.SetLicenseKeyLicensingDto
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
+import io.tolgee.events.OnUserCountChanged
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.service.InstanceIdService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
@@ -48,7 +51,7 @@ class EeSubscriptionServiceImpl(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
-) : EeSubscriptionProvider {
+) : EeSubscriptionProvider, Logging {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
     const val PREPARE_SET_KEY_PATH: String = "/v2/public/licensing/prepare-set-key"
@@ -232,11 +235,17 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun checkCountAndReportUsage() {
-    val seats = userAccountService.countAllEnabled()
-    val subscription = self.findSubscriptionDto()
-    reportUsage(seats, subscription)
-    checkUserCount(seats, subscription)
+  fun checkCountAndReportUsage(event: OnUserCountChanged) {
+    try {
+      val seats = userAccountService.countAllEnabled()
+      val subscription = self.findSubscriptionDto()
+      reportUsage(seats, subscription)
+      if (!event.decrease) {
+        checkUserCount(seats, subscription)
+      }
+    } catch (e: NoActiveSubscriptionException) {
+      logger.debug("No active subscription, skipping usage reporting.")
+    }
   }
 
   private fun checkUserCount(
@@ -276,9 +285,10 @@ class EeSubscriptionServiceImpl(
         throw e
       }
       executeInNewTransaction(platformTransactionManager) {
-        val entity = findSubscriptionEntity() ?: throw e
+        val entity = findSubscriptionEntity() ?: throw NoActiveSubscriptionException()
         entity.status = SubscriptionStatus.ERROR
         self.save(entity)
+        throw e
       }
       throw e
     }

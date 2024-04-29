@@ -6,7 +6,6 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.LanguageValidator
@@ -17,6 +16,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -48,11 +48,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/languages",
   ],
 )
-@Tags(
-  value = [
-    Tag(name = "Languages", description = "Languages"),
-  ],
-)
+@Tag(name = "Languages", description = "Languages")
+@OpenApiOrderExtension(2)
 class V2LanguagesController(
   private val languageService: LanguageService,
   private val projectService: ProjectService,
@@ -62,10 +59,11 @@ class V2LanguagesController(
   private val projectHolder: ProjectHolder,
 ) : IController {
   @PostMapping(value = [""])
-  @Operation(summary = "Creates language")
+  @Operation(summary = "Create language")
   @RequestActivity(ActivityType.CREATE_LANGUAGE)
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
     @RequestBody @Valid
@@ -77,11 +75,37 @@ class V2LanguagesController(
     return languageModelAssembler.toModel(LanguageDto.fromEntity(language, project.baseLanguage?.id))
   }
 
-  @Operation(summary = "Edits language")
+  @GetMapping(value = ["/{languageId}"])
+  @Operation(summary = "Get one language")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  @OpenApiOrderExtension(2)
+  fun get(
+    @PathVariable("languageId") id: Long,
+  ): LanguageModel {
+    val languageView = languageService.get(id, projectHolder.project.id)
+    return languageModelAssembler.toModel(languageView)
+  }
+
+  @GetMapping(value = [""])
+  @Operation(summary = "Get all languages", tags = ["Languages"])
+  @UseDefaultPermissions
+  @AllowApiAccess
+  @OpenApiOrderExtension(3)
+  fun getAll(
+    @PathVariable("projectId") pathProjectId: Long?,
+    @ParameterObject @SortDefault("tag") pageable: Pageable,
+  ): PagedModel<LanguageModel> {
+    val data = languageService.getPaged(projectHolder.project.id, pageable)
+    return pagedAssembler.toModel(data, languageModelAssembler)
+  }
+
+  @Operation(summary = "Update language")
   @PutMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.EDIT_LANGUAGE)
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
+  @OpenApiOrderExtension(4)
   fun editLanguage(
     @RequestBody @Valid
     dto: LanguageRequest,
@@ -92,34 +116,12 @@ class V2LanguagesController(
     return languageModelAssembler.toModel(languageService.get(languageId, projectHolder.project.id))
   }
 
-  @GetMapping(value = [""])
-  @Operation(summary = "Returns all project languages", tags = ["Languages"])
-  @UseDefaultPermissions
-  @AllowApiAccess
-  fun getAll(
-    @PathVariable("projectId") pathProjectId: Long?,
-    @ParameterObject @SortDefault("tag") pageable: Pageable,
-  ): PagedModel<LanguageModel> {
-    val data = languageService.getPaged(projectHolder.project.id, pageable)
-    return pagedAssembler.toModel(data, languageModelAssembler)
-  }
-
-  @GetMapping(value = ["/{languageId}"])
-  @Operation(summary = "Returns specific language")
-  @UseDefaultPermissions
-  @AllowApiAccess
-  fun get(
-    @PathVariable("languageId") id: Long,
-  ): LanguageModel {
-    val languageView = languageService.get(id, projectHolder.project.id)
-    return languageModelAssembler.toModel(languageView)
-  }
-
-  @Operation(summary = "Deletes specific language")
+  @Operation(summary = "Delete specific language")
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
+  @OpenApiOrderExtension(5)
   fun deleteLanguage(
     @PathVariable languageId: Long,
   ) {

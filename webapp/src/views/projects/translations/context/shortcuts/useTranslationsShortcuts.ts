@@ -15,6 +15,7 @@ import {
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { CellPosition } from '../types';
 import { getMeta } from 'tg.fixtures/isMac';
+import { isElementInput } from 'tg.fixtures/isElementInput';
 
 export const KEY_MAP = {
   MOVE: ARROWS,
@@ -109,7 +110,6 @@ export const useTranslationsShortcuts = () => {
           setEdit({
             keyId: focused.keyId,
             language: focused.language,
-            mode: 'editor',
           });
         };
       }
@@ -192,11 +192,7 @@ export const useTranslationsShortcuts = () => {
 
     // ignore events coming from inputs
     // as we don't want to influence them
-    if (
-      activeElement.tagName === 'INPUT' &&
-      // @ts-ignore
-      !['checkbox', 'radio', 'submit', 'reset'].includes(activeElement.type)
-    ) {
+    if (isElementInput(activeElement)) {
       return false;
     }
 

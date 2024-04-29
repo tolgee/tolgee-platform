@@ -1,11 +1,12 @@
-import { FunctionComponent, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { FunctionComponent, useEffect } from 'react';
+import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { globalActions, GlobalState } from 'tg.store/global/GlobalActions';
-import { AppState } from 'tg.store/index';
 
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
@@ -13,14 +14,13 @@ const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 
 export const OAuthRedirectionHandler: FunctionComponent<
   OAuthRedirectionHandlerProps
-> = (props) => {
-  const security = useSelector<AppState, GlobalState['security']>(
-    (state) => state.global.security
-  );
+> = () => {
+  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
+  const loginLoadable = useGlobalContext((c) => c.auth.authorizeOAuthLoadable);
 
-  const [invalidState, setInvalidState] = useState(false);
-
+  const { loginWithOAuthCode } = useGlobalActions();
   const match = useRouteMatch();
+  const history = useHistory();
 
   useEffect(() => {
     const url = new URLSearchParams(window.location.search);
@@ -30,32 +30,25 @@ export const OAuthRedirectionHandler: FunctionComponent<
       const state = url.get('state');
       const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
       if (storedState !== state) {
-        setInvalidState(true);
+        history.replace(LINKS.LOGIN.build());
         return;
       } else {
         localStorage.removeItem(LOCAL_STORAGE_STATE_KEY);
       }
     }
 
-    if (code && !security.allowPrivate) {
-      globalActions.oAuthSuccessful.dispatch(
-        match.params[PARAMS.SERVICE_TYPE],
-        code
-      );
+    if (code && !allowPrivate) {
+      loginWithOAuthCode(match.params[PARAMS.SERVICE_TYPE], code);
     }
-  }, [security.allowPrivate]);
+  }, [allowPrivate]);
 
-  if (security.jwtToken) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+  if (loginLoadable.error) {
+    return (
+      <Redirect to={LINKS.LOGIN.build()}>
+        <FullPageLoading />
+      </Redirect>
+    );
   }
 
-  if (security.loginErrorCode || invalidState) {
-    return <Redirect to={LINKS.LOGIN.build()} />;
-  }
-
-  return (
-    <>
-      <FullPageLoading />
-    </>
-  );
+  return <FullPageLoading />;
 };

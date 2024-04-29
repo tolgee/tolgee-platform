@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress';
+import { GLOBAL_RETRIES } from './cypress/common/globalRetries';
 
 export default defineConfig({
   scrollBehavior: 'center',
@@ -14,5 +15,6 @@ export default defineConfig({
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       return require('./cypress/plugins/index.js')(on, config);
     },
+    retries: { runMode: GLOBAL_RETRIES },
   },
 });

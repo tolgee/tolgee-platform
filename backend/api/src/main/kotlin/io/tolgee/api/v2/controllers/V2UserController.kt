@@ -11,6 +11,8 @@ import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModel
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
@@ -51,30 +53,21 @@ class V2UserController(
   private val jwtService: JwtService,
   private val mfaService: MfaService,
 ) {
-  @Operation(summary = "Returns current user's data.")
+  @Operation(
+    summary = "Get user info",
+    description = "Returns information about currently authenticated user.",
+  )
   @GetMapping("")
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
   fun getInfo(): PrivateUserAccountModel {
     val userAccount = authenticationFacade.authenticatedUserView
     return privateUserAccountModelAssembler.toModel(userAccount)
   }
 
-  @Operation(summary = "Deletes current user.")
-  @DeleteMapping("")
-  @RequiresSuperAuthentication
-  fun delete() {
-    userAccountService.delete(authenticationFacade.authenticatedUserEntity)
-  }
-
-  @PostMapping("")
-  @Operation(summary = "Updates current user's data.", deprecated = true)
-  fun updateUserOld(
-    @RequestBody @Valid
-    dto: UserUpdateRequestDto?,
-  ): PrivateUserAccountModel = updateUser(dto)
-
   @PutMapping("")
-  @Operation(summary = "Updates current user's data.")
+  @Operation(summary = "Update user", description = "Updates current user's profile information.")
+  @OpenApiOrderExtension(2)
   fun updateUser(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
@@ -87,7 +80,11 @@ class V2UserController(
   }
 
   @PutMapping("/password")
-  @Operation(summary = "Updates current user's password. Invalidates all previous sessions upon success.")
+  @Operation(
+    summary = "Update password",
+    description = "Updates current user's password. Invalidates all previous sessions upon success.",
+  )
+  @OpenApiOrderExtension(3)
   fun updateUserPassword(
     @RequestBody @Valid
     dto: UserUpdatePasswordRequestDto?,
@@ -99,7 +96,8 @@ class V2UserController(
   }
 
   @PutMapping("/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(summary = "Uploads user's avatar.")
+  @Operation(summary = "Upload avatar")
+  @OpenApiOrderExtension(4)
   @ResponseStatus(HttpStatus.OK)
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
@@ -114,8 +112,9 @@ class V2UserController(
   }
 
   @DeleteMapping("/avatar")
-  @Operation(summary = "Deletes user's avatar.")
+  @Operation(summary = "Delete avatar")
   @ResponseStatus(HttpStatus.OK)
+  @OpenApiOrderExtension(5)
   fun removeAvatar(): PrivateUserAccountModel {
     val entity = authenticationFacade.authenticatedUserEntity
     userAccountService.removeAvatar(entity)
@@ -125,8 +124,27 @@ class V2UserController(
     return privateUserAccountModelAssembler.toModel(view)
   }
 
+  @Operation(summary = "Delete user")
+  @DeleteMapping("")
+  @RequiresSuperAuthentication
+  @OpenApiOrderExtension(6)
+  fun delete() {
+    userAccountService.delete(authenticationFacade.authenticatedUserEntity)
+  }
+
+  @PostMapping("")
+  @Operation(summary = "Updates current user's data.", deprecated = true)
+  @OpenApiHideFromPublicDocs
+  fun updateUserOld(
+    @RequestBody @Valid
+    dto: UserUpdateRequestDto?,
+  ): PrivateUserAccountModel = updateUser(dto)
+
   @GetMapping("/single-owned-organizations")
-  @Operation(summary = "Returns all organizations owned only by current user")
+  @Operation(
+    summary = "Get all single owned organizations",
+    description = "Returns all organizations owned only by current user",
+  )
   @ResponseStatus(HttpStatus.OK)
   fun getAllSingleOwnedOrganizations(): CollectionModel<SimpleOrganizationModel> {
     val organizations = organizationService.getAllSingleOwnedByUser(authenticationFacade.authenticatedUserEntity)
@@ -134,7 +152,7 @@ class V2UserController(
   }
 
   @PostMapping("/generate-super-token")
-  @Operation(summary = "Generates new JWT token permitted to sensitive operations")
+  @Operation(summary = "Get super JWT", description = "Generates new JWT token permitted to sensitive operations")
   fun getSuperToken(
     @RequestBody @Valid
     req: SuperTokenRequest,

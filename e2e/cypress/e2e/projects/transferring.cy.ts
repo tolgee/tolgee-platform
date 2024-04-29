@@ -5,7 +5,7 @@ import { projectTransferringTestData } from '../../common/apiCalls/testData/test
 import { login } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 
-describe('Projects Basics', () => {
+describe('Projects Transferring', () => {
   beforeEach(() => {
     projectTransferringTestData.clean();
     projectTransferringTestData.generate();
@@ -45,6 +45,7 @@ describe('Projects Basics', () => {
 
 const openTransferDialog = (projectName: string, organization: string) => {
   enterProjectSettings(projectName, organization);
+  gcy('project-settings-menu-advanced').click();
   gcy('project-settings-transfer-button')
     .should('contain', 'Transfer')
     .wait(100)

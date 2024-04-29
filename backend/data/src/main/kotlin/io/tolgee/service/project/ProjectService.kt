@@ -7,8 +7,8 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.dtos.request.project.CreateProjectDTO
-import io.tolgee.dtos.request.project.EditProjectDTO
+import io.tolgee.dtos.request.project.CreateProjectRequest
+import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
@@ -32,6 +32,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationService
@@ -80,6 +81,10 @@ class ProjectService(
   @set:Autowired
   @set:Lazy
   lateinit var languageService: LanguageService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var namespaceService: NamespaceService
 
   @set:Autowired
   @set:Lazy
@@ -145,9 +150,10 @@ class ProjectService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectDTO): Project {
+  fun createProject(dto: CreateProjectRequest): Project {
     val project = Project()
     project.name = dto.name
+    project.icuPlaceholders = dto.icuPlaceholders
 
     project.organizationOwner = organizationService.get(dto.organizationId)
 
@@ -167,13 +173,27 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
   fun editProject(
     id: Long,
-    dto: EditProjectDTO,
+    dto: EditProjectRequest,
   ): Project {
     val project =
       projectRepository.findById(id)
         .orElseThrow { NotFoundException() }!!
     project.name = dto.name
     project.description = dto.description
+    project.icuPlaceholders = dto.icuPlaceholders
+
+    if (project.defaultNamespace != null) {
+      namespaceService.deleteUnusedNamespaces(listOf(project.defaultNamespace!!))
+    }
+
+    if (dto.defaultNamespaceId != null) {
+      var namespace =
+        project.namespaces.find { it.id == dto.defaultNamespaceId }
+          ?: throw BadRequestException(Message.NAMESPACE_NOT_FROM_PROJECT)
+      project.defaultNamespace = namespace
+    } else {
+      project.defaultNamespace = null
+    }
 
     dto.baseLanguageId?.let {
       val language =
@@ -397,7 +417,7 @@ class ProjectService(
   }
 
   private fun getOrAssignBaseLanguage(
-    dto: CreateProjectDTO,
+    dto: CreateProjectRequest,
     createdLanguages: List<Language>,
   ): Language {
     if (dto.baseLanguageTag != null) {

@@ -16,7 +16,6 @@ import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckB
 import { Select } from 'tg.component/common/form/fields/Select';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { redirect } from 'tg.hooks/redirect';
 import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -24,6 +23,9 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
 import { ProjectModel } from 'tg.fixtures/permissions';
+import { useHistory } from 'react-router-dom';
+
+type Scope = components['schemas']['ComputedPermissionModel']['scopes'][number];
 
 interface Value {
   scopes: string[];
@@ -42,12 +44,13 @@ const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));
 
 export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
+  const history = useHistory();
   const onDialogClose = () => {
     if (props.onClose) {
       props.onClose();
       return;
     }
-    redirect(LINKS.USER_API_KEYS);
+    history.push(LINKS.USER_API_KEYS.build());
   };
 
   const { t } = useTranslate();
@@ -94,15 +97,38 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const expirationDateOptions = useExpirationDateOptions();
 
-  const getProject = () => {
-    return projects.data?._embedded?.projects?.[0] || props.project;
+  const getProject = (projectId?: number) => {
+    return (
+      projects.data?._embedded?.projects?.find(
+        (p) => p.id === projectId || projectId === undefined
+      ) || props.project
+    );
   };
 
   const getInitialValues = (project: ProjectModel) => {
+    const projectScoopes = new Set(project.computedPermission.scopes);
+    const preselectedScopes = new Set<Scope>([
+      'keys.view',
+      'keys.create',
+      'keys.edit',
+      'translations.view',
+      'translations.edit',
+      'translations.state-edit',
+      'screenshots.view',
+      'screenshots.upload',
+      'screenshots.delete',
+    ]);
+
+    preselectedScopes.forEach((value) => {
+      if (!projectScoopes.has(value)) {
+        preselectedScopes.delete(value);
+      }
+    });
+
     return {
       projectId: project.id,
       //all scopes checked by default
-      scopes: new Set(project.computedPermission.scopes),
+      scopes: preselectedScopes,
       description: props.initialDescriptionValue || '',
       expiresAt: expirationDateOptions[0].time,
     };
@@ -138,7 +164,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                 validationSchema={Validation.CREATE_API_KEY}
               >
                 {(formikProps: FormikProps<Value>) => {
-                  const project = getProject()!;
+                  const project = getProject(formikProps.values.projectId)!;
 
                   const availableScopes = new Set(
                     project.computedPermission.scopes ?? []
@@ -152,7 +178,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                         new Set(formikProps.values.scopes)
                       )
                     );
-                  }, [formikProps.values.projectId]);
+                  }, [project]);
 
                   return (
                     <>

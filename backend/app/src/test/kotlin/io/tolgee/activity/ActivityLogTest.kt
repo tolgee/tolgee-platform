@@ -13,6 +13,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
@@ -153,6 +154,34 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
     params!!["utm_hello"].assert.isEqualTo("hello")
     params!!["sdkType"].assert.isEqualTo("Unreal")
     params!!["sdkVersion"].assert.isEqualTo("1.0.0")
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `stores namespace as relation when changing translation state`() {
+    val testData = BaseTestData()
+    val key =
+      testData.projectBuilder.addKey {
+        name = "key"
+      }
+    key.setNamespace("ns")
+    val translation =
+      key.addTranslation {
+        language = testData.englishLanguage
+        text = "t"
+        state = TranslationState.REVIEWED
+      }.self
+
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier =
+      { testData.project }
+
+    performProjectAuthPut("/translations/${translation.id}/set-state/TRANSLATED").andIsOk
+    performProjectAuthGet("activity").andAssertThatJson {
+      node("_embedded.activities[0].modifiedEntities.Translation[0].relations.key.relations.namespace.data.name")
+        .isEqualTo("ns")
+    }
   }
 
   private fun JsonAssert.isValidTranslationModifications() {

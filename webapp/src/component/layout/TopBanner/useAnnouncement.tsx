@@ -59,6 +59,16 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_VISUAL_EDITOR':
+        return (
+          <Announcement
+            content={
+              <T keyName="announcement_visual_editor_and_formats_support" />
+            }
+            link="https://tolgee.io/blog/releasing-visual-editor-and-formats-support"
+          />
+        );
+
       default:
         assertUnreachable(value);
     }

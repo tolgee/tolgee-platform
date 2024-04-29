@@ -1,297 +1,5 @@
-import { getDiffVersion } from './activityTools';
 import { T } from '@tolgee/react';
-import {
-  ActivityOptions,
-  ActivityTypeEnum,
-  EntityEnum,
-  EntityOptions,
-  KeyReferenceData,
-  Reference,
-} from './types';
-
-const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {
-  if (relations?.key?.data?.name) {
-    const language = relations.language?.data as any;
-    const key = relations.key;
-    const namespace = key.relations?.namespace?.data?.name as string;
-    return {
-      type: 'key',
-      keyName: key.data.name as unknown as string,
-      namespace,
-      exists: key.exists,
-      id: key.entityId,
-      languages: language ? [language] : [],
-    };
-  }
-  return undefined;
-};
-
-export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
-  Translation: {
-    label(params) {
-      return <T keyName="activity_entity_translation" params={params} />;
-    },
-    description: ['key'],
-    fields: {
-      text: { type: 'text' },
-      state: { type: 'translation_state' },
-      autoTranslation: {
-        type: 'translation_auto',
-        compute: ({ auto, mtProvider }) => mtProvider || auto || undefined,
-      },
-      outdated: { type: 'outdated' },
-    },
-    references: ({ relations }) => {
-      const result: Reference[] = [];
-      const keyRef = getKeyWithLanguages(relations);
-      if (keyRef) {
-        result.push(keyRef);
-      }
-      return result;
-    },
-  },
-  Language: {
-    label(params) {
-      return <T keyName="activity_entity_language" params={params} />;
-    },
-    fields: {
-      tag: {
-        label(params) {
-          return (
-            <T keyName="activity_entity_translation.tag" params={params} />
-          );
-        },
-      },
-      name: {
-        label(params) {
-          return (
-            <T keyName="activity_entity_translation.name" params={params} />
-          );
-        },
-      },
-      flagEmoji: {
-        label(params) {
-          return (
-            <T
-              keyName="activity_entity_translation.flag_emoji"
-              params={params}
-            />
-          );
-        },
-        type: 'language_flag',
-      },
-    },
-    references: ({ modifications, description }) => {
-      const result: Reference[] = [];
-      const newData = getDiffVersion('new', modifications);
-      const data = {
-        ...(Object.values(newData).some(Boolean)
-          ? newData
-          : getDiffVersion('old', modifications)),
-        ...description,
-      };
-      if (data.tag && data.name) {
-        result.push({
-          type: 'language',
-          language: data,
-        });
-      }
-
-      return result;
-    },
-  },
-  Key: {
-    label(params) {
-      return <T keyName="activity_entity_key" params={params} />;
-    },
-    fields: {
-      name: {
-        label(params) {
-          return <T keyName="activity_entity_key.name" params={params} />;
-        },
-      },
-      namespace: {
-        type: 'namespace',
-        label(params) {
-          return <T keyName="activity_entity_key.namespace" params={params} />;
-        },
-      },
-    },
-    references: ({
-      modifications,
-      entityId,
-      exists,
-      description,
-      relations,
-    }) => {
-      const result: Reference[] = [];
-      const newData = getDiffVersion('new', modifications);
-      const data = newData.name
-        ? newData
-        : getDiffVersion('old', modifications);
-      const keyName = data.name || description?.name;
-      const namespace = relations?.namespace?.data?.name;
-      if (keyName) {
-        result.push({
-          type: 'key',
-          exists,
-          id: entityId,
-          keyName: keyName,
-          namespace: namespace as unknown as string,
-        });
-      }
-      return result;
-    },
-  },
-  KeyMeta: {
-    label(params) {
-      return <T keyName="activity_entity_key_meta" params={params} />;
-    },
-    fields: {
-      description: {
-        type: 'text',
-        label(params) {
-          return (
-            <T keyName="activity_entity_key_meta.description" params={params} />
-          );
-        },
-      },
-      tags: {
-        type: 'key_tags',
-        label(params) {
-          return <T keyName="activity_entity_key_meta.tags" params={params} />;
-        },
-      },
-    },
-    references: ({ relations }) => {
-      const result: Reference[] = [];
-      const keyRef = getKeyWithLanguages(relations);
-      if (keyRef) {
-        result.push(keyRef);
-      }
-      return result;
-    },
-  },
-  TranslationComment: {
-    label(params) {
-      return (
-        <T keyName="activity_entity_translation_comment" params={params} />
-      );
-    },
-    description: ['comment'],
-    fields: {
-      text: {
-        type: 'text',
-      },
-      state: {
-        type: 'comment_state',
-      },
-    },
-    references: ({ relations, description }) => {
-      const result: Reference[] = [];
-      // @ts-ignore
-      const translationRelations = relations?.translation?.relations;
-      const keyRef = getKeyWithLanguages(translationRelations);
-      if (keyRef) {
-        result.push(keyRef);
-      }
-      if (description?.text) {
-        result.push({ type: 'comment', text: description.text as any });
-      }
-      return result;
-    },
-  },
-  Screenshot: {
-    label(params) {
-      return <T keyName="activity_entity_screenshot" params={params} />;
-    },
-    fields: {},
-    references: ({ relations }) => {
-      const result: Reference[] = [];
-      const keyRef = getKeyWithLanguages(relations);
-      if (keyRef) {
-        result.push(keyRef);
-      }
-      return result;
-    },
-  },
-  Project: {
-    label(params) {
-      return <T keyName="activity_entity_project" params={params} />;
-    },
-    fields: {
-      name: {
-        label(params) {
-          return <T keyName="activity_entity_project.name" params={params} />;
-        },
-      },
-      baseLanguage: {
-        type: 'project_language',
-        label(params) {
-          return (
-            <T keyName="activity_entity_project.language" params={params} />
-          );
-        },
-      },
-    },
-  },
-  Namespace: {
-    label(params) {
-      return <T keyName="activity_entity_namespace" params={params} />;
-    },
-    fields: {
-      name: {
-        type: 'namespace',
-        label(params) {
-          return <T keyName="activity_entity_namespace.name" params={params} />;
-        },
-      },
-    },
-  },
-  Params: {
-    label() {
-      return <T keyName="activity_entity_params" />;
-    },
-    fields: {
-      sourceLanguageId: {
-        type: 'batch_language_id',
-        label() {
-          return <T keyName="activity_entity_params.source_language_id" />;
-        },
-      },
-      targetLanguageIds: {
-        type: 'batch_language_ids',
-        label() {
-          return <T keyName="activity_entity_params.target_language_ids" />;
-        },
-      },
-      languageIds: {
-        type: 'batch_language_ids',
-        label() {
-          return <T keyName="activity_entity_params.target_language_ids" />;
-        },
-      },
-      state: {
-        type: 'batch_translation_state',
-        label() {
-          return <T keyName="activity_entity_params.state" />;
-        },
-      },
-      tags: {
-        type: 'batch_key_tag_list',
-        label() {
-          return <T keyName="activity_entity_params.tags" />;
-        },
-      },
-      namespace: {
-        type: 'batch_namespace',
-        label() {
-          return <T keyName="activity_entity_params.namespace" />;
-        },
-      },
-    },
-  },
-};
+import { ActivityOptions, ActivityTypeEnum } from './types';
 
 export const actionsConfiguration: Partial<
   Record<ActivityTypeEnum, ActivityOptions>
@@ -440,7 +148,7 @@ export const actionsConfiguration: Partial<
     label(params) {
       return <T keyName="activity_edit_project" params={params} />;
     },
-    entities: { Project: true },
+    entities: { Project: ['name'] },
   },
   NAMESPACE_EDIT: {
     label(params) {
@@ -534,6 +242,84 @@ export const actionsConfiguration: Partial<
       return (
         <T keyName="activity_batch_operation_auto_translate" params={params} />
       );
+    },
+  },
+  CONTENT_DELIVERY_CONFIG_CREATE: {
+    label(params) {
+      return (
+        <T keyName="activity_content_delivery_config_create" params={params} />
+      );
+    },
+    entities: {
+      ContentDeliveryConfig: [],
+    },
+  },
+  CONTENT_DELIVERY_CONFIG_UPDATE: {
+    label(params) {
+      return (
+        <T keyName="activity_content_delivery_config_update" params={params} />
+      );
+    },
+    entities: {
+      ContentDeliveryConfig: [],
+    },
+  },
+  CONTENT_DELIVERY_CONFIG_DELETE: {
+    label(params) {
+      return (
+        <T keyName="activity_content_delivery_config_delete" params={params} />
+      );
+    },
+    entities: {
+      ContentDeliveryConfig: [],
+    },
+  },
+  CONTENT_STORAGE_CREATE: {
+    label(params) {
+      return <T keyName="activity_content_storage_create" params={params} />;
+    },
+    entities: {
+      ContentStorage: [],
+    },
+  },
+  CONTENT_STORAGE_UPDATE: {
+    label(params) {
+      return <T keyName="activity_content_storage_update" params={params} />;
+    },
+    entities: {
+      ContentStorage: [],
+    },
+  },
+  CONTENT_STORAGE_DELETE: {
+    label(params) {
+      return <T keyName="activity_content_storage_delete" params={params} />;
+    },
+    entities: {
+      ContentStorage: [],
+    },
+  },
+  WEBHOOK_CONFIG_CREATE: {
+    label(params) {
+      return <T keyName="activity_webhook_config_create" params={params} />;
+    },
+    entities: {
+      WebhookConfig: [],
+    },
+  },
+  WEBHOOK_CONFIG_UPDATE: {
+    label(params) {
+      return <T keyName="activity_webhook_config_update" params={params} />;
+    },
+    entities: {
+      WebhookConfig: [],
+    },
+  },
+  WEBHOOK_CONFIG_DELETE: {
+    label(params) {
+      return <T keyName="activity_webhook_config_delete" params={params} />;
+    },
+    entities: {
+      WebhookConfig: [],
     },
   },
 };

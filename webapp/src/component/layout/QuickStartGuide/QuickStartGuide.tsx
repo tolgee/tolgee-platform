@@ -43,7 +43,7 @@ const StyledHeader = styled(Box)`
 const StyledArrow = styled(Box)`
   position: absolute;
   top: -10px;
-  right: 170px;
+  right: 87px;
   width: 0;
   height: 0;
   border-left: 10px solid transparent;
@@ -56,7 +56,7 @@ export const QuickStartGuide = () => {
   const projectId = useGlobalContext((c) => c.quickStartGuide.lastProjectId);
   const completed = useGlobalContext((c) => c.quickStartGuide.completed);
   const { setQuickStartOpen } = useGlobalActions();
-  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
+  const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
   const allCompleted = useMemo(
     () => items.every((i) => completed.includes(i.step)),
     [completed, items]

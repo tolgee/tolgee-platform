@@ -7,7 +7,9 @@ package io.tolgee.component.fileStorage
 import io.tolgee.exceptions.FileStoreException
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier
 import java.io.ByteArrayInputStream
 
 open class S3FileStorage(
@@ -53,6 +55,34 @@ open class S3FileStorage(
       true
     } catch (e: NoSuchKeyException) {
       false
+    }
+  }
+
+  override fun pruneDirectory(path: String) {
+    try {
+      // Add trailing slash if not exists
+      val adjustedPath = if (path.endsWith("/")) path else "$path/"
+
+      val objectsToDelete =
+        s3.listObjectsV2 { it.bucket(bucketName).prefix(adjustedPath) }
+          .contents()
+          .map { it.key() }
+          .toSet()
+          .map { ObjectIdentifier.builder().key(it).build() }
+
+      if (objectsToDelete.isNotEmpty()) {
+        val deleteObjectsRequest =
+          DeleteObjectsRequest.builder()
+            .bucket(bucketName)
+            .delete {
+              it.objects(objectsToDelete)
+            }
+            .build()
+
+        s3.deleteObjects(deleteObjectsRequest)
+      }
+    } catch (e: Exception) {
+      throw FileStoreException("Can not prune directory in s3 bucket!", path, e)
     }
   }
 }

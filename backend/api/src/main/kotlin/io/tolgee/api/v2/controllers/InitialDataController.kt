@@ -7,6 +7,7 @@ import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.hateoas.InitialDataModel
 import io.tolgee.hateoas.ee.IEeSubscriptionModelAssembler
 import io.tolgee.notifications.UserNotificationService
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController
   ],
 )
 @Tag(name = "Initial data")
+@OpenApiHideFromPublicDocs
 class InitialDataController(
   private val configurationController: ConfigurationController,
   private val authenticationFacade: AuthenticationFacade,
@@ -34,7 +36,7 @@ class InitialDataController(
   private val userNotificationService: UserNotificationService,
 ) : IController {
   @GetMapping(value = [""])
-  @Operation(description = "Returns initial data always required by frontend")
+  @Operation(summary = "Get initial data", description = "Returns initial data required by the UI to load")
   fun get(): InitialDataModel {
     val data =
       InitialDataModel(

@@ -11,7 +11,7 @@ export const ReleaseKeyButton = () => {
     url: '/v2/ee-license/release-license-key',
     method: 'put',
     invalidatePrefix: '/v2/ee-license',
-    options: { onSuccess: refetchInitialData },
+    options: { onSuccess: () => refetchInitialData() },
   });
 
   function onClick() {

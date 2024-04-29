@@ -1,13 +1,13 @@
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { IconButton, Portal, styled, Tooltip, useTheme } from '@mui/material';
+import { IconButton, Portal, styled, Tooltip } from '@mui/material';
 import { KeyboardArrowUp } from '@mui/icons-material';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
-import { TranslationsShortcuts } from './TranslationsShortcuts';
 import { BatchOperations } from './BatchOperations/BatchOperations';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
   z-index: ${({ theme }) => theme.zIndex.drawer};
@@ -16,7 +16,7 @@ const StyledContainer = styled('div')`
   align-items: stretch;
   justify-content: space-between;
   bottom: 0px;
-  left: 44px;
+  padding-left: 44px;
   pointer-events: none;
 `;
 
@@ -75,15 +75,10 @@ const StyledStretcher = styled('div')`
   overflow: hidden;
 `;
 
-type Props = {
-  width: number;
-};
-
-export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
+export const TranslationsToolbar: React.FC = () => {
   const [index, setIndex] = useState(1);
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [selectionOpen, setSelectionOpen] = useState(false);
-  const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const { t } = useTranslate();
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
@@ -133,19 +128,20 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
 
   const counterContent = `${index} / ${totalCount}`;
 
-  return width ? (
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
+
+  return (
     <Portal>
       <StyledContainer
-        style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
+        style={{ width: `calc(100vw - ${rightPanelWidth}px)` }}
       >
         <StyledShortcutsContainer>
           <BatchOperations
             open={selectionOpen}
             onClose={() => setIsMouseOver(false)}
           />
-          {!selectionOpen && <TranslationsShortcuts />}
         </StyledShortcutsContainer>
         <StyledCounterContainer
           className={clsx({
@@ -171,5 +167,5 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
         </StyledCounterContainer>
       </StyledContainer>
     </Portal>
-  ) : null;
+  );
 };

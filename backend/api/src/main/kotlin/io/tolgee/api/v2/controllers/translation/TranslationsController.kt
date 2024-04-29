@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
-import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
@@ -19,7 +18,6 @@ import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectTranslationLastModifiedManager
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
-import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
@@ -30,19 +28,17 @@ import io.tolgee.hateoas.translations.TranslationHistoryModel
 import io.tolgee.hateoas.translations.TranslationHistoryModelAssembler
 import io.tolgee.hateoas.translations.TranslationModel
 import io.tolgee.hateoas.translations.TranslationModelAssembler
-import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.LanguageService
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
@@ -50,6 +46,7 @@ import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.beans.propertyeditors.CustomCollectionEditor
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -88,10 +85,10 @@ import java.util.concurrent.TimeUnit
     Tag(name = "Translations", description = "Operations related to translations in project"),
   ],
 )
+@OpenApiOrderExtension(4)
 class TranslationsController(
   private val projectHolder: ProjectHolder,
   private val translationService: TranslationService,
-  private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
   private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
   private val historyModelAssembler: TranslationHistoryModelAssembler,
@@ -100,13 +97,14 @@ class TranslationsController(
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
   private val screenshotService: ScreenshotService,
-  private val activityHolder: ActivityHolder,
   private val activityService: ActivityService,
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
+  private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
-    summary = "Returns all translations for specified languages",
+    summary = "Get all translations",
+    description = "Returns all translations for specified languages",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -125,6 +123,7 @@ class TranslationsController(
   )
   @UseDefaultPermissions // Security: check performed in the handler
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
   fun getAllTranslations(
     @Parameter(
       description =
@@ -175,54 +174,37 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("")
-  @Operation(summary = "Sets translations for existing key")
+  @Operation(summary = "Update translations for existing key", description = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
+  @OpenApiOrderExtension(2)
   fun setTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
-    securityService.checkLanguageTranslatePermissionsByTag(dto.translations.keys, projectHolder.project.id)
-
-    val modifiedTranslations = translationService.setForKey(key, dto.translations)
-
-    val translations =
-      dto.languagesToReturn
-        ?.let { languagesToReturn ->
-          translationService.findForKeyByLanguages(key, languagesToReturn)
-            .associateBy { it.language.tag }
-        }
-        ?: modifiedTranslations
-
-    return getSetTranslationsResponse(key, translations)
+    return createOrUpdateTranslationsFacade.setTranslations(dto)
   }
 
   @PostMapping("")
-  @Operation(summary = "Sets translations for existing or not existing key.")
+  @Operation(
+    summary = "Create key or update translations",
+    description = "Sets translations for existing key or creates new key and sets the translations to it.",
+  )
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @Transactional
+  @OpenApiOrderExtension(3)
   fun createOrUpdateTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    val key =
-      keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
-        activityHolder.activity = ActivityType.SET_TRANSLATIONS
-      } ?: let {
-        checkKeyEditScope()
-        activityHolder.activity = ActivityType.CREATE_KEY
-        keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
-      }
-    val translations = translationService.setForKey(key, dto.translations)
-    return getSetTranslationsResponse(key, translations)
+    return createOrUpdateTranslationsFacade.createOrUpdateTranslations(dto)
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
-  @Operation(summary = "Sets translation state")
+  @Operation(summary = "Set translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
@@ -246,10 +228,11 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = [""])
-  @Operation(summary = "Returns translations in project")
-  @UseDefaultPermissions // Security: check done internally
+  @Operation(summary = "Get translations in project")
+  @RequiresProjectPermissions(scopes = [Scope.KEYS_VIEW]) // Security: check done internally
   @AllowApiAccess
   @Transactional
+  @OpenApiOrderExtension(5)
   fun getTranslations(
     @ParameterObject
     @ModelAttribute("translationFilters")
@@ -269,43 +252,26 @@ When null, resulting file will be a flat key-value object.
       translationService
         .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
-    val keysWithScreenshots = getScreenshots(data.map { it.keyId }.toList())
-
-    if (keysWithScreenshots != null) {
-      data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
-    }
+    addScreenshotsToResponse(data)
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
   }
 
-  @GetMapping(value = ["select-all"])
-  @Operation(summary = "Get select all keys")
-  @RequiresProjectPermissions([Scope.KEYS_VIEW])
-  @AllowApiAccess
-  fun getSelectAllKeyIds(
-    @ParameterObject
-    @ModelAttribute("translationFilters")
-    params: TranslationFilters,
-  ): SelectAllResponse {
-    val languages =
-      languageService.getLanguagesForTranslationsView(
-        params.languages,
-        projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
-      )
+  private fun addScreenshotsToResponse(data: Page<KeyWithTranslationsView>) {
+    val canViewScreenshots = securityService.currentPermittedScopesContain(Scope.SCREENSHOTS_VIEW)
 
-    return SelectAllResponse(
-      translationService.getSelectAllKeys(
-        projectId = projectHolder.project.id,
-        params = params,
-        languages = languages,
-      ),
-    )
+    if (!canViewScreenshots) {
+      return
+    }
+
+    val keysWithScreenshots = screenshotService.getScreenshotsForKeys(data.map { it.keyId }.content)
+
+    data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
-  @Operation(summary = """Removes "auto translated" indication""")
+  @Operation(summary = "Dismiss auto-translated", description = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
@@ -320,7 +286,12 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
-  @Operation(summary = """Set's "outdated" indication""")
+  @Operation(
+    summary = "Set outdated value",
+    description =
+      """Set's "outdated" flag indicating the base translation """ +
+        """was changed without updating current translation.""",
+  )
   @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
@@ -336,9 +307,8 @@ When null, resulting file will be a flat key-value object.
 
   @GetMapping(value = ["/{translationId:[0-9]+}/history"])
   @Operation(
-    summary = """Returns history of specific translation. 
-
-Sorting is not supported for supported. It is automatically sorted from newest to oldest.""",
+    summary = """Get translation history""",
+    description = """Sorting is not supported for supported. It is automatically sorted from newest to oldest.""",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
@@ -353,38 +323,6 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(translation.language.id))
     val translations = activityService.getTranslationHistory(translation.id, pageable)
     return historyPagedAssembler.toModel(translations, historyModelAssembler)
-  }
-
-  private fun getScreenshots(keyIds: Collection<Long>): Map<Long, List<Screenshot>>? {
-    if (
-      !authenticationFacade.isProjectApiKeyAuth ||
-      authenticationFacade.projectApiKey.scopes.contains(Scope.SCREENSHOTS_VIEW)
-    ) {
-      return screenshotService.getScreenshotsForKeys(keyIds)
-    }
-    return null
-  }
-
-  private fun getSetTranslationsResponse(
-    key: Key,
-    translations: Map<String, Translation>,
-  ): SetTranslationsResponseModel {
-    return SetTranslationsResponseModel(
-      keyId = key.id,
-      keyName = key.name,
-      keyNamespace = key.namespace?.name,
-      translations =
-        translations.entries.associate { (languageTag, translation) ->
-          languageTag to translationModelAssembler.toModel(translation)
-        },
-    )
-  }
-
-  private fun checkKeyEditScope() {
-    securityService.checkProjectPermission(
-      projectHolder.project.id,
-      Scope.KEYS_EDIT,
-    )
   }
 
   private fun getSafeSortPageable(pageable: Pageable): Pageable {

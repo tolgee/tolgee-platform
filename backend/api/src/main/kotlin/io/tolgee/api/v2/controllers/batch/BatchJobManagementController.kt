@@ -15,6 +15,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -33,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/", "/v2/projects/"])
-@Tag(name = "Batch Operations management")
+@Tag(name = "Batch Operations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class BatchJobManagementController(
   private val batchJobCancellationManager: BatchJobCancellationManager,
@@ -45,7 +46,7 @@ class BatchJobManagementController(
   private val securityService: SecurityService,
 ) {
   @GetMapping(value = ["batch-jobs"])
-  @Operation(summary = "Lists all batch operations in project")
+  @Operation(summary = "List batch operations")
   @RequiresProjectPermissions([ Scope.BATCH_JOBS_VIEW ])
   @AllowApiAccess
   fun list(
@@ -59,7 +60,7 @@ class BatchJobManagementController(
   }
 
   @GetMapping(value = ["my-batch-jobs"])
-  @Operation(summary = "Lists all batch operations in project started by current user")
+  @Operation(summary = "List user batch operations", description = "List all batch operations started by current user")
   @UseDefaultPermissions
   @AllowApiAccess
   fun myList(
@@ -79,9 +80,10 @@ class BatchJobManagementController(
 
   @GetMapping(value = ["current-batch-jobs"])
   @Operation(
-    summary = "Returns all running and pending batch operations",
+    summary = "Get all running and pending batch operations",
     description =
-      "Completed batch operations are returned only if they are not older than 1 hour. " +
+      "Returns all running and pending batch operations. " +
+        "Completed batch operations are returned only if they are not older than 1 hour. " +
         "If user doesn't have permission to view all batch operations, only their operations are returned.",
   )
   @UseDefaultPermissions
@@ -95,7 +97,7 @@ class BatchJobManagementController(
   }
 
   @GetMapping(value = ["batch-jobs/{id}"])
-  @Operation(summary = "Returns batch operation")
+  @Operation(summary = "Get batch operation")
   @UseDefaultPermissions // Security: permission checked internally
   @AllowApiAccess
   fun get(
@@ -107,7 +109,8 @@ class BatchJobManagementController(
   }
 
   @PutMapping(value = ["batch-jobs/{id}/cancel"])
-  @Operation(summary = "Stops batch operation (if possible)")
+  @Operation(summary = "Stop batch operation", description = "Stops batch operation if possible.")
+  @RateLimited(limit = 10, refillDurationInMs = 300_000, pathVariablesToDiscriminate = 0)
   @UseDefaultPermissions // Security: permission checked internally
   @AllowApiAccess
   fun cancel(

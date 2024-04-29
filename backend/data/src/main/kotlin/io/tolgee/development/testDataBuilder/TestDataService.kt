@@ -219,6 +219,14 @@ class TestDataService(
     saveContentDeliveryConfigs(builder)
     saveWebhookConfigs(builder)
     saveAutomations(builder)
+    saveImportSettings(builder)
+  }
+
+  private fun saveImportSettings(builder: ProjectBuilder) {
+    builder.data.importSettings?.let {
+      entityManager.merge(it.userAccount)
+      entityManager.persist(it)
+    }
   }
 
   private fun saveWebhookConfigs(builder: ProjectBuilder) {
@@ -230,7 +238,7 @@ class TestDataService(
   private fun saveContentDeliveryConfigs(builder: ProjectBuilder) {
     builder.data.contentDeliveryConfigs.forEach {
       if (it.self.slug.isEmpty()) {
-        it.self.slug = contentDeliveryConfigService.generateSlug(it.projectBuilder.self.id)
+        it.self.slug = contentDeliveryConfigService.generateSlug()
       }
       entityManager.persist(it.self)
     }

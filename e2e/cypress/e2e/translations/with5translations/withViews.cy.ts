@@ -47,7 +47,7 @@ describe('Views with 5 Translations', () => {
         editCell('Studený přeložený text 1');
         getCellInsertBaseButton().click();
 
-        cy.get('.CodeMirror')
+        cy.gcy('global-editor')
           .first()
           .contains('Cool translated text 1')
           .should('be.visible');

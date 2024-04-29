@@ -2,6 +2,7 @@ package io.tolgee.hateoas.project
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.Avatar
+import io.tolgee.hateoas.key.namespace.NamespaceModel
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.permission.ComputedPermissionModel
@@ -20,8 +21,11 @@ open class ProjectModel(
   val avatar: Avatar?,
   val organizationOwner: SimpleOrganizationModel?,
   val baseLanguage: LanguageModel?,
+  val defaultNamespace: NamespaceModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")
   val directPermission: PermissionModel?,
   val computedPermission: ComputedPermissionModel,
+  @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
+  var icuPlaceholders: Boolean,
 ) : RepresentationModel<ProjectModel>()

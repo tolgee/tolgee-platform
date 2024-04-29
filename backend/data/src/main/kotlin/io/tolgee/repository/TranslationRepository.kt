@@ -73,6 +73,20 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getAllByKeyIdIn(keyIds: Collection<Long>): Collection<Translation>
 
   @Query(
+    """from Translation t 
+    join fetch t.key k 
+    left join fetch k.keyMeta 
+    left join fetch t.comments
+    where t.key.id in :keyIds
+    and (:excludeTranslationIds is null or t.id not in :excludeTranslationIds)
+    """,
+  )
+  fun getAllByKeyIdInExcluding(
+    keyIds: Collection<Long>,
+    excludeTranslationIds: List<Long>? = null,
+  ): Collection<Translation>
+
+  @Query(
     """select t.id from Translation t where t.key.id in 
         (select k.id from t.key k where k.project.id = :projectId)""",
   )
@@ -100,12 +114,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
             target.text is not null
       where baseTranslation.language.id = p.baseLanguage.id and
         cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
-        (:key is null or key <> :key)
+        (:key is null or key <> :key) and target.key.isPlural = :isPlural
       order by similarity desc
       """,
   )
   fun getTranslateMemorySuggestions(
     baseTranslationText: String,
+    isPlural: Boolean,
     key: Key? = null,
     targetLanguageId: Long,
     pageable: Pageable,
@@ -210,4 +225,14 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     key: Key,
     languageTags: Collection<String>,
   ): List<Translation>
+
+  @Query(
+    """
+    from Translation t where t.key.project.id = :projectId and t.id = :translationId
+  """,
+  )
+  fun find(
+    projectId: Long,
+    translationId: Long,
+  ): Translation?
 }

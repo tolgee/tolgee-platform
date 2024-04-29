@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { useHistory } from 'react-router-dom';
@@ -19,7 +19,8 @@ import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
-export type CreateProjectValueType = components['schemas']['CreateProjectDTO'];
+export type CreateProjectValueType =
+  components['schemas']['CreateProjectRequest'];
 
 export const ProjectCreateView: FunctionComponent = () => {
   const history = useHistory();
@@ -71,8 +72,9 @@ export const ProjectCreateView: FunctionComponent = () => {
     languages: [
       { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
     ],
-    organizationId: preferredOrganization.id,
+    organizationId: preferredOrganization?.id || 0,
     baseLanguageTag: 'en',
+    icuPlaceholders: true,
   };
 
   return (
@@ -90,19 +92,19 @@ export const ProjectCreateView: FunctionComponent = () => {
       >
         {(props: FormikProps<CreateProjectValueType>) => {
           return (
-            <Box mb={8}>
-              <Grid container spacing={2}>
-                <Grid item lg md sm xs={12}>
-                  <TextField
-                    variant="standard"
-                    autoFocus
-                    data-cy="project-name-field"
-                    label={<T keyName="create_project_name_label" />}
-                    name="name"
-                    required={true}
-                  />
-                </Grid>
-              </Grid>
+            <Box>
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="h6">
+                  <T keyName="create_project_name_label" />
+                </Typography>
+                <TextField
+                  size="small"
+                  autoFocus
+                  data-cy="project-name-field"
+                  name="name"
+                  required={true}
+                />
+              </Box>
               <Box mb={2}>
                 <Typography variant="h6">
                   <T keyName="project_create_languages_title" />

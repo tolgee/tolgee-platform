@@ -1,23 +1,18 @@
 import { ReactNode } from 'react';
 import { VariantType } from 'notistack';
 
-import { messageActions, MessageActions } from '../store/global/MessageActions';
-import { Message } from '../store/global/types';
+import { globalContext } from 'tg.globalContext/globalActions';
 
-export class MessageService {
-  constructor(private actions: MessageActions) {}
-
+export const messageService = {
   yell(message: ReactNode | string, variant: VariantType) {
-    this.actions.showMessage.dispatch(new Message(message, variant));
-  }
+    globalContext.actions?.showMessage({ text: message, variant });
+  },
 
   success(message: ReactNode) {
     this.yell(message, 'success');
-  }
+  },
 
   error(message: ReactNode) {
     this.yell(message, 'error');
-  }
-}
-
-export const messageService = new MessageService(messageActions);
+  },
+};

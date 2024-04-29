@@ -51,8 +51,6 @@ tolgee.run().then(() => {
 
 ```javascript
 tolgee.on('update', () => {
-  tolgee.t('tolgee_example_title', { noWrap: true }).then((translation) => {
-    document.title = translation; // change the document title when language changes!
-  });
+  document.title = tolgee.t('tolgee_example_title', { noWrap: true });
 });
 ```

@@ -1,0 +1,17 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Tolgee 1.0.1\n"
+"Report-Msgid-Bugs-To: info@tolgee.io \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "hello"
+msgstr "Hi %d {icuParam}"
+
+msgid "%d page read."
+msgid_plural "%d pages read."
+msgstr[0] "Hallo %d {icuParam}"
+msgstr[1] "Hallo %d {icuParam}"

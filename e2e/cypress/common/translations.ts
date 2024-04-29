@@ -7,7 +7,7 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
-import { assertMessage, dismissMenu } from './shared';
+import { assertMessage, dismissMenu, gcyAdvanced } from './shared';
 import Chainable = Cypress.Chainable;
 import { selectNamespace } from './namespace';
 
@@ -27,12 +27,23 @@ export const getCell = (value: string) => {
   return cy.gcy('translations-table-cell').contains(value);
 };
 
+export const getTranslationCell = (key: string, language: string) => {
+  return gcyAdvanced({ value: 'translations-table-cell', key, language });
+};
+
+export const getPluralEditor = (variant: string) => {
+  return gcyAdvanced({ value: 'translation-editor', variant }).find(
+    '[contenteditable]'
+  );
+};
+
 type Props = {
   key: string;
-  translation?: string;
+  translation?: string | Record<string, string>;
   tag?: string;
   namespace?: string;
   description?: string;
+  variableName?: string;
 };
 
 export function createTranslation({
@@ -41,6 +52,7 @@ export function createTranslation({
   tag,
   namespace,
   description,
+  variableName,
 }: Props) {
   waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
@@ -55,8 +67,19 @@ export function createTranslation({
     cy.gcy('translations-tag-input').type(tag);
     cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
   }
-  if (translation) {
-    cy.gcy('translation-create-translation-input').first().type(translation);
+  if (typeof translation === 'string') {
+    cy.gcy('translation-editor').first().type(translation);
+  } else if (typeof translation === 'object') {
+    cy.gcy('key-plural-checkbox').click();
+    if (variableName) {
+      cy.gcy('key-plural-checkbox-expand').click();
+      cy.gcy('key-plural-variable-name').type(variableName);
+    }
+    Object.entries(translation).forEach(([key, value]) => {
+      gcyAdvanced({ value: 'translation-editor', variant: key })
+        .find('[contenteditable]')
+        .type(value);
+    });
   }
 
   cy.gcy('global-form-save-button').click();
@@ -70,7 +93,9 @@ export function selectLangsInLocalstorage(projectId: number, langs: string[]) {
   );
 }
 
-export function translationsBeforeEach(): Chainable<ProjectDTO> {
+export function translationsBeforeEach(
+  languages?: string[]
+): Chainable<ProjectDTO> {
   return login().then(() => {
     return createProject({
       name: 'Test',
@@ -88,7 +113,7 @@ export function translationsBeforeEach(): Chainable<ProjectDTO> {
       ],
     }).then((r) => {
       const project = r.body as ProjectDTO;
-      selectLangsInLocalstorage(project.id, ['en']);
+      selectLangsInLocalstorage(project.id, languages ?? ['en']);
       return visitTranslations(project.id).then(() => project);
     });
   });
@@ -108,12 +133,11 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   if (newValue !== undefined) {
     // select all, delete and type new text
-    cy.get('.CodeMirror')
+    cy.gcy('global-editor')
       .first()
-      .then((editor) => {
-        // @ts-ignore
-        editor[0].CodeMirror.setValue(newValue);
-      });
+      .find('[contenteditable]')
+      .clear()
+      .type(newValue);
 
     if (save) {
       getCellSaveButton().click();

@@ -17,8 +17,9 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
     const [topNamespace, setTopNamespace] = useState<
       NsBannerRecord | undefined
     >(undefined);
-    const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
-    const [topBarHeight, setTopBarHeight] = useState(0);
+    const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+    const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
+    const [floatingBannerHeight, setFloatingBannerHeight] = useState(0);
 
     const nsElements = useRef<Record<number, HTMLElement | undefined>>({});
 
@@ -50,7 +51,9 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
         const advance = !isFirst ? 5 : 0;
         const top = el.getBoundingClientRect()!.top;
         // check exact location
-        return top > topBarHeight + topBannerHeight + advance;
+        return (
+          top > floatingBannerHeight + topBannerHeight + topBarHeight + advance
+        );
       }
 
       // take first banner that is after `start`
@@ -72,7 +75,13 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
 
     useEffect(() => {
       calculateTopNamespace();
-    }, [reactList, topBarHeight, topBannerHeight, nsElements, translations]);
+    }, [
+      reactList,
+      floatingBannerHeight,
+      topBannerHeight,
+      nsElements,
+      translations,
+    ]);
 
     useEffect(() => {
       window.addEventListener('scroll', calculateTopNamespace, {
@@ -92,13 +101,14 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
         nsElements.current[index] = el;
         calculateTopNamespace();
       },
-      setTopBarHeight(height: number) {
-        setTopBarHeight(height);
+      setFloatingBannerHeight(height: number) {
+        setFloatingBannerHeight(height);
       },
     };
 
     const contextData = {
       topNamespace,
+      floatingBannerHeight,
     };
 
     return [contextData, actions];

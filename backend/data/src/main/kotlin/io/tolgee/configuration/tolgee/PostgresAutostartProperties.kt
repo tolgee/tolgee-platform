@@ -34,6 +34,9 @@ class PostgresAutostartProperties {
   @DocProperty(description = "The name of the database created to store Tolgee data.")
   var databaseName: String = "postgres"
 
+  @DocProperty(description = "The max time to wait for running postgres in seconds.")
+  var maxWaitTime: Long = 300
+
   @DocProperty(
     description =
       "The port of Postgres to listen on host machine.\n" +
@@ -63,7 +66,7 @@ class PostgresAutostartProperties {
 
   @DocProperty(
     description =
-      "When true, Tolgee will stop the Postgres container on Tolgee shutdown." +
+      "When true, Tolgee will stop the Postgres container on Tolgee shutdown. " +
         "This setting is applicable only for `DOCKER` mode.",
   )
   var stop: Boolean = true

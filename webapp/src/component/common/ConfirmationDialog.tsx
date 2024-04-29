@@ -41,6 +41,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
       onClose={props.onCancel}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
+      data-cy="global-confirmation-dialog"
     >
       <DialogTitle id="alert-dialog-title">{props.title}</DialogTitle>
       <form

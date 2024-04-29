@@ -15,6 +15,7 @@ import { getBatchLanguageIdChange } from './types/getBatchLanguageIdChange';
 import { getBatchKeyTagListChange } from './types/getBatchKeyTagListChange';
 import { getBatchNamespaceChange } from './types/getBatchNamespaceChange';
 import { getBatchStateChange } from './types/getBatchStateChange';
+import { getDefaultNamespaceChange } from './types/getDefaultNamespaceChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -60,7 +61,27 @@ export const formatDiff = ({
       return getBatchNamespaceChange(value);
     case 'batch_translation_state':
       return getBatchStateChange(value);
+    case 'default_namespace':
+      return getDefaultNamespaceChange(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }
 };
+
+export function valueToText(value: any) {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    value === null ||
+    value === undefined
+  ) {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+}

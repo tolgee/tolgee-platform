@@ -1,8 +1,10 @@
 package io.tolgee.automation
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Caches
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
+import io.tolgee.dtos.cacheable.automations.AutomationDto
 import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.testing.ContextRecreatingTest
@@ -49,46 +51,51 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `caches the automation`() {
     val zeroInvocations = getEntityManagerInvocationsCount()
-    doGetAutomations()
+    getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
 
     // first time - not cached
     val invocations = getEntityManagerInvocationsCount()
     zeroInvocations.assert.isLessThan(invocations)
 
     // second time cached
-    doGetAutomations()
+    getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
     val secondInvocations = getEntityManagerInvocationsCount()
     secondInvocations.assert.isEqualTo(invocations)
-    getFromCache().assert.isNotNull
+    getFromCache(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION).assert.isNotNull
   }
-
-  private fun getFromCache(): Cache.ValueWrapper? =
-    cacheManager.getCache(Caches.AUTOMATIONS)!!.get(
-      listOf(
-        testData.projectBuilder.self.id,
-        AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
-        null,
-      ),
-    )
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `save clears the cache`() {
-    doGetAutomations()
-    getFromCache().assert.isNotNull
+    getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
+    getFromCache(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION).assert.isNotNull
     executeInNewTransaction {
       automationService.save(automationService.get(testData.automation.self.id))
     }
-    getFromCache().assert.isNull()
+    getFromCache(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION).assert.isNull()
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `delete clears the cache`() {
-    doGetAutomations()
-    getFromCache().assert.isNotNull
+    getAutomations(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION, null)
+    getFromCache(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION).assert.isNotNull
     automationService.delete(testData.automation.self.id)
-    getFromCache().assert.isNull()
+    getFromCache(AutomationTriggerType.TRANSLATION_DATA_MODIFICATION).assert.isNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `correctly caches when when request for null activity type`() {
+    getAutomations(
+      AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
+      ActivityType.BATCH_TAG_KEYS,
+    ).assert.isNotEmpty
+    automationService.delete(testData.automation.self.id)
+    getAutomations(
+      AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
+      ActivityType.BATCH_TAG_KEYS,
+    ).assert.isEmpty()
   }
 
   private fun getEntityManagerInvocationsCount() =
@@ -97,11 +104,26 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
         it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
       }
 
-  private fun doGetAutomations() {
-    automationService.getProjectAutomations(
+  private fun getAutomations(
+    automationTriggerType: AutomationTriggerType,
+    activityType: ActivityType?,
+  ): List<AutomationDto> {
+    return automationService.getProjectAutomations(
       testData.projectBuilder.self.id,
-      AutomationTriggerType.TRANSLATION_DATA_MODIFICATION,
-      null,
+      automationTriggerType,
+      activityType,
     )
   }
+
+  private fun getFromCache(
+    automationTriggerType: AutomationTriggerType,
+    activityType: ActivityType? = null,
+  ): Cache.ValueWrapper? =
+    cacheManager.getCache(Caches.AUTOMATIONS)!!.get(
+      arrayListOf(
+        testData.projectBuilder.self.id,
+        automationTriggerType,
+        activityType,
+      ),
+    )
 }

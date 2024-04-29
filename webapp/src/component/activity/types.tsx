@@ -42,12 +42,16 @@ export type EntityEnum =
   | 'Screenshot'
   | 'Project'
   | 'Namespace'
-  | 'Params';
+  | 'Params'
+  | 'ContentDeliveryConfig'
+  | 'WebhookConfig'
+  | 'ContentStorage';
 
 export type FieldTypeEnum =
   | 'text'
   | 'translation_state'
   | 'translation_auto'
+  | 'default_namespace'
   | 'comment_state'
   | 'key_tags'
   | 'language_flag'
@@ -59,7 +63,9 @@ export type FieldTypeEnum =
   | 'batch_key_tag_list'
   | 'batch_namespace'
   | 'batch_translation_state'
-  | 'batch_boolean';
+  | 'batch_boolean'
+  | 'state_array'
+  | 'language_tags';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;
@@ -94,12 +100,32 @@ export type CommentReferenceData = {
   text: string;
 };
 
+export type ContentDeliveryConfigReferenceData = {
+  type: 'content_delivery_config';
+  name: string;
+};
+
+export type ContentStorageReferenceData = {
+  type: 'content_storage';
+  name: string;
+};
+
+export type WebhookConfigReferenceData = {
+  type: 'webhook_config';
+  url: string;
+};
+
 export type Reference =
   | KeyReferenceData
   | LanguageReferenceData
-  | CommentReferenceData;
+  | CommentReferenceData
+  | ContentDeliveryConfigReferenceData
+  | ContentStorageReferenceData
+  | WebhookConfigReferenceData;
 
-export type ReferenceBuilder = (data: ModifiedEntityModel) => Reference[];
+export type ReferenceBuilder = (
+  data: ModifiedEntityModel
+) => Reference[] | undefined;
 
 export type Field = {
   name: string;

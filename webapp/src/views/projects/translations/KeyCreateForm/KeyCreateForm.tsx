@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { T } from '@tolgee/react';
+import { T, TFnType, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
-import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
@@ -13,20 +12,23 @@ import { FormBody } from './FormBody';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useTranslationsWebsocketBlocker } from '../context/useTranslationsWebsocketBlocker';
 import { messageService } from 'tg.service/MessageService';
-import { redirectionActions } from 'tg.store/global/RedirectionActions';
+import { TolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { useHistory } from 'react-router-dom';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
-type LanguageModel = components['schemas']['LanguageModel'];
 
 export type ValuesCreateType = {
   name: string;
-  translations: Record<string, string>;
+  baseValue: TolgeeFormat;
   tags: string[];
   description: string | undefined;
+  isPlural: boolean;
+  pluralParameter: string;
 };
 
 type Props = {
-  languages: LanguageModel[];
+  baseLanguage: string;
   onSuccess?: (data: KeyWithDataModel) => void;
   onCancel?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
@@ -34,18 +36,20 @@ type Props = {
 };
 
 export const KeyCreateForm: React.FC<Props> = ({
-  languages,
+  baseLanguage,
   onSuccess,
   onCancel,
   onDirtyChange,
   autofocus,
 }) => {
+  const { t } = useTranslate();
   const project = useProject();
   const permissions = useProjectPermissions();
   const { refetchUsage } = useGlobalActions();
+  const history = useHistory();
 
   const keyName = useUrlSearch().key as string;
-  const namespace = useUrlSearch().ns as string;
+  const namespace = project.defaultNamespace?.name;
 
   const createKey = useApiMutation({
     url: '/v2/projects/{projectId}/keys/create',
@@ -55,10 +59,27 @@ export const KeyCreateForm: React.FC<Props> = ({
   useTranslationsWebsocketBlocker(createKey.isLoading);
 
   const handleSubmit = (values: ValuesCreateType) => {
+    const actualParameter = values.isPlural
+      ? values.pluralParameter || 'value'
+      : undefined;
     return createKey.mutateAsync(
       {
         path: { projectId: project.id },
-        content: { 'application/json': values },
+        content: {
+          'application/json': {
+            ...values,
+            isPlural: Boolean(values.isPlural),
+            translations: {
+              [baseLanguage]: tolgeeFormatGenerateIcu(
+                {
+                  ...values.baseValue,
+                  parameter: actualParameter,
+                },
+                !project.icuPlaceholders
+              ),
+            },
+          },
+        },
       },
       {
         onSuccess(data) {
@@ -70,15 +91,14 @@ export const KeyCreateForm: React.FC<Props> = ({
     );
   };
 
-  const translationValues = {};
-  languages.forEach(({ tag }) => {
-    translationValues[tag] = '';
-  });
+  const baseValue: TolgeeFormat = {
+    variants: { other: '' },
+  };
 
   const canCreateKeys = permissions.satisfiesPermission('keys.create');
   useEffect(() => {
     if (!canCreateKeys) {
-      redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
+      history.push(LINKS.AFTER_LOGIN.build());
       messageService.error(
         <T keyName="translation_single_no_permission_create" />
       );
@@ -89,27 +109,21 @@ export const KeyCreateForm: React.FC<Props> = ({
     <Formik
       initialValues={{
         name: keyName,
-        translations: translationValues,
+        baseValue,
         tags: [],
         description: '',
         namespace,
+        isPlural: false,
+        pluralParameter: 'value',
       }}
       onSubmit={handleSubmit}
-      validationSchema={Yup.object().shape({
-        name: Yup.string().required(),
-      })}
+      validationSchema={Validation.NEW_KEY_FORM(t as TFnType)}
     >
       {(formik) => {
         useEffect(() => {
           onDirtyChange?.(formik.dirty);
         }, [formik.dirty]);
-        return (
-          <FormBody
-            languages={languages}
-            onCancel={onCancel}
-            autofocus={autofocus}
-          />
-        );
+        return <FormBody onCancel={onCancel} autofocus={autofocus} />;
       }}
     </Formik>
   ) : null;
