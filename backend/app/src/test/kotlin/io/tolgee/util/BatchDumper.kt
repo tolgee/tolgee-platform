@@ -4,6 +4,8 @@ import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.model.batch.BatchJob
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 
 @Component
@@ -12,6 +14,7 @@ class BatchDumper(
   private val batchJobStateProvider: BatchJobStateProvider,
   private val currentDateProvider: CurrentDateProvider,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
+  private val entityManager: EntityManager,
 ) : Logging {
   fun dump(jobId: Long) {
     val stringBuilder = StringBuilder()
@@ -66,6 +69,16 @@ class BatchDumper(
       stringBuilder.append("\n\n$headers\n$cachedStateString")
     }
   }
+
+  fun <T> finallyDump(fn: () -> T): T {
+    return try {
+      fn()
+    } finally {
+      this.dump(getSingleJob().id)
+    }
+  }
+
+  fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult
 
   private fun dumpQueuedItems(
     jobId: Long,

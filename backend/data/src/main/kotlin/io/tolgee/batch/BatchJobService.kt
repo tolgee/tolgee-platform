@@ -419,4 +419,8 @@ class BatchJobService(
   fun getStuckJobIds(jobIds: MutableSet<Long>): List<Long> {
     return batchJobRepository.getStuckJobIds(jobIds, currentDateProvider.date.addMinutes(-2))
   }
+
+  fun save(entity: BatchJob): BatchJob {
+    return cachingBatchJobService.saveJob(entity)
+  }
 }

@@ -16,6 +16,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
@@ -410,6 +411,26 @@ class BatchJobTestUtil(
       batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
     }
   }
+
+  fun runChunkedJob(
+    keyCount: Int,
+    author: UserAccount = testData.user,
+  ): BatchJob {
+    return executeInNewTransaction(transactionManager) {
+      batchJobService.startJob(
+        request =
+          PreTranslationByTmRequest().apply {
+            keyIds = (1L..keyCount).map { it }
+          },
+        project = testData.projectBuilder.self,
+        author = author,
+        type = BatchJobType.PRE_TRANSLATE_BT_TM,
+        isHidden = false,
+      )
+    }
+  }
+
+  fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult
 
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager
     get() = applicationContext.getBean(BatchJobProjectLockingManager::class.java)
