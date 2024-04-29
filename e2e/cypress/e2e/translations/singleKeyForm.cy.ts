@@ -39,7 +39,7 @@ describe('Single key form', () => {
 
   it("can't add key with TRANSLATE permissions", () => {
     logInAs('jindra');
-    visitSingleKey(projectId, 'testkey');
+    visitSingleKey({ projectId, key: 'testkey' });
     assertMessage('insufficient permissions');
   });
 
@@ -70,7 +70,7 @@ describe('Single key form', () => {
 
     // translation single view should take settings from localstorage
     // but't not modify them
-    visitSingleKey(projectId, 'A key');
+    visitSingleKey({ projectId, key: 'A key' });
     languageIsSelected('English');
     languageIsNotSelected('Czech');
     toggleLang('Czech');
@@ -97,7 +97,7 @@ describe('Single key form', () => {
   }
 
   function createKey() {
-    visitSingleKey(projectId, 'testkey', ['en']);
+    visitSingleKey({ projectId, key: 'testkey', languages: ['en'] });
     cy.gcy('translation-field-label').contains('English').should('be.visible');
     cy.gcy('translations-tag-input').type('cooltag');
     cy.gcy('tag-autocomplete-option').contains('Add "cooltag"').click();
@@ -112,7 +112,7 @@ describe('Single key form', () => {
   }
 
   function visitEditKey() {
-    visitSingleKey(projectId, 'A key', ['en']);
+    visitSingleKey({ projectId, key: 'A key', languages: ['en'] });
   }
 
   function editKey() {

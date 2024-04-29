@@ -1,13 +1,22 @@
 import { HOST } from './constants';
 
-export const visitSingleKey = (
-  projectId: number,
-  keyName?: string,
-  languages?: string[]
-) => {
+type Props = {
+  projectId: number;
+  key?: string;
+  languages?: string[];
+  namespace?: string;
+};
+
+export const visitSingleKey = ({
+  projectId,
+  key,
+  languages,
+  namespace,
+}: Props) => {
   cy.visit(
     `${HOST}/projects/${projectId}/translations/single?` +
-      (keyName ? `key=${keyName}&` : '') +
+      (key ? `key=${key}&` : '') +
+      (namespace ? `ns=${namespace}&` : '') +
       (languages ? languages.map((l) => `languages=${l}&`).join('') : '')
   );
   return cy
