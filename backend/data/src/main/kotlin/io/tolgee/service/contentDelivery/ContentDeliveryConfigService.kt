@@ -146,6 +146,10 @@ class ContentDeliveryConfigService(
     val wasCustomStorage = config.contentStorage != null
     val nowCustomStorage = dto.contentStorageId != null
 
+    if (!wasCustomStorage && !nowCustomStorage && desiredSlug == null) {
+      return
+    }
+
     if (desiredSlug == null) {
       config.slug = generateSlug()
       config.customSlug = false
