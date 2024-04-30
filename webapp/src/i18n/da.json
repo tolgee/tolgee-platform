@@ -50,6 +50,7 @@
   "activity_create_project" : "Oprettede projekt",
   "activity_date_today" : "I dag",
   "activity_delete_language" : "Slettede sprog",
+  "activity_detail_translation_view_link" : "Oversættelsesvisning",
   "activity_dismiss_auto_translated_state" : "Automatisk oversættelse afvist",
   "activity_edit_language" : "Sprog opdateret",
   "activity_edit_namespace" : "Navnerum redigeret",

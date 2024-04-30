@@ -50,6 +50,7 @@
   "activity_create_project" : "Vytvořen projekt",
   "activity_date_today" : "Dnes",
   "activity_delete_language" : "Odstraněn jazyk",
+  "activity_detail_translation_view_link" : "Pohled na překlady",
   "activity_dismiss_auto_translated_state" : "Odebrán příznak automatického překladu",
   "activity_edit_language" : "Upraven jazyk",
   "activity_edit_namespace" : "Upraven namespace",

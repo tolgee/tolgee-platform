@@ -50,6 +50,7 @@
   "activity_create_project" : "Created project",
   "activity_date_today" : "Today",
   "activity_delete_language" : "Deleted language",
+  "activity_detail_translation_view_link" : "Translation view",
   "activity_dismiss_auto_translated_state" : "Auto translated state dismissed",
   "activity_edit_language" : "Updated language",
   "activity_edit_namespace" : "Namespace edited",

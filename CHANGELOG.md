@@ -1,3 +1,10 @@
+## [3.59.7](https://github.com/tolgee/tolgee-platform/compare/v3.59.6...v3.59.7) (2024-04-30)
+
+
+### Bug Fixes
+
+* XLIFF files > unescape the XML entities ([#2294](https://github.com/tolgee/tolgee-platform/issues/2294)) ([5d0e1ee](https://github.com/tolgee/tolgee-platform/commit/5d0e1ee648981797115a25428313cd67e5450eb7))
+
 ## [3.59.6](https://github.com/tolgee/tolgee-platform/compare/v3.59.5...v3.59.6) (2024-04-30)
 
 
