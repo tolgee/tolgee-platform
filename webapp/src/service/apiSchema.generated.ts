@@ -559,8 +559,11 @@ export interface paths {
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
   };
-  "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
+  "/v2/projects/{projectId}/activity/revisions/{revisionId}/modified-entities": {
     get: operations["getModifiedEntitiesByRevision"];
+  };
+  "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
+    get: operations["getSingleRevision"];
   };
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
@@ -1774,9 +1777,9 @@ export interface components {
       lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
+      description: string;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1914,9 +1917,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       scopes: string[];
+      username?: string;
       /** Format: int64 */
       projectId: number;
-      username?: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
@@ -3034,12 +3037,6 @@ export interface components {
       old?: { [key: string]: unknown };
       new?: { [key: string]: unknown };
     };
-    PagedModelProjectActivityModel: {
-      _embedded?: {
-        activities?: components["schemas"]["ProjectActivityModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     ProjectActivityAuthorModel: {
       /** Format: int64 */
       id: number;
@@ -3103,6 +3100,12 @@ export interface components {
       meta?: { [key: string]: { [key: string]: unknown } };
       counts?: { [key: string]: number };
       params?: { [key: string]: unknown };
+    };
+    PagedModelProjectActivityModel: {
+      _embedded?: {
+        activities?: components["schemas"]["ProjectActivityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelTagModel: {
       _embedded?: {
@@ -3514,9 +3517,9 @@ export interface components {
       lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
+      description: string;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3650,9 +3653,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       scopes: string[];
+      username?: string;
       /** Format: int64 */
       projectId: number;
-      username?: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
@@ -11524,6 +11527,46 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelModifiedEntityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getSingleRevision: {
+    parameters: {
+      path: {
+        revisionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["ProjectActivityModel"];
         };
       };
       /** Bad Request */

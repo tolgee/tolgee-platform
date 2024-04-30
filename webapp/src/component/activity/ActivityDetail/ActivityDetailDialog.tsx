@@ -70,7 +70,7 @@ export const ActivityDetailDialog: React.FC<Props> = ({
               size="medium"
               href={`${LINKS.PROJECT_TRANSLATIONS.build({
                 [PARAMS.PROJECT_ID]: project.id,
-              })}?revision=${data.revisionId}`}
+              })}?activity=${data.revisionId}`}
               endIcon={<OpenInNew fontSize="small" />}
               target="_blank"
               rel="noreferrer noopener"

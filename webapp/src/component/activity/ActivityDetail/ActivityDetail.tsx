@@ -56,7 +56,7 @@ export const ActivityDetail = ({ data, diffEnabled, activity }: Props) => {
   const path = { projectId: project.id, revisionId: data.revisionId };
   const query = { size: 40 };
   const detailLoadable = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/activity/revisions/{revisionId}',
+    url: '/v2/projects/{projectId}/activity/revisions/{revisionId}/modified-entities',
     method: 'get',
     path,
     query,
