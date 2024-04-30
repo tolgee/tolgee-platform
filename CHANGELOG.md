@@ -1,3 +1,10 @@
+## [3.59.6](https://github.com/tolgee/tolgee-platform/compare/v3.59.5...v3.59.6) (2024-04-30)
+
+
+### Bug Fixes
+
+* respect namespace in url in single key view ([#2291](https://github.com/tolgee/tolgee-platform/issues/2291)) ([f5c95ab](https://github.com/tolgee/tolgee-platform/commit/f5c95ab8c900b8b1705124b61c7808d1f8190951))
+
 ## [3.59.5](https://github.com/tolgee/tolgee-platform/compare/v3.59.4...v3.59.5) (2024-04-29)
 
 
