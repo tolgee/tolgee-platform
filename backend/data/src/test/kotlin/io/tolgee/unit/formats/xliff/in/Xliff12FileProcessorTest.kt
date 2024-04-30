@@ -102,6 +102,21 @@ class Xliff12FileProcessorTest {
   }
 
   @Test
+  fun `it unescapes the string`() {
+    mockUtil.mockIt("example.xliff", "src/test/resources/import/xliff/escaping.xliff")
+    xmlStreamReader = inputFactory.createXMLEventReader(mockUtil.importFileDto.data.inputStream())
+    Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("Hello & hello")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "key 2")
+      .assertSingle {
+        hasText("<b>Hello</b> &amp; hello")
+      }
+  }
+
+  @Test
   fun `handles errors correctly`() {
     mockUtil.mockIt("error_example.xliff", "src/test/resources/import/xliff/error_example.xliff")
     Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
