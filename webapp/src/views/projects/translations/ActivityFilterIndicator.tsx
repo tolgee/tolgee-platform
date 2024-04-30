@@ -28,7 +28,6 @@ const StyledContainer = styled('div')`
 
 const StyledDescription = styled('div')`
   display: flex;
-  gap: 4px;
   align-items: center;
   overflow: hidden;
   max-width: 100%;
@@ -46,9 +45,16 @@ const StyledLabel = styled('div')`
   display: flex;
   align-items: center;
   gap: 6px;
-  font-weight: 600;
   margin-right: 16px;
   flex-shrink: 1;
+  overflow: hidden;
+`;
+
+const StyledLabelText = styled('div')`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
 `;
 
 const StyledTime = styled(Box)`
@@ -97,14 +103,14 @@ export const RevisionFilterIndicator = ({ revisionId }: Props) => {
     <StyledContainer>
       <StyledLabel>
         <FilterList color="inherit" />
-        <span style={{ whiteSpace: 'nowrap' }}>
+        <StyledLabelText>
           <T keyName="activity_filter_indicator_label" />
-        </span>
+        </StyledLabelText>
       </StyledLabel>
       {!isSmall && (
         <StyledDescription>
           {data.author && (
-            <Box gridArea="avatar">
+            <Box gridArea="avatar" sx={{ marginRight: '6px' }}>
               <AvatarImg
                 size={24}
                 owner={{
@@ -123,10 +129,10 @@ export const RevisionFilterIndicator = ({ revisionId }: Props) => {
               data.author?.name
             )}
           </StyledUser>
-          <Box sx={{ marginLeft: '8px' }}>
+          <Box sx={{ marginLeft: '12px' }}>
             <ActivityTitle activity={activity} />
           </Box>
-          <StyledTime sx={{ marginLeft: '8px' }}>
+          <StyledTime sx={{ marginLeft: '12px' }}>
             {date.toLocaleDateString(lang) + ' '}
             {date.toLocaleTimeString(lang, {
               hour: 'numeric',
