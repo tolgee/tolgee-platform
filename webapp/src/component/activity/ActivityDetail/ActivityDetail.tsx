@@ -11,12 +11,11 @@ import {
 } from '../types';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { buildEntity } from '../activityTools';
 import { activityEntities } from '../activityEntities';
-import { T } from '@tolgee/react';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { useInView } from 'react-intersection-observer';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -49,9 +48,10 @@ type Props = {
 };
 
 export const ActivityDetail = ({ data, diffEnabled, activity }: Props) => {
+  const { ref, inView } = useInView({ rootMargin: '100px' });
   const project = useProject();
 
-  const needsToBeFetched = !data.modifiedEntities;
+  const isBatch = !data.modifiedEntities;
 
   const path = { projectId: project.id, revisionId: data.revisionId };
   const query = { size: 40 };
@@ -61,7 +61,7 @@ export const ActivityDetail = ({ data, diffEnabled, activity }: Props) => {
     path,
     query,
     options: {
-      enabled: needsToBeFetched,
+      enabled: isBatch,
       cacheTime: 0,
       getNextPageParam: (lastPage) => {
         if (
@@ -81,6 +81,12 @@ export const ActivityDetail = ({ data, diffEnabled, activity }: Props) => {
       },
     },
   });
+
+  useEffect(() => {
+    if (inView) {
+      detailLoadable.fetchNextPage();
+    }
+  }, [inView]);
 
   const activityWithData = useMemo(() => {
     const entities = detailLoadable.data?.pages.flatMap((p) => {
@@ -115,15 +121,11 @@ export const ActivityDetail = ({ data, diffEnabled, activity }: Props) => {
           <ActivityEntities
             activity={activityWithData}
             diffEnabled={diffEnabled}
+            showAllReferences={isBatch}
           />
           {detailLoadable.hasNextPage && (
-            <Box display="flex" justifyContent="center" mt={3}>
-              <LoadingButton
-                onClick={() => detailLoadable.fetchNextPage()}
-                loading={detailLoadable.isFetchingNextPage}
-              >
-                <T keyName="global_load_more" />
-              </LoadingButton>
+            <Box display="flex" justifyContent="center" mt={3} ref={ref}>
+              <BoxLoading />
             </Box>
           )}
         </>

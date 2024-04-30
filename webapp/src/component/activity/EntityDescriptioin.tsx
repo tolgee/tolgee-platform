@@ -10,11 +10,15 @@ const StyledContainer = styled('div')`
 
 type Props = {
   entity: Entity;
+  showAllReferences?: boolean;
 };
 
-export const EntityDescription: React.FC<Props> = ({ entity }) => {
-  const descriptionReferences = entity.references.filter((ref) =>
-    entity.options.description?.includes(ref.type)
+export const EntityDescription: React.FC<Props> = ({
+  entity,
+  showAllReferences,
+}) => {
+  const descriptionReferences = entity.references.filter(
+    (ref) => showAllReferences || entity.options.description?.includes(ref.type)
   );
   return (
     <StyledContainer>

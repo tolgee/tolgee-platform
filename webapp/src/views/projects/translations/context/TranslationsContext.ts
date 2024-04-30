@@ -41,6 +41,7 @@ type Props = {
   keyNamespace?: string;
   updateLocalStorageLanguages?: boolean;
   pageSize?: number;
+  revisionFilter?: number;
 };
 
 export const [
@@ -89,6 +90,7 @@ export const [
     // when initial langs are null, fetching is postponed
     initialLangs: initialLangs,
     baseLang: props.baseLang,
+    revisionFilter: props.revisionFilter,
   });
 
   const { setEventBlockers } = useWebsocketService(translationService);

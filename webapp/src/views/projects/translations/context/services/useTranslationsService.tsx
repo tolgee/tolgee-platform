@@ -50,6 +50,7 @@ type Props = {
   pageSize?: number;
   updateLocalStorageLanguages?: boolean;
   baseLang: string | undefined;
+  revisionFilter: number | undefined;
 };
 
 const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
@@ -130,7 +131,7 @@ export const useTranslationsService = (props: Props) => {
       ? [props.keyNamespace]
       : parsedFilters.filterNamespace;
 
-  const requestQuery = {
+  const requestQuery: TranslationsQueryType = {
     ...query,
     // smuggle in base lang if not present
     languages: addBaseIfMissing(query.languages, props.baseLang!),
@@ -139,6 +140,8 @@ export const useTranslationsService = (props: Props) => {
     filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
     search: urlSearch as string,
+    filterRevisionId:
+      props.revisionFilter !== undefined ? [props.revisionFilter] : undefined,
   };
 
   const translations = useApiInfiniteQuery({
