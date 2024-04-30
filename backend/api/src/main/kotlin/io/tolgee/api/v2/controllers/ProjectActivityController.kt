@@ -57,11 +57,11 @@ class ProjectActivityController(
   }
 
   @Operation(summary = "Get one revision data")
-  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/revisions/{revisionId}", produces = [MediaTypes.HAL_JSON_VALUE])
   @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
   @AllowApiAccess
   fun getSingleRevision(
-    @ParameterObject revisionId: Long,
+    @PathVariable revisionId: Long,
   ): ProjectActivityModel {
     val views =
       activityService.findProjectActivity(projectId = projectHolder.project.id, revisionId)
@@ -70,7 +70,7 @@ class ProjectActivityController(
   }
 
   @Operation(summary = "Get modified entities in revision")
-  @GetMapping("/revisions/{revisionId}")
+  @GetMapping("/revisions/{revisionId}/modified-entities")
   @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
   fun getModifiedEntitiesByRevision(
     @ParameterObject pageable: Pageable,
