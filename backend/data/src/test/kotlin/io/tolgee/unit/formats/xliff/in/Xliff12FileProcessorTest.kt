@@ -62,12 +62,12 @@ class Xliff12FileProcessorTest {
     assertThat(keyMeta.codeReferences[0].path).isEqualTo("../src/ui/components/VPNAboutUs.qml")
     assertThat(mockUtil.fileProcessorContext.translations["systray.quit"]!![0].text).isEqualTo(
       "<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
-        " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>",
+        " 'Add to favorites'}}\" id=\"INTERPOLATION\" />",
     )
     assertThat(mockUtil.fileProcessorContext.translations["systray.quit"]!![1].text)
       .isEqualTo(
         "<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
-          " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>",
+          " 'Add to favorites'}}\" id=\"INTERPOLATION\" />",
       )
   }
 
@@ -98,6 +98,21 @@ class Xliff12FileProcessorTest {
     mockUtil.fileProcessorContext.assertTranslations("en", "3")
       .assertSingle {
         hasText("  Back")
+      }
+  }
+
+  @Test
+  fun `it unescapes the string`() {
+    mockUtil.mockIt("example.xliff", "src/test/resources/import/xliff/escaping.xliff")
+    xmlStreamReader = inputFactory.createXMLEventReader(mockUtil.importFileDto.data.inputStream())
+    Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("Hello & hello")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "key 2")
+      .assertSingle {
+        hasText("<b>Hello</b> &amp; hello")
       }
   }
 

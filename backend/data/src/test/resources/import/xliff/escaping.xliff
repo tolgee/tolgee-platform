@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="" datatype="plaintext" source-language="en" target-language="cs">
+    <body>
+      <trans-unit id="key" xml:space="preserve">
+        <source>Hello &amp; hello</source>
+      </trans-unit>
+      <trans-unit id="key 2" xml:space="preserve">
+        <source><b>Hello</b> &amp; hello</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

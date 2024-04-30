@@ -4,20 +4,16 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
-import java.io.StringWriter
 import java.util.*
 import javax.xml.XMLConstants
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLEventWriter
-import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.events.StartElement
 
 class XliffParser(
   private val xmlEventReader: XMLEventReader,
 ) {
-  private var sw = StringWriter()
-  private val of: XMLOutputFactory = XMLOutputFactory.newDefaultFactory()
   private var xw: XMLEventWriter? = null
   private val openElements = mutableListOf("xliff")
   private val currentOpenElement: String?
@@ -27,6 +23,7 @@ class XliffParser(
   private var currentFile: XliffFile? = null
   private var currentTransUnit: XliffTransUnit? = null
   private var preservingSpaces = mutableListOf<Boolean?>()
+  private var blockParser: XliffXmlValueBlockParser? = null
 
   fun parse(): XliffModel {
     try {
@@ -45,8 +42,7 @@ class XliffParser(
       when {
         event.isStartElement -> {
           if (!isAnyToContentSaveOpen) {
-            sw = StringWriter()
-            xw = of.createXMLEventWriter(sw)
+            blockParser = XliffXmlValueBlockParser()
           }
           (event as? StartElement)?.let { startElement ->
             preservingSpaces.add(getCurrentElementPreserveSpaces(startElement))
@@ -117,10 +113,8 @@ class XliffParser(
       if (isAnyToContentSaveOpen) {
         val startName = (event as? StartElement)?.name?.localPart?.lowercase(Locale.getDefault())
         if (!CONTENT_SAVE_ELEMENTS.contains(startName)) {
-          xw?.add(event)
+          blockParser?.onXmlEvent(event)
         }
-      } else {
-        xw?.close()
       }
     }
     return result
@@ -136,7 +130,7 @@ class XliffParser(
   }
 
   private fun getCurrentSwString(): String {
-    val result = sw.toString()
+    val result = blockParser?.result ?: ""
     val preserveNamespace = preservingSpaces.lastOrNull { it != null } ?: false
     if (!preserveNamespace) {
       return result.trim()

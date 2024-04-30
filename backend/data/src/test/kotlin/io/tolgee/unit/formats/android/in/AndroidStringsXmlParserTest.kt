@@ -53,6 +53,12 @@ class AndroidStringsXmlParserTest {
   }
 
   @Test
+  fun `parses element with attributes`() {
+    "<a href=\"hey\" />"
+      .assertParsedTo("<a href=\"hey\" />", false)
+  }
+
+  @Test
   fun `doesnt unescape amp XML entity in XML context`() {
     "I am just a text! <b>&amp;</b>"
       .assertParsedTo("I am just a text! <b>&amp;</b>", false)
