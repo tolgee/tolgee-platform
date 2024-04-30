@@ -8,6 +8,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import net.javacrumbs.jsonunit.assertj.JsonAssert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -31,6 +32,26 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `returns single activity`() {
+    performProjectAuthPut("/import/apply").andIsOk
+    val revision = getLastRevision()
+    performProjectAuthGet("activity/revisions/${revision?.id}")
+      .andIsOk.andAssertThatJson {
+        assertCountsOnlyResult()
+      }
+  }
+
+  private fun JsonAssert.assertCountsOnlyResult() {
+    node("modifiedEntities").isNull()
+    node("counts") {
+      node("Key").isEqualTo(1)
+      node("KeyMeta").isEqualTo(1)
+      node("Translation").isEqualTo(305)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `large operation data only contain counts`() {
     performProjectAuthPut("/import/apply").andIsOk
     performProjectAuthGet("activity")
@@ -38,12 +59,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
         node("_embedded.activities") {
           isArray.hasSize(1)
           node("[0]") {
-            node("modifiedEntities").isNull()
-            node("counts") {
-              node("Key").isEqualTo(1)
-              node("KeyMeta").isEqualTo(1)
-              node("Translation").isEqualTo(305)
-            }
+            assertCountsOnlyResult()
           }
         }
       }
@@ -54,7 +70,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   fun `returns modified entities with pagination`() {
     performProjectAuthPut("/import/apply").andIsOk
     val revision = getLastRevision()
-    performProjectAuthGet("activity/revisions/${revision?.id}")
+    performProjectAuthGet("activity/revisions/${revision?.id}/modified-entities")
       .andIsOk.andAssertThatJson {
         node("_embedded.modifiedEntities") {
           isArray
@@ -70,7 +86,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   fun `filters modified entities by class`() {
     performProjectAuthPut("/import/apply").andIsOk
     val revision = getLastRevision()
-    performProjectAuthGet("activity/revisions/${revision?.id}?filterEntityClass=Key")
+    performProjectAuthGet("activity/revisions/${revision?.id}/modified-entities?filterEntityClass=Key")
       .andIsOk.andAssertThatJson {
         node("page.totalElements").isEqualTo(1)
       }

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.activity.ModifiedEntityModel
 import io.tolgee.hateoas.activity.ModifiedEntityModelAssembler
 import io.tolgee.hateoas.activity.ProjectActivityModel
@@ -51,12 +52,25 @@ class ProjectActivityController(
   fun getActivity(
     @ParameterObject pageable: Pageable,
   ): PagedModel<ProjectActivityModel> {
-    val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
+    val views = activityService.findProjectActivity(projectId = projectHolder.project.id, pageable)
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
 
+  @Operation(summary = "Get one revision data")
+  @GetMapping("/revisions/{revisionId}", produces = [MediaTypes.HAL_JSON_VALUE])
+  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @AllowApiAccess
+  fun getSingleRevision(
+    @PathVariable revisionId: Long,
+  ): ProjectActivityModel {
+    val views =
+      activityService.findProjectActivity(projectId = projectHolder.project.id, revisionId)
+        ?: throw NotFoundException()
+    return projectActivityModelAssembler.toModel(views)
+  }
+
   @Operation(summary = "Get modified entities in revision")
-  @GetMapping("/revisions/{revisionId}")
+  @GetMapping("/revisions/{revisionId}/modified-entities")
   @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
   fun getModifiedEntitiesByRevision(
     @ParameterObject pageable: Pageable,

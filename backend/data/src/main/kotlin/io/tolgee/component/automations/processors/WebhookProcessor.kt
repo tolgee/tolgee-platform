@@ -26,7 +26,7 @@ class WebhookProcessor(
     activityRevisionId: Long?,
   ) {
     activityRevisionId ?: return
-    val view = activityService.getProjectActivity(activityRevisionId) ?: return
+    val view = activityService.findProjectActivity(activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
     val config = action.webhookConfig ?: return
 

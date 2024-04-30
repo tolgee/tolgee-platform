@@ -103,7 +103,7 @@ class ActivityService(
   }
 
   @Transactional
-  fun getProjectActivity(
+  fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
   ): Page<ProjectActivityView> {
@@ -115,10 +115,22 @@ class ActivityService(
   }
 
   @Transactional
-  fun getProjectActivity(revisionId: Long): ProjectActivityView? {
+  fun findProjectActivity(revisionId: Long): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
-      revisionId,
+      revisionId = revisionId,
+    ).get()
+  }
+
+  @Transactional
+  fun findProjectActivity(
+    projectId: Long,
+    revisionId: Long,
+  ): ProjectActivityView? {
+    return ProjectActivityViewByRevisionProvider(
+      applicationContext = applicationContext,
+      revisionId = revisionId,
+      projectId = projectId,
     ).get()
   }
 
