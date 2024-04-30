@@ -14,7 +14,7 @@ import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
-  margin-top: -8px;
+  margin-top: -4px;
   margin-bottom: 12px;
   background: ${({ theme }) => theme.palette.revisionFilterBanner.background};
   padding: 0px 4px 0px 14px;
