@@ -62,12 +62,12 @@ class Xliff12FileProcessorTest {
     assertThat(keyMeta.codeReferences[0].path).isEqualTo("../src/ui/components/VPNAboutUs.qml")
     assertThat(mockUtil.fileProcessorContext.translations["systray.quit"]!![0].text).isEqualTo(
       "<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
-        " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>",
+        " 'Add to favorites'}}\" id=\"INTERPOLATION\" />",
     )
     assertThat(mockUtil.fileProcessorContext.translations["systray.quit"]!![1].text)
       .isEqualTo(
         "<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
-          " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>",
+          " 'Add to favorites'}}\" id=\"INTERPOLATION\" />",
       )
   }
 

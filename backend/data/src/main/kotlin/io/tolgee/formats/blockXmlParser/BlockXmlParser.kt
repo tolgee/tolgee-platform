@@ -1,6 +1,5 @@
 package io.tolgee.formats.blockXmlParser
 
-import javax.xml.stream.events.Attribute
 import javax.xml.stream.events.Characters
 import javax.xml.stream.events.EndElement
 import javax.xml.stream.events.StartElement
@@ -24,11 +23,8 @@ class BlockXmlParser {
         val element = ModelElement(event.name.localPart, getAndIncrementId(), currentModel)
         currentModel.children.add(element)
         currentModel = element
+        element.attributes.putAll(getAttributes(event))
         lastStartElementLocationCharacterOffset = event.location.characterOffset
-      }
-
-      is Attribute -> {
-        currentModel.attributes[event.name.localPart] = event.value
       }
 
       is EndElement -> {
@@ -37,6 +33,9 @@ class BlockXmlParser {
       }
     }
   }
+
+  private fun getAttributes(event: StartElement) =
+    event.attributes.asSequence().map { it.name.localPart to it.value }.toMap()
 
   private var idCounter = 0
   val rootModel = ModelElement("root", idCounter++, null)
@@ -55,7 +54,6 @@ class BlockXmlParser {
     fun escapeXmlAttribute(s: String): String {
       return escapeXml(s)
         .replace("\"", "&quot;")
-        .replace("'", "&apos;")
     }
   }
 }

@@ -64,7 +64,8 @@ class ModelElement(
 
   private fun appendOpenTagEnd() {
     if (selfClosing) {
-      stringBuilder.append("/>")
+      val space = if (attributes.isNotEmpty()) " " else ""
+      stringBuilder.append("$space/>")
       return
     }
     stringBuilder.append(">")
