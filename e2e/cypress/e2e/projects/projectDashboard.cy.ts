@@ -21,7 +21,7 @@ describe('Project stats', () => {
     projectListData.clean();
   });
 
-  it.only('Activity', () => {
+  it('Activity', () => {
     createProject('Project with activity', 'test_username');
     enterProject('Project with activity');
     createTranslation({
