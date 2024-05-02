@@ -8,14 +8,17 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { UseInfiniteQueryResult } from 'react-query';
+import { useInView } from 'react-intersection-observer';
 
 import { ActivityCompact } from 'tg.component/activity/ActivityCompact/ActivityCompact';
 import { components } from 'tg.service/apiSchema.generated';
 import { ActivityDateSeparator } from 'tg.views/projects/dashboard/ActivityDateSeparator';
 import { useState } from 'react';
 import { useDateCounter } from 'tg.hooks/useDateCounter';
-import { useInView } from 'react-intersection-observer';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { ActivityDetailDialog } from 'tg.component/activity/ActivityDetail/ActivityDetailDialog';
+import { ActivityModel } from 'tg.component/activity/types';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 type ProjectActivityModel = components['schemas']['ProjectActivityModel'];
 type PagedModelProjectActivityModel =
@@ -59,6 +62,8 @@ type Props = {
 
 export const ActivityList: React.FC<Props> = ({ activityLoadable }) => {
   const { ref, inView } = useInView({ rootMargin: '100px' });
+  const [detailData, setDetailData] = useState<ActivityModel>();
+  const [detailId, setDetailId] = useUrlSearchState('activity');
 
   const data = useMemo(() => {
     const result: ProjectActivityModel[] = [];
@@ -108,7 +113,14 @@ export const ActivityList: React.FC<Props> = ({ activityLoadable }) => {
                 {counter.isNewDate(date) && (
                   <ActivityDateSeparator date={date} />
                 )}
-                <ActivityCompact data={item} diffEnabled={diffEnabled} />
+                <ActivityCompact
+                  data={item}
+                  diffEnabled={diffEnabled}
+                  onDetailOpen={(detailData) => {
+                    setDetailData(detailData);
+                    setDetailId(String(detailData.revisionId));
+                  }}
+                />
               </React.Fragment>
             );
           })}
@@ -119,6 +131,19 @@ export const ActivityList: React.FC<Props> = ({ activityLoadable }) => {
           )}
         </StyledList>
       </StyledScroller>
+      {detailId && (
+        <ActivityDetailDialog
+          data={detailData}
+          detailId={Number(detailId)}
+          initialDiffEnabled={diffEnabled}
+          open={Boolean(detailId)}
+          onClose={() => {
+            setDetailData(undefined);
+            setDetailId(undefined);
+          }}
+          maxWidth="lg"
+        />
+      )}
     </StyledContainer>
   );
 };
