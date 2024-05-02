@@ -4,6 +4,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.UnsupportedXliffVersionException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.apple.`in`.xliff.AppleXliffFileProcessor
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -34,6 +35,10 @@ class XliffFileProcessor(override val context: FileProcessorContext) : ImportFil
   }
 
   private fun isApple(parsed: XliffModel): Boolean {
+    if (context.mapping?.format == ImportFormat.APPLE_XLIFF) {
+      return true
+    }
+
     return parsed.files.any {
       it.original?.matches(Regex(".*\\.(?:xc)?strings(?:dict)?$")) == true
     }

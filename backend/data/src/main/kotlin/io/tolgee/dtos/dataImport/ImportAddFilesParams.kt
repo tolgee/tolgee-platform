@@ -2,6 +2,7 @@ package io.tolgee.dtos.dataImport
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
+import io.tolgee.dtos.request.SingleStepImportPathMapping
 
 class ImportAddFilesParams(
   @field:Parameter(
@@ -19,4 +20,5 @@ class ImportAddFilesParams(
         "hello[0] = \"item1\" and hello[1] = \"item2\".",
   )
   var supportArrays: Boolean = true,
+  override var fileMappings: List<SingleStepImportPathMapping> = listOf(),
 ) : IImportAddFilesParams

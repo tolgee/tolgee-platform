@@ -1,7 +1,6 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
-import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
@@ -237,17 +236,6 @@ class ImportDataManager(
     this.handleConflicts(false)
     this.importService.saveLanguages(listOf(importLanguage))
     this.saveAllStoredTranslations()
-  }
-
-  fun findMatchingExistingLanguage(importLanguageName: String): LanguageDto? {
-    val possibleTag =
-      """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
-        .matchEntire(importLanguageName)?.groups?.get(1)?.value
-        ?: return null
-
-    val candidate = languageService.findByTag(possibleTag, import.project.id)
-
-    return candidate
   }
 
   fun resetCollisionsBetweenFiles(

@@ -1,6 +1,7 @@
 package io.tolgee.formats.android.`in`
 
 import AndroidStringsXmlParser
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
 import io.tolgee.formats.android.AndroidStringValue
@@ -14,7 +15,7 @@ import javax.xml.stream.XMLInputFactory
 
 class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
   override fun process() {
-    val parsed = AndroidStringsXmlParser(xmlEventReader).parse()
+    val parsed = parse()
 
     parsed.items.forEach { (keyName, item) ->
       when (item) {
@@ -25,6 +26,13 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       }
     }
   }
+
+  private fun parse() =
+    try {
+      AndroidStringsXmlParser(xmlEventReader).parse()
+    } catch (e: Exception) {
+      throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
+    }
 
   private fun handleString(
     keyName: String,

@@ -8,10 +8,10 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.parameters.RequestBody
-import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -32,18 +32,14 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/single-step-import", "/v2/projects/single-step-import"])
-@Tag(
-  name = "Import",
-  description = "These endpoints handle multi-step data import",
-)
+@ImportDocsTag
 class SingleStepImportController(
   private val importService: ImportService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectHolder: ProjectHolder,
-  private val streamingImportProgressUtil: StreamingImportProgressUtil,
 ) : Logging {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(description = "Imports provided data", summary = "Single step import")
+  @Operation(summary = "Single step import", description = "Imports provided data")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @RequestBody(
     content =
@@ -56,6 +52,7 @@ class SingleStepImportController(
       ],
   )
   @AllowApiAccess
+  @OpenApiOrderExtension(1)
   fun doImport(
     @RequestPart("files")
     files: Array<MultipartFile>,

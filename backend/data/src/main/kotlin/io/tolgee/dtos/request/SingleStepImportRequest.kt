@@ -20,4 +20,5 @@ class SingleStepImportRequest : IImportAddFilesParams, IImportSettings {
   override var storeFilesToFileStorage: Boolean = true
   override var overrideKeyDescriptions: Boolean = false
   override var convertPlaceholdersToIcu: Boolean = true
+  override var fileMappings: List<SingleStepImportPathMapping> = listOf()
 }
