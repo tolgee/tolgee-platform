@@ -36,7 +36,7 @@ export const ActivityDetailDialog: React.FC<Props> = ({
   const detailData = data || detailLoadable.data;
 
   return (
-    <Dialog {...dialogProps}>
+    <Dialog {...dialogProps} data-cy="activity-detail-dialog">
       {detailLoadable.isLoading ? (
         <DialogContent>
           <BoxLoading />

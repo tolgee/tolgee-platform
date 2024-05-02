@@ -6,10 +6,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { buildActivity } from '../activityTools';
 import { ActivityTitle } from '../ActivityTitle';
 import { ActivityFields } from './CompactFields';
-import { useState } from 'react';
 import { ActivityModel, Field } from '../types';
 import { ActivityUser } from '../ActivityUser';
-import { ActivityDetailDialog } from '../ActivityDetail/ActivityDetailDialog';
 import { actionsConfiguration } from '../configuration';
 
 type ProjectActivityModel = components['schemas']['ProjectActivityModel'];
@@ -99,11 +97,11 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
   });
 
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="activity-compact">
       <StyledUser>
         <ActivityUser item={data} onlyTime />
       </StyledUser>
-      <StyledContent data-cy="activity-compact">
+      <StyledContent>
         <ActivityTitle activity={activity} />
         <ActivityFields fields={limitedFields} diffEnabled={diffEnabled} />
         {fieldsNum > maxFields && (
@@ -115,6 +113,7 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
       </StyledContent>
       <StyledAction>
         <IconButton
+          data-cy="activity-compact-detail-button"
           className="showOnMouseOver"
           size="small"
           onClick={() => onDetailOpen(data)}
