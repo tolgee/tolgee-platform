@@ -3,6 +3,7 @@ package io.tolgee.unit.formats.yaml.`in`
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
@@ -120,8 +121,11 @@ class YamlFileProcessorTest {
   @Test
   fun `respects provided format`() {
     mockUtil.mockIt("en.yaml", "src/test/resources/import/yaml/icu.yaml")
-    mockUtil.fileProcessorContext.params.fileMappings =
-      listOf(ImportFileMapping(fileName = "en.yaml", format = ImportFormat.YAML_PHP))
+    mockUtil.fileProcessorContext.params =
+      SingleStepImportRequest().also {
+        it.fileMappings =
+          listOf(ImportFileMapping(fileName = "en.yaml", format = ImportFormat.YAML_PHP))
+      }
     processFile()
     // it's escaped because ICU doesn't php doesn't contain ICU
     mockUtil.fileProcessorContext.assertTranslations("en", "some_text_with_params")

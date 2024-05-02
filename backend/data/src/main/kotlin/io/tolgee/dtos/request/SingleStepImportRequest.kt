@@ -1,24 +1,24 @@
 package io.tolgee.dtos.request
 
-import io.swagger.v3.oas.annotations.Hidden
-import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.IImportSettings
-import io.tolgee.dtos.dataImport.IImportAddFilesParams
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.service.dataImport.ForceMode
 
-class SingleStepImportRequest : IImportAddFilesParams, IImportSettings {
-  val forceMode: ForceMode = ForceMode.KEEP
-
-  @field:Parameter(
+class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
+  @Schema(
     description =
-      "When importing structured JSONs, you can set " +
-        "the delimiter which will be used in names of imported keys.",
+      "Whether to override existing translation data.\n\n" +
+        "When set to `KEEP`, existing translations will be kept.\n\n" +
+        "When set to `OVERRIDE`, existing translations will be overridden.\n\n" +
+        "When set to `NO_FORCE`, error will be thrown on conflict.",
   )
-  override var structureDelimiter: Char? = '.'
-
-  @field:Hidden
-  override var storeFilesToFileStorage: Boolean = true
+  val forceMode: ForceMode = ForceMode.KEEP
   override var overrideKeyDescriptions: Boolean = false
   override var convertPlaceholdersToIcu: Boolean = true
-  override var fileMappings: List<ImportFileMapping> = listOf()
+
+  @get:Schema(
+    description = "Definition of mapping for each file to import.",
+  )
+  var fileMappings: List<ImportFileMapping> = listOf()
 }

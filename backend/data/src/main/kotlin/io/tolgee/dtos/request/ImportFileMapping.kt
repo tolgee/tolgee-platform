@@ -14,7 +14,7 @@ class ImportFileMapping(
     description =
       "This field maps the languages from imported files to languages existing in the Tolgee platform. " +
         "If this field is null, Tolgee will try to guess the language from the file name or file contents.\n\n" +
-        "It is recommended to provide these values, to prevent any issues with language detection.",
+        "It is recommended to provide these values to prevent any issues with language detection.",
   )
   val languageMappings: List<LanguageMapping>? = null,
   @Schema(
@@ -25,7 +25,7 @@ class ImportFileMapping(
     description =
       "Format of the file. If not provided, " +
         "Tolgee will try to guess the format from the file name or file contents.\n\n" +
-        "It is recommended to provide these values, to prevent any issues with format detection.",
+        "It is recommended to provide these values to prevent any issues with format detection.",
   )
   val format: ImportFormat? = null,
 )

@@ -7,6 +7,7 @@ import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.importCommon.wrapIfRequired
@@ -24,7 +25,7 @@ data class FileProcessorContext(
   var file: ImportFileDto,
   val fileEntity: ImportFile,
   val maxTranslationTextLength: Long = 2000L,
-  val params: IImportAddFilesParams = ImportAddFilesParams(),
+  var params: IImportAddFilesParams = ImportAddFilesParams(),
   val importSettings: IImportSettings =
     object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = false
@@ -179,7 +180,9 @@ data class FileProcessorContext(
   }
 
   val mapping: ImportFileMapping? by lazy {
-    this.params.fileMappings.filter { it.fileName == this.file.name }
+    val mappings = (params as? SingleStepImportRequest)?.fileMappings ?: return@lazy null
+
+    mappings.filter { it.fileName == this.file.name }
       .getOrThrowIfMoreThanOne {
         BadRequestException(Message.TOO_MANY_MAPPINGS_FOR_FILE, listOf(this.file.name))
       }
