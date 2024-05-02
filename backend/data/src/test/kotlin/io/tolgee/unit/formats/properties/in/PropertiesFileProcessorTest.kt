@@ -1,5 +1,7 @@
 package io.tolgee.unit.formats.properties.`in`
 
+import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
@@ -172,6 +174,19 @@ class PropertiesFileProcessorTest {
       assertAfterReEnablingConversion =
         listOf(),
     )
+  }
+
+  @Test
+  fun `respects provided format`() {
+    mockUtil.mockIt("en.properties", "src/test/resources/import/properties/icu.properties")
+    mockUtil.fileProcessorContext.params.fileMappings =
+      listOf(ImportFileMapping(fileName = "en.properties", format = ImportFormat.PROPERTIES_JAVA))
+    processFile()
+    // it's escaped because ICU doesn't php doesn't contain ICU
+    mockUtil.fileProcessorContext.assertTranslations("en", "key1")
+      .assertSingle {
+        hasText("Param '{'hello'}'")
+      }
   }
 
   private fun mockPlaceholderConversionTestFile(

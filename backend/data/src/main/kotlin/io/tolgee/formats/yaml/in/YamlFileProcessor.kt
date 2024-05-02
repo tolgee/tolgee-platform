@@ -21,7 +21,7 @@ class YamlFileProcessor(
         throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
       }
     val dataMap = data as? Map<*, *> ?: return
-    val detectedFormat = importFormat(dataMap)
+    val detectedFormat = getFormat(dataMap)
     if (detectedFormat.rootKeyIsLanguageTag) {
       dataMap.entries.forEach { (languageTag, languageData) ->
         if (languageTag !is String) return@forEach
@@ -32,7 +32,7 @@ class YamlFileProcessor(
     processLanguageData(detectedFormat, firstLanguageTagGuessOrUnknown, data)
   }
 
-  private fun importFormat(dataMap: Map<*, *>): ImportFormat {
+  private fun getFormat(dataMap: Map<*, *>): ImportFormat {
     return context.mapping?.format ?: YamlImportFormatDetector().detectFormat(dataMap)
   }
 

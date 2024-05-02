@@ -7,7 +7,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.SingleStepImportLanguageMapping
+import io.tolgee.dtos.request.LanguageMapping
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
@@ -220,7 +220,7 @@ class CoreImportFilesProcessor(
     return existingLanguages.find { it.tag == mappedLanguageTag }
   }
 
-  private fun FileProcessorContext.findNullLanguageMapping(): SingleStepImportLanguageMapping? {
+  private fun FileProcessorContext.findNullLanguageMapping(): LanguageMapping? {
     val mapping = mapping ?: return null
     return mapping.languageMappings?.filter { it.importFileLanguage == null }
       ?.getOrThrowIfMoreThanOne {
@@ -228,9 +228,7 @@ class CoreImportFilesProcessor(
       }
   }
 
-  private fun FileProcessorContext.findExactLanguageMapping(
-    languageEntity: ImportLanguage,
-  ): SingleStepImportLanguageMapping? {
+  private fun FileProcessorContext.findExactLanguageMapping(languageEntity: ImportLanguage): LanguageMapping? {
     val mapping = this.mapping ?: return null
     return mapping.languageMappings?.filter { it.importFileLanguage == languageEntity.name }
       ?.getOrThrowIfMoreThanOne {

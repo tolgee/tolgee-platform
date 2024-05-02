@@ -2,7 +2,7 @@ package io.tolgee.dtos.dataImport
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.dtos.request.SingleStepImportPathMapping
+import io.tolgee.dtos.request.ImportFileMapping
 
 interface IImportAddFilesParams {
   var structureDelimiter: Char?
@@ -13,5 +13,5 @@ interface IImportAddFilesParams {
   @get:Schema(
     description = "Map of filename mapping to import mappings",
   )
-  var fileMappings: List<SingleStepImportPathMapping>
+  var fileMappings: List<ImportFileMapping>
 }

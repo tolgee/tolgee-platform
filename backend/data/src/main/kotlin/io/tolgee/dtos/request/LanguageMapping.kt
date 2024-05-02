@@ -1,6 +1,6 @@
 package io.tolgee.dtos.request
 
-class SingleStepImportLanguageMapping(
+class LanguageMapping(
   val importFileLanguage: String? = null,
   val existingLanguageTag: String,
 )

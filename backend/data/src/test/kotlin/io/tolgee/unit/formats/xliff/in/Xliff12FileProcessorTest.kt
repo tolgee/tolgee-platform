@@ -1,5 +1,7 @@
 package io.tolgee.unit.formats.xliff.`in`
 
+import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.xliff.`in`.Xliff12FileProcessor
 import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
@@ -223,6 +225,19 @@ class Xliff12FileProcessorTest {
           "%D this is java {1, number}",
         ),
     )
+  }
+
+  @Test
+  fun `respects provided format`() {
+    mockUtil.mockIt("en.xliff", "src/test/resources/import/xliff/icu.xliff")
+    mockUtil.fileProcessorContext.params.fileMappings =
+      listOf(ImportFileMapping(fileName = "en.xliff", format = ImportFormat.XLIFF_PHP))
+    processFile()
+    // it's escaped because ICU doesn't php doesn't contain ICU
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("Hello '{'icuPara'}'")
+      }
   }
 
   private fun mockPlaceholderConversionTestFile(

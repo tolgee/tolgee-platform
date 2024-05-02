@@ -6,7 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.SingleStepImportPathMapping
+import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.importCommon.wrapIfRequired
@@ -178,7 +178,7 @@ data class FileProcessorContext(
     }
   }
 
-  val mapping: SingleStepImportPathMapping? by lazy {
+  val mapping: ImportFileMapping? by lazy {
     this.params.fileMappings.filter { it.fileName == this.file.name }
       .getOrThrowIfMoreThanOne {
         BadRequestException(Message.TOO_MANY_MAPPINGS_FOR_FILE, listOf(this.file.name))

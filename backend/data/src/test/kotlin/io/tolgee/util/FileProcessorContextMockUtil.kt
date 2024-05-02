@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.Project
@@ -32,6 +33,7 @@ class FileProcessorContextMockUtil {
   lateinit var fileProcessorContext: FileProcessorContext
   lateinit var importServiceMock: ImportService
   lateinit var coreImportFileProcessor: CoreImportFilesProcessor
+  val params = ImportAddFilesParams()
 
   fun mockIt(
     fileName: String,
@@ -47,6 +49,7 @@ class FileProcessorContextMockUtil {
       FileProcessorContext(
         importFileDto,
         importFile,
+        params = ImportAddFilesParams(),
         applicationContext = applicationContextMock,
         importSettings = getImportSettings(convertPlaceholders),
         projectIcuPlaceholdersEnabled = projectIcuPlaceholdersEnabled,

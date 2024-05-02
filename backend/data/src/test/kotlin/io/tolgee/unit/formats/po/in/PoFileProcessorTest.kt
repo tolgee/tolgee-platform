@@ -2,6 +2,8 @@ package io.tolgee.unit.formats.po.`in`
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -160,6 +162,16 @@ class PoFileProcessorTest {
           "{0, plural,\none {Hallo # '{'icuParam'}'}\nother {Hallo # '{'icuParam'}'}\n}",
         ),
     )
+  }
+
+  @Test
+  fun `respects provided format`() {
+    mockUtil.mockIt("en.json", "src/test/resources/import/po/example.po")
+    mockUtil.fileProcessorContext.params.fileMappings =
+      listOf(ImportFileMapping(fileName = "en.po", format = ImportFormat.PO_ICU))
+    processFile()
+    // it's not converted to ICU
+    mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
   }
 
   private fun mockPlaceholderConversionTestFile(
