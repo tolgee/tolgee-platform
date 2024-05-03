@@ -54,6 +54,10 @@ class ContentDeliveryConfigRequest() : IExportParams {
 
   override var filterTag: String? = null
 
+  override var filterTagIn: List<String>? = null
+
+  override var filterTagNotIn: List<String>? = null
+
   override var filterKeyPrefix: String? = null
 
   override var filterState: List<TranslationState>? =

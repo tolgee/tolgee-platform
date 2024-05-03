@@ -83,6 +83,8 @@ class ExportDataProvider(
   private fun addWhereConditions() {
     filterProjectId()
     filterTag()
+    filterTagIn()
+    filterTagNot()
     filterKeyId()
     filterKeyIdNot()
     filterKeyPrefix()
@@ -100,6 +102,18 @@ class ExportDataProvider(
   private fun filterTag() {
     if (exportParams.filterTag != null) {
       whereConditions.add(tagJoin.get(Tag_.name).`in`(exportParams.filterTag))
+    }
+  }
+
+  private fun filterTagIn() {
+    if (exportParams.filterTagIn != null) {
+      whereConditions.add(tagJoin.get(Tag_.name).`in`(exportParams.filterTagIn))
+    }
+  }
+
+  private fun filterTagNot() {
+    if (exportParams.filterTagNotIn != null) {
+      whereConditions.add(cb.not(tagJoin.get(Tag_.name).`in`(exportParams.filterTagNotIn)))
     }
   }
 

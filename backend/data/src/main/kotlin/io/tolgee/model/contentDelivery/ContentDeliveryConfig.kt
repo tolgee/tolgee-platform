@@ -83,6 +83,16 @@ class ContentDeliveryConfig(
   @ActivityLoggedProp
   override var filterTag: String? = null
 
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  @ActivityLoggedProp
+  override var filterTagIn: List<String>? = null
+
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  @ActivityLoggedProp
+  override var filterTagNotIn: List<String>? = null
+
   @ActivityLoggedProp
   override var filterKeyPrefix: String? = null
 

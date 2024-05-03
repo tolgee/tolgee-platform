@@ -44,6 +44,8 @@ data class ExportParams(
     description = FILTER_TAG_DESCRIPTION,
   )
   override var filterTag: String? = null,
+  override var filterTagIn: List<String>? = null,
+  override var filterTagNotIn: List<String>? = null,
   @field:Parameter(
     description = FILTER_KEY_PREFIX_DESCRIPTION,
   )

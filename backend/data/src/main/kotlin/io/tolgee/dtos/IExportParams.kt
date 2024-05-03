@@ -56,6 +56,10 @@ interface IExportParams {
   )
   var filterTag: String?
 
+  var filterTagIn: List<String>?
+
+  var filterTagNotIn: List<String>?
+
   @get:Schema(
     description = FILTER_KEY_PREFIX_DESCRIPTION,
   )
@@ -83,6 +87,8 @@ interface IExportParams {
     this.filterKeyId = other.filterKeyId
     this.filterKeyIdNot = other.filterKeyIdNot
     this.filterTag = other.filterTag
+    this.filterTagIn = other.filterTagIn
+    this.filterTagNotIn = other.filterTagNotIn
     this.filterKeyPrefix = other.filterKeyPrefix
     this.filterState = other.filterState
     this.filterNamespace = other.filterNamespace

@@ -27,6 +27,8 @@ class ContentDeliveryConfigModel(
   override var filterKeyId: List<Long>? = null
   override var filterKeyIdNot: List<Long>? = null
   override var filterTag: String? = null
+  override var filterTagIn: List<String>? = null
+  override var filterTagNotIn: List<String>? = null
   override var filterKeyPrefix: String? = null
   override var filterState: List<TranslationState>? = null
   override var filterNamespace: List<String?>? = null
