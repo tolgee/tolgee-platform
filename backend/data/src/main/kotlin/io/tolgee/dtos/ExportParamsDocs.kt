@@ -24,7 +24,13 @@ e.g. Key hello[0] will be exported as {"hello": ["..."]}"""
 
   const val FILTER_KEY_ID_NOT_DESCRIPTION = """Filter key IDs not to be contained in export"""
 
-  const val FILTER_TAG_DESCRIPTION = """Filter keys tagged by"""
+  const val FILTER_TAG_DESCRIPTION = """Filter keys tagged by.
+
+This filter works the same as `filterTagIn` but in this cases it accepts single tag only."""
+
+  const val FILTER_TAG_IN_DESCRIPTION = """Filter keys tagged by one of provided tags"""
+
+  const val FILTER_TAG_NOT_IN_DESCRIPTION = """Filter keys not tagged by one of provided tags"""
 
   const val FILTER_KEY_PREFIX_DESCRIPTION = """Filter keys with prefix"""
 

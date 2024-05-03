@@ -9,6 +9,8 @@ import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_NAMESPACE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_STATE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_IN_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_NOT_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
@@ -56,8 +58,14 @@ interface IExportParams {
   )
   var filterTag: String?
 
+  @get:Schema(
+    description = FILTER_TAG_IN_DESCRIPTION,
+  )
   var filterTagIn: List<String>?
 
+  @get:Schema(
+    description = FILTER_TAG_NOT_IN_DESCRIPTION,
+  )
   var filterTagNotIn: List<String>?
 
   @get:Schema(

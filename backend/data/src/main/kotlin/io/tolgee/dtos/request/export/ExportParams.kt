@@ -8,6 +8,8 @@ import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_NAMESPACE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_STATE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_IN_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_NOT_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
@@ -44,7 +46,13 @@ data class ExportParams(
     description = FILTER_TAG_DESCRIPTION,
   )
   override var filterTag: String? = null,
+  @field:Parameter(
+    description = FILTER_TAG_IN_DESCRIPTION,
+  )
   override var filterTagIn: List<String>? = null,
+  @field:Parameter(
+    description = FILTER_TAG_NOT_IN_DESCRIPTION,
+  )
   override var filterTagNotIn: List<String>? = null,
   @field:Parameter(
     description = FILTER_KEY_PREFIX_DESCRIPTION,
