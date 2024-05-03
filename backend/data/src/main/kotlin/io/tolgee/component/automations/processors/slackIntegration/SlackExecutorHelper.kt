@@ -477,7 +477,7 @@ class SlackExecutorHelper(
           }
         },
       )
-      .color("#EC407A")
+      .color("#00000000")
       .build()
 
   private fun ActionsBlockBuilder.redirectOnPlatformButton() {
@@ -488,6 +488,7 @@ class SlackExecutorHelper(
       value("redirect")
       url(tolgeeUrl)
       actionId("button_redirect_to_tolgee")
+      style("danger")
     }
   }
 
