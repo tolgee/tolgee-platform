@@ -10,16 +10,18 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
     description =
       "Whether to override existing translation data.\n\n" +
         "When set to `KEEP`, existing translations will be kept.\n\n" +
-        "When set to `OVERRIDE`, existing translations will be overridden.\n\n" +
+        "When set to `OVERRIDE`, existing translations will be overwrote.\n\n" +
         "When set to `NO_FORCE`, error will be thrown on conflict.",
   )
   val forceMode: ForceMode = ForceMode.KEEP
 
   @Schema(
     description =
-      "This field maps the languages from imported files to languages existing in the Tolgee platform.\n\n" +
-        "Use this field only when your files contain multiple languages (e.g, XLIFF files).\n\n" +
-        "Otherwise, use the `languages` property of `fileMappings`.",
+      "Maps the languages from imported files to languages existing in the Tolgee platform.\n\n" +
+        "Use this field only when your files contain multiple languages (e.g., XLIFF files).\n\n" +
+        "Otherwise, use the `languageTag` property of `fileMappings`.\n\n" +
+        "Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` " +
+        "element. Using this field you can map source and target values to languages stored in the Tolgee Platform.",
   )
   val languageMappings: List<LanguageMapping>? = null
 

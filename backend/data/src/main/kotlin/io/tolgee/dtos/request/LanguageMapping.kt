@@ -5,8 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 class LanguageMapping(
   @Schema(
     description =
-      "The language from the imported file. For xliff files, this is the `source-language` or the `target-language` " +
-        "attribute of `file` element.",
+      "The language from the imported file.\n\n" +
+        "For xliff files, this is the `source-language` or the `target-language` " +
+        "attribute value of `file` element.",
     example = "en-US",
   )
   val importLanguage: String,
