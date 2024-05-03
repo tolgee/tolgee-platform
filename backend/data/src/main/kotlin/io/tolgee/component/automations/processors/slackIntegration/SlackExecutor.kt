@@ -97,7 +97,6 @@ class SlackExecutor(
     }
 
     val additionalAttachments: MutableList<Attachment> = mutableListOf()
-
     languagesToAdd.forEach { lang ->
       val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, message.keyId)
       attachment?.let {
@@ -110,6 +109,16 @@ class SlackExecutor(
     val updatedMessageDto = message.copy(attachments = updatedAttachments, langTag = updatedLanguages)
 
     updateMessage(savedMsg, config, updatedMessageDto)
+  }
+
+  fun sortSoBaseLanguageFirst(attachments: MutableList<Attachment>): MutableList<Attachment> {
+    val baseLanguageAttachmentIndex = attachments.indexOfFirst { it.blocks[0].toString().contains("(base)") }
+    if (baseLanguageAttachmentIndex != -1) {
+      val baseLanguageAttachment = attachments[baseLanguageAttachmentIndex]
+      attachments.removeAt(baseLanguageAttachmentIndex)
+      attachments.add(0, baseLanguageAttachment)
+    }
+    return attachments
   }
 
   fun sendMessageOnKeyAdded(
@@ -190,7 +199,7 @@ class SlackExecutor(
         request
           .channel(config.channelId)
           .ts(savedMessage.messageTs)
-          .attachments(messageDto.attachments)
+          .attachments(sortSoBaseLanguageFirst(messageDto.attachments.toMutableList()))
         if (messageDto.blocks.isNotEmpty()) {
           request.blocks(messageDto.blocks)
         }
@@ -212,7 +221,7 @@ class SlackExecutor(
       slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatPostMessage { request ->
         request.channel(config.channelId)
           .blocks(messageDto.blocks)
-          .attachments(messageDto.attachments)
+          .attachments(sortSoBaseLanguageFirst(messageDto.attachments.toMutableList()))
       }
     if (response.isOk) {
       saveMessage(messageDto, response.ts, config)
