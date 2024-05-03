@@ -197,7 +197,6 @@ class SlackExecutorHelper(
       attachments = listOf(createRedirectButton()),
       0L,
       setOf(),
-      false,
     )
   }
 
@@ -220,25 +219,30 @@ class SlackExecutorHelper(
 
     data.activityData?.modifiedEntities?.forEach modifiedEntities@{ (_, modifiedEntityList) ->
       modifiedEntityList.forEach { modifiedEntity ->
-        //  modifiedEntity.entityId
         val translationKey = modifiedEntity.entityId
-        result.add(processTranslationChange(translationKey) ?: return@modifiedEntities)
+        val translation = findTranslationByKey(translationKey) ?: return@modifiedEntities
+        result.add(processTranslationChange(translation) ?: return@modifiedEntities)
+
+        val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return@modifiedEntities
+        if (baseLanguageTag == translation.language.tag) {
+          return@modifiedEntities
+        }
       }
     }
 
     return result
   }
 
-  private fun processTranslationChange(translationKey: Long): SavedMessageDto? {
-    val translation = findTranslationByKey(translationKey) ?: return null
+  private fun processTranslationChange(translation: Translation): SavedMessageDto? {
     val key = translation.key
     val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return null
     val modifiedLangTag = translation.language.tag
+    val isBaseChanged = modifiedLangTag == baseLanguageTag
 
     if (!shouldProcessEventTranslationChanged(modifiedLangTag, baseLanguageTag, modifiedLangTag)) return null
 
     val langName =
-      if (translation.language.tag == baseLanguageTag) {
+      if (isBaseChanged) {
         "base language"
       } else {
         translation.language.name
@@ -260,6 +264,7 @@ class SlackExecutorHelper(
         keyId = key.id,
         langTag = langTags,
         false,
+        isBaseChanged,
       )
     }
   }

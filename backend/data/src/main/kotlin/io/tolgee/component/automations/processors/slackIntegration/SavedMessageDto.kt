@@ -8,5 +8,6 @@ data class SavedMessageDto(
   val attachments: List<Attachment>,
   val keyId: Long,
   val langTag: Set<String>,
-  val createdKeyBlocks: Boolean,
+  val createdKeyBlocks: Boolean = false,
+  val baseChanged: Boolean = false,
 )
