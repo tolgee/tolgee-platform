@@ -3,6 +3,7 @@ package io.tolgee.formats.properties.out
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import org.apache.commons.configuration2.PropertiesConfiguration
@@ -19,11 +20,11 @@ import java.io.StringWriter
 import java.io.Writer
 
 class PropertiesFileExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   private val projectIcuPlaceholdersSupport: Boolean,
 ) : FileExporter {
-  override val fileExtension: String = "properties"
+  private val fileExtension: String = "properties"
 
   val result: MutableMap<String, PropertiesConfiguration> = mutableMapOf()
 
@@ -69,7 +70,14 @@ class PropertiesFileExporter(
   }
 
   private fun computeFileName(translation: ExportTranslationView): String {
-    return translation.getFilePath()
+    return filePathProvider.getFilePath(translation)
+  }
+
+  private val filePathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      fileExtension,
+    )
   }
 }
 

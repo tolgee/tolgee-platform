@@ -8,18 +8,19 @@ import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
 import io.tolgee.model.ILanguage
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class XliffFileExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
   val projectIcuPlaceholdersSupport: Boolean,
 ) : FileExporter {
-  override val fileExtension: String = ExportFormat.XLIFF.extension
+  val fileExtension: String = ExportFormat.XLIFF.extension
 
   /**
    * Path -> Xliff Model
@@ -76,7 +77,7 @@ class XliffFileExporter(
   }
 
   private fun getResultXliffFile(translation: ExportTranslationView): XliffFile {
-    val absolutePath = translation.getFilePath()
+    val absolutePath = filePathProvider.getFilePath(translation)
     return models.computeIfAbsent(absolutePath) {
       XliffModel().apply {
         files.add(
@@ -87,5 +88,12 @@ class XliffFileExporter(
         )
       }
     }.files.first()
+  }
+
+  private val filePathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      fileExtension,
+    )
   }
 }

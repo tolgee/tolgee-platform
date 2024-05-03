@@ -11,12 +11,12 @@ import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class JsonFileExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   projectIcuPlaceholdersSupport: Boolean,
   val objectMapper: ObjectMapper,
 ) : FileExporter {
-  override val fileExtension: String = ExportFormat.JSON.extension
+  private val fileExtension: String = ExportFormat.JSON.extension
 
   private val messageFormat =
     when (exportParams.format) {

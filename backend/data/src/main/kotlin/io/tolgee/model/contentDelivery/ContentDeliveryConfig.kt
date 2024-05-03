@@ -113,4 +113,7 @@ class ContentDeliveryConfig(
   @Enumerated(EnumType.STRING)
   @ActivityLoggedProp
   override var messageFormat: ExportMessageFormat? = null
+
+  @ActivityLoggedProp
+  override var fileStructureTemplate: String? = null
 }

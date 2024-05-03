@@ -78,6 +78,10 @@ data class ExportParams(
     description = MESSAGE_FORMAT_DESCRIPTION,
   )
   override var messageFormat: ExportMessageFormat? = null,
+  @field:Parameter(
+    description = ExportParamsDocs.FILE_STRUCTURE_TEMPLATE_DESCRIPTION,
+  )
+  override var fileStructureTemplate: String? = null,
 ) : IExportParams {
   @field:Parameter(description = SUPPORT_ARRAYS_DESCRIPTION)
   override var supportArrays: Boolean = false

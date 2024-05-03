@@ -6,12 +6,10 @@ import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class AppleStringsStringsdictExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
-  override val fileExtension: String = ""
-
   private val preparedFiles = mutableMapOf<String, PreparedFile>()
 
   override fun produceFiles(): Map<String, InputStream> {

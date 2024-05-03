@@ -51,4 +51,13 @@ For specific formats like `YAML_RUBY` it's ignored."""
   const val ZIP_DESCRIPTION = """If false, it doesn't return zip of files, but it returns single file.
       
 This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response."""
+
+  const val FILE_STRUCTURE_TEMPLATE_DESCRIPTION =
+    """This is a template that defines the structure of the resulting .zip file content.
+
+The template is a string that can contain the following placeholders: {namespace}, {languageTag}, {extension}. 
+
+For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`, 
+the English translations of the `home` namespace will be stored in `home/en.json`.
+    """
 }

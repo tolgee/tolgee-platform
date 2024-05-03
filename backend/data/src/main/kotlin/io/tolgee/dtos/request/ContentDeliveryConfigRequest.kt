@@ -67,5 +67,8 @@ class ContentDeliveryConfigRequest() : IExportParams {
     )
 
   override var filterNamespace: List<String?>? = null
+
   override var messageFormat: ExportMessageFormat? = null
+
+  override var fileStructureTemplate: String? = null
 }

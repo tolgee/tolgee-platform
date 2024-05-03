@@ -1,6 +1,5 @@
 package io.tolgee.formats.android.out
 
-import com.ibm.icu.util.ULocale
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
@@ -12,13 +11,14 @@ import io.tolgee.formats.android.StringArrayItem
 import io.tolgee.formats.android.StringArrayUnit
 import io.tolgee.formats.android.StringUnit
 import io.tolgee.formats.populateForms
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class AndroidStringsXmlExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
   /**
@@ -89,7 +89,7 @@ class AndroidStringsXmlExporter(
   ) {
     val normalizedKeyName = keyNameWithoutIndex.normalizedKeyName()
     val isExactKeyName = normalizedKeyName == keyNameWithoutIndex
-    val units = getFileUnits(translation.languageTag)
+    val units = getFileUnits(translation)
     val text = getConvertedMessage(translation, false).singleResult!!
     units.compute(normalizedKeyName) { _, stringsArrayWrapper ->
       when {
@@ -157,7 +157,7 @@ class AndroidStringsXmlExporter(
     val keyName = translation.key.name
     val normalizedName = keyName.normalizedKeyName()
     val isExactKeyName = normalizedName == keyName
-    val units = getFileUnits(translation.languageTag)
+    val units = getFileUnits(translation)
     val existingUnit = units[normalizedName]
 
     // key with exact name was added before
@@ -178,22 +178,18 @@ class AndroidStringsXmlExporter(
     val exactKeyName: String,
   )
 
-  private fun getFileUnits(languageTag: String): MutableMap<String, NodeWrapper> {
-    val folderName = convertBCP47ToAndroidResourceFormat(languageTag)
-    val filePath = "$folderName/strings.xml"
+  private fun getFileUnits(translation: ExportTranslationView): MutableMap<String, NodeWrapper> {
+    val filePath =
+      pathProvider.getFilePath(languageTag = translation.languageTag, namespace = translation.key.namespace)
     return fileUnits.computeIfAbsent(filePath) { mutableMapOf() }
   }
 
-  private fun convertBCP47ToAndroidResourceFormat(languageTag: String): String {
-    val uLocale = ULocale.forLanguageTag(languageTag)
-    val language = uLocale.language
-    val country = uLocale.country // assuming you have a region in your bcp47Tag
-
-    return if (country.isEmpty()) {
-      "values-$language"
-    } else {
-      "values-$language-r$country"
-    }
+  val pathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      "xml",
+      defaultTemplate = "values-{androidLanguageTag}/strings.xml",
+    )
   }
 
   private fun getConvertedMessage(
@@ -209,9 +205,6 @@ class AndroidStringsXmlExporter(
 
     return converted
   }
-
-  override val fileExtension: String
-    get() = "xml"
 
   override fun produceFiles(): Map<String, InputStream> {
     return getModels().map { (path, model) ->
