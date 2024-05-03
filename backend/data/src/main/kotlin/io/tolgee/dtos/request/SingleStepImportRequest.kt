@@ -14,6 +14,15 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "When set to `NO_FORCE`, error will be thrown on conflict.",
   )
   val forceMode: ForceMode = ForceMode.KEEP
+
+  @Schema(
+    description =
+      "This field maps the languages from imported files to languages existing in the Tolgee platform.\n\n" +
+        "Use this field only when your files contain multiple languages (e.g, XLIFF files).\n\n" +
+        "Otherwise, use the `languages` property of `fileMappings`.",
+  )
+  val languageMappings: List<LanguageMapping>? = null
+
   override var overrideKeyDescriptions: Boolean = false
   override var convertPlaceholdersToIcu: Boolean = true
 

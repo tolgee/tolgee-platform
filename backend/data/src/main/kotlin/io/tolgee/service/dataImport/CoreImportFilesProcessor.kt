@@ -7,7 +7,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.LanguageMapping
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
@@ -215,25 +214,24 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.findExistingLanguageInMappings(languageEntity: ImportLanguage): LanguageDto? {
-    val mapping = findExactLanguageMapping(languageEntity) ?: findNullLanguageMapping()
-    val mappedLanguageTag = mapping?.existingLanguageTag ?: return null
-    return existingLanguages.find { it.tag == mappedLanguageTag }
+    val desiredTag = findInLanguageMappings(languageEntity) ?: findFileLanguageMapping() ?: return null
+    return existingLanguages.find { it.tag == desiredTag }
   }
 
-  private fun FileProcessorContext.findNullLanguageMapping(): LanguageMapping? {
+  private fun FileProcessorContext.findFileLanguageMapping(): String? {
     val mapping = mapping ?: return null
-    return mapping.languageMappings?.filter { it.importFileLanguage == null }
-      ?.getOrThrowIfMoreThanOne {
-        BadRequestException(Message.MULTIPLE_MAPPINGS_FOR_NULL_FILE_LANGUAGE_NAME)
-      }
+    return mapping.languageTag
   }
 
-  private fun FileProcessorContext.findExactLanguageMapping(languageEntity: ImportLanguage): LanguageMapping? {
-    val mapping = this.mapping ?: return null
-    return mapping.languageMappings?.filter { it.importFileLanguage == languageEntity.name }
-      ?.getOrThrowIfMoreThanOne {
-        BadRequestException(Message.MULTIPLE_MAPPINGS_FOR_SAME_FILE_LANGUAGE_NAME)
-      }
+  private fun FileProcessorContext.findInLanguageMappings(languageEntity: ImportLanguage): String? {
+    val languageMappings = singleStepImportParams?.languageMappings ?: return null
+    val found =
+      languageMappings.filter { it.importLanguage == languageEntity.name }
+        .getOrThrowIfMoreThanOne {
+          BadRequestException(Message.MULTIPLE_MAPPINGS_FOR_SAME_FILE_LANGUAGE_NAME)
+        }
+
+    return found?.platformLanguageTag
   }
 
   private fun addToStoredTranslations(translation: ImportTranslation) {

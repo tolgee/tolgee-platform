@@ -5,17 +5,16 @@ import io.swagger.v3.oas.annotations.media.Schema
 class LanguageMapping(
   @Schema(
     description =
-      "The language from the imported file. This is only case of files supporting multiple languages " +
-        "like XLIFF, where you specify the source and target languages. " +
-        "For files containing single language values, keep this `null`.",
+      "The language from the imported file. For xliff files, this is the `source-language` or the `target-language` " +
+        "attribute of `file` element.",
     example = "en-US",
   )
-  val importFileLanguage: String? = null,
+  val importLanguage: String,
   @Schema(
     description =
       "The tag of language existing in the Tolgee platform to which the imported " +
         "language should be mapped.",
     example = "en-US",
   )
-  val existingLanguageTag: String,
+  val platformLanguageTag: String,
 )

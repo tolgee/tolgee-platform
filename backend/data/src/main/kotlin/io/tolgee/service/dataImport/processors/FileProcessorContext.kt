@@ -180,7 +180,7 @@ data class FileProcessorContext(
   }
 
   val mapping: ImportFileMapping? by lazy {
-    val mappings = (params as? SingleStepImportRequest)?.fileMappings ?: return@lazy null
+    val mappings = singleStepImportParams?.fileMappings ?: return@lazy null
 
     mappings.filter { it.fileName == this.file.name }
       .getOrThrowIfMoreThanOne {
@@ -188,7 +188,9 @@ data class FileProcessorContext(
       }
   }
 
-  val customValuesValidator: KeyCustomValuesValidator by lazy {
+  val singleStepImportParams get() = (params as? SingleStepImportRequest)
+
+  private val customValuesValidator: KeyCustomValuesValidator by lazy {
     applicationContext.getBean(KeyCustomValuesValidator::class.java)
   }
 }

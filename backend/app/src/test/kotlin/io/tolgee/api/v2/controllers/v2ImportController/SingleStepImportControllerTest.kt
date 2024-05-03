@@ -52,7 +52,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       listOf(Pair(jsonFileName, simpleJson)),
       getFileMappings(
         jsonFileName,
-        listOf(mapOf("existingLanguageTag" to "de")),
+        languageTag = "de",
       ),
     )
     getTestTranslation().language.tag.assert.isEqualTo("de")
@@ -123,7 +123,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       listOf(Pair("import.xml", simpleJson)),
       getFileMappings(
         "import.xml",
-        requestLanguageMappings = getRequestLanguageMappings(mapOf(null to "en")),
+        languageTag = "en",
         format = "JSON_ICU",
       ),
     ).andIsOk
@@ -136,33 +136,35 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     getTestKeyTranslations().find { it.language.tag == "en" }!!.text.assert.isEqualTo("Test en")
   }
 
-  private fun getSimpleXliffMapping(languageMappings: Map<String?, String>): Map<String, List<Map<String, Any?>>> {
+  private fun getSimpleXliffMapping(languageMappings: Map<String?, String>): Map<String, List<Map<String, Any?>>?> {
     val requestLanguageMappings = getRequestLanguageMappings(languageMappings)
 
-    return getFileMappings(xliffFileName, requestLanguageMappings)
+    return getFileMappings(xliffFileName, requestLanguageMappings = requestLanguageMappings)
   }
 
   private fun getRequestLanguageMappings(languageMappings: Map<String?, String>) =
     languageMappings.map { (import, existing) ->
       mapOf(
-        "importFileLanguage" to import,
-        "existingLanguageTag" to existing,
+        "importLanguage" to import,
+        "platformLanguageTag" to existing,
       )
     }
 
   private fun getFileMappings(
     fileName: String,
+    languageTag: String? = null,
     requestLanguageMappings: List<Map<String, String?>>? = null,
     namespace: String? = null,
     format: String? = null,
-  ): Map<String, List<Map<String, Any?>>> {
+  ): Map<String, List<Map<String, Any?>>?> {
     return mapOf(
+      "languageMappings" to requestLanguageMappings,
       "fileMappings" to
         listOf(
           mapOf(
             "fileName" to fileName,
             "namespace" to namespace,
-            "languageMappings" to requestLanguageMappings,
+            "languageTag" to languageTag,
             "format" to format,
           ),
         ),
