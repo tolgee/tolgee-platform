@@ -350,6 +350,11 @@ export class LINKS {
   static PROJECT_STORAGE = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'storage');
   static PROJECT_WEBHOOKS = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'webhooks');
 
+  static GO_TO_PROJECT_ACTIVITY_DETAIL = Link.ofParent(
+    LINKS.PROJECT,
+    'activity-detail'
+  );
+
   /**
    * Slack
    */

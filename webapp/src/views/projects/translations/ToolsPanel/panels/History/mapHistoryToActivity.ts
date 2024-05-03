@@ -23,6 +23,7 @@ export const mapHistoryToActivity = (
         {
           entityId: 0,
           modifications: data.modifications,
+          entityClass: 'Translation',
         },
       ],
     },

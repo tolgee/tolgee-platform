@@ -18,6 +18,7 @@ import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
 import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
+import { ActivityDetailRedirect } from 'tg.component/security/ActivityDetailRedirect';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -78,6 +79,10 @@ export const ProjectRouter = () => {
 
             <Route path={LINKS.PROJECT_DEVELOPER.template}>
               <DeveloperView />
+            </Route>
+
+            <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
+              <ActivityDetailRedirect />
             </Route>
 
             {/*
