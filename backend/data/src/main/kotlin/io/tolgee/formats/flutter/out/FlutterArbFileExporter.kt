@@ -81,7 +81,7 @@ class FlutterArbFileExporter(
     ExportFilePathProvider(
       exportParams,
       "arb",
-      "app_{snakeLanguageTag}.arb",
+      "app_{snakeLanguageTag}.{extension}",
     )
   }
 

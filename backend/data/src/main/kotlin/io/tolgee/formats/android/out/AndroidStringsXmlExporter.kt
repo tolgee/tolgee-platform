@@ -184,11 +184,11 @@ class AndroidStringsXmlExporter(
     return fileUnits.computeIfAbsent(filePath) { mutableMapOf() }
   }
 
-  val pathProvider by lazy {
+  private val pathProvider by lazy {
     ExportFilePathProvider(
       exportParams,
       "xml",
-      defaultTemplate = "values-{androidLanguageTag}/strings.xml",
+      defaultTemplate = "values-{androidLanguageTag}/strings.{extension}",
     )
   }
 
