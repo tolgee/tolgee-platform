@@ -1,5 +1,6 @@
 package io.tolgee.component.automations.processors.slackIntegration
 
+import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
@@ -14,65 +15,132 @@ class SlackHelpBlocksProvider(
         markdownText(i18n.translate("help-intro"))
       }
       divider()
+
       section {
-        markdownText(i18n.translate("help-subscribe"))
+        markdownText(i18n.translate("help-subscribe-to-project"))
       }
 
       section {
-        markdownText(i18n.translate("help-subscribe-command"))
+        fields {
+          markdownText(i18n.translate("help-subscribe"))
+
+          markdownText(i18n.translate("help-subscribe-command"))
+        }
       }
 
       section {
-        markdownText(i18n.translate("help-subscribe-events"))
+        fields {
+          markdownText(i18n.translate("help-unsubscribe"))
+
+          markdownText(i18n.translate("help-unsubscribe-command"))
+        }
       }
 
       section {
-        markdownText(i18n.translate("help-subscribe-all-event"))
+        fields {
+          markdownText(i18n.translate("help-show-subscriptions"))
+          markdownText(i18n.translate("help-show-subscriptions-command"))
+        }
       }
 
       section {
-        markdownText(i18n.translate("help-subscribe-new-key-event"))
+        markdownText(i18n.translate("help-subscribe-default-subscription"))
       }
 
-      section {
-        markdownText(i18n.translate("help-subscribe-base-changed-event"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-subscribe-translation-change-event"))
-      }
-
-      divider()
-      section {
-        markdownText(i18n.translate("help-unsubscribe"))
-      }
-
-      section {
-        markdownText(i18n.translate("help-unsubscribe-command"))
-      }
-
-      divider()
-      section {
-        markdownText(i18n.translate("help-show-subscriptions"))
-      }
-      section {
-        markdownText(i18n.translate("help-show-subscriptions-command"))
+      actions {
+        advancedCommandsButton()
       }
 
       divider()
+
       section {
-        markdownText(i18n.translate("help-connect-tolgee"))
+        markdownText(i18n.translate("help-account"))
       }
+
       section {
-        markdownText(i18n.translate("help-connect-tolgee-command"))
+        fields {
+          markdownText(i18n.translate("help-connect-tolgee"))
+          markdownText(i18n.translate("help-connect-tolgee-command"))
+        }
+      }
+
+      section {
+        fields {
+          markdownText(i18n.translate("help-disconnect-tolgee"))
+          markdownText(i18n.translate("help-disconnect-tolgee-command"))
+        }
       }
 
       divider()
+
       section {
-        markdownText(i18n.translate("help-disconnect-tolgee"))
+        markdownText(i18n.translate("help-more"))
       }
-      section {
-        markdownText(i18n.translate("help-disconnect-tolgee-command"))
+
+      actions {
+        contactSupportButton()
+
+        docsButton()
       }
     }
+
+  fun getAdvancedSubscriptionHelpBlocks() =
+    withBlocks {
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-intro"))
+      }
+
+      divider()
+
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-language"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-language-info"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-language-example"))
+      }
+
+      divider()
+
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-events"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-events-info"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-events-usage"))
+      }
+
+      section {
+        markdownText(i18n.translate("help-advanced-subscribe-events-example"))
+      }
+    }
+
+  private fun ActionsBlockBuilder.advancedCommandsButton() {
+    button {
+      text(i18n.translate("help-button-advanced-subscribe"), emoji = true)
+      value("help_advanced_subscribe_btn")
+    }
+  }
+
+  private fun ActionsBlockBuilder.contactSupportButton() {
+    button {
+      text(i18n.translate("help-button-contact-support"), emoji = true)
+      actionId("contact_support_btn")
+    }
+  }
+
+  private fun ActionsBlockBuilder.docsButton() {
+    button {
+      text(i18n.translate("help-button-docs"), emoji = true)
+      actionId("docs_btn")
+    }
+  }
 }

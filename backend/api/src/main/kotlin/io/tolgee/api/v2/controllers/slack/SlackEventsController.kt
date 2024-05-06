@@ -55,6 +55,13 @@ class SlackEventsController(
               event.channel.id,
               slackHelpBlocksProvider.getHelpBlocks(),
             )
+
+          "help_advanced_subscribe_btn" ->
+            slackExecutor.sendBlocksMessage(
+              event.team.id,
+              event.channel.id,
+              slackHelpBlocksProvider.getAdvancedSubscriptionHelpBlocks(),
+            )
         }
       }
     } catch (e: SlackErrorException) {
