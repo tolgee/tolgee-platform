@@ -6,10 +6,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { buildActivity } from '../activityTools';
 import { ActivityTitle } from '../ActivityTitle';
 import { ActivityFields } from './CompactFields';
-import { useState } from 'react';
-import { Field } from '../types';
+import { ActivityModel, Field } from '../types';
 import { ActivityUser } from '../ActivityUser';
-import { ActivityDetailDialog } from '../ActivityDetail/ActivityDetailDialog';
 import { actionsConfiguration } from '../configuration';
 
 type ProjectActivityModel = components['schemas']['ProjectActivityModel'];
@@ -75,11 +73,11 @@ const StyledMoreIndicator = styled(Box)`
 type Props = {
   data: ProjectActivityModel;
   diffEnabled: boolean;
+  onDetailOpen: (data: ActivityModel) => void;
 };
 
-export const ActivityCompact = ({ data, diffEnabled }: Props) => {
+export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
   const activity = useMemo(() => buildActivity(data, true), [data]);
-  const [detailOpen, setDetailOpen] = useState(false);
 
   let fieldsNum = 0;
 
@@ -99,15 +97,15 @@ export const ActivityCompact = ({ data, diffEnabled }: Props) => {
   });
 
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="activity-compact">
       <StyledUser>
         <ActivityUser item={data} onlyTime />
       </StyledUser>
-      <StyledContent data-cy="activity-compact">
+      <StyledContent>
         <ActivityTitle activity={activity} />
         <ActivityFields fields={limitedFields} diffEnabled={diffEnabled} />
         {fieldsNum > maxFields && (
-          <StyledMoreIndicator onClick={() => setDetailOpen(true)}>
+          <StyledMoreIndicator onClick={() => onDetailOpen(data)}>
             ...
           </StyledMoreIndicator>
         )}
@@ -115,22 +113,14 @@ export const ActivityCompact = ({ data, diffEnabled }: Props) => {
       </StyledContent>
       <StyledAction>
         <IconButton
+          data-cy="activity-compact-detail-button"
           className="showOnMouseOver"
           size="small"
-          onClick={() => setDetailOpen(true)}
+          onClick={() => onDetailOpen(data)}
         >
           <MoreVert />
         </IconButton>
       </StyledAction>
-      {detailOpen && (
-        <ActivityDetailDialog
-          data={data}
-          initialDiffEnabled={diffEnabled}
-          open={detailOpen}
-          onClose={() => setDetailOpen(false)}
-          maxWidth="lg"
-        />
-      )}
     </StyledContainer>
   );
 };

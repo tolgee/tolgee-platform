@@ -47,6 +47,19 @@ describe('Project stats', () => {
       .should('be.visible');
     cy.gcy('activity-compact').contains('Created key').should('be.visible');
     cy.gcy('activity-compact').contains('Created project').should('be.visible');
+
+    openActivityDetail('Created key');
+
+    // activity is accessible through external link
+    cy.url().then((url) => {
+      const activityId = new URL(url).searchParams.get('activity');
+      const projectId = new URL(url).pathname.match(/[0-9]+/)[0];
+      cy.visit(
+        HOST + `/projects/${projectId}/activity-detail?activity=${activityId}`
+      );
+      cy.waitForDom();
+      cy.gcy('activity-detail-dialog').contains('Created key');
+    });
   });
 
   it('Global statistics', () => {
@@ -85,6 +98,15 @@ describe('Project stats', () => {
     checkLabelRow('Untranslated', '25%', 2, 1);
   });
 });
+
+const openActivityDetail = (label: string) => {
+  cy.gcy('activity-compact')
+    .contains(label)
+    .closestDcy('activity-compact')
+    .findDcy('activity-compact-detail-button')
+    .click({ force: true });
+  cy.gcy('activity-detail-dialog').contains(label);
+};
 
 const checkLabelRow = (
   state: string,

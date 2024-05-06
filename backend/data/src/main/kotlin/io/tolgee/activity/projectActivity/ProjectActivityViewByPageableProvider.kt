@@ -1,4 +1,4 @@
-package io.tolgee.activity.projectActivityView
+package io.tolgee.activity.projectActivity
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.model.activity.ActivityRevision
@@ -24,7 +24,7 @@ class ProjectActivityViewByPageableProvider(
     projectId: Long,
     pageable: Pageable,
   ): Page<ActivityRevision> {
-    val types = ActivityType.values().filter { !it.hideInList }
+    val types = ActivityType.entries.filter { !it.hideInList }
     return activityRevisionRepository.getForProject(projectId, pageable, types)
   }
 

@@ -1,7 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.activity.projectActivityView.ActivityViewByRevisionsProvider
+import io.tolgee.activity.projectActivity.ActivityViewByRevisionsProvider
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.activity.ActivityRevision

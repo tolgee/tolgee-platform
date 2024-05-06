@@ -36,11 +36,13 @@ const StyledSeparator = styled(Box)`
 type Props = {
   activity: Activity;
   diffEnabled: boolean;
+  showAllReferences?: boolean;
 };
 
 export const ActivityEntities: React.FC<Props> = ({
   activity,
   diffEnabled,
+  showAllReferences,
 }) => {
   return (
     <StyledFields>
@@ -53,7 +55,10 @@ export const ActivityEntities: React.FC<Props> = ({
             <StyledSeparator gridColumn="1 / span 2" />
             <StyledEntityTitle sx={{ gridColumn: '1 / span 2' }}>
               {entity.options.label?.()}
-              <EntityDescription entity={entity} />
+              <EntityDescription
+                entity={entity}
+                showAllReferences={showAllReferences}
+              />
             </StyledEntityTitle>
             {entity.fields.map((field, i) => {
               const label = field.options.label;
