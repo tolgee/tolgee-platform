@@ -55,9 +55,15 @@ This is possible only when single language is exported. Otherwise it returns "40
   const val FILE_STRUCTURE_TEMPLATE_DESCRIPTION =
     """This is a template that defines the structure of the resulting .zip file content.
 
-The template is a string that can contain the following placeholders: {namespace}, {languageTag}, {extension}. 
+The template is a string that can contain the following placeholders: {namespace}, {languageTag}, 
+{androidLanguageTag}, {snakeLanguageTag}, {extension}. 
 
 For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`, 
 the English translations of the `home` namespace will be stored in `home/en.json`.
-    """
+
+The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+
+The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}` 
+but in Android format. (e.g., en-rUS)
+"""
 }
