@@ -83,7 +83,6 @@ class SlackSlashCommandController(
         "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackResponseString
 
         "logout" -> logout(payload.user_id).asSlackResponseString
-
         else -> {
           throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
         }

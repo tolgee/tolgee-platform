@@ -482,7 +482,7 @@ class SlackExecutorHelper(
       .build()
 
   private fun ActionsBlockBuilder.redirectOnPlatformButton() {
-    val tolgeeUrl = "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/translations"
+    val tolgeeUrl = "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/activity-detail?activity=${data.activityData?.revisionId}"
 
     button {
       text(i18n.translate("tolgee_redirect_button_text"), emoji = true)
