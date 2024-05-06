@@ -44,7 +44,7 @@ class SlackExecutor(
     val config = slackExecutorHelper.slackConfig
     val counts = slackExecutorHelper.data.activityData?.counts?.get("Translation") ?: 0
     if (counts >= 10) {
-      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(counts) ?: return
+      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(counts)
       sendRegularMessageWithSaving(messageDto, config)
       return
     }

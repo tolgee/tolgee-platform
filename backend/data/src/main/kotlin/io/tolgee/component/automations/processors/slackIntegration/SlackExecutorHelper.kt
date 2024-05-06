@@ -182,8 +182,9 @@ class SlackExecutorHelper(
 
       if (filtered.isEmpty()) return@section
       fields {
-        filtered.forEach { (key, value) ->
-          markdownText("*$key* \n$value")
+        filtered.forEachIndexed { index, (key, value) ->
+          val finalValue = value + if (index % 2 == 1 && index != filtered.size - 1) "\n\u200d" else ""
+          markdownText("*$key* \n$finalValue")
         }
       }
     }
@@ -492,7 +493,7 @@ class SlackExecutorHelper(
     }
   }
 
-  fun createMessageIfTooManyTranslations(counts: Long): SavedMessageDto? {
+  fun createMessageIfTooManyTranslations(counts: Long): SavedMessageDto {
     return SavedMessageDto(
       blocks = buildBlocksTooManyTranslations(counts),
       attachments = listOf(createRedirectButton()),
