@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats.apple.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
@@ -358,7 +359,7 @@ class StringsStringsdictFileExporterTest {
   ): AppleStringsStringsdictExporter {
     return AppleStringsStringsdictExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = getExportParams(),
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
   }
@@ -366,7 +367,9 @@ class StringsStringsdictFileExporterTest {
   private fun getExporter(translations: List<ExportTranslationView>): AppleStringsStringsdictExporter {
     return AppleStringsStringsdictExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = getExportParams(),
     )
   }
+
+  private fun getExportParams() = ExportParams().also { it.format = ExportFormat.APPLE_STRINGS_STRINGSDICT }
 }

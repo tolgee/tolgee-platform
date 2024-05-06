@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats.apple.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.apple.APPLE_FILE_ORIGINAL_CUSTOM_KEY
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -447,7 +448,7 @@ class AppleXliffFileExporterTest {
   ): AppleXliffExporter {
     return AppleXliffExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = ExportParams().also { it.format = ExportFormat.APPLE_XLIFF },
       baseTranslationsProvider = { baseTranslations },
       baseLanguageTag = "tag",
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,

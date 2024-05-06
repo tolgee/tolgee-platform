@@ -9,7 +9,6 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 class ExportFilePathProvider(
   private val params: IExportParams,
   private val extension: String,
-  private val defaultTemplate: String = DEFAULT_PATH,
 ) {
   /**
    * This method takes the template provided in params and returns the file path by replacing the placeholders
@@ -44,7 +43,7 @@ class ExportFilePathProvider(
   }
 
   private fun getTemplate(): String {
-    return params.fileStructureTemplate ?: defaultTemplate
+    return params.fileStructureTemplate ?: params.format.defaultFileStructureTemplate
   }
 
   private fun validateAndGetTemplate(): String {
@@ -114,7 +113,7 @@ class ExportFilePathProvider(
 
   companion object {
     private val MULTIPLE_SLASHES = "/{2,}".toRegex()
-    private const val DEFAULT_PATH = "{namespace}/{languageTag}.{extension}"
+    const val DEFAULT_TEMPLATE = "{namespace}/{languageTag}.{extension}"
   }
 
   private fun convertBCP47ToAndroidResourceFormat(languageTag: String): String {

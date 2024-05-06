@@ -1,11 +1,13 @@
 package io.tolgee.unit.formats.android.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
 import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
+import okhttp3.internal.format
 import org.junit.jupiter.api.Test
 
 class AdnroidXmlFileExporterTest {
@@ -294,7 +296,7 @@ class AdnroidXmlFileExporterTest {
   ): AndroidStringsXmlExporter {
     return AndroidStringsXmlExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = ExportParams().also { it.format = ExportFormat.ANDROID_XML },
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
   }

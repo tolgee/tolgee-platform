@@ -141,15 +141,6 @@ class AndroidStringsXmlExporter(
     addToUnits(translation, pluralUnit)
   }
 
-  companion object {
-    val KEY_IS_ARRAY_REGEX by lazy {
-      Regex("(?<name>.*)\\[(?<index>\\d+)\\]$")
-    }
-    val KEY_REPLACE_REGEX by lazy {
-      Regex("[^a-zA-Z0-9_]")
-    }
-  }
-
   private fun addToUnits(
     translation: ExportTranslationView,
     node: AndroidXmlNode,
@@ -188,7 +179,6 @@ class AndroidStringsXmlExporter(
     ExportFilePathProvider(
       exportParams,
       "xml",
-      defaultTemplate = "values-{androidLanguageTag}/strings.{extension}",
     )
   }
 
@@ -210,5 +200,14 @@ class AndroidStringsXmlExporter(
     return getModels().map { (path, model) ->
       path to AndroidStringsXmlFileWriter(model).produceFiles()
     }.toMap()
+  }
+
+  companion object {
+    val KEY_IS_ARRAY_REGEX by lazy {
+      Regex("(?<name>.*)\\[(?<index>\\d+)\\]$")
+    }
+    val KEY_REPLACE_REGEX by lazy {
+      Regex("[^a-zA-Z0-9_]")
+    }
   }
 }

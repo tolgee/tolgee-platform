@@ -44,12 +44,11 @@ class AppleStringsStringsdictExporter(
     ExportFilePathProvider(
       exportParams,
       "strings",
-      defaultTemplate = DEFAULT_TEMPLATE,
     )
   }
 
   private val stringsdictFilePathProvider by lazy {
-    ExportFilePathProvider(exportParams, "stringsdict", defaultTemplate = DEFAULT_TEMPLATE)
+    ExportFilePathProvider(exportParams, "stringsdict")
   }
 
   private fun handleTranslation(it: ExportTranslationView) {
@@ -103,9 +102,5 @@ class AppleStringsStringsdictExporter(
       hasSingle = true
       StringsWriter()
     }
-  }
-
-  companion object {
-    private const val DEFAULT_TEMPLATE = "{namespace}/{languageTag}.lproj/Localizable.{extension}"
   }
 }

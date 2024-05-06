@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.fluttter.out
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
@@ -184,7 +185,7 @@ class FlutterArbFileExporterTest {
 private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFileExporter {
   return FlutterArbFileExporter(
     translations = translations,
-    exportParams = ExportParams(),
+    exportParams = getExportParams(),
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
   )
@@ -196,12 +197,17 @@ private fun getExporter(
 ): FlutterArbFileExporter {
   return FlutterArbFileExporter(
     translations = translations,
-    exportParams = ExportParams(),
+    exportParams = getExportParams(),
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
     isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
   )
 }
+
+private fun getExportParams() =
+  ExportParams().also {
+    it.format = ExportFormat.FLUTTER_ARB
+  }
 
 private fun getExported(exporter: FlutterArbFileExporter): Map<String, String> {
   val files = exporter.produceFiles()

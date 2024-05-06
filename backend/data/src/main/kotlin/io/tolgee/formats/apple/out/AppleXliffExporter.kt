@@ -295,7 +295,6 @@ class AppleXliffExporter(
     ExportFilePathProvider(
       exportParams,
       fileExtension,
-      defaultTemplate = "{languageTag}.{extension}",
     )
   }
 
