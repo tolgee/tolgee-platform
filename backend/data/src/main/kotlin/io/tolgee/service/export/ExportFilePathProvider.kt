@@ -88,7 +88,13 @@ class ExportFilePathProvider(
 
   private fun String.replaceExtensionIfEnabled(replaceExtension: Boolean): String {
     if (replaceExtension) {
-      return this.replacePlaceholder(ExportFilePathPlaceholder.EXTENSION, extension)
+      val placeholder = ExportFilePathPlaceholder.EXTENSION
+
+      return this.replace(
+        "/+\\.${placeholder.placeholderForRegex}".toRegex(),
+        ".${placeholder.placeholder}",
+      )
+        .replacePlaceholder(placeholder, extension)
     }
     return this
   }

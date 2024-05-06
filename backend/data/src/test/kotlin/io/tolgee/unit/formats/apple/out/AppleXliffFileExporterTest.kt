@@ -290,6 +290,19 @@ class AppleXliffFileExporterTest {
     )
   }
 
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+    val files = exporter.produceFiles()
+    files["cs/hello/homepage.xliff"].assert.isNotNull()
+  }
+
   private fun getExported(exporter: AppleXliffExporter): Map<String, String> {
     val files = exporter.produceFiles()
     val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
@@ -303,7 +316,7 @@ class AppleXliffFileExporterTest {
     this[file]!!.assert.isEqualTo(content)
   }
 
-  private fun getExporter(): AppleXliffExporter {
+  private fun getExporter(params: ExportParams = getExportParams()): AppleXliffExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -400,7 +413,7 @@ class AppleXliffFileExporterTest {
           key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.strings")
         }
       }
-    return getExporter(built.translations, built.baseTranslations)
+    return getExporter(built.translations, built.baseTranslations, params = params)
   }
 
   private fun getIcuPlaceholdersEnabledExporter(): AppleXliffExporter {
@@ -445,13 +458,18 @@ class AppleXliffFileExporterTest {
     translations: List<ExportTranslationView>,
     baseTranslations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    params: ExportParams = getExportParams(),
   ): AppleXliffExporter {
     return AppleXliffExporter(
       translations = translations,
-      exportParams = ExportParams().also { it.format = ExportFormat.APPLE_XLIFF },
+      exportParams = params,
       baseTranslationsProvider = { baseTranslations },
       baseLanguageTag = "tag",
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
+  }
+
+  private fun getExportParams(): ExportParams {
+    return ExportParams().also { it.format = ExportFormat.APPLE_XLIFF }
   }
 }

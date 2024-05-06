@@ -3,10 +3,10 @@ package io.tolgee.unit.formats.properties.out
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.properties.out.PropertiesFileExporter
-import io.tolgee.model.enums.TranslationState
-import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.testing.assert
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
@@ -31,7 +31,20 @@ class PropertiesFileExporterTest {
     )
   }
 
-  private fun getBasicExporter(): PropertiesFileExporter {
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getBasicExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+    val files = exporter.produceFiles()
+    files["cs/hello.properties"].assert.isNotNull()
+  }
+
+  private fun getBasicExporter(params: ExportParams = getExportParams()): PropertiesFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -53,7 +66,7 @@ class PropertiesFileExporterTest {
           text = "I am key with dots = a = \n # not a comment \n = = \\ yep +áěááššá",
         )
       }
-    return getExporter(built.translations, false)
+    return getExporter(built.translations, false, params = params)
   }
 
   @Test
@@ -130,26 +143,17 @@ class PropertiesFileExporterTest {
     return jacksonObjectMapper().readValue(this.getFileTextContent(fileName))
   }
 
-  private fun generateTranslationsForKeys(keys: List<String>): List<ExportTranslationView> {
-    return keys.sorted().map { keyDef ->
-      val split = keyDef.split(":").toMutableList()
-      val keyName = split.removeLast()
-      val namespace = split.removeLastOrNull()
-      val key = ExportKeyView(1, keyName, namespace = namespace)
-      val trans = ExportTranslationView(1, "text", TranslationState.TRANSLATED, key, "en")
-      key.translations["en"] = trans
-      trans
-    }
-  }
-
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    params: ExportParams = getExportParams(),
   ): PropertiesFileExporter {
     return PropertiesFileExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
     )
   }
+
+  private fun getExportParams() = ExportParams().also { it.format = ExportFormat.PROPERTIES }
 }

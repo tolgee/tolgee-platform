@@ -1,15 +1,13 @@
 package io.tolgee.unit.formats.yaml.out
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.testing.assert
 import io.tolgee.unit.formats.yaml.out.YamlExportTestData.getAllFeaturesExporter
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import org.junit.jupiter.api.Test
-import java.io.InputStream
 
 class YamlFileExporterTest {
   // generate this with:
@@ -105,10 +103,17 @@ class YamlFileExporterTest {
     )
   }
 
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val data = exportWithParams(fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}")
+    data["cs/hello.yaml"].assert.isNotNull()
+  }
+
   private fun exportWithParams(
     supportArrays: Boolean = false,
     messageFormat: ExportMessageFormat? = null,
     structureDelimiter: Char? = '.',
+    fileStructureTemplate: String? = null,
   ): Map<String, String> {
     val exporter =
       getAllFeaturesExporter(
@@ -117,17 +122,10 @@ class YamlFileExporterTest {
           it.structureDelimiter = structureDelimiter
           it.format = ExportFormat.YAML
           it.messageFormat = messageFormat
+          it.fileStructureTemplate = fileStructureTemplate
         },
       )
     val data = getExported(exporter)
     return data
-  }
-
-  private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {
-    return this[fileName]!!.bufferedReader().readText()
-  }
-
-  private inline fun <reified T> Map<String, InputStream>.parseFileContent(fileName: String): T {
-    return jacksonObjectMapper().readValue(this.getFileTextContent(fileName))
   }
 }

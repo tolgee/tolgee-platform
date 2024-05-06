@@ -9,4 +9,6 @@ enum class ExportFilePathPlaceholder(val value: String) {
   ;
 
   val placeholder = "{$value}"
+
+  val placeholderForRegex = "\\{$value\\}"
 }

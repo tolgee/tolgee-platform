@@ -6,6 +6,7 @@ import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.testing.assert
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
@@ -162,6 +163,20 @@ class StringsStringsdictFileExporterTest {
   }
 
   @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+    val files = exporter.produceFiles()
+    files["en/hello/homepage.strings"].assert.isNotNull()
+    files["en/hello/homepage.stringsdict"].assert.isNotNull()
+  }
+
+  @Test
   fun `exports with placeholders (ICU placeholders enabled)`() {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExported(exporter)
@@ -289,7 +304,7 @@ class StringsStringsdictFileExporterTest {
     return getExporter(built.translations, false)
   }
 
-  private fun getExporter() =
+  private fun getExporter(params: ExportParams = getExportParams()) =
     getExporter(
       listOf(
         ExportTranslationView(
@@ -351,15 +366,17 @@ class StringsStringsdictFileExporterTest {
           "cs",
         ),
       ),
+      params = params,
     )
 
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    params: ExportParams = getExportParams(),
   ): AppleStringsStringsdictExporter {
     return AppleStringsStringsdictExporter(
       translations = translations,
-      exportParams = getExportParams(),
+      exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
   }

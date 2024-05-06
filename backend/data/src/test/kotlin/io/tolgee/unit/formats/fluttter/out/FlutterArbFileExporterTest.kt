@@ -49,6 +49,21 @@ class FlutterArbFileExporterTest {
   }
 
   @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+
+    val files = exporter.produceFiles()
+
+    files["cs/hello.arb"].assert.isNotNull()
+  }
+
+  @Test
   fun `exports with placeholders (ICU placeholders disabled)`() {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
@@ -125,7 +140,7 @@ class FlutterArbFileExporterTest {
     this[file]!!.assert.isEqualTo(content)
   }
 
-  private fun getExporter(): FlutterArbFileExporter {
+  private fun getExporter(params: ExportParams = getExportParams()): FlutterArbFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -178,7 +193,7 @@ class FlutterArbFileExporterTest {
           key.description = "What a count"
         }
       }
-    return getExporter(built.translations)
+    return getExporter(built.translations, params = params)
   }
 }
 
@@ -194,10 +209,11 @@ private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFi
 private fun getExporter(
   translations: List<ExportTranslationView>,
   isProjectIcuPlaceholdersEnabled: Boolean = true,
+  params: ExportParams = getExportParams(),
 ): FlutterArbFileExporter {
   return FlutterArbFileExporter(
     translations = translations,
-    exportParams = getExportParams(),
+    exportParams = params,
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
     isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
