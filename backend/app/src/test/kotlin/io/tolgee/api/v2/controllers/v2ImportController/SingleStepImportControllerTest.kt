@@ -111,6 +111,27 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `maps null namespace from non-null mapping`() {
+    val fileName = "guessed-ns/en.json"
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, simpleJson)),
+      getFileMappings(fileName, namespace = null),
+    ).andIsOk
+
+    getTestTranslation().assert.isNotNull
+
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, simpleJson)),
+      mapOf(),
+    ).andIsOk
+
+    getTestTranslation(namespace = "guessed-ns").assert.isNotNull
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `respects provided format`() {
     performImport(
       projectId = testData.project.id,

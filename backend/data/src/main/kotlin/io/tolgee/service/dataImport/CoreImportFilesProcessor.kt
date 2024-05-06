@@ -156,7 +156,7 @@ class CoreImportFilesProcessor(
     val mappedNamespace = findMappedNamespace()
 
     if (mappedNamespace != null) {
-      return mappedNamespace
+      return getSafeNamespace(mappedNamespace)
     }
 
     if (this.namespace != null) {
@@ -174,6 +174,12 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.findMappedNamespace(): String? {
+    if (mapping != null) {
+      // if mapping is present, use it even when the namespace is null to avoid
+      // guessing from the file name
+      return this.mapping?.namespace ?: ""
+    }
+
     return this.mapping?.namespace
   }
 
