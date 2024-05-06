@@ -10,6 +10,7 @@ import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
@@ -35,6 +36,7 @@ class SlackExecutor(
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val slackClient: Slack,
+  private val languageService: LanguageService,
 ) : Logging {
   fun sendMessageOnTranslationSet(
     slackConfig: SlackConfig,
@@ -303,7 +305,16 @@ class SlackExecutor(
           }
           config.preferences.forEach {
             section {
-              markdownText("*Subscribed Languages:*\n- ${it.languageTag} :${it.languageTag}: on ${it.onEvent.name}")
+              if (it.languageTag == null) {
+                return@section
+              }
+              val language = languageService.getByTag(it.languageTag!!, config.project)
+              val flagEmoji = language.flagEmoji
+
+              val fullName = language.name
+              markdownText(
+                "*Subscribed Languages:*\n- $fullName $flagEmoji : on ${it.onEvent.name}",
+              )
             }
           }
           divider()
