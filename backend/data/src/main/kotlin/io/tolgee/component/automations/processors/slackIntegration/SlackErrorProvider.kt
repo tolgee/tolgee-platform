@@ -29,15 +29,15 @@ class SlackErrorProvider(
     return withBlocks {
       section {
         markdownText(
-          i18n.translate("slack-not-connected-message"),
+          i18n.translate("slack.common.message.not-connected"),
         )
       }
       section {
-        markdownText(i18n.translate("connect-account-instruction"))
+        markdownText(i18n.translate("slack.common.message.connect-account-instruction"))
       }
       actions {
         button {
-          text(i18n.translate("connect-button-text"), emoji = true)
+          text(i18n.translate("slack.common.text.button.connect"), emoji = true)
           url(url)
           style("primary")
         }
@@ -48,10 +48,10 @@ class SlackErrorProvider(
   fun getInvalidCommandError(): List<LayoutBlock> {
     return withBlocks {
       section {
-        markdownText(i18n.translate("command-not-recognized"))
+        markdownText(i18n.translate("slack.common.message.command-not-recognized"))
       }
       section {
-        markdownText(i18n.translate("check-command-solutions"))
+        markdownText(i18n.translate("slack.common.message.check-command-solutions"))
       }
       actions {
         helpButton()
@@ -63,11 +63,11 @@ class SlackErrorProvider(
     return withBlocks {
       section {
         markdownText(
-          i18n.translate("not-subscribed-yet-message"),
+          i18n.translate("slack.common.message.not-subscribed-yet"),
         )
       }
       section {
-        markdownText(i18n.translate("not-subscribed-solution"))
+        markdownText(i18n.translate("slack.common.message.not-subscribed-solution"))
       }
       actions {
         helpButton()
@@ -98,12 +98,12 @@ class SlackErrorProvider(
   fun getWorkspaceNotFoundError(): List<LayoutBlock> {
     return withBlocks {
       section {
-        markdownText(i18n.translate("slack-workspace-not-connected-to-any-organization"))
+        markdownText(i18n.translate("slack.common.message.slack-workspace-not-connected-to-any-organization"))
       }
 
       actions {
         button {
-          text(i18n.translate("connect-workspace-button-text"), emoji = true)
+          text(i18n.translate("slack.common.text.button.connect-workspace"), emoji = true)
           url(tolgeeProperties.frontEndUrl + "/preferred-organization?path=apps")
           style("primary")
         }
@@ -122,7 +122,7 @@ class SlackErrorProvider(
   private fun ActionsBlockBuilder.helpButton() {
     button {
       value("help_btn")
-      text(i18n.translate("view-help-button-text"), emoji = true)
+      text(i18n.translate("slack.common.text.button.view-help"), emoji = true)
     }
   }
 }

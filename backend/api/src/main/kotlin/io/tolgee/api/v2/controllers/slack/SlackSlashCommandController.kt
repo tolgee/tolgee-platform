@@ -125,7 +125,7 @@ class SlackSlashCommandController(
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
     if (slackUserConnectionService.isUserConnected(payload.user_id)) {
-      return SlackMessageDto(text = i18n.translate("already_logged_in"))
+      return SlackMessageDto(text = i18n.translate("slack.common.message.already_logged_in"))
     }
 
     val workspace = organizationSlackWorkspaceService.findBySlackTeamId(payload.team_id)
@@ -191,7 +191,7 @@ class SlackSlashCommandController(
       throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
     }
 
-    return SlackMessageDto(text = i18n.translate("subscribed_successfully"))
+    return SlackMessageDto(text = i18n.translate("slack.common.message.subscribed_successfully"))
   }
 
   private fun unsubscribe(
@@ -206,7 +206,7 @@ class SlackSlashCommandController(
     }
 
     return SlackMessageDto(
-      text = i18n.translate("unsubscribed-successfully"),
+      text = i18n.translate("slack.common.message.unsubscribed-successfully"),
     )
   }
 

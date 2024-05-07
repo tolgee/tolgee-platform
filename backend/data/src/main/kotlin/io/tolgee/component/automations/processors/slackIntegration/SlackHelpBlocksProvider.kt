@@ -12,39 +12,39 @@ class SlackHelpBlocksProvider(
   fun getHelpBlocks() =
     withBlocks {
       section {
-        markdownText(i18n.translate("help-intro"))
+        markdownText(i18n.translate("slack.help.message.intro"))
       }
       divider()
 
       section {
-        markdownText(i18n.translate("help-subscribe-to-project"))
+        markdownText(i18n.translate("slack.help.message.subscribe-to-project"))
       }
 
       section {
         fields {
-          markdownText(i18n.translate("help-subscribe"))
+          markdownText(i18n.translate("slack.help.message.subscribe"))
 
-          markdownText(i18n.translate("help-subscribe-command"))
+          markdownText(i18n.translate("slack.help.message.subscribe-command"))
         }
       }
 
       section {
         fields {
-          markdownText(i18n.translate("help-unsubscribe"))
+          markdownText(i18n.translate("slack.help.message.unsubscribe"))
 
-          markdownText(i18n.translate("help-unsubscribe-command"))
+          markdownText(i18n.translate("slack.help.message.unsubscribe-command"))
         }
       }
 
       section {
         fields {
-          markdownText(i18n.translate("help-show-subscriptions"))
-          markdownText(i18n.translate("help-show-subscriptions-command"))
+          markdownText(i18n.translate("slack.help.message.show-subscriptions"))
+          markdownText(i18n.translate("slack.help.message.show-subscriptions-command"))
         }
       }
 
       section {
-        markdownText(i18n.translate("help-subscribe-default-subscription"))
+        markdownText(i18n.translate("slack.help.message.default-subscription"))
       }
 
       actions {
@@ -54,27 +54,27 @@ class SlackHelpBlocksProvider(
       divider()
 
       section {
-        markdownText(i18n.translate("help-account"))
+        markdownText(i18n.translate("slack.help.message.account"))
       }
 
       section {
         fields {
-          markdownText(i18n.translate("help-connect-tolgee"))
-          markdownText(i18n.translate("help-connect-tolgee-command"))
+          markdownText(i18n.translate("slack.help.message.connect-tolgee"))
+          markdownText(i18n.translate("slack.help.message.connect-tolgee-command"))
         }
       }
 
       section {
         fields {
-          markdownText(i18n.translate("help-disconnect-tolgee"))
-          markdownText(i18n.translate("help-disconnect-tolgee-command"))
+          markdownText(i18n.translate("slack.help.message.disconnect-tolgee"))
+          markdownText(i18n.translate("slack.help.message.disconnect-tolgee-command"))
         }
       }
 
       divider()
 
       section {
-        markdownText(i18n.translate("help-more"))
+        markdownText(i18n.translate("slack.help.message.more"))
       }
 
       actions {
@@ -87,59 +87,59 @@ class SlackHelpBlocksProvider(
   fun getAdvancedSubscriptionHelpBlocks() =
     withBlocks {
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-intro"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-intro"))
       }
 
       divider()
 
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-language"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-language"))
       }
 
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-language-info"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-language-info"))
       }
 
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-language-example"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-language-example"))
       }
 
       divider()
 
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-events"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-events"))
       }
 
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-events-info"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-events-info"))
       }
 
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-events-usage"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-events-usage"))
       }
 
       section {
-        markdownText(i18n.translate("help-advanced-subscribe-events-example"))
+        markdownText(i18n.translate("slack.help.message.advanced-subscribe-events-example"))
       }
     }
 
   private fun ActionsBlockBuilder.advancedCommandsButton() {
     button {
-      text(i18n.translate("help-button-advanced-subscribe"), emoji = true)
+      text(i18n.translate("slack.help.text.button.advanced-subscribe"), emoji = true)
       value("help_advanced_subscribe_btn")
     }
   }
 
   private fun ActionsBlockBuilder.contactSupportButton() {
     button {
-      text(i18n.translate("help-button-contact-support"), emoji = true)
+      text(i18n.translate("slack.help.text.button.contact-support"), emoji = true)
       actionId("contact_support_btn")
     }
   }
 
   private fun ActionsBlockBuilder.docsButton() {
     button {
-      text(i18n.translate("help-button-docs"), emoji = true)
+      text(i18n.translate("slack.help.text.button.docs"), emoji = true)
       actionId("docs_btn")
     }
   }

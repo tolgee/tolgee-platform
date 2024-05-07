@@ -143,16 +143,16 @@ class SlackExecutor(
   ): List<LayoutBlock> {
     return withBlocks {
       section {
-        markdownText(i18n.translate("slack-not-connected-message"))
+        markdownText(i18n.translate("slack.common.message.not-connected"))
       }
 
       section {
-        markdownText(i18n.translate("connect-account-instruction"))
+        markdownText(i18n.translate("slack.common.message.connect-account-instruction"))
       }
 
       actions {
         button {
-          text(i18n.translate("connect-button-text"), emoji = true)
+          text(i18n.translate("slack.common.text.button.connect"), emoji = true)
           value("connect_slack")
           url(slackUserLoginUrlProvider.getUrl(slackChannelId, slackId, workspace?.id))
           actionId("button_connect_slack")
@@ -170,10 +170,10 @@ class SlackExecutor(
       it.channel(dto.slackChannelId)
         .blocks {
           section {
-            markdownText(i18n.translate("success_login_message"))
+            markdownText(i18n.translate("slack.common.message.success_login"))
           }
           context {
-            plainText(i18n.translate("success_login_context"))
+            plainText(i18n.translate("slack.common.context.success_login"))
           }
         }
     }
