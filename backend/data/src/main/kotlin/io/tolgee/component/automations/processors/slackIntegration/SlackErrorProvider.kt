@@ -59,6 +59,22 @@ class SlackErrorProvider(
     }
   }
 
+  fun getInvalidLangTagError(): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.invalid-lang-tag"))
+      }
+    }
+  }
+
+  fun getInvalidGlobalSubscriptionError(): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.global-subscription-error"))
+      }
+    }
+  }
+
   fun getNotSubscribedYetError(): List<LayoutBlock> {
     return withBlocks {
       section {

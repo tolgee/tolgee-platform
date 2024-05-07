@@ -1,12 +1,15 @@
 package io.tolgee.service.slackIntegration
 
+import io.tolgee.component.automations.processors.slackIntegration.SlackErrorProvider
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.repository.slackIntegration.SlackConfigRepository
+import io.tolgee.service.LanguageService
 import io.tolgee.service.automations.AutomationService
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
@@ -18,6 +21,8 @@ class SlackConfigService(
   private val slackConfigPreferenceService: SlackConfigPreferenceService,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackProperties: SlackProperties,
+  private val languageService: LanguageService,
+  private val slackErrorProvider: SlackErrorProvider,
 ) {
   fun get(
     projectId: Long,
@@ -62,6 +67,10 @@ class SlackConfigService(
   }
 
   private fun create(dto: SlackConfigDto): SlackConfig {
+    if (dto.isGlobal == false && dto.languageTag.isNullOrBlank()) {
+      throw SlackErrorException(slackErrorProvider.getInvalidGlobalSubscriptionError())
+    }
+
     val workspace = findWorkspace(dto.slackTeamId)
     val slackConfig =
       SlackConfig(
@@ -70,7 +79,7 @@ class SlackConfigService(
         channelId = dto.channelId,
       ).apply {
         onEvent = dto.onEvent ?: EventName.ALL
-        isGlobalSubscription = dto.languageTag.isNullOrBlank()
+        isGlobalSubscription = dto.isGlobal ?: dto.languageTag.isNullOrBlank()
         this.organizationSlackWorkspace = workspace
       }
     slackConfigRepository.save(slackConfig)
@@ -101,8 +110,21 @@ class SlackConfigService(
       slackConfig.onEvent = eventName
     }
 
+    dto.isGlobal?.let {
+      slackConfig.isGlobalSubscription = it
+
+      if (!slackConfig.isGlobalSubscription &&
+        dto.languageTag.isNullOrBlank() &&
+        slackConfig.preferences.isEmpty()
+      ) {
+        throw SlackErrorException(slackErrorProvider.getInvalidGlobalSubscriptionError())
+      }
+    }
+
     if (dto.languageTag.isNullOrBlank()) {
-      slackConfig.isGlobalSubscription = true
+      if (dto.isGlobal != null && dto.isGlobal != false) {
+        slackConfig.isGlobalSubscription = true
+      }
     } else {
       if (slackConfig.preferences.isEmpty() ||
         !slackConfig.preferences.any { it.languageTag == dto.languageTag }
@@ -133,6 +155,11 @@ class SlackConfigService(
     langTag: String,
     onEvent: EventName,
   ) {
+    languageService.findByTag(
+      langTag,
+      slackConfig.project,
+    ) ?: throw SlackErrorException(slackErrorProvider.getInvalidLangTagError())
+
     val pref =
       slackConfigPreferenceService.create(
         slackConfig,
