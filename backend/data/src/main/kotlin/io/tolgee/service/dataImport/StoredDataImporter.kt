@@ -266,7 +266,9 @@ class StoredDataImporter(
 
   private fun ImportTranslation.checkConflictResolved() {
     if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
-      importDataManager.saveAllStoredTranslations()
+      if (importDataManager.saveData) {
+        importDataManager.saveAllStoredTranslations()
+      }
       throw ImportConflictNotResolvedException(
         mutableListOf(this.key.name, this.language.name, this.text).filterNotNull().toMutableList(),
       )

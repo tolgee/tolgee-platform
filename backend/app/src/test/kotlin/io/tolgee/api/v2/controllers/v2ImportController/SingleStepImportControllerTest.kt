@@ -32,14 +32,12 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @BeforeEach
   fun beforeEach() {
     testData = SingleStepImportTestData()
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    projectSupplier = { testData.project }
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `import simple json`() {
+    saveAndPrepare()
     performImport(projectId = testData.project.id, listOf(Pair(jsonFileName, simpleJson)))
     assertJsonImported()
   }
@@ -47,6 +45,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `correctly maps language in single language file`() {
+    saveAndPrepare()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -61,6 +60,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `correctly maps language in multi language file`() {
+    saveAndPrepare()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -73,6 +73,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `throws when language not mapped`() {
+    saveAndPrepare()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -84,6 +85,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `maps languages automatically when possible`() {
+    saveAndPrepare()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -101,6 +103,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `maps namespace`() {
+    saveAndPrepare()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -112,6 +115,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `maps null namespace from non-null mapping`() {
+    saveAndPrepare()
     val fileName = "guessed-ns/en.json"
     performImport(
       projectId = testData.project.id,
@@ -133,6 +137,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `respects provided format`() {
+    saveAndPrepare()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -150,6 +155,17 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     ).andIsOk
 
     assertJsonImported()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `throws on conflict`() {
+    testData.addConflictTranslation()
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+    ).andIsBadRequest.andHasErrorMessage(Message.CONFLICT_IS_NOT_RESOLVED)
   }
 
   private fun assertXliffDataImported() {
@@ -207,5 +223,11 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   private fun assertJsonImported() {
     getTestTranslation().text.assert.isEqualTo("test")
+  }
+
+  private fun saveAndPrepare() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.project }
   }
 }

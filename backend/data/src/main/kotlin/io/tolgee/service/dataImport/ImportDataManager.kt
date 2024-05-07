@@ -28,7 +28,7 @@ class ImportDataManager(
   private val applicationContext: ApplicationContext,
   private val import: Import,
   // data is not saved when single step import is used
-  private val saveData: Boolean = true,
+  val saveData: Boolean = true,
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 

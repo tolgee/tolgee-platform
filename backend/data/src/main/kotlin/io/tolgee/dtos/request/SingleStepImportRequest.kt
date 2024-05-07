@@ -13,7 +13,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "When set to `OVERRIDE`, existing translations will be overwrote.\n\n" +
         "When set to `NO_FORCE`, error will be thrown on conflict.",
   )
-  val forceMode: ForceMode = ForceMode.KEEP
+  val forceMode: ForceMode = ForceMode.NO_FORCE
 
   @Schema(
     description =
