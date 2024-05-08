@@ -2,53 +2,61 @@ package io.tolgee.component.demoProject
 
 import io.tolgee.model.Language
 
+private const val ADD_ITEM_ADD_BUTTON_KEY = "add-item-add-button"
+private const val ADD_ITEM_INPUT_PLACEHOLDER_KEY = "add-item-input-placeholder"
+private const val DELETE_ITEM_BUTTON_KEY = "delete-item-button"
+private const val MENU_ITEM_TRANSLATION_METHODS_KEY = "menu-item-translation-methods"
+private const val SEND_VIA_EMAIL_KEY = "send-via-email"
+private const val SHARE_BUTTON_KEY = "share-button"
+private const val APP_TITLE_KEY = "app-title"
+
 object DemoProjectData {
   val translations =
     mapOf(
       "en" to
         mapOf(
-          "add-item-add-button" to "Add",
-          "add-item-input-placeholder" to "New list item",
-          "delete-item-button" to "Delete",
-          "menu-item-translation-methods" to "Translation methods",
-          "send-via-email" to "Send via e-mail",
-          "share-button" to "Share",
-          "app-title" to "What to pack",
+          ADD_ITEM_ADD_BUTTON_KEY to "Add",
+          ADD_ITEM_INPUT_PLACEHOLDER_KEY to "New list item",
+          DELETE_ITEM_BUTTON_KEY to "Delete",
+          MENU_ITEM_TRANSLATION_METHODS_KEY to "Translation methods",
+          SEND_VIA_EMAIL_KEY to "Send via e-mail",
+          SHARE_BUTTON_KEY to "Share",
+          APP_TITLE_KEY to "What to pack",
         ),
       "de" to
         mapOf(
-          "add-item-add-button" to "Einfügen",
-          "add-item-input-placeholder" to "Neuer Eintrag",
-          "delete-item-button" to "Löschen",
-          "menu-item-translation-methods" to "Übersetzungsmethoden",
-          "send-via-email" to "Per Email abschicken",
-          "share-button" to "Teilen",
-          "app-title" to "Was mitnehmen",
+          ADD_ITEM_ADD_BUTTON_KEY to "Einfügen",
+          ADD_ITEM_INPUT_PLACEHOLDER_KEY to "Neuer Eintrag",
+          DELETE_ITEM_BUTTON_KEY to "Löschen",
+          MENU_ITEM_TRANSLATION_METHODS_KEY to "Übersetzungsmethoden",
+          SEND_VIA_EMAIL_KEY to "Per Email abschicken",
+          SHARE_BUTTON_KEY to "Teilen",
+          APP_TITLE_KEY to "Was mitnehmen",
         ),
       "fr" to
         mapOf(
-          "add-item-add-button" to "Ajouter",
-          "add-item-input-placeholder" to "Nouvel élément de la liste",
-          "delete-item-button" to "Supprimer",
-          "menu-item-translation-methods" to "Méthodes de traduction",
-          "send-via-email" to "Envoyer par courriel",
-          "share-button" to "Partager",
-          "app-title" to "Quoi emballer",
+          ADD_ITEM_ADD_BUTTON_KEY to "Ajouter",
+          ADD_ITEM_INPUT_PLACEHOLDER_KEY to "Nouvel élément de la liste",
+          DELETE_ITEM_BUTTON_KEY to "Supprimer",
+          MENU_ITEM_TRANSLATION_METHODS_KEY to "Méthodes de traduction",
+          SEND_VIA_EMAIL_KEY to "Envoyer par courriel",
+          SHARE_BUTTON_KEY to "Partager",
+          APP_TITLE_KEY to "Quoi emballer",
         ),
     )
 
   val screenshots =
     listOf(
       DemoProjectScreenshotReference(
-        keyName = "add-item-add-button",
+        keyName = ADD_ITEM_ADD_BUTTON_KEY,
         positions = listOf(DemoProjectScreenshotReferencePosition(1601, 359, 168, 86)),
       ),
       DemoProjectScreenshotReference(
-        keyName = "add-item-input-placeholder",
+        keyName = ADD_ITEM_INPUT_PLACEHOLDER_KEY,
         positions = listOf(DemoProjectScreenshotReferencePosition(617, 359, 951, 86)),
       ),
       DemoProjectScreenshotReference(
-        keyName = "delete-item-button",
+        keyName = DELETE_ITEM_BUTTON_KEY,
         positions =
           listOf(
             DemoProjectScreenshotReferencePosition(1637, 568, 116, 35),
@@ -57,24 +65,26 @@ object DemoProjectData {
           ),
       ),
       DemoProjectScreenshotReference(
-        keyName = "menu-item-translation-methods",
+        keyName = MENU_ITEM_TRANSLATION_METHODS_KEY,
         positions = listOf(DemoProjectScreenshotReferencePosition(564, 27, 290, 60)),
       ),
       DemoProjectScreenshotReference(
-        keyName = "send-via-email",
+        keyName = SEND_VIA_EMAIL_KEY,
         positions = listOf(DemoProjectScreenshotReferencePosition(1439, 995, 331, 86)),
       ),
       DemoProjectScreenshotReference(
-        keyName = "share-button",
+        keyName = SHARE_BUTTON_KEY,
         positions = listOf(DemoProjectScreenshotReferencePosition(1202, 995, 204, 86)),
       ),
       DemoProjectScreenshotReference(
-        keyName = "app-title",
+        keyName = APP_TITLE_KEY,
         positions = listOf(DemoProjectScreenshotReferencePosition(956, 181, 475, 91)),
       ),
     )
 
-  val inTranslatedState = mapOf("fr" to "add-item-add-button")
+  val inTranslatedState = mapOf("fr" to ADD_ITEM_ADD_BUTTON_KEY)
+
+  val keys = translations.keys
 
   val languages
     get() =
@@ -98,6 +108,16 @@ object DemoProjectData {
           flagEmoji = "🇫🇷"
         },
       )
+
+  val tags =
+    mapOf(
+      ADD_ITEM_ADD_BUTTON_KEY to listOf("web", "button", "draft"),
+      SHARE_BUTTON_KEY to listOf("web", "button"),
+      DELETE_ITEM_BUTTON_KEY to listOf("web", "button"),
+      MENU_ITEM_TRANSLATION_METHODS_KEY to listOf("web", "menu"),
+      SEND_VIA_EMAIL_KEY to listOf("web", "button"),
+      APP_TITLE_KEY to listOf("web", "title"),
+    )
 
   data class DemoProjectScreenshotReference(
     val keyName: String,

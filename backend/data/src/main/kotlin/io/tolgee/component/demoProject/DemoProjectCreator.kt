@@ -16,6 +16,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.key.TagService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
@@ -26,8 +27,8 @@ class DemoProjectCreator(
   private val applicationContext: ApplicationContext,
 ) {
   companion object {
-    val SCREENSHOT_WIDTH = 2387
-    val SCREENSHOT_HEIGHT = 1256
+    const val SCREENSHOT_WIDTH = 2387
+    const val SCREENSHOT_HEIGHT = 1256
   }
 
   fun createDemoProject(): Project {
@@ -36,6 +37,7 @@ class DemoProjectCreator(
     setStates()
     addBigMeta()
     addScreenshots()
+    tagKeys()
     project.baseLanguage = languages["en"]
     projectService.save(project)
     return project
@@ -88,6 +90,15 @@ class DemoProjectCreator(
     return translationService.setTranslation(getOrCreateKey(keyName), language, translation).also {
       it.state = TranslationState.REVIEWED
     }
+  }
+
+  private fun tagKeys() {
+    val tagsMap =
+      DemoProjectData.tags.mapNotNull {
+        val key = keys[it.key] ?: return@mapNotNull null
+        key to it.value
+      }.toMap()
+    tagService.tagKeys(tagsMap)
   }
 
   private fun addScreenshots() {
@@ -181,5 +192,9 @@ class DemoProjectCreator(
 
   private val screenshotService: ScreenshotService by lazy {
     applicationContext.getBean(ScreenshotService::class.java)
+  }
+
+  private val tagService: TagService by lazy {
+    applicationContext.getBean(TagService::class.java)
   }
 }
