@@ -31,8 +31,6 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   @MockBean
   lateinit var slackClient: Slack
 
-  lateinit var mockedSlackClient: MockedSlackClient
-
   @Autowired
   lateinit var slackMessageService: SavedSlackMessageService
 
@@ -40,7 +38,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `sends message to correct channel after translation changed`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
     loginAsUser(testData.user.username)
@@ -51,14 +49,14 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
       val request = mockedSlackClient.chatPostMessageRequests.single()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
     }
-    Assertions.assertThat(slackMessageService.findByKey(testData.key.id, testData.slackConfig.id)).hasSize(1)
+    Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
   }
 
   @Test
   fun `sends message to correct channel after key added`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     loginAsUser(testData.user.username)
     waitForNotThrowing(timeout = 3000) {
@@ -73,7 +71,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `Doesn't send a message if the subscription isn't global and modified language isn't in preferred languages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     val updatedConfig =
       SlackConfigDto(
@@ -92,7 +90,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     modifyTranslationData(testData.projectBuilder.self.id, "cs")
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
-    slackMessageService.findByKey(testData.key.id, config.id).forEach {
+    slackMessageService.find(testData.key.id, config.id).forEach {
       it.langTags.assert.doesNotContain("cs")
     }
   }
@@ -101,7 +99,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `Doesn't send a message if the event isn't in subscribed by user`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     val updatedConfig =
       SlackConfigDto(
@@ -120,7 +118,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     addKeyToProject(testData.projectBuilder.self.id)
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
-    slackMessageService.findByKey(testData.key.id, config.id).forEach {
+    slackMessageService.find(testData.key.id, config.id).forEach {
       it.langTags.assert.doesNotContain("en")
     }
   }
