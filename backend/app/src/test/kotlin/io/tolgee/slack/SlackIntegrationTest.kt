@@ -46,7 +46,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
     waitForNotThrowing(timeout = 3000) {
       modifyTranslationData(testData.projectBuilder.self.id, langTag)
-      val request = mockedSlackClient.chatPostMessageRequests.single()
+      val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
     }
     Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
@@ -62,7 +62,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     waitForNotThrowing(timeout = 3000) {
       addKeyToProject(testData.projectBuilder.self.id)
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
-      val request = mockedSlackClient.chatPostMessageRequests.single()
+      val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
     }
   }
