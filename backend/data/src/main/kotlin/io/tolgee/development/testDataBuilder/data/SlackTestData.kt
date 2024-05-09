@@ -5,6 +5,10 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
+import io.tolgee.model.automations.*
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
+import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
@@ -15,6 +19,8 @@ class SlackTestData() {
   var userAccountBuilder: UserAccountBuilder
   var projectBuilder: ProjectBuilder
   var organization: Organization
+  var automation: Automation
+  var key: Key
 
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackUserConnection: SlackUserConnection
@@ -36,7 +42,11 @@ class SlackTestData() {
         addProject {
           name = "projectName"
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+        }.build buildProject@{
+          this@buildProject.self.baseLanguage = this@buildProject.addEnglish().self
         }
+      projectBuilder.addKey("testKey").also { key = it.self }
+        .addTranslation("en", "Hello")
 
       userAccountBuilder.defaultOrganizationBuilder.addSlackWorkspace {
         author = userAccountBuilder.self
@@ -49,11 +59,62 @@ class SlackTestData() {
       organization = userAccountBuilder.defaultOrganizationBuilder.self
 
       user = userAccountBuilder.self
+
+      projectBuilder.addPermission {
+        project = projectBuilder.self
+        user = user
+        type = ProjectPermissionType.MANAGE
+        scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
+      }
+
+      projectBuilder.addFrench()
+
+      projectBuilder.addCzech()
+
       slackConfig =
         projectBuilder.addSlackConfig {
-          this.channelId = "channel"
+          this.channelId = "testChannel"
           this.project = projectBuilder.self
           this.userAccount = userAccountBuilder.self
+          isGlobalSubscription = true
+        }.build config@{
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 0L
+            this.langTags = mutableSetOf("en", "fr")
+          }
+
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 0L
+            this.langTags = mutableSetOf("fr", "cz")
+          }
+
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 1L
+            this.langTags = mutableSetOf("cz", "ru")
+          }
+
+          addSlackMessage {
+            slackConfig = this@config.self
+            this.keyId = 52L
+            this.langTags = mutableSetOf("fr", "cz")
+          }
+        }.self
+
+      automation =
+        projectBuilder.addAutomation {
+          this.triggers.add(
+            AutomationTrigger(this)
+              .also { it.type = AutomationTriggerType.ACTIVITY },
+          )
+          this.actions.add(
+            AutomationAction(this).also {
+              it.type = AutomationActionType.SLACK_SUBSCRIPTION
+              it.slackConfig = slackConfig
+            },
+          )
         }.self
     }
 }

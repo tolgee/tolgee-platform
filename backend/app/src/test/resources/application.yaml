@@ -40,6 +40,9 @@ spring:
   datasource:
     maximum-pool-size: 100
 tolgee:
+  slack:
+    token: fakeToken
+    signingSecret: fakeSecret
   postgres-autostart:
     enabled: true
     container-name: tolgee_backend_tests_postgres_main

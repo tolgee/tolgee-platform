@@ -34,6 +34,10 @@ class SlackConfigService(
     return slackConfigRepository.getAllByChannelId(channelId)
   }
 
+  fun findAll(): List<SlackConfig> {
+    return slackConfigRepository.findAll()
+  }
+
   @Transactional
   fun delete(
     projectId: Long,

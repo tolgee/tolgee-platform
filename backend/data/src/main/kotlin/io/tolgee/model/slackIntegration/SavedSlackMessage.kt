@@ -12,9 +12,10 @@ import org.hibernate.annotations.Type
 class SavedSlackMessage(
   val messageTs: String,
   @ManyToOne(fetch = FetchType.LAZY)
-  val slackConfig: SlackConfig,
-  val keyId: Long,
+  var slackConfig: SlackConfig,
+  var keyId: Long,
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var langTags: Set<String>,
+  var createdKeyBlocks: Boolean,
 ) : StandardAuditModel()

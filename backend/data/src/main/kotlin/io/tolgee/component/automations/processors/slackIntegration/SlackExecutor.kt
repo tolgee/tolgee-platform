@@ -44,7 +44,7 @@ class SlackExecutor(
     val config = slackExecutorHelper.slackConfig
     val counts = slackExecutorHelper.data.activityData?.counts?.get("Translation") ?: 0
     if (counts >= 10) {
-      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(counts) ?: return
+      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(counts)
       sendRegularMessageWithSaving(messageDto, config)
       return
     }
@@ -52,7 +52,7 @@ class SlackExecutor(
     val messagesDto = slackExecutorHelper.createTranslationChangeMessage()
 
     messagesDto.forEach { message ->
-      val savedMessage = findSavedMessageOrNull(message.keyId, message.langTag, config.id)
+      val savedMessage = findSavedMessageOrNull(message.keyId, config.id)
 
       if (savedMessage.isEmpty()) {
         sendRegularMessageWithSaving(message, config)
@@ -60,8 +60,25 @@ class SlackExecutor(
       }
 
       savedMessage.forEach { savedMsg ->
+        if (savedMsg.createdKeyBlocks) {
+          message.blocks = emptyList()
+        }
         processSavedMessage(savedMsg, message, config, slackExecutorHelper)
       }
+    }
+  }
+
+  fun getSlackNickName(author: String?): String? {
+    val response =
+      slackClient.methods(tolgeeProperties.slack.token).usersLookupByEmail { req ->
+        req.email(author)
+      }
+
+    return if (response.isOk) {
+      response.user?.name
+    } else {
+      logger.info(response.error)
+      null
     }
   }
 
@@ -80,7 +97,6 @@ class SlackExecutor(
     }
 
     val additionalAttachments: MutableList<Attachment> = mutableListOf()
-
     languagesToAdd.forEach { lang ->
       val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, message.keyId)
       attachment?.let {
@@ -93,6 +109,16 @@ class SlackExecutor(
     val updatedMessageDto = message.copy(attachments = updatedAttachments, langTag = updatedLanguages)
 
     updateMessage(savedMsg, config, updatedMessageDto)
+  }
+
+  fun sortSoBaseLanguageFirst(attachments: MutableList<Attachment>): MutableList<Attachment> {
+    val baseLanguageAttachmentIndex = attachments.indexOfFirst { it.blocks[0].toString().contains("(base)") }
+    if (baseLanguageAttachmentIndex != -1) {
+      val baseLanguageAttachment = attachments[baseLanguageAttachmentIndex]
+      attachments.removeAt(baseLanguageAttachmentIndex)
+      attachments.add(0, baseLanguageAttachment)
+    }
+    return attachments
   }
 
   fun sendMessageOnKeyAdded(
@@ -173,8 +199,11 @@ class SlackExecutor(
         request
           .channel(config.channelId)
           .ts(savedMessage.messageTs)
-          .blocks(messageDto.blocks)
-          .attachments(messageDto.attachments)
+          .attachments(sortSoBaseLanguageFirst(messageDto.attachments.toMutableList()))
+        if (messageDto.blocks.isNotEmpty()) {
+          request.blocks(messageDto.blocks)
+        }
+        request
       }
 
     if (response.isOk) {
@@ -192,7 +221,7 @@ class SlackExecutor(
       slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatPostMessage { request ->
         request.channel(config.channelId)
           .blocks(messageDto.blocks)
-          .attachments(messageDto.attachments)
+          .attachments(sortSoBaseLanguageFirst(messageDto.attachments.toMutableList()))
       }
     if (response.isOk) {
       saveMessage(messageDto, response.ts, config)
@@ -213,27 +242,28 @@ class SlackExecutor(
       slackUserConnectionService,
       i18n,
       tolgeeProperties,
+      getSlackNickName(data.activityData?.author?.name ?: ""),
     )
   }
 
   private fun findSavedMessageOrNull(
     keyId: Long,
-    langTags: Set<String>,
     configId: Long,
-  ) = savedSlackMessageService.find(keyId, langTags, configId)
+  ) = savedSlackMessageService.find(keyId, configId)
 
   private fun saveMessage(
     messageDto: SavedMessageDto,
     ts: String,
     config: SlackConfig,
   ) {
-    savedSlackMessageService.create(
+    savedSlackMessageService.save(
       savedSlackMessage =
         SavedSlackMessage(
           messageTs = ts,
           slackConfig = config,
           keyId = messageDto.keyId,
           langTags = messageDto.langTag,
+          messageDto.createdKeyBlocks,
         ),
     )
   }

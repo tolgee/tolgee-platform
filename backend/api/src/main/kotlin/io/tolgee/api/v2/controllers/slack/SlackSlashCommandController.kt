@@ -4,6 +4,7 @@ import com.slack.api.model.block.LayoutBlock
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.SlackRequestValidation
 import io.tolgee.component.automations.processors.slackIntegration.*
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
@@ -42,6 +43,7 @@ class SlackSlashCommandController(
   private val slackErrorProvider: SlackErrorProvider,
   private val slackExceptionHandler: SlackExceptionHandler,
   private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
   @Suppress("UastIncorrectHttpHeaderInspection")
   @PostMapping
@@ -53,6 +55,8 @@ class SlackSlashCommandController(
   ): String? {
     return slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)
+
+      checkIfTokenIsPresent(payload.team_id)
 
       val matchResult =
         commandRegex.matchEntire(payload.text) ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
@@ -85,6 +89,16 @@ class SlackSlashCommandController(
         }
       }
     }
+  }
+
+  private fun checkIfTokenIsPresent(teamId: String) {
+    if (tolgeeProperties.slack.token != null) {
+      return
+    }
+
+    organizationSlackWorkspaceService.findBySlackTeamId(
+      teamId,
+    ) ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
   }
 
   private fun String?.toLongOrThrowInvalidCommand(): Long {
