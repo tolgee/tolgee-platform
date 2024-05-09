@@ -1,6 +1,9 @@
 package io.tolgee.component.demoProject
 
 import io.tolgee.model.Language
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 private const val ADD_ITEM_ADD_BUTTON_KEY = "add-item-add-button"
 private const val ADD_ITEM_INPUT_PLACEHOLDER_KEY = "add-item-input-placeholder"
@@ -9,6 +12,9 @@ private const val MENU_ITEM_TRANSLATION_METHODS_KEY = "menu-item-translation-met
 private const val SEND_VIA_EMAIL_KEY = "send-via-email"
 private const val SHARE_BUTTON_KEY = "share-button"
 private const val APP_TITLE_KEY = "app-title"
+private const val ITEMS_COUNT_KEY = "items-count"
+private const val WELCOME_MESSAGE = "welcome-message"
+private const val TERMS_CONDITIONS_AGREEMENT_KEY = "terms-conditions-agreement"
 
 object DemoProjectData {
   val translations =
@@ -22,6 +28,10 @@ object DemoProjectData {
           SEND_VIA_EMAIL_KEY to "Send via e-mail",
           SHARE_BUTTON_KEY to "Share",
           APP_TITLE_KEY to "What to pack",
+          ITEMS_COUNT_KEY to "{count, plural, one {Showing # item} other {Showing # items}}",
+          WELCOME_MESSAGE to "Hello {name}!",
+          TERMS_CONDITIONS_AGREEMENT_KEY to
+            "I agree with the <a>Terms and Conditions</a>",
         ),
       "de" to
         mapOf(
@@ -32,6 +42,10 @@ object DemoProjectData {
           SEND_VIA_EMAIL_KEY to "Per Email abschicken",
           SHARE_BUTTON_KEY to "Teilen",
           APP_TITLE_KEY to "Was mitnehmen",
+          ITEMS_COUNT_KEY to "{count, plural, one {Zeige # Eintrag} other {Zeige # Einträge}}",
+          WELCOME_MESSAGE to "Hallo {name}!",
+          TERMS_CONDITIONS_AGREEMENT_KEY to
+            "Ich stimme den <a>Allgemeinen Geschäftsbedingungen</a> zu",
         ),
       "fr" to
         mapOf(
@@ -42,6 +56,10 @@ object DemoProjectData {
           SEND_VIA_EMAIL_KEY to "Envoyer par courriel",
           SHARE_BUTTON_KEY to "Partager",
           APP_TITLE_KEY to "Quoi emballer",
+          ITEMS_COUNT_KEY to "{count, plural, one {Affiche # élément} other {Affiche # éléments}}",
+          WELCOME_MESSAGE to "Bonjour {name}!",
+          TERMS_CONDITIONS_AGREEMENT_KEY to
+            "J'accepte les <a>Conditions générales</a>",
         ),
     )
 
@@ -109,6 +127,8 @@ object DemoProjectData {
         },
       )
 
+  val pluralArgNames = mapOf(ITEMS_COUNT_KEY to "count")
+
   val tags =
     mapOf(
       ADD_ITEM_ADD_BUTTON_KEY to listOf("web", "button", "draft"),
@@ -117,6 +137,53 @@ object DemoProjectData {
       MENU_ITEM_TRANSLATION_METHODS_KEY to listOf("web", "menu"),
       SEND_VIA_EMAIL_KEY to listOf("web", "button"),
       APP_TITLE_KEY to listOf("web", "title"),
+    )
+
+  val descriptions =
+    mapOf(
+      ADD_ITEM_ADD_BUTTON_KEY to "Text for the 'Add' button in the 'Add Item' context",
+      ADD_ITEM_INPUT_PLACEHOLDER_KEY to "Placeholder text for the input field when adding a new list item",
+      DELETE_ITEM_BUTTON_KEY to "Text for the 'Delete' button in the item context",
+      MENU_ITEM_TRANSLATION_METHODS_KEY to "Text for the menu item linking to translation methods",
+      SEND_VIA_EMAIL_KEY to "Text for the option to send the items to pack via email",
+      SHARE_BUTTON_KEY to "Text for the share (on social media, etc) button",
+      APP_TITLE_KEY to "Title of the application",
+      ITEMS_COUNT_KEY to "Text displaying the number of items",
+      WELCOME_MESSAGE to "Welcome message including a placeholder for a user's name",
+      TERMS_CONDITIONS_AGREEMENT_KEY to "Statement for accepting the Terms and Conditions that includes a hyperlink",
+    )
+
+  val alice =
+    DemoUser(
+      name = "Alice Smith",
+      username = "alice-demo@demo.tolgee.io",
+      avatarFileName = "alice.png",
+    )
+
+  val bob =
+    DemoUser(
+      name = "Bob Johnson",
+      username = "bob-demo@demo.tolgee.io",
+      avatarFileName = "bob.png",
+    )
+
+  val charlie =
+    DemoUser(
+      name = "Charlie Brown",
+      username = "charlie-demo@demo.tolgee.io",
+      avatarFileName = "charlie.png",
+    )
+
+  val demoUsers: List<DemoUser> =
+    listOf(
+      alice,
+      bob,
+      charlie,
+    )
+
+  val comments =
+    listOf(
+      Comment(APP_TITLE_KEY, "de", "This is wrong!", alice, 10.toDuration(DurationUnit.HOURS)),
     )
 
   data class DemoProjectScreenshotReference(
@@ -129,5 +196,22 @@ object DemoProjectData {
     val y: Int,
     val width: Int,
     val height: Int,
+  )
+
+  data class DemoUser(
+    val name: String,
+    /**
+     * The e-mail
+     */
+    val username: String,
+    val avatarFileName: String,
+  )
+
+  data class Comment(
+    val key: String,
+    val language: String,
+    val text: String,
+    val author: DemoUser,
+    val createdBefore: Duration,
   )
 }

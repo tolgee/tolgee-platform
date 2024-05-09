@@ -1,6 +1,7 @@
 package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -96,6 +97,39 @@ class UserAccountService(
 
   fun getDto(id: Long): UserAccountDto {
     return self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+  }
+
+  fun getOrCreateDemoUsers(demoUsers: List<DemoProjectData.DemoUser>): Map<String, UserAccount> {
+    val usernames = demoUsers.map { it.username }
+    val existingUsers = userAccountRepository.findDemoByUsernames(usernames)
+    return demoUsers.associate { demoUser ->
+      val existingUser =
+        existingUsers.find { existingUser -> demoUser.username == existingUser.username }
+          ?: createDemoUser(demoUser)
+      demoUser.username to existingUser
+    }
+  }
+
+  private fun createDemoUser(demoUser: DemoProjectData.DemoUser): UserAccount {
+    val user = UserAccount()
+    user.username = demoUser.username
+    user.name = demoUser.name
+    user.isDemo = true
+
+    setDemoUserAvatar(demoUser, user)
+
+    return save(user)
+  }
+
+  private fun setDemoUserAvatar(
+    demoUser: DemoProjectData.DemoUser,
+    user: UserAccount,
+  ) {
+    val stream =
+      javaClass.getResourceAsStream("/demoProject/userAvatars/${demoUser.avatarFileName}")
+        ?: throw IllegalArgumentException("Demo user avatar doesn't exist")
+
+    avatarService.setAvatar(user, stream)
   }
 
   @Transactional

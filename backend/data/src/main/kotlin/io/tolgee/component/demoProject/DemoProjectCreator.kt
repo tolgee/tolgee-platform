@@ -9,15 +9,21 @@ import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.TranslationComment
 import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 import java.awt.Dimension
@@ -38,9 +44,26 @@ class DemoProjectCreator(
     addBigMeta()
     addScreenshots()
     tagKeys()
+    setDescriptions()
+    addComments()
     project.baseLanguage = languages["en"]
     projectService.save(project)
     return project
+  }
+
+  private fun addComments() {
+    DemoProjectData.comments.forEach { comment ->
+      val translation = translations[comment.language to comment.key]
+      val translationComment =
+        TranslationComment(
+          text = comment.text,
+          state = TranslationCommentState.RESOLVED,
+          translation = translation!!,
+        ).also {
+          it.author = users[comment.author.username]!!
+        }
+      translationCommentService.create(translationComment)
+    }
   }
 
   val project: Project by lazy {
@@ -55,6 +78,9 @@ class DemoProjectCreator(
     project
   }
 
+  /**
+   * Map of Pair(languageTag, keyName) -> Translation
+   */
   private val translations by lazy {
     DemoProjectData.translations.flatMap { (languageTag, translations) ->
       translations.map { (key, text) ->
@@ -145,10 +171,34 @@ class DemoProjectCreator(
       val key =
         Key().apply {
           name = keyName
+          val pluralArgName = DemoProjectData.pluralArgNames[name]
+          if (pluralArgName != null) {
+            isPlural = true
+            this.pluralArgName = pluralArgName
+          }
           this@apply.project = this@DemoProjectCreator.project
         }
       keyService.save(key)
       key
+    }
+  }
+
+  private fun setDescriptions() {
+    DemoProjectData.descriptions.forEach { (keyName, description) ->
+      val key = getOrCreateKey(keyName)
+      val meta = getOrCreateKeyMeta(key)
+      meta.description = description
+      keyMetaService.save(meta)
+    }
+  }
+
+  private fun getOrCreateKeyMeta(key: Key): KeyMeta {
+    return key.keyMeta ?: let {
+      val keyMeta = KeyMeta()
+      keyMeta.key = key
+      key.keyMeta = keyMeta
+      keyMetaService.save(keyMeta)
+      keyMeta
     }
   }
 
@@ -164,6 +214,10 @@ class DemoProjectCreator(
     applicationContext.getResource("classpath:demoProject/demoAvatar.png").inputStream.use {
       projectService.setAvatar(project, it)
     }
+  }
+
+  private val users by lazy {
+    userAccountService.getOrCreateDemoUsers(DemoProjectData.demoUsers)
   }
 
   private val activityHolder: ActivityHolder by lazy {
@@ -196,5 +250,17 @@ class DemoProjectCreator(
 
   private val tagService: TagService by lazy {
     applicationContext.getBean(TagService::class.java)
+  }
+
+  private val keyMetaService: KeyMetaService by lazy {
+    applicationContext.getBean(KeyMetaService::class.java)
+  }
+
+  private val userAccountService: UserAccountService by lazy {
+    applicationContext.getBean(UserAccountService::class.java)
+  }
+
+  private val translationCommentService: TranslationCommentService by lazy {
+    applicationContext.getBean(TranslationCommentService::class.java)
   }
 }
