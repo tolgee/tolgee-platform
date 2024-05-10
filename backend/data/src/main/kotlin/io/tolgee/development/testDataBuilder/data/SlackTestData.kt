@@ -21,7 +21,7 @@ class SlackTestData() {
   var organization: Organization
   var automation: Automation
   var key: Key
-
+  var key2: Key
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackUserConnection: SlackUserConnection
 
@@ -46,6 +46,9 @@ class SlackTestData() {
           this@buildProject.self.baseLanguage = this@buildProject.addEnglish().self
         }
       projectBuilder.addKey("testKey").also { key = it.self }
+        .addTranslation("en", "Hello")
+
+      projectBuilder.addKey("testKey2").also { key2 = it.self }
         .addTranslation("en", "Hello")
 
       userAccountBuilder.defaultOrganizationBuilder.addSlackWorkspace {

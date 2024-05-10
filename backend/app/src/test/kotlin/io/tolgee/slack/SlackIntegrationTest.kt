@@ -42,10 +42,9 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
     loginAsUser(testData.user.username)
-
     Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
     waitForNotThrowing(timeout = 3000) {
-      modifyTranslationData(testData.projectBuilder.self.id, langTag)
+      modifyTranslationData(testData.projectBuilder.self.id, langTag, testData.key.name)
       val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
     }
@@ -88,9 +87,9 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     loginAsUser(testData.user.username)
 
-    modifyTranslationData(testData.projectBuilder.self.id, "cs")
+    modifyTranslationData(testData.projectBuilder.self.id, "cs", testData.key2.name)
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
-    slackMessageService.find(testData.key.id, config.id).forEach {
+    slackMessageService.find(testData.key2.id, config.id).forEach {
       it.langTags.assert.doesNotContain("cs")
     }
   }
@@ -118,7 +117,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     addKeyToProject(testData.projectBuilder.self.id)
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
-    slackMessageService.find(testData.key.id, config.id).forEach {
+    slackMessageService.find(testData.key2.id, config.id).forEach {
       it.langTags.assert.doesNotContain("en")
     }
   }
@@ -151,11 +150,12 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   private fun modifyTranslationData(
     projectId: Long,
     landTag: String,
+    keyName: String,
   ) {
     performAuthPost(
       "/v2/projects/$projectId/translations",
       mapOf(
-        "key" to "testKey",
+        "key" to keyName,
         "translations" to mapOf(landTag to UUID.randomUUID().toString()),
       ),
     ).andIsOk
