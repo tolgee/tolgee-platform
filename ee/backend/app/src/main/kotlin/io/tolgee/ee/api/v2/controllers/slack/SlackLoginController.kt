@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.slack
+package io.tolgee.ee.api.v2.controllers.slack
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.team.TeamInfoRequest
@@ -6,23 +6,21 @@ import com.slack.api.methods.request.users.UsersInfoRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.automations.processors.slackIntegration.SlackExecutor
-import io.tolgee.component.automations.processors.slackIntegration.SlackUserLoginUrlProvider
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.ee.component.slackIntegration.SlackExecutor
+import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.SlackUserInfoModel
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.util.Logging
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -40,6 +38,8 @@ class SlackLoginController(
   private val slackProperties: SlackProperties,
   private val slackWorkspaceService: OrganizationSlackWorkspaceService,
   private val organizationRoleService: OrganizationRoleService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val projectHolder: ProjectHolder,
 ) : Logging {
   @PostMapping("/user-login")
   @Operation(summary = "User login", description = "Pairs user account with slack account.")
@@ -47,6 +47,11 @@ class SlackLoginController(
     @Parameter(description = "The encrypted data about the desired connection between Slack account and Tolgee account")
     @RequestParam data: String,
   ) {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = projectHolder.project.organizationOwnerId,
+      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
+    )
+
     val decrypted = slackUserLoginUrlProvider.decryptData(data)
     val token = getToken(decrypted.workspaceId)
     slackUserConnectionService.createOrUpdate(authenticationFacade.authenticatedUserEntity, decrypted.slackUserId)

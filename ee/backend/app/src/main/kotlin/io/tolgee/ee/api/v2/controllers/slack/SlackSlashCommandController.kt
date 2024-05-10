@@ -1,19 +1,23 @@
-package io.tolgee.api.v2.controllers.slack
+package io.tolgee.ee.api.v2.controllers.slack
 
 import com.slack.api.model.block.LayoutBlock
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.SlackRequestValidation
-import io.tolgee.component.automations.processors.slackIntegration.*
+import io.tolgee.component.SlackErrorProvider
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.ee.component.slackIntegration.*
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
@@ -44,6 +48,8 @@ class SlackSlashCommandController(
   private val slackExceptionHandler: SlackExceptionHandler,
   private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
   private val tolgeeProperties: TolgeeProperties,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val projectHolder: ProjectHolder,
 ) : Logging {
   @Suppress("UastIncorrectHttpHeaderInspection")
   @PostMapping
@@ -55,7 +61,6 @@ class SlackSlashCommandController(
   ): String? {
     return slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)
-
       checkIfTokenIsPresent(payload.team_id)
 
       val matchResult =
@@ -124,6 +129,8 @@ class SlackSlashCommandController(
   }
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
+    featureEnabled()
+
     if (slackUserConnectionService.isUserConnected(payload.user_id)) {
       return SlackMessageDto(text = i18n.translate("slack.common.message.already_logged_in"))
     }
@@ -146,6 +153,8 @@ class SlackSlashCommandController(
     languageTag: String?,
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
+    featureEnabled()
+
     var onEvent: EventName? = null
     var isGlobal: Boolean? = null
     optionsMap.forEach { (option, value) ->
@@ -228,6 +237,17 @@ class SlackSlashCommandController(
       }
     } catch (e: NotFoundException) {
       throw SlackErrorException(slackErrorProvider.getProjectNotFoundError())
+    }
+  }
+
+  private fun featureEnabled() {
+    try {
+      enabledFeaturesProvider.checkFeatureEnabled(
+        organizationId = projectHolder.project.organizationOwnerId,
+        Feature.PROJECT_LEVEL_CONTENT_STORAGES,
+      )
+    } catch (e: BadRequestException) {
+      throw SlackErrorException(slackErrorProvider.getFeatureDisabledError())
     }
   }
 
