@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.slack
 
-import io.tolgee.component.automations.processors.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.testing.AuthorizedControllerTest

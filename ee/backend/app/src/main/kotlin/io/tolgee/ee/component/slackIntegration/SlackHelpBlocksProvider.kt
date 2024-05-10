@@ -1,4 +1,4 @@
-package io.tolgee.component.automations.processors.slackIntegration
+package io.tolgee.ee.component.slackIntegration
 
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks

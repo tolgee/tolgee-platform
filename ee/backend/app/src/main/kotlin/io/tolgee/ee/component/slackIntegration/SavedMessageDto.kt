@@ -1,4 +1,4 @@
-package io.tolgee.component.automations.processors.slackIntegration
+package io.tolgee.ee.component.slackIntegration
 
 import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock

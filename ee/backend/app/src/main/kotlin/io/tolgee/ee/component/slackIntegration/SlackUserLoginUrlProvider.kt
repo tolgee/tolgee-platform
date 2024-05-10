@@ -1,4 +1,4 @@
-package io.tolgee.component.automations.processors.slackIntegration
+package io.tolgee.ee.component.slackIntegration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

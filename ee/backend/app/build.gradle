@@ -65,6 +65,7 @@ dependencies {
      */
     implementation libs.hibernateTypes
     implementation libs.jacksonKotlin
+    implementation libs.commonsCodec
 
     /**
      * Liquibase
@@ -81,6 +82,13 @@ dependencies {
 
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    /**
+     * SLACK SDK
+     */
+    implementation libs.slackApiClient
+    implementation libs.slackApiModelKotlinExtension
+    implementation libs.slackApiClientKotlinExtension
 }
 
 kotlin {

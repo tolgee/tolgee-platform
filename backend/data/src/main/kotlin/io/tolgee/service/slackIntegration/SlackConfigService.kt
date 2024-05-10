@@ -1,6 +1,6 @@
 package io.tolgee.service.slackIntegration
 
-import io.tolgee.component.automations.processors.slackIntegration.SlackErrorProvider
+import io.tolgee.component.SlackErrorProvider
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.exceptions.NotFoundException

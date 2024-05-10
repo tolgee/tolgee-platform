@@ -1,19 +1,19 @@
-package io.tolgee.component.automations.processors.slackIntegration
+package io.tolgee.ee.component.slackIntegration
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
 import io.tolgee.api.IProjectActivityModelAssembler
-import io.tolgee.component.automations.AutomationProcessor
+import io.tolgee.component.automations.processors.SlackSubscriptionProcessor
 import io.tolgee.model.automations.AutomationAction
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class SlackSubscriptionProcessor(
+class SlackSubscriptionProcessorImpl(
   private val activityModelAssembler: IProjectActivityModelAssembler,
   private val slackExecutor: SlackExecutor,
   private val applicationContext: ApplicationContext,
-) : AutomationProcessor {
+) : SlackSubscriptionProcessor {
   override fun process(
     action: AutomationAction,
     activityRevisionId: Long?,
