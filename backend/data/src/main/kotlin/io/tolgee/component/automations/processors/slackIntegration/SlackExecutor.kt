@@ -54,7 +54,7 @@ class SlackExecutor(
     val messagesDto = slackExecutorHelper.createTranslationChangeMessage()
 
     messagesDto.forEach { message ->
-      val savedMessage = findSavedMessageOrNull(message.keyId, config.id)
+      val savedMessage = savedSlackMessageService.find(message.keyId, config.id)
 
       if (savedMessage.isEmpty()) {
         sendRegularMessageWithSaving(message, config)
@@ -247,11 +247,6 @@ class SlackExecutor(
       getSlackNickName(data.activityData?.author?.name ?: ""),
     )
   }
-
-  private fun findSavedMessageOrNull(
-    keyId: Long,
-    configId: Long,
-  ) = savedSlackMessageService.find(keyId, configId)
 
   private fun saveMessage(
     messageDto: SavedMessageDto,
