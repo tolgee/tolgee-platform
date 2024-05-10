@@ -14,7 +14,7 @@ class PostgresDockerRunner(
   override fun run() {
     instance =
       DockerContainerRunner(
-        image = "postgres:13",
+        image = "postgres:16.3",
         expose = mapOf(postgresAutostartProperties.port to "5432"),
         waitForLog = "database system is ready to accept connections",
         waitForLogTimesForNewContainer = 2,
