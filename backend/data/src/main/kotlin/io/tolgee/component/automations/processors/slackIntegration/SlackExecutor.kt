@@ -10,6 +10,7 @@ import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
@@ -35,6 +36,7 @@ class SlackExecutor(
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val slackClient: Slack,
+  private val languageService: LanguageService,
 ) : Logging {
   fun sendMessageOnTranslationSet(
     slackConfig: SlackConfig,
@@ -52,7 +54,7 @@ class SlackExecutor(
     val messagesDto = slackExecutorHelper.createTranslationChangeMessage()
 
     messagesDto.forEach { message ->
-      val savedMessage = findSavedMessageOrNull(message.keyId, config.id)
+      val savedMessage = savedSlackMessageService.find(message.keyId, config.id)
 
       if (savedMessage.isEmpty()) {
         sendRegularMessageWithSaving(message, config)
@@ -141,16 +143,16 @@ class SlackExecutor(
   ): List<LayoutBlock> {
     return withBlocks {
       section {
-        markdownText(i18n.translate("slack-not-connected-message"))
+        markdownText(i18n.translate("slack.common.message.not-connected"))
       }
 
       section {
-        markdownText(i18n.translate("connect-account-instruction"))
+        markdownText(i18n.translate("slack.common.message.connect-account-instruction"))
       }
 
       actions {
         button {
-          text(i18n.translate("connect-button-text"), emoji = true)
+          text(i18n.translate("slack.common.text.button.connect"), emoji = true)
           value("connect_slack")
           url(slackUserLoginUrlProvider.getUrl(slackChannelId, slackId, workspace?.id))
           actionId("button_connect_slack")
@@ -168,10 +170,10 @@ class SlackExecutor(
       it.channel(dto.slackChannelId)
         .blocks {
           section {
-            markdownText(i18n.translate("success_login_message"))
+            markdownText(i18n.translate("slack.common.message.success_login"))
           }
           context {
-            plainText(i18n.translate("success_login_context"))
+            plainText(i18n.translate("slack.common.context.success_login"))
           }
         }
     }
@@ -246,11 +248,6 @@ class SlackExecutor(
     )
   }
 
-  private fun findSavedMessageOrNull(
-    keyId: Long,
-    configId: Long,
-  ) = savedSlackMessageService.find(keyId, configId)
-
   private fun saveMessage(
     messageDto: SavedMessageDto,
     ts: String,
@@ -303,7 +300,16 @@ class SlackExecutor(
           }
           config.preferences.forEach {
             section {
-              markdownText("*Subscribed Languages:*\n- ${it.languageTag} :${it.languageTag}: on ${it.onEvent.name}")
+              if (it.languageTag == null) {
+                return@section
+              }
+              val language = languageService.getByTag(it.languageTag!!, config.project)
+              val flagEmoji = language.flagEmoji
+
+              val fullName = language.name
+              markdownText(
+                "*Subscribed Languages:*\n- $fullName $flagEmoji : on ${it.onEvent.name}",
+              )
             }
           }
           divider()

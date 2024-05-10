@@ -12,4 +12,5 @@ data class SlackConfigDto(
   val languageTag: String? = "",
   val onEvent: EventName?,
   val slackTeamId: String = "",
+  val isGlobal: Boolean? = false,
 )

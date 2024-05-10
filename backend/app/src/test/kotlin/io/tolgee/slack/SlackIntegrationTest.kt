@@ -31,8 +31,6 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   @MockBean
   lateinit var slackClient: Slack
 
-  lateinit var mockedSlackClient: MockedSlackClient
-
   @Autowired
   lateinit var slackMessageService: SavedSlackMessageService
 
@@ -40,31 +38,30 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `sends message to correct channel after translation changed`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
     loginAsUser(testData.user.username)
-
     Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
     waitForNotThrowing(timeout = 3000) {
-      modifyTranslationData(testData.projectBuilder.self.id, langTag)
-      val request = mockedSlackClient.chatPostMessageRequests.single()
+      modifyTranslationData(testData.projectBuilder.self.id, langTag, testData.key.name)
+      val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
     }
-    Assertions.assertThat(slackMessageService.findByKey(testData.key.id, testData.slackConfig.id)).hasSize(1)
+    Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
   }
 
   @Test
   fun `sends message to correct channel after key added`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     loginAsUser(testData.user.username)
     waitForNotThrowing(timeout = 3000) {
       addKeyToProject(testData.projectBuilder.self.id)
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
-      val request = mockedSlackClient.chatPostMessageRequests.single()
+      val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
     }
   }
@@ -73,7 +70,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `Doesn't send a message if the subscription isn't global and modified language isn't in preferred languages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     val updatedConfig =
       SlackConfigDto(
@@ -90,9 +87,9 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     loginAsUser(testData.user.username)
 
-    modifyTranslationData(testData.projectBuilder.self.id, "cs")
+    modifyTranslationData(testData.projectBuilder.self.id, "cs", testData.key2.name)
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
-    slackMessageService.findByKey(testData.key.id, config.id).forEach {
+    slackMessageService.find(testData.key2.id, config.id).forEach {
       it.langTags.assert.doesNotContain("cs")
     }
   }
@@ -101,7 +98,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `Doesn't send a message if the event isn't in subscribed by user`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = mockSlackClient()
 
     val updatedConfig =
       SlackConfigDto(
@@ -120,7 +117,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
     addKeyToProject(testData.projectBuilder.self.id)
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
-    slackMessageService.findByKey(testData.key.id, config.id).forEach {
+    slackMessageService.find(testData.key2.id, config.id).forEach {
       it.langTags.assert.doesNotContain("en")
     }
   }
@@ -153,11 +150,12 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   private fun modifyTranslationData(
     projectId: Long,
     landTag: String,
+    keyName: String,
   ) {
     performAuthPost(
       "/v2/projects/$projectId/translations",
       mapOf(
-        "key" to "testKey",
+        "key" to keyName,
         "translations" to mapOf(landTag to UUID.randomUUID().toString()),
       ),
     ).andIsOk

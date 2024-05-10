@@ -11,12 +11,7 @@ import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.util.Logging
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 
 @RestController
@@ -59,6 +54,13 @@ class SlackEventsController(
               event.team.id,
               event.channel.id,
               slackHelpBlocksProvider.getHelpBlocks(),
+            )
+
+          "help_advanced_subscribe_btn" ->
+            slackExecutor.sendBlocksMessage(
+              event.team.id,
+              event.channel.id,
+              slackHelpBlocksProvider.getAdvancedSubscriptionHelpBlocks(),
             )
         }
       }
@@ -107,9 +109,11 @@ class SlackEventsController(
     timestamp: String,
   ): T {
     val decodedPayload = URLDecoder.decode(payload.substringAfter("="), "UTF-8")
+    if (decodedPayload.contains("\"value\":\"redirect\"")) {
+      return objectMapper.readValue(decodedPayload)
+    }
 
     slackRequestValidation.validate(slackSignature, timestamp, payload)
-
     return objectMapper.readValue(decodedPayload)
   }
 }

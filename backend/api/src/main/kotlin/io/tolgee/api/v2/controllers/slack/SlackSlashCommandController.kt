@@ -83,7 +83,6 @@ class SlackSlashCommandController(
         "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackResponseString
 
         "logout" -> logout(payload.user_id).asSlackResponseString
-
         else -> {
           throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
         }
@@ -126,7 +125,7 @@ class SlackSlashCommandController(
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
     if (slackUserConnectionService.isUserConnected(payload.user_id)) {
-      return SlackMessageDto(text = i18n.translate("already_logged_in"))
+      return SlackMessageDto(text = i18n.translate("slack.common.message.already_logged_in"))
     }
 
     val workspace = organizationSlackWorkspaceService.findBySlackTeamId(payload.team_id)
@@ -148,22 +147,26 @@ class SlackSlashCommandController(
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
     var onEvent: EventName? = null
+    var isGlobal: Boolean? = null
     optionsMap.forEach { (option, value) ->
-      when (option) {
-        "--on" ->
-          onEvent =
-            try {
-              EventName.valueOf(value.uppercase())
-            } catch (e: IllegalArgumentException) {
-              throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
-            }
-        else -> {
-          throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+      try {
+        when (option) {
+          "--on" ->
+            onEvent = EventName.valueOf(value.uppercase())
+
+          "--global" ->
+            isGlobal = value.lowercase().toBooleanStrictOrNull() ?: throw java.lang.IllegalArgumentException()
+
+          else -> {
+            throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+          }
         }
+      } catch (e: IllegalArgumentException) {
+        throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
       }
     }
 
-    return subscribe(payload, projectId, languageTag, onEvent)
+    return subscribe(payload, projectId, languageTag, onEvent, isGlobal)
   }
 
   private fun subscribe(
@@ -171,6 +174,7 @@ class SlackSlashCommandController(
     projectId: Long,
     languageTag: String?,
     onEventName: EventName?,
+    isGlobal: Boolean?,
   ): SlackMessageDto {
     val user = getUserAccount(payload)
     checkPermissions(projectId, userAccountId = user.id)
@@ -184,15 +188,15 @@ class SlackSlashCommandController(
         languageTag = languageTag,
         onEvent = onEventName,
         slackTeamId = payload.team_id,
+        isGlobal = isGlobal,
       )
-
     try {
       slackConfigService.createOrUpdate(slackConfigDto)
     } catch (e: SlackWorkspaceNotFound) {
       throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
     }
 
-    return SlackMessageDto(text = i18n.translate("subscribed_successfully"))
+    return SlackMessageDto(text = i18n.translate("slack.common.message.subscribed_successfully"))
   }
 
   private fun unsubscribe(
@@ -207,7 +211,7 @@ class SlackSlashCommandController(
     }
 
     return SlackMessageDto(
-      text = i18n.translate("unsubscribed-successfully"),
+      text = i18n.translate("slack.common.message.unsubscribed-successfully"),
     )
   }
 
@@ -251,7 +255,8 @@ class SlackSlashCommandController(
   }
 
   companion object {
-    val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+(\w{2}))?\s*(.*)$""".toRegex()
+    val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+([\p{L}][\p{L}\d-]*))?\s*(.*)$""".toRegex()
+
     val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
   }
 }

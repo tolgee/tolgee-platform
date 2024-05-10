@@ -57,13 +57,6 @@ class SavedSlackMessageService(
     )
   }
 
-  fun findByKey(
-    keyId: Long,
-    configId: Long,
-  ): List<SavedSlackMessage> {
-    return savedSlackMessageRepository.findByKeyIdAndSlackConfigId(keyId, configId)
-  }
-
   fun findAll(): List<SavedSlackMessage> {
     return savedSlackMessageRepository.findAll()
   }

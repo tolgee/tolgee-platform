@@ -64,7 +64,7 @@ class SlackExecutorHelper(
 
     val keyId = modifiedEntity.entityId
     val key = keyService.get(keyId)
-    blocksHeader = buildKeyInfoBlock(key, i18n.translate("new-key-text"))
+    blocksHeader = buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-key"))
     key.translations.forEach translations@{ translation ->
       if (!shouldProcessEventNewKeyAdded(translation.language.tag, baseLanguage.tag)) {
         return@translations
@@ -204,14 +204,14 @@ class SlackExecutorHelper(
   private fun buildImportBlocks(count: Long) =
     withBlocks {
       section {
-        authorHeadSection(i18n.translate("imported-text") + " $count keys")
+        authorHeadSection(i18n.translate("slack.common.message.imported") + " $count keys")
       }
     }
 
   private fun buildBlocksTooManyTranslations(count: Long) =
     withBlocks {
       section {
-        authorHeadSection(i18n.translate("too-many-translations-text") + " $count translations")
+        authorHeadSection(i18n.translate("slack.common.message.too-many-translations").format(count))
       }
     }
 
@@ -249,7 +249,7 @@ class SlackExecutorHelper(
         translation.language.name
       }
 
-    val headerBlock = buildKeyInfoBlock(key, i18n.translate("new-translation-text").format(langName))
+    val headerBlock = buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-translation").format(langName))
     val attachments = mutableListOf(createAttachmentForLanguage(translation) ?: return null)
     val langTags = mutableSetOf(modifiedLangTag)
 
@@ -482,10 +482,12 @@ class SlackExecutorHelper(
       .build()
 
   private fun ActionsBlockBuilder.redirectOnPlatformButton() {
-    val tolgeeUrl = "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/translations"
+    val tolgeeUrl =
+      "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
+        "activity-detail?activity=${data.activityData?.revisionId}"
 
     button {
-      text(i18n.translate("tolgee_redirect_button_text"), emoji = true)
+      text(i18n.translate("slack.common.text.button.tolgee_redirect"), emoji = true)
       value("redirect")
       url(tolgeeUrl)
       actionId("button_redirect_to_tolgee")

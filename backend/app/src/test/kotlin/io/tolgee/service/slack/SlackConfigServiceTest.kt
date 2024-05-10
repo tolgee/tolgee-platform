@@ -26,6 +26,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
         channelId = "testChannel2",
         userAccount = testData.user,
         onEvent = EventName.ALL,
+        isGlobal = true,
       )
     slackConfigService.createOrUpdate(slackConfigDto)
     Assertions.assertThat(slackConfigService.findAll()).hasSize(2)
