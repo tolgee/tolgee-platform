@@ -60,7 +60,10 @@ class SlackSlashCommandController(
   ): String? {
     return slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)
-      checkIfTokenIsPresent(payload.team_id)
+      val token = checkIfTokenIsPresent(payload.team_id)
+      if (!slackExecutor.isBotInChannel(payload, token)) {
+        throw SlackErrorException(slackErrorProvider.getBotNotInChannelError())
+      }
 
       val matchResult =
         commandRegex.matchEntire(payload.text) ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
@@ -186,14 +189,11 @@ class SlackSlashCommandController(
   ): SlackMessageDto {
     val user = getUserAccount(payload)
     checkPermissions(projectId, userAccountId = user.id)
-
-    val channelId = slackExecutor.determineChannelId(payload, checkIfTokenIsPresent(payload.team_id))
-
     val slackConfigDto =
       SlackConfigDto(
         project = getProject(projectId),
         slackId = payload.user_id,
-        channelId = channelId,
+        channelId = payload.channel_id,
         userAccount = user,
         languageTag = languageTag,
         onEvent = onEventName,

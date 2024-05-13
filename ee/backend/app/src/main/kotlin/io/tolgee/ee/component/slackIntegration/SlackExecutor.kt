@@ -233,24 +233,18 @@ class SlackExecutor(
     }
   }
 
-  fun determineChannelId(
+  fun isBotInChannel(
     payload: SlackCommandDto,
     token: String,
-  ): String {
-    return if (payload.channel_name == "directmessage") {
-      val slackMethods = slackClient.methods(token)
-      val openConversationResponse =
-        slackMethods.conversationsOpen { req ->
-          req.users(listOf(payload.user_id))
-        }
-      if (openConversationResponse.isOk) {
-        openConversationResponse.channel.id
-      } else {
-        logger.error("Failed to open conversation: ${openConversationResponse.error}")
-        throw IllegalArgumentException("Could not open direct message channel with user.")
+  ): Boolean {
+    val response =
+      slackClient.methods(token).conversationsInfo {
+        it.channel(payload.channel_id)
       }
+    return if (response.isOk) {
+      response.channel.isMember
     } else {
-      payload.channel_id
+      false
     }
   }
 

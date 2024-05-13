@@ -151,4 +151,12 @@ class SlackErrorProvider(
       text(i18n.translate("slack.common.text.button.view-help"), emoji = true)
     }
   }
+
+  fun getBotNotInChannelError(): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.bot-not-in-channel"))
+      }
+    }
+  }
 }
