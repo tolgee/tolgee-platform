@@ -353,4 +353,29 @@ class SlackExecutor(
       sendMessageOnKeyAdded(slackConfig, request)
     }
   }
+
+  fun getSuccessfullySubscribedBlocks(config: SlackConfig): List<LayoutBlock> =
+    withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.subscribed-successfully").format(config.project.name))
+      }
+      val subscriptionInfo =
+        if (config.isGlobalSubscription) {
+          i18n.translate("slack.common.message.subscribed-successfully-global-subscription").format(config.onEvent.name)
+        } else {
+          i18n.translate("slack.common.message.subscribed-successfully-not-global-subscription") +
+            config.preferences.mapNotNull { pref ->
+              pref.languageTag?.let { tag ->
+                val language = languageService.getByTag(tag, config.project)
+                val flagEmoji = language.flagEmoji
+                val fullName = language.name
+                "\n - $fullName $flagEmoji : on `${pref.onEvent.name}`"
+              }
+            }.joinToString("\n")
+        }
+
+      section {
+        markdownText(subscriptionInfo)
+      }
+    }
 }

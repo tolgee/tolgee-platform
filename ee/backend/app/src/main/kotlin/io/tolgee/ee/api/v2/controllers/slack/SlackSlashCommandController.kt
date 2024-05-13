@@ -201,12 +201,13 @@ class SlackSlashCommandController(
         isGlobal = isGlobal,
       )
     try {
-      slackConfigService.createOrUpdate(slackConfigDto)
+      val config = slackConfigService.createOrUpdate(slackConfigDto)
+      return SlackMessageDto(
+        blocks = slackExecutor.getSuccessfullySubscribedBlocks(config),
+      )
     } catch (e: SlackWorkspaceNotFound) {
       throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
     }
-
-    return SlackMessageDto(text = i18n.translate("slack.common.message.subscribed_successfully"))
   }
 
   private fun unsubscribe(
