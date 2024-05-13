@@ -2,7 +2,6 @@ package io.tolgee.ee.api.v2.controllers.slack
 
 import com.slack.api.model.block.LayoutBlock
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.SlackErrorProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
@@ -10,6 +9,10 @@ import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.component.slackIntegration.*
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
+import io.tolgee.ee.service.slackIntegration.SlackConfigService
+import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
+import io.tolgee.ee.service.slackIntegration.SlackWorkspaceNotFound
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.SlackErrorException
@@ -20,10 +23,6 @@ import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
-import io.tolgee.service.slackIntegration.SlackConfigService
-import io.tolgee.service.slackIntegration.SlackUserConnectionService
-import io.tolgee.service.slackIntegration.SlackWorkspaceNotFound
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.*
@@ -95,14 +94,14 @@ class SlackSlashCommandController(
     }
   }
 
-  private fun checkIfTokenIsPresent(teamId: String) {
+  private fun checkIfTokenIsPresent(teamId: String): String {
     if (tolgeeProperties.slack.token != null) {
-      return
+      return tolgeeProperties.slack.token!!
     }
 
-    organizationSlackWorkspaceService.findBySlackTeamId(
+    return organizationSlackWorkspaceService.findBySlackTeamId(
       teamId,
-    ) ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
+    )?.accessToken ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
   }
 
   private fun String?.toLongOrThrowInvalidCommand(): Long {
@@ -153,7 +152,7 @@ class SlackSlashCommandController(
     languageTag: String?,
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
-    featureEnabled()
+    // featureEnabled()
 
     var onEvent: EventName? = null
     var isGlobal: Boolean? = null
@@ -188,11 +187,13 @@ class SlackSlashCommandController(
     val user = getUserAccount(payload)
     checkPermissions(projectId, userAccountId = user.id)
 
+    val channelId = slackExecutor.determineChannelId(payload, checkIfTokenIsPresent(payload.team_id))
+
     val slackConfigDto =
       SlackConfigDto(
         project = getProject(projectId),
         slackId = payload.user_id,
-        channelId = payload.channel_id,
+        channelId = channelId,
         userAccount = user,
         languageTag = languageTag,
         onEvent = onEventName,

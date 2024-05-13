@@ -8,8 +8,8 @@ import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.ee.component.slackIntegration.SlackExecutor
 import io.tolgee.ee.component.slackIntegration.SlackHelpBlocksProvider
 import io.tolgee.ee.component.slackIntegration.SlackRequestValidation
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.exceptions.SlackErrorException
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder

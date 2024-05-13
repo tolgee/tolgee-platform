@@ -17,9 +17,6 @@ import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.*
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
-import io.tolgee.service.slackIntegration.SavedSlackMessageService
-import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
@@ -66,9 +63,6 @@ class TestDataService(
   private val automationService: AutomationService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val languageStatsListener: LanguageStatsListener,
-  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
-  private val slackUserConnectionService: SlackUserConnectionService,
-  private val savedSlackMessageService: SavedSlackMessageService,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -166,9 +160,9 @@ class TestDataService(
 
   private fun saveSlackWorkspaces(builder: TestDataBuilder) {
     builder.data.organizations.forEach { organizationBuilder ->
-      organizationSlackWorkspaceService.saveAll(
-        organizationBuilder.data.slackWorkspaces.map { it.self },
-      )
+      organizationBuilder.data.slackWorkspaces.map { it.self }.forEach {
+        entityManager.persist(it)
+      }
     }
   }
 
@@ -236,7 +230,7 @@ class TestDataService(
 
     builder.data.slackConfigs.forEach { slackConfig ->
       val messages = slackConfig.data.slackMessages.map { it.self }.toMutableList()
-      savedSlackMessageService.saveAll(messages)
+      messages.forEach { entityManager.persist(it) }
     }
   }
 
@@ -436,7 +430,9 @@ class TestDataService(
   }
 
   private fun saveUserSlackConnections(data: List<SlackUserConnectionBuilder>) {
-    data.forEach { slackUserConnectionService.save(it.self) }
+    data.forEach {
+      entityManager.persist(it.self)
+    }
   }
 
   private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {

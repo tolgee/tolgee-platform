@@ -12,13 +12,13 @@ import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.component.slackIntegration.SlackExecutor
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
+import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.SlackUserInfoModel
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
-import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.*
 

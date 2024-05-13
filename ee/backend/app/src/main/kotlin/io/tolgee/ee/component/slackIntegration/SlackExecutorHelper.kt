@@ -8,6 +8,7 @@ import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -17,7 +18,6 @@ import io.tolgee.model.slackIntegration.SlackConfigPreference
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
-import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.util.I18n
 import kotlin.jvm.optionals.getOrElse
 

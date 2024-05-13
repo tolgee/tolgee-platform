@@ -1,13 +1,18 @@
-package io.tolgee.service.slack
+package io.tolgee.ee.service.slack
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class SavedSlackMessageServiceTest : AbstractSpringTest() {
+  @Autowired
+  lateinit var savedSlackMessageService: SavedSlackMessageService
+
   @AfterEach
   fun after() {
     currentDateProvider.forcedDate = null

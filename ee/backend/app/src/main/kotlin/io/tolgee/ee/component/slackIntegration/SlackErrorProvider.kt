@@ -3,21 +3,20 @@ package io.tolgee.ee.component.slackIntegration
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
-import io.tolgee.component.SlackErrorProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
 
 @Component
-class SlackErrorProviderImpl(
+class SlackErrorProvider(
   private val i18n: I18n,
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val tolgeeProperties: TolgeeProperties,
-) : SlackErrorProvider {
-  override fun getUserNotConnectedError(payload: SlackCommandDto): List<LayoutBlock> {
+) {
+  fun getUserNotConnectedError(payload: SlackCommandDto): List<LayoutBlock> {
     val workspace = organizationSlackWorkspaceService.findBySlackTeamId(payload.team_id)
 
     val url =
@@ -46,7 +45,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getInvalidCommandError(): List<LayoutBlock> {
+  fun getInvalidCommandError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.command-not-recognized"))
@@ -60,7 +59,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getInvalidLangTagError(): List<LayoutBlock> {
+  fun getInvalidLangTagError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.invalid-lang-tag"))
@@ -68,7 +67,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getInvalidGlobalSubscriptionError(): List<LayoutBlock> {
+  fun getInvalidGlobalSubscriptionError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.global-subscription-error"))
@@ -76,7 +75,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getNotSubscribedYetError(): List<LayoutBlock> {
+  fun getNotSubscribedYetError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(
@@ -92,7 +91,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getNoPermissionError(): List<LayoutBlock> {
+  fun getNoPermissionError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(
@@ -102,7 +101,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getFeatureDisabledError(): List<LayoutBlock> {
+  fun getFeatureDisabledError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(
@@ -112,7 +111,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getProjectNotFoundError(): List<LayoutBlock> {
+  fun getProjectNotFoundError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(
@@ -122,7 +121,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getWorkspaceNotFoundError(): List<LayoutBlock> {
+  fun getWorkspaceNotFoundError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.slack-workspace-not-connected-to-any-organization"))
@@ -138,7 +137,7 @@ class SlackErrorProviderImpl(
     }
   }
 
-  override fun getInvalidSignatureError(): List<LayoutBlock> {
+  fun getInvalidSignatureError(): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(i18n.translate("slack-invalid-signature"))

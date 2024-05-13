@@ -13,6 +13,7 @@ plugins {
     id "java"
     id "kotlin-allopen"
     id "org.hibernate.orm"
+    id "io.sentry.jvm.gradle"
 }
 
 apply plugin: "kotlin-allopen"

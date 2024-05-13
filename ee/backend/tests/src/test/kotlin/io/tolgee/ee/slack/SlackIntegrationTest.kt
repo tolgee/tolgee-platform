@@ -1,4 +1,4 @@
-package io.tolgee.slack
+package io.tolgee.ee.slack
 
 import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
@@ -10,10 +10,11 @@ import com.slack.api.methods.response.users.UsersLookupByEmailResponse
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
+import io.tolgee.ee.service.slackIntegration.SlackConfigService
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.slackIntegration.EventName
-import io.tolgee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.Logging
@@ -33,6 +34,9 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
   @Autowired
   lateinit var slackMessageService: SavedSlackMessageService
+
+  @Autowired
+  lateinit var slackConfigService: SlackConfigService
 
   @Test
   fun `sends message to correct channel after translation changed`() {

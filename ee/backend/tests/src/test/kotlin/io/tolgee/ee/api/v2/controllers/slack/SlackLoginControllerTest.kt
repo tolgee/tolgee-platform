@@ -1,9 +1,11 @@
-package io.tolgee.api.v2.controllers.slack
+package io.tolgee.ee.api.v2.controllers.slack
 
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
+import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -17,9 +19,13 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var slackUserLoginUrlProvider: SlackUserLoginUrlProvider
 
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeAll
   fun setUp() {
     tolgeeProperties.slack.token = "token"
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.SLACK_INTEGRATION)
   }
 
   @Test

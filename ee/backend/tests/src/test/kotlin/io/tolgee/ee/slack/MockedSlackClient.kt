@@ -1,4 +1,4 @@
-package io.tolgee.slack
+package io.tolgee.ee.slack
 
 import com.slack.api.RequestConfigurator
 import com.slack.api.methods.MethodsClient

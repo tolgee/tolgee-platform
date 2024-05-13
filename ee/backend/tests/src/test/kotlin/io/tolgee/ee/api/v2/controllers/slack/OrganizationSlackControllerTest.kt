@@ -1,13 +1,18 @@
-package io.tolgee.api.v2.controllers.slack
+package io.tolgee.ee.api.v2.controllers.slack
 
 import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
+import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.util.executeInNewTransaction
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,6 +30,10 @@ import org.springframework.web.client.RestTemplate
 class OrganizationSlackControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var slackWorkspaceService: OrganizationSlackWorkspaceService
+
+  @Autowired
+  private lateinit var projectHolder: ProjectHolder
+
   lateinit var testData: SlackTestData
 
   @MockBean
@@ -34,10 +43,14 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var slackProperties: SlackProperties
 
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeEach
   fun setUp() {
     testData = SlackTestData()
     testDataService.saveTestData(testData.root)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.SLACK_INTEGRATION)
   }
 
   @Test
@@ -82,6 +95,12 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
 
     slackProperties.clientId = "clientId"
     slackProperties.clientSecret = "clientSecret"
+
+    executeInNewTransaction(platformTransactionManager) {
+      val projectDto = ProjectDto.fromEntity(testData.projectBuilder.self)
+      projectHolder.project = projectDto
+    }
+
     mockSlackRequest()
 
     performAuthPost(
@@ -91,7 +110,8 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk
 
-    Assertions.assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id)).isNotEmpty()
+    Assertions.assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id))
+      .isNotEmpty()
   }
 
   private fun mockSlackRequest() {

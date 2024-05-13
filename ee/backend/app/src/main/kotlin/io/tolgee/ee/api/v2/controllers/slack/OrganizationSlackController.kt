@@ -11,6 +11,7 @@ import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ConnectToSlackDto
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.slack.ConnectToSlackUrlModel
 import io.tolgee.hateoas.organization.slack.WorkspaceModel
@@ -20,7 +21,6 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.*
@@ -61,7 +61,7 @@ class OrganizationSlackController(
   ) {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
+      Feature.SLACK_INTEGRATION,
     )
 
     try {

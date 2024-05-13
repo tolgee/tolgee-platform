@@ -1,4 +1,4 @@
-package io.tolgee.service.slackIntegration
+package io.tolgee.ee.service.slackIntegration
 
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.SlackConfig

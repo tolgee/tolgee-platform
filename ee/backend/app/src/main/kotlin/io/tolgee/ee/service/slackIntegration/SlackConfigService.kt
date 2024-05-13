@@ -1,8 +1,8 @@
-package io.tolgee.service.slackIntegration
+package io.tolgee.ee.service.slackIntegration
 
-import io.tolgee.component.SlackErrorProvider
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.ee.component.slackIntegration.SlackErrorProvider
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.slackIntegration.EventName
@@ -129,9 +129,9 @@ class SlackConfigService(
       if (slackConfig.preferences.isEmpty() ||
         !slackConfig.preferences.any { it.languageTag == dto.languageTag }
       ) {
-        addPreferenceToConfig(slackConfig, dto.languageTag, dto.onEvent ?: EventName.ALL)
+        addPreferenceToConfig(slackConfig, dto.languageTag!!, dto.onEvent ?: EventName.ALL)
       } else {
-        updatePreferenceInConfig(slackConfig, dto.languageTag, dto.onEvent ?: EventName.ALL)
+        updatePreferenceInConfig(slackConfig, dto.languageTag!!, dto.onEvent ?: EventName.ALL)
       }
     }
 

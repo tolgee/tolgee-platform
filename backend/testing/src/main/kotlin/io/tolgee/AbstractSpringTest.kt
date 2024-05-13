@@ -32,8 +32,6 @@ import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.*
-import io.tolgee.service.slackIntegration.SavedSlackMessageService
-import io.tolgee.service.slackIntegration.SlackConfigService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
@@ -209,12 +207,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var allCachesProvider: AllCachesProvider
-
-  @Autowired
-  lateinit var savedSlackMessageService: SavedSlackMessageService
-
-  @Autowired
-  lateinit var slackConfigService: SlackConfigService
 
   @BeforeEach
   fun clearCaches() {

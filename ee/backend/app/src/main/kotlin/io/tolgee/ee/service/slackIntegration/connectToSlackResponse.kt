@@ -1,6 +1,6 @@
 @file:Suppress("PropertyName")
 
-package io.tolgee.service.slackIntegration
+package io.tolgee.ee.service.slackIntegration
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 

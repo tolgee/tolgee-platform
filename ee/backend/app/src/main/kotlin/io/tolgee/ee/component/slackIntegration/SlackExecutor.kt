@@ -6,17 +6,18 @@ import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
+import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
+import io.tolgee.ee.service.slackIntegration.SlackConfigService
+import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
-import io.tolgee.service.slackIntegration.OrganizationSlackWorkspaceService
-import io.tolgee.service.slackIntegration.SavedSlackMessageService
-import io.tolgee.service.slackIntegration.SlackConfigService
-import io.tolgee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -229,6 +230,27 @@ class SlackExecutor(
       saveMessage(messageDto, response.ts, config)
     } else {
       logger.info(response.error)
+    }
+  }
+
+  fun determineChannelId(
+    payload: SlackCommandDto,
+    token: String,
+  ): String {
+    return if (payload.channel_name == "directmessage") {
+      val slackMethods = slackClient.methods(token)
+      val openConversationResponse =
+        slackMethods.conversationsOpen { req ->
+          req.users(listOf(payload.user_id))
+        }
+      if (openConversationResponse.isOk) {
+        openConversationResponse.channel.id
+      } else {
+        logger.error("Failed to open conversation: ${openConversationResponse.error}")
+        throw IllegalArgumentException("Could not open direct message channel with user.")
+      }
+    } else {
+      payload.channel_id
     }
   }
 
