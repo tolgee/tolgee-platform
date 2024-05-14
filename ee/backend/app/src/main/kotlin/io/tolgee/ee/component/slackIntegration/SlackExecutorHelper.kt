@@ -19,6 +19,8 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.jvm.optionals.getOrElse
 
 class SlackExecutorHelper(
@@ -70,7 +72,7 @@ class SlackExecutorHelper(
         return@translations
       }
 
-      val attachment = createAttachmentForLanguage(translation) ?: return@translations
+      val attachment = createAttachmentForLanguage(translation, null) ?: return@translations
 
       attachments.add(attachment)
       langTags.add(translation.language.tag)
@@ -78,7 +80,7 @@ class SlackExecutorHelper(
 
     if (!langTags.contains(baseLanguage.tag) && langTags.isNotEmpty()) {
       baseLanguage.translations?.find { it.key.id == keyId }?.let { baseTranslation ->
-        val attachment = createAttachmentForLanguage(baseTranslation) ?: return@let
+        val attachment = createAttachmentForLanguage(baseTranslation, null) ?: return@let
 
         attachments.add(attachment)
         langTags.add(baseLanguage.tag)
@@ -134,6 +136,7 @@ class SlackExecutorHelper(
   private fun buildBlocksWithTranslation(
     translation: Translation,
     baseLanguage: Language,
+    author: String?,
   ) = withBlocks {
     if (shouldSkipModification(
         slackConfig.preferences,
@@ -151,6 +154,10 @@ class SlackExecutorHelper(
     section {
       val currentTranslate = translation.text!!
       markdownText(currentTranslate)
+    }
+    if (author == null) return@withBlocks
+    context {
+      markdownText(author)
     }
   }
 
@@ -220,9 +227,21 @@ class SlackExecutorHelper(
 
     data.activityData?.modifiedEntities?.forEach modifiedEntities@{ (_, modifiedEntityList) ->
       modifiedEntityList.forEach { modifiedEntity ->
+        val event =
+          when {
+            modifiedEntity.modifications?.contains("text") == true -> "translation"
+            modifiedEntity.modifications?.contains("state") == true -> "state"
+            else -> ""
+          }
+
         val translationKey = modifiedEntity.entityId
         val translation = findTranslationByKey(translationKey) ?: return@modifiedEntities
-        result.add(processTranslationChange(translation) ?: return@modifiedEntities)
+        result.add(
+          processTranslationChange(
+            translation,
+            getModificationAuthorContext(event, data.activityData.timestamp),
+          ) ?: return@modifiedEntities,
+        )
 
         val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return@modifiedEntities
         if (baseLanguageTag == translation.language.tag) {
@@ -234,7 +253,10 @@ class SlackExecutorHelper(
     return result
   }
 
-  private fun processTranslationChange(translation: Translation): SavedMessageDto? {
+  private fun processTranslationChange(
+    translation: Translation,
+    modificationAuthor: String?,
+  ): SavedMessageDto? {
     val key = translation.key
     val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return null
     val modifiedLangTag = translation.language.tag
@@ -250,7 +272,8 @@ class SlackExecutorHelper(
       }
 
     val headerBlock = buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-translation").format(langName))
-    val attachments = mutableListOf(createAttachmentForLanguage(translation) ?: return null)
+    val attachments =
+      mutableListOf(createAttachmentForLanguage(translation, modificationAuthor) ?: return null)
     val langTags = mutableSetOf(modifiedLangTag)
 
     addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
@@ -268,6 +291,18 @@ class SlackExecutorHelper(
         isBaseChanged,
       )
     }
+  }
+
+  private fun getModificationAuthorContext(
+    event: String,
+    timestamp: Long,
+  ): String {
+    val date = Date(timestamp)
+    val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val formattedTime = formatter.format(date)
+
+    val authorMention = author?.let { "@$it" } ?: data.activityData?.author?.name
+    return i18n.translate("slack.common.message.modification-info").format(authorMention, event, formattedTime)
   }
 
   private fun addLanguagesIfNeed(
@@ -425,7 +460,7 @@ class SlackExecutorHelper(
         val color = determineColorByState(translation?.state)
         val blocksBody =
           if (translation?.text != null) {
-            buildBlocksWithTranslation(translation, baseLanguage)
+            buildBlocksWithTranslation(translation, baseLanguage, null)
           } else {
             val language = slackConfig.project.languages.find { it.tag == langTag } ?: return null
             buildBlocksNoTranslation(baseLanguage, language)
@@ -441,7 +476,10 @@ class SlackExecutorHelper(
     return result
   }
 
-  private fun createAttachmentForLanguage(translation: Translation): Attachment? {
+  private fun createAttachmentForLanguage(
+    translation: Translation,
+    author: String?,
+  ): Attachment? {
     val baseLanguage = slackConfig.project.baseLanguage ?: return null
 
     val savedLanguageTags = slackConfig.preferences
@@ -458,7 +496,7 @@ class SlackExecutorHelper(
     val color = determineColorByState(translation.state)
     val blocksBody =
       if (translation.text != null) {
-        buildBlocksWithTranslation(translation, baseLanguage)
+        buildBlocksWithTranslation(translation, baseLanguage, author)
       } else {
         buildBlocksNoTranslation(baseLanguage, translation.language)
       }

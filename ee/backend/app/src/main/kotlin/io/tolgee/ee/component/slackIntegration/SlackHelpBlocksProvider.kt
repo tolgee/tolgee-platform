@@ -78,8 +78,6 @@ class SlackHelpBlocksProvider(
       }
 
       actions {
-        contactSupportButton()
-
         docsButton()
       }
     }
