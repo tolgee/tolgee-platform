@@ -237,53 +237,45 @@ class KeyComplexEditHelper(
       .toMap()
 
   private fun setActivityHolder() {
-    if (!isSingleOperation) {
-      activityHolder.activity = ActivityType.COMPLEX_EDIT
-      return
-    }
+    activityHolder.activity = getActivityType()
+  }
+
+  private fun getActivityType(): ActivityType {
+    val possible = getPossibleOperations()
+    val singlePossible = possible.singleOrNull()
+
+    return singlePossible ?: ActivityType.COMPLEX_EDIT
+  }
+
+  private fun getPossibleOperations(): MutableList<ActivityType> {
+    val possibleOperations = mutableListOf<ActivityType>()
 
     if (areTranslationsModified) {
-      activityHolder.activity = ActivityType.SET_TRANSLATIONS
-      return
+      possibleOperations.add(ActivityType.SET_TRANSLATIONS)
     }
 
     if (areStatesModified) {
-      activityHolder.activity = ActivityType.SET_TRANSLATION_STATE
-      return
+      possibleOperations.add(ActivityType.SET_TRANSLATION_STATE)
     }
 
     if (areTagsModified) {
-      activityHolder.activity = ActivityType.KEY_TAGS_EDIT
-      return
+      possibleOperations.add(ActivityType.KEY_TAGS_EDIT)
     }
 
     if (isKeyNameModified) {
-      activityHolder.activity = ActivityType.KEY_NAME_EDIT
-      return
+      possibleOperations.add(ActivityType.KEY_NAME_EDIT)
     }
 
     if (isScreenshotAdded) {
-      activityHolder.activity = ActivityType.SCREENSHOT_ADD
-      return
+      possibleOperations.add(ActivityType.SCREENSHOT_ADD)
     }
 
     if (isScreenshotDeleted) {
-      activityHolder.activity = ActivityType.SCREENSHOT_DELETE
-      return
+      possibleOperations.add(ActivityType.SCREENSHOT_DELETE)
     }
-  }
 
-  private val isSingleOperation: Boolean
-    get() {
-      return arrayOf(
-        areTranslationsModified,
-        areStatesModified,
-        areTagsModified,
-        isKeyNameModified,
-        isScreenshotAdded,
-        isScreenshotDeleted,
-      ).sumOf { if (it) 1 as Int else 0 } == 0
-    }
+    return possibleOperations
+  }
 
   private fun prepareData() {
     key = keyService.get(keyId)
