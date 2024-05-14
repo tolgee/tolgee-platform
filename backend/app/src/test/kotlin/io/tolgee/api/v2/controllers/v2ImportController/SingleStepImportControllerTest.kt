@@ -21,6 +21,12 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Value("classpath:import/simple.json")
   lateinit var simpleJson: Resource
 
+  @Value("classpath:import/apple/Localizable.strings")
+  lateinit var appleStringsFile: Resource
+
+  @Value("classpath:import/apple/en.xliff")
+  lateinit var appleXliffFile: Resource
+
   @Value("classpath:import/xliff/simple.xliff")
   lateinit var simpleXliff: Resource
 
@@ -155,6 +161,30 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     ).andIsOk
 
     assertJsonImported()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `imports apple strings file`() {
+    saveAndPrepare()
+    val fileName = "en/Localizable.strings"
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, appleStringsFile)),
+      getFileMappings(fileName, format = "STRINGS", languageTag = "en"),
+    ).andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `imports xliff file`() {
+    saveAndPrepare()
+    val fileName = "en.xliff"
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, appleXliffFile)),
+      getFileMappings(fileName, format = "APPLE_XLIFF", languageTag = "en"),
+    ).andIsOk
   }
 
   @Test

@@ -7,7 +7,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
-import jakarta.persistence.EntityManager
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.time.Duration
@@ -16,7 +16,7 @@ import java.time.Duration
 class ExportService(
   private val fileExporterFactory: FileExporterFactory,
   private val projectService: ProjectService,
-  private val entityManager: EntityManager,
+  private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
 ) {
   fun export(
@@ -72,11 +72,11 @@ class ExportService(
     overrideLanguageTags: List<String>? = null,
   ): List<ExportTranslationView> {
     return ExportDataProvider(
-      entityManager = entityManager,
+      applicationContext = applicationContext,
       exportParams = exportParams,
       projectId = projectId,
       overrideLanguageTag = overrideLanguageTags,
-    ).getData()
+    ).data
   }
 
   private fun getProjectBaseLanguage(projectId: Long): LanguageDto {

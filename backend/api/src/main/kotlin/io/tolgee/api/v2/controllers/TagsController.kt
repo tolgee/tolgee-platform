@@ -5,6 +5,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.invitation.TagModel
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
+import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.dtos.request.key.TagKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -98,6 +99,17 @@ class TagsController(
   ): PagedModel<TagModel> {
     val data = tagService.getProjectTags(projectHolder.project.id, search, pageable)
     return pagedResourcesAssembler.toModel(data, tagModelAssembler)
+  }
+
+  @PutMapping("tag-complex")
+  @Operation(summary = "Execute complex tag operation")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @RequestActivity(ActivityType.KEY_TAGS_EDIT)
+  fun executeComplexTagOperation(
+    @RequestBody req: ComplexTagKeysRequest,
+  ) {
+    tagService.complexTagOperation(projectHolder.project.id, req)
   }
 
   private fun Key.checkInProject() {

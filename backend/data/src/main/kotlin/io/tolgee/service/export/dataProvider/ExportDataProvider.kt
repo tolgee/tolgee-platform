@@ -13,9 +13,9 @@ import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.Tag
-import io.tolgee.model.key.Tag_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
+import io.tolgee.service.key.TaggedKeyIdsProvider
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
@@ -25,17 +25,23 @@ import jakarta.persistence.criteria.ListJoin
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
 import jakarta.persistence.criteria.SetJoin
+import org.springframework.context.ApplicationContext
 
 class ExportDataProvider(
-  private val entityManager: EntityManager,
+  private val applicationContext: ApplicationContext,
   private val exportParams: IExportParams,
   private val projectId: Long,
   private val overrideLanguageTag: List<String>? = null,
 ) {
-  private val cb: CriteriaBuilder = entityManager.criteriaBuilder
-  val query: CriteriaQuery<ExportDataView> = cb.createQuery(ExportDataView::class.java)
+  private val cb: CriteriaBuilder by lazy { entityManager.criteriaBuilder }
+  val query: CriteriaQuery<ExportDataView> by lazy {
+    cb.createQuery(ExportDataView::class.java)
+  }
 
-  private var key: Root<Key> = query.from(Key::class.java)
+  private val key: Root<Key> by lazy {
+    query.from(Key::class.java)
+  }
+
   private lateinit var tagJoin: SetJoin<KeyMeta, Tag>
   private lateinit var keyMetaJoin: Join<Key, KeyMeta>
   private lateinit var translationJoin: ListJoin<Key, Translation>
@@ -44,10 +50,6 @@ class ExportDataProvider(
   private lateinit var namespaceJoin: Join<Key, Namespace>
 
   private var whereConditions: MutableList<Predicate> = mutableListOf()
-
-  init {
-    initQuery()
-  }
 
   private fun initQuery() {
     addJoins()
@@ -82,10 +84,8 @@ class ExportDataProvider(
 
   private fun addWhereConditions() {
     filterProjectId()
-    filterTag()
-    filterTagIn()
-    filterTagNot()
     filterKeyId()
+    applyTagFilters()
     filterKeyIdNot()
     filterKeyPrefix()
     filterState()
@@ -99,21 +99,9 @@ class ExportDataProvider(
     whereConditions.add(cb.equal(projectJoin.get(Project_.id), projectId))
   }
 
-  private fun filterTag() {
-    if (exportParams.filterTag != null) {
-      whereConditions.add(tagJoin.get(Tag_.name).`in`(exportParams.filterTag))
-    }
-  }
-
-  private fun filterTagIn() {
-    if (exportParams.filterTagIn != null) {
-      whereConditions.add(tagJoin.get(Tag_.name).`in`(exportParams.filterTagIn))
-    }
-  }
-
-  private fun filterTagNot() {
-    if (exportParams.filterTagNotIn != null) {
-      whereConditions.add(cb.not(tagJoin.get(Tag_.name).`in`(exportParams.filterTagNotIn)))
+  private fun applyTagFilters() {
+    if (shouldApplyTagFilters) {
+      whereConditions.add(key.get(Key_.id).`in`(tagFilteredKeyIds))
     }
   }
 
@@ -183,11 +171,13 @@ class ExportDataProvider(
     return language
   }
 
-  fun getData(): List<ExportTranslationView> {
-    val resultList = entityManager.createQuery(query).resultList
-    val keyMap = transformResult(resultList)
-    return keyMap.flatMap { it.value.translations.values }
-  }
+  val data: List<ExportTranslationView>
+    by lazy {
+      initQuery()
+      val resultList = entityManager.createQuery(query).resultList
+      val keyMap = transformResult(resultList)
+      keyMap.flatMap { it.value.translations.values }
+    }
 
   private fun transformResult(resultList: MutableList<ExportDataView>): HashMap<Long, ExportKeyView> {
     val keyMap = LinkedHashMap<Long, ExportKeyView>()
@@ -216,4 +206,36 @@ class ExportDataProvider(
     }
     return keyMap
   }
+
+  private val shouldApplyTagFilters
+    get() =
+      exportParams.filterTagIn != null || exportParams.filterTagNotIn != null || exportParams.filterTag != null
+
+  private val tagFilteredKeyIds by lazy {
+    taggedKeyIdsProvider.getFilteredKeys(
+      projectId,
+      getJoinedTagInFilter(),
+      exportParams.filterTagNotIn,
+    )
+  }
+
+  private fun getJoinedTagInFilter(): MutableList<String>? {
+    if (exportParams.filterTagIn == null && exportParams.filterTag == null) {
+      return null
+    }
+
+    val tagIn = (exportParams.filterTagIn ?: emptyList()).toMutableList()
+
+    if (exportParams.filterTag != null) {
+      tagIn.add(exportParams.filterTag!!)
+    }
+
+    return tagIn
+  }
+
+  private val entityManager: EntityManager
+    by lazy { applicationContext.getBean(EntityManager::class.java) }
+
+  private val taggedKeyIdsProvider: TaggedKeyIdsProvider
+    by lazy { applicationContext.getBean(TaggedKeyIdsProvider::class.java) }
 }

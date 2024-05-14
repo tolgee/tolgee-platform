@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -10,6 +11,7 @@ import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -23,6 +25,7 @@ class TagService(
   @Lazy
   private val keyService: KeyService,
   private val entityManager: EntityManager,
+  private val applicationContext: ApplicationContext,
 ) : Logging {
   fun tagKey(
     key: Key,
@@ -46,7 +49,7 @@ class TagService(
       }
 
     if (tag.name.length > 100) {
-      throw BadRequestException(io.tolgee.constants.Message.TAG_TOO_LOG)
+      throw BadRequestException(Message.TAG_TOO_LOG)
     }
 
     tagRepository.save(tag)
@@ -286,5 +289,48 @@ class TagService(
       delete from tag where project_id = :projectId
       """,
     ).setParameter("projectId", projectId).executeUpdate()
+  }
+
+  @Transactional
+  fun complexTagOperation(
+    projectId: Long,
+    req: ComplexTagKeysRequest,
+  ) {
+    val provider =
+      ComplexTagOperationKeyProvider(projectId, req.filterKeys, req.filterTag, req.filterTagNot, applicationContext)
+
+    if (req.tagFiltered != null || req.untagOther != null) {
+      val filteredKeys = provider.filtered
+      tagKeys(filteredKeys, req.tagFiltered)
+      untagKeys(filteredKeys, req.untagFiltered)
+    }
+
+    if (req.tagOther != null || req.untagOther != null) {
+      val rest = provider.rest
+      tagKeys(rest, req.tagOther)
+      untagKeys(rest, req.untagOther)
+    }
+
+    entityManager.flush()
+  }
+
+  private fun tagKeys(
+    keysWithFetchedTags: List<Key>,
+    tags: List<String>?,
+  ) {
+    if (tags != null) {
+      val mapToTag = keysWithFetchedTags.associate { it.id to tags }
+      tagKeys(keysWithFetchedTags, mapToTag)
+    }
+  }
+
+  private fun untagKeys(
+    keysWithFetchedTags: List<Key>,
+    tags: List<String>?,
+  ) {
+    if (tags != null) {
+      val mapToTag = keysWithFetchedTags.associate { it.id to tags }
+      untagKeys(keysWithFetchedTags, mapToTag)
+    }
   }
 }

@@ -122,7 +122,6 @@ enum class ImportFormat(
         toIcuPlaceholderConvertorFactory = null,
       ),
   ),
-
   YAML_RUBY(
     ImportFileFormat.YAML,
     pluralsViaNesting = true,

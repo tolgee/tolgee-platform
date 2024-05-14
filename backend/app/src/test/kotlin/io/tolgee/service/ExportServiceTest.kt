@@ -23,9 +23,9 @@ class ExportServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     val exportParams = ExportParams(filterState = null)
 
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
 
-    val result = provider.getData()
+    val result = provider.data
 
     assertThat(result).hasSize(4)
   }
@@ -36,9 +36,9 @@ class ExportServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     val exportParams = ExportParams(filterState = listOf(TranslationState.UNTRANSLATED))
 
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
 
-    val result = provider.getData()
+    val result = provider.data
 
     assertThat(result).hasSize(2)
     assertThat(result).allMatch { it.id == null }
@@ -50,8 +50,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(languages = setOf("de"))
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
 
     assertThat(result).hasSize(1)
     assertThat(result[0].languageTag).isEqualTo("de")
@@ -64,8 +64,8 @@ class ExportServiceTest : AbstractSpringTest() {
 
     val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id))
 
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
 
     assertThat(result).hasSize(1)
     assertThat(result[0].key.id).isEqualTo(testData.aKey.id)
@@ -77,8 +77,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(filterKeyIdNot = listOf(testData.aKey.id))
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
 
     assertThat(result).hasSize(1)
     assertThat(result[0].key.id).isNotEqualTo(testData.aKey.id)
@@ -91,8 +91,8 @@ class ExportServiceTest : AbstractSpringTest() {
 
     val tag = "Cool tag"
     val exportParams = ExportParams(filterTag = tag)
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
 
     assertThat(result).hasSize(1)
 
@@ -133,8 +133,8 @@ class ExportServiceTest : AbstractSpringTest() {
     tags: List<String>,
   ): List<ExportTranslationView> {
     val exportParams = ExportParams(filterTagIn = tags)
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
     return result
   }
 
@@ -143,8 +143,8 @@ class ExportServiceTest : AbstractSpringTest() {
     tags: List<String>,
   ): List<ExportTranslationView> {
     val exportParams = ExportParams(filterTagNotIn = tags)
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    return provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    return provider.data
   }
 
   @Test
@@ -153,8 +153,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(filterKeyPrefix = "A")
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
 
     assertThat(result).hasSize(1)
     assertThat(result[0].key.id).isEqualTo(testData.aKey.id)
@@ -167,8 +167,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(filterState = listOf(TranslationState.REVIEWED))
-    val provider = ExportDataProvider(entityManager, exportParams, testData.project.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
 
     assertThat(result).hasSize(5)
     assertThat(result.map { it.state }).allMatch { it == TranslationState.REVIEWED }
@@ -180,8 +180,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(filterNamespace = listOf("ns-1", null))
-    val provider = ExportDataProvider(entityManager, exportParams, testData.projectBuilder.self.id)
-    val result = provider.getData()
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.projectBuilder.self.id)
+    val result = provider.data
 
     result.assert.hasSize(4)
     result.forEach { it.key.namespace.assert.isIn(null, "ns-1") }

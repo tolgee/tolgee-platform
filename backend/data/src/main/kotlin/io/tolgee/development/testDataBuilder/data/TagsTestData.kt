@@ -29,7 +29,6 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
         existingTagKey2 = this
       }.build {
         addMeta {
-
           tags.add(existingTag2)
         }
       }
@@ -42,6 +41,15 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
           }
         }
       }
+    }
+  }
+
+  fun addNamespacedKey() {
+    projectBuilder.addKey {
+      name = "namespaced key"
+    }.build {
+      setNamespace("namespace")
+      addTag("existing tag")
     }
   }
 
