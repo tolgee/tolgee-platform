@@ -11,11 +11,16 @@ import org.springframework.transaction.annotation.Transactional
 class SlackUserConnectionService(
   private val slackUserConnectionRepository: SlackUserConnectionRepository,
 ) : Logging {
-  fun get(
-    id: Long,
-    channelId: String,
-  ): SlackUserConnection {
+  fun get(id: Long): SlackUserConnection {
     return slackUserConnectionRepository.findById(id).get()
+  }
+
+  fun find(id: Long): SlackUserConnection? {
+    return slackUserConnectionRepository.findById(id).orElse(null)
+  }
+
+  fun findByUserAccountId(id: Long): SlackUserConnection? {
+    return slackUserConnectionRepository.findByUserAccountId(id)
   }
 
   fun findBySlackId(slackId: String): SlackUserConnection? {

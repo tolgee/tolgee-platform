@@ -336,8 +336,8 @@ class SlackExecutorHelper(
   }
 
   private fun SectionBlockBuilder.authorHeadSection(head: String) {
-    val authorMention = author?.let { "@$it " } ?: data.activityData?.author?.name
-    markdownText(authorMention + head)
+    val authorMention = author?.let { "@$it" } ?: data.activityData?.author?.name
+    markdownText(" *$authorMention* $head")
   }
 
   private fun shouldSkipModification(

@@ -71,10 +71,11 @@ class SlackExecutor(
     }
   }
 
-  fun getSlackNickName(author: String?): String? {
+  fun getSlackNickName(authorId: Long): String? {
+    val slackId = slackUserConnectionService.findByUserAccountId(authorId)?.slackUserId ?: return null
     val response =
-      slackClient.methods(tolgeeProperties.slack.token).usersLookupByEmail { req ->
-        req.email(author)
+      slackClient.methods(tolgeeProperties.slack.token).usersInfo {
+        it.user(slackId)
       }
 
     return if (response.isOk) {
@@ -260,7 +261,7 @@ class SlackExecutor(
       slackUserConnectionService,
       i18n,
       tolgeeProperties,
-      getSlackNickName(data.activityData?.author?.name ?: ""),
+      getSlackNickName(data.activityData?.author?.id ?: 0L),
     )
   }
 
