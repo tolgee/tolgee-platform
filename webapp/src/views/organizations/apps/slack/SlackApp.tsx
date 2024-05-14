@@ -117,17 +117,19 @@ export const SlackApp = () => {
         </LoadingButton>
       </StyledAppSplitHeader>
 
-      <div>
-        {workspaces.data?._embedded?.workspaces?.map((item) => (
-          <StyledItem key={item.id}>
-            <Box display="grid" gap={0.2}>
-              <div>{item.slackTeamName}</div>
-              <StyledTeamId>{item.slackTeamId}</StyledTeamId>
-            </Box>
-            <DisconnectButton workspaceId={item.id} />
-          </StyledItem>
-        ))}
-      </div>
+      {Boolean(workspaces.data?._embedded?.workspaces?.length) && (
+        <div>
+          {workspaces.data?._embedded?.workspaces?.map((item) => (
+            <StyledItem key={item.id}>
+              <Box display="grid" gap={0.2}>
+                <div>{item.slackTeamName}</div>
+                <StyledTeamId>{item.slackTeamId}</StyledTeamId>
+              </Box>
+              <DisconnectButton workspaceId={item.id} />
+            </StyledItem>
+          ))}
+        </div>
+      )}
 
       <PrivateRoute path={LINKS.ORGANIZATION_APPS_SLACK_OAUTH_SUCCESS.template}>
         <OrganizationSlackSuccessHandler />

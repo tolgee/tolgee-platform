@@ -2,7 +2,7 @@ import { styled } from '@mui/material';
 import React from 'react';
 
 const StyledContainer = styled('div')`
-  border-radius: 3px;
+  border-radius: 8px;
   background: ${({ theme }) => theme.palette.background.default};
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.25);
   padding: 30px 20px 20px 20px;

@@ -15,7 +15,7 @@ import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const StyledContainer = styled('div')`
-  padding: 18px 4px;
+  padding: 28px 4px 0px 4px;
   display: grid;
   justify-items: center;
 `;
@@ -26,13 +26,14 @@ const StyledTitle = styled('h2')`
   font-style: normal;
   font-weight: 400;
   padding-top: 40px;
+  margin-top: 0px;
   text-align: center;
 `;
 
 const StyledDescription = styled('div')`
   color: ${({ theme }) => theme.palette.text.primary}
   font-size: 15px;
-  padding-bottom: 40px;
+  padding-bottom: 60px;
   max-width: 550px;
   text-align: center;
 `;
@@ -104,7 +105,7 @@ export const SlackConnectView = () => {
             </Alert>
           )
         }
-        maxWidth={964}
+        maxWidth={800}
         windowTitle={t('slack_connect_title')}
         content={
           <>
@@ -151,7 +152,7 @@ export const SlackConnectView = () => {
                   <T keyName="slack_connect_description" />
                 </StyledDescription>
 
-                <Box display="flex" gap={2} mt={3} mb={0.5}>
+                <Box display="flex" gap={2} mb={1.5}>
                   <Button
                     component={Link}
                     size="medium"
