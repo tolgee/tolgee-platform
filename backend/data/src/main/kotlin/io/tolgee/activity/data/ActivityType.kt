@@ -59,4 +59,5 @@ enum class ActivityType(
   WEBHOOK_CONFIG_CREATE,
   WEBHOOK_CONFIG_UPDATE,
   WEBHOOK_CONFIG_DELETE,
+  COMPLEX_TAG_OPERATION(onlyCountsInList = true),
 }

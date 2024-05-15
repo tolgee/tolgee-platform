@@ -7,17 +7,13 @@ import io.tolgee.api.v2.hateoas.invitation.TagModel
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.dtos.request.key.TagKeyDto
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.TagService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -48,7 +44,6 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 @OpenApiTag(name = "Tags", description = "Manipulates key tags")
 @OpenApiOrderExtension(6)
 class TagsController(
-  private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val tagService: TagService,
   private val tagModelAssembler: TagModelAssembler,
@@ -68,9 +63,7 @@ class TagsController(
     @Valid @RequestBody
     tagKeyDto: TagKeyDto,
   ): TagModel {
-    val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
-    key.checkInProject()
-    return tagService.tagKey(key, tagKeyDto.name.trim()).model
+    return tagService.tagKey(projectHolder.project.id, keyId, tagKeyDto.name.trim()).model
   }
 
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
@@ -82,11 +75,7 @@ class TagsController(
     @PathVariable keyId: Long,
     @PathVariable tagId: Long,
   ) {
-    val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
-    val tag = tagService.find(tagId) ?: throw NotFoundException()
-    tag.checkInProject()
-    key.checkInProject()
-    return tagService.remove(key, tag)
+    return tagService.removeTag(projectHolder.project.id, keyId, tagId)
   }
 
   @GetMapping(value = ["tags"])
@@ -105,21 +94,11 @@ class TagsController(
   @Operation(summary = "Execute complex tag operation")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
-  @RequestActivity(ActivityType.KEY_TAGS_EDIT)
+  @RequestActivity(ActivityType.COMPLEX_TAG_OPERATION)
   fun executeComplexTagOperation(
     @RequestBody req: ComplexTagKeysRequest,
   ) {
     tagService.complexTagOperation(projectHolder.project.id, req)
-  }
-
-  private fun Key.checkInProject() {
-    keyService.checkInProject(this, projectHolder.project.id)
-  }
-
-  private fun Tag.checkInProject() {
-    if (this.project.id != projectHolder.project.id) {
-      throw BadRequestException(io.tolgee.constants.Message.TAG_NOT_FROM_PROJECT)
-    }
   }
 
   private val Tag.model: TagModel

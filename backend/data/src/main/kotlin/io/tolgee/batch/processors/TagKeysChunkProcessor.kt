@@ -26,7 +26,7 @@ class TagKeysChunkProcessor(
     var params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      tagService.tagKeysById(subChunk.associateWith { params.tags })
+      tagService.tagKeysById(job.projectId, subChunk.associateWith { params.tags })
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)

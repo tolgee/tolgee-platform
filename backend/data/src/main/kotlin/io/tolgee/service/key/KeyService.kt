@@ -392,7 +392,18 @@ class KeyService(
 
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
 
-  fun getKeysWithTagsById(keysIds: Iterable<Long>): Set<Key> = keyRepository.getWithTagsByIds(keysIds)
+  fun getKeysWithTagsById(
+    projectId: Long,
+    keysIds: Iterable<Long>,
+  ): Set<Key> {
+    val result = keyRepository.getWithTagsByIds(projectId, keysIds)
+
+    if (keysIds.count() != result.count()) {
+      throw NotFoundException(Message.KEY_NOT_FOUND)
+    }
+
+    return result
+  }
 
   fun find(id: List<Long>): List<Key> {
     return keyRepository.findAllByIdIn(id)
