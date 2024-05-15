@@ -205,7 +205,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     """
     from UserAccount ua 
     left join fetch ua.organizationRoles
-    where ua.username in :usernames and ua.deletedAt is null and ua.isDemo = false and ua.deletedAt is null
+    where ua.username in :usernames and ua.deletedAt is null and ua.isDemo = true
   """,
   )
   fun findDemoByUsernames(usernames: List<String>): List<UserAccount>

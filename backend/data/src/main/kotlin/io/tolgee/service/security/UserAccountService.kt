@@ -115,6 +115,7 @@ class UserAccountService(
     user.username = demoUser.username
     user.name = demoUser.name
     user.isDemo = true
+    user.disabledAt = currentDateProvider.date
 
     setDemoUserAvatar(demoUser, user)
 
