@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfies
 import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

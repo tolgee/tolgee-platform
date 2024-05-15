@@ -122,7 +122,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   fun `caches permission by project and user`() {
     val permission = Permission(id = 1)
     whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1))
-      .then { permission }
+      .then { Permission.PermissionWithLanguageIdsWrapper(permission, null, null, null) }
     permissionService.find(1, 1)
     Mockito.verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
@@ -137,7 +137,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     whenever(
       permissionRepository
         .findOneByProjectIdAndUserIdAndOrganizationId(null, null, organizationId = 1),
-    ).then { permission }
+    ).then { Permission.PermissionWithLanguageIdsWrapper(permission, null, null, null) }
 
     permissionService.find(organizationId = 1)
     Mockito.verify(permissionRepository, times(1))

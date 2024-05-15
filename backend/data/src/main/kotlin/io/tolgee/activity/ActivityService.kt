@@ -3,8 +3,8 @@ package io.tolgee.activity
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
-import io.tolgee.activity.projectActivityView.ProjectActivityViewByPageableProvider
-import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
+import io.tolgee.activity.views.ProjectActivityViewByPageableProvider
+import io.tolgee.activity.views.ProjectActivityViewByRevisionProvider
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityModifiedEntity

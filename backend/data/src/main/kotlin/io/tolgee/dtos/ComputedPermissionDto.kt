@@ -77,9 +77,9 @@ class ComputedPermissionDto(
   )
 
   companion object {
-    private fun getEmptyPermission(
+    fun getEmptyPermission(
       scopes: Array<Scope>,
-      type: ProjectPermissionType,
+      type: ProjectPermissionType?,
     ): IPermission {
       return object : IPermission {
         override val scopes: Array<Scope>
@@ -94,7 +94,7 @@ class ComputedPermissionDto(
           get() = null
         override val stateChangeLanguageIds: Set<Long>?
           get() = null
-        override val type: ProjectPermissionType
+        override val type: ProjectPermissionType?
           get() = type
         override val granular: Boolean?
           get() = null

@@ -1,6 +1,7 @@
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { PrivateRoute } from './common/PrivateRoute';
+import { NotificationsRouter } from 'tg.views/notifications/NotificationsRouter';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
@@ -13,33 +14,17 @@ import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 
-const LoginRouter = React.lazy(
-  () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
-);
-const SignUpView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "sign-up-view" */ './security/SignUp/SignUpView'
-    )
-);
+const LoginRouter = React.lazy(() => import('./security/Login/LoginRouter'));
+const SignUpView = React.lazy(() => import('./security/SignUp/SignUpView'));
 
 const PasswordResetSetView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "reset-password-set-view" */ './security/ResetPasswordSetView'
-    )
+  () => import('./security/ResetPasswordSetView')
 );
 const PasswordResetView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "reset-password-view" */ './security/ResetPasswordView'
-    )
+  () => import('./security/ResetPasswordView')
 );
 const AcceptInvitationHandler = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "accept-invitation-handler" */ './security/AcceptInvitationHandler'
-    )
+  () => import('./security/AcceptInvitationHandler')
 );
 
 const RecaptchaProvider: FC = (props) => {
@@ -85,6 +70,9 @@ export const RootRouter = () => (
     </PrivateRoute>
     <PrivateRoute path={LINKS.USER_SETTINGS.template}>
       <UserSettingsRouter />
+    </PrivateRoute>
+    <PrivateRoute path={LINKS.NOTIFICATIONS.template}>
+      <NotificationsRouter />
     </PrivateRoute>
     <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
       <AdministrationView />

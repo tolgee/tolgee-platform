@@ -6,6 +6,7 @@ import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.hateoas.InitialDataModel
 import io.tolgee.hateoas.ee.IEeSubscriptionModelAssembler
+import io.tolgee.notifications.UserNotificationService
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.UserPreferencesService
@@ -32,6 +33,7 @@ class InitialDataController(
   private val eeSubscriptionModelAssembler: IEeSubscriptionModelAssembler,
   private val eeSubscriptionProvider: EeSubscriptionProvider,
   private val announcementController: AnnouncementController,
+  private val userNotificationService: UserNotificationService,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(summary = "Get initial data", description = "Returns initial data required by the UI to load")
@@ -53,6 +55,7 @@ class InitialDataController(
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()
+      data.unreadNotifications = userNotificationService.getUnreadNotificationsCount(userAccount.id)
     }
 
     return data

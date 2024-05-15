@@ -21,6 +21,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
+import io.tolgee.notifications.NotificationPreferencesService
+import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
@@ -62,10 +64,10 @@ class ProjectService(
   private val slugGenerator: SlugGenerator,
   private val avatarService: AvatarService,
   private val activityHolder: ActivityHolder,
-  @Lazy
-  private val projectHolder: ProjectHolder,
-  @Lazy
-  private val batchJobService: BatchJobService,
+  @Lazy private val projectHolder: ProjectHolder,
+  @Lazy private val batchJobService: BatchJobService,
+  @Lazy private val userNotificationService: UserNotificationService,
+  @Lazy private val notificationPreferencesService: NotificationPreferencesService,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   @set:Autowired
@@ -309,12 +311,16 @@ class ProjectService(
       avatarService.unlinkAvatarFiles(project)
       batchJobService.deleteAllByProjectId(project.id)
       bigMetaService.deleteAllByProjectId(project.id)
+
+      userNotificationService.deleteAllByProjectId(project.id)
+      notificationPreferencesService.deleteAllByProjectId(project.id)
+
       projectRepository.delete(project)
     }
   }
 
   /**
-   * If base language is missing on project it selects language with lowest id
+   * If base language is missing on project it selects the language with the lowest id
    * It saves updated project and returns project's new baseLanguage
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")

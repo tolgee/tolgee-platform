@@ -4,7 +4,7 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobProgress
-import io.tolgee.batch.events.OnBatchJobStatusUpdated
+import io.tolgee.batch.events.OnBatchJobStarted
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.batch.state.ExecutionState
@@ -130,7 +130,6 @@ class ProgressManager(
   }
 
   fun onJobCompletedCommitted(batchJob: BatchJobDto) {
-    eventPublisher.publishEvent(OnBatchJobStatusUpdated(batchJob.id, batchJob.projectId, batchJob.status))
     cachingBatchJobService.evictJobCache(batchJob.id)
     batchJobProjectLockingManager.unlockJobForProject(batchJob.projectId, batchJob.id)
     batchJobStateProvider.removeJobState(batchJob.id)
@@ -200,6 +199,7 @@ class ProgressManager(
       if (job.status == BatchJobStatus.PENDING) {
         logger.debug { """Updating job state to running ${job.id}""" }
         cachingBatchJobService.setRunningState(job.id)
+        eventPublisher.publishEvent(OnBatchJobStarted(job))
       }
     }
   }

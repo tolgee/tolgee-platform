@@ -78,7 +78,6 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var apiKeys: MutableSet<ApiKey> = LinkedHashSet()
 
-  @Suppress("SetterBackingFieldAssignment")
   @ManyToOne(optional = true, fetch = FetchType.LAZY)
   @Deprecated(message = "Project can be owned only by organization")
   var userOwner: UserAccount? = null
@@ -109,16 +108,16 @@ class Project(
   @Transient
   override var disableActivityLogging = false
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var automations: MutableList<Automation> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var contentDeliveryConfigs: MutableList<ContentDeliveryConfig> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var contentStorages: MutableList<ContentStorage> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
   @ColumnDefault("true")

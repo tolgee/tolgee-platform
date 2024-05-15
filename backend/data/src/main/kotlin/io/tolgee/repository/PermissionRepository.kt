@@ -10,18 +10,28 @@ import org.springframework.stereotype.Repository
 interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query(
     """
-    from Permission p 
-    where 
+      SELECT DISTINCT new io.tolgee.model.Permission${'$'}PermissionWithLanguageIdsWrapper(
+        p,
+        listagg(str(vl.id), ','),
+        listagg(str(tl.id), ','),
+        listagg(str(sl.id), ',')
+      )
+      FROM Permission p 
+      LEFT JOIN p.viewLanguages vl
+      LEFT JOIN p.translateLanguages tl
+      LEFT JOIN p.stateChangeLanguages sl 
+      WHERE
         ((:projectId is null and p.project.id is null) or p.project.id = :projectId) and 
         ((:userId is null and p.user.id is null) or p.user.id = :userId) and 
         ((:organizationId is null and p.organization.id is null) or p.organization.id = :organizationId)
+      GROUP BY p
   """,
   )
   fun findOneByProjectIdAndUserIdAndOrganizationId(
     projectId: Long?,
     userId: Long?,
     organizationId: Long? = null,
-  ): Permission?
+  ): Permission.PermissionWithLanguageIdsWrapper?
 
   fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
 

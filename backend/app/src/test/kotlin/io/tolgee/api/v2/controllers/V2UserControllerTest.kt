@@ -16,6 +16,7 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.satisfies
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import java.util.*
 
 @ContextRecreatingTest
 @SpringBootTest(

@@ -259,6 +259,16 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
+  fun findLanguageIdsOfTranslations(translationIds: List<Long>): Map<Long, Long> {
+    val maps = languageRepository.findLanguageIdsOfTranslations(translationIds)
+    if (maps.isEmpty()) return emptyMap()
+
+    return maps
+      .map { mapOf(it["translationId"]!! to it["languageId"]!!) }
+      .reduce { acc, map -> acc.plus(map) }
+  }
+
+  @Transactional
   fun deleteAllByProject(projectId: Long) {
     translationService.deleteAllByProject(projectId)
     autoTranslationService.deleteConfigsByProject(projectId)
@@ -407,5 +417,9 @@ class LanguageService(
     language.tag = "en"
     language.project = entityManager.getReference(Project::class.java, projectId)
     return languageRepository.save(language)
+  }
+
+  fun getBaseLanguageForProjectId(projectId: Long): Long? {
+    return languageRepository.getBaseLanguageForProjectId(projectId)
   }
 }

@@ -20,6 +20,9 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.model.views.UserProjectMetadataView
+import io.tolgee.notifications.NotificationPreferencesService
+import io.tolgee.notifications.UserNotificationService
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -53,6 +56,8 @@ class UserAccountService(
   private val organizationService: OrganizationService,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
+  @Lazy private val userNotificationService: UserNotificationService,
+  @Lazy private val notificationPreferencesService: NotificationPreferencesService,
   private val cacheManager: CacheManager,
   @Suppress("SelfReferenceConstructorParameter")
   @Lazy
@@ -162,6 +167,10 @@ class UserAccountService(
     toDelete.organizationRoles.forEach {
       entityManager.remove(it)
     }
+
+    userNotificationService.deleteAllByUserId(toDelete.id)
+    notificationPreferencesService.deleteAllByUserId(toDelete.id)
+
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
@@ -331,6 +340,11 @@ class UserAccountService(
         avatarHash = it.avatarHash,
       )
     }
+  }
+
+  fun getAllConnectedUserProjectMetadataViews(projectId: Long): List<UserProjectMetadataView> {
+    userAccountRepository.findAllUserProjectMetadataViews(projectId).forEach { println(it.userAccountId) }
+    return userAccountRepository.findAllUserProjectMetadataViews(projectId)
   }
 
   @Transactional
