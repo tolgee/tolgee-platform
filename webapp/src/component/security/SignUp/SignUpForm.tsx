@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Link, Typography } from '@mui/material';
+import { Box, Link, Typography, styled } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -15,6 +15,11 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
 import { Alert } from '../../common/Alert';
 import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
+
+const StyledInputFields = styled('div')`
+  display: grid;
+  align-items: start;
+`;
 
 const PasswordFieldWithValidation = React.lazy(
   () => import('tg.component/security/PasswordFieldWithValidation')
@@ -99,25 +104,18 @@ export const SignUpForm = (props: Props) => {
       }
       onSubmit={props.onSubmit}
     >
-      <Error loadable={props.loadable} />
-      <TextField
-        name="name"
-        label={<T keyName="sign_up_form_full_name" />}
-        variant="standard"
-      />
-      <TextField
-        name="email"
-        label={<T keyName="sign_up_form_email" />}
-        variant="standard"
-      />
-      {orgRequired && (
-        <TextField
-          name="organizationName"
-          label={<T keyName="sign_up_form_organization_name" />}
-          variant="standard"
-        />
-      )}
-      <PasswordFieldWithValidation label={<PasswordLabel />} />
+      <StyledInputFields>
+        <Error loadable={props.loadable} />
+        <TextField name="name" label={<T keyName="sign_up_form_full_name" />} />
+        <TextField name="email" label={<T keyName="sign_up_form_email" />} />
+        {orgRequired && (
+          <TextField
+            name="organizationName"
+            label={<T keyName="sign_up_form_organization_name" />}
+          />
+        )}
+        <PasswordFieldWithValidation label={<PasswordLabel />} />
+      </StyledInputFields>
       <Box mt={2} mb={3}>
         <Typography variant="body2">
           <T

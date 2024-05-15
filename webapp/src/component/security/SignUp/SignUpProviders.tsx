@@ -1,4 +1,4 @@
-import { Button, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, styled, useMediaQuery } from '@mui/material';
 
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
 import { MouseIllustration } from '../MouseIllustration';
@@ -31,7 +31,11 @@ export const SignUpProviders = () => {
           {provider.signUpButtonTitle}
         </Button>
       ))}
-      {!isSmall && <MouseIllustration />}
+      {!isSmall && (
+        <Box my={5}>
+          <MouseIllustration />
+        </Box>
+      )}
       <TolgeeMore />
     </StyledProviders>
   );

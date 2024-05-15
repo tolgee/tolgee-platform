@@ -75,7 +75,6 @@ export const PasswordFieldWithValidation: React.FC<Props> = (props) => {
         helperText={getPasswordCheck(field.value)}
         name="password"
         type="password"
-        variant="standard"
       />
     </>
   );

@@ -1,39 +1,39 @@
 import { styled } from '@mui/material';
 
 export const SPLIT_CONTENT_BREAK_POINT = '(max-width: 800px)';
+export const FULL_PAGE_BREAK_POINT = '(max-width: 550px)';
 
 const StyledGrid = styled('div')`
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 32px 48px;
 
   @media ${SPLIT_CONTENT_BREAK_POINT} {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1px auto;
+    grid-template-rows: auto auto;
   }
 `;
 
-const StyledSpacer = styled('div')`
-  display: grid;
-  background: lightgrey;
-  @media ${SPLIT_CONTENT_BREAK_POINT} {
-    margin: 0px -8px;
-  }
+const StyledPrimaryPart = styled('div')`
+  padding: 60px;
+`;
+
+const StyledSecondaryPart = styled('div')`
+  padding: 60px;
+  background: ${({ theme }) => theme.palette.login.backgroundSecondary};
 `;
 
 type Props = {
-  left: React.ReactNode;
-  right: React.ReactNode;
+  primary: React.ReactNode;
+  secondary: React.ReactNode;
 };
 
-export const SplitContent = ({ left, right }: Props) => {
+export const SplitContent = ({ primary, secondary }: Props) => {
   return (
     <StyledGrid>
-      {left}
+      <StyledPrimaryPart>{primary}</StyledPrimaryPart>
 
-      <StyledSpacer />
-
-      {right}
+      <StyledSecondaryPart>{secondary}</StyledSecondaryPart>
     </StyledGrid>
   );
 };

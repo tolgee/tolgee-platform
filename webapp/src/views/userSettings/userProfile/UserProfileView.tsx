@@ -1,5 +1,5 @@
-import React, { FunctionComponent } from 'react';
-import { Alert, Box, Grid, Typography } from '@mui/material';
+import { FunctionComponent } from 'react';
+import { Alert, Box, Grid, Typography, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { Redirect, useHistory } from 'react-router-dom';
@@ -70,12 +70,10 @@ export const UserProfileView: FunctionComponent = () => {
           </Grid>
           <Grid item xs={12} sm>
             <TextField
-              variant="standard"
               name="name"
               label={<T keyName="User settings - Full name" />}
             />
             <TextField
-              variant="standard"
               name="email"
               disabled={isManaged}
               helperText={

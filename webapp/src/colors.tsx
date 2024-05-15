@@ -122,6 +122,12 @@ export type QuickStart = {
   finishCircle: string;
 };
 
+export type Login = {
+  backgroundFloating: string;
+  backgroundPrimary: string;
+  backgroundSecondary: string;
+};
+
 export type LanguageChips = {
   background: string;
 };
@@ -247,6 +253,11 @@ export const colors = {
         text: '#808080',
       },
     } satisfies Placeholders,
+    login: {
+      backgroundFloating: '#F0F2F4',
+      backgroundPrimary: '#fff',
+      backgroundSecondary: '#1f2d407',
+    } satisfies Login,
   },
   dark: {
     white: '#dddddd',
@@ -370,5 +381,10 @@ export const colors = {
         text: '#acacac',
       },
     } satisfies Placeholders,
+    login: {
+      backgroundFloating: '#2C3C52',
+      backgroundPrimary: '#ffffff0a',
+      backgroundSecondary: '#1f2d4028',
+    } satisfies Login,
   },
 } as const;

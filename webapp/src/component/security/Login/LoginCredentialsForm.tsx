@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import { Button, Link as MuiLink, Typography } from '@mui/material';
+import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
@@ -15,6 +15,12 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { ApiError } from 'tg.service/http/ApiError';
+
+const StyledInputFields = styled('div')`
+  display: grid;
+  padding-bottom: 12px;
+  align-items: start;
+`;
 
 type Credentials = { username: string; password: string };
 type LoginViewCredentialsProps = {
@@ -39,7 +45,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
     <StandardForm
       initialValues={props.credentialsRef.current!}
       submitButtons={
-        <Box mt={2}>
+        <Box>
           <Box display="flex" flexDirection="column" alignItems="stretch">
             <LoadingButton
               loading={isLoading}
@@ -110,17 +116,14 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         }
       }}
     >
-      <TextField
-        name="username"
-        label={<T keyName="login_email_label" />}
-        variant="standard"
-      />
-      <TextField
-        name="password"
-        type="password"
-        label={<T keyName="login_password_label" />}
-        variant="standard"
-      />
+      <StyledInputFields>
+        <TextField name="username" label={<T keyName="login_email_label" />} />
+        <TextField
+          name="password"
+          type="password"
+          label={<T keyName="login_password_label" />}
+        />
+      </StyledInputFields>
     </StandardForm>
   );
 }

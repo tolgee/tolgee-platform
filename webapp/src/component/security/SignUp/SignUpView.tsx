@@ -12,7 +12,7 @@ import { DashboardPage } from '../../layout/DashboardPage';
 import { SignUpForm } from './SignUpForm';
 import { SignUpProviders } from './SignUpProviders';
 import { useRecaptcha } from './useRecaptcha';
-import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
+import { SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
 import {
   useGlobalActions,
@@ -69,28 +69,25 @@ export const SignUpView: FunctionComponent = () => {
           maxWidth={isSmall ? 430 : 964}
           windowTitle={t('sign_up_title')}
           title={t('sign_up_title')}
-          backLink={LINKS.LOGIN.build()}
-          content={
+          primaryContent={
             signUpMutation.isSuccess && config.needsEmailVerification ? (
               <Alert severity="success">
                 <T keyName="sign_up_success_needs_verification_message" />
               </Alert>
             ) : (
-              <SplitContent
-                left={
-                  <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
-                }
-                right={
-                  <StyledRightPart>
-                    <SignUpProviders />
-                  </StyledRightPart>
-                }
-              />
+              <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
             )
+          }
+          secondaryContent={
+            <StyledRightPart>
+              <SignUpProviders />
+            </StyledRightPart>
           }
         />
       </DashboardPage>
-      {config.capterraTracker && <img src={config.capterraTracker} />}
+      {config.capterraTracker && (
+        <img style={{ height: 0 }} src={config.capterraTracker} />
+      )}
     </>
   );
 };

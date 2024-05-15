@@ -157,6 +157,7 @@ const getTheme = (mode: PaletteMode) => {
       tokens: c.tokens,
       placeholders: c.placeholders,
       languageChips: c.languageChips,
+      login: c.login,
     },
     mixins: {
       toolbar: {

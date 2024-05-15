@@ -8,7 +8,7 @@ import { CompactView } from 'tg.component/layout/CompactView';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
+import { SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
 import { LoginCredentialsForm } from './LoginCredentialsForm';
 import { LoginTotpForm } from './LoginTotpForm';
 import { LoginMoreInfo } from './LoginMoreInfo';
@@ -53,17 +53,13 @@ export const LoginView: FunctionComponent = () => {
             </Alert>
           )
         }
-        content={
-          <SplitContent
-            left={
-              <LoginCredentialsForm
-                credentialsRef={credentialsRef}
-                onMfaEnabled={() => setMfaRequired(true)}
-              />
-            }
-            right={<LoginMoreInfo />}
+        primaryContent={
+          <LoginCredentialsForm
+            credentialsRef={credentialsRef}
+            onMfaEnabled={() => setMfaRequired(true)}
           />
         }
+        secondaryContent={<LoginMoreInfo />}
       />
     </DashboardPage>
   );
