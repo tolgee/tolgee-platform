@@ -149,7 +149,7 @@ object DemoProjectData {
       SHARE_BUTTON_KEY to "Text for the share (on social media, etc) button",
       APP_TITLE_KEY to "Title of the application",
       ITEMS_COUNT_KEY to "Text displaying the number of items",
-      WELCOME_MESSAGE to "Welcome message including a placeholder for a user's name",
+      WELCOME_MESSAGE to "Welcome message including a placeholder for the user's name",
       TERMS_CONDITIONS_AGREEMENT_KEY to "Statement for accepting the Terms and Conditions that includes a hyperlink",
     )
 
