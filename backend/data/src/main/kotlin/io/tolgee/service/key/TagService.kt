@@ -321,19 +321,26 @@ class TagService(
     val provider =
       ComplexTagOperationKeyProvider(projectId, req.filterKeys, req.filterTag, req.filterTagNot, applicationContext)
 
-    if (req.tagFiltered != null || req.untagOther != null) {
-      val filteredKeys = provider.filtered
-      tagKeys(filteredKeys, req.tagFiltered)
-      untagKeys(filteredKeys, req.untagFiltered)
+    if (req.tagFiltered != null || req.untagFiltered != null) {
+      tagAndUntag(req.tagFiltered, req.untagFiltered, provider.filtered)
     }
 
     if (req.tagOther != null || req.untagOther != null) {
-      val rest = provider.rest
-      tagKeys(rest, req.tagOther)
-      untagKeys(rest, req.untagOther)
+      tagAndUntag(req.tagOther, req.untagOther, provider.rest)
     }
+  }
 
-    entityManager.flush()
+  private fun TagService.tagAndUntag(
+    tagWith: List<String>?,
+    untagWith: List<String>?,
+    keys: List<Key>,
+  ): Boolean {
+    if (keys.isEmpty()) {
+      return true
+    }
+    tagKeys(keys, tagWith)
+    untagKeys(keys, untagWith)
+    return false
   }
 
   private fun tagKeys(

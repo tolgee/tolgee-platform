@@ -50,14 +50,18 @@ class TaggedKeyIdsProvider(
     query.setParameter("projectId", projectId)
 
     filterTag?.let {
-      query.setParameter("filterTag", filterTag)
+      query.setParameter("filterTag", filterTag.applyWildcards(projectId))
     }
 
     filterTagNot?.let {
-      query.setParameter("filterTagNot", filterTagNot)
+      query.setParameter("filterTagNot", filterTagNot.applyWildcards(projectId))
     }
 
     @Suppress("UNCHECKED_CAST")
     return query.resultList as List<Long>
+  }
+
+  fun Collection<String>.applyWildcards(projectId: Long): Collection<String> {
+    return WildcardTagsProvider(entityManager).getTagsWithAppliedWildcards(projectId, this)
   }
 }

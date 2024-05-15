@@ -7,6 +7,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.measureTime
 
 class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TagsTestData
@@ -16,6 +17,9 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
     testData = TagsTestData()
     testData.addNamespacedKey()
     projectSupplier = { testData.projectBuilder.self }
+  }
+
+  private fun saveAndPrepare() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
   }
@@ -23,6 +27,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   @ProjectJWTAuthTestMethod
   fun `tag filtered by tag`() {
+    saveAndPrepare()
     performProjectAuthPut(
       "tag-complex",
       mapOf(
@@ -43,7 +48,30 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `filterTag works with wildcard filtered by tag`() {
+    saveAndPrepare()
+    performProjectAuthPut(
+      "tag-complex",
+      mapOf(
+        "filterTag" to listOf("existing*"),
+        "tagFiltered" to listOf("new tag"),
+        "tagOther" to listOf("other tag"),
+      ),
+    ).andIsOk
+
+    assertKeyTags(
+      mapOf(
+        (null to "test key") to listOf("test", "existing tag", "existing tag 2", "new tag"),
+        (null to "no tag key") to listOf("other tag"),
+        (null to "existing tag key 2") to listOf("existing tag 2", "new tag"),
+      ),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `tag filtered by tag not`() {
+    saveAndPrepare()
     performProjectAuthPut(
       "tag-complex",
       mapOf(
@@ -64,7 +92,30 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `filterTagNot works with wildcard filtered by tag`() {
+    saveAndPrepare()
+    performProjectAuthPut(
+      "tag-complex",
+      mapOf(
+        "filterTagNot" to listOf("existing*"),
+        "tagOther" to listOf("other tag"),
+        "tagFiltered" to listOf("new tag"),
+      ),
+    ).andIsOk
+
+    assertKeyTags(
+      mapOf(
+        (null to "test key") to listOf("test", "existing tag", "existing tag 2", "other tag"),
+        (null to "no tag key") to listOf("new tag"),
+        (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
+      ),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun untags() {
+    saveAndPrepare()
     performProjectAuthPut(
       "tag-complex",
       mapOf(
@@ -86,6 +137,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   @ProjectJWTAuthTestMethod
   fun `tag filtered by key`() {
+    saveAndPrepare()
     performProjectAuthPut(
       "tag-complex",
       mapOf(
@@ -114,6 +166,51 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "no tag key") to listOf("new tag"),
         (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
         ("namespace" to "namespaced key") to listOf("existing tag", "new tag"),
+      ),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it doesnt take forever`() {
+    testData.generateVeryLotOfData()
+    saveAndPrepare()
+
+    val time =
+      measureTime {
+        performProjectAuthPut(
+          "tag-complex",
+          mapOf(
+            "filterTag" to listOf("tag from*"),
+            "tagFiltered" to listOf("new tag"),
+            "tagOther" to listOf("other tag"),
+          ),
+        ).andIsOk
+      }
+
+    time.inWholeSeconds.assert.isLessThan(30)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `works when nothing matched`() {
+    saveAndPrepare()
+
+    performProjectAuthPut(
+      "tag-complex",
+      mapOf(
+        "filterTag" to listOf("oh no it doesnt exist"),
+        "tagFiltered" to listOf("new tag"),
+        "tagOther" to listOf("other tag"),
+      ),
+    ).andIsOk
+
+    assertKeyTags(
+      mapOf(
+        (null to "test key") to listOf("test", "existing tag", "existing tag 2", "other tag"),
+        (null to "no tag key") to listOf("other tag"),
+        (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
+        ("namespace" to "namespaced key") to listOf("existing tag", "other tag"),
       ),
     )
   }

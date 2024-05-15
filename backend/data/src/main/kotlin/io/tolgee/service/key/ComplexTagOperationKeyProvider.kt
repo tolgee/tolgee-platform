@@ -13,6 +13,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import org.springframework.context.ApplicationContext
 
@@ -60,10 +61,20 @@ class ComplexTagOperationKeyProvider(
         .where(
           cb.and(
             cb.equal(root.get(Key_.project).get(Project_.id), projectId),
-            cb.not(root.get(Key_.id).`in`(returnedIds)),
+            cb.notIn(root.get(Key_.id), returnedIds),
           ),
         ),
     ).resultList
+  }
+
+  private fun CriteriaBuilder.notIn(
+    path: Path<Long>,
+    collection: Collection<*>,
+  ): Predicate {
+    if (collection.isEmpty()) {
+      return this.and()
+    }
+    return this.not(path.`in`(collection))
   }
 
   private fun getKeyCondition(key: KeyId): Predicate? {
