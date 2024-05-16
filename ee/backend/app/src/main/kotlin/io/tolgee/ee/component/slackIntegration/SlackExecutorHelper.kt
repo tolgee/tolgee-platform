@@ -8,7 +8,7 @@ import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
+import io.tolgee.ee.service.slackIntegration.SlackMessageInfoService
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -28,10 +28,10 @@ class SlackExecutorHelper(
   val data: SlackRequest,
   val keyService: KeyService,
   val permissionService: PermissionService,
-  private val slackUserConnectionService: SlackUserConnectionService,
   private val i18n: I18n,
   private val tolgeeProperties: TolgeeProperties,
   private val author: String?,
+  private val slackMessageInfoService: SlackMessageInfoService,
 ) {
   fun createKeyAddMessage(): List<SavedMessageDto> {
     val activities = data.activityData ?: return emptyList()
@@ -138,6 +138,13 @@ class SlackExecutorHelper(
     baseLanguage: Language,
     author: String?,
   ) = withBlocks {
+    val authorContext =
+      slackMessageInfoService.find(
+        slackConfig.id,
+        translation.language.tag,
+        translation.key.id,
+      )?.authorContext
+
     if (shouldSkipModification(
         slackConfig.preferences,
         translation.language.tag,
@@ -155,9 +162,9 @@ class SlackExecutorHelper(
       val currentTranslate = translation.text!!
       markdownText(currentTranslate)
     }
-    if (author == null) return@withBlocks
+    val contextText = author ?: authorContext ?: return@withBlocks
     context {
-      markdownText(author)
+      markdownText(contextText)
     }
   }
 
@@ -324,7 +331,7 @@ class SlackExecutorHelper(
       }
 
       if (shouldAddLanguage(addedTags, modifiedLangTag, language.tag, baseLanguageTag)) {
-        createAttachmentForLanguage(language.tag, keyId)?.let { attachment ->
+        createAttachmentForLanguage(language.tag, keyId, null)?.let { attachment ->
           attachments.add(attachment)
           addedTags.add(language.tag)
         }
@@ -448,6 +455,7 @@ class SlackExecutorHelper(
   fun createAttachmentForLanguage(
     langTag: String,
     keyId: Long,
+    author: String?,
   ): Attachment? {
     val result =
       keyService.find(keyId)?.let { foundKey ->
@@ -461,7 +469,7 @@ class SlackExecutorHelper(
         val color = determineColorByState(translation?.state)
         val blocksBody =
           if (translation?.text != null) {
-            buildBlocksWithTranslation(translation, baseLanguage, null)
+            buildBlocksWithTranslation(translation, baseLanguage, author)
           } else {
             val language = slackConfig.project.languages.find { it.tag == langTag } ?: return null
             buildBlocksNoTranslation(baseLanguage, language)

@@ -131,7 +131,7 @@ class SlackSlashCommandController(
   }
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
-    featureEnabled()
+    // featureEnabled()
 
     if (slackUserConnectionService.isUserConnected(payload.user_id)) {
       return SlackMessageDto(text = i18n.translate("slack.common.message.already_logged_in"))

@@ -8,10 +8,7 @@ import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
-import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
-import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
-import io.tolgee.ee.service.slackIntegration.SlackConfigService
-import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
+import io.tolgee.ee.service.slackIntegration.*
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
@@ -38,6 +35,7 @@ class SlackExecutor(
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val slackClient: Slack,
   private val languageService: LanguageService,
+  private val slackMessageInfoService: SlackMessageInfoService,
 ) : Logging {
   fun sendMessageOnTranslationSet(
     slackConfig: SlackConfig,
@@ -92,7 +90,7 @@ class SlackExecutor(
     config: SlackConfig,
     slackExecutorHelper: SlackExecutorHelper,
   ) {
-    val existingLanguages = savedMsg.langTags
+    val existingLanguages = savedMsg.info.map { it.langTag }
     val newLanguages = message.langTag
 
     val languagesToAdd = existingLanguages - newLanguages
@@ -102,7 +100,10 @@ class SlackExecutor(
 
     val additionalAttachments: MutableList<Attachment> = mutableListOf()
     languagesToAdd.forEach { lang ->
-      val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, message.keyId)
+
+      val authorContext = savedMsg.info.find { it.langTag == lang }?.authorContext
+
+      val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, message.keyId, authorContext)
       attachment?.let {
         additionalAttachments.add(it)
       }
@@ -258,10 +259,10 @@ class SlackExecutor(
       data,
       keyService,
       permissionService,
-      slackUserConnectionService,
       i18n,
       tolgeeProperties,
       getSlackNickName(data.activityData?.author?.id ?: 0L),
+      slackMessageInfoService,
     )
   }
 

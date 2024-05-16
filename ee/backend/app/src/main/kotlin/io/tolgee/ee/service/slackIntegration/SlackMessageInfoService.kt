@@ -33,6 +33,18 @@ class SlackMessageInfoService(
     slackMessageInfoRepository.delete(slackMessageInfo)
   }
 
+  fun find(
+    configId: Long,
+    langTag: String,
+    keyId: Long,
+  ): SlackMessageInfo? {
+    return slackMessageInfoRepository.findBySlackMessageSlackConfigIdAndLangTagAndSlackMessageKeyId(
+      configId,
+      langTag,
+      keyId,
+    )
+  }
+
   fun create(
     savedSlackMessage: SavedSlackMessage,
     it: String,

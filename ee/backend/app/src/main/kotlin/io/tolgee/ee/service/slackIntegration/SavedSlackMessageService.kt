@@ -69,7 +69,8 @@ class SavedSlackMessageService(
       val existingInfo = savedMessage.info.find { it.langTag == langTag }
 
       if (existingInfo != null) {
-        slackMessageInfoService.update(existingInfo, authorContextMap[langTag] ?: "")
+        val authorContext = authorContextMap[langTag] ?: return@forEach
+        slackMessageInfoService.update(existingInfo, authorContext)
       } else {
         addMessageInfo(savedMessage, setOf(langTag), authorContextMap)
       }
