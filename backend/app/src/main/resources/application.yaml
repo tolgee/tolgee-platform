@@ -25,6 +25,7 @@ spring:
         enhancer:
           enableLazyInitialization: true
           enableDirtyTracking: true
+        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
   batch:
     job:
       enabled: false
