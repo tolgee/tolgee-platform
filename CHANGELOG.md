@@ -1,3 +1,10 @@
+# [3.60.0](https://github.com/tolgee/tolgee-platform/compare/v3.59.7...v3.60.0) (2024-05-16)
+
+
+### Features
+
+* Demo project enhancements ([#2305](https://github.com/tolgee/tolgee-platform/issues/2305)) ([b652195](https://github.com/tolgee/tolgee-platform/commit/b6521952639b0cc9962c1ba3d79d819264b27bfc))
+
 ## [3.59.7](https://github.com/tolgee/tolgee-platform/compare/v3.59.6...v3.59.7) (2024-04-30)
 
 
