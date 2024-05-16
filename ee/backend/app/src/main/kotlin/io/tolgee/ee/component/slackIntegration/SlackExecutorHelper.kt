@@ -289,6 +289,7 @@ class SlackExecutorHelper(
         langTag = langTags,
         false,
         isBaseChanged,
+        authorContext = mapOf(modifiedLangTag to (modificationAuthor ?: "")),
       )
     }
   }

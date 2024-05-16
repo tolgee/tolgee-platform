@@ -2,9 +2,9 @@ package io.tolgee.ee.service.slackIntegration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.ee.repository.slackIntegration.SavedSlackMessageRepository
+import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.model.slackIntegration.SavedSlackMessage
-import io.tolgee.repository.slackIntegration.SavedSlackMessageRepository
-import io.tolgee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.util.addMinutes
 import jakarta.transaction.Transactional
 import org.springframework.scheduling.annotation.Scheduled
@@ -16,15 +16,39 @@ class SavedSlackMessageService(
   private val slackConfigRepository: SlackConfigRepository,
   private val currentDateProvider: CurrentDateProvider,
   private val objectMapper: ObjectMapper,
+  private val slackMessageInfoService: SlackMessageInfoService,
 ) {
   @Transactional
-  fun save(savedSlackMessage: SavedSlackMessage): SavedSlackMessage {
+  fun save(
+    savedSlackMessage: SavedSlackMessage,
+    authorContext: Map<String, String>,
+    langTags: Set<String>,
+  ): SavedSlackMessage {
     savedSlackMessage.slackConfig.apply {
       this.savedSlackMessage.add(savedSlackMessage)
       slackConfigRepository.save(this)
     }
-
+    addMessageInfo(savedSlackMessage, langTags, authorContext)
     return savedSlackMessageRepository.save(savedSlackMessage)
+  }
+
+  private fun addMessageInfo(
+    savedSlackMessage: SavedSlackMessage,
+    langTags: Set<String>,
+    authorContextMap: Map<String, String>,
+  ) {
+    langTags.forEach {
+      val authorContext = authorContextMap[it] ?: ""
+
+      val info =
+        slackMessageInfoService.create(
+          savedSlackMessage,
+          it,
+          authorContext,
+        )
+
+      savedSlackMessage.info.add(info)
+    }
   }
 
   @Transactional
@@ -36,9 +60,20 @@ class SavedSlackMessageService(
   fun update(
     id: Long,
     langTags: Set<String>,
+    authorContextMap: Map<String, String>,
   ): SavedSlackMessage? {
     val savedMessage = savedSlackMessageRepository.findById(id).orElse(null) ?: return null
     savedMessage.langTags = langTags
+
+    langTags.forEach { langTag ->
+      val existingInfo = savedMessage.info.find { it.langTag == langTag }
+
+      if (existingInfo != null) {
+        slackMessageInfoService.update(existingInfo, authorContextMap[langTag] ?: "")
+      } else {
+        addMessageInfo(savedMessage, setOf(langTag), authorContextMap)
+      }
+    }
 
     return savedSlackMessageRepository.save(savedMessage)
   }

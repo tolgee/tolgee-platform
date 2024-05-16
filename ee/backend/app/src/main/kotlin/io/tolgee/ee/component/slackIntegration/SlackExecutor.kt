@@ -211,7 +211,7 @@ class SlackExecutor(
       }
 
     if (response.isOk) {
-      updateLangTagsMessage(savedMessage.id, messageDto.langTag)
+      updateLangTagsMessage(savedMessage.id, messageDto.langTag, messageDto.authorContext)
     } else {
       logger.info(response.error)
     }
@@ -279,14 +279,17 @@ class SlackExecutor(
           langTags = messageDto.langTag,
           messageDto.createdKeyBlocks,
         ),
+      messageDto.authorContext,
+      messageDto.langTag,
     )
   }
 
   private fun updateLangTagsMessage(
     id: Long,
     langTags: Set<String>,
+    authorContextMap: Map<String, String>,
   ) {
-    savedSlackMessageService.update(id, langTags)
+    savedSlackMessageService.update(id, langTags, authorContextMap)
   }
 
   fun getListOfSubscriptions(
