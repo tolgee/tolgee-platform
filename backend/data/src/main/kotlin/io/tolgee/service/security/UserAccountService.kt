@@ -99,7 +99,10 @@ class UserAccountService(
   }
 
   @Transactional
-  fun createUser(userAccount: UserAccount, userSource: String? = null): UserAccount {
+  fun createUser(
+    userAccount: UserAccount,
+    userSource: String? = null,
+  ): UserAccount {
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))

@@ -34,8 +34,6 @@ class SignUpService(
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
 
-
-
     val user = dtoToEntity(dto)
     signUp(user, dto.invitationCode, dto.organizationName, dto.userSource)
 
@@ -52,7 +50,7 @@ class SignUpService(
     entity: UserAccount,
     invitationCode: String?,
     organizationName: String?,
-    userSource: String? = null
+    userSource: String? = null,
   ): UserAccount {
     val invitation = findAndCheckInvitationOnRegistration(invitationCode)
     val user = userAccountService.createUser(entity, userSource)
