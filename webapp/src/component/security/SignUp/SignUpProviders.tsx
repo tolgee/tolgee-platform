@@ -2,8 +2,8 @@ import { Box, Button, styled, useMediaQuery } from '@mui/material';
 
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
 import { MouseIllustration } from '../MouseIllustration';
-import { SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
 import { TolgeeMore } from '../TolgeeMore';
+import { SPLIT_CONTENT_BREAK_POINT } from 'tg.component/layout/CompactView';
 
 const StyledProviders = styled('div')`
   display: flex;
@@ -26,6 +26,7 @@ export const SignUpProviders = () => {
           size="medium"
           endIcon={provider.buttonIcon}
           variant="outlined"
+          color="inherit"
           style={{ marginBottom: '0.5rem' }}
         >
           {provider.signUpButtonTitle}

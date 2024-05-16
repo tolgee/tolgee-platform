@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
-import Box from '@mui/material/Box';
+import { Typography, Box, Link as MuiLink } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
@@ -53,51 +53,58 @@ const PasswordResetView: FunctionComponent<LoginProps> = () => {
         }
         windowTitle={t('reset_password_title')}
         title={t('reset_password_title')}
-        maxWidth={650}
+        maxWidth={550}
         primaryContent={
-          isSuccess ? (
-            <Alert severity="success">
-              <T keyName="reset_password_success_message" />
-            </Alert>
-          ) : (
-            <StandardForm
-              initialValues={{ email: '' } as ValueType}
-              validationSchema={Validation.RESET_PASSWORD_REQUEST}
-              submitButtons={
-                <>
-                  <Box display="flex">
-                    <Box flexGrow={1}></Box>
-                    <Box display="flex" flexGrow={0}>
-                      <LoadingButton
-                        color="primary"
-                        type="submit"
-                        variant="contained"
-                        loading={isLoading}
-                      >
-                        <T keyName="reset_password_send_request_button" />
-                      </LoadingButton>
-                    </Box>
-                  </Box>
-                </>
-              }
-              onSubmit={(v: ValueType) => {
-                mutate({
-                  content: {
-                    'application/json': {
-                      email: v.email,
-                      callbackUrl: LINKS.RESET_PASSWORD.buildWithOrigin(),
+          <>
+            {isSuccess ? (
+              <Alert severity="success">
+                <T keyName="reset_password_success_message" />
+              </Alert>
+            ) : (
+              <StandardForm
+                initialValues={{ email: '' } as ValueType}
+                validationSchema={Validation.RESET_PASSWORD_REQUEST}
+                submitButtons={
+                  <>
+                    <LoadingButton
+                      sx={{ mt: 1 }}
+                      color="primary"
+                      type="submit"
+                      variant="contained"
+                      fullWidth
+                      loading={isLoading}
+                    >
+                      <T keyName="reset_password_send_link_button" />
+                    </LoadingButton>
+                  </>
+                }
+                onSubmit={(v: ValueType) => {
+                  mutate({
+                    content: {
+                      'application/json': {
+                        email: v.email,
+                        callbackUrl: LINKS.RESET_PASSWORD.buildWithOrigin(),
+                      },
                     },
-                  },
-                });
-              }}
-            >
-              <TextField
-                name="email"
-                label={<T keyName="reset_password_email_field" />}
-                variant="standard"
-              />
-            </StandardForm>
-          )
+                  });
+                }}
+              >
+                <TextField
+                  name="email"
+                  label={
+                    <T keyName="reset_password_registration_email_field" />
+                  }
+                />
+              </StandardForm>
+            )}
+            <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>
+              <MuiLink to={LINKS.LOGIN.build()} component={Link}>
+                <Typography variant="body2">
+                  <T keyName="reset_password_back_to_login" />
+                </Typography>
+              </MuiLink>
+            </Box>
+          </>
         }
       />
     </DashboardPage>

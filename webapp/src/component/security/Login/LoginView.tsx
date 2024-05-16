@@ -1,19 +1,22 @@
 import { FunctionComponent, useRef, useState } from 'react';
-import { useTranslate } from '@tolgee/react';
-import { Alert, useMediaQuery } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { Alert, useMediaQuery, Link as MuiLink } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { CompactView } from 'tg.component/layout/CompactView';
+import {
+  CompactView,
+  SPLIT_CONTENT_BREAK_POINT,
+} from 'tg.component/layout/CompactView';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-import { SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
 import { LoginCredentialsForm } from './LoginCredentialsForm';
 import { LoginTotpForm } from './LoginTotpForm';
 import { LoginMoreInfo } from './LoginMoreInfo';
 
-// noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent = () => {
   const { t } = useTranslate();
   const credentialsRef = useRef({ username: '', password: '' });
@@ -23,6 +26,12 @@ export const LoginView: FunctionComponent = () => {
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
+
+  const registrationAllowed = useGlobalContext(
+    (c) =>
+      c.initialData.serverConfiguration.allowRegistrations ||
+      c.auth.allowRegistration
+  );
 
   useReportOnce('LOGIN_PAGE_OPENED');
 
@@ -44,6 +53,16 @@ export const LoginView: FunctionComponent = () => {
         maxWidth={isSmall ? 430 : 964}
         windowTitle={t('login_title')}
         title={t('login_title')}
+        subtitle={
+          registrationAllowed ? (
+            <T
+              keyName="login_subtitle"
+              params={{
+                link: <MuiLink to={LINKS.SIGN_UP.build()} component={Link} />,
+              }}
+            />
+          ) : undefined
+        }
         alerts={
           error?.code &&
           error.code !== 'mfa_enabled' &&

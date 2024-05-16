@@ -11,7 +11,6 @@ const StyledContainer = styled('div')`
   display: grid;
   .${textFieldClasses.root} {
     margin-top: 4px;
-    min-height: 64px;
   }
 `;
 
@@ -20,14 +19,19 @@ const StyledInputLabel = styled(InputLabel)`
   font-weight: 500px;
 `;
 
-type Props = TextFieldProps;
+type Props = TextFieldProps & { minHeight?: boolean };
 
 export const TextField: FunctionComponent<Props> = (props) => {
-  const { label, ...otherProps } = props;
+  const { label, minHeight = true, sx, ...otherProps } = props;
   return (
     <StyledContainer>
       {label && <StyledInputLabel>{label}</StyledInputLabel>}
-      <MUITextField variant="outlined" size="small" {...otherProps} />
+      <MUITextField
+        variant="outlined"
+        size="small"
+        sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
+        {...otherProps}
+      />
     </StyledContainer>
   );
 };

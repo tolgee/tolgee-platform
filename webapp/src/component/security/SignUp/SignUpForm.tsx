@@ -19,6 +19,7 @@ import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExc
 const StyledInputFields = styled('div')`
   display: grid;
   align-items: start;
+  padding-bottom: 12px;
 `;
 
 const PasswordFieldWithValidation = React.lazy(
@@ -76,48 +77,53 @@ export const SignUpForm = (props: Props) => {
   const { t } = useTranslate();
 
   return (
-    <StandardForm
-      rootSx={{ mb: 1 }}
-      saveActionLoadable={props.loadable}
-      showResourceError={false}
-      initialValues={
-        {
-          password: '',
-          name: '',
-          email: '',
-          organizationName: orgRequired ? '' : undefined,
-        } as SignUpType
-      }
-      validationSchema={Validation.SIGN_UP(t, orgRequired)}
-      submitButtons={
-        <Box display="flex" flexDirection="column" alignItems="stretch">
-          <LoadingButton
-            data-cy="sign-up-submit-button"
-            color="primary"
-            type="submit"
-            variant="contained"
-            loading={props.loadable.isLoading}
-          >
-            <T keyName="sign_up_submit_button" />
-          </LoadingButton>
-        </Box>
-      }
-      onSubmit={props.onSubmit}
-    >
-      <StyledInputFields>
-        <Error loadable={props.loadable} />
-        <TextField name="name" label={<T keyName="sign_up_form_full_name" />} />
-        <TextField name="email" label={<T keyName="sign_up_form_email" />} />
-        {orgRequired && (
+    <>
+      <StandardForm
+        rootSx={{ mb: 1 }}
+        saveActionLoadable={props.loadable}
+        showResourceError={false}
+        initialValues={
+          {
+            password: '',
+            name: '',
+            email: '',
+            organizationName: orgRequired ? '' : undefined,
+          } as SignUpType
+        }
+        validationSchema={Validation.SIGN_UP(t, orgRequired)}
+        submitButtons={
+          <Box display="flex" flexDirection="column" alignItems="stretch">
+            <LoadingButton
+              data-cy="sign-up-submit-button"
+              color="primary"
+              type="submit"
+              variant="contained"
+              loading={props.loadable.isLoading}
+            >
+              <T keyName="sign_up_submit_button" />
+            </LoadingButton>
+          </Box>
+        }
+        onSubmit={props.onSubmit}
+      >
+        <StyledInputFields>
+          <Error loadable={props.loadable} />
           <TextField
-            name="organizationName"
-            label={<T keyName="sign_up_form_organization_name" />}
+            name="name"
+            label={<T keyName="sign_up_form_full_name" />}
           />
-        )}
-        <PasswordFieldWithValidation label={<PasswordLabel />} />
-      </StyledInputFields>
-      <Box mt={2} mb={3}>
-        <Typography variant="body2">
+          <TextField name="email" label={<T keyName="sign_up_form_email" />} />
+          {orgRequired && (
+            <TextField
+              name="organizationName"
+              label={<T keyName="sign_up_form_organization_name" />}
+            />
+          )}
+          <PasswordFieldWithValidation label={<PasswordLabel />} />
+        </StyledInputFields>
+      </StandardForm>
+      <Box mt={1}>
+        <Typography variant="caption" fontSize={14}>
           <T
             keyName="sign-up-terms-and-conditions-message"
             params={{
@@ -126,6 +132,6 @@ export const SignUpForm = (props: Props) => {
           />
         </Typography>
       </Box>
-    </StandardForm>
+    </>
   );
 };

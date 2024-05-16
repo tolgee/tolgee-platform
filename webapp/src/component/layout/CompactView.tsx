@@ -4,15 +4,15 @@ import {
   GlobalStyles,
   styled,
   useMediaQuery,
+  Box,
 } from '@mui/material';
 import clsx from 'clsx';
 
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { CompactFooter } from './CompactFooter';
-import {
-  SPLIT_CONTENT_BREAK_POINT,
-  FULL_PAGE_BREAK_POINT,
-} from 'tg.component/security/SplitContent';
+
+export const SPLIT_CONTENT_BREAK_POINT = '(max-width: 900px)';
+export const FULL_PAGE_BREAK_POINT = '(max-width: 550px)';
 
 const StyledContainer = styled('div')`
   width: 100%;
@@ -44,7 +44,7 @@ const StyledInner = styled('div')`
 const StyledAlerts = styled('div')`
   display: flex;
   flex-direction: column;
-  min-height: 100px;
+  min-height: 70px;
   @media ${FULL_PAGE_BREAK_POINT} {
     min-height: 50px;
   }
@@ -68,12 +68,13 @@ const StyledContent = styled('div')`
   display: grid;
   padding: 60px;
   @media ${SPLIT_CONTENT_BREAK_POINT} {
-    padding: 45px;
+    padding: 35px;
   }
 `;
 
 const StyledPrimaryContent = styled(StyledContent)`
   display: grid;
+  align-content: start;
   padding: 60px;
   &.split {
     padding-right: 45px;
@@ -81,6 +82,7 @@ const StyledPrimaryContent = styled(StyledContent)`
 `;
 
 const StyledSecondaryContent = styled(StyledContent)`
+  align-content: end;
   background: ${({ theme }) => theme.palette.login.backgroundSecondary};
   &.split {
     padding-left: 45px;
@@ -91,6 +93,7 @@ type Props = {
   windowTitle: string;
   alerts?: React.ReactNode;
   title: React.ReactNode;
+  subtitle?: React.ReactNode;
   primaryContent: React.ReactNode;
   secondaryContent?: React.ReactNode;
   maxWidth?: number;
@@ -101,8 +104,9 @@ export const CompactView: React.FC<Props> = ({
   primaryContent,
   secondaryContent,
   title,
+  subtitle,
   alerts,
-  maxWidth = 430,
+  maxWidth = 550,
 }) => {
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
@@ -124,14 +128,13 @@ export const CompactView: React.FC<Props> = ({
         <StyledAlerts>{alerts}</StyledAlerts>
         <StyledPaper className={clsx({ split })}>
           <StyledPrimaryContent className={clsx({ split })}>
-            <Typography
-              color="textSecondary"
-              variant="h5"
-              sx={{ marginBottom: '20px' }}
-            >
-              {title}
-            </Typography>
-            <div>{primaryContent}</div>
+            <Typography variant="h4">{title}</Typography>
+            {subtitle && (
+              <Typography color="textSecondary" variant="body2">
+                {subtitle}
+              </Typography>
+            )}
+            <Box mt={2}>{primaryContent}</Box>
           </StyledPrimaryContent>
           {secondaryContent && (
             <StyledSecondaryContent className={clsx({ split })}>

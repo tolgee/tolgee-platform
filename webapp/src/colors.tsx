@@ -382,7 +382,7 @@ export const colors = {
       },
     } satisfies Placeholders,
     login: {
-      backgroundFloating: '#2C3C52',
+      backgroundFloating: '#1f2d40',
       backgroundPrimary: '#ffffff0a',
       backgroundSecondary: '#1f2d4028',
     } satisfies Login,
