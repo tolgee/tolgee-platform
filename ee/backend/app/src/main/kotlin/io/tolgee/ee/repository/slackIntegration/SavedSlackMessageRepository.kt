@@ -1,4 +1,4 @@
-package io.tolgee.repository.slackIntegration
+package io.tolgee.ee.repository.slackIntegration
 
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import org.springframework.data.jpa.repository.JpaRepository

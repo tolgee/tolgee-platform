@@ -3,12 +3,12 @@ package io.tolgee.ee.service.slackIntegration
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.component.slackIntegration.SlackErrorProvider
+import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
-import io.tolgee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.automations.AutomationService
 import jakarta.transaction.Transactional

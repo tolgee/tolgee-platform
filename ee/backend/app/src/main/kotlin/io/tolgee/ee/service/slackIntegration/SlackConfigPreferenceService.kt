@@ -1,9 +1,9 @@
 package io.tolgee.ee.service.slackIntegration
 
+import io.tolgee.ee.repository.slackIntegration.SlackConfigPreferenceRepository
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackConfigPreference
-import io.tolgee.repository.slackIntegration.SlackConfigPreferenceRepository
 import org.springframework.stereotype.Service
 
 @Service

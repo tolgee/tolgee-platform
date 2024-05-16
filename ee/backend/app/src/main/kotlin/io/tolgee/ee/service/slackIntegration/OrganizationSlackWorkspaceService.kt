@@ -10,12 +10,12 @@ import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ConnectToSlackDto
+import io.tolgee.ee.repository.slackIntegration.OrganizationSlackWorkspaceRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
-import io.tolgee.repository.slackIntegration.OrganizationSlackWorkspaceRepository
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.http.HttpEntity

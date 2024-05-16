@@ -1,8 +1,8 @@
 package io.tolgee.ee.service.slackIntegration
 
+import io.tolgee.ee.repository.slackIntegration.SlackUserConnectionRepository
 import io.tolgee.model.UserAccount
 import io.tolgee.model.slackIntegration.SlackUserConnection
-import io.tolgee.repository.slackIntegration.SlackUserConnectionRepository
 import io.tolgee.util.Logging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
