@@ -64,7 +64,7 @@ export const SignUpView: FunctionComponent = () => {
     <>
       <DashboardPage>
         <CompactView
-          maxWidth={isSmall ? 430 : 964}
+          maxWidth={isSmall ? 550 : 964}
           windowTitle={t('sign_up_title')}
           title={t('sign_up_title')}
           subtitle={

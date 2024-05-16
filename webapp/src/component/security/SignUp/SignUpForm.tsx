@@ -32,6 +32,7 @@ export type SignUpType = {
   password: string;
   organizationName: string;
   invitationCode?: string;
+  userSource?: string;
 };
 
 type Props = {
@@ -88,6 +89,7 @@ export const SignUpForm = (props: Props) => {
             name: '',
             email: '',
             organizationName: orgRequired ? '' : undefined,
+            userSource: '',
           } as SignUpType
         }
         validationSchema={Validation.SIGN_UP(t, orgRequired)}
@@ -120,6 +122,12 @@ export const SignUpForm = (props: Props) => {
             />
           )}
           <PasswordFieldWithValidation label={<PasswordLabel />} />
+          {
+            <TextField
+              name="userSource"
+              label={<T keyName="sign_up_form_user_source" />}
+            />
+          }
         </StyledInputFields>
       </StandardForm>
       <Box mt={1}>

@@ -17,6 +17,7 @@ const StyledContainer = styled('div')`
   padding: 0 32px 0 32px;
   @media ${FULL_PAGE_BREAK_POINT} {
     padding: 0px;
+    background: ${({ theme }) => theme.palette.login.backgroundPrimary};
   }
 `;
 
@@ -53,6 +54,7 @@ const StyledPaper = styled(Paper)`
   }
   @media ${FULL_PAGE_BREAK_POINT} {
     box-shadow: none;
+    background: none;
   }
 `;
 

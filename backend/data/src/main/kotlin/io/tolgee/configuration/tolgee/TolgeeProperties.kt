@@ -76,6 +76,8 @@ open class TolgeeProperties(
   @DocProperty(hidden = true)
   var ga4Tag: String? = null,
   @DocProperty(hidden = true)
+  var userSourceField: Boolean = false,
+  @DocProperty(hidden = true)
   var internal: InternalProperties = InternalProperties(),
   @DocProperty(
     description = "Public base path where files are accessible. Used by the user interface.",
@@ -117,4 +119,5 @@ open class TolgeeProperties(
   var postHog: PostHogProperties = PostHogProperties(),
   var telemetry: TelemetryProperties = TelemetryProperties(),
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
+
 )
