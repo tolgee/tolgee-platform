@@ -123,9 +123,11 @@ export type QuickStart = {
 };
 
 export type Login = {
-  backgroundFloating: string;
   backgroundPrimary: string;
-  backgroundSecondary: string;
+};
+
+export type Input = {
+  background: string;
 };
 
 export type LanguageChips = {
@@ -254,10 +256,11 @@ export const colors = {
       },
     } satisfies Placeholders,
     login: {
-      backgroundFloating: '#F0F2F4',
       backgroundPrimary: '#fff',
-      backgroundSecondary: '#1f2d407',
     } satisfies Login,
+    input: {
+      background: '#ffffff00',
+    } satisfies Input,
   },
   dark: {
     white: '#dddddd',
@@ -382,9 +385,10 @@ export const colors = {
       },
     } satisfies Placeholders,
     login: {
-      backgroundFloating: '#1f2d40',
       backgroundPrimary: '#ffffff0a',
-      backgroundSecondary: '#1f2d4028',
     } satisfies Login,
+    input: {
+      background: '#ffffff08',
+    } satisfies Input,
   },
 } as const;

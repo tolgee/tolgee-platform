@@ -1,11 +1,4 @@
-import {
-  Typography,
-  Paper,
-  GlobalStyles,
-  styled,
-  useMediaQuery,
-  Box,
-} from '@mui/material';
+import { Typography, Paper, styled, useMediaQuery, Box } from '@mui/material';
 import clsx from 'clsx';
 
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
@@ -59,7 +52,6 @@ const StyledPaper = styled(Paper)`
     grid-template-columns: 1fr 1fr;
   }
   @media ${FULL_PAGE_BREAK_POINT} {
-    background: ${({ theme }) => theme.palette.login.backgroundFloating};
     box-shadow: none;
   }
 `;
@@ -83,7 +75,6 @@ const StyledPrimaryContent = styled(StyledContent)`
 
 const StyledSecondaryContent = styled(StyledContent)`
   align-content: end;
-  background: ${({ theme }) => theme.palette.login.backgroundSecondary};
   &.split {
     padding-left: 45px;
   }
@@ -116,21 +107,17 @@ export const CompactView: React.FC<Props> = ({
 
   return (
     <StyledContainer className={clsx({ split })}>
-      <GlobalStyles
-        styles={(theme) => ({
-          body: {
-            backgroundColor:
-              theme.palette.login.backgroundFloating + ' !important',
-          },
-        })}
-      />
       <StyledInner style={{ width: `min(${maxWidth}px, 100%)` }}>
         <StyledAlerts>{alerts}</StyledAlerts>
         <StyledPaper className={clsx({ split })}>
           <StyledPrimaryContent className={clsx({ split })}>
             <Typography variant="h4">{title}</Typography>
             {subtitle && (
-              <Typography color="textSecondary" variant="body2">
+              <Typography
+                sx={{ mt: 0.5 }}
+                color="textSecondary"
+                variant="body2"
+              >
                 {subtitle}
               </Typography>
             )}

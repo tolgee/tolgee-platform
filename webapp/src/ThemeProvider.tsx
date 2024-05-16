@@ -176,6 +176,15 @@ const getTheme = (mode: PaletteMode) => {
           },
         },
       },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            '&.MuiOutlinedInput-root': {
+              backgroundColor: c.input.background,
+            },
+          },
+        },
+      },
       MuiCssBaseline: {
         styleOverrides: {
           '@font-face': [rubik, righteousLatinExt, righteousLatin],
