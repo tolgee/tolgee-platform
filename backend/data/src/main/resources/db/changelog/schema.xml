@@ -3224,4 +3224,11 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1715262903773-1">
+        <addColumn tableName="user_account">
+            <column defaultValueBoolean="false" name="is_demo" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
