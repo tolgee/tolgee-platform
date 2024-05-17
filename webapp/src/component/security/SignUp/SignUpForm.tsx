@@ -75,6 +75,7 @@ export const SignUpForm = (props: Props) => {
   const config = useConfig();
   const orgRequired =
     !InvitationCodeService.getCode() && config.userCanCreateOrganizations;
+  const userSourceField = config.userSourceField;
   const { t } = useTranslate();
 
   return (
@@ -122,12 +123,12 @@ export const SignUpForm = (props: Props) => {
             />
           )}
           <PasswordFieldWithValidation label={<PasswordLabel />} />
-          {
+          {userSourceField && (
             <TextField
               name="userSource"
               label={<T keyName="sign_up_form_user_source" />}
             />
-          }
+          )}
         </StyledInputFields>
       </StandardForm>
       <Box mt={1}>

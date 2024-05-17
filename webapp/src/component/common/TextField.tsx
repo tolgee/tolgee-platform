@@ -38,7 +38,7 @@ export const TextField: FunctionComponent<Props> = (props) => {
         variant="outlined"
         size="small"
         sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
-        InputProps={{
+        inputProps={{
           // @ts-ignore
           'data-cy': dataCy,
         }}
