@@ -32,7 +32,7 @@ class PhpToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
 
     val PHP_DETECTION_REGEX =
       """
-      (?x)(
+      \s+(?x)(
       %
       (?:(?<argnum>\d+)${"\\$"})?
       (?<flags>[\-+0']+)?
