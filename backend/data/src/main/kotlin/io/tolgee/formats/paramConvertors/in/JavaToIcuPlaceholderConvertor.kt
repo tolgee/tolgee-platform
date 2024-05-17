@@ -32,8 +32,8 @@ class JavaToIcuPlaceholderConvertor() : ToIcuPlaceholderConvertor {
 
     val JAVA_DETECTION_REGEX =
       """
-      \s+(?x)(
-      %
+      (?x)(
+      (^|\W+)%
       (?:(?<argnum>\d+)${"\\$"})?
       (?<flags>[-\#+0,(]+)?
       (?<width>\d+)?

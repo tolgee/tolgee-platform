@@ -38,8 +38,8 @@ class RubyToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
 
     val RUBY_DETECTION_REGEX =
       """
-      \s+(?x)(
-      %
+      (?x)(
+      (^|\W+)%
       (?:(?<argnum>\d+)?${"\\$"}|<(?<argname>\w+)>)?
       (?<flags>[+\-0\#*]+)?
       (?<width>\d+)?
