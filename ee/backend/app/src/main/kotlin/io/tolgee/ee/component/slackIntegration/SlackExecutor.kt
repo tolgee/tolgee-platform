@@ -412,18 +412,35 @@ class SlackExecutor(
         markdownText(i18n.translate("slack.common.message.subscribed-successfully").format(config.project.name))
       }
       val subscriptionInfo =
-        if (config.isGlobalSubscription) {
-          i18n.translate("slack.common.message.subscribed-successfully-global-subscription").format(config.onEvent.name)
-        } else {
-          i18n.translate("slack.common.message.subscribed-successfully-not-global-subscription") +
+        buildString {
+          if (config.isGlobalSubscription) {
+            append(
+              i18n.translate(
+                "slack.common.message.subscribed-successfully-global-subscription",
+              ).format(config.onEvent.name),
+            )
+          }
+
+          val languageInfo =
             config.preferences.mapNotNull { pref ->
               pref.languageTag?.let { tag ->
                 val language = languageService.getByTag(tag, config.project)
                 val flagEmoji = language.flagEmoji
                 val fullName = language.name
-                "\n - $fullName $flagEmoji : on `${pref.onEvent.name}`"
+                " - $fullName $flagEmoji : on `${pref.onEvent.name}`"
               }
             }.joinToString("\n")
+
+          if (languageInfo.isNotEmpty()) {
+            if (config.isGlobalSubscription) {
+              append("\n\n").append(i18n.translate("slack.common.message.also-subscribed-to"))
+            } else {
+              append(
+                "\n\n",
+              ).append(i18n.translate("slack.common.message.subscribed-successfully-not-global-subscription"))
+            }
+            append("\n").append(languageInfo)
+          }
         }
 
       section {
