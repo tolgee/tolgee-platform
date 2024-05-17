@@ -61,10 +61,11 @@ class SlackExecutor(
       }
 
       savedMessage.forEach { savedMsg ->
-        if (savedMsg.createdKeyBlocks) {
-          message.blocks = emptyList()
-        }
         processSavedMessage(savedMsg, message, config, slackExecutorHelper)
+      }
+
+      if (shouldSendNewMessage(message, config)) {
+        sendRegularMessageWithSaving(message, config)
       }
     }
   }
@@ -108,12 +109,58 @@ class SlackExecutor(
         additionalAttachments.add(it)
       }
     }
-
     val updatedAttachments = additionalAttachments + message.attachments
     val updatedLanguages = message.langTag + languagesToAdd
-    val updatedMessageDto = message.copy(attachments = updatedAttachments, langTag = updatedLanguages)
+    val authorContextMap = savedMsg.info.associate { it.langTag to it.authorContext }
+    val updatedMessageDto =
+      message.copy(
+        attachments = addAuthorContextToAttachments(updatedAttachments.toMutableList(), authorContextMap, config),
+        langTag = updatedLanguages,
+      )
 
+    if (savedMsg.createdKeyBlocks) {
+      updatedMessageDto.blocks = emptyList()
+    }
     updateMessage(savedMsg, config, updatedMessageDto)
+  }
+
+  private fun addAuthorContextToAttachments(
+    additionalAttachments: MutableList<Attachment>,
+    authorContextMap: Map<String, String>,
+    config: SlackConfig,
+  ): List<Attachment> {
+    authorContextMap.forEach { (langTag, author) ->
+      val fullLanguageName = languageService.getByTag(langTag, config.project).name
+
+      additionalAttachments.forEach attachments@{ attachment ->
+        if (attachment.blocks[0].toString().contains(fullLanguageName) && attachment.blocks.size != 3) {
+          if (author.isEmpty()) {
+            return@attachments
+          }
+          attachment.blocks = attachment.blocks + getAuthorBlocks(author)
+        }
+      }
+    }
+
+    return additionalAttachments
+  }
+
+  private fun getAuthorBlocks(authorContext: String): List<LayoutBlock> {
+    return withBlocks {
+      context {
+        markdownText(authorContext)
+      }
+    }
+  }
+
+  private fun shouldSendNewMessage(
+    message: SavedMessageDto,
+    config: SlackConfig,
+  ): Boolean {
+    val languages = message.langTag
+    val subscribedLanguages = config.preferences.mapNotNull { it.languageTag }
+
+    return languages.any { it in subscribedLanguages } && languages.size <= 2
   }
 
   fun sortSoBaseLanguageFirst(attachments: MutableList<Attachment>): MutableList<Attachment> {

@@ -10,5 +10,5 @@ interface SlackMessageInfoRepository : JpaRepository<SlackMessageInfo, Long> {
     configId: Long,
     langTag: String,
     keyId: Long,
-  ): SlackMessageInfo?
+  ): List<SlackMessageInfo>
 }

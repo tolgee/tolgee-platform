@@ -138,13 +138,6 @@ class SlackExecutorHelper(
     baseLanguage: Language,
     author: String?,
   ) = withBlocks {
-    val authorContext =
-      slackMessageInfoService.find(
-        slackConfig.id,
-        translation.language.tag,
-        translation.key.id,
-      )?.authorContext
-
     if (shouldSkipModification(
         slackConfig.preferences,
         translation.language.tag,
@@ -162,7 +155,7 @@ class SlackExecutorHelper(
       val currentTranslate = translation.text!!
       markdownText(currentTranslate)
     }
-    val contextText = author ?: authorContext ?: return@withBlocks
+    val contextText = author ?: return@withBlocks
     context {
       markdownText(contextText)
     }
