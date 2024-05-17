@@ -1,5 +1,5 @@
 import { RefObject } from 'react';
-import { Alert } from '@mui/material';
+import { Alert, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -38,7 +38,6 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
       <CompactView
         windowTitle={t('account-security-mfa')}
         title={t('account-security-mfa')}
-        backLink={() => props.onMfaCancel()}
         alerts={
           loginErrorCode &&
           loginErrorCode !== 'mfa_enabled' &&
@@ -48,7 +47,7 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
             </Alert>
           )
         }
-        content={
+        primaryContent={
           <StandardForm
             initialValues={
               {
@@ -69,6 +68,22 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
                   >
                     <T keyName="login_login_button" />
                   </LoadingButton>
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    flexWrap="wrap"
+                    mt={1}
+                  >
+                    <Typography
+                      variant="body2"
+                      color="primary"
+                      role="button"
+                      sx={{ cursor: 'pointer' }}
+                      onClick={props.onMfaCancel}
+                    >
+                      <T keyName="reset_password_back_to_login" />
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             }
@@ -77,7 +92,6 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
             <TextField
               name="otp"
               label={<T keyName="account-security-mfa-otp-code" />}
-              variant="standard"
             />
           </StandardForm>
         }

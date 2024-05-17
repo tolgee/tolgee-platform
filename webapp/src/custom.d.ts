@@ -17,6 +17,8 @@ import {
   TipsBanner,
   TopBanner,
   LanguageChips,
+  Login,
+  Input,
 } from './colors';
 
 declare module '*.svg' {
@@ -51,6 +53,8 @@ declare module '@mui/material/styles/createPalette' {
     tokens: typeof all.tokens;
     placeholders: Placeholders;
     languageChips: LanguageChips;
+    login: Login;
+    input: Input;
   }
 
   interface PaletteOptions {
@@ -76,6 +80,8 @@ declare module '@mui/material/styles/createPalette' {
     tokens: typeof all.tokens;
     placeholders: Placeholders;
     languageChips: LanguageChips;
+    login: Login;
+    input: Input;
   }
 }
 

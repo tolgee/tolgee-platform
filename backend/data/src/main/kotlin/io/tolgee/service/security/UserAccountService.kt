@@ -134,15 +134,18 @@ class UserAccountService(
   }
 
   @Transactional
-  fun createUser(userAccount: UserAccount): UserAccount {
+  fun createUser(
+    userAccount: UserAccount,
+    userSource: String? = null,
+  ): UserAccount {
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
     userAccountRepository.saveAndFlush(userAccount)
-    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
     return userAccount
   }
 
   @Transactional
-  fun createUser(
+  fun createUserWithPassword(
     userAccount: UserAccount,
     rawPassword: String,
   ): UserAccount {

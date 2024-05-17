@@ -1,5 +1,5 @@
 import { FunctionComponent, useEffect, useState } from 'react';
-import { TextField as MUITextField, TextFieldProps } from '@mui/material';
+import { TextField as TolgeeTextField } from 'tg.component/common/TextField';
 import { useField } from 'formik';
 
 interface PGTextFieldProps {
@@ -7,7 +7,7 @@ interface PGTextFieldProps {
   onValueChange?: (newValue: string) => void;
 }
 
-type Props = PGTextFieldProps & TextFieldProps;
+type Props = PGTextFieldProps & React.ComponentProps<typeof TolgeeTextField>;
 
 export const TextField: FunctionComponent<Props> = (props) => {
   const [field, meta] = useField(props.name);
@@ -24,10 +24,8 @@ export const TextField: FunctionComponent<Props> = (props) => {
   });
 
   return (
-    <MUITextField
-      sx={{ mt: 2, minHeight: otherProps.size === 'small' ? 50 : 70 }}
-      className={props.className}
-      fullWidth={props.fullWidth ? props.fullWidth : true}
+    <TolgeeTextField
+      fullWidth={props.fullWidth ?? true}
       {...field}
       {...otherProps}
       helperText={(meta.touched && meta.error) || props.helperText}

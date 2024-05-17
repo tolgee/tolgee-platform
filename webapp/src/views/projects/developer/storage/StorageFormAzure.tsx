@@ -69,14 +69,12 @@ export const StorageFormAzure = ({
           <DialogContent>
             <TextField
               size="small"
-              variant="standard"
               name="name"
               label={t('storage_form_name')}
               data-cy="storage-form-name"
             />
             <TextField
               size="small"
-              variant="standard"
               name="azureContentStorageConfig.connectionString"
               label="Connection string"
               placeholder={keepAsIsPlaceholder}
@@ -85,14 +83,12 @@ export const StorageFormAzure = ({
             />
             <TextField
               size="small"
-              variant="standard"
               name="azureContentStorageConfig.containerName"
               label="Container name"
               data-cy="storage-form-azure-container-name"
             />
             <TextField
               size="small"
-              variant="standard"
               name="publicUrlPrefix"
               label={t('storage_form_public_url_prefix')}
               data-cy="storage-form-public-url-prefix"

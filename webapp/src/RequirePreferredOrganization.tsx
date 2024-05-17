@@ -20,7 +20,7 @@ export const RequirePreferredOrganization: FC = (props) => {
     return (
       <DashboardPage>
         <CompactView
-          content={
+          primaryContent={
             <>
               <T keyName={'no-permissions-on-the-server'} />
             </>

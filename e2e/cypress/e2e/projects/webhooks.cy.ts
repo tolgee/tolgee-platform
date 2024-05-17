@@ -42,7 +42,7 @@ describe('Content delivery', () => {
     gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
       .findDcy('webhooks-item-edit')
       .click();
-    cy.gcy('webhook-form-url').clear().type(newUrl);
+    cy.gcy('webhook-form-url').find('input').clear().type(newUrl);
     cy.gcy('webhook-form-save').click();
     waitForGlobalLoading();
     assertMessage('Webhook successfully updated!');
@@ -113,7 +113,7 @@ describe('Content delivery', () => {
 
   function createWebhook(url: string = testUrl) {
     cy.gcy('webhooks-add-item-button').click();
-    cy.gcy('webhook-form-url').type(url);
+    cy.gcy('webhook-form-url').find('input').type(url);
     cy.gcy('webhook-form-save').click();
 
     waitForGlobalLoading();

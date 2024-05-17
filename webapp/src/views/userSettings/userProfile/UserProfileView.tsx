@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { Alert, Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
@@ -70,12 +70,10 @@ export const UserProfileView: FunctionComponent = () => {
           </Grid>
           <Grid item xs={12} sm>
             <TextField
-              variant="standard"
               name="name"
               label={<T keyName="User settings - Full name" />}
             />
             <TextField
-              variant="standard"
               name="email"
               disabled={isManaged}
               helperText={
@@ -109,7 +107,6 @@ export const UserProfileView: FunctionComponent = () => {
             name="currentPassword"
             type="password"
             label={<T keyName="current-password" />}
-            variant="standard"
           />
         )}
       </Box>

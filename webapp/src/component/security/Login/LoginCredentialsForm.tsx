@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import { Button, Link as MuiLink, Typography } from '@mui/material';
+import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,13 @@ import {
 } from 'tg.globalContext/GlobalContext';
 import { ApiError } from 'tg.service/http/ApiError';
 
+const StyledInputFields = styled('div')`
+  display: grid;
+  align-items: start;
+  gap: 16px;
+  padding-bottom: 32px;
+`;
+
 type Credentials = { username: string; password: string };
 type LoginViewCredentialsProps = {
   credentialsRef: RefObject<Credentials>;
@@ -27,19 +34,13 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const { login } = useGlobalActions();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
-  const registrationAllowed = useGlobalContext(
-    (c) =>
-      c.initialData.serverConfiguration.allowRegistrations ||
-      c.auth.allowRegistration
-  );
-
   const oAuthServices = useOAuthServices();
 
   return (
     <StandardForm
       initialValues={props.credentialsRef.current!}
       submitButtons={
-        <Box mt={2}>
+        <Box>
           <Box display="flex" flexDirection="column" alignItems="stretch">
             <LoadingButton
               loading={isLoading}
@@ -51,36 +52,20 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
               <T keyName="login_login_button" />
             </LoadingButton>
 
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              flexWrap="wrap"
-              mt={1}
-            >
-              <Box>
-                {registrationAllowed && (
-                  <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
-                    <Typography variant="caption">
-                      <T keyName="login_sign_up" />
-                    </Typography>
-                  </MuiLink>
-                )}
-              </Box>
+            <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>
               {remoteConfig.passwordResettable && (
                 <MuiLink
                   to={LINKS.RESET_PASSWORD_REQUEST.build()}
                   component={Link}
                 >
-                  <Typography variant="caption">
-                    <T keyName="login_reset_password_button" />
+                  <Typography variant="body2">
+                    <T keyName="login_forgot_your_password" />
                   </Typography>
                 </MuiLink>
               )}
             </Box>
 
-            {oAuthServices.length > 0 && (
-              <Box height="1px" bgcolor="lightgray" marginY={4} marginX={-1} />
-            )}
+            {oAuthServices.length > 0 && <Box height="0px" mt={5} />}
             {oAuthServices.map((provider) => (
               <React.Fragment key={provider.id}>
                 <Button
@@ -90,6 +75,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                   endIcon={provider.buttonIcon}
                   variant="outlined"
                   style={{ marginBottom: '0.5rem' }}
+                  color="inherit"
                 >
                   {provider.loginButtonTitle}
                 </Button>
@@ -110,17 +96,19 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         }
       }}
     >
-      <TextField
-        name="username"
-        label={<T keyName="login_email_label" />}
-        variant="standard"
-      />
-      <TextField
-        name="password"
-        type="password"
-        label={<T keyName="login_password_label" />}
-        variant="standard"
-      />
+      <StyledInputFields>
+        <TextField
+          name="username"
+          label={<T keyName="login_email_label" />}
+          minHeight={false}
+        />
+        <TextField
+          name="password"
+          type="password"
+          label={<T keyName="login_password_label" />}
+          minHeight={false}
+        />
+      </StyledInputFields>
     </StandardForm>
   );
 }
