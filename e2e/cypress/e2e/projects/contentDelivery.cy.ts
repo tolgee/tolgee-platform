@@ -49,7 +49,7 @@ describe('Content delivery', () => {
     assertMessage('Content delivery successfully created!');
   });
 
-  it.only('show custom slug only for custom storage', () => {
+  it('show custom slug only for custom storage', () => {
     cy.gcy('content-delivery-add-button').click();
     fillContentDeliveryConfigForm('Custom slug');
     waitForGlobalLoading();
