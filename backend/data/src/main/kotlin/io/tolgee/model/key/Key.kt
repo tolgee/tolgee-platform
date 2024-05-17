@@ -1,5 +1,6 @@
 package io.tolgee.model.key
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
@@ -78,6 +79,7 @@ class Key(
     this.translations = translations
   }
 
+  @get:JsonIgnore
   val path: PathDTO
     get() = PathDTO.fromFullPath(name)
 
