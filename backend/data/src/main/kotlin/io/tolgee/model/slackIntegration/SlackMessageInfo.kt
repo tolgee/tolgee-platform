@@ -1,15 +1,12 @@
 package io.tolgee.model.slackIntegration
 
 import io.tolgee.model.StandardAuditModel
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
 class SlackMessageInfo(
-  @ManyToOne()
+  @ManyToOne(fetch = FetchType.LAZY)
   var slackMessage: SavedSlackMessage = SavedSlackMessage(),
   var langTag: String = "",
 ) : StandardAuditModel() {

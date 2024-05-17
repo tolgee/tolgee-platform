@@ -98,8 +98,16 @@ class SavedSlackMessageService(
   }
 
   @Scheduled(fixedDelay = 60000)
+  @Transactional
   fun deleteOldMessage() {
     val cutoff = currentDateProvider.date.addMinutes(-120)
-    savedSlackMessageRepository.deleteOlderThan(cutoff)
+    val oldMessages = savedSlackMessageRepository.findOlderThan(cutoff)
+
+    // Delete related SlackMessageInfo entries
+    oldMessages.forEach { message ->
+      slackMessageInfoService.deleteAll(message.info)
+    }
+
+    savedSlackMessageRepository.deleteAll(oldMessages)
   }
 }

@@ -16,6 +16,6 @@ class SavedSlackMessage(
   var langTags: Set<String> = setOf(),
   var createdKeyBlocks: Boolean = false,
 ) : StandardAuditModel() {
-  @OneToMany(mappedBy = "slackMessage", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "slackMessage", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
   var info: MutableList<SlackMessageInfo> = mutableListOf()
 }
