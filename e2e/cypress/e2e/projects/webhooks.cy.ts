@@ -113,7 +113,7 @@ describe('Content delivery', () => {
 
   function createWebhook(url: string = testUrl) {
     cy.gcy('webhooks-add-item-button').click();
-    cy.gcy('webhook-form-url').type(url);
+    cy.gcy('webhook-form-url').find('input').type(url);
     cy.gcy('webhook-form-save').click();
 
     waitForGlobalLoading();
