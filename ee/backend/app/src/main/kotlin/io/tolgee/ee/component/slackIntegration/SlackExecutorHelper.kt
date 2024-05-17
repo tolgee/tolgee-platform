@@ -240,6 +240,7 @@ class SlackExecutorHelper(
           processTranslationChange(
             translation,
             getModificationAuthorContext(event, data.activityData.timestamp),
+            event,
           ) ?: return@modifiedEntities,
         )
 
@@ -256,6 +257,7 @@ class SlackExecutorHelper(
   private fun processTranslationChange(
     translation: Translation,
     modificationAuthor: String?,
+    event: String,
   ): SavedMessageDto? {
     val key = translation.key
     val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return null
@@ -271,7 +273,8 @@ class SlackExecutorHelper(
         translation.language.name
       }
 
-    val headerBlock = buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-translation").format(langName))
+    val headerBlock =
+      buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-translation").format(langName, event))
     val attachments =
       mutableListOf(createAttachmentForLanguage(translation, modificationAuthor) ?: return null)
     val langTags = mutableSetOf(modifiedLangTag)
