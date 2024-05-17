@@ -10,5 +10,6 @@ data class SavedMessageDto(
   val langTag: Set<String>,
   val createdKeyBlocks: Boolean = false,
   val baseChanged: Boolean = false,
-  val authorContext: Map<String, String> = mapOf(), // map of langTag and authorContext
+  // map of langTag and authorContext
+  val authorContext: Map<String, String> = mapOf(),
 )
