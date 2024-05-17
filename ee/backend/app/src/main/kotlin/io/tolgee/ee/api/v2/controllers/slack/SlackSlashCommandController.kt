@@ -13,7 +13,6 @@ import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SlackConfigService
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.ee.service.slackIntegration.SlackWorkspaceNotFound
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.Project
@@ -131,7 +130,7 @@ class SlackSlashCommandController(
   }
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
-    // featureEnabled()
+    checkFeatureEnabled()
 
     if (slackUserConnectionService.isUserConnected(payload.user_id)) {
       return SlackMessageDto(text = i18n.translate("slack.common.message.already_logged_in"))
@@ -155,7 +154,7 @@ class SlackSlashCommandController(
     languageTag: String?,
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
-    // featureEnabled()
+    checkFeatureEnabled()
 
     var onEvent: EventName? = null
     var isGlobal: Boolean? = null
@@ -242,13 +241,12 @@ class SlackSlashCommandController(
     }
   }
 
-  private fun featureEnabled() {
-    try {
-      enabledFeaturesProvider.checkFeatureEnabled(
+  private fun checkFeatureEnabled() {
+    if (!enabledFeaturesProvider.isFeatureEnabled(
         organizationId = projectHolder.project.organizationOwnerId,
-        Feature.PROJECT_LEVEL_CONTENT_STORAGES,
+        Feature.SLACK_INTEGRATION,
       )
-    } catch (e: BadRequestException) {
+    ) {
       throw SlackErrorException(slackErrorProvider.getFeatureDisabledError())
     }
   }

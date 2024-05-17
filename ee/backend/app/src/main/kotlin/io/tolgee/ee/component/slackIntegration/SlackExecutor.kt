@@ -250,7 +250,7 @@ class SlackExecutor(
       slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatUpdate { request ->
         request
           .channel(config.channelId)
-          .ts(savedMessage.messageTs)
+          .ts(savedMessage.messageTimeStamp)
           .attachments(sortSoBaseLanguageFirst(messageDto.attachments.toMutableList()))
         if (messageDto.blocks.isNotEmpty()) {
           request.blocks(messageDto.blocks)
@@ -321,10 +321,10 @@ class SlackExecutor(
     savedSlackMessageService.save(
       savedSlackMessage =
         SavedSlackMessage(
-          messageTs = ts,
+          messageTimeStamp = ts,
           slackConfig = config,
           keyId = messageDto.keyId,
-          langTags = messageDto.langTag,
+          languageTags = messageDto.langTag,
           messageDto.createdKeyBlocks,
         ),
       messageDto.authorContext,

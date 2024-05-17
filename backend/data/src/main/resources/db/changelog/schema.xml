@@ -3380,4 +3380,20 @@
     <changeSet author="huglx (generated)" id="1715853492795-2">
         <addForeignKeyConstraint baseColumnNames="slack_message_id" baseTableName="slack_message_info" constraintName="FKevih8rhrt7tmk3fdpcnry6avr" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="saved_slack_message" validate="true"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1715968099414-1">
+        <addColumn tableName="saved_slack_message">
+            <column name="language_tags" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1715968099414-2">
+        <addColumn tableName="saved_slack_message">
+            <column name="message_time_stamp" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1715968099414-3">
+        <dropColumn columnName="lang_tags" tableName="saved_slack_message"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1715968099414-4">
+        <dropColumn columnName="message_ts" tableName="saved_slack_message"/>
+    </changeSet>
 </databaseChangeLog>

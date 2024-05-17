@@ -7,11 +7,11 @@ import org.hibernate.annotations.ColumnDefault
 @Entity
 class SlackMessageInfo(
   @ManyToOne(fetch = FetchType.LAZY)
-  var slackMessage: SavedSlackMessage = SavedSlackMessage(),
+  var slackMessage: SavedSlackMessage,
   var langTag: String = "",
 ) : StandardAuditModel() {
   @Enumerated(EnumType.STRING)
-  @ColumnDefault("'GLOBAL'")
+  @ColumnDefault("GLOBAL")
   var subscriptionType: SubscriptionType = SubscriptionType.GLOBAL
 
   var authorContext: String = "" // string containing author name, event and date

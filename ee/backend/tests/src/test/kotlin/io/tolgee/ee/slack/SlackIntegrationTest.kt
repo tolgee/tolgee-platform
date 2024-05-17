@@ -94,7 +94,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     modifyTranslationData(testData.projectBuilder.self.id, "cs", testData.key2.name)
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
     slackMessageService.find(testData.key2.id, config.id).forEach {
-      it.langTags.assert.doesNotContain("cs")
+      it.languageTags.assert.doesNotContain("cs")
     }
   }
 
@@ -122,7 +122,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     addKeyToProject(testData.projectBuilder.self.id)
     mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
     slackMessageService.find(testData.key2.id, config.id).forEach {
-      it.langTags.assert.doesNotContain("en")
+      it.languageTags.assert.doesNotContain("en")
     }
   }
 

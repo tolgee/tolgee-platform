@@ -12,7 +12,7 @@ import org.hibernate.annotations.Type
 @Entity
 class SlackConfig(
   @ManyToOne(fetch = FetchType.LAZY)
-  var project: Project = Project(),
+  var project: Project,
   @ManyToOne(fetch = FetchType.LAZY)
   var userAccount: UserAccount = UserAccount(),
   var channelId: String = "",

@@ -84,25 +84,25 @@ class SlackTestData() {
           addSlackMessage {
             slackConfig = this@config.self
             this.keyId = 0L
-            this.langTags = mutableSetOf("en", "fr")
+            this.languageTags = mutableSetOf("en", "fr")
           }
 
           addSlackMessage {
             slackConfig = this@config.self
             this.keyId = 0L
-            this.langTags = mutableSetOf("fr", "cz")
+            this.languageTags = mutableSetOf("fr", "cz")
           }
 
           addSlackMessage {
             slackConfig = this@config.self
             this.keyId = 1L
-            this.langTags = mutableSetOf("cz", "ru")
+            this.languageTags = mutableSetOf("cz", "ru")
           }
 
           addSlackMessage {
             slackConfig = this@config.self
             this.keyId = 52L
-            this.langTags = mutableSetOf("fr", "cz")
+            this.languageTags = mutableSetOf("fr", "cz")
           }
         }.self
 

@@ -7,13 +7,13 @@ import org.hibernate.annotations.Type
 
 @Entity
 class SavedSlackMessage(
-  val messageTs: String = "",
+  val messageTimeStamp: String = "",
   @ManyToOne(fetch = FetchType.LAZY)
-  var slackConfig: SlackConfig = SlackConfig(),
+  var slackConfig: SlackConfig,
   var keyId: Long = 0L,
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  var langTags: Set<String> = setOf(),
+  var languageTags: Set<String> = setOf(),
   var createdKeyBlocks: Boolean = false,
 ) : StandardAuditModel() {
   @OneToMany(mappedBy = "slackMessage", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])

@@ -63,7 +63,7 @@ class SavedSlackMessageService(
     authorContextMap: Map<String, String>,
   ): SavedSlackMessage? {
     val savedMessage = savedSlackMessageRepository.findById(id).orElse(null) ?: return null
-    savedMessage.langTags = langTags
+    savedMessage.languageTags = langTags
 
     langTags.forEach { langTag ->
       val existingInfo = savedMessage.info.find { it.langTag == langTag }
