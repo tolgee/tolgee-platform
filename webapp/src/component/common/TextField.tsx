@@ -23,14 +23,7 @@ type Props = React.ComponentProps<typeof MUITextField> & {
 };
 
 export const TextField: FunctionComponent<Props> = (props) => {
-  const {
-    label,
-    minHeight = true,
-    sx,
-    // @ts-ignore
-    'data-cy': dataCy,
-    ...otherProps
-  } = props;
+  const { label, minHeight = true, sx, ...otherProps } = props;
   return (
     <StyledContainer>
       {label && <StyledInputLabel>{label}</StyledInputLabel>}
@@ -38,10 +31,6 @@ export const TextField: FunctionComponent<Props> = (props) => {
         variant="outlined"
         size="small"
         sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
-        inputProps={{
-          // @ts-ignore
-          'data-cy': dataCy,
-        }}
         {...otherProps}
       />
     </StyledContainer>

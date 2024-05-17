@@ -107,7 +107,6 @@ export const UserProfileView: FunctionComponent = () => {
             name="currentPassword"
             type="password"
             label={<T keyName="current-password" />}
-            variant="standard"
           />
         )}
       </Box>
