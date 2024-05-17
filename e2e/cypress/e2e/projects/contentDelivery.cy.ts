@@ -150,7 +150,7 @@ describe('Content delivery', () => {
     gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
       .findDcy('content-delivery-item-edit')
       .click();
-    cy.gcy('content-delivery-form-name').clear().type(name);
+    cy.gcy('content-delivery-form-name').find('input').clear().type(name);
     cy.gcy('content-delivery-auto-publish-checkbox').click();
     cy.gcy('content-delivery-form-save').click();
     waitForGlobalLoading();

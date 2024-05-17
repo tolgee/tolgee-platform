@@ -42,7 +42,7 @@ describe('Content delivery', () => {
     gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
       .findDcy('webhooks-item-edit')
       .click();
-    cy.gcy('webhook-form-url').clear().type(newUrl);
+    cy.gcy('webhook-form-url').find('input').clear().type(newUrl);
     cy.gcy('webhook-form-save').click();
     waitForGlobalLoading();
     assertMessage('Webhook successfully updated!');
