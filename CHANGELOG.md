@@ -1,3 +1,10 @@
+# [3.61.0](https://github.com/tolgee/tolgee-platform/compare/v3.60.0...v3.61.0) (2024-05-17)
+
+
+### Features
+
+* new login page ([#2309](https://github.com/tolgee/tolgee-platform/issues/2309)) ([b91b371](https://github.com/tolgee/tolgee-platform/commit/b91b3714c4f2f4a0d4789b7a01d7f0cb2e6f9005))
+
 # [3.60.0](https://github.com/tolgee/tolgee-platform/compare/v3.59.7...v3.60.0) (2024-05-16)
 
 
