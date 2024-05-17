@@ -2,7 +2,6 @@ import { FunctionComponent } from 'react';
 import {
   InputLabel,
   TextField as MUITextField,
-  TextFieldProps,
   styled,
   textFieldClasses,
 } from '@mui/material';
@@ -19,10 +18,19 @@ const StyledInputLabel = styled(InputLabel)`
   font-weight: 500px;
 `;
 
-type Props = TextFieldProps & { minHeight?: boolean };
+type Props = React.ComponentProps<typeof MUITextField> & {
+  minHeight?: boolean;
+};
 
 export const TextField: FunctionComponent<Props> = (props) => {
-  const { label, minHeight = true, sx, ...otherProps } = props;
+  const {
+    label,
+    minHeight = true,
+    sx,
+    // @ts-ignore
+    'data-cy': dataCy,
+    ...otherProps
+  } = props;
   return (
     <StyledContainer>
       {label && <StyledInputLabel>{label}</StyledInputLabel>}
@@ -30,6 +38,10 @@ export const TextField: FunctionComponent<Props> = (props) => {
         variant="outlined"
         size="small"
         sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
+        InputProps={{
+          // @ts-ignore
+          'data-cy': dataCy,
+        }}
         {...otherProps}
       />
     </StyledContainer>
