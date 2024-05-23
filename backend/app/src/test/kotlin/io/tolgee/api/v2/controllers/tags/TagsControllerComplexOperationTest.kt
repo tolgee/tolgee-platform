@@ -172,6 +172,42 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `tag filtered by key not`() {
+    saveAndPrepare()
+    performProjectAuthPut(
+      "tag-complex",
+      mapOf(
+        "filterKeysNot" to
+          listOf(
+            mapOf(
+              "id" to testData.existingTagKey.id,
+            ),
+            mapOf(
+              "name" to testData.noTagKey.name,
+              "namespace" to null,
+            ),
+            mapOf(
+              "name" to "namespaced key",
+              "namespace" to "namespace",
+            ),
+          ),
+        "tagFiltered" to listOf("other tag"),
+        "tagOther" to listOf("new tag"),
+      ),
+    ).andIsOk
+
+    assertKeyTags(
+      mapOf(
+        (null to "test key") to listOf("test", "existing tag", "existing tag 2", "new tag"),
+        (null to "no tag key") to listOf("new tag"),
+        (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
+        ("namespace" to "namespaced key") to listOf("existing tag", "new tag"),
+      ),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it doesnt take forever`() {
     testData.generateVeryLotOfData()
     saveAndPrepare()

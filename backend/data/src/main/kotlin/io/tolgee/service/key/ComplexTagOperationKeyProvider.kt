@@ -1,5 +1,6 @@
 package io.tolgee.service.key
 
+import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.dtos.request.KeyId
 import io.tolgee.model.Project_
 import io.tolgee.model.key.Key
@@ -19,9 +20,7 @@ import org.springframework.context.ApplicationContext
 
 class ComplexTagOperationKeyProvider(
   private val projectId: Long,
-  private val filterKeys: List<KeyId>?,
-  private val filterTag: List<String>?,
-  private val filterTagNot: List<String>?,
+  private val request: ComplexTagKeysRequest,
   private val applicationContext: ApplicationContext,
 ) {
   private val cb: CriteriaBuilder = entityManager.criteriaBuilder
@@ -36,10 +35,16 @@ class ComplexTagOperationKeyProvider(
 
     val conditions = getBaseConditions()
 
-    filterKeys?.map {
+    request.filterKeys?.map {
       getKeyCondition(it)
     }?.let {
       conditions.add(cb.or(*it.toTypedArray()))
+    }
+
+    request.filterKeysNot?.map {
+      getKeyCondition(it)
+    }?.let {
+      conditions.add(cb.not(cb.or(*it.toTypedArray())))
     }
 
     conditions.add(root.get(Key_.id).`in`(filteredByTagFiltersKeyIds))
@@ -98,7 +103,7 @@ class ComplexTagOperationKeyProvider(
    * with specific tags and then use the key ids for further filtering
    */
   private val filteredByTagFiltersKeyIds by lazy {
-    taggedKeyIdsProvider.getFilteredKeys(projectId, filterTag, filterTagNot)
+    taggedKeyIdsProvider.getFilteredKeys(projectId, request.filterTag, request.filterTagNot)
   }
 
   private val entityManager: EntityManager

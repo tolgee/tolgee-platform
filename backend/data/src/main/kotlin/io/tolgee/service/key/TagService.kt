@@ -319,7 +319,7 @@ class TagService(
     req: ComplexTagKeysRequest,
   ) {
     val provider =
-      ComplexTagOperationKeyProvider(projectId, req.filterKeys, req.filterTag, req.filterTagNot, applicationContext)
+      ComplexTagOperationKeyProvider(projectId, req, applicationContext)
 
     if (req.tagFiltered != null || req.untagFiltered != null) {
       tagAndUntag(req.tagFiltered, req.untagFiltered, provider.filtered)

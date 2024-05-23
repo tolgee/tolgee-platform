@@ -1,0 +1,21 @@
+tolgee:
+  authentication:
+    registrationsAllowed: false
+    initialUsername: admin
+    initialPassword: admin
+  rateLimits:
+    enabled: false
+  internal:
+    showVersion: true
+    controllerEnabled: true
+  import:
+    dir: /Users/jenik/IdeaProjects/tolgee-cli/test/__fixtures__/tolgeeImportData
+    createImplicitApiKey: true
+    baseLanguageTag: en
+  postgres-autostart:
+    container-name: tolgee-postgres-cli
+    port: 64321
+  billing:
+    enabled: false
+server:
+  port: 22222

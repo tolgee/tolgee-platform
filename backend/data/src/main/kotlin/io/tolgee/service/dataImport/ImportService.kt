@@ -126,7 +126,7 @@ class ImportService(
 
     publishImportBusinessEvent(project.id, userAccount.id)
 
-    val importId = "single-step-p${project.id}-a$userAccount-${currentDateProvider.date.time}"
+    val importId = "single-step-p${project.id}-a${userAccount.id}-${currentDateProvider.date.time}"
     Sentry.addBreadcrumb("Import ID: $importId")
     self.saveFilesToFileStorage(importId, files, params.storeFilesToFileStorage)
 
