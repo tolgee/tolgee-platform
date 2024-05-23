@@ -39,6 +39,8 @@ import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
 
+class ErrorResponseTyped(var code: Message, var params: List<Serializable?>?)
+
 @RestControllerAdvice
 class ExceptionHandlers {
   private val logger = LoggerFactory.getLogger(this::class.java)
@@ -125,8 +127,10 @@ class ExceptionHandlers {
     responseCode = "400",
     content = [
       Content(
+        mediaType = "application/json",
         schema =
           Schema(
+            implementation = ErrorResponseTyped::class,
             example = """{"code": "you_did_something_wrong", "params": ["something", "wrong"]}""",
           ),
       ),
@@ -136,8 +140,10 @@ class ExceptionHandlers {
     responseCode = "403",
     content = [
       Content(
+        mediaType = "application/json",
         schema =
           Schema(
+            implementation = ErrorResponseTyped::class,
             example = """{"code": "operation_not_permitted", "params": ["translations.edit"]}""",
           ),
       ),
@@ -147,8 +153,10 @@ class ExceptionHandlers {
     responseCode = "401",
     content = [
       Content(
+        mediaType = "application/json",
         schema =
           Schema(
+            implementation = ErrorResponseTyped::class,
             example = """{"code": "unauthenticated"}""",
           ),
       ),
@@ -169,8 +177,10 @@ class ExceptionHandlers {
     responseCode = "404",
     content = [
       Content(
+        mediaType = "application/json",
         schema =
           Schema(
+            implementation = ErrorResponseTyped::class,
             example = """{"code": "resource_not_found", "params": null}""",
           ),
       ),

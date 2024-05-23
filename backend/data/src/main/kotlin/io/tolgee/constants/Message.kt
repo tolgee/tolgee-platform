@@ -3,6 +3,7 @@
  */
 package io.tolgee.constants
 
+import com.fasterxml.jackson.annotation.JsonValue
 import java.util.*
 
 enum class Message {
@@ -224,4 +225,7 @@ enum class Message {
 
   val code: String
     get() = name.lowercase(Locale.getDefault())
+
+  @JsonValue
+  fun toLowerCase() = name.lowercase(Locale.getDefault())
 }
