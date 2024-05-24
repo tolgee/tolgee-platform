@@ -136,6 +136,28 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `untags with wildcards`() {
+    saveAndPrepare()
+    performProjectAuthPut(
+      "tag-complex",
+      mapOf(
+        "filterTag" to listOf("existing tag"),
+        "untagFiltered" to listOf("existing*"),
+        "untagOther" to listOf("ex*2"),
+      ),
+    ).andIsOk
+
+    assertKeyTags(
+      mapOf(
+        (null to "test key") to listOf("test"),
+        (null to "no tag key") to listOf(),
+        (null to "existing tag key 2") to listOf(),
+      ),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `tag filtered by key`() {
     saveAndPrepare()
     performProjectAuthPut(

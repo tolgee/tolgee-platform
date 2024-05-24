@@ -322,12 +322,18 @@ class TagService(
       ComplexTagOperationKeyProvider(projectId, req, applicationContext)
 
     if (req.tagFiltered != null || req.untagFiltered != null) {
-      tagAndUntag(req.tagFiltered, req.untagFiltered, provider.filtered)
+      val untagFilteredWithAppliedWildcards = req.untagFiltered?.applyWildcards(projectId)?.toList()
+      tagAndUntag(req.tagFiltered, untagFilteredWithAppliedWildcards, provider.filtered)
     }
 
     if (req.tagOther != null || req.untagOther != null) {
-      tagAndUntag(req.tagOther, req.untagOther, provider.rest)
+      val untagOtherWithAppliedWildcards = req.untagOther?.applyWildcards(projectId)?.toList()
+      tagAndUntag(req.tagOther, untagOtherWithAppliedWildcards, provider.rest)
     }
+  }
+
+  private fun Collection<String>.applyWildcards(projectId: Long): Collection<String> {
+    return WildcardTagsProvider(entityManager).getTagsWithAppliedWildcards(projectId, this)
   }
 
   private fun TagService.tagAndUntag(
