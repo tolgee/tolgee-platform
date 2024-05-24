@@ -1,3 +1,10 @@
+## [3.61.1](https://github.com/tolgee/tolgee-platform/compare/v3.61.0...v3.61.1) (2024-05-24)
+
+
+### Bug Fixes
+
+* Remove false positives of format detection ([#2310](https://github.com/tolgee/tolgee-platform/issues/2310)) ([289772f](https://github.com/tolgee/tolgee-platform/commit/289772f59ff9a34af13d4be65b2cd76dab0afd05))
+
 # [3.61.0](https://github.com/tolgee/tolgee-platform/compare/v3.60.0...v3.61.0) (2024-05-17)
 
 

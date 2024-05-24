@@ -1096,6 +1096,7 @@
   "sign_up_form_email" : "E-mail",
   "sign_up_form_full_name" : "Celé jméno",
   "sign_up_form_organization_name" : "Název organizace",
+  "sign_up_form_user_source" : "Kde jste se o nás dozvěděli?",
   "sign_up_submit_button" : "Odeslat",
   "sign_up_subtitle" : "Máte již účet? <link>Přihlaste se zde</link>",
   "sign_up_success_message" : "Děkujeme za registraci!",
