@@ -242,8 +242,7 @@ class StoredDataImporter(
       return keysToSave.computeIfAbsent(this.key.file.namespace to this.key.name) {
         // or get it from conflict or create new one
         val newKey =
-          this.conflict?.key
-            ?: importDataManager.existingKeys[this.key.file.namespace to this.key.name]
+          importDataManager.existingKeys[this.key.file.namespace to this.key.name]
             ?: Key(name = this.key.name).apply {
               project = import.project
               namespace = getNamespace(this@existingKey.key.file.namespace)
