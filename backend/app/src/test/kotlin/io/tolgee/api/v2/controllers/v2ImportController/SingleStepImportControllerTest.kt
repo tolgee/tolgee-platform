@@ -14,9 +14,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.transaction.annotation.Transactional
 
-@Transactional
 class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:import/simple.json")
   lateinit var simpleJson: Resource
@@ -44,8 +42,15 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `import simple json`() {
     saveAndPrepare()
-    performImport(projectId = testData.project.id, listOf(Pair(jsonFileName, simpleJson)))
-    assertJsonImported()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+      params = mapOf("tagNewKeys" to listOf("new-tag")),
+    )
+    executeInNewTransaction {
+      assertJsonImported()
+      getTestTranslation().key.keyMeta!!.tags.map { it.name }.assert.contains("new-tag")
+    }
   }
 
   @Test
@@ -60,7 +65,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
         languageTag = "de",
       ),
     )
-    getTestTranslation().language.tag.assert.isEqualTo("de")
+    executeInNewTransaction {
+      getTestTranslation().language.tag.assert.isEqualTo("de")
+    }
   }
 
   @Test
@@ -73,7 +80,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       listOf(Pair(fileName, simpleXliff)),
       getSimpleXliffMapping(mapOf("cs" to "de", "en" to "en")),
     )
-    assertXliffDataImported()
+    executeInNewTransaction {
+      assertXliffDataImported()
+    }
   }
 
   @Test
@@ -103,7 +112,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
         ),
       ),
     )
-    assertXliffDataImported()
+    executeInNewTransaction {
+      assertXliffDataImported()
+    }
   }
 
   @Test
@@ -115,7 +126,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       listOf(Pair(jsonFileName, simpleJson)),
       getFileMappings(jsonFileName, namespace = "test"),
     ).andIsOk
-    getTestTranslation(namespace = "test").assert.isNotNull
+    executeInNewTransaction {
+      getTestTranslation(namespace = "test").assert.isNotNull
+    }
   }
 
   @Test
@@ -129,15 +142,18 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       getFileMappings(fileName, namespace = null),
     ).andIsOk
 
-    getTestTranslation().assert.isNotNull
-
+    executeInNewTransaction {
+      getTestTranslation().assert.isNotNull
+    }
     performImport(
       projectId = testData.project.id,
       listOf(Pair(fileName, simpleJson)),
       mapOf(),
     ).andIsOk
 
-    getTestTranslation(namespace = "guessed-ns").assert.isNotNull
+    executeInNewTransaction {
+      getTestTranslation(namespace = "guessed-ns").assert.isNotNull
+    }
   }
 
   @Test
@@ -160,7 +176,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       ),
     ).andIsOk
 
-    assertJsonImported()
+    executeInNewTransaction {
+      assertJsonImported()
+    }
   }
 
   @Test
@@ -205,7 +223,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   private fun getSimpleXliffMapping(languageMappings: Map<String?, String>): Map<String, List<Map<String, Any?>>?> {
     val requestLanguageMappings = getRequestLanguageMappings(languageMappings)
-
     return getFileMappings(xliffFileName, requestLanguageMappings = requestLanguageMappings)
   }
 

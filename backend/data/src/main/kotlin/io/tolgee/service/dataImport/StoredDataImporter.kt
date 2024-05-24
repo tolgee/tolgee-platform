@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
+import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
@@ -15,6 +16,7 @@ import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.flushAndClear
@@ -65,6 +67,8 @@ class StoredDataImporter(
   private val entityManager = applicationContext.getBean(EntityManager::class.java)
 
   private val namespacesToSave = mutableMapOf<String?, Namespace>()
+
+  private val newKeys = mutableListOf<Key>()
 
   /**
    * Keys where base translation was changed, so we need to set outdated flag on all translations
@@ -126,7 +130,15 @@ class StoredDataImporter(
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
 
+    tagNewKeys()
+
     entityManager.flushAndClear()
+  }
+
+  private fun tagNewKeys() {
+    (importSettings as? SingleStepImportRequest)?.tagNewKeys?.let { tagNewKeys ->
+      tagService.tagKeys(newKeys.associateWith { tagNewKeys })
+    }
   }
 
   private fun handlePluralization() {
@@ -243,10 +255,7 @@ class StoredDataImporter(
         // or get it from conflict or create new one
         val newKey =
           importDataManager.existingKeys[this.key.file.namespace to this.key.name]
-            ?: Key(name = this.key.name).apply {
-              project = import.project
-              namespace = getNamespace(this@existingKey.key.file.namespace)
-            }
+            ?: createNewKey(this.key.name, this.key.file.namespace)
         newKey
       }
     }
@@ -256,10 +265,18 @@ class StoredDataImporter(
     keyName: String,
   ): Key {
     return keysToSave.computeIfAbsent(namespace to keyName) {
-      importDataManager.existingKeys[namespace to keyName] ?: Key(name = keyName).apply {
-        project = import.project
-        this.namespace = getNamespace(namespace)
-      }
+      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace)
+    }
+  }
+
+  private fun createNewKey(
+    name: String,
+    namespace: String?,
+  ): Key {
+    return Key(name = name).apply {
+      project = import.project
+      this.namespace = getNamespace(namespace)
+      newKeys.add(this)
     }
   }
 
@@ -279,5 +296,9 @@ class StoredDataImporter(
     return importDataManager.existingNamespaces[name] ?: namespacesToSave.computeIfAbsent(name) {
       Namespace(name, import.project)
     }
+  }
+
+  private val tagService by lazy {
+    applicationContext.getBean(TagService::class.java)
   }
 }

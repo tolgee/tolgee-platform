@@ -32,4 +32,11 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
     description = "Definition of mapping for each file to import.",
   )
   var fileMappings: List<ImportFileMapping> = listOf()
+
+  @get:Schema(
+    description =
+      "Keys created by this import will be tagged with these tags. " +
+        "It add tags only to new keys. The keys that already exist will not be tagged.",
+  )
+  var tagNewKeys: List<String> = listOf()
 }
