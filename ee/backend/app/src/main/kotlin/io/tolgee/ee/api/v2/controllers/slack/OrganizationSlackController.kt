@@ -18,7 +18,6 @@ import io.tolgee.hateoas.organization.slack.WorkspaceModel
 import io.tolgee.hateoas.organization.slack.WorkspaceModelAssembler
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
-import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import org.springframework.dao.DataIntegrityViolationException
@@ -36,7 +35,6 @@ class OrganizationSlackController(
   private val authenticationFacade: AuthenticationFacade,
   private val workspaceModelAssembler: WorkspaceModelAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  private val projectHolder: ProjectHolder,
 ) {
   @GetMapping("get-connect-url")
   @Operation(summary = "")
@@ -60,7 +58,8 @@ class OrganizationSlackController(
     @PathVariable organizationId: Long,
   ) {
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = projectHolder.project.organizationOwnerId,
+      organizationId =
+        organizationHolder.organization.id,
       Feature.SLACK_INTEGRATION,
     )
 

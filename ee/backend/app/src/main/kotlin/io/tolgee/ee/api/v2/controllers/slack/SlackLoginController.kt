@@ -17,7 +17,6 @@ import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.SlackUserInfoModel
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
-import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.Logging
@@ -40,7 +39,6 @@ class SlackLoginController(
   private val slackWorkspaceService: OrganizationSlackWorkspaceService,
   private val organizationRoleService: OrganizationRoleService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  private val projectHolder: ProjectHolder,
 ) : Logging {
   @PostMapping("/user-login")
   @Operation(summary = "User login", description = "Pairs user account with slack account.")

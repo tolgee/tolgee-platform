@@ -19,7 +19,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.slackIntegration.EventName
-import io.tolgee.security.ProjectHolder
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
@@ -47,7 +46,6 @@ class SlackSlashCommandController(
   private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
   private val tolgeeProperties: TolgeeProperties,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  private val projectHolder: ProjectHolder,
 ) : Logging {
   @Suppress("UastIncorrectHttpHeaderInspection")
   @PostMapping
@@ -130,7 +128,7 @@ class SlackSlashCommandController(
   }
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
-    checkFeatureEnabled()
+    checkFeatureEnabled(payload.team_id)
 
     if (slackUserConnectionService.isUserConnected(payload.user_id)) {
       return SlackMessageDto(text = i18n.translate("slack.common.message.already_logged_in"))
@@ -154,7 +152,7 @@ class SlackSlashCommandController(
     languageTag: String?,
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
-    checkFeatureEnabled()
+    checkFeatureEnabled(payload.team_id)
 
     var onEvent: EventName? = null
     var isGlobal: Boolean? = null
@@ -241,9 +239,10 @@ class SlackSlashCommandController(
     }
   }
 
-  private fun checkFeatureEnabled() {
+  private fun checkFeatureEnabled(teamId: String) {
+    val workspace = organizationSlackWorkspaceService.findBySlackTeamId(teamId)
     if (!enabledFeaturesProvider.isFeatureEnabled(
-        organizationId = projectHolder.project.organizationOwnerId,
+        organizationId = workspace?.organization?.id,
         Feature.SLACK_INTEGRATION,
       )
     ) {
