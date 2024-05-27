@@ -1,3 +1,10 @@
+## [3.61.2](https://github.com/tolgee/tolgee-platform/compare/v3.61.1...v3.61.2) (2024-05-27)
+
+
+### Bug Fixes
+
+* error when user subscribes to new plan and is redirecting ([#2323](https://github.com/tolgee/tolgee-platform/issues/2323)) ([779cf3d](https://github.com/tolgee/tolgee-platform/commit/779cf3d0945b7868a51a557a93ae674cae7d3983))
+
 ## [3.61.1](https://github.com/tolgee/tolgee-platform/compare/v3.61.0...v3.61.1) (2024-05-24)
 
 
