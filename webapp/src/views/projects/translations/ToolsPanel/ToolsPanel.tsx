@@ -80,13 +80,7 @@ export const ToolsPanel = () => {
   };
 
   return (
-    <StyledWrapper
-      onMouseDown={(e) => {
-        if (!isElementInput(e.target as Element)) {
-          e.preventDefault();
-        }
-      }}
-    >
+    <StyledWrapper>
       {displayPanels ? (
         <StyledPanelList>
           {PANELS.filter(

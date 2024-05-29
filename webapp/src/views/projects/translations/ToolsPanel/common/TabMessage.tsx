@@ -11,5 +11,9 @@ type Props = {
 };
 
 export const TabMessage: React.FC<Props> = ({ children }) => {
-  return <StyledWrapper>{children}</StyledWrapper>;
+  return (
+    <StyledWrapper onMouseDown={(e) => e.preventDefault()}>
+      {children}
+    </StyledWrapper>
+  );
 };
