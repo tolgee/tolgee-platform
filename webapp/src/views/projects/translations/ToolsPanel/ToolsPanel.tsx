@@ -12,7 +12,6 @@ import { PANELS, PANELS_WHEN_INACTIVE } from './panelsList';
 import { useOpenPanels } from './useOpenPanels';
 import { Close } from '@mui/icons-material';
 import { T } from '@tolgee/react';
-import { isElementInput } from 'tg.fixtures/isElementInput';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const StyledButton = styled(IconButton)`
