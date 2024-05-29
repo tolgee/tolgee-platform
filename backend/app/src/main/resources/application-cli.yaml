@@ -9,7 +9,6 @@ tolgee:
     showVersion: true
     controllerEnabled: true
   import:
-    dir: /Users/jenik/IdeaProjects/tolgee-cli/test/__fixtures__/tolgeeImportData
     createImplicitApiKey: true
     baseLanguageTag: en
   postgres-autostart:
