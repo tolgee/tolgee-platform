@@ -19,6 +19,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Value("classpath:import/simple.json")
   lateinit var simpleJson: Resource
 
+  @Value("classpath:import/new.json")
+  lateinit var newJson: Resource
+
   @Value("classpath:import/apple/Localizable.strings")
   lateinit var appleStringsFile: Resource
 
@@ -216,12 +219,39 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     ).andIsBadRequest.andHasErrorMessage(Message.CONFLICT_IS_NOT_RESOLVED)
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `removes other keys`() {
+    testData.addConflictTranslation()
+    saveAndPrepare()
+    val params = getFileMappings(jsonFileName)
+    params["removeOtherKeys"] = true
+
+    executeInNewTransaction {
+      keyService.find(testData.project.id, "test", null).assert.isNotNull()
+    }
+
+    executeInNewTransaction {
+      performImport(
+        projectId = testData.project.id,
+        files = listOf(Pair(jsonFileName, newJson)),
+        params,
+      ).andIsOk
+    }
+
+    executeInNewTransaction {
+      // import with "new" key removes "test" key
+      keyService.find(testData.project.id, "new", null).assert.isNotNull()
+      keyService.find(testData.project.id, "test", null).assert.isNull()
+    }
+  }
+
   private fun assertXliffDataImported() {
     getTestKeyTranslations().find { it.language.tag == "de" }!!.text.assert.isEqualTo("Test cs")
     getTestKeyTranslations().find { it.language.tag == "en" }!!.text.assert.isEqualTo("Test en")
   }
 
-  private fun getSimpleXliffMapping(languageMappings: Map<String?, String>): Map<String, List<Map<String, Any?>>?> {
+  private fun getSimpleXliffMapping(languageMappings: Map<String?, String>): MutableMap<String, Any?> {
     val requestLanguageMappings = getRequestLanguageMappings(languageMappings)
     return getFileMappings(xliffFileName, requestLanguageMappings = requestLanguageMappings)
   }
@@ -240,8 +270,8 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     requestLanguageMappings: List<Map<String, String?>>? = null,
     namespace: String? = null,
     format: String? = null,
-  ): Map<String, List<Map<String, Any?>>?> {
-    return mapOf(
+  ): MutableMap<String, Any?> {
+    return mutableMapOf(
       "languageMappings" to requestLanguageMappings,
       "fileMappings" to
         listOf(
