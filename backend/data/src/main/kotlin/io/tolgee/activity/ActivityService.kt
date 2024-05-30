@@ -3,6 +3,7 @@ package io.tolgee.activity
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.activity.groups.ActivityGroupService
 import io.tolgee.activity.views.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.views.ProjectActivityViewByRevisionProvider
 import io.tolgee.dtos.queryResults.TranslationHistoryView
@@ -29,6 +30,7 @@ class ActivityService(
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
   private val objectMapper: ObjectMapper,
   private val jdbcTemplate: JdbcTemplate,
+  private val activityGroupService: ActivityGroupService,
 ) : Logging {
   @Transactional
   fun storeActivityData(
@@ -42,6 +44,9 @@ class ActivityService(
 
     persistedDescribingRelations(mergedActivityRevision)
     mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
+
+    activityGroupService.addToGroup(activityRevision, modifiedEntities)
+
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
   }
 
