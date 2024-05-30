@@ -165,7 +165,7 @@ export interface paths {
     put: operations["store"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
-    /** Stops batch opperation if possible. */
+    /** Stops batch operation if possible. */
     put: operations["cancel"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
@@ -266,6 +266,15 @@ export interface paths {
   "/v2/organizations/{id}/avatar": {
     put: operations["uploadAvatar_2"];
     delete: operations["removeAvatar_2"];
+  };
+  "/v2/notifications/preferences/project/{id}": {
+    get: operations["getPerProjectPreferences"];
+    put: operations["updatePerProjectPreferences"];
+    delete: operations["deletePerProjectPreferences"];
+  };
+  "/v2/notifications/preferences/global": {
+    get: operations["getGlobalPreferences"];
+    put: operations["updateGlobalPreferences"];
   };
   "/v2/ee-license/set-license-key": {
     put: operations["setLicenseKey"];
@@ -471,6 +480,27 @@ export interface paths {
     get: operations["getAll_10"];
     post: operations["create_12"];
   };
+  "/v2/notifications/unmark-as-done": {
+    post: operations["unmarkNotificationsAsDone"];
+  };
+  "/v2/notifications/preferences/project/{id}/subscribe": {
+    post: operations["subscribeToProject"];
+  };
+  "/v2/notifications/mark-as-unread": {
+    post: operations["markNotificationsAsUnread"];
+  };
+  "/v2/notifications/mark-as-read": {
+    post: operations["markNotificationsAsRead"];
+  };
+  "/v2/notifications/mark-as-read/all": {
+    post: operations["markAllNotificationsAsRead"];
+  };
+  "/v2/notifications/mark-as-done": {
+    post: operations["markNotificationsAsDone"];
+  };
+  "/v2/notifications/mark-as-done/all": {
+    post: operations["markAllNotificationsAsDone"];
+  };
   "/v2/image-upload": {
     post: operations["upload"];
   };
@@ -522,6 +552,10 @@ export interface paths {
   };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
+  };
+  "/v2/public/machine-translation-providers": {
+    /** Get machine translation providers */
+    get: operations["getInfo_3"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data required by the UI to load */
@@ -687,11 +721,17 @@ export interface paths {
     /** Returns all organization projects the user has access to */
     get: operations["getAllProjects_1"];
   };
+  "/v2/notifications": {
+    get: operations["getNotifications"];
+  };
+  "/v2/notifications/preferences": {
+    get: operations["getAllPreferences"];
+  };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
   "/v2/ee-license/info": {
-    get: operations["getInfo_3"];
+    get: operations["getInfo_4"];
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
@@ -866,14 +906,6 @@ export interface components {
         | "webhooks.manage"
       )[];
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -883,6 +915,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1775,15 +1815,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1830,6 +1870,23 @@ export interface components {
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
+    };
+    NotificationPreferencesDto: {
+      /** @description List of notification types the user does not want to receive. */
+      disabledNotifications: (
+        | "ACTIVITY_LANGUAGES_CREATED"
+        | "ACTIVITY_KEYS_CREATED"
+        | "ACTIVITY_KEYS_UPDATED"
+        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
+        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
+        | "ACTIVITY_TRANSLATIONS_UPDATED"
+        | "ACTIVITY_TRANSLATION_OUTDATED"
+        | "ACTIVITY_TRANSLATION_REVIEWED"
+        | "ACTIVITY_TRANSLATION_UNREVIEWED"
+        | "ACTIVITY_NEW_COMMENTS"
+        | "ACTIVITY_COMMENTS_MENTION"
+        | "BATCH_JOB_ERRORED"
+      )[];
     };
     SetLicenseKeyDto: {
       licenseKey: string;
@@ -1920,17 +1977,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
+      description: string;
       username?: string;
       /** Format: int64 */
-      lastUsedAt?: number;
-      scopes: string[];
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      description: string;
+      lastUsedAt?: number;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2445,7 +2502,8 @@ export interface components {
         | "USER_IS_NOT_OWNER_OF_ORGANIZATION"
         | "PAK_CREATED_FOR_DIFFERENT_PROJECT"
         | "CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE"
-        | "INVALID_SLUG_FORMAT";
+        | "INVALID_SLUG_FORMAT"
+        | "BATCH_JOB_CANCELLATION_TIMEOUT";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2829,6 +2887,16 @@ export interface components {
         | "webhooks.manage";
       requires: components["schemas"]["HierarchyItem"][];
     };
+    MachineTranslationProviderModel: {
+      /**
+       * @description BCP 47 tags of languages supported by the translation service. When null, all possible languages are supported.
+       *
+       * Please note that Tolgee tries to fall back to a higher subtag if the subtag is not supported.
+       *
+       * E.g., if `pt-BR` is not supported. Tolgee fallbacks to `pt`.
+       */
+      supportedLanguages?: string[];
+    };
     AnnouncementDto: {
       type:
         | "FEATURE_BATCH_OPERATIONS"
@@ -2850,6 +2918,8 @@ export interface components {
       languageTag?: string;
       eeSubscription?: components["schemas"]["EeSubscriptionModel"];
       announcement?: components["schemas"]["AnnouncementDto"];
+      /** Format: int32 */
+      unreadNotifications?: number;
     };
     MtServiceDTO: {
       enabled: boolean;
@@ -2906,11 +2976,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3020,9 +3090,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
       description?: string;
       namespace?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -3030,9 +3100,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
       description?: string;
       namespace?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3105,62 +3175,2359 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
     };
-    ProjectActivityModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
+    ProjectActivityModel:
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type:
+            | "UNKNOWN"
+            | "SET_TRANSLATION_STATE"
+            | "SET_TRANSLATIONS"
+            | "DISMISS_AUTO_TRANSLATED_STATE"
+            | "SET_OUTDATED_FLAG"
+            | "TRANSLATION_COMMENT_ADD"
+            | "TRANSLATION_COMMENT_DELETE"
+            | "TRANSLATION_COMMENT_EDIT"
+            | "TRANSLATION_COMMENT_SET_STATE"
+            | "SCREENSHOT_DELETE"
+            | "SCREENSHOT_ADD"
+            | "KEY_TAGS_EDIT"
+            | "KEY_NAME_EDIT"
+            | "KEY_DELETE"
+            | "CREATE_KEY"
+            | "COMPLEX_EDIT"
+            | "IMPORT"
+            | "CREATE_LANGUAGE"
+            | "EDIT_LANGUAGE"
+            | "DELETE_LANGUAGE"
+            | "CREATE_PROJECT"
+            | "EDIT_PROJECT"
+            | "NAMESPACE_EDIT"
+            | "BATCH_PRE_TRANSLATE_BY_TM"
+            | "BATCH_MACHINE_TRANSLATE"
+            | "AUTO_TRANSLATE"
+            | "BATCH_CLEAR_TRANSLATIONS"
+            | "BATCH_COPY_TRANSLATIONS"
+            | "BATCH_SET_TRANSLATION_STATE"
+            | "BATCH_TAG_KEYS"
+            | "BATCH_UNTAG_KEYS"
+            | "BATCH_SET_KEYS_NAMESPACE"
+            | "AUTOMATION"
+            | "CONTENT_DELIVERY_CONFIG_CREATE"
+            | "CONTENT_DELIVERY_CONFIG_UPDATE"
+            | "CONTENT_DELIVERY_CONFIG_DELETE"
+            | "CONTENT_STORAGE_CREATE"
+            | "CONTENT_STORAGE_UPDATE"
+            | "CONTENT_STORAGE_DELETE"
+            | "WEBHOOK_CONFIG_CREATE"
+            | "WEBHOOK_CONFIG_UPDATE"
+            | "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            [key: string]: components["schemas"]["ModifiedEntityModel"][];
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        };
     PropertyModification: {
       old?: { [key: string]: unknown };
       new?: { [key: string]: unknown };
@@ -3569,15 +5936,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -3688,6 +6055,44 @@ export interface components {
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       avatar?: components["schemas"]["Avatar"];
     };
+    SimpleModifiedEntityView: {
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+      exists?: boolean;
+      modifications: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+      description?: { [key: string]: { [key: string]: unknown } };
+      describingRelations?: {
+        [key: string]: components["schemas"]["ExistenceEntityDescription"];
+      };
+    };
+    UserNotificationModel: {
+      /** Format: int64 */
+      id: number;
+      type:
+        | "ACTIVITY_LANGUAGES_CREATED"
+        | "ACTIVITY_KEYS_CREATED"
+        | "ACTIVITY_KEYS_UPDATED"
+        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
+        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
+        | "ACTIVITY_TRANSLATIONS_UPDATED"
+        | "ACTIVITY_TRANSLATION_OUTDATED"
+        | "ACTIVITY_TRANSLATION_REVIEWED"
+        | "ACTIVITY_TRANSLATION_UNREVIEWED"
+        | "ACTIVITY_NEW_COMMENTS"
+        | "ACTIVITY_COMMENTS_MENTION"
+        | "BATCH_JOB_ERRORED";
+      project?: components["schemas"]["SimpleProjectModel"];
+      batchJob?: components["schemas"]["BatchJobModel"];
+      modifiedEntities?: components["schemas"]["SimpleModifiedEntityView"][];
+      unread: boolean;
+      /** Format: date-time */
+      markedDoneAt?: string;
+      /** Format: date-time */
+      lastUpdated: string;
+    };
     ApiKeyWithLanguagesModel: {
       /**
        * @deprecated
@@ -3696,17 +6101,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
+      description: string;
       username?: string;
       /** Format: int64 */
-      lastUsedAt?: number;
-      scopes: string[];
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      description: string;
+      lastUsedAt?: number;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -3731,6 +6136,2386 @@ export interface components {
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
       ids: number[];
+    };
+    ProjectActivityUnknownModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivitySetTranslationStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivitySetTranslationsModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityDismissAutoTranslatedStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivitySetOutdatedFlagModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentAddModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentSetStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityScreenshotDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityScreenshotAddModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityKeyTagsEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityKeyNameEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityKeyDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityCreateKeyModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityComplexEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityImportModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityCreateLanguageModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityEditLanguageModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityDeleteLanguageModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityCreateProjectModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityEditProjectModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityNamespaceEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchPreTranslateByTmModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchMachineTranslateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityAutoTranslateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchClearTranslationsModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchCopyTranslationsModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchSetTranslationStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchTagKeysModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchUntagKeysModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchSetKeysNamespaceModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityAutomationModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentDeliveryConfigCreateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentDeliveryConfigUpdateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentDeliveryConfigDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentStorageCreateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentStorageUpdateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentStorageDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityWebhookConfigCreateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityWebhookConfigUpdateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityWebhookConfigDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    KeyModifiedEntity: {
+      name?: {
+        old?: string;
+        new?: string;
+      };
+      pluralArgName?: {
+        old?: string;
+        new?: string;
+      };
+      namespace?: {
+        old?: {
+          entityClass?: string;
+          /** Format: int64 */
+          entityId?: number;
+          data?: {
+            name?: string;
+          };
+        };
+        new?: {
+          entityClass?: string;
+          /** Format: int64 */
+          entityId?: number;
+          data?: {
+            name?: string;
+          };
+        };
+      };
     };
   };
 }
@@ -6031,7 +10816,7 @@ export interface operations {
       };
     };
   };
-  /** Stops batch opperation if possible. */
+  /** Stops batch operation if possible. */
   cancel: {
     parameters: {
       path: {
@@ -6383,11 +11168,11 @@ export interface operations {
         filterKeyName?: string[];
         /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
         filterKeyId?: number[];
-        /** Selects only keys, where translation is missing in any language */
+        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
         filterUntranslatedAny?: boolean;
         /** Selects only keys, where translation is provided in any language */
         filterTranslatedAny?: boolean;
-        /** Selects only keys, where translation is missing in specified language */
+        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
@@ -7572,6 +12357,197 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  getPerProjectPreferences: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  updatePerProjectPreferences: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationPreferencesDto"];
+      };
+    };
+  };
+  deletePerProjectPreferences: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getGlobalPreferences: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  updateGlobalPreferences: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationPreferencesDto"];
       };
     };
   };
@@ -10511,6 +15487,245 @@ export interface operations {
       };
     };
   };
+  unmarkNotificationsAsDone: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  subscribeToProject: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  markNotificationsAsUnread: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  markNotificationsAsRead: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  markAllNotificationsAsRead: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  markNotificationsAsDone: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  markAllNotificationsAsDone: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   upload: {
     responses: {
       /** Created */
@@ -11115,6 +16330,45 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["HierarchyItem"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Get machine translation providers */
+  getInfo_3: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": {
+            [
+              key: string
+            ]: components["schemas"]["MachineTranslationProviderModel"];
+          };
         };
       };
       /** Bad Request */
@@ -12268,11 +17522,11 @@ export interface operations {
         filterKeyName?: string[];
         /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
         filterKeyId?: number[];
-        /** Selects only keys, where translation is missing in any language */
+        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
         filterUntranslatedAny?: boolean;
         /** Selects only keys, where translation is provided in any language */
         filterTranslatedAny?: boolean;
-        /** Selects only keys, where translation is missing in specified language */
+        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
@@ -12354,11 +17608,11 @@ export interface operations {
         filterKeyName?: string[];
         /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
         filterKeyId?: number[];
-        /** Selects only keys, where translation is missing in any language */
+        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
         filterUntranslatedAny?: boolean;
         /** Selects only keys, where translation is provided in any language */
         filterTranslatedAny?: boolean;
-        /** Selects only keys, where translation is missing in specified language */
+        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
@@ -13176,6 +18430,87 @@ export interface operations {
       };
     };
   };
+  getNotifications: {
+    parameters: {
+      query: {
+        status?: ("UNREAD" | "READ" | "DONE")[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UserNotificationModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllPreferences: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["NotificationPreferencesDto"];
+          };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   acceptInvitation: {
     parameters: {
       path: {
@@ -13211,7 +18546,7 @@ export interface operations {
       };
     };
   };
-  getInfo_3: {
+  getInfo_4: {
     responses: {
       /** OK */
       200: {

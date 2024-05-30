@@ -6,14 +6,48 @@ import io.swagger.v3.oas.models.media.Schema
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.data.EntityDescription
+import io.tolgee.activity.data.EntityModificationTypeDefinition
 import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 
 class ModificationsSchemaGenerator {
-  fun getModificationSchema(entityClass: KClass<*>): Schema<*> {
+  fun getModificationSchema(
+    entityClass: KClass<*>,
+    definition: EntityModificationTypeDefinition<*>,
+  ): Schema<*> {
     val schema = getEntitySchema(entityClass)
+    schema.required = emptyList()
+    val properties = getProperties(entityClass, schema)
+
+    if (definition.isOnlyCreation()) {
+      properties.forEach { (_, prop) ->
+        prop.properties["old"] = createNullSchema()
+      }
+    }
+
+    schema.properties = properties
+
+    return schema
+  }
+
+  private fun createNullSchema(): Schema<Any> {
+    val schema = Schema<Any>()
+    schema.type = "null"
+    return schema
+  }
+
+  private fun EntityModificationTypeDefinition<*>.isOnlyCreation(): Boolean {
+    return creation && !deletion && modificationProps.isNullOrEmpty()
+  }
+
+  private fun getProperties(
+    entityClass: KClass<*>,
+    schema: Schema<*>,
+  ): Map<String, Schema<*>> {
     val loggedProps = getAllLoggedProps(entityClass)
     val simplePropNames = loggedProps.getSimpleProps().map { it.name }
     val schemaSimpleProps = schema.properties.filterKeys { it in simplePropNames }
@@ -29,17 +63,18 @@ class ModificationsSchemaGenerator {
         it.name to getModificationSchemaForComplexProp(it.returnType.classifier as KClass<*>)
       }.toMap()
 
-    schema.properties = singlePropChangeMap + complexPropChangeMap
-
-    return schema
+    return singlePropChangeMap + complexPropChangeMap
   }
 
   private fun getModificationSchemaForComplexProp(it: KClass<*>): Schema<*> {
     val describingProps = it.getDescriptionProps().map { it.name }
     val entitySchema = getEntitySchema(it)
     val schemaDescribingProps =
-      entitySchema.properties.filterKeys { propertyName -> propertyName in describingProps }
-    descriptionSchema.properties["data"]?.properties = schemaDescribingProps
+      entitySchema.properties?.filterKeys { propertyName -> propertyName in describingProps }
+    descriptionSchema.properties["data"]?.let { dataProp ->
+      dataProp.properties = schemaDescribingProps
+      dataProp.additionalProperties = null
+    }
     descriptionSchema.additionalProperties = null
     return descriptionSchema.toChangeSchema()
   }
@@ -48,14 +83,13 @@ class ModificationsSchemaGenerator {
     val changeSchema = Schema<Any>()
     changeSchema.addProperty("old", this)
     changeSchema.addProperty("new", this)
-    changeSchema.nullable = true
     return changeSchema
   }
 
   private fun getEntitySchema(entityClass: KClass<*>): Schema<*> =
     ModelConverters.getInstance()
       .readAllAsResolvedSchema(AnnotatedType(entityClass.java))
-      .schema
+      .schema ?: Schema<Any>()
 
   private fun getAllLoggedProps(entityClass: KClass<*>): List<KProperty1<out Any, *>> {
     return entityClass.memberProperties
@@ -66,25 +100,29 @@ class ModificationsSchemaGenerator {
   private fun KClass<*>.getDescriptionProps(): List<KProperty1<out Any, *>> {
     return memberProperties
       .filter { it.findAnnotation<ActivityDescribingProp>() != null }
-      .map { it }.filter { it.returnType.classifier in simpleTypes }
+      .map { it }.filter { it.returnType.classifier.isSimpleType() }
   }
 
   private fun List<KProperty1<out Any, *>>.getSimpleProps(): List<KProperty1<out Any, *>> {
     return this
       .filter { prop ->
-        simpleTypes.any { it == prop.returnType.classifier }
+        prop.returnType.classifier.isSimpleType()
       }
   }
 
   private fun List<KProperty1<out Any, *>>.getComplexProps(): List<KProperty1<out Any, *>> {
     return this
       .filter { prop ->
-        simpleTypes.none { it == prop.returnType.classifier }
+        !prop.returnType.classifier.isSimpleType()
       }
   }
 
-  val descriptionSchema by lazy {
+  private val descriptionSchema by lazy {
     getEntitySchema(EntityDescription::class)
+  }
+
+  private fun KClassifier?.isSimpleType(): Boolean {
+    return simpleTypes.any { (this as? KClass<*>)?.isSubclassOf(it) == true }
   }
 
   companion object {
@@ -92,7 +130,7 @@ class ModificationsSchemaGenerator {
       setOf(
         Int::class, Long::class, Double::class, Float::class,
         Boolean::class, Char::class, Byte::class, Short::class,
-        String::class, Enum::class,
+        String::class, Enum::class, Map::class,
       )
   }
 }

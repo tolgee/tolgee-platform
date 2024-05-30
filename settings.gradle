@@ -70,6 +70,7 @@ dependencyResolutionManagement {
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.9.12")
             library('mailjet', "com.mailjet:mailjet-client:5.2.5")
             library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.11.0')
+            library('commonsText', 'org.apache.commons:commons-text:1.10.0')
         }
     }
 }

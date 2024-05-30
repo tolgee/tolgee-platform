@@ -4,6 +4,9 @@ import io.tolgee.activity.PublicParamsProvider
 import io.tolgee.batch.BatchActivityParamsProvider
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.Language
+import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
+import io.tolgee.model.translation.Translation
 import kotlin.reflect.KClass
 
 enum class ActivityType(
@@ -16,11 +19,42 @@ enum class ActivityType(
    * not contain any changes in fields market for activity logging
    */
   val saveWithoutModification: Boolean = false,
+  val typeDefinitions: Map<KClass<out EntityWithId>, EntityModificationTypeDefinition<*>>? = null,
 ) {
   UNKNOWN,
-  SET_TRANSLATION_STATE,
-  SET_TRANSLATIONS,
-  DISMISS_AUTO_TRANSLATED_STATE,
+  SET_TRANSLATION_STATE(
+    typeDefinitions =
+      mapOf(
+        Translation::class to
+          EntityModificationTypeDefinition(
+            creation = false,
+            modificationProps = arrayOf(Translation::state, Translation::outdated, Translation::mtProvider),
+            deletion = false,
+          ),
+      ),
+  ),
+  SET_TRANSLATIONS(
+    typeDefinitions =
+      mapOf(
+        Translation::class to
+          EntityModificationTypeDefinition<Translation>(
+            creation = true,
+            modificationProps = arrayOf(),
+            deletion = true,
+          ),
+      ),
+  ),
+  DISMISS_AUTO_TRANSLATED_STATE(
+    typeDefinitions =
+      mapOf(
+        Translation::class to
+          EntityModificationTypeDefinition(
+            creation = false,
+            modificationProps = arrayOf(Translation::outdated, Translation::mtProvider),
+            deletion = false,
+          ),
+      ),
+  ),
   SET_OUTDATED_FLAG,
   TRANSLATION_COMMENT_ADD,
   TRANSLATION_COMMENT_DELETE,
@@ -31,7 +65,23 @@ enum class ActivityType(
   KEY_TAGS_EDIT,
   KEY_NAME_EDIT,
   KEY_DELETE(true),
-  CREATE_KEY,
+  CREATE_KEY(
+    typeDefinitions =
+      mapOf(
+        Key::class to
+          EntityModificationTypeDefinition<KeyMeta>(
+            creation = true,
+            modificationProps = null,
+            deletion = false,
+          ),
+        KeyMeta::class to
+          EntityModificationTypeDefinition<KeyMeta>(
+            creation = true,
+            modificationProps = null,
+            deletion = false,
+          ),
+      ),
+  ),
   COMPLEX_EDIT,
   IMPORT(true),
   CREATE_LANGUAGE,

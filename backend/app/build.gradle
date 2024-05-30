@@ -106,6 +106,7 @@ dependencies {
      * MISC
      */
     implementation libs.commonsCodec
+    implementation libs.commonsText
     implementation libs.amazonS3
     implementation libs.amazonSTS
     implementation libs.icu4j

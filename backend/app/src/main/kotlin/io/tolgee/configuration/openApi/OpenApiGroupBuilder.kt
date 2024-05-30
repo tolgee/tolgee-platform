@@ -3,8 +3,7 @@ package io.tolgee.configuration.openApi
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.Paths
-import io.tolgee.configuration.openApi.activity.ModificationsSchemaGenerator
-import io.tolgee.model.key.Key
+import io.tolgee.configuration.openApi.activity.ProjectActivityModelEnhancer
 import io.tolgee.openApiDocs.OpenApiCloudExtension
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -41,16 +40,17 @@ class OpenApiGroupBuilder(
 
     cleanUnusedModels()
 
-    addSchmeForTesting()
+    updateActivitySchema()
 
     return@lazy builder.build()
   }
 
   // todo: Remove this!
-  private fun addSchmeForTesting() {
-    val keySchema = ModificationsSchemaGenerator().getModificationSchema(Key::class)
+  private fun updateActivitySchema() {
+//    val keySchema = ModificationsSchemaGenerator().getModificationSchema(Key::class)
     builder.addOpenApiCustomizer {
-      it.schema("KeyModifiedEntity", keySchema)
+      ProjectActivityModelEnhancer(it).enhance()
+//      it.schema("KeyModifiedEntity", keySchema)
     }
   }
 
