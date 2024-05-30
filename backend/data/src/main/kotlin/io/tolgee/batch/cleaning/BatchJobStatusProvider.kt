@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 class BatchJobStatusProvider {
   fun getNewStatus(it: Collection<BatchJobChunkExecutionStatus>) =
     when {
-      it.contains(BatchJobChunkExecutionStatus.FAILED) -> BatchJobStatus.FAILED
       it.contains(BatchJobChunkExecutionStatus.CANCELLED) -> BatchJobStatus.CANCELLED
+      it.contains(BatchJobChunkExecutionStatus.FAILED) -> BatchJobStatus.FAILED
       else -> BatchJobStatus.SUCCESS
     }
 }
