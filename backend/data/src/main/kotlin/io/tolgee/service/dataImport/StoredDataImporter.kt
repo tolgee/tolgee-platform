@@ -5,6 +5,7 @@ import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.enums.Scope
@@ -132,12 +133,25 @@ class StoredDataImporter(
 
     tagNewKeys()
 
+    entityManager.flush()
+
+    deleteOtherKeys()
+
     entityManager.flushAndClear()
   }
 
   private fun tagNewKeys() {
     (importSettings as? SingleStepImportRequest)?.tagNewKeys?.let { tagNewKeys ->
       tagService.tagKeys(newKeys.associateWith { tagNewKeys })
+    }
+  }
+
+  private fun deleteOtherKeys() {
+    (importSettings as? SingleStepImportRequest)?.removeOtherKeys?.let {
+      val existingKeys = importDataManager.existingKeys.entries
+      val importedKeys = importDataManager.storedKeys.entries.map { (pair) -> Pair(pair.first.namespace, pair.second)  }
+      val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
+      keyService.deleteMultiple(otherKeys.map { it.value.id })
     }
   }
 
