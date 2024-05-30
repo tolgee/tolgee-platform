@@ -105,6 +105,7 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
       BatchJobStatus.RUNNING,
       setOf(
         BatchJobChunkExecutionStatus.CANCELLED,
+        BatchJobChunkExecutionStatus.FAILED,
         BatchJobChunkExecutionStatus.SUCCESS,
       ),
     )
@@ -114,7 +115,6 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
       testData.project,
       BatchJobStatus.RUNNING,
       setOf(
-        BatchJobChunkExecutionStatus.CANCELLED,
         BatchJobChunkExecutionStatus.SUCCESS,
         BatchJobChunkExecutionStatus.FAILED,
       ),
