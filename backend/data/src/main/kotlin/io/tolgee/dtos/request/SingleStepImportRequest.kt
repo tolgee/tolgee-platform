@@ -39,4 +39,9 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "It add tags only to new keys. The keys that already exist will not be tagged.",
   )
   var tagNewKeys: List<String> = listOf()
+
+  @get:Schema(
+    description = "Delete keys that were not included in import.",
+  )
+  var removeOtherKeys: Boolean? = false
 }

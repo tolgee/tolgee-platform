@@ -132,12 +132,25 @@ class StoredDataImporter(
 
     tagNewKeys()
 
+    entityManager.flush()
+
+    deleteOtherKeys()
+
     entityManager.flushAndClear()
   }
 
   private fun tagNewKeys() {
     (importSettings as? SingleStepImportRequest)?.tagNewKeys?.let { tagNewKeys ->
       tagService.tagKeys(newKeys.associateWith { tagNewKeys })
+    }
+  }
+
+  private fun deleteOtherKeys() {
+    if ((importSettings as? SingleStepImportRequest)?.removeOtherKeys == true) {
+      val existingKeys = importDataManager.existingKeys.entries
+      val importedKeys = importDataManager.storedKeys.entries.map { (pair) -> Pair(pair.first.namespace, pair.second) }
+      val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
+      keyService.deleteMultiple(otherKeys.map { it.value.id })
     }
   }
 
