@@ -89,6 +89,8 @@ jobs:
       - name: Tag production and deprecated keys in platform
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: "npm run tag-keys"
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
       - uses: actions/upload-artifact@v3
         if: always()

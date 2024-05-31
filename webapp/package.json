@@ -80,7 +80,7 @@
     "load-translations": "tolgee pull",
     "check-translations": "tolgee extract check",
     "tag-keys:deprecated": "tolgee tag --filter-not-extracted --filter-tag production --tag deprecated",
-    "tag-keys:production": "tolgee tag --filter-extracted --tag production --untag-other production",
+    "tag-keys:production": "tolgee tag --filter-extracted --tag production --untag 'draft: *' --untag-other production",
     "tag-keys": "npm run tag-keys:deprecated && npm run tag-keys:production"
   },
   "eslintConfig": {
