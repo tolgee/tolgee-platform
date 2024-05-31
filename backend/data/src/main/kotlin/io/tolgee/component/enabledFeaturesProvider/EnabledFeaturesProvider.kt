@@ -5,17 +5,17 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 
 interface EnabledFeaturesProvider {
-  fun get(organizationId: Long): Array<Feature>
+  fun get(organizationId: Long?): Array<Feature>
 
   fun isFeatureEnabled(
-    organizationId: Long,
+    organizationId: Long?,
     feature: Feature,
   ): Boolean {
     return this.get(organizationId).contains(feature)
   }
 
   fun checkFeatureEnabled(
-    organizationId: Long,
+    organizationId: Long?,
     feature: Feature,
   ) {
     if (!this.isFeatureEnabled(organizationId, feature)) {

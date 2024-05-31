@@ -16,6 +16,7 @@ import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.SlackUserInfoModel
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
@@ -47,13 +48,15 @@ class SlackLoginController(
     @Parameter(description = "The encrypted data about the desired connection between Slack account and Tolgee account")
     @RequestParam data: String,
   ) {
+    val decrypted = slackUserLoginUrlProvider.decryptData(data)
+    val workspace = decrypted.workspaceId?.let { slackWorkspaceService.find(it) }
+
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = projectHolder.project.organizationOwnerId,
+      organizationId = workspace?.organization?.id,
       Feature.SLACK_INTEGRATION,
     )
 
-    val decrypted = slackUserLoginUrlProvider.decryptData(data)
-    val token = getToken(decrypted.workspaceId)
+    val token = getToken(workspace)
     slackUserConnectionService.createOrUpdate(authenticationFacade.authenticatedUserEntity, decrypted.slackUserId)
     slackExecutor.sendUserLoginSuccessMessage(token, decrypted)
   }
@@ -106,10 +109,16 @@ class SlackLoginController(
    * This method also checks the permissions
    */
   private fun getToken(workspaceId: Long?): String {
-    val workspaceIdNotNull =
-      workspaceId ?: return slackProperties.token ?: throw BadRequestException(Message.SLACK_NOT_CONFIGURED)
+    val workspace = workspaceId?.let { slackWorkspaceService.find(it) }
+    return getToken(workspace)
+  }
 
-    val workspace = slackWorkspaceService.get(workspaceIdNotNull)
+  /**
+   * This method also checks the permissions
+   */
+  private fun getToken(workspace: OrganizationSlackWorkspace?): String {
+    workspace ?: return slackProperties.token ?: throw BadRequestException(Message.SLACK_NOT_CONFIGURED)
+
     organizationRoleService.checkUserCanView(workspace.organization.id)
 
     return workspace.accessToken
