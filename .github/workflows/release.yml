@@ -86,7 +86,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.VERSION }}
 
-      - name: Tag deprecated keys in platform
+      - name: Tag production and deprecated keys in platform
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: "npm run tag-keys"
 
