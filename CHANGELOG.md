@@ -1,3 +1,10 @@
+# [3.62.0](https://github.com/tolgee/tolgee-platform/compare/v3.61.3...v3.62.0) (2024-05-31)
+
+
+### Features
+
+* Single step import & export enhancements for CLI ([#2142](https://github.com/tolgee/tolgee-platform/issues/2142)) ([ecdf37a](https://github.com/tolgee/tolgee-platform/commit/ecdf37a17fd3c5fc1a7ad4e3d5ea7fd41d7f5638))
+
 ## [3.61.3](https://github.com/tolgee/tolgee-platform/compare/v3.61.2...v3.61.3) (2024-05-31)
 
 
