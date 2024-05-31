@@ -4,14 +4,13 @@
     "release": "semantic-release",
     "release-dry": "semantic-release --no-ci -d",
     "release-dry-debug": "semantic-release --no-ci -d --debug",
-    "prepare": "husky"
+    "init-husky": "node ./webapp/node_modules/husky/bin.mjs"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.4",
-    "husky": "^9.0.11",
     "semantic-release": "^19.0.2"
   },
   "release": {
