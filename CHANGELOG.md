@@ -1,3 +1,10 @@
+## [3.62.1](https://github.com/tolgee/tolgee-platform/compare/v3.62.0...v3.62.1) (2024-05-31)
+
+
+### Bug Fixes
+
+* .properties file import broken -> force commons-lang3 version ([#2333](https://github.com/tolgee/tolgee-platform/issues/2333)) ([303ede0](https://github.com/tolgee/tolgee-platform/commit/303ede0983f7a0689e94c090a4fdc30ccc6267ec))
+
 # [3.62.0](https://github.com/tolgee/tolgee-platform/compare/v3.61.3...v3.62.0) (2024-05-31)
 
 
