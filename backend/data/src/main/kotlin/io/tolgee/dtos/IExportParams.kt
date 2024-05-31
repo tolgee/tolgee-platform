@@ -3,12 +3,15 @@ package io.tolgee.dtos
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.ExportParamsDocs.FILE_STRUCTURE_TEMPLATE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_NOT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_NAMESPACE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_STATE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_IN_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_NOT_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
@@ -57,6 +60,16 @@ interface IExportParams {
   var filterTag: String?
 
   @get:Schema(
+    description = FILTER_TAG_IN_DESCRIPTION,
+  )
+  var filterTagIn: List<String>?
+
+  @get:Schema(
+    description = FILTER_TAG_NOT_IN_DESCRIPTION,
+  )
+  var filterTagNotIn: List<String>?
+
+  @get:Schema(
     description = FILTER_KEY_PREFIX_DESCRIPTION,
   )
   var filterKeyPrefix: String?
@@ -76,6 +89,11 @@ interface IExportParams {
   )
   var messageFormat: ExportMessageFormat?
 
+  @get:Schema(
+    description = FILE_STRUCTURE_TEMPLATE_DESCRIPTION,
+  )
+  var fileStructureTemplate: String?
+
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages
     this.format = other.format
@@ -83,11 +101,14 @@ interface IExportParams {
     this.filterKeyId = other.filterKeyId
     this.filterKeyIdNot = other.filterKeyIdNot
     this.filterTag = other.filterTag
+    this.filterTagIn = other.filterTagIn
+    this.filterTagNotIn = other.filterTagNotIn
     this.filterKeyPrefix = other.filterKeyPrefix
     this.filterState = other.filterState
     this.filterNamespace = other.filterNamespace
     this.messageFormat = other.messageFormat
     this.supportArrays = other.supportArrays
+    this.fileStructureTemplate = other.fileStructureTemplate
   }
 
   @get:Hidden

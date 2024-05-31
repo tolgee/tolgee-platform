@@ -97,4 +97,14 @@ interface TagRepository : JpaRepository<Tag, Long> {
   """,
   )
   fun getAllByKeyIds(keyIds: Collection<Long>): List<Tag>
+
+  @Query(
+    """
+    from Tag t left join fetch t.keyMetas km where t.project.id = :projectId and t.id = :tagId
+  """,
+  )
+  fun findWithKeyMetasFetched(
+    projectId: Long,
+    tagId: Long,
+  ): Tag?
 }

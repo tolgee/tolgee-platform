@@ -24,7 +24,13 @@ e.g. Key hello[0] will be exported as {"hello": ["..."]}"""
 
   const val FILTER_KEY_ID_NOT_DESCRIPTION = """Filter key IDs not to be contained in export"""
 
-  const val FILTER_TAG_DESCRIPTION = """Filter keys tagged by"""
+  const val FILTER_TAG_DESCRIPTION = """Filter keys tagged by.
+
+This filter works the same as `filterTagIn` but in this cases it accepts single tag only."""
+
+  const val FILTER_TAG_IN_DESCRIPTION = """Filter keys tagged by one of provided tags"""
+
+  const val FILTER_TAG_NOT_IN_DESCRIPTION = """Filter keys not tagged by one of provided tags"""
 
   const val FILTER_KEY_PREFIX_DESCRIPTION = """Filter keys with prefix"""
 
@@ -45,4 +51,19 @@ For specific formats like `YAML_RUBY` it's ignored."""
   const val ZIP_DESCRIPTION = """If false, it doesn't return zip of files, but it returns single file.
       
 This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response."""
+
+  const val FILE_STRUCTURE_TEMPLATE_DESCRIPTION =
+    """This is a template that defines the structure of the resulting .zip file content.
+
+The template is a string that can contain the following placeholders: {namespace}, {languageTag}, 
+{androidLanguageTag}, {snakeLanguageTag}, {extension}. 
+
+For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`, 
+the English translations of the `home` namespace will be stored in `home/en.json`.
+
+The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+
+The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}` 
+but in Android format. (e.g., en-rUS)
+"""
 }

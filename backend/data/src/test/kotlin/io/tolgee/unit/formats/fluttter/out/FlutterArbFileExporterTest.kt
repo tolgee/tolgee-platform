@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.fluttter.out
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
@@ -45,6 +46,21 @@ class FlutterArbFileExporterTest {
     |}
       """.trimMargin(),
     )
+  }
+
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+
+    val files = exporter.produceFiles()
+
+    files["cs/hello.arb"].assert.isNotNull()
   }
 
   @Test
@@ -124,7 +140,7 @@ class FlutterArbFileExporterTest {
     this[file]!!.assert.isEqualTo(content)
   }
 
-  private fun getExporter(): FlutterArbFileExporter {
+  private fun getExporter(params: ExportParams = getExportParams()): FlutterArbFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -177,14 +193,14 @@ class FlutterArbFileExporterTest {
           key.description = "What a count"
         }
       }
-    return getExporter(built.translations)
+    return getExporter(built.translations, params = params)
   }
 }
 
 private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFileExporter {
   return FlutterArbFileExporter(
     translations = translations,
-    exportParams = ExportParams(),
+    exportParams = getExportParams(),
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
   )
@@ -193,15 +209,21 @@ private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFi
 private fun getExporter(
   translations: List<ExportTranslationView>,
   isProjectIcuPlaceholdersEnabled: Boolean = true,
+  params: ExportParams = getExportParams(),
 ): FlutterArbFileExporter {
   return FlutterArbFileExporter(
     translations = translations,
-    exportParams = ExportParams(),
+    exportParams = params,
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
     isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
   )
 }
+
+private fun getExportParams() =
+  ExportParams().also {
+    it.format = ExportFormat.FLUTTER_ARB
+  }
 
 private fun getExported(exporter: FlutterArbFileExporter): Map<String, String> {
   val files = exporter.produceFiles()

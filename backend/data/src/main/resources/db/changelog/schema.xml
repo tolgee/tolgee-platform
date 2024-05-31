@@ -3231,4 +3231,19 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1714722376862-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="filter_tag_in" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1714722376862-2">
+        <addColumn tableName="content_delivery_config">
+            <column name="filter_tag_not_in" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1714995693668-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="file_structure_template" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

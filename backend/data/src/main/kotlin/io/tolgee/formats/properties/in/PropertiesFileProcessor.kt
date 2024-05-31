@@ -24,7 +24,7 @@ class PropertiesFileProcessor(
             firstLanguageTagGuessOrUnknown,
             it.message,
             rawData = value,
-            convertedBy = detectedFormat,
+            convertedBy = format,
             pluralArgName = it.pluralArgName,
           )
         }
@@ -46,12 +46,13 @@ class PropertiesFileProcessor(
       .toMap(LinkedHashMap())
   }
 
-  private val detectedFormat by lazy {
-    PropertiesImportFormatDetector().detectFormat(keyValueMap)
+  private val format by lazy {
+    context.mapping?.format
+      ?: PropertiesImportFormatDetector().detectFormat(keyValueMap)
   }
 
   private val convertor by lazy {
-    detectedFormat.messageConvertor
+    format.messageConvertor
   }
 
   private fun convert(data: Any?): MessageConvertorResult {

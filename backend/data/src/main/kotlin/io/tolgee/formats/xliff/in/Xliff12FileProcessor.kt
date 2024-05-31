@@ -57,7 +57,7 @@ class Xliff12FileProcessor(
       converted.message,
       pluralArgName = converted.pluralArgName,
       rawData = text,
-      convertedBy = detectedFormat,
+      convertedBy = format,
     )
   }
 
@@ -79,11 +79,11 @@ class Xliff12FileProcessor(
     )
   }
 
-  private val detectedFormat by lazy {
-    XliffImportFormatDetector().detectFormat(parsed)
+  private val format by lazy {
+    context.mapping?.format ?: XliffImportFormatDetector().detectFormat(parsed)
   }
 
   private val convertor by lazy {
-    detectedFormat.messageConvertor
+    format.messageConvertor
   }
 }

@@ -2,8 +2,13 @@ package io.tolgee.service.dataImport.processors
 
 import io.tolgee.api.IImportSettings
 import io.tolgee.component.KeyCustomValuesValidator
+import io.tolgee.constants.Message
+import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.dtos.request.SingleStepImportRequest
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.importCommon.wrapIfRequired
 import io.tolgee.model.dataImport.ImportFile
@@ -13,13 +18,14 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.model.key.KeyMeta
+import io.tolgee.util.getOrThrowIfMoreThanOne
 import org.springframework.context.ApplicationContext
 
 data class FileProcessorContext(
   var file: ImportFileDto,
   val fileEntity: ImportFile,
   val maxTranslationTextLength: Long = 2000L,
-  val params: ImportAddFilesParams = ImportAddFilesParams(),
+  var params: IImportAddFilesParams = ImportAddFilesParams(),
   val importSettings: IImportSettings =
     object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = false
@@ -173,7 +179,18 @@ data class FileProcessorContext(
     }
   }
 
-  val customValuesValidator: KeyCustomValuesValidator by lazy {
+  val mapping: ImportFileMapping? by lazy {
+    val mappings = singleStepImportParams?.fileMappings ?: return@lazy null
+
+    mappings.filter { it.fileName == this.file.name }
+      .getOrThrowIfMoreThanOne {
+        BadRequestException(Message.TOO_MANY_MAPPINGS_FOR_FILE, listOf(this.file.name))
+      }
+  }
+
+  val singleStepImportParams get() = (params as? SingleStepImportRequest)
+
+  private val customValuesValidator: KeyCustomValuesValidator by lazy {
     applicationContext.getBean(KeyCustomValuesValidator::class.java)
   }
 }

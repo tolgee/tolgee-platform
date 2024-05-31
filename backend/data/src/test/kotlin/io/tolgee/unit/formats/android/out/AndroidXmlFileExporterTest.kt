@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats.android.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
 import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -8,7 +9,7 @@ import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 
-class AdnroidXmlFileExporterTest {
+class AndroidXmlFileExporterTest {
   @Test
   fun exports() {
     val exporter = getExporter()
@@ -62,6 +63,21 @@ class AdnroidXmlFileExporterTest {
     |
       """.trimMargin(),
     )
+  }
+
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+
+    val files = exporter.produceFiles()
+
+    files["cs/hello.xml"].assert.isNotNull()
   }
 
   @Test
@@ -125,7 +141,7 @@ class AdnroidXmlFileExporterTest {
     this[file]!!.assert.isEqualTo(content)
   }
 
-  private fun getExporter(): AndroidStringsXmlExporter {
+  private fun getExporter(params: ExportParams = getExportParams()): AndroidStringsXmlExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -247,7 +263,7 @@ class AdnroidXmlFileExporterTest {
           key.isPlural = true
         }
       }
-    return getExporter(built.translations)
+    return getExporter(built.translations, params = params)
   }
 
   private fun getIcuPlaceholdersEnabledExporter(): AndroidStringsXmlExporter {
@@ -291,11 +307,16 @@ class AdnroidXmlFileExporterTest {
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    params: ExportParams = getExportParams(),
   ): AndroidStringsXmlExporter {
     return AndroidStringsXmlExporter(
       translations = translations,
-      exportParams = ExportParams(),
+      exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
+  }
+
+  private fun getExportParams(): ExportParams {
+    return ExportParams().also { it.format = ExportFormat.ANDROID_XML }
   }
 }

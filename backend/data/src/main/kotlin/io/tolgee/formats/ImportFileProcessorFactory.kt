@@ -7,6 +7,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
+import io.tolgee.formats.importCommon.ImportFileFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
@@ -35,17 +36,30 @@ class ImportFileProcessorFactory(
     file: ImportFileDto,
     context: FileProcessorContext,
   ): ImportFileProcessor {
-    return when (file.name.fileNameExtension) {
-      "json" -> JsonFileProcessor(context, objectMapper)
-      "po" -> PoFileProcessor(context)
-      "strings" -> StringsFileProcessor(context)
-      "stringsdict" -> StringsdictFileProcessor(context)
-      "xliff", "xlf" -> XliffFileProcessor(context)
-      "properties" -> PropertiesFileProcessor(context)
-      "xml" -> AndroidStringsXmlProcessor(context)
-      "arb" -> FlutterArbFileProcessor(context, objectMapper)
-      "yaml", "yml" -> YamlFileProcessor(context, yamlObjectMapper)
-      else -> throw ImportCannotParseFileException(file.name, "No matching processor")
+    val format =
+      findFormatInMapping(context)
+        ?: ImportFileFormat.findByExtension(file.name.fileNameExtension)
+        ?: throw ImportCannotParseFileException(file.name, "No matching processor")
+
+    return getProcessor(format, context)
+  }
+
+  private fun findFormatInMapping(context: FileProcessorContext) = context.mapping?.format?.fileFormat
+
+  private fun getProcessor(
+    importFileFormat: ImportFileFormat,
+    context: FileProcessorContext,
+  ): ImportFileProcessor {
+    return when (importFileFormat) {
+      ImportFileFormat.JSON -> JsonFileProcessor(context, objectMapper)
+      ImportFileFormat.PO -> PoFileProcessor(context)
+      ImportFileFormat.STRINGS -> StringsFileProcessor(context)
+      ImportFileFormat.STRINGSDICT -> StringsdictFileProcessor(context)
+      ImportFileFormat.XLIFF -> XliffFileProcessor(context)
+      ImportFileFormat.PROPERTIES -> PropertiesFileProcessor(context)
+      ImportFileFormat.XML -> AndroidStringsXmlProcessor(context)
+      ImportFileFormat.ARB -> FlutterArbFileProcessor(context, objectMapper)
+      ImportFileFormat.YAML -> YamlFileProcessor(context, yamlObjectMapper)
     }
   }
 

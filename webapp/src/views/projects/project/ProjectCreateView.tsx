@@ -61,9 +61,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     method: 'get',
     query: {
       size: 100,
-      params: {
-        filterCurrentUserOwner: true,
-      },
+      filterCurrentUserOwner: true,
     },
   });
 

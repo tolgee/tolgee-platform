@@ -3,6 +3,7 @@
  */
 package io.tolgee.constants
 
+import com.fasterxml.jackson.annotation.JsonValue
 import java.util.*
 
 enum class Message {
@@ -211,8 +212,20 @@ enum class Message {
   CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE,
   INVALID_SLUG_FORMAT,
   BATCH_JOB_CANCELLATION_TIMEOUT,
+  IMPORT_FAILED,
+  CANNOT_ADD_MORE_THEN_1000_LANGUAGES,
+  NO_DATA_TO_IMPORT,
+  MULTIPLE_NAMESPACES_MAPPED_TO_SINGLE_FILE,
+  MULTIPLE_MAPPINGS_FOR_SAME_FILE_LANGUAGE_NAME,
+  MULTIPLE_MAPPINGS_FOR_NULL_FILE_LANGUAGE_NAME,
+  TOO_MANY_MAPPINGS_FOR_FILE,
+  MISSING_PLACEHOLDER_IN_TEMPLATE,
+  TAG_NOT_FOUND,
   ;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())
+
+  @JsonValue
+  fun toLowerCase() = name.lowercase(Locale.getDefault())
 }

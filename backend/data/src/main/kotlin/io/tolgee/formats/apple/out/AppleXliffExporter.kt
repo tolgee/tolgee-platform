@@ -10,19 +10,20 @@ import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.formats.xliff.model.XliffTransUnit
 import io.tolgee.formats.xliff.out.XliffFileWriter
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class AppleXliffExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  private val translations: List<ExportTranslationView>,
+  private val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   private val baseLanguageTag: String,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
-  override val fileExtension: String = ExportFormat.XLIFF.extension
+  private val fileExtension: String = ExportFormat.XLIFF.extension
 
   private val baseTranslations by lazy {
     baseTranslationsProvider().associateBy { it.key.namespace to it.key.name }
@@ -283,15 +284,18 @@ class AppleXliffExporter(
     STRINGSDICT,
   }
 
-  fun getFilePath(
+  private fun getFilePath(
     languageTag: String,
     namespace: String?,
   ): String {
-    return "$languageTag.$fileExtension"
+    return filePathProvider.getFilePath(namespace, languageTag)
   }
 
-  companion object {
-    val STRINGSDICT_REGEX = Regex("\\.stringsdict$")
+  private val filePathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      fileExtension,
+    )
   }
 
   data class KeyInStringsDict(

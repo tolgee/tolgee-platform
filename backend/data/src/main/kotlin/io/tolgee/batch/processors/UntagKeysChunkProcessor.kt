@@ -27,7 +27,7 @@ class UntagKeysChunkProcessor(
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      tagService.untagKeys(subChunk.associateWith { params.tags })
+      tagService.untagKeys(job.projectId, subChunk.associateWith { params.tags })
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)

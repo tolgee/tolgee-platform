@@ -90,6 +90,7 @@ class TranslationsTestData {
             auto = true
           }.build {
             addTag("Lame tag")
+            addTag("Some other tag")
           }
         }
         projectBuilder = this
