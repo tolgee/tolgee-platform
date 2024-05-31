@@ -10,6 +10,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.exceptions.ErrorResponseTyped
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
@@ -38,8 +39,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
-
-class ErrorResponseTyped(var code: Message, var params: List<Serializable?>?)
 
 @RestControllerAdvice
 class ExceptionHandlers {
@@ -130,7 +129,7 @@ class ExceptionHandlers {
         mediaType = "application/json",
         schema =
           Schema(
-            implementation = ErrorResponseTyped::class,
+            oneOf = [ErrorResponseTyped::class, ErrorResponseBody::class],
             example = """{"code": "you_did_something_wrong", "params": ["something", "wrong"]}""",
           ),
       ),
@@ -143,7 +142,7 @@ class ExceptionHandlers {
         mediaType = "application/json",
         schema =
           Schema(
-            implementation = ErrorResponseTyped::class,
+            oneOf = [ErrorResponseTyped::class, ErrorResponseBody::class],
             example = """{"code": "operation_not_permitted", "params": ["translations.edit"]}""",
           ),
       ),
@@ -156,7 +155,7 @@ class ExceptionHandlers {
         mediaType = "application/json",
         schema =
           Schema(
-            implementation = ErrorResponseTyped::class,
+            oneOf = [ErrorResponseTyped::class, ErrorResponseBody::class],
             example = """{"code": "unauthenticated"}""",
           ),
       ),
@@ -180,7 +179,7 @@ class ExceptionHandlers {
         mediaType = "application/json",
         schema =
           Schema(
-            implementation = ErrorResponseTyped::class,
+            oneOf = [ErrorResponseTyped::class, ErrorResponseBody::class],
             example = """{"code": "resource_not_found", "params": null}""",
           ),
       ),

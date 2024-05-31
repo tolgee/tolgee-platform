@@ -13,11 +13,4 @@ class OctetStreamSupportConfiguration(converter: MappingJackson2HttpMessageConve
     supportedMediaTypes.add(MediaType("application", "octet-stream"))
     converter.supportedMediaTypes = supportedMediaTypes
   }
-
-//  @Bean
-//  fun octetStreamJsonConverter(): MappingJackson2HttpMessageConverter {
-//    val converter = MappingJackson2HttpMessageConverter()
-//    converter.supportedMediaTypes = listOf(MediaType("application", "octet-stream"))
-//    return converter
-//  }
 }
