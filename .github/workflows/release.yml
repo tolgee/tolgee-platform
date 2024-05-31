@@ -86,6 +86,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.VERSION }}
 
+      - name: Tag deprecated keys in platform
+        if: ${{ steps.version.outputs.VERSION != '' }}
+        run: "npm run tag-keys"
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:

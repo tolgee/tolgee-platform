@@ -79,8 +79,9 @@
     "tsc:prod": "tsc --project tsconfig.prod.json",
     "load-translations": "tolgee pull",
     "check-translations": "tolgee extract check",
-    "tag:production": "tolgee tag --filter-extracted --tag production --untag-other production",
-    "tag:deprecated": "tolgee tag --filter-not-extracted --filter-tag production --tag deprecated"
+    "tag-keys:deprecated": "tolgee tag --filter-not-extracted --filter-tag production --tag deprecated",
+    "tag-keys:production": "tolgee tag --filter-extracted --tag production --untag-other production",
+    "tag-keys": "npm run tag-keys:deprecated && npm run tag-keys:production"
   },
   "eslintConfig": {
     "extends": [
