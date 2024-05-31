@@ -39,7 +39,13 @@ class SingleStepImportController(
   private val projectHolder: ProjectHolder,
 ) : Logging {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(summary = "Single step import", description = "Imports provided data")
+  @Operation(
+    summary = "Single step import",
+    description =
+      "Unlike the /v2/projects/{projectId}/import endpoint, " +
+        "imports the data in single request by provided files and parameters. " +
+        "This is useful for automated importing via API or CLI.",
+  )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @RequestBody(
     content =
