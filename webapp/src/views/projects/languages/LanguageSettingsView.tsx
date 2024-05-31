@@ -39,7 +39,7 @@ export const LanguageSettingsView = () => {
     <BaseProjectView
       maxWidth={700}
       windowTitle={t('languages_title')}
-      title={t('languages_title')}
+      title={t('languages_titlee')}
       navigation={[
         [
           t('languages_title'),

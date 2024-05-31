@@ -66,3 +66,5 @@ backend/app/src/main/resources/application-js-e2e.properties
 /profile-out
 /.stash*
 
+/webapp/src/branch.json
+
