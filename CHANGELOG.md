@@ -1,3 +1,10 @@
+## [3.61.3](https://github.com/tolgee/tolgee-platform/compare/v3.61.2...v3.61.3) (2024-05-31)
+
+
+### Bug Fixes
+
+* Select right job status on cancellation ([#2329](https://github.com/tolgee/tolgee-platform/issues/2329)) ([506c603](https://github.com/tolgee/tolgee-platform/commit/506c60397088b0979137cd9d1844e05ce73ab4b8))
+
 ## [3.61.2](https://github.com/tolgee/tolgee-platform/compare/v3.61.1...v3.61.2) (2024-05-27)
 
 
