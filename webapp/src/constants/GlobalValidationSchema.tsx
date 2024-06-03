@@ -158,6 +158,7 @@ export class Validation {
       .test({
         name: 'language-tag-exists',
         test: (value) => !existingTags?.includes(value!),
+        // @tolgee-key language-tag-exists
         message: t('validation_language_tag_exists'),
       })
       .matches(/^[^,]*$/, {
