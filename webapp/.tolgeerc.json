@@ -1,1 +1,8 @@
-{ "projectId": 1 }
+{
+  "$schema": "https://tolgee.io/cli-schema.json",
+  "projectId": 1,
+  "patterns": ["./src/**/*.ts?(x)"],
+  "pull": {
+    "path": "./src/i18n"
+  }
+}

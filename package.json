@@ -3,7 +3,8 @@
   "scripts": {
     "release": "semantic-release",
     "release-dry": "semantic-release --no-ci -d",
-    "release-dry-debug": "semantic-release --no-ci -d --debug"
+    "release-dry-debug": "semantic-release --no-ci -d --debug",
+    "init-husky": "node ./webapp/node_modules/husky/bin.mjs"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.1",

@@ -29,6 +29,12 @@ import { ThemeProvider } from './ThemeProvider';
 import reportWebVitals from './reportWebVitals';
 import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
+import { branchName } from './branch.json';
+
+function getFeatureName(branch: string) {
+  const parts = branch.split('/');
+  return parts[parts.length - 1];
+}
 
 const tolgee = Tolgee()
   .use(DevTools())
@@ -40,6 +46,7 @@ const tolgee = Tolgee()
     fallbackLanguage: 'en',
     apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL,
     apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY,
+    tagNewKeys: [`draft: ${getFeatureName(branchName)}`],
     staticData: {
       en: () => import('./i18n/en.json').then((m) => m.default),
       es: () => import('./i18n/es.json').then((m) => m.default),
