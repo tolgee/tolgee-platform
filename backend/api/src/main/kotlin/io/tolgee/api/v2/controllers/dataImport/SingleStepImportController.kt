@@ -17,6 +17,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
 import jakarta.validation.Valid
@@ -37,6 +38,7 @@ class SingleStepImportController(
   private val importService: ImportService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectHolder: ProjectHolder,
+  private val securityService: SecurityService,
 ) : Logging {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(
@@ -70,6 +72,10 @@ class SingleStepImportController(
       filteredFiles.map {
         ImportFileDto(it.originalFilename ?: "", it.inputStream.readAllBytes())
       }
+
+    if (params.removeOtherKeys == true) {
+      securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_DELETE)
+    }
 
     importService.singleStepImport(
       files = fileDtos,

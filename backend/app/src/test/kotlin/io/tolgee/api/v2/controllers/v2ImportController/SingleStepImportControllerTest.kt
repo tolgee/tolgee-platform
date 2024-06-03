@@ -5,7 +5,9 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SingleStepImportTestData
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.performSingleStepImport
@@ -243,6 +245,24 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       // import with "new" key removes "test" key
       keyService.find(testData.project.id, "new", null).assert.isNotNull()
       keyService.find(testData.project.id, "test", null).assert.isNull()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `doesn't allow deletion when no permission to do so`() {
+    testData.addConflictTranslation()
+    testData.setUserScopes(arrayOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_CREATE, Scope.KEYS_VIEW))
+    saveAndPrepare()
+    val params = getFileMappings(jsonFileName)
+    params["removeOtherKeys"] = true
+
+    executeInNewTransaction {
+      performImport(
+        projectId = testData.project.id,
+        files = listOf(Pair(jsonFileName, newJson)),
+        params,
+      ).andIsForbidden
     }
   }
 
