@@ -183,6 +183,7 @@
   "ai_customization_not_enabled_message" : "Pro přístup k funkci přizpůsobení AI je nutné upgradovat váš plán.",
   "ai_customization_title" : "Přizpůsobení AI",
   "ai_tips_label" : "Tipy",
+  "announcement_cli_2" : "CLI 2.0 je venku s podporou nových formátů!",
   "announcement_feature_ai_customization" : "Vydali jsme funkci přizpůsobení pro Tolgee AI překladač",
   "announcement_feature_batch_operations" : "Byly vydány hromadné operace",
   "announcement_feature_content_delivery_and_webhooks" : "Zrychlete své lokalizace s novým <link-delivery>Doručováním obsahu</link-delivery> a <link-webhooks>Webhooks</link-webhooks>!",

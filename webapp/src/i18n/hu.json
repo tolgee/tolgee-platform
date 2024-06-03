@@ -179,6 +179,7 @@
   "ai_customization_not_enabled_message" : "Frissítse a tervét az AI testreszabási funkcióhoz való hozzáféréshez.",
   "ai_customization_title" : "AI testreszabása",
   "ai_tips_label" : "Tippek",
+  "announcement_cli_2" : "A CLI 2.0 elérhető új formátumok támogatásával!",
   "announcement_feature_ai_customization" : "Tolgee AI Fordítóhoz testreszabási lehetőségek elérhetőek",
   "announcement_feature_batch_operations" : "Kötegelt műveletek kiadva",
   "announcement_feature_content_delivery_and_webhooks" : "Gyorsítsd fel a lokalizációt a frissen kiadott <link-delivery>Tartalom szállítás</link-delivery> és <link-webhooks>Webhooks</link-webhooks> segítségével!",

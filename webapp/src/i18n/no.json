@@ -179,6 +179,7 @@
   "ai_customization_not_enabled_message" : "Oppgrader planen din for å få tilgang til AI-tilpasningsfunksjonen.",
   "ai_customization_title" : "AI-tilpasning",
   "ai_tips_label" : "Tips",
+  "announcement_cli_2" : "CLI 2.0 er ute med støtte for nye formater!",
   "announcement_feature_ai_customization" : "Tilpasninger for Tolgee AI-oversetter er lansert",
   "announcement_feature_batch_operations" : "Vi har lansert batch-operasjoner",
   "announcement_feature_content_delivery_and_webhooks" : "Øk hastigheten på lokaliseringen din med nylig utgitte <link-delivery>Content Delivery</link-delivery> og <link-webhooks>Webhooks</link-webhooks>!",

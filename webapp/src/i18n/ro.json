@@ -183,6 +183,7 @@
   "ai_customization_not_enabled_message" : "Upgradează-ți planul pentru a accesa funcționalitatea de personalizare AI.",
   "ai_customization_title" : "Personalizare AI",
   "ai_tips_label" : "Sfaturi",
+  "announcement_cli_2" : "CLI 2.0 este disponibil cu suport pentru noi formate!",
   "announcement_feature_ai_customization" : "Personalizări pentru traducătorul Tolgee AI lansate",
   "announcement_feature_batch_operations" : "Am lansat operațiuni în lot",
   "announcement_feature_content_delivery_and_webhooks" : "Accelerati procesul de localizare cu <link-delivery>Livrarea de conținut</link-delivery> și <link-webhooks>Webhooks</link-webhooks> lansate recent!",

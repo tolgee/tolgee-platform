@@ -179,6 +179,7 @@
   "ai_customization_not_enabled_message" : "升级您的套餐以访问 AI 定制功能。",
   "ai_customization_title" : "AI 定制",
   "ai_tips_label" : "提示",
+  "announcement_cli_2" : "CLI 2.0已发布，支持新格式！",
   "announcement_feature_ai_customization" : "Tolgee AI 翻译器定制功能已发布",
   "announcement_feature_batch_operations" : "我们发布了批量操作",
   "announcement_feature_content_delivery_and_webhooks" : "使用最新发布的<link-delivery>内容交付</link-delivery>和<link-webhooks>Webhooks</link-webhooks>加速本地化！",

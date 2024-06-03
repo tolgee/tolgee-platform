@@ -179,6 +179,7 @@
   "ai_customization_not_enabled_message" : "Atualize seu plano para acessar a funcionalidade de personalização de IA.",
   "ai_customization_title" : "Personalização de IA",
   "ai_tips_label" : "Dicas",
+  "announcement_cli_2" : "O CLI 2.0 está disponível com suporte para novos formatos!",
   "announcement_feature_ai_customization" : "Personalizações para o Tradutor AI Tolgee lançadas",
   "announcement_feature_batch_operations" : "Lançamos operações em lote",
   "announcement_feature_content_delivery_and_webhooks" : "Acelere sua localização com <link-delivery>Entrega de Conteúdo</link-delivery> e <link-webhooks>Webhooks</link-webhooks>!",

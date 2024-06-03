@@ -183,6 +183,7 @@
   "ai_customization_not_enabled_message" : "Upgrade your plan to access AI customization feature.",
   "ai_customization_title" : "AI Customization",
   "ai_tips_label" : "Tips",
+  "announcement_cli_2" : "CLI 2.0 is out with support for new formats!",
   "announcement_feature_ai_customization" : "Customizations for Tolgee AI Translator released",
   "announcement_feature_batch_operations" : "We've released batch operations",
   "announcement_feature_content_delivery_and_webhooks" : "Accelerate your localization with freshly released <link-delivery>Content Delivery</link-delivery> and <link-webhooks>Webhooks</link-webhooks>!",

@@ -1,3 +1,11 @@
+## [3.62.2](https://github.com/tolgee/tolgee-platform/compare/v3.62.1...v3.62.2) (2024-06-03)
+
+
+### Bug Fixes
+
+* ICU detection with plural & number support ([#2335](https://github.com/tolgee/tolgee-platform/issues/2335)) ([1d57c22](https://github.com/tolgee/tolgee-platform/commit/1d57c2239d17361827d60e28e5f30b540b19b052))
+* keys delete permission on import ([#2339](https://github.com/tolgee/tolgee-platform/issues/2339)) ([86c4015](https://github.com/tolgee/tolgee-platform/commit/86c4015a1f65598a4439bc771aaaced0802885db))
+
 ## [3.62.1](https://github.com/tolgee/tolgee-platform/compare/v3.62.0...v3.62.1) (2024-05-31)
 
 
