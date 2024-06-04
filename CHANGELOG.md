@@ -1,6 +1,18 @@
 # [3.63.0](https://github.com/tolgee/tolgee-platform/compare/v3.62.2...v3.63.0) (2024-06-04)
 
 
+### Bug Fixes
+
+* tagging CI ([a3aeefb](https://github.com/tolgee/tolgee-platform/commit/a3aeefb2d4e23626699fe35f3b2c7c1944bfae8b))
+
+
+### Features
+
+* tolgee cli 2 announcement ([#2340](https://github.com/tolgee/tolgee-platform/issues/2340)) ([fed1f92](https://github.com/tolgee/tolgee-platform/commit/fed1f92ad47837a6674754886ea6057897271ff7))
+
+# [3.63.0](https://github.com/tolgee/tolgee-platform/compare/v3.62.2...v3.63.0) (2024-06-04)
+
+
 ### Features
 
 * tolgee cli 2 announcement ([#2340](https://github.com/tolgee/tolgee-platform/issues/2340)) ([fed1f92](https://github.com/tolgee/tolgee-platform/commit/fed1f92ad47837a6674754886ea6057897271ff7))
