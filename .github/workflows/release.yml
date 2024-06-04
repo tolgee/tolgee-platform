@@ -91,6 +91,8 @@ jobs:
         run: "npm run tag-keys"
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+        working-directory: ./webapp
+
 
       - uses: actions/upload-artifact@v3
         if: always()
