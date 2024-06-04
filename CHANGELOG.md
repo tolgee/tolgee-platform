@@ -1,3 +1,10 @@
+# [3.63.0](https://github.com/tolgee/tolgee-platform/compare/v3.62.2...v3.63.0) (2024-06-04)
+
+
+### Features
+
+* tolgee cli 2 announcement ([#2340](https://github.com/tolgee/tolgee-platform/issues/2340)) ([fed1f92](https://github.com/tolgee/tolgee-platform/commit/fed1f92ad47837a6674754886ea6057897271ff7))
+
 ## [3.62.2](https://github.com/tolgee/tolgee-platform/compare/v3.62.1...v3.62.2) (2024-06-03)
 
 
