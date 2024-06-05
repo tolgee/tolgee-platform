@@ -86,6 +86,10 @@ class ScheduledJobCleaner(
     val chunkIncompleteStatuses = BatchJobChunkExecutionStatus.entries.filter { !it.completed }.map { it.name }
     val jobIncompleteStatuses = BatchJobStatus.entries.filter { !it.completed }.map { it.name }
 
+    // In this query we are looking for jobs
+    // - that have incomplete status
+    // - have all chunks completed
+    // - and we are obtaining the resulting chunk status by preferably filtering out chunks which have success status
     val data =
       entityManager.createNativeQuery(
         """
