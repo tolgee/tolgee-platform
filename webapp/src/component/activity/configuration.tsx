@@ -322,4 +322,9 @@ export const actionsConfiguration: Partial<
       WebhookConfig: [],
     },
   },
+  COMPLEX_TAG_OPERATION: {
+    label(params) {
+      return <T keyName="activity_complex_tag_operation" params={params} />;
+    },
+  },
 };
