@@ -1,3 +1,10 @@
+## [3.63.1](https://github.com/tolgee/tolgee-platform/compare/v3.63.0...v3.63.1) (2024-06-05)
+
+
+### Bug Fixes
+
+* Wrong batch job status and error message ([#2342](https://github.com/tolgee/tolgee-platform/issues/2342)) ([26ee281](https://github.com/tolgee/tolgee-platform/commit/26ee281498091477b965870966f77dcca633c1fe))
+
 # [3.63.0](https://github.com/tolgee/tolgee-platform/compare/v3.62.2...v3.63.0) (2024-06-04)
 
 
