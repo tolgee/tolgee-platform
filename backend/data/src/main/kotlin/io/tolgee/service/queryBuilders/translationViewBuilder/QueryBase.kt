@@ -20,6 +20,7 @@ import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
+import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Expression
@@ -37,6 +38,7 @@ class QueryBase<T>(
   private val languages: Set<LanguageDto>,
   params: TranslationFilters,
   private var isKeyIdsQuery: Boolean = false,
+  private val entityManager: EntityManager,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
@@ -50,7 +52,7 @@ class QueryBase<T>(
   var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   lateinit var screenshotCountExpression: Expression<Long>
   val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
-  private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb)
+  private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb, entityManager)
   var queryTranslationFiltering = QueryTranslationFiltering(params, this, cb)
 
   init {

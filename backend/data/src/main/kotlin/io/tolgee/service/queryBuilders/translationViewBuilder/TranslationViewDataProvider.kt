@@ -59,6 +59,7 @@ class TranslationViewDataProvider(
         languages = languages,
         params = params,
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
+        entityManager = em,
       )
     return em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
   }
@@ -76,5 +77,6 @@ class TranslationViewDataProvider(
     params = params,
     sort = pageable.sort,
     cursor = cursor?.let { CursorUtil.parseCursor(it) },
+    entityManager = em,
   )
 }

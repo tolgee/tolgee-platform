@@ -98,6 +98,28 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
     assertThat(key.translations["de"]?.unresolvedCommentCount).isEqualTo(2)
   }
 
+  @Test
+  fun `returns failed keys`() {
+    val testData = TranslationsTestData()
+    val job = testData.addFailedBatchJob()
+    testDataService.saveTestData(testData.root)
+    val result =
+      translationViewDataProvider.getData(
+        projectId = testData.project.id,
+        languages =
+          languageService.dtosFromEntities(
+            listOf(testData.germanLanguage),
+            testData.project.id,
+          ).toSet(),
+        PageRequest.of(0, 10),
+        params =
+          GetTranslationsParams().apply {
+            filterFailedKeysOfJob = job.id
+          },
+      )
+    result
+  }
+
   private fun generateCommentStatesTestData(): TranslationsTestData {
     val testData = TranslationsTestData()
     testData.addCommentStatesData()

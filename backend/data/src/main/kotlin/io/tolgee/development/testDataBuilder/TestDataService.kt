@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.eventListeners.LanguageStatsListener
+import io.tolgee.development.testDataBuilder.builders.BatchJobBuilder
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.PatBuilder
@@ -223,6 +224,7 @@ class TestDataService(
     saveSlackConfigs(builder)
     saveAutomations(builder)
     saveImportSettings(builder)
+    saveBatchJobs(builder)
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -458,6 +460,25 @@ class TestDataService(
     userAccountBuilders.forEach {
       it.data.avatarFile?.let { file ->
         userAccountService.setAvatar(it.self, file.inputStream)
+      }
+    }
+  }
+
+  private fun saveBatchJobs(builder: ProjectBuilder) {
+    builder.data.batchJobs.forEach {
+      it.targetProvider?.let { provider ->
+        it.self.target = provider()
+      }
+      entityManager.persist(it.self)
+      saveChunkExecutions(it)
+    }
+  }
+
+  private fun saveChunkExecutions(batchJobBuilder: BatchJobBuilder) {
+    batchJobBuilder.data.chunkExecutions.forEach {
+      entityManager.persist(it.self)
+      it.successfulTargetsProvider?.let { provider ->
+        it.self.successTargets = provider()
       }
     }
   }
