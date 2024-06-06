@@ -149,16 +149,6 @@ export const SignUpForm = (props: Props) => {
               ),
             }}
           />
-          {/* <FormControlLabel
-            control={
-              <Checkbox
-                checked={showPassword}
-                onChange={(e) => setShowPassword(e.currentTarget.checked)}
-              />
-            }
-            label={<T keyName="sign_up_form_show_password" />}
-            sx={{ mt: -1, mb: 4 }}
-          /> */}
           <TextField
             name="name"
             label={<T keyName="sign_up_form_full_name" />}
