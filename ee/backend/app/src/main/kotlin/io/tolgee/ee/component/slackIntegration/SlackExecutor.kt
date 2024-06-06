@@ -292,11 +292,20 @@ class SlackExecutor(
       slackClient.methods(token).conversationsInfo {
         it.channel(payload.channel_id)
       }
-    return if (response.isOk) {
-      response.channel.isMember
-    } else {
-      false
+
+    if (!response.isOk || response.channel == null) {
+      return false
     }
+
+    if (!response.channel.isPrivate) {
+      return true
+    }
+
+    if (response.channel.isIm) {
+      return true
+    }
+
+    return response.channel.isMember
   }
 
   fun getHelper(
