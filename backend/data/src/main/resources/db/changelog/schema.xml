@@ -3311,4 +3311,38 @@
     <changeSet author="cynthia (generated)" id="1701635886941-14">
         <addForeignKeyConstraint baseColumnNames="recipient_id" baseTableName="user_notification" constraintName="FKtrh0lg36wbpag2rwgn4btv4dd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-1">
+        <createTable tableName="activity_group">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_groupPK"/>
+            </column>
+            <column name="author_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="type" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-2">
+        <createTable tableName="activity_revision_activity_groups">
+            <column name="activity_revisions_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_groups_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-3">
+        <createIndex indexName="IDXcg7y08d599p7jxdebbxwavak0" tableName="activity_revision">
+            <column name="timestamp"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-4">
+        <addForeignKeyConstraint baseColumnNames="activity_revisions_id" baseTableName="activity_revision_activity_groups" constraintName="FK61mk7dao9gvk65tgg736cmqsc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-5">
+        <addForeignKeyConstraint baseColumnNames="activity_groups_id" baseTableName="activity_revision_activity_groups" constraintName="FK932a1x2vub7nsnm6f338tg3pj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_group" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-6">
+        <dropPrimaryKey constraintName="user_notification_modified_entities_pkey" tableName="user_notification_modified_entities"/>
+    </changeSet>
 </databaseChangeLog>

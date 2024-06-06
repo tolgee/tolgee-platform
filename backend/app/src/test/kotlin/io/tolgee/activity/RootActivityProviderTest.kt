@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable
 
 class RootActivityProviderTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
-  fun `it applies the import`() {
+  fun `returns rooted activity`() {
     importData()
     val latestRevisionId = getLatestRevisionId()
     val items =

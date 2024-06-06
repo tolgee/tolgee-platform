@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
@@ -34,6 +35,7 @@ import java.util.*
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
     Index(columnList = "type"),
+    Index(columnList = "timestamp"),
   ],
 )
 @EntityListeners(ActivityRevision.Companion.ActivityRevisionListener::class)
@@ -103,6 +105,9 @@ class ActivityRevision : java.io.Serializable {
 
   @Transient
   var cancelledBatchJobExecutionCount: Int? = null
+
+  @ManyToMany
+  var activityGroups: MutableList<ActivityGroup> = mutableListOf()
 
   companion object {
     @Configurable

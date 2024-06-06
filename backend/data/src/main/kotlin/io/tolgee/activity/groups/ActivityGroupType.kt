@@ -2,6 +2,9 @@ package io.tolgee.activity.groups
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.eq
+import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.modification
+import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.notNull
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
@@ -19,7 +22,7 @@ import io.tolgee.model.webhook.WebhookConfig
 
 enum class ActivityGroupType(
   val sourceActivityTypes: List<ActivityType>,
-  val allowedGroupEntityModificationDefinitions: List<GroupEntityModificationDefinition<*>>,
+  val modifications: List<GroupEntityModificationDefinition<*>>,
 ) {
   SET_TRANSLATION_STATE(
     listOf(ActivityType.SET_TRANSLATION_STATE, ActivityType.COMPLEX_EDIT),
@@ -28,6 +31,12 @@ enum class ActivityGroupType(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::state, Translation::outdated, Translation::mtProvider),
+        deniedValues =
+          mapOf(
+            Translation::state to TranslationState.REVIEWED,
+            Translation::text to modification(eq(null) to notNull()),
+          ),
+        countInView = true,
       ),
     ),
   ),
@@ -40,6 +49,7 @@ enum class ActivityGroupType(
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::state, Translation::outdated, Translation::mtProvider),
         allowedValues = mapOf(Translation::state to TranslationState.REVIEWED),
+        countInView = true,
       ),
     ),
   ),
@@ -50,6 +60,8 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL, RevisionType.MOD),
+        modificationProps = listOf(Translation::text),
+        countInView = true,
       ),
     ),
   ),
@@ -62,6 +74,7 @@ enum class ActivityGroupType(
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::auto, Translation::mtProvider),
         allowedValues = mapOf(Translation::mtProvider to null, Translation::auto to false),
+        countInView = true,
       ),
     ),
   ),
@@ -73,6 +86,7 @@ enum class ActivityGroupType(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::outdated),
+        countInView = true,
       ),
     ),
   ),
@@ -83,6 +97,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.ADD),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = Translation::class,
@@ -97,6 +112,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.DEL),
+        countInView = true,
       ),
     ),
   ),
@@ -108,6 +124,7 @@ enum class ActivityGroupType(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(TranslationComment::text),
+        countInView = true,
       ),
     ),
   ),
@@ -119,6 +136,7 @@ enum class ActivityGroupType(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(TranslationComment::state),
+        countInView = true,
       ),
     ),
   ),
@@ -129,6 +147,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Screenshot::class,
         revisionTypes = listOf(RevisionType.DEL),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = KeyScreenshotReference::class,
@@ -143,6 +162,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Screenshot::class,
         revisionTypes = listOf(RevisionType.ADD),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = KeyScreenshotReference::class,
@@ -163,10 +183,12 @@ enum class ActivityGroupType(
         entityClass = KeyMeta::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(KeyMeta::tags),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = Tag::class,
         revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
+        countInView = true,
       ),
     ),
   ),
@@ -178,10 +200,12 @@ enum class ActivityGroupType(
         entityClass = Key::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Key::name, Key::namespace),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = Namespace::class,
         revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
+        countInView = true,
       ),
     ),
   ),
@@ -192,6 +216,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Key::class,
         revisionTypes = listOf(RevisionType.DEL),
+        countInView = true,
       ),
     ),
   ),
@@ -202,6 +227,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Key::class,
         revisionTypes = listOf(RevisionType.ADD),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = KeyMeta::class,
@@ -216,6 +242,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Key::class,
         revisionTypes = listOf(RevisionType.ADD),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = KeyMeta::class,
@@ -225,6 +252,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.ADD),
+        countInView = true,
       ),
       GroupEntityModificationDefinition(
         entityClass = Namespace::class,
@@ -239,6 +267,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Language::class,
         revisionTypes = listOf(RevisionType.ADD),
+        countInView = true,
       ),
     ),
   ),
@@ -250,6 +279,7 @@ enum class ActivityGroupType(
         entityClass = Language::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Language::name, Language::tag, Language::originalName, Language::flagEmoji),
+        countInView = true,
       ),
     ),
   ),
@@ -260,6 +290,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Language::class,
         revisionTypes = listOf(RevisionType.DEL),
+        countInView = true,
       ),
     ),
   ),
@@ -270,6 +301,7 @@ enum class ActivityGroupType(
       GroupEntityModificationDefinition(
         entityClass = Project::class,
         revisionTypes = listOf(RevisionType.ADD),
+        countInView = true,
       ),
     ),
   ),
@@ -299,6 +331,7 @@ enum class ActivityGroupType(
         entityClass = Namespace::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Namespace::name),
+        countInView = true,
       ),
     ),
   ),
@@ -310,6 +343,7 @@ enum class ActivityGroupType(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
+        countInView = true,
       ),
     ),
   ),
@@ -321,6 +355,7 @@ enum class ActivityGroupType(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
+        countInView = true,
       ),
     ),
   ),
@@ -332,6 +367,7 @@ enum class ActivityGroupType(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
+        countInView = true,
       ),
     ),
   ),
@@ -350,6 +386,7 @@ enum class ActivityGroupType(
             Translation::outdated to false,
             Translation::auto to false,
           ),
+        countInView = true,
       ),
     ),
   ),
@@ -361,6 +398,7 @@ enum class ActivityGroupType(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
+        countInView = true,
       ),
     ),
   ),
@@ -372,6 +410,7 @@ enum class ActivityGroupType(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::state, Translation::outdated, Translation::auto),
+        countInView = true,
       ),
     ),
   ),

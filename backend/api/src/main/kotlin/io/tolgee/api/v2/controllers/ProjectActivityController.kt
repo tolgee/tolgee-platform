@@ -45,4 +45,18 @@ class ProjectActivityController(
     val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
     return pagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
+
+  @Operation(
+    summary = "Get project activity groups",
+    description = "This endpoints returns the activity grouped by time windows so it's easier to read on the frontend.",
+  )
+  @GetMapping("/groups", produces = [MediaTypes.HAL_JSON_VALUE])
+  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @AllowApiAccess
+  fun getActivityGroups(
+    @ParameterObject pageable: Pageable,
+  ): PagedModel<ProjectActivityModel> {
+    val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
+    return pagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
+  }
 }

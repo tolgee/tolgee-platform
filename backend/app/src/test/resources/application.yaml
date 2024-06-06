@@ -40,6 +40,8 @@ spring:
     enabled: false
   datasource:
     maximum-pool-size: 100
+  jooq:
+    sql-dialect: postgres
 tolgee:
   postgres-autostart:
     enabled: true
@@ -81,7 +83,6 @@ tolgee:
     server: http://localhost:8080
   batch:
     concurrency: 10
-
 logging:
   level:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
@@ -92,3 +93,5 @@ logging:
     io.tolgee.component.reporting.BusinessEventPublisher: DEBUG
     io.tolgee.ExceptionHandlers: DEBUG
     io.tolgee.component.reporting.ReportingService: DEBUG
+    org.jooq.tools.LoggerListener: DEBUG
+    org.jooq.Constants: off
