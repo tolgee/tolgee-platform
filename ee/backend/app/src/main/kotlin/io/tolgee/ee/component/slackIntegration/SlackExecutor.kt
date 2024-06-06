@@ -286,8 +286,6 @@ class SlackExecutor(
     payload: SlackCommandDto,
     token: String,
   ): Boolean {
-    // TODO check if its DM with bot itself and return true
-
     val response =
       slackClient.methods(token).conversationsInfo {
         it.channel(payload.channel_id)
