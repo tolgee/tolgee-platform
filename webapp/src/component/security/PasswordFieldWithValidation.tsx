@@ -3,8 +3,9 @@ import { useTranslate } from '@tolgee/react';
 import { useField } from 'formik';
 
 import { TextField } from '../common/form/fields/TextField';
-import { Box, TextFieldProps, useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import zxcvbn from 'zxcvbn';
+import { TextFieldProps } from 'tg.component/common/TextField';
 
 type SetPasswordFieldsProps = {
   label: ReactNode;

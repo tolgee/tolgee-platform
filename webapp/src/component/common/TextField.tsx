@@ -18,11 +18,11 @@ const StyledInputLabel = styled(InputLabel)`
   font-weight: 500px;
 `;
 
-type Props = React.ComponentProps<typeof MUITextField> & {
+export type TextFieldProps = React.ComponentProps<typeof MUITextField> & {
   minHeight?: boolean;
 };
 
-export const TextField: FunctionComponent<Props> = (props) => {
+export const TextField: FunctionComponent<TextFieldProps> = (props) => {
   const { label, minHeight = true, sx, ...otherProps } = props;
   return (
     <StyledContainer>

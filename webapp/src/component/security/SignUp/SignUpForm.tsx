@@ -1,5 +1,12 @@
-import React from 'react';
-import { Box, Link, Typography, styled } from '@mui/material';
+import React, { useState } from 'react';
+import {
+  Box,
+  IconButton,
+  Link,
+  Tooltip,
+  Typography,
+  styled,
+} from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -15,6 +22,7 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
 import { Alert } from '../../common/Alert';
 import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -76,6 +84,9 @@ export const SignUpForm = (props: Props) => {
   const orgRequired =
     !InvitationCodeService.getCode() && config.userCanCreateOrganizations;
   const userSourceField = config.userSourceField;
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const { t } = useTranslate();
 
   return (
@@ -111,18 +122,53 @@ export const SignUpForm = (props: Props) => {
       >
         <StyledInputFields>
           <Error loadable={props.loadable} />
+          <TextField name="email" label={<T keyName="sign_up_form_email" />} />
+          <PasswordFieldWithValidation
+            label={<PasswordLabel />}
+            inputProps={{ type: showPassword ? 'text' : 'password' }}
+            InputProps={{
+              endAdornment: (
+                <Tooltip
+                  title={
+                    showPassword
+                      ? t('sign_up_form_hide_password')
+                      : t('sign_up_form_show_password')
+                  }
+                >
+                  <IconButton
+                    size="small"
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? (
+                      <VisibilityOff fontSize="small" />
+                    ) : (
+                      <Visibility fontSize="small" />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              ),
+            }}
+          />
+          {/* <FormControlLabel
+            control={
+              <Checkbox
+                checked={showPassword}
+                onChange={(e) => setShowPassword(e.currentTarget.checked)}
+              />
+            }
+            label={<T keyName="sign_up_form_show_password" />}
+            sx={{ mt: -1, mb: 4 }}
+          /> */}
           <TextField
             name="name"
             label={<T keyName="sign_up_form_full_name" />}
           />
-          <TextField name="email" label={<T keyName="sign_up_form_email" />} />
           {orgRequired && (
             <TextField
               name="organizationName"
               label={<T keyName="sign_up_form_organization_name" />}
             />
           )}
-          <PasswordFieldWithValidation label={<PasswordLabel />} />
           {userSourceField && (
             <TextField
               name="userSource"
