@@ -17,6 +17,7 @@ import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.SlackUserInfoModel
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.Logging
