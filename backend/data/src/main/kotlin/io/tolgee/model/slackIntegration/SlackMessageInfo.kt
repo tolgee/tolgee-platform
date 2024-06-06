@@ -8,7 +8,7 @@ import org.hibernate.annotations.ColumnDefault
 class SlackMessageInfo(
   @ManyToOne(fetch = FetchType.LAZY)
   var slackMessage: SavedSlackMessage,
-  var langTag: String = "",
+  var languageTag: String = "",
 ) : StandardAuditModel() {
   @Enumerated(EnumType.STRING)
   @ColumnDefault("GLOBAL")

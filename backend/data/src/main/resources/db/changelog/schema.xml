@@ -3396,4 +3396,12 @@
     <changeSet author="huglx (generated)" id="1715968099414-4">
         <dropColumn columnName="message_ts" tableName="saved_slack_message"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1717662938469-1">
+        <addColumn tableName="slack_message_info">
+            <column name="language_tag" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1717662938469-2">
+        <dropColumn columnName="lang_tag" tableName="slack_message_info"/>
+    </changeSet>
 </databaseChangeLog>

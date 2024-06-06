@@ -91,7 +91,7 @@ class SlackExecutor(
     config: SlackConfig,
     slackExecutorHelper: SlackExecutorHelper,
   ) {
-    val existingLanguages = savedMsg.info.map { it.langTag }
+    val existingLanguages = savedMsg.info.map { it.languageTag }
     val newLanguages = message.langTag
 
     val languagesToAdd = existingLanguages - newLanguages
@@ -102,7 +102,7 @@ class SlackExecutor(
     val additionalAttachments: MutableList<Attachment> = mutableListOf()
     languagesToAdd.forEach { lang ->
 
-      val authorContext = savedMsg.info.find { it.langTag == lang }?.authorContext
+      val authorContext = savedMsg.info.find { it.languageTag == lang }?.authorContext
 
       val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, message.keyId, authorContext)
       attachment?.let {
@@ -111,7 +111,7 @@ class SlackExecutor(
     }
     val updatedAttachments = additionalAttachments + message.attachments
     val updatedLanguages = message.langTag + languagesToAdd
-    val authorContextMap = savedMsg.info.associate { it.langTag to it.authorContext }
+    val authorContextMap = savedMsg.info.associate { it.languageTag to it.authorContext }
     val updatedMessageDto =
       message.copy(
         attachments = addAuthorContextToAttachments(updatedAttachments.toMutableList(), authorContextMap, config),
@@ -286,6 +286,8 @@ class SlackExecutor(
     payload: SlackCommandDto,
     token: String,
   ): Boolean {
+    // TODO check if its DM with bot itself and return true
+
     val response =
       slackClient.methods(token).conversationsInfo {
         it.channel(payload.channel_id)

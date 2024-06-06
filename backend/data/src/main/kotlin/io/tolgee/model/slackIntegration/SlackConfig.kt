@@ -14,7 +14,7 @@ class SlackConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
   @ManyToOne(fetch = FetchType.LAZY)
-  var userAccount: UserAccount = UserAccount(),
+  var userAccount: UserAccount,
   var channelId: String = "",
 ) : StandardAuditModel() {
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true, fetch = FetchType.LAZY)

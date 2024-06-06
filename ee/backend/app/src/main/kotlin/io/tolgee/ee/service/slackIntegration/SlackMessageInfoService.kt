@@ -45,7 +45,7 @@ class SlackMessageInfoService(
     val slackMessageInfo =
       SlackMessageInfo(
         slackMessage = savedSlackMessage,
-        langTag = it,
+        languageTag = it,
       )
     slackMessageInfo.authorContext = authorContext
     return create(slackMessageInfo)

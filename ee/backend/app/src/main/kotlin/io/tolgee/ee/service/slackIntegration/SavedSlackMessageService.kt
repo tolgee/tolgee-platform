@@ -66,7 +66,7 @@ class SavedSlackMessageService(
     savedMessage.languageTags = langTags
 
     langTags.forEach { langTag ->
-      val existingInfo = savedMessage.info.find { it.langTag == langTag }
+      val existingInfo = savedMessage.info.find { it.languageTag == langTag }
 
       if (existingInfo != null) {
         val authorContext = authorContextMap[langTag] ?: return@forEach
