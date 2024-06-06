@@ -1,3 +1,10 @@
+## [3.63.3](https://github.com/tolgee/tolgee-platform/compare/v3.63.2...v3.63.3) (2024-06-06)
+
+
+### Bug Fixes
+
+* history items selectable ([#2327](https://github.com/tolgee/tolgee-platform/issues/2327)) ([43ed652](https://github.com/tolgee/tolgee-platform/commit/43ed6526b2692e3dce101679c682c70aeeb066f6))
+
 ## [3.63.2](https://github.com/tolgee/tolgee-platform/compare/v3.63.1...v3.63.2) (2024-06-06)
 
 
