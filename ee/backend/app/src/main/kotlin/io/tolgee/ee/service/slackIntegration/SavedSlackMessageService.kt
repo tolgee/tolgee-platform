@@ -2,6 +2,7 @@ package io.tolgee.ee.service.slackIntegration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.ee.component.slackIntegration.SavedMessageDto
 import io.tolgee.ee.repository.slackIntegration.SavedSlackMessageRepository
 import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.model.slackIntegration.SavedSlackMessage
@@ -91,6 +92,15 @@ class SavedSlackMessageService(
       keyId,
       configId,
     )
+  }
+
+  fun findAll(
+    messagesDto: List<SavedMessageDto>,
+    config: Long,
+  ): List<SavedSlackMessage> {
+    val keyIds = messagesDto.map { it.keyId }
+
+    return savedSlackMessageRepository.findAllByKeyIdAndConfigId(keyIds, config)
   }
 
   fun findAll(): List<SavedSlackMessage> {

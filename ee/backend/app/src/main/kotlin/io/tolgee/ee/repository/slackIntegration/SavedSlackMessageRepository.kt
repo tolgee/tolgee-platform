@@ -30,4 +30,16 @@ interface SavedSlackMessageRepository : JpaRepository<SavedSlackMessage, Long> {
     keyId: Long,
     configId: Long,
   ): List<SavedSlackMessage>
+
+  @Query(
+    """
+    select sm from SavedSlackMessage sm
+    join fetch sm.info info
+    where sm.keyId in :keyIds and sm.slackConfig.id = :configId
+    """,
+  )
+  fun findAllByKeyIdAndConfigId(
+    keyIds: List<Long>,
+    configId: Long,
+  ): List<SavedSlackMessage>
 }
