@@ -1,3 +1,10 @@
+## [3.63.4](https://github.com/tolgee/tolgee-platform/compare/v3.63.3...v3.63.4) (2024-06-06)
+
+
+### Bug Fixes
+
+* improve signup screen to avoid mistakes ([#2344](https://github.com/tolgee/tolgee-platform/issues/2344)) ([7f319a9](https://github.com/tolgee/tolgee-platform/commit/7f319a9fafee6b56e9b8344fef4cbbba37dcc22b))
+
 ## [3.63.3](https://github.com/tolgee/tolgee-platform/compare/v3.63.2...v3.63.3) (2024-06-06)
 
 
