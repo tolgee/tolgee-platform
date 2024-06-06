@@ -39,6 +39,7 @@
   "activity_batch_operation_tag_keys" : "{KeyMetaCount, plural, one {Hromadně přidán tag k # klíči} few {Hromadně přidán tag ke # klíčům} other {Hromadně přidán tag k # klíčům}}",
   "activity_batch_operation_untag_keys" : "{KeyMetaCount, plural, one {Hromadně odebrán tag z # klíče} other {Hromadně odebrán tag z # klíčů} }",
   "activity_complex_edit" : "Upraven klíč",
+  "activity_complex_tag_operation" : "{KeyMetaCount, plural, one {Aktualizovány tagy u # klíče} other {Aktualizovány tagy u # klíčů} }",
   "activity_content_delivery_config_create" : "Konfigurace doručování obsahu vytvořena",
   "activity_content_delivery_config_delete" : "Konfigurace doručování obsahu smazána",
   "activity_content_delivery_config_update" : "Konfigurace doručování obsahu upravena",

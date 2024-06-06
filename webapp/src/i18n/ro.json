@@ -39,6 +39,7 @@
   "activity_batch_operation_tag_keys" : "{KeyMetaCount, plural, one {Etichetă adăugată la # cheie în lot} few {Etichetă adăugată la # chei în lot} other {Etichetă adăugată la # de chei în lot}}",
   "activity_batch_operation_untag_keys" : "{KeyMetaCount, plural, one {Eliminată eticheta de la # cheie în lot} other {Eliminată eticheta de la # chei în lot}}",
   "activity_complex_edit" : "Cheie editată",
+  "activity_complex_tag_operation" : "{KeyMetaCount, plural, one {Etichete actualizate pentru # cheie} other {Etichete actualizate pentru # de chei}}",
   "activity_content_delivery_config_create" : "Configurația de livrare a conținutului a fost creată",
   "activity_content_delivery_config_delete" : "Configurația de livrare a conținutului a fost ștearsă",
   "activity_content_delivery_config_update" : "Configurația de livrare a conținutului a fost actualizată",

@@ -1,3 +1,10 @@
+## [3.63.2](https://github.com/tolgee/tolgee-platform/compare/v3.63.1...v3.63.2) (2024-06-06)
+
+
+### Bug Fixes
+
+* add translation for tagging operation ([#2343](https://github.com/tolgee/tolgee-platform/issues/2343)) ([2b23e53](https://github.com/tolgee/tolgee-platform/commit/2b23e535a38803b61b5f9dfb782afc53251f1ce7))
+
 ## [3.63.1](https://github.com/tolgee/tolgee-platform/compare/v3.63.0...v3.63.1) (2024-06-05)
 
 

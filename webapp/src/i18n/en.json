@@ -39,6 +39,7 @@
   "activity_batch_operation_tag_keys" : "{KeyMetaCount, plural, one {Added tag to # key in batch} other {Added tag to # keys in batch}}",
   "activity_batch_operation_untag_keys" : "{KeyMetaCount, plural, one {Removed tag from # key in batch} other {Removed tag from # keys in batch}}",
   "activity_complex_edit" : "Edited key",
+  "activity_complex_tag_operation" : "{KeyMetaCount, plural, one {Updated tags of # key} other {Updated tags of # keys}}",
   "activity_content_delivery_config_create" : "Created Content Delivery Configuration",
   "activity_content_delivery_config_delete" : "Deleted Content Delivery Configuration",
   "activity_content_delivery_config_update" : "Updated Content Delivery Configuration",

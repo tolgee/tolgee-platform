@@ -39,6 +39,7 @@
   "activity_batch_operation_tag_keys" : "{KeyMetaCount, plural, one {Tilføjede tag til # key i batch} other {Tilføjede tag til # keys i batch}}",
   "activity_batch_operation_untag_keys" : "{KeyMetaCount, plural, one {Fjernede tag fra # nøgle i batch} other {Fjernede tag fra # nøgler i batch}}",
   "activity_complex_edit" : "Redigerede nøgle",
+  "activity_complex_tag_operation" : "{KeyMetaCount, plural, one {Opdaterede tags for # nøgle} other {Opdaterede tags for # nøgler}}",
   "activity_content_delivery_config_create" : "Oprettet konfiguration til levering af indhold",
   "activity_content_delivery_config_delete" : "Slettet konfiguration til levering af indhold",
   "activity_content_delivery_config_update" : "Opdaterede konfiguration til levering af indhold",
