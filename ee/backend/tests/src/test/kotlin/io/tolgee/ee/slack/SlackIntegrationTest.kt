@@ -4,9 +4,9 @@ import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
 import com.slack.api.methods.MethodsClient
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.request.users.UsersLookupByEmailRequest
+import com.slack.api.methods.request.users.UsersInfoRequest
 import com.slack.api.methods.response.chat.ChatPostMessageResponse
-import com.slack.api.methods.response.users.UsersLookupByEmailResponse
+import com.slack.api.methods.response.users.UsersInfoResponse
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
@@ -133,7 +133,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     whenever(mockPostMessageResponse.isOk).thenReturn(true)
     whenever(mockPostMessageResponse.ts).thenReturn("ts")
 
-    val mockUsersResponse = mock<UsersLookupByEmailResponse>()
+    val mockUsersResponse = mock<UsersInfoResponse>()
     whenever(mockUsersResponse.isOk).thenReturn(true)
 
     whenever(
@@ -143,8 +143,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     ).thenReturn(mockPostMessageResponse)
 
     whenever(
-      methodsClientMock.usersLookupByEmail(
-        any<RequestConfigurator<UsersLookupByEmailRequest.UsersLookupByEmailRequestBuilder>>(),
+      methodsClientMock.usersInfo(
+        any<RequestConfigurator<UsersInfoRequest.UsersInfoRequestBuilder>>(),
       ),
     ).thenReturn(mockUsersResponse)
 
