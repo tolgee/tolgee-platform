@@ -10,6 +10,8 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+    async:
+      request-timeout: 180000
   jpa:
     properties:
       hibernate:
