@@ -156,6 +156,9 @@ class SlackExecutorHelper(
       markdownText(currentTranslate)
     }
     val contextText = author ?: return@withBlocks
+    if (contextText.isEmpty()) {
+      return@withBlocks
+    }
     context {
       markdownText(contextText)
     }
