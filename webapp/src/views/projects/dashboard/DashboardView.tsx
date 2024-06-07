@@ -1,5 +1,5 @@
 import { Box, styled } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
@@ -15,24 +15,30 @@ import { BaseProjectView } from '../BaseProjectView';
 import { ProjectDescription } from './ProjectDescription';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useEffect } from 'react';
+import { ProjectNameAndId } from './ProjectNameAndId';
+import { ProjectSettingsRight } from './ProjectSettingsRight';
 
 const StyledContainer = styled(Box)`
   display: grid;
   grid-template:
+    'title         title'
     'totalStats    totalStats'
     'langStats     activityList'
     'activityChart activityChart';
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto minmax(300px, auto) auto;
+  grid-template-rows: auto auto minmax(300px, auto) auto;
   min-height: 100%;
   flex-direction: column;
   gap: 16px 16px;
   padding-bottom: 60px;
-
+  @container main-container (min-width: 1400px) {
+    padding-top: 24px;
+  }
   @container main-container (max-width: 1000px) {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto;
     grid-template-areas:
+      'title'
       'totalStats'
       'langStats'
       'activityList'
@@ -40,11 +46,10 @@ const StyledContainer = styled(Box)`
   }
 `;
 
-const StyledProjectId = styled('div')`
+const StyledTopInfo = styled(Box)`
   display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: ${({ theme }) => theme.palette.text.secondary};
+  grid-area: title;
+  justify-content: space-between;
 `;
 
 export const DashboardView = () => {
@@ -119,19 +124,15 @@ export const DashboardView = () => {
       <BaseProjectView
         windowTitle={t('project_dashboard_title')}
         maxWidth="wide"
-        navigationRight={
-          <StyledProjectId>
-            <T
-              keyName="project_dashboard_project_id"
-              params={{ id: project.id }}
-            />
-          </StyledProjectId>
-        }
       >
         {anythingLoading ? (
           <EmptyListMessage loading={true} />
         ) : (
           <StyledContainer>
+            <StyledTopInfo>
+              <ProjectNameAndId project={project} />
+              <ProjectSettingsRight project={project} />
+            </StyledTopInfo>
             <Box gridArea="totalStats">
               <ProjectTotals stats={statsLoadable.data!} />
               {project.description && (
