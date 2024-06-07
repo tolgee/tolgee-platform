@@ -52,6 +52,10 @@ class PreTranslationByTmChunkProcessor(
     return PreTranslationByTmJobParams::class.java
   }
 
+  override fun getMaxPerJobConcurrency(): Int {
+    return 1
+  }
+
   override fun getChunkSize(
     request: PreTranslationByTmRequest,
     projectId: Long,
