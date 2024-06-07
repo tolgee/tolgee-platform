@@ -627,6 +627,7 @@
   "import-status-storing-keys" : "Storing keys...",
   "import-status-storing-translations" : "Storing translations...",
   "import-successful-message" : "Import successful",
+  "import-timeout-message" : "Import timed out",
   "import_translations_title" : "Import translations",
   "integrate-api-key-hidden-description" : "<Only new key can be revealed>",
   "integrate_choose_your_weapon" : "Choose your weapon",

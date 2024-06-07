@@ -627,6 +627,7 @@
   "import-status-storing-keys" : "Ukládání klíčů...",
   "import-status-storing-translations" : "Ukládání překladů...",
   "import-successful-message" : "Úspěšně importováno",
+  "import-timeout-message" : "Časový limit importu vypršel",
   "import_translations_title" : "Importovat překlady",
   "integrate-api-key-hidden-description" : "<Pouze nový klíč může být zobrazen>",
   "integrate_choose_your_weapon" : "Vyberte svou zbraň",

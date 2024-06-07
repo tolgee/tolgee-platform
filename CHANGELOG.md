@@ -1,3 +1,10 @@
+## [3.64.1](https://github.com/tolgee/tolgee-platform/compare/v3.64.0...v3.64.1) (2024-06-07)
+
+
+### Bug Fixes
+
+* Make batch MT translation less concurrent ([#2351](https://github.com/tolgee/tolgee-platform/issues/2351)) ([094bf6c](https://github.com/tolgee/tolgee-platform/commit/094bf6c5e479d48aff83e0bea5a91ca15c8543f4))
+
 # [3.64.0](https://github.com/tolgee/tolgee-platform/compare/v3.63.4...v3.64.0) (2024-06-07)
 
 
