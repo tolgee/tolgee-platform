@@ -27,6 +27,8 @@ class TranslationViewDataProvider(
     // otherwise it takes forever for postgres to plan the execution
     em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
 
+    createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
+
     var translationsViewQueryBuilder = getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor)
     val count = em.createQuery(translationsViewQueryBuilder.countQuery).singleResult
 
@@ -45,6 +47,16 @@ class TranslationViewDataProvider(
       views.forEach { it.keyTags = tagMap[it.keyId] ?: listOf() }
     }
     return PageImpl(views, pageable, count)
+  }
+
+  private fun createFailedKeysInJobTempTable(filterFailedKeysOfJob: Long?) {
+    if (filterFailedKeysOfJob == null) {
+      return
+    }
+
+    em.createNativeQuery("select from create_unsuccessful_job_keys_temp(:jobId)")
+      .setParameter("jobId", filterFailedKeysOfJob)
+      .singleResult
   }
 
   fun getSelectAllKeys(

@@ -3420,27 +3420,29 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1714995693669-0">
         <sql>
-            CREATE OR REPLACE FUNCTION get_unsuccessful_job_keys(batchJobId BIGINT)
-            RETURNS TABLE(keyId bigint) AS '
-            BEGIN
-            RETURN QUERY WITH unsuccessful_targets AS (
-            SELECT *
-            FROM (
-                     SELECT jsonb_array_elements(bj.target) AS target
-                     FROM tolgee_batch_job bj
-                     WHERE bj.id = batchJobId
-                 ) AS targets
-            WHERE targets.target NOT IN (
-                SELECT jsonb_array_elements(tbje.success_targets)
-                FROM tolgee_batch_job_chunk_execution tbje
-                WHERE tbje.batch_job_id = batchJobId
-              )
-            )
-            SELECT DISTINCT (target -> ''keyId'')::bigint AS keyId
-            FROM unsuccessful_targets;
-            END;
-            '
-            LANGUAGE plpgsql;
+            CREATE OR REPLACE FUNCTION create_unsuccessful_job_keys_temp(batchJobId BIGINT)
+            RETURNS void
+            AS '
+                BEGIN
+                    -- Create a temporary table to store the results
+                    CREATE TEMP TABLE temp_unsuccessful_job_keys AS
+                    WITH unsuccessful_targets AS (
+                        SELECT *
+                        FROM (
+                                 SELECT jsonb_array_elements(bj.target) AS target
+                                 FROM tolgee_batch_job bj
+                                 WHERE bj.id = batchJobId
+                             ) AS targets
+                        WHERE targets.target NOT IN (
+                            SELECT jsonb_array_elements(tbje.success_targets)
+                            FROM tolgee_batch_job_chunk_execution tbje
+                            WHERE tbje.batch_job_id = batchJobId
+                          )
+                    )
+                    SELECT DISTINCT (target -> ''keyId'')::bigint AS key_id
+                    FROM unsuccessful_targets;
+                END;
+            ' LANGUAGE plpgsql;
         </sql>
     </changeSet>
 </databaseChangeLog>

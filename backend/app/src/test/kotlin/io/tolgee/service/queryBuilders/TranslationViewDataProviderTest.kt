@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -117,7 +118,8 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
             filterFailedKeysOfJob = job.id
           },
       )
-    result
+    result.content.assert.hasSize(1)
+    result.content[0].keyName.assert.isEqualTo("A key")
   }
 
   private fun generateCommentStatesTestData(): TranslationsTestData {
