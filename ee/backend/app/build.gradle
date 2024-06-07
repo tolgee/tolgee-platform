@@ -13,6 +13,7 @@ plugins {
     id "java"
     id "kotlin-allopen"
     id "org.hibernate.orm"
+    id "io.sentry.jvm.gradle"
 }
 
 apply plugin: "kotlin-allopen"
@@ -65,6 +66,7 @@ dependencies {
      */
     implementation libs.hibernateTypes
     implementation libs.jacksonKotlin
+    implementation libs.commonsCodec
 
     /**
      * Liquibase
@@ -81,6 +83,13 @@ dependencies {
 
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    /**
+     * SLACK SDK
+     */
+    implementation libs.slackApiClient
+    implementation libs.slackApiModelKotlinExtension
+    implementation libs.slackApiClientKotlinExtension
 }
 
 kotlin {

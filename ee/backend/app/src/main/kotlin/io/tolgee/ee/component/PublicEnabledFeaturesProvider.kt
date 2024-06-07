@@ -16,6 +16,6 @@ class PublicEnabledFeaturesProvider(
 ) : EnabledFeaturesProvider {
   var forceEnabled: Set<Feature>? = null
 
-  override fun get(organizationId: Long): Array<Feature> =
+  override fun get(organizationId: Long?): Array<Feature> =
     forceEnabled?.toTypedArray() ?: eeSubscriptionService.findSubscriptionEntity()?.enabledFeatures ?: emptyArray()
 }

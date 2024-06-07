@@ -2,20 +2,20 @@ package io.tolgee.model.slackIntegration
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.StandardAuditModel
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
 import org.hibernate.annotations.Type
 
 @Entity
 class SavedSlackMessage(
-  val messageTs: String,
+  val messageTimeStamp: String = "",
   @ManyToOne(fetch = FetchType.LAZY)
   var slackConfig: SlackConfig,
-  var keyId: Long,
+  var keyId: Long = 0L,
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  var langTags: Set<String>,
-  var createdKeyBlocks: Boolean,
-) : StandardAuditModel()
+  var languageTags: Set<String> = setOf(),
+  var createdKeyBlocks: Boolean = false,
+) : StandardAuditModel() {
+  @OneToMany(mappedBy = "slackMessage", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+  var info: MutableList<SlackMessageInfo> = mutableListOf()
+}
