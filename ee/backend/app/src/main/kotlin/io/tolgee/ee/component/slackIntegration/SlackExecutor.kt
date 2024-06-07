@@ -72,17 +72,7 @@ class SlackExecutor(
 
   fun getSlackNickName(authorId: Long): String? {
     val slackId = slackUserConnectionService.findByUserAccountId(authorId)?.slackUserId ?: return null
-    val response =
-      slackClient.methods(tolgeeProperties.slack.token).usersInfo {
-        it.user(slackId)
-      }
-
-    return if (response.isOk) {
-      response.user?.name
-    } else {
-      logger.info(response.error)
-      null
-    }
+    return "<@$slackId>"
   }
 
   private fun processSavedMessage(

@@ -308,7 +308,7 @@ class SlackExecutorHelper(
     val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
     val formattedTime = formatter.format(date)
 
-    val authorMention = author?.let { "@$it" } ?: data.activityData?.author?.name
+    val authorMention = author ?: data.activityData?.author?.name
     return i18n.translate("slack.common.message.modification-info").format(authorMention, event, formattedTime)
   }
 
@@ -378,7 +378,7 @@ class SlackExecutorHelper(
   }
 
   private fun SectionBlockBuilder.authorHeadSection(head: String) {
-    val authorMention = author?.let { "@$it" } ?: data.activityData?.author?.name
+    val authorMention = author ?: data.activityData?.author?.name
     markdownText(" *$authorMention* $head")
   }
 
