@@ -57,6 +57,7 @@ export type BillingProgress = {
   low: string;
   over: string;
   sufficient: string;
+  overForbidden: string;
   separator: string;
 };
 
@@ -186,9 +187,10 @@ export const colors = {
       background: '#C4C4C4',
       low: '#E80000',
       over: '#ffce00',
+      overForbidden: '#970000',
       sufficient: '#17AD18',
       separator: '#656565',
-    },
+    } satisfies BillingProgress,
     billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
     marker: {
@@ -316,9 +318,10 @@ export const colors = {
       background: '#565656',
       low: '#ca0000',
       over: '#ffce00',
+      overForbidden: '#980000',
       sufficient: '#1e991e',
       separator: '#656565',
-    },
+    } satisfies BillingProgress,
     billingPlan: '#233043',
     globalLoading: '#ff6995',
     marker: {

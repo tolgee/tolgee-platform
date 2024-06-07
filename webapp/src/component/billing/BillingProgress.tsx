@@ -34,7 +34,10 @@ const StyledExtra = styled(Box)`
   right: 0px;
   top: 0px;
   bottom: 0px;
-  background: ${({ theme }) => theme.palette.billingProgress.over};
+  background: ${({ theme }) => theme.palette.billingProgress.overForbidden};
+  &.canGoOver {
+    background: ${({ theme }) => theme.palette.billingProgress.over};
+  }
 `;
 
 const StyledLabelContainer = styled('div')`
@@ -120,7 +123,9 @@ export const BillingProgress: React.FC<Props> = ({
       label: (
         <T keyName="billing-progress-label-over" params={{ value: extra }} />
       ),
-      color: theme.palette.billingProgress.over,
+      color: canGoOver
+        ? theme.palette.billingProgress.over
+        : theme.palette.billingProgress.overForbidden,
     });
   }
 
@@ -146,7 +151,12 @@ export const BillingProgress: React.FC<Props> = ({
           width={`${progressLength}%`}
           className={clsx({ critical })}
         />
-        {Boolean(extra) && <StyledExtra width={`${extraProgressLength}%`} />}
+        {Boolean(extra) && (
+          <StyledExtra
+            width={`${extraProgressLength}%`}
+            className={clsx({ canGoOver })}
+          />
+        )}
       </StyledContainer>
     </Tooltip>
   );
