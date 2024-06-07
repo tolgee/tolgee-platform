@@ -291,7 +291,8 @@ class SlackExecutor(
         it.channel(payload.channel_id)
       }
 
-    if (!response.isOk || response.channel == null) {
+    if (!response.isOk) {
+      logger.info(response.error)
       return false
     }
 
