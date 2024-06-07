@@ -22,12 +22,12 @@ export const ProjectSettingsRight = ({ project }: Props) => {
   return (
     <StyledContainer>
       <Tooltip title={t('project_dashboard_settings_link')} disableInteractive>
-        <Link
-          component={IconButton}
+        <IconButton
+          component={Link}
           to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: project.id })}
         >
           <Settings />
-        </Link>
+        </IconButton>
       </Tooltip>
     </StyledContainer>
   );
