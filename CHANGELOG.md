@@ -1,3 +1,15 @@
+# [3.64.0](https://github.com/tolgee/tolgee-platform/compare/v3.63.4...v3.64.0) (2024-06-07)
+
+
+### Bug Fixes
+
+* billing indicator more red and working in safari ([#2349](https://github.com/tolgee/tolgee-platform/issues/2349)) ([2628cdd](https://github.com/tolgee/tolgee-platform/commit/2628cdd069bae123181292de93a90272bd91bbb5))
+
+
+### Features
+
+* dashboard project id ([#2347](https://github.com/tolgee/tolgee-platform/issues/2347)) ([8fff975](https://github.com/tolgee/tolgee-platform/commit/8fff975e5c1554214602061e03f9d68126a33881))
+
 ## [3.63.4](https://github.com/tolgee/tolgee-platform/compare/v3.63.3...v3.63.4) (2024-06-06)
 
 

@@ -969,6 +969,7 @@
   "project_dashboard_project_id" : "ID {id, number}",
   "project_dashboard_project_owner" : "Projektejer",
   "project_dashboard_reviewed_percent" : "Gennemgået",
+  "project_dashboard_settings_link" : "Projektindstillinger",
   "project_dashboard_show_translations" : "Vis oversættelser",
   "project_dashboard_strings_count" : "Tekststrenge",
   "project_dashboard_tag_count" : "Tags",
