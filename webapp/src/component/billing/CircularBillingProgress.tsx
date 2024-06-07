@@ -29,43 +29,49 @@ const StyledCircleContent = styled('circle')`
 
 const StyledCircleContentOver = styled(StyledCircleContent)`
   stroke-width: 17px;
-  stroke: ${({ theme }) => theme.palette.billingProgress.over};
   stroke-linecap: unset;
   stroke-linecap: round;
+  stroke: ${({ theme }) => theme.palette.billingProgress.overForbidden};
+  &.canGoOver {
+    stroke: ${({ theme }) => theme.palette.billingProgress.over};
+  }
 `;
 
 type Props = {
-  percent: number;
+  value: number;
+  maxValue: number;
+  canGoOver: boolean;
   size?: number;
-  canGoOver?: boolean;
 };
 
 export const CircularBillingProgress = ({
-  percent,
-  size = 28,
+  value,
+  maxValue = 100,
   canGoOver,
+  size = 28,
 }: Props) => {
-  const normalized = percent > 1 ? 1 : percent < 0 ? 0 : percent;
-  const critical = normalized > BILLING_CRITICAL_FRACTION && !canGoOver;
+  const normalized = value > maxValue ? maxValue : value < 0 ? 0 : value;
+  const critical =
+    normalized > BILLING_CRITICAL_FRACTION * maxValue && !canGoOver;
 
-  const extra = percent > 1 ? percent - 1 : 0;
+  const extra = value > maxValue ? value - maxValue : 0;
 
-  const fullLength = percent > 1 ? percent : 1;
+  const fullLength = value > maxValue ? value : maxValue;
   let progressLength = CIRCUIT - (normalized / fullLength) * CIRCUIT;
-  let extraProgressLength = (extra / fullLength) * CIRCUIT - CIRCUIT;
+  let extraProgressLength = CIRCUIT - (extra / fullLength) * CIRCUIT;
   let rotation = 0;
 
   if (extra) {
     // make bars separated
     progressLength += 20;
-    extraProgressLength -= 20;
-    rotation = 12.5;
+    extraProgressLength += 20;
+    rotation = 12;
   }
 
   return (
     <svg viewBox="0 0 114 114" style={{ width: size, height: size }}>
       <StyledCircleBackground
-        className={clsx({ critical, extra })}
+        className={clsx({ extra })}
         cx="57"
         cy="57"
         r={RADIUS}
@@ -87,8 +93,9 @@ export const CircularBillingProgress = ({
           r={RADIUS}
           sx={{
             strokeDashoffset: extraProgressLength,
-            transform: `rotate(${-90 - rotation}deg)`,
+            transform: `scale(1, -1) rotate(${90 + rotation}deg)`,
           }}
+          className={clsx({ canGoOver })}
         />
       )}
     </svg>
