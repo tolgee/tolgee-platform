@@ -3251,4 +3251,9 @@
             create index translation_comment_translation_id_state on translation_comment(translation_id, state);
         </sql>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1717855133193-1">
+        <addColumn tableName="language">
+            <column name="deleted_at" type="timestamp(6)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

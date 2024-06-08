@@ -36,7 +36,7 @@ class LanguageStatsService(
         try {
           val baseLanguage = projectService.getOrAssignBaseLanguage(projectId)
           val rawBaseLanguageStats =
-            allRawLanguageStats.find { it.languageId == baseLanguage?.id }
+            allRawLanguageStats.find { it.languageId == baseLanguage.id }
               ?: return@tx
           val projectStats = projectStatsService.getProjectStats(projectId)
           val languageStats =

@@ -24,7 +24,7 @@ class LanguageServiceTest : AbstractSpringTest() {
 
     var foundImportLanguage = importService.findLanguages(testData.import).first()
     assertThat(foundImportLanguage.existingLanguage!!.id).isEqualTo(testData.english.id)
-    languageService.deleteLanguage(testData.german.id)
+    languageService.hardDeleteLanguage(testData.german.id)
     entityManager.flush()
     entityManager.clear()
     foundImportLanguage = importService.findLanguages(testData.import).find { it.name == "de" }!!
@@ -37,7 +37,7 @@ class LanguageServiceTest : AbstractSpringTest() {
     val testData = MtSettingsTestData()
     testDataService.saveTestData(testData.root)
     entityManager.flush()
-    languageService.deleteLanguage(testData.germanLanguage.id)
+    languageService.hardDeleteLanguage(testData.germanLanguage.id)
     languageService.findEntity(testData.germanLanguage.id).assert.isNull()
   }
 
@@ -47,7 +47,7 @@ class LanguageServiceTest : AbstractSpringTest() {
     val testData = TranslationCommentsTestData()
     testDataService.saveTestData(testData.root)
     entityManager.flush()
-    languageService.deleteLanguage(testData.englishLanguage.id)
+    languageService.hardDeleteLanguage(testData.englishLanguage.id)
     languageService.findEntity(testData.englishLanguage.id).assert.isNull()
   }
 }

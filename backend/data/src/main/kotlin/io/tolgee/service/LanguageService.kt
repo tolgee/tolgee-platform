@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -10,6 +11,7 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
@@ -22,6 +24,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -39,6 +42,8 @@ class LanguageService(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: LanguageService,
   private val cacheManager: org.springframework.cache.CacheManager,
+  private val currentDateProvider: CurrentDateProvider,
+  private val importService: ImportService,
 ) {
   @set:Autowired
   @set:Lazy
@@ -62,12 +67,32 @@ class LanguageService(
     languageId: Long,
     projectId: Long,
   ) {
+    entityManager.clear()
     val language = getEntity(languageId, projectId)
     deleteLanguage(language)
   }
 
   @Transactional
   fun deleteLanguage(language: Language) {
+    language.deletedAt = currentDateProvider.date
+    importService.onExistingLanguageRemoved(language)
+    save(language)
+    self.hardDeleteLanguageAsync(language)
+  }
+
+  @Transactional
+  fun deleteLanguage(id: Long) {
+    hardDeleteLanguage(getEntity(id))
+  }
+
+  @Async
+  @Transactional
+  fun hardDeleteLanguageAsync(language: Language) {
+    hardDeleteLanguage(language)
+  }
+
+  @Transactional
+  fun hardDeleteLanguage(language: Language) {
     permissionService.removeLanguageFromPermissions(language)
     languageRepository.delete(language)
     entityManager.flush()
@@ -75,8 +100,8 @@ class LanguageService(
   }
 
   @Transactional
-  fun deleteLanguage(id: Long) {
-    deleteLanguage(getEntity(id))
+  fun hardDeleteLanguage(id: Long) {
+    hardDeleteLanguage(getEntity(id))
   }
 
   @Transactional
@@ -163,13 +188,6 @@ class LanguageService(
     project: Project,
   ): LanguageDto? {
     return self.getProjectLanguages(project.id).singleOrNull { tag == it.tag }
-  }
-
-  fun getByTag(
-    tag: String,
-    project: Project,
-  ): LanguageDto {
-    return findByTag(tag, project) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
   fun findByTag(
