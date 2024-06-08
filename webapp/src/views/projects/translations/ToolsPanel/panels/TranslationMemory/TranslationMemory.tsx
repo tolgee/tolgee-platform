@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { Skeleton, styled } from '@mui/material';
+import { styled } from '@mui/material';
 
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';

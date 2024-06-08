@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
