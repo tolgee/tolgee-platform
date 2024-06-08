@@ -3246,4 +3246,9 @@
             <column name="file_structure_template" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1715000000000-0">
+        <sql>
+            create index translation_comment_translation_id_state on translation_comment(translation_id, state);
+        </sql>
+    </changeSet>
 </databaseChangeLog>
