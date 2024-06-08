@@ -7,7 +7,9 @@ package io.tolgee.service
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
+import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -49,5 +51,23 @@ class LanguageServiceTest : AbstractSpringTest() {
     entityManager.flush()
     languageService.hardDeleteLanguage(testData.englishLanguage.id)
     languageService.findEntity(testData.englishLanguage.id).assert.isNull()
+  }
+
+  @Test
+  fun `hard deletes language`() {
+    val testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+
+    executeInNewTransaction {
+      languageService.deleteLanguage(testData.germanLanguage.id)
+    }
+
+    executeInNewTransaction {
+      waitForNotThrowing(timeout = 10000, pollTime = 100) {
+        entityManager.createQuery("select 1 from Language l where l.id = :id")
+          .setParameter("id", testData.germanLanguage.id)
+          .resultList.assert.isEmpty()
+      }
+    }
   }
 }

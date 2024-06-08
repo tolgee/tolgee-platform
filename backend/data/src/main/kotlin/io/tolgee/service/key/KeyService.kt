@@ -454,7 +454,7 @@ class KeyService(
       translation.state = TranslationState.DISABLED
       translationService.save(translation)
     }
-    return languages
+    return languages.sortedBy { languageIds.indexOf(it.id) }
   }
 
   fun getViewsByKeyIds(ids: List<Long>): List<KeyView> {

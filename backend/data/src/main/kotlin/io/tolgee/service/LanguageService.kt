@@ -73,16 +73,17 @@ class LanguageService(
   }
 
   @Transactional
-  fun deleteLanguage(language: Language) {
-    language.deletedAt = currentDateProvider.date
-    importService.onExistingLanguageRemoved(language)
-    save(language)
-    self.hardDeleteLanguageAsync(language)
+  fun deleteLanguage(id: Long) {
+    deleteLanguage(getEntity(id))
   }
 
   @Transactional
-  fun deleteLanguage(id: Long) {
-    hardDeleteLanguage(getEntity(id))
+  fun deleteLanguage(language: Language) {
+    language.deletedAt = currentDateProvider.date
+    importService.onExistingLanguageRemoved(language)
+    permissionService.removeLanguageFromPermissions(language)
+    save(language)
+    self.hardDeleteLanguageAsync(language)
   }
 
   @Async
@@ -93,7 +94,6 @@ class LanguageService(
 
   @Transactional
   fun hardDeleteLanguage(language: Language) {
-    permissionService.removeLanguageFromPermissions(language)
     languageRepository.delete(language)
     entityManager.flush()
     evictCache(language)
@@ -162,7 +162,7 @@ class LanguageService(
   }
 
   fun findEntity(id: Long): Language? {
-    return languageRepository.findById(id).orElse(null)
+    return languageRepository.find(id)
   }
 
   fun getEntity(id: Long): Language {

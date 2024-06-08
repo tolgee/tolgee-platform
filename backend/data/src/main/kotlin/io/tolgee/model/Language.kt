@@ -8,7 +8,6 @@ import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.events.OnLanguagePrePersist
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
-import io.tolgee.service.dataImport.ImportService
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -19,7 +18,6 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
-import jakarta.persistence.Transient
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
@@ -106,13 +104,6 @@ class Language : StandardAuditModel(), ILanguage, SoftDeletable {
     flagEmoji = dto.flagEmoji
   }
 
-  /**
-   * Executing ot the #ImportService.onExistingLanguageRemoved(Language) method leads to stack overflow
-   * so we need to prevent it from being executed multiple times
-   */
-  @Transient
-  private var _removedHookExecuted = false
-
   override fun toString(): String {
     return "Language(tag=$tag, name=$name, originalName=$originalName)"
   }
@@ -130,9 +121,6 @@ class Language : StandardAuditModel(), ILanguage, SoftDeletable {
 
     @Configurable
     class LanguageListeners {
-      @Autowired
-      lateinit var importServiceProvider: ObjectFactory<ImportService>
-
       @Autowired
       lateinit var eventPublisherProvider: ObjectFactory<ApplicationEventPublisher>
 
