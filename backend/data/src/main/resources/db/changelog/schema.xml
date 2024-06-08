@@ -3246,12 +3246,6 @@
             <column name="file_structure_template" type="varchar(255)"/>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1714995693769-0">
-        <sql>
-            DROP INDEX translation_text_gin_trgm_index;
-            CREATE INDEX translation_text_gist_trgm_index ON translation USING GIST (text gist_trgm_ops);
-        </sql>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1715000000000-0">
         <sql>
             create index translation_comment_translation_id_state on translation_comment(translation_id, state);
