@@ -19,7 +19,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.notNull
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
@@ -186,7 +186,7 @@ class MtBatchTranslatorTest {
       ).getSuggestions(
         any<String>(),
         any<Boolean>(),
-        eq(null),
+        notNull(),
         any<LanguageDto>(),
         any<Pageable>(),
       )
