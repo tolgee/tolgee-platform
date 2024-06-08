@@ -1,3 +1,10 @@
+## [3.64.5](https://github.com/tolgee/tolgee-platform/compare/v3.64.4...v3.64.5) (2024-06-08)
+
+
+### Bug Fixes
+
+* Don't move to GIST index ([4f0a79a](https://github.com/tolgee/tolgee-platform/commit/4f0a79a5c2d02c0491def89afe6d7657362c5ff9))
+
 ## [3.64.4](https://github.com/tolgee/tolgee-platform/compare/v3.64.3...v3.64.4) (2024-06-08)
 
 
