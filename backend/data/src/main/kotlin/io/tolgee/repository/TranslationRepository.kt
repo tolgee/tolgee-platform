@@ -7,7 +7,6 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -94,42 +93,10 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   fun deleteByIdIn(ids: Collection<Long>)
 
-  /**
-   * inputKey param is optional. When provided, target translation for given won't be returned,
-   * because it's the base translation
-   */
   @Query(
     """
-      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
-        key.name as keyName, ns.name as keyNamespace, key.id as keyId, 
-      similarity(baseTranslation.text, :baseTranslationText) as similarity
-      from Translation baseTranslation
-      join baseTranslation.key key
-      left join key.namespace ns
-      join key.project p
-      join Translation target on 
-            target.key = key and 
-            target.language.id = :targetLanguageId and
-            target.text <> '' and
-            target.text is not null
-      where baseTranslation.language.id = p.baseLanguage.id and
-        cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
-        (:key is null or key <> :key) and target.key.isPlural = :isPlural
-      order by similarity desc
-      """,
-  )
-  fun getTranslateMemorySuggestions(
-    baseTranslationText: String,
-    isPlural: Boolean,
-    key: Key? = null,
-    targetLanguageId: Long,
-    pageable: Pageable,
-  ): Page<TranslationMemoryItemView>
-
-  @Query(
-    """
-      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, 
-      1 as similarity
+      select 
+      new io.tolgee.model.views.TranslationMemoryItemView(baseTranslation.text, target.text, key.name, null, 1, key.id) 
       from Translation baseTranslation
       join baseTranslation.key key
       join key.project p
@@ -147,7 +114,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     baseTranslationText: String,
     key: Key,
     targetLanguageId: Long,
-    pageable: Pageable = PageRequest.of(0, 1),
+    pageable: Pageable = Pageable.ofSize(1),
   ): List<TranslationMemoryItemView>
 
   @Query(

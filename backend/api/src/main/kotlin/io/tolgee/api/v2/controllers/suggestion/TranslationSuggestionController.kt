@@ -103,9 +103,10 @@ class TranslationSuggestionController(
 
     val data =
       dto.baseText?.let { baseText ->
-        translationMemoryService.suggest(
+        translationMemoryService.getSuggestions(
           baseText,
           isPlural = dto.isPlural ?: false,
+          keyId = null,
           targetLanguage,
           pageable,
         )
@@ -114,7 +115,7 @@ class TranslationSuggestionController(
           val keyId = dto.keyId ?: throw BadRequestException(Message.KEY_NOT_FOUND)
           val key = keyService.findOptional(keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
           key.checkInProject()
-          translationMemoryService.suggest(key, targetLanguage, pageable)
+          translationMemoryService.getSuggestions(key, targetLanguage, pageable)
         }
     return arraytranslationMemoryItemModelAssembler.toModel(data, translationMemoryItemModelAssembler)
   }
