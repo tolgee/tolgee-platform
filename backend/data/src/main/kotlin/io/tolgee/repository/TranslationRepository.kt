@@ -114,7 +114,8 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     baseTranslationText: String,
     key: Key,
     targetLanguageId: Long,
-  ): TranslationMemoryItemView
+    pageable: Pageable = Pageable.ofSize(1),
+  ): List<TranslationMemoryItemView>
 
   @Query(
     """

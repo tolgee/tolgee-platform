@@ -357,7 +357,7 @@ class TranslationService(
       baseTranslationText,
       key,
       targetLanguage.id,
-    )
+    ).firstOrNull()
   }
 
   @Transactional
