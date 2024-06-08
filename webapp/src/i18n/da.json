@@ -627,6 +627,7 @@
   "import-status-storing-keys" : "Gemmer nøgler...",
   "import-status-storing-translations" : "Gemmer oversættelser...",
   "import-successful-message" : "Importering fuldført",
+  "import-timeout-message" : "Importen timed out",
   "import_translations_title" : "Importer oversættelser",
   "integrate-api-key-hidden-description" : "<Kun nyoprettede nøgler kan vises>",
   "integrate_choose_your_weapon" : "Vælg dit skæbne",

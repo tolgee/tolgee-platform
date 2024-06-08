@@ -1,3 +1,10 @@
+## [3.64.2](https://github.com/tolgee/tolgee-platform/compare/v3.64.1...v3.64.2) (2024-06-08)
+
+
+### Bug Fixes
+
+* Import timeout issues ([#2350](https://github.com/tolgee/tolgee-platform/issues/2350)) ([8b50781](https://github.com/tolgee/tolgee-platform/commit/8b5078153784097df1cb8d75682afec562a7fb84))
+
 ## [3.64.1](https://github.com/tolgee/tolgee-platform/compare/v3.64.0...v3.64.1) (2024-06-07)
 
 
