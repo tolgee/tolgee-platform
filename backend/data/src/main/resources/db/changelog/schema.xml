@@ -3250,6 +3250,7 @@
         <sql>
             DROP INDEX translation_text_gin_trgm_index;
             CREATE INDEX translation_text_gist_trgm_index ON translation USING GIST (text gist_trgm_ops);
+        </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1715000000000-0">
         <sql>
