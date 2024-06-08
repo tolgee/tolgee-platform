@@ -1,4 +1,4 @@
-import { styled } from '@mui/material';
+import { Skeleton, styled } from '@mui/material';
 import { green, grey, orange } from '@mui/material/colors';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationWithPlaceholders } from 'tg.views/projects/translations/translationVisual/TranslationWithPlaceholders';
@@ -65,6 +65,13 @@ const StyledSimilarity = styled('div')`
   grid-area: similarity;
   font-size: 13px;
   color: white;
+  padding: 1px 9px;
+  border-radius: 10px;
+`;
+
+const StyledSkeletonSimilarity = styled(Skeleton)`
+  grid-area: similarity;
+  font-size: 13px;
   padding: 1px 9px;
   border-radius: 10px;
 `;
@@ -173,6 +180,23 @@ export const TranslationMemoryItem = ({
         {Math.round(100 * item.similarity)}%
       </StyledSimilarity>
       <StyledSource>{item.keyName}</StyledSource>
+    </StyledItem>
+  );
+};
+
+export const SkeletonTranslationMemoryItem = () => {
+  return (
+    <StyledItem>
+      <StyledTarget>
+        <Skeleton variant="text" />
+      </StyledTarget>
+      <StyledBase>
+        <Skeleton variant="text" />
+      </StyledBase>
+      <StyledSkeletonSimilarity />
+      <StyledSource>
+        <Skeleton variant="text" />
+      </StyledSource>
     </StyledItem>
   );
 };

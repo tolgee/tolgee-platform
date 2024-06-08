@@ -1,12 +1,15 @@
 import { useTranslate } from '@tolgee/react';
-import { styled } from '@mui/material';
+import { Skeleton, styled } from '@mui/material';
 
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { stringHash } from 'tg.fixtures/stringHash';
 import { useEffect } from 'react';
-import { TranslationMemoryItem } from './TranslationMemoryItem';
+import {
+  SkeletonTranslationMemoryItem,
+  TranslationMemoryItem,
+} from './TranslationMemoryItem';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -51,7 +54,11 @@ export const TranslationMemory: React.FC<PanelContentProps> = ({
   }, [items?.length]);
 
   if (!data) {
-    return null;
+    return (
+      <StyledContainer>
+        <SkeletonTranslationMemoryItem />
+      </StyledContainer>
+    );
   }
 
   return (

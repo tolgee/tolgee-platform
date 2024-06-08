@@ -13,6 +13,7 @@ import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { messageService } from 'tg.service/MessageService';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -124,7 +125,8 @@ export const LanguageEditDialog = () => {
             saveActionLoadable={editLoadable}
             validationSchema={Validation.LANGUAGE(t)}
             customActions={
-              <Button
+              <LoadingButton
+                loading={deleteLoadable.isLoading}
                 variant="outlined"
                 color="secondary"
                 data-cy="language-delete-button"
@@ -149,7 +151,7 @@ export const LanguageEditDialog = () => {
                 }}
               >
                 <T keyName="delete_language_button" />
-              </Button>
+              </LoadingButton>
             }
           >
             <Box data-cy="language-modify-form">
