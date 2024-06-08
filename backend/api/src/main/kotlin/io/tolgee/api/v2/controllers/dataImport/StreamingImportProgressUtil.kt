@@ -26,6 +26,11 @@ class StreamingImportProgressUtil(
       }
       try {
         fn(writeStatus)
+        write(
+          ImportApplicationStatusItem(
+            ImportApplicationStatus.DONE,
+          ),
+        )
       } catch (e: Exception) {
         if (e !is BadRequestException) {
           Sentry.captureException(e)

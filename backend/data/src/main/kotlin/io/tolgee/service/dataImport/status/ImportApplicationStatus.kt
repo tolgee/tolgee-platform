@@ -7,4 +7,5 @@ enum class ImportApplicationStatus {
   STORING_TRANSLATIONS,
   FINALIZING,
   ERROR,
+  DONE,
 }
