@@ -10,7 +10,7 @@ import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
-import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
 import jakarta.persistence.TypedQuery
@@ -174,14 +174,16 @@ class MtBatchTranslatorTest {
       this.contains("io.tolgee.component.machineTranslation.metadata.ExampleItem")
     }
 
-    val translationServiceMock = mock(TranslationService::class.java)
-    whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
+    val translationMemoryServiceMock = mock(TranslationMemoryService::class.java)
+    whenever(
+      applicationContextMock.getBean(TranslationMemoryService::class.java),
+    ).thenReturn(translationMemoryServiceMock)
     doAnswer {
       Page.empty<TranslationMemoryItemView>()
     }
       .whenever(
-        translationServiceMock,
-      ).getTranslationMemorySuggestions(
+        translationMemoryServiceMock,
+      ).getSuggestions(
         any<String>(),
         any<Boolean>(),
         eq(null),

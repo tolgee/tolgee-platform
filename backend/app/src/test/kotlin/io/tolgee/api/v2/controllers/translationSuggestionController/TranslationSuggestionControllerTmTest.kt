@@ -177,6 +177,6 @@ class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/pro
           SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id),
         ).andIsOk
       }
-    assertThat(time).isLessThan(1500)
+    assertThat(time).isLessThan(1000)
   }
 }

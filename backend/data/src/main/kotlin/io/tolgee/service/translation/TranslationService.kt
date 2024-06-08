@@ -360,43 +360,6 @@ class TranslationService(
     ).firstOrNull()
   }
 
-  fun getTranslationMemorySuggestions(
-    key: Key,
-    targetLanguage: LanguageDto,
-    pageable: Pageable,
-  ): Page<TranslationMemoryItemView> {
-    val baseTranslation = findBaseTranslation(key) ?: return Page.empty()
-
-    val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
-
-    return getTranslationMemorySuggestions(
-      baseTranslationText,
-      isPlural = key.isPlural,
-      key,
-      targetLanguage,
-      pageable,
-    )
-  }
-
-  fun getTranslationMemorySuggestions(
-    sourceTranslationText: String,
-    isPlural: Boolean,
-    key: Key?,
-    targetLanguage: LanguageDto,
-    pageable: Pageable,
-  ): Page<TranslationMemoryItemView> {
-    if ((sourceTranslationText.length) < 3) {
-      return Page.empty(pageable)
-    }
-    return translationRepository.getTranslateMemorySuggestions(
-      baseTranslationText = sourceTranslationText,
-      isPlural = isPlural,
-      key = key,
-      targetLanguageId = targetLanguage.id,
-      pageable = pageable,
-    )
-  }
-
   @Transactional
   fun dismissAutoTranslated(translation: Translation) {
     translation.auto = false

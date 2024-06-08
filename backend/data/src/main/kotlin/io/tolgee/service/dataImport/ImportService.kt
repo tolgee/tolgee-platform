@@ -301,17 +301,20 @@ class ImportService(
         .setParameter("import", import)
         .resultList as List<ImportKey>
 
+    // when we are import very lot of keys, we need to split it to multiple queries due to parameter limit
     result =
-      entityManager.createQuery(
-        """
+      result.chunked(30000).flatMap { subresult ->
+        entityManager.createQuery(
+          """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ik in :keys
         """,
-      ).setParameter("keys", result)
-        .resultList as List<ImportKey>
+        ).setParameter("keys", subresult)
+          .resultList as List<ImportKey>
+      }
 
     return result
   }
