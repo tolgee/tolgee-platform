@@ -1,3 +1,15 @@
+## [3.64.3](https://github.com/tolgee/tolgee-platform/compare/v3.64.2...v3.64.3) (2024-06-08)
+
+
+### Bug Fixes
+
+* Make Translation Memory faster & enable large project import ([#2352](https://github.com/tolgee/tolgee-platform/issues/2352)) ([0b9d5c0](https://github.com/tolgee/tolgee-platform/commit/0b9d5c02850204dcf80e1606c61479912f2baa54))
+
+
+### Performance Improvements
+
+* Add index so it filters by namespace faster ([#2353](https://github.com/tolgee/tolgee-platform/issues/2353)) ([2802c10](https://github.com/tolgee/tolgee-platform/commit/2802c1076781e9374679e750b5dffd118245e80a))
+
 ## [3.64.2](https://github.com/tolgee/tolgee-platform/compare/v3.64.1...v3.64.2) (2024-06-08)
 
 
