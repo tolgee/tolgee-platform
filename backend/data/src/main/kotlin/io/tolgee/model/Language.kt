@@ -95,6 +95,7 @@ class Language : StandardAuditModel(), ILanguage, SoftDeletable {
   @Column(columnDefinition = "text")
   override var aiTranslatorPromptDescription: String? = null
 
+  @ActivityLoggedProp
   override var deletedAt: Date? = null
 
   fun updateByDTO(dto: LanguageRequest) {

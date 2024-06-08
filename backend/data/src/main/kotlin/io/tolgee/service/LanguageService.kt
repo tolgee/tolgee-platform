@@ -1,5 +1,7 @@
 package io.tolgee.service
 
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -11,6 +13,7 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -44,6 +47,8 @@ class LanguageService(
   private val cacheManager: org.springframework.cache.CacheManager,
   private val currentDateProvider: CurrentDateProvider,
   private val importService: ImportService,
+  private val activityHolder: ActivityHolder,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @set:Autowired
   @set:Lazy
@@ -83,12 +88,18 @@ class LanguageService(
     importService.onExistingLanguageRemoved(language)
     permissionService.removeLanguageFromPermissions(language)
     save(language)
-    self.hardDeleteLanguageAsync(language)
+    self.hardDeleteLanguageAsync(language, authenticationFacade.authenticatedUserOrNull?.id)
   }
 
   @Async
   @Transactional
-  fun hardDeleteLanguageAsync(language: Language) {
+  fun hardDeleteLanguageAsync(
+    language: Language,
+    authorId: Long?,
+  ) {
+    activityHolder.activity = ActivityType.HARD_DELETE_LANGUAGE
+    activityHolder.activityRevision.authorId = authorId
+    activityHolder.activityRevision.projectId = language.project.id
     hardDeleteLanguage(language)
   }
 
