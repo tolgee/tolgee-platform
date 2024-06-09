@@ -7,7 +7,7 @@ import io.tolgee.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.ProjectWithStatsView
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectStatsService
 import org.springframework.data.domain.Page

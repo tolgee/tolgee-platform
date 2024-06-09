@@ -11,8 +11,8 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.nullIfEmpty
 import org.apache.tomcat.util.http.fileupload.IOUtils

@@ -56,7 +56,7 @@ import java.util.*
 @ActivityReturnsExistence
 class Language : StandardAuditModel(), ILanguage, SoftDeletable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language", orphanRemoval = true)
-  var translations: MutableSet<Translation>? = null
+  var translations: MutableList<Translation> = mutableListOf()
 
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project

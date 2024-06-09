@@ -8,8 +8,8 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.views.TranslationMemoryItemView
-import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager

@@ -15,12 +15,12 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.ProjectHolder
-import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.executeInNewRepeatableTransaction

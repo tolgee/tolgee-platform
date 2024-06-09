@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.language
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
@@ -24,6 +24,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -49,6 +50,7 @@ class LanguageService(
   private val importService: ImportService,
   private val activityHolder: ActivityHolder,
   private val authenticationFacade: AuthenticationFacade,
+  private val applicationContext: ApplicationContext,
 ) {
   @set:Autowired
   @set:Lazy
@@ -105,8 +107,7 @@ class LanguageService(
 
   @Transactional
   fun hardDeleteLanguage(language: Language) {
-    languageRepository.delete(language)
-    entityManager.flush()
+    LanguageHardDeleter(language, applicationContext).delete()
     evictCache(language)
   }
 

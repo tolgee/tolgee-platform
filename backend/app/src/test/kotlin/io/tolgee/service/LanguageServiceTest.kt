@@ -16,16 +16,25 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
-@SpringBootTest
+@SpringBootTest(
+  properties = [
+    "spring.jpa.properties.hibernate.generate_statistics=true",
+    "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN",
+  ],
+)
 class LanguageServiceTest : AbstractSpringTest() {
   @Autowired
   private lateinit var authenticationFacade: AuthenticationFacade
+
+  @Autowired
+  private lateinit var sessionFactory: SessionFactory
 
   @Test
   @Transactional
@@ -80,6 +89,25 @@ class LanguageServiceTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  fun `hard deletes language without n+1s`() {
+    val testData = TranslationsTestData()
+    testData.generateLotOfData(100)
+    testDataService.saveTestData(testData.root)
+
+    sessionFactory.statistics.clear()
+    executeInNewTransaction {
+      setAuthentication(testData)
+      languageService.hardDeleteLanguage(testData.germanLanguage.id)
+    }
+    val count = sessionFactory.statistics.prepareStatementCount
+    count.assert.isLessThan(20)
+
+    executeInNewTransaction {
+      assertLanguageDeleted(testData)
+    }
+  }
+
   private fun setAuthentication(testData: TranslationsTestData) {
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
@@ -99,9 +127,9 @@ class LanguageServiceTest : AbstractSpringTest() {
     val result =
       entityManager.createQuery(
         """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
-            |join ar.modifiedEntities ame
-            |where ar.type = :type
-        """.trimMargin(),
+           join ar.modifiedEntities ame
+           where ar.type = :type
+        """,
       )
         .setParameter("type", ActivityType.HARD_DELETE_LANGUAGE)
         .resultList

@@ -20,8 +20,8 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable

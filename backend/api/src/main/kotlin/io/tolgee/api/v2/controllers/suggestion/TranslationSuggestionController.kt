@@ -15,8 +15,8 @@ import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.util.disableAccelBuffering

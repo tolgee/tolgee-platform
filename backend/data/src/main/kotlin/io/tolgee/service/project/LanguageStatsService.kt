@@ -6,7 +6,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.LanguageStats
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.LanguageStatsProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.debug

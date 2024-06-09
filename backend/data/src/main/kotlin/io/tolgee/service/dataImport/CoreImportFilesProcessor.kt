@@ -19,8 +19,8 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
 import io.tolgee.util.getOrThrowIfMoreThanOne

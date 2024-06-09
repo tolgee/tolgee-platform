@@ -25,7 +25,7 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.equalNullable
