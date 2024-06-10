@@ -69,13 +69,6 @@ const StyledSimilarity = styled('div')`
   border-radius: 10px;
 `;
 
-const StyledSkeletonSimilarity = styled(Skeleton)`
-  grid-area: similarity;
-  font-size: 13px;
-  padding: 1px 9px;
-  border-radius: 10px;
-`;
-
 const StyledSource = styled('div')`
   grid-area: source;
   font-size: 13px;
