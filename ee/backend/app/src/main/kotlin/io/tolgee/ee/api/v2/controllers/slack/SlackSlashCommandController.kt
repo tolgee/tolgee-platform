@@ -80,7 +80,12 @@ class SlackSlashCommandController(
             optionsMap,
           ).asSlackResponseString
 
-        "unsubscribe" -> unsubscribe(payload, projectId.toLongOrThrowInvalidCommand()).asSlackResponseString
+        "unsubscribe" ->
+          unsubscribe(
+            payload,
+            projectId.toLongOrThrowInvalidCommand(),
+            languageTag,
+          ).asSlackResponseString
 
         "subscriptions" -> listOfSubscriptions(payload).asSlackResponseString
 
@@ -210,13 +215,12 @@ class SlackSlashCommandController(
   private fun unsubscribe(
     payload: SlackCommandDto,
     projectId: Long,
+    languageTag: String,
   ): SlackMessageDto {
     val user = getUserAccount(payload)
     checkPermissions(projectId, user.id)
 
-    if (!slackConfigService.delete(projectId, payload.channel_id)) {
-      throw SlackErrorException(slackErrorProvider.getNotSubscribedYetError())
-    }
+    slackConfigService.delete(projectId, payload.channel_id, languageTag)
 
     return SlackMessageDto(
       text = i18n.translate("slack.common.message.unsubscribed-successfully"),

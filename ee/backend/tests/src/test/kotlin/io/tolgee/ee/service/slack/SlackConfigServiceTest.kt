@@ -17,7 +17,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
   fun `deletes configs`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    slackConfigService.delete(testData.projectBuilder.self.id, testData.slackConfig.channelId)
+    slackConfigService.delete(testData.projectBuilder.self.id, testData.slackConfig.channelId, "")
     Assertions.assertThat(slackConfigService.findAll()).isEmpty()
   }
 
