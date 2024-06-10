@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import {
   Box,
   Dialog,
@@ -10,7 +10,7 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS } from 'tg.constants/links';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useUser } from 'tg.globalContext/helpers';
@@ -30,12 +30,13 @@ type MfaRecoveryCodesDialogProps = {
 export const MfaRecoveryCodesDialog: FunctionComponent<
   MfaRecoveryCodesDialogProps
 > = ({ password: providedPassword }) => {
+  const [insertedPassword, setInsertedPassword] = useState<string>();
   const history = useHistory();
   const onDialogClose = () => {
     history.push(LINKS.USER_ACCOUNT_SECURITY.build());
+    setInsertedPassword(undefined);
   };
 
-  const [codes, setCodes] = useState<string[] | null>(null);
   const user = useUser();
   const { t } = useTranslate();
 
@@ -43,18 +44,16 @@ export const MfaRecoveryCodesDialog: FunctionComponent<
     if (!providedPassword && user && !user.mfaEnabled) onDialogClose();
   }, [user, providedPassword]);
 
-  const fetchRecoveryCodes = useApiMutation({
+  const codesLoadable = useApiQuery({
     url: '/v2/user/mfa/recovery',
     method: 'put',
+    options: {
+      enabled: Boolean(insertedPassword || providedPassword),
+    },
+    content: {
+      'application/json': { password: insertedPassword || providedPassword! },
+    },
   });
-
-  useEffect(() => {
-    if (providedPassword) {
-      fetchRecoveryCodes.mutate({
-        content: { 'application/json': { password: providedPassword } },
-      });
-    }
-  }, [providedPassword]);
 
   if (!user) return null;
 
@@ -70,36 +69,26 @@ export const MfaRecoveryCodesDialog: FunctionComponent<
         <T keyName="account-security-mfa-recovery-codes" />
       </DialogTitle>
       <DialogContent data-cy="mfa-recovery-codes-dialog-content">
-        {codes ? (
+        {codesLoadable.isLoading ? (
+          <BoxLoading />
+        ) : codesLoadable.data ? (
           <Box>
             <Typography mb={2}>
               <T keyName="account-security-mfa-recovery-codes-description" />
             </Typography>
             <Grid container spacing={2} component="ul">
-              {codes.map((code) => (
+              {codesLoadable.data.map((code) => (
                 <Grid item xs={6} key={code} component="li">
                   <code>{code}</code>
                 </Grid>
               ))}
             </Grid>
           </Box>
-        ) : providedPassword ? (
-          <BoxLoading />
         ) : (
           <StandardForm
             onSubmit={(values) => {
-              fetchRecoveryCodes.mutate(
-                {
-                  content: { 'application/json': values },
-                },
-                {
-                  onSuccess: (codes) => {
-                    setCodes(codes);
-                  },
-                }
-              );
+              setInsertedPassword(values.password);
             }}
-            saveActionLoadable={fetchRecoveryCodes}
             onCancel={() => onDialogClose()}
             initialValues={
               {
@@ -129,7 +118,7 @@ export const MfaRecoveryCodesDialog: FunctionComponent<
           </StandardForm>
         )}
       </DialogContent>
-      {codes && (
+      {codesLoadable.data && (
         <DialogActions>
           <Button
             data-cy="mfa-recovery-codes-dialog-close"
