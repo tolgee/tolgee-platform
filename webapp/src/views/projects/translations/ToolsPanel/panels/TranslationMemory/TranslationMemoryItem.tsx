@@ -1,4 +1,4 @@
-import { Skeleton, styled } from '@mui/material';
+import { styled } from '@mui/material';
 import { green, grey, orange } from '@mui/material/colors';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationWithPlaceholders } from 'tg.views/projects/translations/translationVisual/TranslationWithPlaceholders';
