@@ -163,6 +163,37 @@ class SlackExecutor(
     return attachments
   }
 
+  fun sortAttachments(attachments: MutableList<Attachment>): MutableList<Attachment> {
+    fun getLanguageName(attachment: Attachment): String {
+      val textBlock = attachment.blocks[0].toString()
+      // Assuming the language name is surrounded by asterisks (e.g., 🇸🇬 *Chinese*)
+      return textBlock.substringAfter('*').substringBefore('*').trim()
+    }
+
+    val baseLanguageAttachmentIndex =
+      attachments.indexOfFirst {
+        it.blocks[0].toString().contains("(base)")
+      }
+    val baseLanguageAttachment =
+      if (baseLanguageAttachmentIndex != -1) {
+        attachments.removeAt(baseLanguageAttachmentIndex)
+      } else {
+        null
+      }
+
+    val buttonAttachment = attachments.removeAt(attachments.size - 1)
+
+    attachments.sortBy { getLanguageName(it) }
+
+    baseLanguageAttachment?.let {
+      attachments.add(0, it)
+    }
+
+    attachments.add(buttonAttachment)
+
+    return attachments
+  }
+
   fun sendMessageOnKeyAdded(
     slackConfig: SlackConfig,
     request: SlackRequest,
@@ -241,7 +272,7 @@ class SlackExecutor(
         request
           .channel(config.channelId)
           .ts(savedMessage.messageTimeStamp)
-          .attachments(sortSoBaseLanguageFirst(messageDto.attachments.toMutableList()))
+          .attachments(sortAttachments(messageDto.attachments.toMutableList()))
         if (messageDto.blocks.isNotEmpty()) {
           request.blocks(messageDto.blocks)
         }
@@ -263,7 +294,7 @@ class SlackExecutor(
       slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatPostMessage { request ->
         request.channel(config.channelId)
           .blocks(messageDto.blocks)
-          .attachments(sortSoBaseLanguageFirst(messageDto.attachments.toMutableList()))
+          .attachments(sortAttachments(messageDto.attachments.toMutableList()))
       }
     if (response.isOk) {
       saveMessage(messageDto, response.ts, config)
