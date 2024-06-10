@@ -1,3 +1,10 @@
+## [3.64.6](https://github.com/tolgee/tolgee-platform/compare/v3.64.5...v3.64.6) (2024-06-10)
+
+
+### Bug Fixes
+
+* Soft delete language, machine translation, translation memory UI enhancements ([#2354](https://github.com/tolgee/tolgee-platform/issues/2354)) ([b1450b6](https://github.com/tolgee/tolgee-platform/commit/b1450b66f8840e4c1de6030aa437517f28298602))
+
 ## [3.64.5](https://github.com/tolgee/tolgee-platform/compare/v3.64.4...v3.64.5) (2024-06-08)
 
 
