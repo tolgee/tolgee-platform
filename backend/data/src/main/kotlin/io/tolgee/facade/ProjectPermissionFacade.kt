@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.project.RequestWithLanguagePermissions
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import org.springframework.stereotype.Component
 
 @Component

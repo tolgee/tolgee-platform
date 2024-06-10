@@ -1,6 +1,5 @@
 package io.tolgee.model.views
 
-import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
@@ -12,7 +11,6 @@ open class ProjectWithLanguagesView(
   override val description: String?,
   override val slug: String?,
   override val avatarHash: String?,
-  override val baseLanguage: Language?,
   override val defaultNamespace: Namespace?,
   override val organizationOwner: Organization,
   override val organizationRole: OrganizationRoleType?,
@@ -31,7 +29,6 @@ open class ProjectWithLanguagesView(
         description = view.description,
         slug = view.slug,
         avatarHash = view.avatarHash,
-        baseLanguage = view.baseLanguage,
         defaultNamespace = view.defaultNamespace,
         organizationOwner = view.organizationOwner,
         organizationRole = view.organizationRole,

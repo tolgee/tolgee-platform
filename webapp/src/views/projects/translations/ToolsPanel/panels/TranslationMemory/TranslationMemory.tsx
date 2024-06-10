@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { styled } from '@mui/material';
+import { Skeleton, styled } from '@mui/material';
 
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
@@ -51,7 +51,13 @@ export const TranslationMemory: React.FC<PanelContentProps> = ({
   }, [items?.length]);
 
   if (!data) {
-    return null;
+    return (
+      <StyledContainer>
+        <TabMessage>
+          <Skeleton variant="text" />
+        </TabMessage>
+      </StyledContainer>
+    );
   }
 
   return (

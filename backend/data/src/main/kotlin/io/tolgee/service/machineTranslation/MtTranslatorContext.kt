@@ -7,7 +7,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.PluralForms
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.PluralTranslationUtil.Companion.REPLACE_NUMBER_PLACEHOLDER
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager

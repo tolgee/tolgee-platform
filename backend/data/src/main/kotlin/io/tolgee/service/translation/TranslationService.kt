@@ -27,9 +27,9 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.util.nullIfEmpty

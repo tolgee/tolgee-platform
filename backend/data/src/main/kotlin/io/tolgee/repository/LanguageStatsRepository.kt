@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.model.LanguageStats
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -9,15 +10,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
-  @Query(
-    """
-    from LanguageStats ls
-    join ls.language l
-    where l.project.id = :projectId
-  """,
-  )
-  fun getAllByProjectId(projectId: Long): List<LanguageStats>
-
   @Modifying
   @Transactional
   @Query(
@@ -26,6 +18,27 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
   """,
   )
   fun deleteAllByLanguage(languageId: Long)
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.LanguageStatsDto(
+      ls.language.id,
+      ls.language.project.id,
+      ls.untranslatedWords,
+      ls.translatedWords,
+      ls.reviewedWords,
+      ls.untranslatedKeys,
+      ls.translatedKeys,
+      ls.reviewedKeys,
+      ls.untranslatedPercentage,
+      ls.translatedPercentage,
+      ls.reviewedPercentage
+    )
+    from LanguageStats ls
+    where ls.language.project.id in :projectIds
+  """,
+  )
+  fun getDtosByProjectIds(projectIds: List<Long>): List<LanguageStatsDto>
 
   @Query(
     """

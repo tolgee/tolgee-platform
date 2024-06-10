@@ -57,6 +57,7 @@ class OrganizationStatsService(
     return entityManager.createQuery(
       """
       select count(t) from Translation t where 
+        t.language.deletedAt is null and
         t.key.project.organizationOwner.id = :organizationId and 
         t.state <> io.tolgee.model.enums.TranslationState.UNTRANSLATED and t.key.project.deletedAt is null
       """.trimIndent(),

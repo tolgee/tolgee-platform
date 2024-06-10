@@ -8,6 +8,7 @@ import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
 import { useEffect } from 'react';
 import { MachineTranslationItem } from './MachineTranslationItem';
+import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -66,6 +67,8 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
       keepPreviousData: true,
     },
   });
+
+  useLoadingRegister(machineLoadable.isFetching);
 
   const data = machineLoadable.data;
 

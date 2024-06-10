@@ -38,8 +38,8 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.LanguageService
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService

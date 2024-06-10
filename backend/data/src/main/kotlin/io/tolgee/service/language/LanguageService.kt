@@ -1,5 +1,8 @@
-package io.tolgee.service
+package io.tolgee.service.language
 
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.data.ActivityType
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -10,6 +13,8 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
@@ -19,9 +24,11 @@ import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -39,6 +46,11 @@ class LanguageService(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: LanguageService,
   private val cacheManager: org.springframework.cache.CacheManager,
+  private val currentDateProvider: CurrentDateProvider,
+  private val importService: ImportService,
+  private val activityHolder: ActivityHolder,
+  private val authenticationFacade: AuthenticationFacade,
+  private val applicationContext: ApplicationContext,
 ) {
   @set:Autowired
   @set:Lazy
@@ -62,21 +74,46 @@ class LanguageService(
     languageId: Long,
     projectId: Long,
   ) {
+    entityManager.clear()
     val language = getEntity(languageId, projectId)
     deleteLanguage(language)
   }
 
   @Transactional
+  fun deleteLanguage(id: Long) {
+    deleteLanguage(getEntity(id))
+  }
+
+  @Transactional
   fun deleteLanguage(language: Language) {
+    language.deletedAt = currentDateProvider.date
+    importService.onExistingLanguageRemoved(language)
     permissionService.removeLanguageFromPermissions(language)
-    languageRepository.delete(language)
-    entityManager.flush()
+    save(language)
+    self.hardDeleteLanguageAsync(language, authenticationFacade.authenticatedUserOrNull?.id)
+  }
+
+  @Async
+  @Transactional
+  fun hardDeleteLanguageAsync(
+    language: Language,
+    authorId: Long?,
+  ) {
+    activityHolder.activity = ActivityType.HARD_DELETE_LANGUAGE
+    activityHolder.activityRevision.authorId = authorId
+    activityHolder.activityRevision.projectId = language.project.id
+    hardDeleteLanguage(language)
+  }
+
+  @Transactional
+  fun hardDeleteLanguage(language: Language) {
+    LanguageHardDeleter(language, applicationContext).delete()
     evictCache(language)
   }
 
   @Transactional
-  fun deleteLanguage(id: Long) {
-    deleteLanguage(getEntity(id))
+  fun hardDeleteLanguage(id: Long) {
+    hardDeleteLanguage(getEntity(id))
   }
 
   @Transactional
@@ -137,7 +174,7 @@ class LanguageService(
   }
 
   fun findEntity(id: Long): Language? {
-    return languageRepository.findById(id).orElse(null)
+    return languageRepository.find(id)
   }
 
   fun getEntity(id: Long): Language {
@@ -163,13 +200,6 @@ class LanguageService(
     project: Project,
   ): LanguageDto? {
     return self.getProjectLanguages(project.id).singleOrNull { tag == it.tag }
-  }
-
-  fun getByTag(
-    tag: String,
-    project: Project,
-  ): LanguageDto {
-    return findByTag(tag, project) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
   fun findByTag(

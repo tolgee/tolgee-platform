@@ -1,7 +1,6 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.ninjasquad.springmockk.clear
 import io.tolgee.activity.ActivityService
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
@@ -29,12 +28,12 @@ import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
