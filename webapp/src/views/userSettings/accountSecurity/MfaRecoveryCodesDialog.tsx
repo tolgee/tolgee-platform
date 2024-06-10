@@ -44,16 +44,26 @@ export const MfaRecoveryCodesDialog: FunctionComponent<
     if (!providedPassword && user && !user.mfaEnabled) onDialogClose();
   }, [user, providedPassword]);
 
+  const password = insertedPassword || providedPassword;
+
   const codesLoadable = useApiQuery({
     url: '/v2/user/mfa/recovery',
     method: 'put',
     options: {
-      enabled: Boolean(insertedPassword || providedPassword),
+      enabled: Boolean(password),
+      staleTime: 0,
+      cacheTime: 0,
     },
     content: {
-      'application/json': { password: insertedPassword || providedPassword! },
+      'application/json': { password: password! },
     },
   });
+
+  useEffect(() => {
+    if (password) {
+      codesLoadable.refetch();
+    }
+  }, [password]);
 
   if (!user) return null;
 
