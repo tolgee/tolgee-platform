@@ -183,20 +183,3 @@ export const TranslationMemoryItem = ({
     </StyledItem>
   );
 };
-
-export const SkeletonTranslationMemoryItem = () => {
-  return (
-    <StyledItem>
-      <StyledTarget>
-        <Skeleton variant="text" />
-      </StyledTarget>
-      <StyledBase>
-        <Skeleton variant="text" />
-      </StyledBase>
-      <StyledSkeletonSimilarity />
-      <StyledSource>
-        <Skeleton variant="text" />
-      </StyledSource>
-    </StyledItem>
-  );
-};

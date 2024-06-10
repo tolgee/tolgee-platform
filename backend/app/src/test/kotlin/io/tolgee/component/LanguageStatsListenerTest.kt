@@ -21,10 +21,12 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
     val testData = TranslationsTestData()
     testDataService.saveTestData(testData.root)
 
+    val projectLanguages = languageService.getProjectLanguages(testData.project.id).associateBy { it.id }
+
     val deutschStats =
       executeInNewTransaction(platformTransactionManager) {
         languageStatsService.getLanguageStats(projectId = testData.project.id)
-          .find { it.language.tag == "de" }
+          .find { projectLanguages[it.languageId]!!.tag == "de" }
       }
 
     executeInNewTransaction(platformTransactionManager) {
@@ -45,7 +47,7 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
       executeInNewTransaction(platformTransactionManager) {
         val newDeutschStats =
           languageStatsService.getLanguageStats(projectId = testData.project.id)
-            .find { it.language.tag == "de" }
+            .find { projectLanguages[it.languageId]!!.tag == "de" }
         assertThat(newDeutschStats!!.untranslatedWords - 1).isEqualTo(deutschStats?.untranslatedWords)
       }
     }

@@ -1,6 +1,7 @@
 package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
+import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.LanguageStats
@@ -40,7 +41,7 @@ class LanguageStatsService(
               ?: return@tx
           val projectStats = projectStatsService.getProjectStats(projectId)
           val languageStats =
-            languageStatsRepository.getAllByProjectId(projectId)
+            languageStatsRepository.getAllByProjectIds(listOf(projectId))
               .associateBy { it.language.id }
               .toMutableMap()
 
@@ -88,8 +89,8 @@ class LanguageStatsService(
     }
   }
 
-  fun getLanguageStats(projectIds: List<Long>): Map<Long, List<LanguageStats>> {
-    val data = languageStatsRepository.getAllByProjectIds(projectIds).groupByProjects()
+  fun getLanguageStatsDtos(projectIds: List<Long>): Map<Long, List<LanguageStatsDto>> {
+    val data = languageStatsRepository.getDtosByProjectIds(projectIds).groupByProjects()
 
     val emptyProjectsIds = projectIds.filter { data[it].isNullOrEmpty() }
     if (emptyProjectsIds.isEmpty()) {
@@ -100,21 +101,15 @@ class LanguageStatsService(
       refreshLanguageStats(it)
     }
 
-    return languageStatsRepository.getAllByProjectIds(projectIds).groupByProjects()
+    return languageStatsRepository.getDtosByProjectIds(projectIds).groupByProjects()
   }
 
-  private fun List<LanguageStats>.groupByProjects(): Map<Long, List<LanguageStats>> {
-    return this.groupBy { it.language.project.id }
+  private fun List<LanguageStatsDto>.groupByProjects(): Map<Long, List<LanguageStatsDto>> {
+    return this.groupBy { it.projectId }
   }
 
-  fun getLanguageStats(projectId: Long): List<LanguageStats> {
-    val languageStats = languageStatsRepository.getAllByProjectId(projectId)
-    // when no stats are populated yet, we can try to do it now
-    if (languageStats.isNotEmpty()) {
-      return languageStats
-    }
-    refreshLanguageStats(projectId)
-    return languageStatsRepository.getAllByProjectId(projectId)
+  fun getLanguageStats(projectId: Long): List<LanguageStatsDto> {
+    return getLanguageStatsDtos(listOf(projectId))[projectId] ?: emptyList()
   }
 
   private fun getLanguageStatsRaw(projectId: Long): List<ProjectLanguageStatsResultView> {

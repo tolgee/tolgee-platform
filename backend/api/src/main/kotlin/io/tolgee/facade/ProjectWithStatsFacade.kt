@@ -31,12 +31,12 @@ class ProjectWithStatsFacade(
     val projectIds = projects.content.map { it.id }
     val totals = projectStatsService.getProjectsTotals(projectIds)
     val languages = languageService.getDtosOfProjects(projectIds)
-    val languageStats = languageStatsService.getLanguageStats(projectIds)
+    val languageStats = languageStatsService.getLanguageStatsDtos(projectIds)
 
     val projectsWithStatsContent =
       projects.content.map { projectWithLanguagesView ->
         val projectTotals = totals[projectWithLanguagesView.id]
-        val baseLanguage = projectWithLanguagesView.baseLanguage
+        val baseLanguage = languages[projectWithLanguagesView.id]?.find { it.base }
         val projectLanguageStats =
           languageStats[projectWithLanguagesView.id]
 

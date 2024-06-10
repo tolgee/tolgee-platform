@@ -11,6 +11,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -27,6 +28,7 @@ class ProjectWithStatsModelAssembler(
   private val permissionModelAssembler: PermissionModelAssembler,
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
+  private val languageService: LanguageService,
 ) : RepresentationModelAssemblerSupport<ProjectWithStatsView, ProjectWithStatsModel>(
     ProjectsController::class.java,
     ProjectWithStatsModel::class.java,
@@ -34,7 +36,7 @@ class ProjectWithStatsModelAssembler(
   override fun toModel(view: ProjectWithStatsView): ProjectWithStatsModel {
     val link = linkTo<ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage =
-      view.baseLanguage ?: let {
+      languageService.getProjectLanguages(view.id).find { it.base } ?: let {
         projectService.getOrAssignBaseLanguage(view.id)
       }
     val computedPermissions =
