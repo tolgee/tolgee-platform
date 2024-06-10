@@ -86,7 +86,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         onEvent = EventName.ALL,
         slackTeamId = "",
       )
-    slackConfigService.delete(testData.slackConfig.project.id, "testChannel")
+    slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
     val config = slackConfigService.createOrUpdate(updatedConfig)
 
     loginAsUser(testData.user.username)
@@ -114,7 +114,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         onEvent = EventName.TRANSLATION_CHANGED,
         slackTeamId = "",
       )
-    slackConfigService.delete(testData.slackConfig.project.id, "testChannel")
+    slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
     val config = slackConfigService.createOrUpdate(updatedConfig)
 
     loginAsUser(testData.user.username)

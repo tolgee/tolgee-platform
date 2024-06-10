@@ -26,10 +26,7 @@ class SlackConfigPreferenceService(
     return slackConfigPreferenceRepository.save(slackConfigPreference)
   }
 
-  fun get(id: Long) {
-  }
-
   fun delete(slackConfigPreference: SlackConfigPreference) {
-    delete(slackConfigPreference)
+    slackConfigPreferenceRepository.delete(slackConfigPreference)
   }
 }

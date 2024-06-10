@@ -24,7 +24,7 @@ class SlackConfigService(
   private val languageService: LanguageService,
   private val slackErrorProvider: SlackErrorProvider,
 ) {
-  fun get(
+  fun find(
     projectId: Long,
     channelId: String,
   ): SlackConfig? {
@@ -47,21 +47,26 @@ class SlackConfigService(
   fun delete(
     projectId: Long,
     channelId: String,
-  ): Boolean {
-    try {
-      val config = get(projectId, channelId) ?: return false
+    languageTag: String,
+  ) {
+    val config = find(projectId, channelId) ?: throw SlackErrorException(slackErrorProvider.getNotSubscribedYetError())
+
+    if (languageTag.isNotEmpty()) {
+      val pref =
+        config.preferences.find {
+          it.languageTag == languageTag
+        } ?: throw SlackErrorException(slackErrorProvider.getNotSubscribedToLanguageOrBadLanguageTagError())
+      slackConfigPreferenceService.delete(pref)
+    } else {
       automationService.deleteForSlackIntegration(config)
       slackConfigRepository.delete(config)
-    } catch (e: NotFoundException) {
-      return false
     }
-    return true
   }
 
   @Transactional
   fun createOrUpdate(slackConfigDto: SlackConfigDto): SlackConfig {
     val existingConfig =
-      get(slackConfigDto.project.id, slackConfigDto.channelId)
+      find(slackConfigDto.project.id, slackConfigDto.channelId)
         ?: return create(slackConfigDto)
     return update(existingConfig, slackConfigDto)
   }

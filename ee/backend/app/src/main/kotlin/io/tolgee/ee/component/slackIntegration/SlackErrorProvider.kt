@@ -91,6 +91,19 @@ class SlackErrorProvider(
     }
   }
 
+  fun getNotSubscribedToLanguageOrBadLanguageTagError(): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(
+          i18n.translate("slack.common.message.unsubscribe_bad-request"),
+        )
+      }
+      actions {
+        helpButton()
+      }
+    }
+  }
+
   fun getNoPermissionError(): List<LayoutBlock> {
     return withBlocks {
       section {
