@@ -87,7 +87,7 @@ class SlackExecutorHelper(
       }
     }
 
-    attachments.add(createRedirectButton())
+    attachments.add(createRedirectButton(getUrlOnSpecifiedUrl(key.name)))
 
     if (langTags.isEmpty()) {
       return null
@@ -205,7 +205,7 @@ class SlackExecutorHelper(
 
     return SavedMessageDto(
       blocks = buildImportBlocks(importedCount),
-      attachments = listOf(createRedirectButton()),
+      attachments = listOf(createRedirectButton(getUrlOnImport())),
       0L,
       setOf(),
     )
@@ -283,7 +283,7 @@ class SlackExecutorHelper(
     val langTags = mutableSetOf(modifiedLangTag)
 
     addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
-    attachments.add(createRedirectButton())
+    attachments.add(createRedirectButton(getUrlOnSpecifiedUrl(key.name)))
 
     return if (langTags.isEmpty()) {
       null
@@ -515,23 +515,19 @@ class SlackExecutorHelper(
       .build()
   }
 
-  private fun createRedirectButton() =
+  private fun createRedirectButton(url: String) =
     Attachment.builder()
       .blocks(
         withBlocks {
           actions {
-            redirectOnPlatformButton()
+            redirectOnPlatformButton(url)
           }
         },
       )
       .color("#00000000")
       .build()
 
-  private fun ActionsBlockBuilder.redirectOnPlatformButton() {
-    val tolgeeUrl =
-      "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
-        "activity-detail?activity=${data.activityData?.revisionId}"
-
+  private fun ActionsBlockBuilder.redirectOnPlatformButton(tolgeeUrl: String) {
     button {
       text(i18n.translate("slack.common.text.button.tolgee_redirect"), emoji = true)
       value("redirect")
@@ -541,10 +537,18 @@ class SlackExecutorHelper(
     }
   }
 
+  private fun getUrlOnImport() =
+    "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
+      "activity-detail?activity=${data.activityData?.revisionId}"
+
+  private fun getUrlOnSpecifiedUrl(keyName: String) =
+    "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
+      "translations?search=$keyName"
+
   fun createMessageIfTooManyTranslations(counts: Long): SavedMessageDto {
     return SavedMessageDto(
       blocks = buildBlocksTooManyTranslations(counts),
-      attachments = listOf(createRedirectButton()),
+      attachments = listOf(createRedirectButton(getUrlOnImport())),
       0L,
       setOf(),
       false,
