@@ -386,7 +386,7 @@ class SlackExecutor(
 
         configList.forEach { config ->
           section {
-            markdownText("*Project Name:* ${config.project.name}\n*Project ID:* ${config.project.id}")
+            markdownText("*Project Name:* ${config.project.name} (id: ${config.project.id})")
           }
           if (config.isGlobalSubscription) {
             section {
@@ -394,7 +394,13 @@ class SlackExecutor(
             }
 
             section {
-              markdownText("Events: ${config.onEvent}")
+              markdownText("*Events:* `${config.onEvent}`")
+            }
+
+            context {
+              markdownText(
+                i18n.translate("slack.common.message.list-subscriptions-global-subscription-meaning"),
+              )
             }
           }
           config.preferences.forEach {
@@ -407,7 +413,7 @@ class SlackExecutor(
 
               val fullName = language.name
               markdownText(
-                "*Subscribed Languages:*\n- $fullName $flagEmoji : on ${it.onEvent.name}",
+                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `${it.onEvent.name}`",
               )
             }
           }
