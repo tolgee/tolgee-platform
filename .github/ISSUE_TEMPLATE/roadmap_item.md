@@ -10,7 +10,7 @@ assignees: ''
 ## Pre-specification
 - [ ] We've setup responsible person
 - [ ] We've checked how other tools solve the similar issues
-- [ ] We've users who require this feature and will pilot it and consult it, or we are the users
+- [ ] We've got users who require this feature and will pilot it and consult it (or we are the users)
 
 ## Specification
 - [ ] ... Specify the user stories here ...
