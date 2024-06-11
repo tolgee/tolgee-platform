@@ -46,6 +46,8 @@ export function useFeatureTranslation() {
         return t('billing_subscriptions_webhooks');
       case 'AI_PROMPT_CUSTOMIZATION':
         return t('billing_subscriptions_ai_prompt_customization');
+      case 'SLACK_INTEGRATION':
+        return t('billing_subscriptions_slack_integration');
       default:
         exhaustiveMatchingGuard(value);
         return value;

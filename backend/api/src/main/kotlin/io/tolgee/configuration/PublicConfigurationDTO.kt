@@ -8,8 +8,7 @@ import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
-  @Schema(hidden = true)
-  properties: TolgeeProperties,
+  @Schema(hidden = true) properties: TolgeeProperties,
   val machineTranslationServices: MtServicesDTO,
   val billing: PublicBillingConfigurationDTO,
   val version: String,
@@ -34,6 +33,10 @@ class PublicConfigurationDTO(
   val postHogApiKey: String? = properties.postHog.apiKey
   val postHogHost: String? = properties.postHog.host
   val contentDeliveryConfigured: Boolean = properties.contentDelivery.publicUrlPrefix != null
+  val slack: SlackDTO = SlackDTO(
+    enabled = (properties.slack.signingSecret != null && (properties.slack.clientId !== null || properties.slack.token !== null)),
+    connected = properties.slack.token != null,
+  )
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
@@ -63,20 +66,24 @@ class PublicConfigurationDTO(
     val defaultEnabledForProject: Boolean,
   )
 
+  data class SlackDTO(
+    val enabled: Boolean,
+    val connected: Boolean,
+  )
+
   init {
     if (authentication) {
-      authMethods =
-        AuthMethodsDTO(
-          OAuthPublicConfigDTO(
-            properties.authentication.github.clientId,
-          ),
-          OAuthPublicConfigDTO(properties.authentication.google.clientId),
-          OAuthPublicExtendsConfigDTO(
-            properties.authentication.oauth2.clientId,
-            properties.authentication.oauth2.authorizationUrl,
-            properties.authentication.oauth2.scopes,
-          ),
-        )
+      authMethods = AuthMethodsDTO(
+        OAuthPublicConfigDTO(
+          properties.authentication.github.clientId,
+        ),
+        OAuthPublicConfigDTO(properties.authentication.google.clientId),
+        OAuthPublicExtendsConfigDTO(
+          properties.authentication.oauth2.clientId,
+          properties.authentication.oauth2.authorizationUrl,
+          properties.authentication.oauth2.scopes,
+        ),
+      )
     }
     passwordResettable = properties.authentication.nativeEnabled
     allowRegistrations = properties.authentication.registrationsAllowed
