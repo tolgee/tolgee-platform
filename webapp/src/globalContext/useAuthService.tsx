@@ -119,9 +119,14 @@ export const useAuthService = (
   async function handleAcceptInvitation() {
     const code = InvitationCodeService.getCode();
     if (code) {
-      await acceptInvitationLoadable.mutateAsync({
-        path: { code },
-      });
+      try {
+        await acceptInvitationLoadable.mutateAsync({
+          path: { code },
+        });
+      } catch (error: any) {
+        // we want to continue regardless, error will be logged
+      }
+
       setInvitationCode(undefined);
     }
   }
