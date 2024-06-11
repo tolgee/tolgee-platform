@@ -304,12 +304,16 @@ class SlackExecutorHelper(
     event: String,
     timestamp: Long,
   ): String {
+    val authorMention = author ?: data.activityData?.author?.name
+    val correctTimestamp = timestamp / 1000 // Convert milliseconds to seconds
+
+    // fallback to timestamp in case of any error
     val date = Date(timestamp)
     val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
     val formattedTime = formatter.format(date)
 
-    val authorMention = author ?: data.activityData?.author?.name
-    return i18n.translate("slack.common.message.modification-info").format(authorMention, event, formattedTime)
+    val formattedTimestamp = "<!date^$correctTimestamp^{time}|$formattedTime>"
+    return i18n.translate("slack.common.message.modification-info").format(authorMention, event, formattedTimestamp)
   }
 
   private fun addLanguagesIfNeed(
