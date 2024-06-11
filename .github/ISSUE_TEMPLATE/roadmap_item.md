@@ -35,6 +35,7 @@ assignees: ''
 - [ ] Telemetry data is sent to PostHog
 
 ## Before release checklist
+- [ ] Preview is created & user stories are tested on the preview 
 - [ ] Blog post about this new feature
 - [ ] Announcement in Tolgee App
 - [ ] New keys are translated
