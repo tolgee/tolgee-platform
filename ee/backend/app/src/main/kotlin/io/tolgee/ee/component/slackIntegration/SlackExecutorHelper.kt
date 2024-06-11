@@ -87,7 +87,7 @@ class SlackExecutorHelper(
       }
     }
 
-    attachments.add(createRedirectButton(getUrlOnSpecifiedUrl(key.name)))
+    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.name)))
 
     if (langTags.isEmpty()) {
       return null
@@ -283,7 +283,7 @@ class SlackExecutorHelper(
     val langTags = mutableSetOf(modifiedLangTag)
 
     addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
-    attachments.add(createRedirectButton(getUrlOnSpecifiedUrl(key.name)))
+    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.name)))
 
     return if (langTags.isEmpty()) {
       null
@@ -545,7 +545,7 @@ class SlackExecutorHelper(
     "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
       "activity-detail?activity=${data.activityData?.revisionId}"
 
-  private fun getUrlOnSpecifiedUrl(keyName: String) =
+  private fun getUrlOnSpecifiedKey(keyName: String) =
     "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
       "translations?search=$keyName"
 
