@@ -48,6 +48,7 @@ assignees: ''
   - [ ] Reddit
   - [ ] Slack Community
   - [ ] Github Discussions
-- [ ] Pricing is updated
+- [ ] In App pricing is updated
+- [ ] Web pricing is updated
 - [ ] FAQ is updated
 - [ ] Website is updated
