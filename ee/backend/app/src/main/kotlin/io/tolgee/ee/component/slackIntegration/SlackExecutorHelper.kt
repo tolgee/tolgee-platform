@@ -89,8 +89,7 @@ class SlackExecutorHelper(
       }
     }
 
-    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.name)))
-    logger.trace("Attachments: ${attachments.last().blocks}")
+    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.id)))
 
     if (langTags.isEmpty()) {
       return null
@@ -286,9 +285,7 @@ class SlackExecutorHelper(
     val langTags = mutableSetOf(modifiedLangTag)
 
     addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
-    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.name)))
-
-    logger.trace("Attachments: ${attachments.last().blocks}")
+    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.id)))
 
     return if (langTags.isEmpty()) {
       null
@@ -551,9 +548,9 @@ class SlackExecutorHelper(
     "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
       "activity-detail?activity=${data.activityData?.revisionId}"
 
-  private fun getUrlOnSpecifiedKey(keyName: String) =
+  private fun getUrlOnSpecifiedKey(keyId: Long) =
     "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
-      "translations?search=$keyName"
+      "translations/single?id=$keyId"
 
   fun createMessageIfTooManyTranslations(counts: Long): SavedMessageDto {
     return SavedMessageDto(
