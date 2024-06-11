@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { styled } from '@mui/material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { stringHash } from 'tg.fixtures/stringHash';
-import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
@@ -55,7 +55,7 @@ export const TranslationMemory: React.FC<PanelContentProps> = ({
     return (
       <StyledContainer>
         <TabMessage>
-          <LoadingSkeleton variant="text" />
+          <LoadingSkeletonFadingIn variant="text" />
         </TabMessage>
       </StyledContainer>
     );

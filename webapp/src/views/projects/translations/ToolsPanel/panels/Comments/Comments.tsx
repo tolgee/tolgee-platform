@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
 import { Box, IconButton, styled, TextField } from '@mui/material';
 import { Send } from '@mui/icons-material';
-import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { StickyDateSeparator } from 'tg.views/projects/translations/ToolsPanel/common/StickyDateSeparator';
 import { useUser } from 'tg.globalContext/helpers';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -136,7 +136,7 @@ export const Comments: React.FC<PanelContentProps> = ({
         ))
       ) : isLoading ? (
         <TabMessage>
-          <LoadingSkeleton variant="text" />
+          <LoadingSkeletonFadingIn variant="text" />
         </TabMessage>
       ) : (
         <TabMessage>

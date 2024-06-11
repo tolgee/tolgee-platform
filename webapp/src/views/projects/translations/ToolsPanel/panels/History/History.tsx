@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { T } from '@tolgee/react';
 import { Box, FormControlLabel, styled, Switch } from '@mui/material';
-import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { StickyDateSeparator } from 'tg.views/projects/translations/ToolsPanel/common/StickyDateSeparator';
 
 import { HistoryItem } from './HistoryItem';
@@ -65,7 +65,7 @@ export const History: React.FC<PanelContentProps> = ({ keyData, language }) => {
       <StyledContainer>
         <TabMessage>
           {loading ? (
-            <LoadingSkeleton variant="text" />
+            <LoadingSkeletonFadingIn variant="text" />
           ) : (
             <T keyName="translations_history_no_activity"></T>
           )}

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { GoToBilling } from 'tg.component/GoToBilling';
 import { stringHash } from 'tg.fixtures/stringHash';
 
@@ -89,7 +89,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
     return (
       <StyledContainer>
         <TabMessage>
-          <LoadingSkeleton variant="text" />
+          <LoadingSkeletonFadingIn variant="text" />
         </TabMessage>
       </StyledContainer>
     );
