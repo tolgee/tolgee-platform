@@ -36,7 +36,7 @@ assignees: ''
 
 ## Before release checklist
 - [ ] Blog post about this new feature
-- [ ] Announcement in tolgee APP
+- [ ] Announcement in Tolgee App
 - [ ] New keys are translated
 
 ## After release checklist
