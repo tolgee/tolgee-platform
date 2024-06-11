@@ -104,11 +104,11 @@ export const SlackApp = () => {
     <StyledContainer>
       {featureNotEnabled ? (
         <PaidFeatureBanner />
-      ) : slackConfig.enabled ? (
-        <NoNeedToConnectBanner />
-      ) : (
+      ) : !slackConfig.enabled ? (
         <NotConfiguredBanner />
-      )}
+      ) : slackConfig.connected ? (
+        <NoNeedToConnectBanner />
+      ) : null}
       <StyledHeader>
         <StyledTitleWrapper>
           <StyledAppTitle>
