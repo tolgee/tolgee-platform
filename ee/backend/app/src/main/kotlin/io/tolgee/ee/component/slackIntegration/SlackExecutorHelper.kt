@@ -19,6 +19,8 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.jvm.optionals.getOrElse
@@ -32,7 +34,7 @@ class SlackExecutorHelper(
   private val tolgeeProperties: TolgeeProperties,
   private val author: String?,
   private val slackMessageInfoService: SlackMessageInfoService,
-) {
+) : Logging {
   fun createKeyAddMessage(): List<SavedMessageDto> {
     val activities = data.activityData ?: return emptyList()
     val baseLanguage = slackConfig.project.baseLanguage ?: return emptyList()
@@ -88,6 +90,7 @@ class SlackExecutorHelper(
     }
 
     attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.name)))
+    logger.trace("Attachments: ${attachments.last().blocks}")
 
     if (langTags.isEmpty()) {
       return null
@@ -284,6 +287,8 @@ class SlackExecutorHelper(
 
     addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
     attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.name)))
+
+    logger.trace("Attachments: ${attachments.last().blocks}")
 
     return if (langTags.isEmpty()) {
       null
@@ -524,6 +529,7 @@ class SlackExecutorHelper(
       .blocks(
         withBlocks {
           actions {
+            logger.trace("URL: $url")
             redirectOnPlatformButton(url)
           }
         },
