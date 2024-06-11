@@ -9,6 +9,10 @@ import org.springframework.stereotype.Component
 class SlackHelpBlocksProvider(
   private val i18n: I18n,
 ) {
+  companion object {
+    const val DOCUMENTATION_URL = "https://tolgee.io/platform/integrations/slack_integration/about"
+  }
+
   fun getHelpBlocks() =
     withBlocks {
       section {
@@ -137,6 +141,7 @@ class SlackHelpBlocksProvider(
 
   private fun ActionsBlockBuilder.docsButton() {
     button {
+      url(DOCUMENTATION_URL)
       text(i18n.translate("slack.help.text.button.docs"), emoji = true)
       actionId("docs_btn")
     }
