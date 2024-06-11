@@ -1,3 +1,10 @@
+## [3.64.7](https://github.com/tolgee/tolgee-platform/compare/v3.64.6...v3.64.7) (2024-06-11)
+
+
+### Bug Fixes
+
+* error handling improvements ([#2361](https://github.com/tolgee/tolgee-platform/issues/2361)) ([e7a269c](https://github.com/tolgee/tolgee-platform/commit/e7a269cc56710da960dca84d7664c1ec8c76c73a))
+
 ## [3.64.6](https://github.com/tolgee/tolgee-platform/compare/v3.64.5...v3.64.6) (2024-06-10)
 
 
