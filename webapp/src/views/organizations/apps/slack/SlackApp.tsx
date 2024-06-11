@@ -8,6 +8,10 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { OrganizationSlackSuccessHandler } from './OrganizationSlackSuccessHandler';
 import { DisconnectButton } from './DisconnectButton';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { useConfig, useEnabledFeatures } from 'tg.globalContext/helpers';
+import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
+import { NotConfiguredBanner } from './NotConfiguredBanner';
+import { NoNeedToConnectBanner } from './NoNeedToConnectBanner';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -16,16 +20,18 @@ const StyledContainer = styled('div')`
   background: ${({ theme }) => theme.palette.background.paper};
 `;
 
-const StyledAppSplitHeader = styled('div')`
+const StyledHeader = styled('div')`
   padding: 20px;
+  padding-top: 15px;
   display: grid;
-  grid-template-columns: 1fr auto;
   align-items: start;
 `;
 
-const StyledAppHeader = styled('div')`
-  display: grid;
-  gap: 4px;
+const StyledTitleWrapper = styled('div')`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 5px;
 `;
 
 const StyledAppTitle = styled('div')`
@@ -56,6 +62,10 @@ const StyledTeamId = styled('div')`
 
 export const SlackApp = () => {
   const organization = useOrganization();
+  const { isEnabled } = useEnabledFeatures();
+  const featureNotEnabled = !isEnabled('SLACK_INTEGRATION');
+  const config = useConfig();
+  const slackConfig = config.slack;
 
   if (!organization) {
     return null;
@@ -92,30 +102,40 @@ export const SlackApp = () => {
 
   return (
     <StyledContainer>
-      <StyledAppSplitHeader>
-        <StyledAppHeader>
+      {featureNotEnabled ? (
+        <PaidFeatureBanner />
+      ) : slackConfig.enabled ? (
+        <NoNeedToConnectBanner />
+      ) : (
+        <NotConfiguredBanner />
+      )}
+      <StyledHeader>
+        <StyledTitleWrapper>
           <StyledAppTitle>
             <StyledAppLogo src="/images/slackLogo.svg" />
             <StyledAppName>Slack</StyledAppName>
           </StyledAppTitle>
+          {!slackConfig.connected && (
+            <LoadingButton
+              onClick={onConnect}
+              color="primary"
+              variant="contained"
+              loading={getUrlMutation.isLoading}
+              disabled={featureNotEnabled || !slackConfig.enabled}
+            >
+              <T keyName="organization_slack_connect_button" />
+            </LoadingButton>
+          )}
+        </StyledTitleWrapper>
 
-          <div>
-            <T keyName="slack_app_description" />
-          </div>
+        <div>
+          <T keyName="slack_app_description" />
+        </div>
 
-          <Link>
-            <T keyName="slack_app_docs_link" />
-          </Link>
-        </StyledAppHeader>
-        <LoadingButton
-          onClick={onConnect}
-          color="primary"
-          variant="contained"
-          loading={getUrlMutation.isLoading}
-        >
-          <T keyName="organization_slack_connect_button" />
-        </LoadingButton>
-      </StyledAppSplitHeader>
+        <Link>
+          <T keyName="slack_app_docs_link" />
+        </Link>
+      </StyledHeader>
 
       {Boolean(workspaces.data?._embedded?.workspaces?.length) && (
         <div>
