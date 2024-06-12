@@ -407,7 +407,7 @@ class SlackExecutorHelper(
   ): Boolean {
     val isBaseChanged = modifiedLangTag == baseLanguageTag
 
-    val eventHandlingPreferences =
+    val globalEventHandlingPreferences =
       if (slackConfig.isGlobalSubscription) {
         Triple(
           slackConfig.onEvent == EventName.ALL,
@@ -415,34 +415,45 @@ class SlackExecutorHelper(
           slackConfig.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
         )
       } else {
-        val pref = slackConfig.preferences.find { it.languageTag == currentLangTag }
-        if (pref != null) {
-          Triple(
-            pref.onEvent == EventName.ALL,
-            pref.onEvent == EventName.BASE_CHANGED && isBaseChanged,
-            pref.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
-          )
-        } else {
-          null
-        }
+        null
       }
 
-    if (eventHandlingPreferences == null) {
-      if (!isBaseChanged) {
-        return false
-      } else {
-        slackConfig.project.languages.forEach { language ->
-          val pref = slackConfig.preferences.find { it.languageTag == language.tag } ?: return@forEach
-          if (pref.onEvent == EventName.ALL || pref.onEvent == EventName.BASE_CHANGED) {
-            return true
-          }
-        }
-        return false
+    val languageSpecificPreferences =
+      slackConfig.preferences.find { it.languageTag == currentLangTag }?.let { pref ->
+        Triple(
+          pref.onEvent == EventName.ALL,
+          pref.onEvent == EventName.BASE_CHANGED && isBaseChanged,
+          pref.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
+        )
+      }
+
+    if (globalEventHandlingPreferences != null) {
+      val (isAllEvent, isBaseLanguageChangedEvent, isTranslationChangedEvent) = globalEventHandlingPreferences
+
+      if (isAllEvent || isBaseLanguageChangedEvent || isTranslationChangedEvent) {
+        return true
       }
     }
 
-    val (isAllEvent, isBaseLanguageChangedEvent, isTranslationChangedEvent) = eventHandlingPreferences
-    return isAllEvent || isBaseLanguageChangedEvent || isTranslationChangedEvent
+    if (languageSpecificPreferences != null) {
+      val (isAllEvent, isBaseLanguageChangedEvent, isTranslationChangedEvent) = languageSpecificPreferences
+
+      if (isAllEvent || isBaseLanguageChangedEvent || isTranslationChangedEvent) {
+        return true
+      }
+    }
+
+    if (isBaseChanged) {
+      slackConfig.project.languages.forEach { language ->
+        val pref = slackConfig.preferences.find { it.languageTag == language.tag } ?: return@forEach
+        if (pref.onEvent == EventName.ALL || pref.onEvent == EventName.BASE_CHANGED) {
+          return true
+        }
+      }
+      return false
+    }
+
+    return false
   }
 
   private fun shouldProcessEventNewKeyAdded(
