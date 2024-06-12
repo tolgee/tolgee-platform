@@ -9,6 +9,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.ee.service.slackIntegration.*
+import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
@@ -393,8 +394,15 @@ class SlackExecutor(
               markdownText("*Global Subscription:* Yes")
             }
 
+            val allEventMeaning =
+              if (config.onEvent == EventName.ALL) {
+                getEventAllMeaning()
+              } else {
+                ""
+              }
+
             section {
-              markdownText("*Events:* `${config.onEvent}`")
+              markdownText("*Events:* `${config.onEvent}` $allEventMeaning")
             }
 
             context {
@@ -412,8 +420,14 @@ class SlackExecutor(
               val flagEmoji = language.flagEmoji
 
               val fullName = language.name
+              val allEventMeaning =
+                if (it.onEvent == EventName.ALL) {
+                  getEventAllMeaning()
+                } else {
+                  ""
+                }
               markdownText(
-                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `${it.onEvent.name}`",
+                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `${it.onEvent.name}` $allEventMeaning",
               )
             }
           }
@@ -427,6 +441,12 @@ class SlackExecutor(
   private fun OrganizationSlackWorkspace?.getSlackToken(): String {
     return this?.accessToken ?: tolgeeProperties.slack.token ?: throw SlackNotConfiguredException()
   }
+
+  private fun getEventAllMeaning() =
+    "(" +
+      i18n.translate(
+        "slack.common.message.list-subscriptions-all-events",
+      ) + ")"
 
   fun sendMessageOnImport(
     slackConfig: SlackConfig,
