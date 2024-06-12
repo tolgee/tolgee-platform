@@ -18,6 +18,7 @@ import io.tolgee.ee.data.ReportUsageDto
 import io.tolgee.ee.data.SetLicenseKeyLicensingDto
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
+import io.tolgee.events.OnUserCountChanged
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
@@ -234,12 +235,14 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun checkCountAndReportUsage() {
+  fun checkCountAndReportUsage(event: OnUserCountChanged) {
     try {
       val seats = userAccountService.countAllEnabled()
       val subscription = self.findSubscriptionDto()
       reportUsage(seats, subscription)
-      checkUserCount(seats, subscription)
+      if (!event.decrease) {
+        checkUserCount(seats, subscription)
+      }
     } catch (e: NoActiveSubscriptionException) {
       logger.debug("No active subscription, skipping usage reporting.")
     }

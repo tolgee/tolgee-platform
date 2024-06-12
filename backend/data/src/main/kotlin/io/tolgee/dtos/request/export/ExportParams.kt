@@ -8,6 +8,8 @@ import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_NAMESPACE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_STATE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_IN_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_NOT_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
@@ -45,6 +47,14 @@ data class ExportParams(
   )
   override var filterTag: String? = null,
   @field:Parameter(
+    description = FILTER_TAG_IN_DESCRIPTION,
+  )
+  override var filterTagIn: List<String>? = null,
+  @field:Parameter(
+    description = FILTER_TAG_NOT_IN_DESCRIPTION,
+  )
+  override var filterTagNotIn: List<String>? = null,
+  @field:Parameter(
     description = FILTER_KEY_PREFIX_DESCRIPTION,
   )
   override var filterKeyPrefix: String? = null,
@@ -68,6 +78,10 @@ data class ExportParams(
     description = MESSAGE_FORMAT_DESCRIPTION,
   )
   override var messageFormat: ExportMessageFormat? = null,
+  @field:Parameter(
+    description = ExportParamsDocs.FILE_STRUCTURE_TEMPLATE_DESCRIPTION,
+  )
+  override var fileStructureTemplate: String? = null,
 ) : IExportParams {
   @field:Parameter(description = SUPPORT_ARRAYS_DESCRIPTION)
   override var supportArrays: Boolean = false

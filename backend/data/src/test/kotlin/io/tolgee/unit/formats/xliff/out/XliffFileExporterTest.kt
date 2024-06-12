@@ -7,6 +7,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
@@ -34,7 +35,7 @@ class XliffFileExporterTest {
   fun `exports translations`() {
     val translations = getBaseTranslations()
 
-    val params = ExportParams()
+    val params = getExportParams()
     val baseProvider = { translations.filter { it.languageTag == "en" } }
 
     val files =
@@ -60,6 +61,37 @@ class XliffFileExporterTest {
     assertThat(transUnit.selectNodes("./target")[0].text).isEqualTo("A translation")
   }
 
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getSimpleExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+
+    val files = exporter.produceFiles()
+    files["cs/hello.xliff"].assert.isNotNull()
+  }
+
+  private fun getSimpleExporter(params: ExportParams): XliffFileExporter {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "simple",
+        )
+      }
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = params,
+      )
+    return exporter
+  }
+
   private fun getBaseTranslations(): List<ExportTranslationView> {
     val zKey = ExportKeyView(1, "Z key")
     val aTranslation = ExportTranslationView(1, "A translation", TranslationState.TRANSLATED, zKey, "en")
@@ -76,7 +108,7 @@ class XliffFileExporterTest {
   fun `works with HTML`() {
     val translations = getHtmlTranslations()
 
-    val params = ExportParams()
+    val params = getExportParams()
     val baseProvider = { translations.filter { it.languageTag == "en" } }
 
     val files =
@@ -99,7 +131,7 @@ class XliffFileExporterTest {
 
   @Test
   fun `respects xml space preserve`() {
-    val params = ExportParams()
+    val params = getExportParams()
 
     val files =
       XliffFileExporter(
@@ -195,7 +227,7 @@ class XliffFileExporterTest {
   @Test
   fun `validate xml output`() {
     val translations = getBaseTranslations()
-    val params = ExportParams()
+    val params = getExportParams()
     val baseProvider = { translations.filter { it.languageTag == "en" } }
 
     val files =
@@ -374,7 +406,7 @@ class XliffFileExporterTest {
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
-    exportParams: ExportParams = ExportParams(),
+    exportParams: ExportParams = getExportParams(),
   ): XliffFileExporter {
     return XliffFileExporter(
       translations = translations,
@@ -384,4 +416,6 @@ class XliffFileExporterTest {
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
     )
   }
+
+  private fun getExportParams() = ExportParams()
 }

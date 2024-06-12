@@ -211,15 +211,18 @@ class OpenApiConfiguration {
   }
 
   fun HandlerMethod.isHidden(path: String): Boolean {
-    val annotation = method.getAnnotation(OpenApiHideFromPublicDocs::class.java)
+    val annotation = getMethodHideAnnotation() ?: getClassHideAnnotation() ?: return false
 
-    val methodIsHidden = annotation != null && (annotation.path == "" || annotation.path == path)
-    if (methodIsHidden) {
-      return true
-    }
-
-    return method.declaringClass.getAnnotation(OpenApiHideFromPublicDocs::class.java) != null
+    return path in annotation.paths || annotation.paths.isEmpty()
   }
+
+  private fun HandlerMethod.getClassHideAnnotation(): OpenApiHideFromPublicDocs? =
+    method.declaringClass.getAnnotation(
+      OpenApiHideFromPublicDocs::class.java,
+    )
+
+  private fun HandlerMethod.getMethodHideAnnotation(): OpenApiHideFromPublicDocs? =
+    method.getAnnotation(OpenApiHideFromPublicDocs::class.java)
 
   companion object {
     private const val API_REPOSITORY_EXCLUDE = "/api/repository/**"

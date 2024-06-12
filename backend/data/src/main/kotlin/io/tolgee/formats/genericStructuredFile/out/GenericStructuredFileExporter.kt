@@ -3,17 +3,17 @@ package io.tolgee.formats.genericStructuredFile.out
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportMessageFormat
-import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class GenericStructuredFileExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
-  override val fileExtension: String,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
+  val fileExtension: String,
   private val projectIcuPlaceholdersSupport: Boolean,
   private val objectMapper: ObjectMapper,
   private val rootKeyIsLanguageTag: Boolean = false,
@@ -106,7 +106,7 @@ class GenericStructuredFileExporter(
     text,
     isPlural,
     projectIcuPlaceholdersSupport,
-    placeholderConvertorFactory ?: { NoOpFromIcuPlaceholderConvertor() },
+    placeholderConvertorFactory,
   )
 
   private fun convertMessageForNestedPlural(text: String?): Map<String, String>? {
@@ -114,7 +114,7 @@ class GenericStructuredFileExporter(
   }
 
   private fun getFileContentResultBuilder(translation: ExportTranslationView): StructureModelBuilder {
-    val absolutePath = translation.getFilePath()
+    val absolutePath = pathProvider.getFilePath(translation)
     return result.computeIfAbsent(absolutePath) {
       StructureModelBuilder(
         structureDelimiter = exportParams.structureDelimiter,
@@ -122,5 +122,12 @@ class GenericStructuredFileExporter(
         rootKeyIsLanguageTag = rootKeyIsLanguageTag,
       )
     }
+  }
+
+  private val pathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      fileExtension,
+    )
   }
 }

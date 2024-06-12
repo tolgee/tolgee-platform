@@ -3,45 +3,18 @@ package io.tolgee.ee
 import io.tolgee.AbstractSpringTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
-import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.model.UserAccount
-import io.tolgee.service.security.SignUpService
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.web.client.RestTemplate
 
 @SpringBootTest()
 class UserLimitTest : AbstractSpringTest() {
-  @Autowired
-  private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
-
-  @MockBean
-  @Autowired
-  lateinit var restTemplate: RestTemplate
-
-  @Autowired
-  private lateinit var eeLicensingMockRequestUtil: EeLicensingMockRequestUtil
-
-  @Autowired
-  private lateinit var eeLicenseMockRequestUtil: EeLicensingMockRequestUtil
-
-  @Autowired
-  private lateinit var signUpService: SignUpService
-
   @Test
   fun `cannot create 11th user`() {
-    val testData =
-      BaseTestData()
-    (2..9).forEach {
-      testData.root.addUserAccount { username = "user$it" }
-    }
-    testDataService.saveTestData(testData.root)
+    createNUsers(9)
 
     // 10th user is fine
     userAccountService.createUser(
@@ -61,7 +34,40 @@ class UserLimitTest : AbstractSpringTest() {
         )
       }
 
-    exception as ExceptionWithMessage
     exception.tolgeeMessage.assert.isEqualTo(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+  }
+
+  @Test
+  fun `can disable users when over plan`() {
+    val users = createNUsers(20)
+    getEnabledUsersCount().assert.isEqualTo(20L)
+    userAccountService.disable(users[10].id)
+    getEnabledUsersCount().assert.isEqualTo(19L)
+  }
+
+  @Test
+  fun `can delete users when over plan`() {
+    val users = createNUsers(20)
+    getEnabledUsersCount().assert.isEqualTo(20L)
+    userAccountService.delete(users[10].id)
+    getEnabledUsersCount().assert.isEqualTo(19L)
+  }
+
+  private fun createNUsers(totalUserCount: Int): List<UserAccount> {
+    val testData =
+      BaseTestData()
+    val users =
+      (2..totalUserCount).map {
+        testData.root.addUserAccount { username = "user$it" }.self
+      }
+    testDataService.saveTestData(testData.root)
+    return users
+  }
+
+  private fun getEnabledUsersCount(): Long? {
+    return entityManager.createQuery(
+      "select count(*) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null",
+      Long::class.java,
+    ).singleResult
   }
 }

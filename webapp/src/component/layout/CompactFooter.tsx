@@ -13,6 +13,7 @@ const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(3, 4)};
   justify-items: center;
   position: relative;
+  align-content: start;
 `;
 
 const StyledContent = styled('div')`

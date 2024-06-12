@@ -37,6 +37,7 @@ class PublicConfigurationDTO(
     enabled = (properties.slack.signingSecret != null && (properties.slack.clientId !== null || properties.slack.token !== null)),
     connected = properties.slack.token != null,
   )
+  val userSourceField: Boolean = properties.userSourceField
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,

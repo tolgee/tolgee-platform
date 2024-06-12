@@ -166,9 +166,9 @@ class OpenApiSecurityHelper(private val groupBuilder: OpenApiGroupBuilder) {
   }
 
   companion object {
-    const val API_KEY_IN_HEADER = "API Key in header"
-    const val JWT_TOKEN = "JWT Token"
-    const val SUPER_JWT_TOKEN = "Super JWT Token"
-    const val API_KEY_IN_QUERY_PARAM = "API Key in query param"
+    const val API_KEY_IN_HEADER = "ApiKeyInHeader"
+    const val JWT_TOKEN = "JwtToken"
+    const val SUPER_JWT_TOKEN = "SuperJwtToken"
+    const val API_KEY_IN_QUERY_PARAM = "ApiKeyInQueryParam"
   }
 }

@@ -1,18 +1,20 @@
 import { FunctionComponent } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Redirect } from 'react-router-dom';
-import { styled, useMediaQuery } from '@mui/material';
+import { Link, Redirect } from 'react-router-dom';
+import { styled, useMediaQuery, Link as MuiLink } from '@mui/material';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { CompactView } from 'tg.component/layout/CompactView';
+import {
+  CompactView,
+  SPLIT_CONTENT_BREAK_POINT,
+} from 'tg.component/layout/CompactView';
 
 import { Alert } from '../../common/Alert';
 import { DashboardPage } from '../../layout/DashboardPage';
 import { SignUpForm } from './SignUpForm';
 import { SignUpProviders } from './SignUpProviders';
 import { useRecaptcha } from './useRecaptcha';
-import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
 import {
   useGlobalActions,
@@ -29,11 +31,7 @@ export type SignUpType = {
 
 const StyledRightPart = styled('div')`
   display: grid;
-  margin-top: 63px;
-
-  @media ${SPLIT_CONTENT_BREAK_POINT} {
-    margin-top: 0px;
-  }
+  align-content: end;
 `;
 
 export const SignUpView: FunctionComponent = () => {
@@ -66,31 +64,36 @@ export const SignUpView: FunctionComponent = () => {
     <>
       <DashboardPage>
         <CompactView
-          maxWidth={isSmall ? 430 : 964}
+          maxWidth={isSmall ? 550 : 964}
           windowTitle={t('sign_up_title')}
           title={t('sign_up_title')}
-          backLink={LINKS.LOGIN.build()}
-          content={
+          subtitle={
+            <T
+              keyName="sign_up_subtitle"
+              params={{
+                link: <MuiLink to={LINKS.LOGIN.build()} component={Link} />,
+              }}
+            />
+          }
+          primaryContent={
             signUpMutation.isSuccess && config.needsEmailVerification ? (
               <Alert severity="success">
                 <T keyName="sign_up_success_needs_verification_message" />
               </Alert>
             ) : (
-              <SplitContent
-                left={
-                  <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
-                }
-                right={
-                  <StyledRightPart>
-                    <SignUpProviders />
-                  </StyledRightPart>
-                }
-              />
+              <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
             )
+          }
+          secondaryContent={
+            <StyledRightPart>
+              <SignUpProviders />
+            </StyledRightPart>
           }
         />
       </DashboardPage>
-      {config.capterraTracker && <img src={config.capterraTracker} />}
+      {config.capterraTracker && (
+        <img style={{ height: 0 }} src={config.capterraTracker} />
+      )}
     </>
   );
 };

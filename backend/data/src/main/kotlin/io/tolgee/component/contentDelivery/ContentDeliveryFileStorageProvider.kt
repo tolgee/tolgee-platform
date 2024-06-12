@@ -89,6 +89,8 @@ class ContentDeliveryFileStorageProvider(
         ) {}
 
         override fun fileExists(storageFilePath: String): Boolean = true
+
+        override fun pruneDirectory(path: String) {}
       }
 
   private val failingFileStorage
@@ -112,6 +114,8 @@ class ContentDeliveryFileStorageProvider(
         override fun fileExists(storageFilePath: String): Boolean {
           throw FileStoreException("Bypassed storage exists exception", "test", IllegalStateException())
         }
+
+        override fun pruneDirectory(path: String) {}
 
         override fun test() {
           throw FileStoreException("Bypassed storage test exception", "test", IllegalStateException())

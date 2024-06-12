@@ -3167,6 +3167,95 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-1">
+        <addColumn tableName="project">
+            <column name="base_namespace_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-2">
+        <addUniqueConstraint columnNames="base_namespace_id" constraintName="UC_PROJECTBASE_NAMESPACE_ID_COL" tableName="project"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-3">
+        <addForeignKeyConstraint baseColumnNames="base_namespace_id" baseTableName="project" constraintName="FKg8lw0aumxlk4u9o24306j6asi" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="namespace" validate="true"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-4">
+        <dropColumn columnName="format" tableName="import_file"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712299385786-5">
+        <dropColumn columnName="root_key_is_language_tag" tableName="content_delivery_config"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712309146235-4">
+        <dropForeignKeyConstraint baseTableName="project" constraintName="FKg8lw0aumxlk4u9o24306j6asi"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712309146235-1">
+        <addColumn tableName="project">
+            <column name="default_namespace_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712309146235-2">
+        <addUniqueConstraint columnNames="default_namespace_id" constraintName="UC_PROJECTDEFAULT_NAMESPACE_ID_COL" tableName="project"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712309146235-3">
+        <addForeignKeyConstraint baseColumnNames="default_namespace_id" baseTableName="project" constraintName="FK4pgl5uneh3it2odrc36nyubbx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="namespace" validate="true"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712309146235-5">
+        <dropUniqueConstraint constraintName="uc_projectbase_namespace_id_col" tableName="project"/>
+    </changeSet>
+    <changeSet author="gyeongwoopark (generated)" id="1712309146235-6">
+        <dropColumn columnName="base_namespace_id" tableName="project"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1713361057414-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="prune_before_publish" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1713450518921-1">
+        <dropUniqueConstraint constraintName="UKof8ghdfcmo45f5tkkknt4voiv" tableName="content_delivery_config"/>
+        <sql>
+            create unique index content_delivery_config_unique_slug on content_delivery_config(slug) where content_storage_id is null;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1713453021423-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="custom_slug" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1715262903773-1">
+        <addColumn tableName="user_account">
+            <column defaultValueBoolean="false" name="is_demo" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1714722376862-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="filter_tag_in" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1714722376862-2">
+        <addColumn tableName="content_delivery_config">
+            <column name="filter_tag_not_in" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1714995693668-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="file_structure_template" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1715000000000-0">
+        <sql>
+            create index translation_comment_translation_id_state on translation_comment(translation_id, state);
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717855133193-1">
+        <addColumn tableName="language">
+            <column name="deleted_at" type="timestamp(6)"/>
+        </addColumn>
+    </changeSet>
     <changeSet author="jenik (generated)" id="1712925098243-1">
         <createTable tableName="organization_slack_workspace">
             <column name="id" type="BIGINT">
@@ -3254,43 +3343,6 @@
             <column name="slack_user_id" type="VARCHAR(255)"/>
             <column name="user_account_id" type="BIGINT"/>
         </createTable>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712299385786-1">
-        <addColumn tableName="project">
-            <column name="base_namespace_id" type="bigint"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712299385786-2">
-        <addUniqueConstraint columnNames="base_namespace_id" constraintName="UC_PROJECTBASE_NAMESPACE_ID_COL" tableName="project"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712299385786-3">
-        <addForeignKeyConstraint baseColumnNames="base_namespace_id" baseTableName="project" constraintName="FKg8lw0aumxlk4u9o24306j6asi" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="namespace" validate="true"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712299385786-4">
-        <dropColumn columnName="format" tableName="import_file"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712299385786-5">
-        <dropColumn columnName="root_key_is_language_tag" tableName="content_delivery_config"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712309146235-4">
-        <dropForeignKeyConstraint baseTableName="project" constraintName="FKg8lw0aumxlk4u9o24306j6asi"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712309146235-1">
-        <addColumn tableName="project">
-            <column name="default_namespace_id" type="bigint"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712309146235-2">
-        <addUniqueConstraint columnNames="default_namespace_id" constraintName="UC_PROJECTDEFAULT_NAMESPACE_ID_COL" tableName="project"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712309146235-3">
-        <addForeignKeyConstraint baseColumnNames="default_namespace_id" baseTableName="project" constraintName="FK4pgl5uneh3it2odrc36nyubbx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="namespace" validate="true"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712309146235-5">
-        <dropUniqueConstraint constraintName="uc_projectbase_namespace_id_col" tableName="project"/>
-    </changeSet>
-    <changeSet author="gyeongwoopark (generated)" id="1712309146235-6">
-        <dropColumn columnName="base_namespace_id" tableName="project"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1712925098243-7">
         <addColumn tableName="automation_action">

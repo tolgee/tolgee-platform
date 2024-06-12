@@ -17,11 +17,11 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

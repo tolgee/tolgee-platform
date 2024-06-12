@@ -5,11 +5,25 @@ import io.tolgee.component.eventListeners.LanguageStatsListener
 import io.tolgee.development.testDataBuilder.builders.*
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.service.LanguageService
+import io.tolgee.development.testDataBuilder.builders.ImportBuilder
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
+import io.tolgee.development.testDataBuilder.builders.PatBuilder
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
+import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.*
+import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.key.TagService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -237,7 +251,7 @@ class TestDataService(
   private fun saveContentDeliveryConfigs(builder: ProjectBuilder) {
     builder.data.contentDeliveryConfigs.forEach {
       if (it.self.slug.isEmpty()) {
-        it.self.slug = contentDeliveryConfigService.generateSlug(it.projectBuilder.self.id)
+        it.self.slug = contentDeliveryConfigService.generateSlug()
       }
       entityManager.persist(it.self)
     }

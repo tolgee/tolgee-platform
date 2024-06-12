@@ -48,7 +48,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("translatedPercentage").isNumber.isLessThan(BigDecimal(14.5)).isGreaterThan(BigDecimal(14))
       node("reviewedPercentage").isNumber.isLessThan(BigDecimal(14.5)).isGreaterThan(BigDecimal(14))
       node("membersCount").isEqualTo(1)
-      node("tagCount").isEqualTo(2)
+      node("tagCount").isEqualTo(3)
       node("languageStats") {
         isArray
         node("[0]") {

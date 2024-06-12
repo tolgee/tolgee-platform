@@ -9,9 +9,11 @@ import {
 import { getAnyContainingText } from '../../common/xPath';
 import { HOST } from '../../common/constants';
 import { login } from '../../common/apiCalls/common';
-import { Scope } from '../../common/types';
 import { apiKeysTestData } from '../../common/apiCalls/testData/testData';
 import { setExpiration } from '../../common/apiKeysAndPats';
+import { components } from '../../../../webapp/src/service/apiSchema.generated';
+
+type Scope = components['schemas']['ComputedPermissionModel']['scopes'][number];
 
 describe('API keys', () => {
   beforeEach(() => {
@@ -22,7 +24,7 @@ describe('API keys', () => {
   });
 
   afterEach(() => {
-    //apiKeysTestData.clean();
+    apiKeysTestData.clean();
   });
 
   it('Adds an API key', () => {
@@ -93,18 +95,26 @@ const visit = () => {
   cy.visit(HOST + '/account/apiKeys');
 };
 
+const getCheckbox = (scope: Scope) => {
+  return cy
+    .gcy('permissions-advanced-item')
+    .filter(`[permissions-scope="${scope}"]`);
+};
+
 const unselectAll = () => {
-  cy.gcy('permissions-advanced-item').contains('Admin').click();
-  cy.gcy('permissions-advanced-item').contains('Edit languages').click();
+  getCheckbox('screenshots.delete').click();
+  getCheckbox('screenshots.upload').click();
+  getCheckbox('screenshots.view').click();
+  getCheckbox('translations.state-edit').click();
+  getCheckbox('translations.edit').click();
+  getCheckbox('translations.view').click();
+  getCheckbox('keys.edit').click();
+  getCheckbox('keys.create').click();
+  getCheckbox('keys.view').click();
 
-  cy.gcy('permissions-advanced-item').contains('View activity').click();
-  cy.gcy('permissions-advanced-item').contains('Edit project').click();
-  cy.gcy('permissions-advanced-item').contains('Members').click();
-  cy.gcy('permissions-advanced-item').contains('Batch operations').click();
-  cy.gcy('permissions-advanced-item').contains('Screenshots').click();
-
-  cy.gcy('permissions-advanced-item').contains('Translations').click();
-  cy.gcy('permissions-advanced-item').contains('Keys').click();
+  cy.gcy('permissions-advanced-item')
+    .find('input[type="checkbox"]')
+    .should('not.be.checked');
 };
 
 const getPermissionItem = (scope: Scope) => {

@@ -70,6 +70,7 @@ export class Validation {
       organizationName: orgRequired
         ? Yup.string().min(3).max(50).required()
         : Yup.string(),
+      userSource: Yup.string().max(255),
     });
 
   static readonly USER_SETTINGS = (
@@ -157,6 +158,7 @@ export class Validation {
       .test({
         name: 'language-tag-exists',
         test: (value) => !existingTags?.includes(value!),
+        // @tolgee-key validation_language_tag_exists
         message: t('validation_language_tag_exists'),
       })
       .matches(/^[^,]*$/, {
@@ -213,19 +215,22 @@ export class Validation {
     description: Yup.string().nullable().min(3).max(2000),
   });
 
-  static readonly ORGANIZATION_CREATE_OR_EDIT = (
-    t: TFunType,
-    slugInitialValue?: string
-  ) => {
-    const slugSyncValidation = Yup.string()
-      .required()
-      .min(3)
-      .max(60)
+  private static slugValidation(min: number, max: number) {
+    return Yup.string()
+      .min(min)
+      .max(max)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
         message: (
           <T keyName="slug_validation_can_contain_just_lowercase_numbers_hyphens" />
         ),
       });
+  }
+
+  static readonly ORGANIZATION_CREATE_OR_EDIT = (
+    t: TFunType,
+    slugInitialValue?: string
+  ) => {
+    const slugSyncValidation = Validation.slugValidation(3, 60).required();
 
     const slugUniqueDebouncedAsyncValidation = (v) => {
       if (slugInitialValue === v) {
@@ -375,6 +380,12 @@ export class Validation {
     name: Yup.string().required().max(100),
     languages: Yup.array().min(1),
     states: Yup.array().min(1),
+    slug: Yup.string().when('contentStorageId', {
+      is(value?: number) {
+        return !!value;
+      },
+      then: Validation.slugValidation(1, 60),
+    }),
   });
 
   static readonly WEBHOOK_FORM = Yup.object().shape({

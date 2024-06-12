@@ -80,9 +80,9 @@ context('Login', () => {
     deleteAllEmails();
     const username = 'test@testuser.com';
     createUser(username);
-    cy.contains('Reset password').click();
+    cy.contains('Forgot your password?').click();
     cy.xpath("//*[@name='email']").type(username);
-    cy.contains('Send request').click();
+    cy.contains('Send link').click();
     cy.contains(
       'Request successfully sent! If you are signed up using this email,' +
         ' you will receive an email with a link for password reset. Check your mail box.'
@@ -92,7 +92,7 @@ context('Login', () => {
     });
     const newPassword = 'new_very.strong.password';
     cy.xpath("//*[@name='password']").type(newPassword);
-    cy.contains('Save new password').click();
+    cy.contains('Set new password').click();
     assertMessage('Password successfully reset');
     login(username, newPassword);
   });

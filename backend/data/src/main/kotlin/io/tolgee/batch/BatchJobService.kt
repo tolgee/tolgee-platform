@@ -274,7 +274,7 @@ class BatchJobService(
 
     return batchJobRepository.getErrorMessages(needsErrorMessage)
       .groupBy { it.batchJobId }
-      .mapValues { it.value.minBy { value -> value.updatedAt }.errorMessage }
+      .mapValues { it.value.maxBy { value -> value.updatedAt }.errorMessage }
   }
 
   private fun getProgresses(jobs: Iterable<BatchJob>): Map<Long, Int> {
@@ -418,5 +418,9 @@ class BatchJobService(
 
   fun getStuckJobIds(jobIds: MutableSet<Long>): List<Long> {
     return batchJobRepository.getStuckJobIds(jobIds, currentDateProvider.date.addMinutes(-2))
+  }
+
+  fun save(entity: BatchJob): BatchJob {
+    return cachingBatchJobService.saveJob(entity)
   }
 }

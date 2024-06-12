@@ -32,7 +32,14 @@ export const handleApiError = (
       if (init?.method === undefined || init?.method === 'get') {
         globalContext.actions?.redirectTo(LINKS.AFTER_LOGIN.build());
       }
-      messageService.error(<T keyName="operation_not_permitted_error" />);
+
+      messageService.error(
+        resObject?.code ? (
+          <TranslatedError code={resObject?.code} />
+        ) : (
+          <T keyName="operation_not_permitted_error" />
+        )
+      );
       Sentry.captureException(new Error('Operation not permitted'));
       return;
     }

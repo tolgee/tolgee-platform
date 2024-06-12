@@ -68,6 +68,13 @@ export function useAnnouncement() {
             link="https://tolgee.io/blog/releasing-visual-editor-and-formats-support"
           />
         );
+      case 'FEATURE_CLI_2':
+        return (
+          <Announcement
+            content={<T keyName="announcement_cli_2" />}
+            link="https://tolgee.io/blog/cli-2-features"
+          />
+        );
 
       default:
         assertUnreachable(value);

@@ -90,6 +90,12 @@ data class UserAccount(
   @ColumnDefault("true")
   var passwordChanged: Boolean = true
 
+  /**
+   * Whether user is created only to be used as a part of demo data
+   */
+  @ColumnDefault("false")
+  var isDemo: Boolean = false
+
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackUserConnection: MutableList<SlackUserConnection> = mutableListOf()
 

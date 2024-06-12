@@ -1,11 +1,11 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
-import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -15,10 +15,10 @@ import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
-import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.getSafeNamespace
@@ -27,6 +27,8 @@ import org.springframework.context.ApplicationContext
 class ImportDataManager(
   private val applicationContext: ApplicationContext,
   private val import: Import,
+  // data is not saved when single step import is used
+  val saveData: Boolean = true,
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 
@@ -45,6 +47,9 @@ class ImportDataManager(
   }
 
   val storedKeys by lazy {
+    if (!saveData) {
+      return@lazy mutableMapOf<Pair<ImportFile, String>, ImportKey>()
+    }
     importService.findKeys(import)
       .asSequence()
       .map { (it.file to it.name) to it }
@@ -200,16 +205,20 @@ class ImportDataManager(
 
   fun saveAllStoredKeys() {
     this.importService.saveAllKeys(this.storedKeys.values)
-    saveAllMetas()
   }
 
-  private fun saveAllMetas() {
+  fun prepareKeyMetas() {
+    this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
+      meta.comments.onEach { comment -> comment.author = comment.author ?: import.author }
+      meta.codeReferences.onEach { ref -> ref.author = ref.author ?: import.author }
+    }
+  }
+
+  fun saveAllKeyMetas() {
     this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
       meta.disableActivityLogging = true
       keyMetaService.save(meta)
-      meta.comments.onEach { comment -> comment.author = comment.author ?: import.author }
       keyMetaService.saveAllComments(meta.comments)
-      meta.codeReferences.onEach { ref -> ref.author = ref.author ?: import.author }
       keyMetaService.saveAllCodeReferences(meta.codeReferences)
     }
   }
@@ -227,17 +236,6 @@ class ImportDataManager(
     this.handleConflicts(false)
     this.importService.saveLanguages(listOf(importLanguage))
     this.saveAllStoredTranslations()
-  }
-
-  fun findMatchingExistingLanguage(importLanguageName: String): LanguageDto? {
-    val possibleTag =
-      """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
-        .matchEntire(importLanguageName)?.groups?.get(1)?.value
-        ?: return null
-
-    val candidate = languageService.findByTag(possibleTag, import.project.id)
-
-    return candidate
   }
 
   fun resetCollisionsBetweenFiles(

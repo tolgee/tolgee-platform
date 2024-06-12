@@ -8,6 +8,7 @@ import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
 import { useEffect } from 'react';
 import { MachineTranslationItem } from './MachineTranslationItem';
+import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -67,6 +68,8 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
     },
   });
 
+  useLoadingRegister(machineLoadable.isFetching);
+
   const data = machineLoadable.data;
 
   const baseIsEmpty = data?.baseBlank;
@@ -95,7 +98,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
             <GoToBilling
               render={(linkProps) => (
                 <Button size="small" variant="outlined" {...linkProps}>
-                  {t('machine_translation_buy_more_credit')}
+                  {t('machine_translation_upgrade_plan')}
                 </Button>
               )}
             />

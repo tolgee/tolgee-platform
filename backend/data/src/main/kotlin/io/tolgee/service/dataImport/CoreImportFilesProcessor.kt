@@ -2,8 +2,12 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.dataImport.IImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
@@ -11,22 +15,26 @@ import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
+import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
+import io.tolgee.util.getOrThrowIfMoreThanOne
 import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
 
 class CoreImportFilesProcessor(
   val applicationContext: ApplicationContext,
   val import: Import,
-  val params: ImportAddFilesParams = ImportAddFilesParams(),
+  val params: IImportAddFilesParams = ImportAddFilesParams(),
   val importSettings: IImportSettings,
   val projectIcuPlaceholdersEnabled: Boolean = true,
+  // single step import doesn't save data
+  val saveData: Boolean = true,
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
   private val importFileProcessorFactory: ImportFileProcessorFactory by lazy {
@@ -37,10 +45,15 @@ class CoreImportFilesProcessor(
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
+  private val existingLanguages by lazy {
+    languageService.getProjectLanguages(projectId = import.project.id)
+  }
+
   val importDataManager by lazy {
     ImportDataManager(
       applicationContext = applicationContext,
       import = import,
+      saveData = false,
     )
   }
 
@@ -91,7 +104,9 @@ class CoreImportFilesProcessor(
   private fun ImportFile.updateFileEntity(fileProcessorContext: FileProcessorContext) {
     if (fileProcessorContext.needsParamConversion) {
       this.needsParamConversion = fileProcessorContext.needsParamConversion
-      importService.saveFile(this)
+      if (saveData) {
+        importService.saveFile(this)
+      }
     }
   }
 
@@ -118,38 +133,111 @@ class CoreImportFilesProcessor(
         import,
       )
     import.files.add(entity)
-    return importService.saveFile(entity)
+    if (saveData) {
+      importService.saveFile(entity)
+    }
+    return entity
   }
 
   private fun ImportFileProcessor.processResult() {
     context.preselectNamespace()
     context.processLanguages()
     context.processTranslations()
-    importService.saveAllFileIssues(this.context.fileEntity.issues)
+    if (saveData) {
+      importService.saveAllFileIssues(this.context.fileEntity.issues)
+    }
   }
 
   private fun FileProcessorContext.preselectNamespace() {
+    this.fileEntity.namespace = getNamespaceToPreselect()
+  }
+
+  private fun FileProcessorContext.getNamespaceToPreselect(): String? {
+    val mappedNamespace = findMappedNamespace()
+
+    if (mappedNamespace != null) {
+      return getSafeNamespace(mappedNamespace)
+    }
+
     if (this.namespace != null) {
       // namespace was selected by processor
-      this.fileEntity.namespace = getSafeNamespace(this.namespace)
-      return
+      return getSafeNamespace(this.namespace)
     }
+
     // select namespace from file name
-    val namespace = """^[\/]?([^/\\]+)[/\\].*""".toRegex().matchEntire(this.fileEntity.name!!)?.groups?.get(1)?.value
+    val namespace = getNamespaceFromPath()
     if (!namespace.isNullOrBlank()) {
-      this.fileEntity.namespace = namespace
+      return namespace
     }
+
+    return null
   }
+
+  private fun FileProcessorContext.findMappedNamespace(): String? {
+    if (mapping != null) {
+      // if mapping is present, use it even when the namespace is null to avoid
+      // guessing from the file name
+      return this.mapping?.namespace ?: ""
+    }
+
+    return this.mapping?.namespace
+  }
+
+  private fun FileProcessorContext.getNamespaceFromPath() =
+    """^[\/]?([^/\\]+)[/\\].*""".toRegex().matchEntire(this.fileEntity.name!!)?.groups?.get(1)?.value
 
   private fun FileProcessorContext.processLanguages() {
     this.languages.forEach { entry ->
       val languageEntity = entry.value
       importDataManager.storedLanguages.add(languageEntity)
-      val existingLanguageDto = importDataManager.findMatchingExistingLanguage(languageEntity.name)
-      languageEntity.existingLanguage = existingLanguageDto?.id?.let { languageService.getEntity(it) }
-      importService.saveLanguages(this.languages.values)
+      preselectExistingLanguage(languageEntity)
+      if (saveData) {
+        importService.saveLanguages(this.languages.values)
+      }
       importDataManager.populateStoredTranslations(entry.value)
     }
+  }
+
+  private fun FileProcessorContext.preselectExistingLanguage(languageEntity: ImportLanguage) {
+    val existingLanguageDto = findExistingLanguage(languageEntity)
+    languageEntity.existingLanguage = existingLanguageDto?.id?.let { languageService.getEntity(it) }
+  }
+
+  private fun FileProcessorContext.findExistingLanguage(languageEntity: ImportLanguage): LanguageDto? {
+    return findExistingLanguageInMappings(languageEntity)
+      ?: findMatchingExistingLanguage(languageEntity.name)
+  }
+
+  private fun findMatchingExistingLanguage(importLanguageName: String): LanguageDto? {
+    val possibleTag =
+      """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
+        .matchEntire(importLanguageName)?.groups?.get(1)?.value
+        ?: return null
+
+    val candidate = languageService.findByTag(possibleTag, import.project.id)
+
+    return candidate
+  }
+
+  private fun FileProcessorContext.findExistingLanguageInMappings(languageEntity: ImportLanguage): LanguageDto? {
+    val desiredTag = findInLanguageMappings(languageEntity) ?: findFileLanguageMapping() ?: return null
+    return existingLanguages.find { it.tag == desiredTag }
+  }
+
+  private fun FileProcessorContext.findFileLanguageMapping(): String? {
+    val mapping = mapping ?: return null
+    return mapping.languageTag
+  }
+
+  private fun FileProcessorContext.findInLanguageMappings(languageEntity: ImportLanguage): String? {
+    val languageMappings = singleStepImportParams?.languageMappings ?: return null
+    val found =
+      languageMappings.filter { it.importLanguage == languageEntity.name }
+        .getOrThrowIfMoreThanOne {
+          BadRequestException(Message.MULTIPLE_MAPPINGS_FOR_SAME_FILE_LANGUAGE_NAME)
+        }
+
+    return found?.platformLanguageTag
   }
 
   private fun addToStoredTranslations(translation: ImportTranslation) {
@@ -160,6 +248,10 @@ class CoreImportFilesProcessor(
     return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
       this.keys.computeIfAbsent(name) {
         ImportKey(name = name, this.fileEntity)
+      }.also {
+        if (saveData) {
+          importService.saveKey(it)
+        }
       }
     }
   }
@@ -171,8 +263,12 @@ class CoreImportFilesProcessor(
         processTranslation(newTranslation, keyEntity)
       }
     }
-    importDataManager.saveAllStoredKeys()
-    importDataManager.saveAllStoredTranslations()
+    importDataManager.prepareKeyMetas()
+    if (saveData) {
+      importDataManager.saveAllStoredKeys()
+      importDataManager.saveAllKeyMetas()
+      importDataManager.saveAllStoredTranslations()
+    }
   }
 
   private fun FileProcessorContext.processTranslation(

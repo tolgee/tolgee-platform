@@ -5,7 +5,7 @@ const StyledEditorWrapper = styled('div')`
     ${({ theme }) => (theme.palette.mode === 'dark' ? '#535e6c' : '#bfbfbf')};
   border-radius: 4px;
   cursor: text;
-  background: ${({ theme }) => theme.palette.background.default};
+  background: ${({ theme }) => theme.palette.input.background};
   padding: 1px;
 
   &:hover {

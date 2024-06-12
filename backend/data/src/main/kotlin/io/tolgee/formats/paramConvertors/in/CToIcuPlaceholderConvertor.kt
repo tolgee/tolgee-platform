@@ -34,7 +34,7 @@ class CToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
     val C_DETECTION_REGEX =
       """
       (?x)(
-      %
+      (^|\W+)%
       (?:(?<argnum>\d+)${"\\$"})?
       (?<flags>[-+0\#]+)?
       (?<width>\d+)?

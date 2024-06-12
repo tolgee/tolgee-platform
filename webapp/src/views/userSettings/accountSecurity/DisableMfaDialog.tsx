@@ -34,6 +34,10 @@ export const DisableMfaDialog: FunctionComponent = () => {
   const enableMfa = useApiMutation({
     url: '/v2/user/mfa/totp',
     method: 'delete',
+    fetchOptions: {
+      disableErrorNotification: true,
+      disableAuthRedirect: true,
+    },
     options: {
       onSuccess: (r) => {
         handleAfterLogin(r);

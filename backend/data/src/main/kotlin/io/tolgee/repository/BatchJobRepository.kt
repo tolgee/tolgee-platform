@@ -66,7 +66,8 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
      select bjce.batchJob.id as batchJobId, bjce.id as executionId, bjce.errorMessage as errorMessage, bjce.updatedAt as updatedAt 
      from BatchJobChunkExecution bjce 
        where bjce.batchJob.id in :jobIds 
-         and  bjce.errorMessage is not null
+         and  bjce.errorMessage is not null 
+         and bjce.retry = false
   """,
   )
   fun getErrorMessages(jobIds: List<Long>): List<JobErrorMessagesView>

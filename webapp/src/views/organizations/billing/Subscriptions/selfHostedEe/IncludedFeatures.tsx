@@ -4,7 +4,7 @@ import { T } from '@tolgee/react';
 import { Box, styled, Typography } from '@mui/material';
 import { PlanFeature } from './PlanFeature';
 import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';
-import { IncludedUsage } from './IncludedUsage';
+import { IncludedUsage, Usage } from './IncludedUsage';
 
 const StyledListWrapper = styled(Box)`
   display: grid;
@@ -15,7 +15,7 @@ const StyledListWrapper = styled(Box)`
 
 export const IncludedFeatures: FC<{
   features: components['schemas']['EeSubscriptionModel']['enabledFeatures'];
-  includedUsage?: components['schemas']['PlanIncludedUsageModel'];
+  includedUsage?: Usage;
 }> = ({ features, includedUsage }) => {
   const translateFeature = useFeatureTranslation();
 

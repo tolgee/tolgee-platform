@@ -1,6 +1,7 @@
 package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -98,23 +99,60 @@ class UserAccountService(
     return self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
-  @Transactional
-  fun createUser(userAccount: UserAccount): UserAccount {
-    userAccountRepository.saveAndFlush(userAccount)
-    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
-    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
-    return userAccount
+  fun getOrCreateDemoUsers(demoUsers: List<DemoProjectData.DemoUser>): Map<String, UserAccount> {
+    val usernames = demoUsers.map { it.username }
+    val existingUsers = userAccountRepository.findDemoByUsernames(usernames)
+    return demoUsers.associate { demoUser ->
+      val existingUser =
+        existingUsers.find { existingUser -> demoUser.username == existingUser.username }
+          ?: createDemoUser(demoUser)
+      demoUser.username to existingUser
+    }
+  }
+
+  private fun createDemoUser(demoUser: DemoProjectData.DemoUser): UserAccount {
+    val user = UserAccount()
+    user.username = demoUser.username
+    user.name = demoUser.name
+    user.isDemo = true
+    user.disabledAt = currentDateProvider.date
+
+    setDemoUserAvatar(demoUser, user)
+
+    return save(user)
+  }
+
+  private fun setDemoUserAvatar(
+    demoUser: DemoProjectData.DemoUser,
+    user: UserAccount,
+  ) {
+    val stream =
+      javaClass.getResourceAsStream("/demoProject/userAvatars/${demoUser.avatarFileName}")
+        ?: throw IllegalArgumentException("Demo user avatar doesn't exist")
+
+    avatarService.setAvatar(user, stream)
   }
 
   @Transactional
   fun createUser(
+    userAccount: UserAccount,
+    userSource: String? = null,
+  ): UserAccount {
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
+    userAccountRepository.saveAndFlush(userAccount)
+    applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
+    return userAccount
+  }
+
+  @Transactional
+  fun createUserWithPassword(
     userAccount: UserAccount,
     rawPassword: String,
   ): UserAccount {
     userAccountRepository.saveAndFlush(userAccount)
     userAccount.password = passwordEncoder.encode(rawPassword)
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
-    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
     return userAccount
   }
 
@@ -123,7 +161,7 @@ class UserAccountService(
   fun delete(id: Long) {
     val user = this.get(id)
     delete(user)
-    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
@@ -163,7 +201,7 @@ class UserAccountService(
       entityManager.remove(it)
     }
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
-    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
   @Transactional
@@ -441,7 +479,7 @@ class UserAccountService(
     val user = this.get(userId)
     user.disabledAt = currentDateProvider.date
     this.save(user)
-    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
   @Transactional
@@ -450,7 +488,7 @@ class UserAccountService(
     val user = this.userAccountRepository.findDisabled(userId)
     user.disabledAt = null
     this.save(user)
-    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
   }
 
   fun transferLegacyNoAuthUser() {

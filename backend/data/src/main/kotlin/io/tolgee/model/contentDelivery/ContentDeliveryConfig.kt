@@ -19,16 +19,11 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
-@Table(
-  uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "slug"])],
-)
 @ActivityLoggedEntity
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
@@ -36,9 +31,17 @@ class ContentDeliveryConfig(
 ) : StandardAuditModel(), IExportParams {
   @ActivityLoggedProp
   @ActivityDescribingProp
-  var name: String = ""
+  lateinit var name: String
 
+  @ActivityLoggedProp
   var slug: String = ""
+
+  /**
+   * Whether the slug was initially generated or custom
+   */
+  @ActivityLoggedProp
+  @ColumnDefault("false")
+  var customSlug: Boolean = false
 
   @ManyToOne
   var contentStorage: ContentStorage? = null
@@ -48,6 +51,9 @@ class ContentDeliveryConfig(
 
   @ActivityIgnoredProp
   var lastPublished: Date? = null
+
+  @ColumnDefault("false")
+  var pruneBeforePublish = true
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
@@ -77,6 +83,16 @@ class ContentDeliveryConfig(
   @ActivityLoggedProp
   override var filterTag: String? = null
 
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  @ActivityLoggedProp
+  override var filterTagIn: List<String>? = null
+
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  @ActivityLoggedProp
+  override var filterTagNotIn: List<String>? = null
+
   @ActivityLoggedProp
   override var filterKeyPrefix: String? = null
 
@@ -97,4 +113,7 @@ class ContentDeliveryConfig(
   @Enumerated(EnumType.STRING)
   @ActivityLoggedProp
   override var messageFormat: ExportMessageFormat? = null
+
+  @ActivityLoggedProp
+  override var fileStructureTemplate: String? = null
 }

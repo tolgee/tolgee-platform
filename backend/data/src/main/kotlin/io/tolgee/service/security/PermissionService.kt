@@ -24,7 +24,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
@@ -67,12 +67,12 @@ class PermissionService(
     return cachedPermissionService.find(id)
   }
 
-  fun getProjectPermissionScopes(
+  fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccount: UserAccount,
-  ) = getProjectPermissionScopes(projectId, userAccount.id)
+  ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id)
 
-  fun getProjectPermissionScopes(
+  fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
   ): Array<Scope>? {

@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -15,6 +15,13 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 const PasswordFieldWithValidation = React.lazy(
   () => import('tg.component/security/PasswordFieldWithValidation')
 );
+
+const StyledInputFields = styled('div')`
+  display: grid;
+  padding-top: 20px;
+  padding-bottom: 12px;
+  align-items: start;
+`;
 
 export const ChangePassword: FunctionComponent = () => {
   const { handleAfterLogin } = useGlobalActions();
@@ -60,13 +67,14 @@ export const ChangePassword: FunctionComponent = () => {
         validationSchema={Validation.USER_PASSWORD_CHANGE(t)}
         onSubmit={handleSubmit}
       >
-        <TextField
-          name="currentPassword"
-          type="password"
-          label={<T keyName="current-password" />}
-          variant="standard"
-        />
-        <PasswordFieldWithValidation label={<NewPasswordLabel />} />
+        <StyledInputFields>
+          <TextField
+            name="currentPassword"
+            type="password"
+            label={<T keyName="current-password" />}
+          />
+          <PasswordFieldWithValidation label={<NewPasswordLabel />} />
+        </StyledInputFields>
       </StandardForm>
     </Box>
   );

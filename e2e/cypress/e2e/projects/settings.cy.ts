@@ -101,6 +101,39 @@ describe('Projects Basics', () => {
     expectDefaultNamespaceInModalCreation('test_namespace2');
   });
 
+  it('default namespace works correctly with single key view', () => {
+    const key = 'test1';
+    const namespace = 'test_namespace1';
+    cy.visit(`${HOST}/projects/${projectId}/translations`);
+    createTranslation({ namespace, key, translation: 'In namespace' });
+    createTranslation({ key, translation: 'Without namespace' });
+
+    cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+    setDefaultNamespace(namespace);
+
+    visitSingleKey({ projectId, key, namespace, languages: ['en'] });
+
+    cy.gcy('namespaces-selector').contains(namespace).should('be.visible');
+    cy.gcy('translation-text').contains('In namespace').should('be.visible');
+
+    visitSingleKey({ projectId, key: key, languages: ['en'] });
+
+    cy.gcy('namespaces-selector').contains('<none>').should('be.visible');
+    cy.gcy('translation-text')
+      .contains('Without namespace')
+      .should('be.visible');
+
+    visitSingleKey({ projectId, key: 'new_key' });
+
+    cy.gcy('namespaces-selector').contains(namespace).should('be.visible');
+
+    visitSingleKey({ projectId, key: 'new_key', namespace: 'new_namespace' });
+
+    cy.gcy('namespaces-selector')
+      .contains('new_namespace')
+      .should('be.visible');
+  });
+
   const setDefaultNamespace = (namespace: string) => {
     cy.gcy('default-namespace-select').click();
     cy.gcy('namespace-value').filter(`:contains("${namespace}")`).click();
@@ -109,7 +142,7 @@ describe('Projects Basics', () => {
   };
 
   const deleteNamespaceByDeletingAllKeys = (key: string) => {
-    visitSingleKey(projectId, key);
+    visitSingleKey({ projectId, key });
     cy.gcy('translation-edit-delete-button').click();
     cy.gcy('global-confirmation-confirm').click();
   };

@@ -193,7 +193,7 @@ dependencies {
     /**
      * AZURE
      */
-    implementation('com.azure:azure-storage-blob:12.25.1') {
+    implementation(libs.azureBlob) {
         exclude group: 'io.netty', module: 'netty-codec-http'
     }
     implementation('io.netty:netty-codec-http:4.1.108.Final')
@@ -211,10 +211,6 @@ test {
     useJUnitPlatform()
     maxHeapSize = "4096m"
 }
-
-project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

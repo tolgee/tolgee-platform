@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -10,6 +11,7 @@ import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -23,6 +25,7 @@ class TagService(
   @Lazy
   private val keyService: KeyService,
   private val entityManager: EntityManager,
+  private val applicationContext: ApplicationContext,
 ) : Logging {
   fun tagKey(
     key: Key,
@@ -46,7 +49,7 @@ class TagService(
       }
 
     if (tag.name.length > 100) {
-      throw BadRequestException(io.tolgee.constants.Message.TAG_TOO_LOG)
+      throw BadRequestException(Message.TAG_TOO_LOG)
     }
 
     tagRepository.save(tag)
@@ -69,57 +72,65 @@ class TagService(
   /**
    * @param map keyId entity to list of tags
    */
-  fun tagKeysById(map: Map<Long, List<String>>) {
+  fun tagKeysById(
+    projectId: Long,
+    map: Map<Long, List<String>>,
+  ): Map<Long, List<Tag>> {
     if (map.isEmpty()) {
-      return
+      return emptyMap()
     }
 
-    val keysWithTags = keyService.getKeysWithTagsById(map.keys)
-    tagKeys(keysWithTags, map)
+    val keysWithTags = keyService.getKeysWithTagsById(projectId, map.keys)
+    return tagKeys(keysWithTags, map)
   }
 
   private fun tagKeys(
     keysWithFetchedTags: Iterable<Key>,
     map: Map<Long, List<String>>,
-  ) {
+  ): Map<Long, List<Tag>> {
     val keysByIdMap = keysWithFetchedTags.associateBy { it.id }
     val projectId = getSingleProjectId(keysByIdMap)
 
     val existingTags =
       this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }.toMutableMap()
 
-    map.forEach { (keyId, tagsToAdd) ->
-      tagsToAdd.forEach { tagToAdd ->
-        val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-        val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
-        val tag =
-          existingTags[tagToAdd]?.let {
-            if (!keyMeta.tags.contains(it)) {
-              it.keyMetas.add(keyMeta)
-              keyMeta.tags.add(it)
+    return map.map { (keyId, tagsToAdd) ->
+      keyId to
+        tagsToAdd.map { tagToAdd ->
+          val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+          val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
+          val tag =
+            existingTags[tagToAdd]?.let {
+              if (!keyMeta.tags.contains(it)) {
+                it.keyMetas.add(keyMeta)
+                keyMeta.tags.add(it)
+              }
+              it
+            } ?: let {
+              Tag().apply {
+                project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+                keyMetas.add(keyMeta)
+                name = tagToAdd
+                keyMeta.tags.add(this)
+                existingTags[tagToAdd] = this
+              }
             }
-            it
-          } ?: let {
-            Tag().apply {
-              project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-              keyMetas.add(keyMeta)
-              name = tagToAdd
-              keyMeta.tags.add(this)
-              existingTags[tagToAdd] = this
-            }
-          }
-        tagRepository.save(tag)
-        keyMetaService.save(keyMeta)
-      }
-    }
+          tagRepository.save(tag)
+          keyMetaService.save(keyMeta)
+          tag
+        }
+    }.toMap()
   }
 
-  fun untagKeys(map: Map<Long, List<String>>) {
+  fun untagKeys(
+    projectId: Long,
+    map: Map<Long, List<String>>,
+  ) {
     if (map.isEmpty()) {
       return
     }
 
-    val keysWithTags = keyService.getKeysWithTagsById(map.keys)
+    val keysWithTags = keyService.getKeysWithTagsById(projectId, map.keys)
     untagKeys(keysWithTags, map)
   }
 
@@ -217,6 +228,20 @@ class TagService(
     return tagRepository.findById(id).orElse(null)
   }
 
+  fun findWithKeyMetasFetched(
+    projectId: Long,
+    id: Long,
+  ): Tag? {
+    return tagRepository.findWithKeyMetasFetched(projectId, id)
+  }
+
+  fun getWithKeyMetasFetched(
+    projectId: Long,
+    id: Long,
+  ): Tag {
+    return findWithKeyMetasFetched(projectId, id) ?: throw NotFoundException(Message.TAG_NOT_FOUND)
+  }
+
   fun get(id: Long): Tag {
     return find(id) ?: throw NotFoundException()
   }
@@ -286,5 +311,82 @@ class TagService(
       delete from tag where project_id = :projectId
       """,
     ).setParameter("projectId", projectId).executeUpdate()
+  }
+
+  @Transactional
+  fun complexTagOperation(
+    projectId: Long,
+    req: ComplexTagKeysRequest,
+  ) {
+    val provider =
+      ComplexTagOperationKeyProvider(projectId, req, applicationContext)
+
+    if (req.tagFiltered != null || req.untagFiltered != null) {
+      val untagFilteredWithAppliedWildcards = req.untagFiltered?.applyWildcards(projectId)?.toList()
+      tagAndUntag(req.tagFiltered, untagFilteredWithAppliedWildcards, provider.filtered)
+    }
+
+    if (req.tagOther != null || req.untagOther != null) {
+      val untagOtherWithAppliedWildcards = req.untagOther?.applyWildcards(projectId)?.toList()
+      tagAndUntag(req.tagOther, untagOtherWithAppliedWildcards, provider.rest)
+    }
+  }
+
+  private fun Collection<String>.applyWildcards(projectId: Long): Collection<String> {
+    return WildcardTagsProvider(entityManager).getTagsWithAppliedWildcards(projectId, this)
+  }
+
+  private fun TagService.tagAndUntag(
+    tagWith: List<String>?,
+    untagWith: List<String>?,
+    keys: List<Key>,
+  ): Boolean {
+    if (keys.isEmpty()) {
+      return true
+    }
+    tagKeys(keys, tagWith)
+    untagKeys(keys, untagWith)
+    return false
+  }
+
+  private fun tagKeys(
+    keysWithFetchedTags: List<Key>,
+    tags: List<String>?,
+  ) {
+    if (tags != null) {
+      val mapToTag = keysWithFetchedTags.associate { it.id to tags }
+      tagKeys(keysWithFetchedTags, mapToTag)
+    }
+  }
+
+  private fun untagKeys(
+    keysWithFetchedTags: List<Key>,
+    tags: List<String>?,
+  ) {
+    if (tags != null) {
+      val mapToTag = keysWithFetchedTags.associate { it.id to tags }
+      untagKeys(keysWithFetchedTags, mapToTag)
+    }
+  }
+
+  @Transactional
+  fun tagKey(
+    projectId: Long,
+    keyId: Long,
+    tagName: String,
+  ): Tag {
+    return tagKeysById(projectId, mapOf(keyId to listOf(tagName))).values.singleOrNull()?.singleOrNull()
+      ?: throw IllegalStateException("No single tag found in result.")
+  }
+
+  @Transactional
+  fun removeTag(
+    projectId: Long,
+    keyId: Long,
+    tagId: Long,
+  ) {
+    val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
+    val tag = getWithKeyMetasFetched(projectId, tagId)
+    remove(key, tag)
   }
 }

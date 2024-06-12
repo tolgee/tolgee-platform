@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import Box from '@mui/material/Box';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
@@ -80,27 +79,21 @@ const PasswordResetSetView: FunctionComponent = () => {
         <CompactView
           windowTitle={t('reset_password_set_title')}
           title={t('reset_password_set_title')}
-          maxWidth={650}
-          content={
+          primaryContent={
             <StandardForm
               initialValues={{ password: '' } as ValueType}
               validationSchema={Validation.PASSWORD_RESET(t)}
               submitButtons={
-                <>
-                  <Box display="flex">
-                    <Box flexGrow={1}></Box>
-                    <Box display="flex" flexGrow={0}>
-                      <LoadingButton
-                        color="primary"
-                        type="submit"
-                        variant="contained"
-                        loading={passwordResetSet.isLoading}
-                      >
-                        Save new password
-                      </LoadingButton>
-                    </Box>
-                  </Box>
-                </>
+                <LoadingButton
+                  color="primary"
+                  type="submit"
+                  variant="contained"
+                  loading={passwordResetSet.isLoading}
+                  fullWidth
+                  sx={{ mt: 1 }}
+                >
+                  {t('reset_password_set_submit')}
+                </LoadingButton>
               }
               onSubmit={(v: ValueType) => {
                 passwordResetSet.mutate(

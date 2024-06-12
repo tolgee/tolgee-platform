@@ -47,7 +47,6 @@ describe('Integrate view', () => {
         .should('contain', 'React')
         .should('contain', 'Angular')
         .should('contain', 'Next.js')
-        .should('contain', 'Gatsby')
         .should('contain', 'Rest')
         .should('contain', 'Web')
         .should('contain', 'JS (NPM)');
@@ -171,10 +170,6 @@ describe('Integrate view', () => {
       {
         weapon: 'Next.js',
         textsToContain: ['@tolgee/react'],
-      },
-      {
-        weapon: 'Gatsby',
-        textsToContain: ['@tolgee/react', 'gatsby-plugin-react-intl'],
       },
       {
         weapon: 'Web',

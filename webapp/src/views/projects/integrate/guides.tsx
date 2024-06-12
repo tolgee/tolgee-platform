@@ -36,11 +36,6 @@ export const guides = [
     guide: React.lazy(() => import('./guides/Next.mdx')),
   },
   {
-    name: 'Gatsby',
-    icon: getTechnologyImgComponent('gatsby'),
-    guide: React.lazy(() => import('./guides/Gatsby.mdx')),
-  },
-  {
     name: 'Web',
     icon: Code,
     guide: React.lazy(() => import('./guides/Web.mdx')),

@@ -1,6 +1,8 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.data.PropertyModification
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andAssertThatJson
@@ -12,6 +14,7 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -78,6 +81,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
     executeInNewTransaction {
       Assertions.assertThat(languageService.findEntity(deutsch.id)).isNull()
+      assertDeleteActivityCreated()
     }
   }
 
@@ -214,5 +218,20 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun performFindAll(projectId: Long): ResultActions {
     return performAuthGet("/v2/projects/$projectId/languages")
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun assertDeleteActivityCreated() {
+    val result =
+      entityManager.createQuery(
+        """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
+            |join ar.modifiedEntities ame
+            |where ar.type = :type
+        """.trimMargin(),
+      )
+        .setParameter("type", ActivityType.DELETE_LANGUAGE)
+        .resultList as List<Array<Any>>
+    val modifications = result[0][1] as Map<String, PropertyModification>
+    modifications["deletedAt"]!!.old.assert.isNull()
   }
 }

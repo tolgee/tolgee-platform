@@ -157,6 +157,8 @@ const getTheme = (mode: PaletteMode) => {
       tokens: c.tokens,
       placeholders: c.placeholders,
       languageChips: c.languageChips,
+      login: c.login,
+      input: c.input,
       revisionFilterBanner: c.revisionFilterBanner,
     },
     mixins: {
@@ -173,6 +175,15 @@ const getTheme = (mode: PaletteMode) => {
             borderRadius: '11px',
             color: c.tooltip.text,
             backgroundColor: c.tooltip.background,
+          },
+        },
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            '&.MuiOutlinedInput-root': {
+              backgroundColor: c.input.background,
+            },
           },
         },
       },

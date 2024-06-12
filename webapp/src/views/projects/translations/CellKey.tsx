@@ -211,12 +211,10 @@ export const CellKey: React.FC<Props> = ({
                       autoFocus
                     />
                   ) : (
-                    active && (
-                      <TagAdd
-                        onClick={() => setTagEdit(true)}
-                        withFullLabel={!data.keyTags?.length}
-                      />
-                    )
+                    <TagAdd
+                      onClick={() => setTagEdit(true)}
+                      withFullLabel={!data.keyTags?.length}
+                    />
                   ))}
               </StyledTags>
             </>

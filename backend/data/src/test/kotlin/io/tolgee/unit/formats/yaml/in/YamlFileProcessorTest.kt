@@ -2,6 +2,9 @@ package io.tolgee.unit.formats.yaml.`in`
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.dtos.request.SingleStepImportRequest
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -112,6 +115,22 @@ class YamlFileProcessorTest {
     mockUtil.fileProcessorContext.assertTranslations("en", "not-valid-bcp47-tag!.relations.part_of_relations")
       .assertSingle {
         hasText("Some text without params")
+      }
+  }
+
+  @Test
+  fun `respects provided format`() {
+    mockUtil.mockIt("en.yaml", "src/test/resources/import/yaml/icu.yaml")
+    mockUtil.fileProcessorContext.params =
+      SingleStepImportRequest().also {
+        it.fileMappings =
+          listOf(ImportFileMapping(fileName = "en.yaml", format = ImportFormat.YAML_PHP))
+      }
+    processFile()
+    // it's escaped because ICU doesn't php doesn't contain ICU
+    mockUtil.fileProcessorContext.assertTranslations("en", "some_text_with_params")
+      .assertSingle {
+        hasText("Toto je text s parametry: '{'param1'}' a '{'param2'}'")
       }
   }
 

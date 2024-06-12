@@ -35,35 +35,36 @@ export const usePlan = ({ planId, period }: Props) => {
   });
 
   const onSubscribe = () => {
-    subscribeMutation.mutate({
-      path: {
-        organizationId: organization!.id,
-      },
-      content: {
-        'application/json': {
-          planId,
-          period,
+    subscribeMutation.mutate(
+      {
+        path: {
+          organizationId: organization!.id,
+        },
+        content: {
+          'application/json': {
+            planId,
+            period,
+          },
         },
       },
-    });
+      {
+        onSuccess: (data) => {
+          window.location.href = data.url;
+        },
+        onError: (data) => {
+          if (data.code === 'organization_already_subscribed') {
+            messaging.error(
+              <T keyName="billing_organization_already_subscribed" />
+            );
+          }
+        },
+      }
+    );
   };
 
   const subscribeMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/subscribe',
     method: 'post',
-    invalidatePrefix: '/',
-    options: {
-      onSuccess: (data) => {
-        window.location.href = data.url;
-      },
-      onError: (data) => {
-        if (data.code === 'organization_already_subscribed') {
-          messaging.error(
-            <T keyName="billing_organization_already_subscribed" />
-          );
-        }
-      },
-    },
   });
 
   const cancelMutation = useBillingApiMutation({

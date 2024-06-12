@@ -8,9 +8,9 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.views.TranslationMemoryItemView
-import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
-import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
 import jakarta.persistence.TypedQuery
@@ -19,7 +19,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.notNull
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
@@ -174,17 +174,19 @@ class MtBatchTranslatorTest {
       this.contains("io.tolgee.component.machineTranslation.metadata.ExampleItem")
     }
 
-    val translationServiceMock = mock(TranslationService::class.java)
-    whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
+    val translationMemoryServiceMock = mock(TranslationMemoryService::class.java)
+    whenever(
+      applicationContextMock.getBean(TranslationMemoryService::class.java),
+    ).thenReturn(translationMemoryServiceMock)
     doAnswer {
       Page.empty<TranslationMemoryItemView>()
     }
       .whenever(
-        translationServiceMock,
-      ).getTranslationMemorySuggestions(
+        translationMemoryServiceMock,
+      ).getSuggestions(
         any<String>(),
         any<Boolean>(),
-        eq(null),
+        notNull(),
         any<LanguageDto>(),
         any<Pageable>(),
       )

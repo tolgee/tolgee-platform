@@ -27,9 +27,9 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.util.nullIfEmpty
@@ -142,6 +142,20 @@ class TranslationService(
 
   fun find(id: Long): Translation? {
     return this.translationRepository.findById(id).orElse(null)
+  }
+
+  fun find(
+    projectId: Long,
+    translationId: Long,
+  ): Translation? {
+    return this.translationRepository.find(projectId, translationId)
+  }
+
+  fun get(
+    projectId: Long,
+    translationId: Long,
+  ): Translation {
+    return find(projectId, translationId) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
   }
 
   fun getViewData(
@@ -344,43 +358,6 @@ class TranslationService(
       key,
       targetLanguage.id,
     ).firstOrNull()
-  }
-
-  fun getTranslationMemorySuggestions(
-    key: Key,
-    targetLanguage: LanguageDto,
-    pageable: Pageable,
-  ): Page<TranslationMemoryItemView> {
-    val baseTranslation = findBaseTranslation(key) ?: return Page.empty()
-
-    val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
-
-    return getTranslationMemorySuggestions(
-      baseTranslationText,
-      isPlural = key.isPlural,
-      key,
-      targetLanguage,
-      pageable,
-    )
-  }
-
-  fun getTranslationMemorySuggestions(
-    sourceTranslationText: String,
-    isPlural: Boolean,
-    key: Key?,
-    targetLanguage: LanguageDto,
-    pageable: Pageable,
-  ): Page<TranslationMemoryItemView> {
-    if ((sourceTranslationText.length) < 3) {
-      return Page.empty(pageable)
-    }
-    return translationRepository.getTranslateMemorySuggestions(
-      baseTranslationText = sourceTranslationText,
-      isPlural = isPlural,
-      key = key,
-      targetLanguageId = targetLanguage.id,
-      pageable = pageable,
-    )
   }
 
   @Transactional

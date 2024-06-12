@@ -13,6 +13,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
@@ -34,6 +35,7 @@ class ProjectStatsController(
   private val projectService: ProjectService,
   private val languageStatsService: LanguageStatsService,
   private val languageStatsModelAssembler: LanguageStatsModelAssembler,
+  private val languageService: LanguageService,
 ) {
   @Operation(summary = "Get project stats")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -42,12 +44,15 @@ class ProjectStatsController(
   fun getProjectStats(): ProjectStatsModel {
     val projectStats = projectStatsService.getProjectStats(projectHolder.project.id)
     val baseLanguage = projectService.getOrAssignBaseLanguage(projectHolder.project.id)
+    val languages = languageService.getProjectLanguages(projectHolder.project.id).associateBy { it.id }
     val languageStats =
       languageStatsService.getLanguageStats(projectHolder.project.id)
-        .sortedBy { it.language.name }
-        .sortedBy { it.language.id != baseLanguage.id }
+        .sortedBy { languages[it.languageId]?.name }
+        .sortedBy { languages[it.languageId]?.base == false }
 
     val totals = projectStatsService.computeProjectTotals(baseLanguage, languageStats)
+
+    val statsLanguagePairs = languageStats.map { it to languages[it.languageId]!! }
 
     return ProjectStatsModel(
       projectId = projectStats.id,
@@ -58,7 +63,7 @@ class ProjectStatsController(
       reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = languageStats.map { languageStatsModelAssembler.toModel(it) },
+      languageStats = statsLanguagePairs.map { languageStatsModelAssembler.toModel(it) },
     )
   }
 

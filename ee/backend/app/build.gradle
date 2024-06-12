@@ -80,7 +80,6 @@ dependencies {
     liquibaseRuntime libs.liquibaseHibernate
     liquibaseRuntime libs.kotlinReflect
     liquibaseRuntime(project(":data"))
-
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
 

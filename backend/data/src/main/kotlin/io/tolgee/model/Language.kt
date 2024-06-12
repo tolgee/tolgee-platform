@@ -6,10 +6,8 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.events.OnLanguagePrePersist
-import io.tolgee.events.OnLanguagePreRemove
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
-import io.tolgee.service.dataImport.ImportService
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -19,7 +17,6 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
-import jakarta.persistence.PreRemove
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
@@ -29,7 +26,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)
@@ -57,9 +54,9 @@ import org.springframework.transaction.annotation.Transactional
 )
 @ActivityLoggedEntity
 @ActivityReturnsExistence
-class Language : StandardAuditModel(), ILanguage {
+class Language : StandardAuditModel(), ILanguage, SoftDeletable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language", orphanRemoval = true)
-  var translations: MutableSet<Translation>? = null
+  var translations: MutableList<Translation> = mutableListOf()
 
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -98,6 +95,9 @@ class Language : StandardAuditModel(), ILanguage {
   @Column(columnDefinition = "text")
   override var aiTranslatorPromptDescription: String? = null
 
+  @ActivityLoggedProp
+  override var deletedAt: Date? = null
+
   fun updateByDTO(dto: LanguageRequest) {
     name = dto.name
     tag = dto.tag
@@ -123,21 +123,11 @@ class Language : StandardAuditModel(), ILanguage {
     @Configurable
     class LanguageListeners {
       @Autowired
-      lateinit var importServiceProvider: ObjectFactory<ImportService>
-
-      @Autowired
       lateinit var eventPublisherProvider: ObjectFactory<ApplicationEventPublisher>
 
       @PrePersist
       fun prePersist(language: Language) {
         eventPublisherProvider.`object`.publishEvent(OnLanguagePrePersist(source = this, language))
-      }
-
-      @PreRemove
-      @Transactional
-      fun preRemove(language: Language) {
-        importServiceProvider.`object`.onExistingLanguageRemoved(language)
-        eventPublisherProvider.`object`.publishEvent(OnLanguagePreRemove(source = this, language))
       }
     }
   }

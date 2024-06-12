@@ -1,17 +1,16 @@
 package io.tolgee.formats.apple.out
 
 import io.tolgee.dtos.IExportParams
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class AppleStringsStringsdictExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
-  override val fileExtension: String = ""
-
   private val preparedFiles = mutableMapOf<String, PreparedFile>()
 
   override fun produceFiles(): Map<String, InputStream> {
@@ -22,19 +21,34 @@ class AppleStringsStringsdictExporter(
     val result = mutableMapOf<String, InputStream>()
     preparedFiles.forEach {
       if (it.value.hasSingle) {
-        result["${it.key}strings"] = it.value.stringsWriter.result.byteInputStream()
+        val path = stringsFilePathProvider.replaceExtensionAndFinalize(it.key)
+        result[path] = it.value.stringsWriter.result.byteInputStream()
       }
       if (it.value.hasPlural) {
-        result["${it.key}stringsdict"] = it.value.stringsdictWriter.result
+        val path = stringsdictFilePathProvider.replaceExtensionAndFinalize(it.key)
+        result[path] = it.value.stringsdictWriter.result
       }
     }
     return result
   }
 
   private fun getBaseFilePath(translation: ExportTranslationView): String {
-    val namespace = translation.key.namespace ?: ""
-    val filePath = "${translation.languageTag}.lproj/Localizable."
-    return "$namespace/$filePath".replace("^/".toRegex(), "")
+    return stringsFilePathProvider.getFilePath(
+      translation.key.namespace,
+      translation.languageTag,
+      replaceExtension = false,
+    )
+  }
+
+  private val stringsFilePathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      "strings",
+    )
+  }
+
+  private val stringsdictFilePathProvider by lazy {
+    ExportFilePathProvider(exportParams, "stringsdict")
   }
 
   private fun handleTranslation(it: ExportTranslationView) {

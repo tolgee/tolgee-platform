@@ -24,6 +24,11 @@ class PropertiesImportFormatDetectorTest {
   }
 
   @Test
+  fun `detected icu with plural only`() {
+    "src/test/resources/import/properties/icu_plural.properties".assertDetected(ImportFormat.PROPERTIES_ICU)
+  }
+
+  @Test
   fun `detected jav`() {
     "src/test/resources/import/properties/java.properties".assertDetected(ImportFormat.PROPERTIES_JAVA)
   }

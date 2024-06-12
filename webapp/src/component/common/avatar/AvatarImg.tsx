@@ -4,10 +4,12 @@ import { styled } from '@mui/material';
 
 const StyledContainer = styled('div')`
   overflow: hidden;
-  display: flex;
+  display: grid;
 `;
 
-export const AvatarImg = (props: { size: number; owner: AvatarOwner }) => {
+type Props = { size: number; owner: AvatarOwner; className?: string };
+
+export const AvatarImg = (props: Props) => {
   const background = 'rgb(242, 242, 242)';
   const avatarPath =
     props.size <= 50
@@ -20,6 +22,7 @@ export const AvatarImg = (props: { size: number; owner: AvatarOwner }) => {
         borderRadius: props.owner.type === 'PROJECT' ? '10%' : '50%',
         filter: props.owner.deleted === true ? 'grayscale(1)' : undefined,
       }}
+      className={props.className}
     >
       {avatarPath ? (
         <img

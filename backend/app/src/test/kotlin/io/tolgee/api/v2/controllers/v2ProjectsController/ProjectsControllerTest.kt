@@ -22,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-open class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {
     executeInNewTransaction {
@@ -242,7 +242,7 @@ open class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
-    permissionService.getProjectPermissionScopes(repo.id, user)
+    permissionService.getProjectPermissionScopesNoApiKey(repo.id, user)
       .let { assertThat(it).isEmpty() }
   }
 

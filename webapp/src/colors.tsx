@@ -57,6 +57,7 @@ export type BillingProgress = {
   low: string;
   over: string;
   sufficient: string;
+  overForbidden: string;
   separator: string;
 };
 
@@ -127,6 +128,14 @@ export type QuickStart = {
   finishCircle: string;
 };
 
+export type Login = {
+  backgroundPrimary: string;
+};
+
+export type Input = {
+  background: string;
+};
+
 export type LanguageChips = {
   background: string;
 };
@@ -183,9 +192,10 @@ export const colors = {
       background: '#C4C4C4',
       low: '#E80000',
       over: '#ffce00',
+      overForbidden: '#970000',
       sufficient: '#17AD18',
       separator: '#656565',
-    },
+    } satisfies BillingProgress,
     billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
     marker: {
@@ -256,6 +266,12 @@ export const colors = {
         text: '#808080',
       },
     } satisfies Placeholders,
+    login: {
+      backgroundPrimary: '#fff',
+    } satisfies Login,
+    input: {
+      background: '#ffffff00',
+    } satisfies Input,
   },
   dark: {
     white: '#dddddd',
@@ -311,9 +327,10 @@ export const colors = {
       background: '#565656',
       low: '#ca0000',
       over: '#ffce00',
+      overForbidden: '#980000',
       sufficient: '#1e991e',
       separator: '#656565',
-    },
+    } satisfies BillingProgress,
     billingPlan: '#233043',
     globalLoading: '#ff6995',
     marker: {
@@ -383,5 +400,11 @@ export const colors = {
         text: '#acacac',
       },
     } satisfies Placeholders,
+    login: {
+      backgroundPrimary: '#ffffff0a',
+    } satisfies Login,
+    input: {
+      background: '#ffffff08',
+    } satisfies Input,
   },
 } as const;

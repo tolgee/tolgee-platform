@@ -128,7 +128,7 @@ class ApiKeyService(
     project: Project,
   ): Array<Scope> {
     val permittedScopes =
-      permissionService.getProjectPermissionScopes(project.id, userAccountId)
+      permissionService.getProjectPermissionScopesNoApiKey(project.id, userAccountId)
         ?: throw NotFoundException()
     return Scope.expand(permittedScopes)
   }

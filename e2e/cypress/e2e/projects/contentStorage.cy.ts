@@ -141,21 +141,21 @@ describe('Content storage', () => {
   }
 
   function fillAzure(name: string) {
-    cy.gcy('storage-form-name').type(name);
-    cy.gcy('storage-form-azure-connection-string').type('fake');
-    cy.gcy('storage-form-azure-container-name').type('fake');
-    cy.gcy('storage-form-public-url-prefix').type('fake');
+    cy.gcy('storage-form-name').find('input').type(name);
+    cy.gcy('storage-form-azure-connection-string').find('input').type('fake');
+    cy.gcy('storage-form-azure-container-name').find('input').type('fake');
+    cy.gcy('storage-form-public-url-prefix').find('input').type('fake');
   }
 
   function fillS3(name: string) {
-    cy.gcy('storage-form-name').type(name);
+    cy.gcy('storage-form-name').find('input').type(name);
 
-    cy.gcy('storage-form-s3-bucket-name').type('fake');
-    cy.gcy('storage-form-s3-access-key').type('fake');
-    cy.gcy('storage-form-s3-secret-key').type('fake');
-    cy.gcy('storage-form-s3-endpoint').type('fake');
-    cy.gcy('storage-form-s3-signing-region').type('fake');
+    cy.gcy('storage-form-s3-bucket-name').find('input').type('fake');
+    cy.gcy('storage-form-s3-access-key').find('input').type('fake');
+    cy.gcy('storage-form-s3-secret-key').find('input').type('fake');
+    cy.gcy('storage-form-s3-endpoint').find('input').type('fake');
+    cy.gcy('storage-form-s3-signing-region').find('input').type('fake');
 
-    cy.gcy('storage-form-public-url-prefix').type('fake');
+    cy.gcy('storage-form-public-url-prefix').find('input').type('fake');
   }
 });

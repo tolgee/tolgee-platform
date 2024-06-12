@@ -63,5 +63,13 @@ object FormatDetectionUtil {
 
   data class Factor(val weight: Double, val matcher: (Any?) -> Double)
 
-  val ICU_DETECTION_REGEX = "(?:^|\\s)\\{[\\w,\\s]+\\}(?:\\W|\$)".toRegex()
+  val ICU_DETECTION_REGEX =
+    (
+      "(?:^|\\s)" +
+        "\\{" +
+        "\\w+(\\s*,\\s*)?(((plural)\\s*,\\s*)?(.*other\\s*\\{.*\\}.*)|number,?.*)?" +
+        "\\}" +
+        "(?:\\W|\$)"
+    )
+      .toRegex()
 }

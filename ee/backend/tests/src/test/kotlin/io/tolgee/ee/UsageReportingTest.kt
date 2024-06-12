@@ -62,7 +62,7 @@ class UsageReportingTest : AbstractSpringTest() {
 
       verify {
         val user1 =
-          userAccountService.createUser(
+          userAccountService.createUserWithPassword(
             UserAccount(
               name = "Test",
               username = "aa@a.a",
@@ -71,7 +71,7 @@ class UsageReportingTest : AbstractSpringTest() {
           )
         captor.assertSeats(1)
         val user2 =
-          userAccountService.createUser(
+          userAccountService.createUserWithPassword(
             UserAccount(
               name = "Test",
               username = "ab@a.a",

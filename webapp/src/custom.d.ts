@@ -17,6 +17,8 @@ import {
   TipsBanner,
   TopBanner,
   LanguageChips,
+  Login,
+  Input,
   RevisionFilterBanner,
 } from './colors';
 
@@ -52,6 +54,8 @@ declare module '@mui/material/styles/createPalette' {
     tokens: typeof all.tokens;
     placeholders: Placeholders;
     languageChips: LanguageChips;
+    login: Login;
+    input: Input;
     revisionFilterBanner: RevisionFilterBanner;
   }
 
@@ -78,6 +82,8 @@ declare module '@mui/material/styles/createPalette' {
     tokens: typeof all.tokens;
     placeholders: Placeholders;
     languageChips: LanguageChips;
+    login: Login;
+    input: Input;
     revisionFilterBanner: RevisionFilterBanner;
   }
 }
