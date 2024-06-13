@@ -3456,4 +3456,17 @@
     <changeSet author="huglx (generated)" id="1717662938469-2">
         <dropColumn columnName="lang_tag" tableName="slack_message_info"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1718311350630-2">
+        <addColumn tableName="slack_config">
+            <column name="events" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1718311350630-3">
+        <addColumn tableName="slack_config_preference">
+            <column name="events" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1718311350630-1">
+        <modifyDataType columnName="on_event" newDataType="varchar(255)" tableName="slack_config_preference"/>
+    </changeSet>
 </databaseChangeLog>

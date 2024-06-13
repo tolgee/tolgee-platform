@@ -394,15 +394,17 @@ class SlackExecutor(
               markdownText("*Global Subscription:* Yes")
             }
 
+            val events = config.events.joinToString(", ") { "$it" }
+
             val allEventMeaning =
-              if (config.onEvent == EventName.ALL) {
+              if (config.events.contains(EventName.ALL)) {
                 getEventAllMeaning()
               } else {
                 ""
               }
 
             section {
-              markdownText("*Events:* `${config.onEvent}` $allEventMeaning")
+              markdownText("*Events:* `$events` $allEventMeaning")
             }
 
             context {
@@ -420,14 +422,15 @@ class SlackExecutor(
               val flagEmoji = language.flagEmoji
 
               val fullName = language.name
+              val events = it.events.joinToString(", ") { "$it" }
               val allEventMeaning =
-                if (it.onEvent == EventName.ALL) {
+                if (it.events.contains(EventName.ALL)) {
                   getEventAllMeaning()
                 } else {
                   ""
                 }
               markdownText(
-                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `${it.onEvent.name}` $allEventMeaning",
+                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `$events` $allEventMeaning",
               )
             }
           }
@@ -471,10 +474,11 @@ class SlackExecutor(
       val subscriptionInfo =
         buildString {
           if (config.isGlobalSubscription) {
+            val events = config.events.joinToString(", ") { "$it" }
             append(
               i18n.translate(
                 "slack.common.message.subscribed-successfully-global-subscription",
-              ).format(config.onEvent.name),
+              ).format(events),
             )
           }
 
@@ -484,7 +488,8 @@ class SlackExecutor(
                 val language = languageService.getByTag(tag, config.project)
                 val flagEmoji = language.flagEmoji
                 val fullName = language.name
-                " - $fullName $flagEmoji : on `${pref.onEvent.name}`"
+                val events = pref.events.joinToString(", ") { "$it" }
+                " - $fullName $flagEmoji : on `$events`"
               }
             }.joinToString("\n")
 

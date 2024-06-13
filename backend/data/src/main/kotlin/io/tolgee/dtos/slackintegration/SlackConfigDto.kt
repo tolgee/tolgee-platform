@@ -10,7 +10,7 @@ data class SlackConfigDto(
   val channelId: String,
   val userAccount: UserAccount,
   val languageTag: String? = "",
-  val onEvent: EventName?,
+  val events: MutableSet<EventName> = mutableSetOf(),
   val slackTeamId: String = "",
   val isGlobal: Boolean? = false,
 )

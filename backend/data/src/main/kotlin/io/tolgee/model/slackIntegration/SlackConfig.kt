@@ -27,6 +27,11 @@ class SlackConfig(
   @Enumerated(EnumType.STRING)
   var onEvent: EventName = EventName.ALL
 
+  @Enumerated(EnumType.STRING)
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  var events: MutableSet<EventName> = mutableSetOf()
+
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true, fetch = FetchType.LAZY)
   @Column(nullable = true)
   var savedSlackMessage: MutableList<SavedSlackMessage> = mutableListOf()

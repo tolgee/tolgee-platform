@@ -159,14 +159,17 @@ class SlackSlashCommandController(
   ): SlackMessageDto? {
     checkFeatureEnabled(payload.team_id)
 
-    var onEvent: EventName? = null
+    val events: MutableSet<EventName> = mutableSetOf()
+
     var isGlobal: Boolean? = null
     optionsMap.forEach { (option, value) ->
       try {
         when (option) {
-          "--on" ->
-            onEvent = EventName.valueOf(value.uppercase())
-
+          "--on" -> {
+            value.split(",").map { it.trim() }.forEach {
+              events.add(EventName.valueOf(it.uppercase()))
+            }
+          }
           "--global" ->
             isGlobal = value.lowercase().toBooleanStrictOrNull() ?: throw java.lang.IllegalArgumentException()
 
@@ -178,15 +181,18 @@ class SlackSlashCommandController(
         throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
       }
     }
-
-    return subscribe(payload, projectId, languageTag, onEvent, isGlobal)
+    if (events.contains(EventName.ALL)) {
+      events.clear()
+      events.add(EventName.ALL)
+    }
+    return subscribe(payload, projectId, languageTag, events, isGlobal)
   }
 
   private fun subscribe(
     payload: SlackCommandDto,
     projectId: Long,
     languageTag: String?,
-    onEventName: EventName?,
+    events: MutableSet<EventName>,
     isGlobal: Boolean?,
   ): SlackMessageDto {
     val user = getUserAccount(payload)
@@ -198,7 +204,7 @@ class SlackSlashCommandController(
         channelId = payload.channel_id,
         userAccount = user,
         languageTag = languageTag,
-        onEvent = onEventName,
+        events = events,
         slackTeamId = payload.team_id,
         isGlobal = isGlobal,
       )
@@ -280,6 +286,6 @@ class SlackSlashCommandController(
   companion object {
     val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+([\p{L}][\p{L}\d-]*))?\s*(.*)$""".toRegex()
 
-    val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
+    val optionsRegex = """(--[\w-]+)\s+([\w-,\s]+)""".toRegex()
   }
 }

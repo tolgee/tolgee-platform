@@ -83,7 +83,14 @@ class SlackConfigService(
         userAccount = dto.userAccount,
         channelId = dto.channelId,
       ).apply {
-        onEvent = dto.onEvent ?: EventName.ALL
+        events =
+          if (dto.events.isEmpty()) {
+            mutableSetOf(EventName.ALL)
+          } else {
+            dto.events
+          }
+
+        onEvent = EventName.ALL
         isGlobalSubscription = dto.isGlobal ?: dto.languageTag.isNullOrBlank()
         this.organizationSlackWorkspace = workspace
       }
@@ -91,7 +98,7 @@ class SlackConfigService(
     workspace?.slackSubscriptions?.add(slackConfig)
 
     if (!slackConfig.isGlobalSubscription) {
-      addPreferenceToConfig(slackConfig, dto.languageTag!!, dto.onEvent ?: EventName.ALL)
+      addPreferenceToConfig(slackConfig, dto.languageTag!!, events = dto.events)
     }
     automationService.createForSlackIntegration(slackConfig)
     return slackConfig
@@ -111,9 +118,9 @@ class SlackConfigService(
   ): SlackConfig {
     val workspace = findWorkspace(dto.slackTeamId)
 
-    dto.onEvent?.let { eventName ->
+    if (dto.events.isNotEmpty()) {
       if (dto.languageTag.isNullOrEmpty()) {
-        slackConfig.onEvent = eventName
+        slackConfig.events = dto.events
       }
     }
 
@@ -136,9 +143,9 @@ class SlackConfigService(
       if (slackConfig.preferences.isEmpty() ||
         !slackConfig.preferences.any { it.languageTag == dto.languageTag }
       ) {
-        addPreferenceToConfig(slackConfig, dto.languageTag!!, dto.onEvent ?: EventName.ALL)
+        addPreferenceToConfig(slackConfig, dto.languageTag!!, events = dto.events)
       } else {
-        updatePreferenceInConfig(slackConfig, dto.languageTag!!, dto.onEvent ?: EventName.ALL)
+        updatePreferenceInConfig(slackConfig, dto.languageTag!!, events = dto.events)
       }
     }
 
@@ -151,16 +158,16 @@ class SlackConfigService(
   private fun updatePreferenceInConfig(
     slackConfig: SlackConfig,
     languageTag: String,
-    eventName: EventName,
+    events: MutableSet<EventName>,
   ) {
     val pref = slackConfig.preferences.find { it.languageTag == languageTag } ?: return
-    slackConfigPreferenceService.update(pref, eventName)
+    slackConfigPreferenceService.update(pref, events)
   }
 
   private fun addPreferenceToConfig(
     slackConfig: SlackConfig,
     langTag: String,
-    onEvent: EventName,
+    events: MutableSet<EventName>,
   ) {
     languageService.findByTag(
       langTag,
@@ -171,7 +178,7 @@ class SlackConfigService(
       slackConfigPreferenceService.create(
         slackConfig,
         langTag,
-        onEvent,
+        events,
       )
     slackConfig.preferences.add(pref)
   }

@@ -13,16 +13,27 @@ class SlackConfigPreferenceService(
   fun create(
     slackConfig: SlackConfig,
     langTag: String,
-    eventName: EventName,
+    events: MutableSet<EventName>,
   ): SlackConfigPreference {
-    return slackConfigPreferenceRepository.save(SlackConfigPreference(slackConfig, langTag, eventName))
+    val preference =
+      SlackConfigPreference(slackConfig, langTag).apply {
+        this.events =
+          if (events.isEmpty()) {
+            mutableSetOf(EventName.ALL)
+          } else {
+            events
+          }
+      }
+    return slackConfigPreferenceRepository.save(preference)
   }
 
   fun update(
     slackConfigPreference: SlackConfigPreference,
-    eventName: EventName,
+    events: MutableSet<EventName>,
   ): SlackConfigPreference {
-    slackConfigPreference.onEvent = eventName
+    if (events.isNotEmpty()) {
+      slackConfigPreference.events = events
+    }
     return slackConfigPreferenceRepository.save(slackConfigPreference)
   }
 
