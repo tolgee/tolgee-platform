@@ -30,7 +30,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
         project = testData.projectBuilder.self,
         channelId = "testChannel2",
         userAccount = testData.user,
-        onEvent = EventName.ALL,
+        events = mutableSetOf(EventName.ALL),
         isGlobal = true,
       )
     slackConfigService.createOrUpdate(slackConfigDto)

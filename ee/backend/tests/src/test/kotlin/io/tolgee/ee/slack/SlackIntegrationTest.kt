@@ -83,7 +83,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         channelId = "testChannel",
         userAccount = testData.user,
         languageTag = "fr",
-        onEvent = EventName.ALL,
+        events = mutableSetOf(EventName.ALL),
         slackTeamId = "",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
@@ -111,7 +111,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         channelId = "testChannel",
         userAccount = testData.user,
         languageTag = "en",
-        onEvent = EventName.TRANSLATION_CHANGED,
+        events = mutableSetOf(EventName.TRANSLATION_CHANGED),
         slackTeamId = "",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
