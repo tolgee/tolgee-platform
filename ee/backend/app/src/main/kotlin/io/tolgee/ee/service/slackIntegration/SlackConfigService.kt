@@ -89,8 +89,6 @@ class SlackConfigService(
           } else {
             dto.events
           }
-
-        onEvent = EventName.ALL
         isGlobalSubscription = dto.isGlobal ?: dto.languageTag.isNullOrBlank()
         this.organizationSlackWorkspace = workspace
       }
