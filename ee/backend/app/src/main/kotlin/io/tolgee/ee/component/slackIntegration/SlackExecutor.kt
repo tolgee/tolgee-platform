@@ -12,8 +12,8 @@ import io.tolgee.ee.service.slackIntegration.*
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
-import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging

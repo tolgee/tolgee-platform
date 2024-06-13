@@ -16,7 +16,7 @@ export const SlackConnectedView = () => {
         }
         windowTitle={t('slack_connect_title')}
         title={t('slack_connect_success_title')}
-        content={
+        primaryContent={
           <Box mt={4}>
             <T keyName="slack_connect_success_message" />
           </Box>

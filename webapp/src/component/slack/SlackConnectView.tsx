@@ -107,7 +107,7 @@ export const SlackConnectView = () => {
         }
         maxWidth={800}
         windowTitle={t('slack_connect_title')}
-        content={
+        primaryContent={
           <>
             {connectionInfo.isLoading ? (
               <BoxLoading />

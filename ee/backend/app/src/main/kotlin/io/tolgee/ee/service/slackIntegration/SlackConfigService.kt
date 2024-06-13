@@ -9,8 +9,8 @@ import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
-import io.tolgee.service.LanguageService
 import io.tolgee.service.automations.AutomationService
+import io.tolgee.service.language.LanguageService
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 

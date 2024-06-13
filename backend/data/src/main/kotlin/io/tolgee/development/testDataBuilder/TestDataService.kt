@@ -2,9 +2,6 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.eventListeners.LanguageStatsListener
-import io.tolgee.development.testDataBuilder.builders.*
-import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
-import io.tolgee.service.LanguageService
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.PatBuilder
@@ -13,11 +10,11 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
+import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.dataImport.ImportService
-import io.tolgee.service.key.*
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -30,7 +27,11 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.*
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.PatService
+import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
