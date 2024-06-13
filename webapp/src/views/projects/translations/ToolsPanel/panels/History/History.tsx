@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { T } from '@tolgee/react';
 import { Box, FormControlLabel, styled, Switch } from '@mui/material';
-
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { StickyDateSeparator } from 'tg.views/projects/translations/ToolsPanel/common/StickyDateSeparator';
+
 import { HistoryItem } from './HistoryItem';
 import { PanelContentProps } from '../../common/types';
 import { TabMessage } from '../../common/TabMessage';
@@ -38,7 +39,7 @@ export const History: React.FC<PanelContentProps> = ({ keyData, language }) => {
   const translation = keyData.translations[language.tag];
   const [limit, setLimit] = useState(true);
 
-  const { fetchMore, historyItems, ...history } = useHistory({
+  const { fetchMore, historyItems, loading, ...history } = useHistory({
     keyId: keyData.keyId,
     translation,
     language,
@@ -63,7 +64,11 @@ export const History: React.FC<PanelContentProps> = ({ keyData, language }) => {
     return (
       <StyledContainer>
         <TabMessage>
-          <T keyName="translation_tools_nothing_found"></T>
+          {loading ? (
+            <LoadingSkeletonFadingIn variant="text" />
+          ) : (
+            <T keyName="translations_history_no_activity"></T>
+          )}
         </TabMessage>
       </StyledContainer>
     );

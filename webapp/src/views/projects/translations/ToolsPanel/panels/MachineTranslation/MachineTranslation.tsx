@@ -1,14 +1,14 @@
+import { useEffect } from 'react';
 import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { GoToBilling } from 'tg.component/GoToBilling';
 import { stringHash } from 'tg.fixtures/stringHash';
+
 import { useMTStreamed } from './useMTStreamed';
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
-import { useEffect } from 'react';
 import { MachineTranslationItem } from './MachineTranslationItem';
-import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -68,8 +68,6 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
     },
   });
 
-  useLoadingRegister(machineLoadable.isFetching);
-
   const data = machineLoadable.data;
 
   const baseIsEmpty = data?.baseBlank;
@@ -86,6 +84,16 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   useEffect(() => {
     setItemsCount(arrayResults.length);
   }, [arrayResults.length]);
+
+  if (machineLoadable.isLoading && !data) {
+    return (
+      <StyledContainer>
+        <TabMessage>
+          <LoadingSkeletonFadingIn variant="text" />
+        </TabMessage>
+      </StyledContainer>
+    );
+  }
 
   return (
     <StyledContainer>

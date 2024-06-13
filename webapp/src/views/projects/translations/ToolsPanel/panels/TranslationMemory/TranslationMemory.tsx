@@ -1,11 +1,12 @@
+import { useEffect } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Skeleton, styled } from '@mui/material';
+import { styled } from '@mui/material';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { stringHash } from 'tg.fixtures/stringHash';
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { stringHash } from 'tg.fixtures/stringHash';
-import { useEffect } from 'react';
 import { TranslationMemoryItem } from './TranslationMemoryItem';
 
 const StyledContainer = styled('div')`
@@ -50,11 +51,11 @@ export const TranslationMemory: React.FC<PanelContentProps> = ({
     setItemsCount(items?.length ?? 0);
   }, [items?.length]);
 
-  if (!data) {
+  if (memory.isLoading) {
     return (
       <StyledContainer>
         <TabMessage>
-          <Skeleton variant="text" />
+          <LoadingSkeletonFadingIn variant="text" />
         </TabMessage>
       </StyledContainer>
     );

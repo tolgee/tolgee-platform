@@ -249,12 +249,7 @@ export const useComments = ({ keyId, translation, language }: Props) => {
     handleDelete,
     changeState,
     commentsList,
-    isLoading:
-      addComment.isLoading ||
-      deleteComment.isLoading ||
-      resolveComment.isLoading ||
-      keyData.isLoading ||
-      (comments.isFetching && !comments.isFetchingNextPage),
+    isLoading: comments.isLoading,
     isAddingComment: addComment.isLoading,
   };
 };
