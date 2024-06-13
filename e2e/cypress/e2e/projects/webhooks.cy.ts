@@ -107,7 +107,9 @@ describe('Content delivery', () => {
     confirmStandard();
     waitForGlobalLoading();
 
-    cy.contains("Your plan doesn't include this feature.").should('be.visible');
+    cy.contains("Your plan doesn't include the webhooks feature").should(
+      'be.visible'
+    );
     cy.gcy('webhooks-add-item-button').should('be.disabled');
   });
 
