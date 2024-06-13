@@ -1,3 +1,10 @@
+## [3.64.8](https://github.com/tolgee/tolgee-platform/compare/v3.64.7...v3.64.8) (2024-06-13)
+
+
+### Bug Fixes
+
+* improve tools panels loading and empty states ([#2367](https://github.com/tolgee/tolgee-platform/issues/2367)) ([025b201](https://github.com/tolgee/tolgee-platform/commit/025b201284eebc697e4a1c93a592287926b34ac8))
+
 ## [3.64.7](https://github.com/tolgee/tolgee-platform/compare/v3.64.6...v3.64.7) (2024-06-11)
 
 
