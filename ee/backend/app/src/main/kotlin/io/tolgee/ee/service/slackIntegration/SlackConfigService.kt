@@ -112,7 +112,9 @@ class SlackConfigService(
     val workspace = findWorkspace(dto.slackTeamId)
 
     dto.onEvent?.let { eventName ->
-      slackConfig.onEvent = eventName
+      if (dto.languageTag.isNullOrEmpty()) {
+        slackConfig.onEvent = eventName
+      }
     }
 
     dto.isGlobal?.let {
