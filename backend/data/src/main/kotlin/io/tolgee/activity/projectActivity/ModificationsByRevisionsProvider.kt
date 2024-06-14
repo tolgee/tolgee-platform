@@ -29,7 +29,7 @@ class ModificationsByRevisionsProvider(
 
   private lateinit var rawModifiedEntities: Page<ActivityModifiedEntity>
   private lateinit var entityExistences: Map<Pair<String, Long>, Boolean>
-  private lateinit var allRelationData: MutableMap<Long, List<ActivityDescribingEntity>>
+  private lateinit var allRelationData: MutableMap<Long, MutableList<ActivityDescribingEntity>>
 
   fun get(): Page<ModifiedEntityView> {
     prepareData()

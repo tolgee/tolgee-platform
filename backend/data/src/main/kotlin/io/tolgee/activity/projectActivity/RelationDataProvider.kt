@@ -10,19 +10,25 @@ class RelationDataProvider(
   private val entityManager: EntityManager,
   private val rawModifiedEntities: Iterable<ActivityModifiedEntity>,
 ) {
-  private lateinit var allRelationData: MutableMap<Long, List<ActivityDescribingEntity>>
+  private lateinit var allRelationData: MutableMap<Long, MutableList<ActivityDescribingEntity>>
 
-  fun provide(): MutableMap<Long, List<ActivityDescribingEntity>> {
+  fun provide(): MutableMap<Long, MutableList<ActivityDescribingEntity>> {
     var missing: Set<Triple<Long, String, Long>> = getInitialMissingRelationData()
 
-    allRelationData = getRelationsForRevisions(missing).groupBy { it.activityRevision.id }.toMutableMap()
+    allRelationData =
+      getRelationsForRevisions(missing)
+        .groupBy { it.activityRevision.id }
+        .mapValues { it.value.toMutableList() }
+        .toMutableMap()
 
     val retrieved = missing.toMutableSet()
 
     missing = getMissingRelationData()
 
     while (!retrieved.containsAll(missing)) {
-      allRelationData.putAll(getRelationsForRevisions(missing).groupBy { it.activityRevision.id })
+      getRelationsForRevisions(missing).map {
+        allRelationData.computeIfAbsent(it.activityRevision.id) { mutableListOf() }.add(it)
+      }
       retrieved.addAll(missing)
       missing = getMissingRelationData()
     }

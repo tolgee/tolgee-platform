@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContext
 class EntityExistenceProvider(
   private val applicationContext: ApplicationContext,
   private val rawModifiedEntities: Iterable<ActivityModifiedEntity>,
-  private val allRelationData: MutableMap<Long, List<ActivityDescribingEntity>>,
+  private val allRelationData: MutableMap<Long, MutableList<ActivityDescribingEntity>>,
 ) {
   private val entityManager: EntityManager =
     applicationContext.getBean(EntityManager::class.java)

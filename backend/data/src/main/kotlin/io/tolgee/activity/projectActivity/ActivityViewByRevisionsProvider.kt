@@ -41,7 +41,7 @@ class ActivityViewByRevisionsProvider(
   private lateinit var revisionIds: MutableList<Long>
   private lateinit var counts: MutableMap<Long, MutableMap<String, Long>>
   private lateinit var allDataReturningActivityTypes: List<ActivityType>
-  private lateinit var allRelationData: MutableMap<Long, List<ActivityDescribingEntity>>
+  private lateinit var allRelationData: MutableMap<Long, MutableList<ActivityDescribingEntity>>
   private lateinit var rawModifiedEntities: List<ActivityModifiedEntity>
   private lateinit var entityExistences: Map<Pair<String, Long>, Boolean>
   private lateinit var params: Map<Long, Any?>

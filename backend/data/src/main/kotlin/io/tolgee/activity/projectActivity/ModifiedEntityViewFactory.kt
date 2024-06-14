@@ -9,7 +9,7 @@ import io.tolgee.model.views.activity.ModifiedEntityView
 
 class ModifiedEntityViewFactory(
   private val entityExistences: Map<Pair<String, Long>, Boolean>,
-  private val allRelationData: MutableMap<Long, List<ActivityDescribingEntity>>,
+  private val allRelationData: MutableMap<Long, MutableList<ActivityDescribingEntity>>,
 ) {
   fun create(modifiedEntity: ActivityModifiedEntity): ModifiedEntityView {
     val relations =
