@@ -18,7 +18,7 @@ import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
@@ -159,7 +159,7 @@ class SlackSlashCommandController(
   ): SlackMessageDto? {
     checkFeatureEnabled(payload.team_id)
 
-    val events: MutableSet<EventName> = mutableSetOf()
+    val events: MutableSet<SlackEventType> = mutableSetOf()
 
     var isGlobal: Boolean? = null
     optionsMap.forEach { (option, value) ->
@@ -167,7 +167,7 @@ class SlackSlashCommandController(
         when (option) {
           "--on" -> {
             value.split(",").map { it.trim() }.forEach {
-              events.add(EventName.valueOf(it.uppercase()))
+              events.add(SlackEventType.valueOf(it.uppercase()))
             }
           }
           "--global" ->
@@ -181,9 +181,9 @@ class SlackSlashCommandController(
         throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
       }
     }
-    if (events.contains(EventName.ALL)) {
+    if (events.contains(SlackEventType.ALL)) {
       events.clear()
-      events.add(EventName.ALL)
+      events.add(SlackEventType.ALL)
     }
     return subscribe(payload, projectId, languageTag, events, isGlobal)
   }
@@ -192,7 +192,7 @@ class SlackSlashCommandController(
     payload: SlackCommandDto,
     projectId: Long,
     languageTag: String?,
-    events: MutableSet<EventName>,
+    events: MutableSet<SlackEventType>,
     isGlobal: Boolean?,
   ): SlackMessageDto {
     val user = getUserAccount(payload)

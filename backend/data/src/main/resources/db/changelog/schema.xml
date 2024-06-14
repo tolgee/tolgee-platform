@@ -3469,4 +3469,10 @@
     <changeSet author="huglx (generated)" id="1718311350630-1">
         <modifyDataType columnName="on_event" newDataType="varchar(255)" tableName="slack_config_preference"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1718358454404-1">
+        <dropColumn columnName="on_event" tableName="slack_config"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1718358454404-2">
+        <dropColumn columnName="on_event" tableName="slack_config_preference"/>
+    </changeSet>
 </databaseChangeLog>

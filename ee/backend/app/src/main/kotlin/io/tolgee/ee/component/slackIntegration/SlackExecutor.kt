@@ -9,10 +9,10 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.ee.service.slackIntegration.*
-import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.PermissionService
@@ -397,7 +397,7 @@ class SlackExecutor(
             val events = config.events.joinToString(", ") { "$it" }
 
             val allEventMeaning =
-              if (config.events.contains(EventName.ALL)) {
+              if (config.events.contains(SlackEventType.ALL)) {
                 getEventAllMeaning()
               } else {
                 ""
@@ -424,7 +424,7 @@ class SlackExecutor(
               val fullName = language.name
               val events = it.events.joinToString(", ") { "$it" }
               val allEventMeaning =
-                if (it.events.contains(EventName.ALL)) {
+                if (it.events.contains(SlackEventType.ALL)) {
                   getEventAllMeaning()
                 } else {
                   ""

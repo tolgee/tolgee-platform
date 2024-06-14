@@ -6,9 +6,9 @@ import io.tolgee.ee.component.slackIntegration.SlackErrorProvider
 import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.SlackErrorException
-import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.language.LanguageService
 import jakarta.transaction.Transactional
@@ -85,7 +85,7 @@ class SlackConfigService(
       ).apply {
         events =
           if (dto.events.isEmpty()) {
-            mutableSetOf(EventName.ALL)
+            mutableSetOf(SlackEventType.ALL)
           } else {
             dto.events
           }
@@ -156,7 +156,7 @@ class SlackConfigService(
   private fun updatePreferenceInConfig(
     slackConfig: SlackConfig,
     languageTag: String,
-    events: MutableSet<EventName>,
+    events: MutableSet<SlackEventType>,
   ) {
     val pref = slackConfig.preferences.find { it.languageTag == languageTag } ?: return
     slackConfigPreferenceService.update(pref, events)
@@ -165,7 +165,7 @@ class SlackConfigService(
   private fun addPreferenceToConfig(
     slackConfig: SlackConfig,
     langTag: String,
-    events: MutableSet<EventName>,
+    events: MutableSet<SlackEventType>,
   ) {
     languageService.findByTag(
       langTag,

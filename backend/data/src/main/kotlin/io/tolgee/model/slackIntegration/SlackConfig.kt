@@ -24,13 +24,9 @@ class SlackConfig(
   @Type(JsonBinaryType::class)
   var languageTags: MutableSet<String> = hashSetOf()
 
-  @Enumerated(EnumType.STRING)
-  var onEvent: EventName = EventName.ALL
-
-  @Enumerated(EnumType.STRING)
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  var events: MutableSet<EventName> = mutableSetOf()
+  var events: MutableSet<SlackEventType> = mutableSetOf()
 
   @OneToMany(mappedBy = "slackConfig", orphanRemoval = true, fetch = FetchType.LAZY)
   @Column(nullable = true)

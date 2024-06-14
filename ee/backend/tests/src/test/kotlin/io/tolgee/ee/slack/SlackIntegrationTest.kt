@@ -14,7 +14,7 @@ import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.ee.service.slackIntegration.SlackConfigService
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.Logging
@@ -89,7 +89,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         channelId = "testChannel",
         userAccount = testData.user,
         languageTag = "fr",
-        events = mutableSetOf(EventName.ALL),
+        events = mutableSetOf(SlackEventType.ALL),
         slackTeamId = "slackTeamId",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
@@ -117,7 +117,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         channelId = "testChannel",
         userAccount = testData.user,
         languageTag = "en",
-        events = mutableSetOf(EventName.TRANSLATION_CHANGED),
+        events = mutableSetOf(SlackEventType.TRANSLATION_CHANGED),
         slackTeamId = "slackTeamId",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
