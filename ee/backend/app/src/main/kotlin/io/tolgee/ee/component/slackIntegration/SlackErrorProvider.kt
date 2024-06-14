@@ -59,6 +59,17 @@ class SlackErrorProvider(
     }
   }
 
+  fun getInvalidParameterError(parameter: String): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.wrong-parameter").format(parameter))
+      }
+      actions {
+        helpButton()
+      }
+    }
+  }
+
   fun getInvalidLangTagError(): List<LayoutBlock> {
     return withBlocks {
       section {

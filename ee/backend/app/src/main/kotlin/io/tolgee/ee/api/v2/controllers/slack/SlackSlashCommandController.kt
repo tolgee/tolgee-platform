@@ -163,22 +163,20 @@ class SlackSlashCommandController(
 
     var isGlobal: Boolean? = null
     optionsMap.forEach { (option, value) ->
-      try {
-        when (option) {
-          "--on" -> {
-            value.split(",").map { it.trim() }.forEach {
-              events.add(SlackEventType.valueOf(it.uppercase()))
-            }
-          }
-          "--global" ->
-            isGlobal = value.lowercase().toBooleanStrictOrNull() ?: throw java.lang.IllegalArgumentException()
-
-          else -> {
-            throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+      when (option) {
+        "--on" -> {
+          value.split(",").map { it.trim() }.forEach {
+            events.add(parseEventName(it))
           }
         }
-      } catch (e: IllegalArgumentException) {
-        throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+        "--global" ->
+          isGlobal = value.lowercase().toBooleanStrictOrNull() ?: throw SlackErrorException(
+            slackErrorProvider.getInvalidParameterError(value),
+          )
+
+        else -> {
+          throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+        }
       }
     }
     if (events.contains(SlackEventType.ALL)) {
@@ -186,6 +184,14 @@ class SlackSlashCommandController(
       events.add(SlackEventType.ALL)
     }
     return subscribe(payload, projectId, languageTag, events, isGlobal)
+  }
+
+  fun parseEventName(event: String): SlackEventType {
+    return try {
+      SlackEventType.valueOf(event.uppercase())
+    } catch (e: IllegalArgumentException) {
+      throw SlackErrorException(slackErrorProvider.getInvalidParameterError(event))
+    }
   }
 
   private fun subscribe(
