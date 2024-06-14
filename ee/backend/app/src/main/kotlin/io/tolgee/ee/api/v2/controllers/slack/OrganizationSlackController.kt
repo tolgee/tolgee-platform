@@ -37,7 +37,10 @@ class OrganizationSlackController(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @GetMapping("get-connect-url")
-  @Operation(summary = "")
+  @Operation(
+    summary = "Get connect URL for Slack authentication",
+    description = "Returns URL to which user should be redirected to connect Slack workspace",
+  )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun connectToSlack(
     @PathVariable organizationId: Long,
@@ -54,6 +57,12 @@ class OrganizationSlackController(
 
   @PostMapping("/connect")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Connect Slack workspace to organization",
+    description =
+      "This endpoint allows the owner of an organization to connect a Slack workspace to their organization.\n" +
+        "Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.",
+  )
   fun connectWorkspace(
     @RequestBody data: ConnectToSlackDto,
     @PathVariable organizationId: Long,
@@ -77,6 +86,10 @@ class OrganizationSlackController(
 
   @GetMapping("/workspaces")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Get connected workspaces",
+    description = "Returns a list of workspaces connected to the organization",
+  )
   fun getConnectedWorkspaces(
     @PathVariable organizationId: Long,
   ): CollectionModel<WorkspaceModel> {
@@ -86,6 +99,10 @@ class OrganizationSlackController(
 
   @DeleteMapping("/workspaces/{workspaceId}")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Disconnect workspace",
+    description = "Disconnects a workspace from the organization",
+  )
   fun disconnectWorkspace(
     @PathVariable workspaceId: Long,
     @PathVariable organizationId: Long,
