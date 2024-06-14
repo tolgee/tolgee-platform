@@ -80,7 +80,7 @@ export const PlanAction = ({
     <StyledContainer>
       <LoadingButton
         data-cy="billing-plan-action-button"
-        variant="outlined"
+        variant="contained"
         color="primary"
         size="small"
         loading={loading}

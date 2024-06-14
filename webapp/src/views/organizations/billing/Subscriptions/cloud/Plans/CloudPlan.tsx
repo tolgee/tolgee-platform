@@ -17,6 +17,7 @@ import { ShowAllFeaturesLink } from '../../common/ShowAllFeaturesLink';
 import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
+import { isPlanLegacy } from './utils';
 
 type Features = PlanType['enabledFeatures'];
 
@@ -58,7 +59,10 @@ export const CloudPlan: FC<Props> = ({
             />
           )}
           {plan.public && <ShowAllFeaturesLink />}
-          <IncludedUsage includedUsage={plan.includedUsage} />
+          <IncludedUsage
+            includedUsage={plan.includedUsage}
+            isLegacy={isPlanLegacy(plan)}
+          />
         </PlanFeaturesBox>
 
         {plan.prices && (

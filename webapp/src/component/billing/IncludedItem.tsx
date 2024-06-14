@@ -1,7 +1,7 @@
 import { Box, SxProps, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { MtHint } from 'tg.component/billing/MtHint';
-import { StringsHint } from './StringsHint';
+import { StringSlotsHint, StringsHint } from './Hints';
 
 export const IncludedItemContainer = styled(Box)``;
 
@@ -13,6 +13,25 @@ type IncludedItemProps = {
   count: number;
   sx?: SxProps;
   className?: string;
+};
+
+export const IncludedStringSlots = ({
+  count,
+  sx,
+  className,
+}: IncludedItemProps) => {
+  return (
+    <IncludedItemContainer {...{ sx, className }}>
+      <T
+        keyName="billing_subscription_included_slots_strings"
+        params={{
+          highlight: <StyledQuantity />,
+          quantity: count,
+          hint: <StringSlotsHint />,
+        }}
+      />
+    </IncludedItemContainer>
+  );
 };
 
 export const IncludedStrings = ({

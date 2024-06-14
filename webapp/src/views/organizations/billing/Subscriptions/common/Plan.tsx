@@ -19,7 +19,7 @@ export const Plan = styled('div')`
 `;
 
 export const PlanContent = styled('div')`
-  padding: 32px 24px 24px 24px;
+  padding: 32px 24px;
   display: grid;
   grid-template-rows: auto 1fr;
   height: 100%;
