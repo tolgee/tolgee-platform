@@ -18,6 +18,7 @@ import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.Logging
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -38,6 +39,11 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   @Autowired
   lateinit var slackConfigService: SlackConfigService
 
+  @BeforeAll
+  fun setup() {
+    tolgeeProperties.slack.token = "token"
+  }
+
   @Test
   fun `sends message to correct channel after translation changed`() {
     val testData = SlackTestData()
@@ -51,8 +57,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
       modifyTranslationData(testData.projectBuilder.self.id, langTag, testData.key.name)
       val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
+      Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
     }
-    Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
   }
 
   @Test
@@ -84,7 +90,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         userAccount = testData.user,
         languageTag = "fr",
         events = mutableSetOf(EventName.ALL),
-        slackTeamId = "",
+        slackTeamId = "slackTeamId",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
     val config = slackConfigService.createOrUpdate(updatedConfig)
@@ -112,7 +118,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         userAccount = testData.user,
         languageTag = "en",
         events = mutableSetOf(EventName.TRANSLATION_CHANGED),
-        slackTeamId = "",
+        slackTeamId = "slackTeamId",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
     val config = slackConfigService.createOrUpdate(updatedConfig)

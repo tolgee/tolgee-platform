@@ -9,6 +9,7 @@ import io.tolgee.model.automations.*
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
+import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
@@ -80,6 +81,7 @@ class SlackTestData() {
           this.project = projectBuilder.self
           this.userAccount = userAccountBuilder.self
           isGlobalSubscription = true
+          events = mutableSetOf(EventName.ALL)
         }.build config@{
           addSlackMessage {
             slackConfig = this@config.self
