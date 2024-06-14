@@ -10,6 +10,7 @@ export const Plan = styled('div')`
   box-shadow: 0px 0px 20px 0px
     ${({ theme }) => theme.palette.billingPlan.shadow};
   background: ${({ theme }) => theme.palette.billingPlan.background};
+
   &.active {
     box-shadow: 0px 0px 20px 0px
       ${({ theme }) => theme.palette.billingPlan.activeShadow};
@@ -18,7 +19,7 @@ export const Plan = styled('div')`
 `;
 
 export const PlanContent = styled('div')`
-  padding: 32px 40px;
+  padding: 32px 24px 24px 24px;
   display: grid;
   grid-template-rows: auto 1fr;
   height: 100%;

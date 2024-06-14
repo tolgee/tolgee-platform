@@ -106,9 +106,9 @@ declare namespace DataCy {
         "billing-plan" |
         "billing-plan-action-button" |
         "billing-plan-monthly-price" |
-        "billing-plan-price-per-seat-extra" |
-        "billing-plan-price-per-thousand-mt-credits-extra" |
-        "billing-plan-price-per-thousand-strings-extra" |
+        "billing-plan-price-extra-seat" |
+        "billing-plan-price-extra-thousand-mt-credits" |
+        "billing-plan-price-extra-thousand-strings" |
         "billing-plan-subtitle" |
         "billing-progress-label-item" |
         "billing-self-hosted-ee-plan" |

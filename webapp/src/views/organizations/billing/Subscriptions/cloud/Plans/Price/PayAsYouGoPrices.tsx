@@ -1,43 +1,66 @@
 import { Box, SxProps, styled } from '@mui/material';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
+import { PayAsYouGoRow } from './PayAsYouGoRow';
+import { useMoneyFormatter } from 'tg.hooks/useLocale';
 
 type PlanPricesModel = components['schemas']['PlanPricesModel'];
 
-const StyledSecondaryPrice = styled(Box)`
+const StyledTitle = styled(Box)`
+  text-align: center;
   font-size: 13px;
+  font-weight: 500;
 `;
 
 type Props = { prices: PlanPricesModel; sx?: SxProps; className?: string };
 
 export const PayAsYouGoPrices = ({ prices, sx, className }: Props) => {
   const { perSeat, perThousandMtCredits, perThousandTranslations } = prices;
+  const { t } = useTranslate();
+  const formatPrice = useMoneyFormatter();
+
+  const display = perSeat || perThousandMtCredits || perThousandTranslations;
+
+  if (!display) {
+    return null;
+  }
 
   return (
-    <Box display="grid" {...{ sx, className }}>
+    <Box display="grid" gap="2px" {...{ sx, className }}>
+      <StyledTitle sx={{ paddingBottom: '2px' }}>
+        <T keyName="billing-plan-pay-as-you-go-price" />
+      </StyledTitle>
+
       {Boolean(perSeat) && (
-        <StyledSecondaryPrice data-cy="billing-plan-price-per-seat-extra">
-          <T
-            keyName="billing-plan-price-per-seat-extra"
-            params={{ price: perSeat }}
-          />
-        </StyledSecondaryPrice>
+        <PayAsYouGoRow
+          data-cy="billing-plan-price-extra-seat"
+          firstPart={t('billing-plan-price-extra-seat')}
+          secondPart={t('billing-plan-price-per-mo', { value: perSeat })}
+        />
       )}
+
       {Boolean(perThousandTranslations) && (
-        <StyledSecondaryPrice data-cy="billing-plan-price-per-thousand-strings-extra">
-          <T
-            keyName="billing-plan-price-per-thousand-strings-extra"
-            params={{ price: perThousandTranslations }}
-          />
-        </StyledSecondaryPrice>
+        <PayAsYouGoRow
+          data-cy="billing-plan-price-extra-thousand-strings"
+          firstPart={t('billing-plan-price-extra-thousand-strings', {
+            num: 1000,
+          })}
+          secondPart={t('billing-plan-price-per-mo', {
+            value: perThousandTranslations,
+          })}
+        />
       )}
+
       {Boolean(perThousandMtCredits) && (
-        <StyledSecondaryPrice data-cy="billing-plan-price-per-thousand-mt-credits-extra">
-          <T
-            keyName="billing-plan-price-per-thousand-mt-credits-extra"
-            params={{ price: perThousandMtCredits }}
-          />
-        </StyledSecondaryPrice>
+        <PayAsYouGoRow
+          data-cy="billing-plan-price-extra-thousand-mt-credits"
+          firstPart={t('billing-plan-price-extra-thousand-mt-credits', {
+            num: 1000,
+          })}
+          secondPart={formatPrice(perThousandMtCredits, {
+            maximumFractionDigits: 4,
+          })}
+        />
       )}
     </Box>
   );
