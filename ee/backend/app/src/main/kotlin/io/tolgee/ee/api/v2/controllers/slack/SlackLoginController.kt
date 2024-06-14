@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.component.slackIntegration.SlackExecutor
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
