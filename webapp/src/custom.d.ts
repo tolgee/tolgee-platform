@@ -20,6 +20,7 @@ import {
   Login,
   Input,
   RevisionFilterBanner,
+  BillingPlan,
 } from './colors';
 
 declare module '*.svg' {
@@ -43,7 +44,7 @@ declare module '@mui/material/styles/createPalette' {
     activity: Activity;
     editor: Editor;
     billingProgress: BillingProgress;
-    billingPlan: PaletteColor;
+    billingPlan: BillingPlan;
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
@@ -71,7 +72,6 @@ declare module '@mui/material/styles/createPalette' {
     activity: Activity;
     editor: Editor;
     billingProgress: BillingProgress;
-    billingPlan: PaletteColorOptions;
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
@@ -85,6 +85,7 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
+    billingPlan: BillingPlan;
   }
 }
 

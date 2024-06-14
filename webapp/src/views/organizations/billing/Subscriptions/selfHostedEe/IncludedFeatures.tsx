@@ -1,40 +1,50 @@
-import { FC } from 'react';
-import { components } from 'tg.service/apiSchema.generated';
+import { Box, SxProps, styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { Box, styled, Typography } from '@mui/material';
-import { PlanFeature } from './PlanFeature';
+import { components } from 'tg.service/apiSchema.generated';
 import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';
-import { IncludedUsage, Usage } from './IncludedUsage';
+import { PlanFeature } from 'tg.component/billing/PlanFeature';
+
+type Features = components['schemas']['EeSubscriptionModel']['enabledFeatures'];
 
 const StyledListWrapper = styled(Box)`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   margin-top: 8px;
   gap: 4px 8px;
+  align-content: start;
 `;
 
-export const IncludedFeatures: FC<{
-  features: components['schemas']['EeSubscriptionModel']['enabledFeatures'];
-  includedUsage?: Usage;
-}> = ({ features, includedUsage }) => {
+type Props = {
+  allFromPlanName?: string | undefined;
+  features: Features;
+  sx?: SxProps;
+  className?: string;
+};
+
+export const IncludedFeatures = ({
+  allFromPlanName,
+  features,
+  sx,
+  className,
+}: Props) => {
   const translateFeature = useFeatureTranslation();
 
   return (
-    <Box>
-      <Typography
-        mt={1}
-        mb={2}
-        sx={{ fontSize: '12px', fontStyle: 'italic' }}
-        color="primary"
-      >
-        <T keyName="billing_subscriptions_plan_includes_title" />
-      </Typography>
-      <StyledListWrapper>
-        {includedUsage && <IncludedUsage included={includedUsage} />}
-        {features.map((feature) => (
-          <PlanFeature key={feature} name={translateFeature(feature)} />
-        ))}
-      </StyledListWrapper>
-    </Box>
+    <StyledListWrapper {...{ sx, className }}>
+      {allFromPlanName && (
+        <PlanFeature
+          bold
+          sx={{ marginBottom: '12px' }}
+          name={
+            <T
+              keyName="billing_subscriptions_all_from_plan_label"
+              params={{ name: allFromPlanName }}
+            />
+          }
+        />
+      )}
+      {features.map((feature) => (
+        <PlanFeature key={feature} name={translateFeature(feature)} />
+      ))}
+    </StyledListWrapper>
   );
 };

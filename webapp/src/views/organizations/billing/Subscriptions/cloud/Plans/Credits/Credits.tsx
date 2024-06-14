@@ -12,7 +12,7 @@ import { getPossibleValues } from './creditsUtil';
 import { Plan, PlanContent } from '../../../common/Plan';
 import { PlanTitle } from '../../../common/PlanTitle';
 import { MtHint } from 'tg.component/billing/MtHint';
-import { PlanActionButton } from '../PlanActionButton';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const StyledSliderWrapper = styled('div')`
   display: grid;
@@ -20,7 +20,6 @@ const StyledSliderWrapper = styled('div')`
 
 const StyledPrice = styled('div')`
   display: grid;
-  grid-area: price;
 `;
 
 const StyledCreditAmount = styled(Box)`
@@ -103,7 +102,7 @@ export const Credits: FC = () => {
   return (
     <Plan>
       <PlanContent>
-        <Box gridArea="title" gridColumn="1 / span 2">
+        <Box gridColumn="1 / span 2">
           <PlanTitle
             title={
               <T
@@ -113,7 +112,7 @@ export const Credits: FC = () => {
             }
           />
         </Box>
-        <Box gridArea="info">
+        <Box>
           <Box mb={2}>
             <T
               keyName="billing_credits_explanation_tolgee_unified"
@@ -148,7 +147,7 @@ export const Credits: FC = () => {
             {regularPrice !== undefined && formatPrice(regularPrice)}
           </StyledFullAmount>
         </StyledPrice>
-        <PlanActionButton
+        <LoadingButton
           variant="contained"
           color="primary"
           size="small"
@@ -157,7 +156,7 @@ export const Credits: FC = () => {
           data-cy="billing-extra-credits-buy"
         >
           {t('billing_extra_credits_buy')}
-        </PlanActionButton>
+        </LoadingButton>
       </PlanContent>
     </Plan>
   );

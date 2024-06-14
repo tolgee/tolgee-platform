@@ -146,7 +146,6 @@ const getTheme = (mode: PaletteMode) => {
       emphasis: c.emphasis,
       editor: c.editor,
       billingProgress: c.billingProgress,
-      billingPlan: createColor(c.billingPlan),
       globalLoading: createColor(c.globalLoading),
       marker: c.marker,
       topBanner: c.topBanner,
@@ -160,6 +159,7 @@ const getTheme = (mode: PaletteMode) => {
       login: c.login,
       input: c.input,
       revisionFilterBanner: c.revisionFilterBanner,
+      billingPlan: c.billingPlan,
     },
     mixins: {
       toolbar: {

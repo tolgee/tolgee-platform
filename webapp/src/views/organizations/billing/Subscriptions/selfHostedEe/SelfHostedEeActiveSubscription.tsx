@@ -1,15 +1,16 @@
 import { FC } from 'react';
+import { useTranslate } from '@tolgee/react';
+import { Box } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
+
 import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
 import { IncludedFeatures } from './IncludedFeatures';
 import { Plan, PlanContent, PlanSubtitle } from '../common/Plan';
-import { PlanPrice } from '../cloud/Plans/PlanPrice';
 import { PlanInfoArea } from '../common/PlanInfo';
 import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';
 import { ActivePlanTitle } from './ActivePlanTitle';
-import { useTranslate } from '@tolgee/react';
-import { Box } from '@mui/material';
 import { PlanDescription } from './PlanDescription';
+import { PlanPrice } from '../cloud/Plans/Price/PlanPrice';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -57,13 +58,14 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
               hasPrice={hasPrice}
             />
           </Box>
-          <IncludedFeatures
-            features={subscription.plan.enabledFeatures}
-            includedUsage={subscription.plan.includedUsage}
-          />
+          <IncludedFeatures features={subscription.plan.enabledFeatures} />
         </PlanInfoArea>
 
-        <PlanPrice prices={subscription.plan.prices} period={period} />
+        <PlanPrice
+          prices={subscription.plan.prices}
+          period={period}
+          onPeriodChange={() => {}}
+        />
 
         <SelfHostedEeSubscriptionActions
           id={subscription.id}

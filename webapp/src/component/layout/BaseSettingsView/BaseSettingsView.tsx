@@ -15,7 +15,6 @@ const StyledWrapper = styled('div')`
   @container main-container (max-width: 800px) {
     grid-template: auto auto / auto;
   }
-  overflow-x: hidden;
 `;
 
 const StyledContainer = styled(Container)`

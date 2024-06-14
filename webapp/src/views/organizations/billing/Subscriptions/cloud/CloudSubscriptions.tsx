@@ -1,20 +1,20 @@
 import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
-import { Box, styled, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { BillingPlans } from './Plans/BillingPlans';
 import { Credits } from './Plans/Credits/Credits';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../../../useOrganization';
-import { BillingPeriodType } from './Plans/PeriodSwitch';
+import { BillingPeriodType } from './Plans/Price/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
 import { useEffect, useState } from 'react';
-import { planIsPeriodDependant } from './Plans/PlanPrice';
+import { planIsPeriodDependant } from './Plans/Price/PricePrimary';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
-import { EnterprisePlan } from './Plans/EnterprisePlan';
+import { StyledBillingSectionTitle } from '../../BillingSection';
 
-const StyledShopping = styled('div')`
+const StyledShoppingGrid = styled('div')`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 16px;
   margin: 16px 0px;
 `;
@@ -80,19 +80,20 @@ export const CloudSubscriptions = () => {
                 balance={creditBalance.data}
               />
             </Box>
-            <Typography variant="h6" mt={2}>
-              <T keyName="organization_pricing_plans_title" />
-            </Typography>
-            <StyledShopping>
+            <Box display="flex" justifyContent="center">
+              <StyledBillingSectionTitle>
+                <T keyName="organization_cloud_plans_title" />
+              </StyledBillingSectionTitle>
+            </Box>
+            <StyledShoppingGrid>
               <BillingPlans
                 plans={plansLoadable.data._embedded.plans}
                 activeSubscription={activeSubscription.data}
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />
-              <EnterprisePlan />
               <Credits />
-            </StyledShopping>
+            </StyledShoppingGrid>
           </>
         )}
     </>

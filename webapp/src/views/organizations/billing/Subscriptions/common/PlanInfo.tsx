@@ -1,7 +1,7 @@
 import { Box, styled } from '@mui/material';
 
 export const PlanInfoArea = styled(Box)`
-  grid-area: info;
+  /* grid-area: info; */
 `;
 
 export const PlanInfo = styled(PlanInfoArea)`
@@ -10,5 +10,4 @@ export const PlanInfo = styled(PlanInfoArea)`
   grid-template-columns: 1fr 16px 1fr;
   padding-bottom: 8px;
   justify-items: center;
-  grid-area: info;
 `;

@@ -4,9 +4,9 @@ import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useOrganization } from '../useOrganization';
-import { StyledActionArea } from './BillingSection';
 import { LoadingButton } from '@mui/lab';
 import { PlanLicenseKey } from './Subscriptions/selfHostedEe/PlanLicenseKey';
+import { Box } from '@mui/material';
 
 type Props = {
   id: number;
@@ -52,7 +52,7 @@ export const SelfHostedEeSubscriptionActions = ({
   }
 
   return (
-    <StyledActionArea>
+    <Box>
       <PlanLicenseKey licenseKey={licenceKey} defaultOpen={isNew} />
       <LoadingButton
         onClick={onClick}
@@ -63,6 +63,6 @@ export const SelfHostedEeSubscriptionActions = ({
       >
         {t('organization-billing-self-hosted-cancel-subscription-button')}
       </LoadingButton>
-    </StyledActionArea>
+    </Box>
   );
 };

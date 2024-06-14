@@ -1,4 +1,4 @@
-import { Box, styled } from '@mui/material';
+import { Box, SxProps, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/billingApiSchema.generated';
@@ -15,15 +15,22 @@ const StyledSwitchButton = styled(Box)`
 type Props = {
   value: BillingPeriodType;
   onChange: (period: BillingPeriodType) => void;
+  sx?: SxProps;
+  className?: string;
 };
 
-export const PeriodSwitch: React.FC<Props> = ({ value, onChange }) => {
+export const PeriodSwitch: React.FC<Props> = ({
+  value,
+  onChange,
+  sx,
+  className,
+}) => {
   return (
     <Box
-      gridArea="period-switch"
       display="flex"
       justifyContent="center"
       data-cy="billing-period-switch"
+      {...{ sx, className }}
     >
       {value === 'MONTHLY' ? (
         <StyledSwitchButton onClick={() => onChange('YEARLY')} role="button">

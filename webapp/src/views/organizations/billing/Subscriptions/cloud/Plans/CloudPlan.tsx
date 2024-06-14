@@ -1,121 +1,85 @@
 import { FC } from 'react';
-import { Box } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 
-import { components } from 'tg.service/billingApiSchema.generated';
-import { confirmation } from 'tg.hooks/confirmation';
-
-import { CloudPlanInfo } from './CloudPlanInfo';
 import { usePlan } from './usePlan';
-import { PlanActionButton } from './PlanActionButton';
-import { PlanTitle } from '../../common/PlanTitle';
-import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
-import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
-import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
-import { PlanPrice, planIsPeriodDependant } from './PlanPrice';
-import { PlanInfoArea } from '../../common/PlanInfo';
+import { BillingPeriodType } from './Price/PeriodSwitch';
+import {
+  PlanFeaturesBox,
+  Plan,
+  PlanContent,
+  PlanTitle,
+} from '../../common/Plan';
+import { PlanPrice } from './Price/PlanPrice';
 import { IncludedFeatures } from '../../selfHostedEe/IncludedFeatures';
+import { PlanActiveBanner } from '../../common/PlanActiveBanner';
+import { PlanAction } from './PlanAction';
+import { ShowAllFeaturesLink } from '../../common/ShowAllFeaturesLink';
+import { PlanType } from './types';
+import { IncludedUsage } from './IncludedUsage';
+import { ContactUsButton } from './ContactUsButton';
 
-type PlanModel = components['schemas']['CloudPlanModel'];
+type Features = PlanType['enabledFeatures'];
 
 type Props = {
-  plan: PlanModel;
-  isOrganizationSubscribed: boolean;
+  plan: PlanType;
+  organizationHasSomeSubscription: boolean;
   period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
   isActive: boolean;
   isEnded: boolean;
+  filteredFeatures: Features;
+  allFromPlanName: string | undefined;
 };
 
 export const CloudPlan: FC<Props> = ({
   plan,
-  isOrganizationSubscribed,
+  organizationHasSomeSubscription,
   period,
   onPeriodChange,
   isActive,
   isEnded,
+  filteredFeatures,
+  allFromPlanName,
 }) => {
-  const { t } = useTranslate();
-  const {
-    onPrepareUpgrade,
-    prepareUpgradeMutation,
-    onSubscribe,
-    subscribeMutation,
-    onCancel,
-    cancelMutation,
-  } = usePlan({ planId: plan.id, period: period });
-
-  const needsPeriodSwitch = planIsPeriodDependant(plan.prices);
-  const handleCancel = () => {
-    confirmation({
-      title: <T keyName="billing_cancel_dialog_title" />,
-      message: <T keyName="billing_cancel_dialog_message" />,
-      onConfirm: onCancel,
-    });
-  };
+  const actions = usePlan({ planId: plan.id, period: period });
 
   return (
     <Plan className={clsx({ active: isActive })} data-cy="billing-plan">
-      {isActive && (
-        <PlanSubtitle data-cy="billing-plan-subtitle">
-          {isEnded
-            ? t('billing_subscription_cancelled')
-            : t('billing_subscription_active')}
-        </PlanSubtitle>
-      )}
+      <PlanActiveBanner isActive={isActive} isEnded={isEnded} />
       <PlanContent>
-        <PlanTitle title={plan.name} />
+        <PlanTitle sx={{ paddingBottom: '20px' }}>{plan.name}</PlanTitle>
 
-        <PlanInfoArea>
-          <CloudPlanInfo plan={plan} />
+        <PlanFeaturesBox sx={{ gap: '18px' }}>
           {Boolean(plan.enabledFeatures.length) && (
-            <IncludedFeatures features={plan.enabledFeatures} />
+            <IncludedFeatures
+              sx={{ height: '155px' }}
+              features={filteredFeatures}
+              allFromPlanName={allFromPlanName}
+            />
           )}
-        </PlanInfoArea>
+          {plan.public && <ShowAllFeaturesLink />}
+          <IncludedUsage includedUsage={plan.includedUsage} />
+        </PlanFeaturesBox>
 
-        <Box minHeight="19px" gridArea="period-switch">
-          {needsPeriodSwitch && (
-            <PeriodSwitch value={period} onChange={onPeriodChange} />
-          )}
-        </Box>
-        <PlanPrice prices={plan.prices} period={period} />
+        {plan.prices && (
+          <PlanPrice
+            sx={{ paddingTop: '20px', paddingBottom: '20px' }}
+            prices={plan.prices}
+            period={period}
+            onPeriodChange={onPeriodChange}
+          />
+        )}
 
-        {!plan.free &&
-          (isActive && !isEnded ? (
-            <PlanActionButton
-              loading={cancelMutation.isLoading}
-              onClick={handleCancel}
-            >
-              {t('billing_plan_cancel')}
-            </PlanActionButton>
-          ) : isActive && isEnded ? (
-            <PlanActionButton
-              loading={prepareUpgradeMutation.isLoading}
-              onClick={() => onPrepareUpgrade()}
-            >
-              {t('billing_plan_resubscribe')}
-            </PlanActionButton>
-          ) : isOrganizationSubscribed ? (
-            <PlanActionButton
-              loading={prepareUpgradeMutation.isLoading}
-              onClick={() => onPrepareUpgrade()}
-            >
-              {t('billing_plan_subscribe')}
-            </PlanActionButton>
-          ) : (
-            <PlanActionButton
-              loading={subscribeMutation.isLoading}
-              onClick={() => onSubscribe()}
-            >
-              {t('billing_plan_subscribe')}
-            </PlanActionButton>
-          ))}
-        {prepareUpgradeMutation.data && (
-          <PrepareUpgradeDialog
-            data={prepareUpgradeMutation.data}
-            onClose={() => {
-              prepareUpgradeMutation.reset();
+        {plan.type === 'CONTACT_US' ? (
+          <ContactUsButton />
+        ) : (
+          <PlanAction
+            {...{
+              actions,
+              isActive,
+              isEnded,
+              organizationHasSomeSubscription,
+              plan,
             }}
           />
         )}

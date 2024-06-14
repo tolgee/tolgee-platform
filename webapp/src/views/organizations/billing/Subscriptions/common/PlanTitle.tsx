@@ -1,24 +1,24 @@
-import { styled, Typography } from '@mui/material';
+import { SxProps, styled } from '@mui/material';
 import React from 'react';
 
 export const PlanTitleArea = styled('div')`
-  grid-area: title;
-  height: 40px;
+  /* grid-area: title; */
 `;
 
-export const PlanTitleText = ({ children }) => (
-  <Typography variant="h4" data-cy="billing-plan-title">
-    {children}
-  </Typography>
-);
+export const PlanTitleText = styled('div')`
+  font-size: 24px;
+  color: ${({ theme }) => theme.palette.primary.main};
+`;
 
 type Props = {
   title: string | React.ReactNode;
+  sx?: SxProps;
+  className?: string;
 };
 
-export const PlanTitle: React.FC<Props> = ({ title }) => {
+export const PlanTitle: React.FC<Props> = ({ title, sx, className }) => {
   return (
-    <PlanTitleArea>
+    <PlanTitleArea {...{ sx, className }}>
       <PlanTitleText>{title}</PlanTitleText>
     </PlanTitleArea>
   );

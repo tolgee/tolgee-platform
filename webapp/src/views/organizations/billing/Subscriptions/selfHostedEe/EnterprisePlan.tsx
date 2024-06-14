@@ -1,6 +1,5 @@
 import { T } from '@tolgee/react';
-import { Button } from '@mui/material';
-import { StyledActionArea } from 'tg.views/organizations/billing/BillingSection';
+import { Box, Button } from '@mui/material';
 
 import { Plan, PlanContent } from '../common/Plan';
 import { PlanInfoArea } from '../common/PlanInfo';
@@ -15,9 +14,9 @@ export const EnterprisePlan = () => {
 
         <PlanInfoArea>
           <IncludedFeatures
-            includedUsage={{
-              seats: -1,
-            }}
+            // includedUsage={{
+            //   seats: -1,
+            // }}
             features={[
               'ACCOUNT_MANAGER',
               'PREMIUM_SUPPORT',
@@ -29,7 +28,7 @@ export const EnterprisePlan = () => {
             ]}
           />
         </PlanInfoArea>
-        <StyledActionArea>
+        <Box>
           <Button
             variant="outlined"
             color="primary"
@@ -38,7 +37,7 @@ export const EnterprisePlan = () => {
           >
             <T keyName="billing_plan_contact_us" />
           </Button>
-        </StyledActionArea>
+        </Box>
       </PlanContent>
     </Plan>
   );

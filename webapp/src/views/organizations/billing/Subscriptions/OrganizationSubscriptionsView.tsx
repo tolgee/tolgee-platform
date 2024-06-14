@@ -70,7 +70,13 @@ export const OrganizationSubscriptionsView: FunctionComponent = () => {
       windowTitle={t({ key: 'organization_subscriptions_title', noWrap: true })}
       maxWidth="wide"
     >
-      <Box mb={2}>
+      <Box
+        mb={2}
+        mt={2}
+        display="flex"
+        justifyContent="center"
+        alignItems="start"
+      >
         <ButtonGroup>
           <ButtonGroupRouterItem
             data-cy="billing-subscriptions-cloud-button"

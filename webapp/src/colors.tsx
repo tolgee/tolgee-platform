@@ -140,6 +140,16 @@ export type LanguageChips = {
   background: string;
 };
 
+export type BillingPlan = {
+  background: string;
+  shadow: string;
+  activeBorder: string;
+  activeShadow: string;
+  subtitleBg: string;
+  subtitleText: string;
+  featuresBg: string;
+};
+
 const getTokensByMode = (mode: 'light' | 'dark') => {
   const result = {} as Record<keyof typeof ALL_TOKENS, string>;
   Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
@@ -196,7 +206,6 @@ export const colors = {
       sufficient: '#17AD18',
       separator: '#656565',
     } satisfies BillingProgress,
-    billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
     marker: {
       primary: '#ff0000',
@@ -272,6 +281,15 @@ export const colors = {
     input: {
       background: '#ffffff00',
     } satisfies Input,
+    billingPlan: {
+      background: '#FFF',
+      shadow: '#1f2d400c',
+      activeBorder: '#00af9a7f',
+      activeShadow: '#00af9a26',
+      subtitleBg: '#00af9a14',
+      subtitleText: '#00AF9A',
+      featuresBg: '#F9F9FB',
+    } satisfies BillingPlan,
   },
   dark: {
     white: '#dddddd',
@@ -331,7 +349,6 @@ export const colors = {
       sufficient: '#1e991e',
       separator: '#656565',
     } satisfies BillingProgress,
-    billingPlan: '#233043',
     globalLoading: '#ff6995',
     marker: {
       primary: '#ff0000',
@@ -406,5 +423,14 @@ export const colors = {
     input: {
       background: '#ffffff08',
     } satisfies Input,
+    billingPlan: {
+      background: '#27364B',
+      shadow: 'transparent',
+      activeBorder: '#99e5d67f',
+      activeShadow: '#00af9a33',
+      subtitleBg: '#99e5d628',
+      subtitleText: '#99E5D6',
+      featuresBg: '#243245',
+    } satisfies BillingPlan,
   },
 } as const;

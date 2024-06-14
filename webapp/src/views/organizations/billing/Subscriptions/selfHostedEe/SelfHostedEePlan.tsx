@@ -5,12 +5,15 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useOrganization } from '../../../useOrganization';
 import { Plan, PlanContent } from '../common/Plan';
 import { PlanTitle } from '../common/PlanTitle';
-import { PlanActionButton } from '../cloud/Plans/PlanActionButton';
-import { PlanPrice } from '../cloud/Plans/PlanPrice';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { IncludedFeatures } from './IncludedFeatures';
-import { BillingPeriodType, PeriodSwitch } from '../cloud/Plans/PeriodSwitch';
+import {
+  BillingPeriodType,
+  PeriodSwitch,
+} from '../cloud/Plans/Price/PeriodSwitch';
 import { PlanDescription } from './PlanDescription';
+import { PlanPrice } from '../cloud/Plans/Price/PlanPrice';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 export const SelfHostedEePlan = (props: {
   plan: components['schemas']['SelfHostedEePlanModel'];
@@ -73,29 +76,30 @@ export const SelfHostedEePlan = (props: {
         <PlanContent>
           <PlanTitle title={props.plan.name}></PlanTitle>
 
-          <Box gridArea="info">
+          <Box>
             <Box>
               <PlanDescription hasPrice={hasPrice} free={props.plan.free} />
             </Box>
-            <IncludedFeatures
-              features={props.plan.enabledFeatures}
-              includedUsage={props.plan.includedUsage}
-            />
+            <IncludedFeatures features={props.plan.enabledFeatures} />
           </Box>
 
           {hasPrice && (
             <PeriodSwitch value={props.period} onChange={props.onChange} />
           )}
 
-          <PlanPrice prices={props.plan.prices} period={props.period} />
+          <PlanPrice
+            prices={props.plan.prices}
+            period={props.period}
+            onPeriodChange={props.onChange}
+          />
 
-          <PlanActionButton
+          <LoadingButton
             data-cy="billing-self-hosted-ee-plan-subscribe-button"
             loading={subscribeMutation.isLoading}
             onClick={onSubscribe}
           >
             {t('billing_plan_subscribe')}
-          </PlanActionButton>
+          </LoadingButton>
         </PlanContent>
       </Plan>
     </>
