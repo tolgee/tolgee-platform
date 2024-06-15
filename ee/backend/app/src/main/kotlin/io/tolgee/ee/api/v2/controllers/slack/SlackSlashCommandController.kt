@@ -251,7 +251,7 @@ class SlackSlashCommandController(
         throw SlackErrorException(slackErrorProvider.getNoPermissionError())
       }
     } catch (e: NotFoundException) {
-      throw SlackErrorException(slackErrorProvider.getProjectNotFoundError())
+      throw SlackErrorException(slackErrorProvider.getProjectNotFoundError(projectId = projectId))
     }
   }
 
@@ -267,7 +267,7 @@ class SlackSlashCommandController(
   }
 
   private fun getProject(id: Long): Project {
-    return projectService.find(id) ?: throw SlackErrorException(slackErrorProvider.getProjectNotFoundError())
+    return projectService.find(id) ?: throw SlackErrorException(slackErrorProvider.getProjectNotFoundError(id))
   }
 
   private fun getUserAccount(payload: SlackCommandDto): UserAccount {
