@@ -135,11 +135,11 @@ class SlackErrorProvider(
     }
   }
 
-  fun getProjectNotFoundError(): List<LayoutBlock> {
+  fun getProjectNotFoundError(projectId: Long): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(
-          i18n.translate("slack-project-not-found-error"),
+          i18n.translate("slack.common.message.slack-project-not-found-error").format(projectId),
         )
       }
     }
