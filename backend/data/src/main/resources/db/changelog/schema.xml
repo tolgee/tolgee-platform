@@ -3417,4 +3417,12 @@
     <changeSet author="huglx (generated)" id="1718360154828-19">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="slack_config" constraintName="FKsgau8dxyxblao9sa16fnka0t1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1718452261216-1">
+        <addColumn tableName="saved_slack_message">
+            <column name="message_timestamp" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1718452261216-2">
+        <dropColumn columnName="message_time_stamp" tableName="saved_slack_message"/>
+    </changeSet>
 </databaseChangeLog>
