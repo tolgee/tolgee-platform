@@ -9,10 +9,10 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.ee.service.slackIntegration.*
-import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.PermissionService
@@ -272,7 +272,7 @@ class SlackExecutor(
       slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatUpdate { request ->
         request
           .channel(config.channelId)
-          .ts(savedMessage.messageTimeStamp)
+          .ts(savedMessage.messageTimestamp)
           .attachments(sortAttachments(messageDto.attachments.toMutableList()))
         if (messageDto.blocks.isNotEmpty()) {
           request.blocks(messageDto.blocks)
@@ -353,7 +353,7 @@ class SlackExecutor(
     savedSlackMessageService.save(
       savedSlackMessage =
         SavedSlackMessage(
-          messageTimeStamp = ts,
+          messageTimestamp = ts,
           slackConfig = config,
           keyId = messageDto.keyId,
           languageTags = messageDto.langTag,
@@ -394,15 +394,17 @@ class SlackExecutor(
               markdownText("*Global Subscription:* Yes")
             }
 
+            val events = config.events.joinToString(", ") { "$it" }
+
             val allEventMeaning =
-              if (config.onEvent == EventName.ALL) {
+              if (config.events.contains(SlackEventType.ALL)) {
                 getEventAllMeaning()
               } else {
                 ""
               }
 
             section {
-              markdownText("*Events:* `${config.onEvent}` $allEventMeaning")
+              markdownText("*Events:* `$events` $allEventMeaning")
             }
 
             context {
@@ -420,14 +422,15 @@ class SlackExecutor(
               val flagEmoji = language.flagEmoji
 
               val fullName = language.name
+              val events = it.events.joinToString(", ") { "$it" }
               val allEventMeaning =
-                if (it.onEvent == EventName.ALL) {
+                if (it.events.contains(SlackEventType.ALL)) {
                   getEventAllMeaning()
                 } else {
                   ""
                 }
               markdownText(
-                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `${it.onEvent.name}` $allEventMeaning",
+                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `$events` $allEventMeaning",
               )
             }
           }
@@ -471,10 +474,11 @@ class SlackExecutor(
       val subscriptionInfo =
         buildString {
           if (config.isGlobalSubscription) {
+            val events = config.events.joinToString(", ") { "$it" }
             append(
               i18n.translate(
                 "slack.common.message.subscribed-successfully-global-subscription",
-              ).format(config.onEvent.name),
+              ).format(events),
             )
           }
 
@@ -484,7 +488,8 @@ class SlackExecutor(
                 val language = languageService.getByTag(tag, config.project)
                 val flagEmoji = language.flagEmoji
                 val fullName = language.name
-                " - $fullName $flagEmoji : on `${pref.onEvent.name}`"
+                val events = pref.events.joinToString(", ") { "$it" }
+                " - $fullName $flagEmoji : on `$events`"
               }
             }.joinToString("\n")
 

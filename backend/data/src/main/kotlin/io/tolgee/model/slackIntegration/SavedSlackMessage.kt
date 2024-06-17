@@ -7,7 +7,7 @@ import org.hibernate.annotations.Type
 
 @Entity
 class SavedSlackMessage(
-  val messageTimeStamp: String = "",
+  val messageTimestamp: String = "",
   @ManyToOne(fetch = FetchType.LAZY)
   var slackConfig: SlackConfig,
   var keyId: Long = 0L,

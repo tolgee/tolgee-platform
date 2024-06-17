@@ -1,6 +1,6 @@
 package io.tolgee.model.slackIntegration
 
-enum class EventName {
+enum class SlackEventType {
   ALL,
   NEW_KEY,
   BASE_CHANGED,

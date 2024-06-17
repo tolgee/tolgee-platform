@@ -14,10 +14,11 @@ import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.ee.service.slackIntegration.SlackConfigService
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.Logging
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -38,6 +39,11 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   @Autowired
   lateinit var slackConfigService: SlackConfigService
 
+  @BeforeAll
+  fun setup() {
+    tolgeeProperties.slack.token = "token"
+  }
+
   @Test
   fun `sends message to correct channel after translation changed`() {
     val testData = SlackTestData()
@@ -51,8 +57,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
       modifyTranslationData(testData.projectBuilder.self.id, langTag, testData.key.name)
       val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
+      Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
     }
-    Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
   }
 
   @Test
@@ -83,8 +89,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         channelId = "testChannel",
         userAccount = testData.user,
         languageTag = "fr",
-        onEvent = EventName.ALL,
-        slackTeamId = "",
+        events = mutableSetOf(SlackEventType.ALL),
+        slackTeamId = "slackTeamId",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
     val config = slackConfigService.createOrUpdate(updatedConfig)
@@ -111,8 +117,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         channelId = "testChannel",
         userAccount = testData.user,
         languageTag = "en",
-        onEvent = EventName.TRANSLATION_CHANGED,
-        slackTeamId = "",
+        events = mutableSetOf(SlackEventType.TRANSLATION_CHANGED),
+        slackTeamId = "slackTeamId",
       )
     slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
     val config = slackConfigService.createOrUpdate(updatedConfig)

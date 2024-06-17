@@ -18,7 +18,7 @@ import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
@@ -159,34 +159,46 @@ class SlackSlashCommandController(
   ): SlackMessageDto? {
     checkFeatureEnabled(payload.team_id)
 
-    var onEvent: EventName? = null
+    val events: MutableSet<SlackEventType> = mutableSetOf()
+
     var isGlobal: Boolean? = null
     optionsMap.forEach { (option, value) ->
-      try {
-        when (option) {
-          "--on" ->
-            onEvent = EventName.valueOf(value.uppercase())
-
-          "--global" ->
-            isGlobal = value.lowercase().toBooleanStrictOrNull() ?: throw java.lang.IllegalArgumentException()
-
-          else -> {
-            throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+      when (option) {
+        "--on" -> {
+          value.split(",").map { it.trim() }.forEach {
+            events.add(parseEventName(it))
           }
         }
-      } catch (e: IllegalArgumentException) {
-        throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+        "--global" ->
+          isGlobal = value.lowercase().toBooleanStrictOrNull() ?: throw SlackErrorException(
+            slackErrorProvider.getInvalidParameterError(value),
+          )
+
+        else -> {
+          throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
+        }
       }
     }
+    if (events.contains(SlackEventType.ALL)) {
+      events.clear()
+      events.add(SlackEventType.ALL)
+    }
+    return subscribe(payload, projectId, languageTag, events, isGlobal)
+  }
 
-    return subscribe(payload, projectId, languageTag, onEvent, isGlobal)
+  fun parseEventName(event: String): SlackEventType {
+    return try {
+      SlackEventType.valueOf(event.uppercase())
+    } catch (e: IllegalArgumentException) {
+      throw SlackErrorException(slackErrorProvider.getInvalidParameterError(event))
+    }
   }
 
   private fun subscribe(
     payload: SlackCommandDto,
     projectId: Long,
     languageTag: String?,
-    onEventName: EventName?,
+    events: MutableSet<SlackEventType>,
     isGlobal: Boolean?,
   ): SlackMessageDto {
     val user = getUserAccount(payload)
@@ -198,7 +210,7 @@ class SlackSlashCommandController(
         channelId = payload.channel_id,
         userAccount = user,
         languageTag = languageTag,
-        onEvent = onEventName,
+        events = events,
         slackTeamId = payload.team_id,
         isGlobal = isGlobal,
       )
@@ -239,7 +251,7 @@ class SlackSlashCommandController(
         throw SlackErrorException(slackErrorProvider.getNoPermissionError())
       }
     } catch (e: NotFoundException) {
-      throw SlackErrorException(slackErrorProvider.getProjectNotFoundError())
+      throw SlackErrorException(slackErrorProvider.getProjectNotFoundError(projectId = projectId))
     }
   }
 
@@ -255,7 +267,7 @@ class SlackSlashCommandController(
   }
 
   private fun getProject(id: Long): Project {
-    return projectService.find(id) ?: throw SlackErrorException(slackErrorProvider.getProjectNotFoundError())
+    return projectService.find(id) ?: throw SlackErrorException(slackErrorProvider.getProjectNotFoundError(id))
   }
 
   private fun getUserAccount(payload: SlackCommandDto): UserAccount {
@@ -280,6 +292,6 @@ class SlackSlashCommandController(
   companion object {
     val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+([\p{L}][\p{L}\d-]*))?\s*(.*)$""".toRegex()
 
-    val optionsRegex = """(--[\w-]+)\s+([\w-]+)""".toRegex()
+    val optionsRegex = """(--[\w-]+)\s+([\w-,\s]+)""".toRegex()
   }
 }

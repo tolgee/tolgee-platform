@@ -12,9 +12,9 @@ import io.tolgee.ee.service.slackIntegration.SlackMessageInfoService
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
-import io.tolgee.model.slackIntegration.EventName
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackConfigPreference
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.PermissionService
@@ -410,9 +410,9 @@ class SlackExecutorHelper(
     val globalEventHandlingPreferences =
       if (slackConfig.isGlobalSubscription) {
         Triple(
-          slackConfig.onEvent == EventName.ALL,
-          slackConfig.onEvent == EventName.BASE_CHANGED && isBaseChanged,
-          slackConfig.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
+          slackConfig.events.contains(SlackEventType.ALL),
+          slackConfig.events.contains(SlackEventType.BASE_CHANGED) && isBaseChanged,
+          slackConfig.events.contains(SlackEventType.TRANSLATION_CHANGED) && !isBaseChanged,
         )
       } else {
         null
@@ -421,9 +421,9 @@ class SlackExecutorHelper(
     val languageSpecificPreferences =
       slackConfig.preferences.find { it.languageTag == currentLangTag }?.let { pref ->
         Triple(
-          pref.onEvent == EventName.ALL,
-          pref.onEvent == EventName.BASE_CHANGED && isBaseChanged,
-          pref.onEvent == EventName.TRANSLATION_CHANGED && !isBaseChanged,
+          pref.events.contains(SlackEventType.ALL),
+          pref.events.contains(SlackEventType.BASE_CHANGED) && isBaseChanged,
+          pref.events.contains(SlackEventType.TRANSLATION_CHANGED) && !isBaseChanged,
         )
       }
 
@@ -446,7 +446,7 @@ class SlackExecutorHelper(
     if (isBaseChanged) {
       slackConfig.project.languages.forEach { language ->
         val pref = slackConfig.preferences.find { it.languageTag == language.tag } ?: return@forEach
-        if (pref.onEvent == EventName.ALL || pref.onEvent == EventName.BASE_CHANGED) {
+        if (pref.events.contains(SlackEventType.ALL) || pref.events.contains(SlackEventType.BASE_CHANGED)) {
           return true
         }
       }
@@ -461,10 +461,10 @@ class SlackExecutorHelper(
     tag: String,
   ): Boolean {
     return if (slackConfig.isGlobalSubscription) {
-      slackConfig.onEvent == EventName.NEW_KEY || slackConfig.onEvent == EventName.ALL
+      slackConfig.events.contains(SlackEventType.NEW_KEY) || slackConfig.events.contains(SlackEventType.ALL)
     } else {
       val pref = slackConfig.preferences.find { it.languageTag == modifiedLangTag } ?: return modifiedLangTag == tag
-      pref.onEvent == EventName.NEW_KEY || pref.onEvent == EventName.ALL
+      pref.events.contains(SlackEventType.NEW_KEY) || pref.events.contains(SlackEventType.ALL)
     }
   }
 

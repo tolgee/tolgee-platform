@@ -4,7 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.service.slackIntegration.SlackConfigService
-import io.tolgee.model.slackIntegration.EventName
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.assertions.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,8 +30,9 @@ class SlackConfigServiceTest : AbstractSpringTest() {
         project = testData.projectBuilder.self,
         channelId = "testChannel2",
         userAccount = testData.user,
-        onEvent = EventName.ALL,
+        events = mutableSetOf(SlackEventType.ALL),
         isGlobal = true,
+        slackTeamId = "slackTeamId",
       )
     slackConfigService.createOrUpdate(slackConfigDto)
     Assertions.assertThat(slackConfigService.findAll()).hasSize(2)

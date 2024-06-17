@@ -59,6 +59,17 @@ class SlackErrorProvider(
     }
   }
 
+  fun getInvalidParameterError(parameter: String): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.wrong-parameter").format(parameter))
+      }
+      actions {
+        helpButton()
+      }
+    }
+  }
+
   fun getInvalidLangTagError(): List<LayoutBlock> {
     return withBlocks {
       section {
@@ -124,11 +135,11 @@ class SlackErrorProvider(
     }
   }
 
-  fun getProjectNotFoundError(): List<LayoutBlock> {
+  fun getProjectNotFoundError(projectId: Long): List<LayoutBlock> {
     return withBlocks {
       section {
         markdownText(
-          i18n.translate("slack-project-not-found-error"),
+          i18n.translate("slack.common.message.slack-project-not-found-error").format(projectId),
         )
       }
     }
