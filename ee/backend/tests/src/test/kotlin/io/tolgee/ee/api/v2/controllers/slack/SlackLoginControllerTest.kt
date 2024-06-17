@@ -1,7 +1,7 @@
 package io.tolgee.ee.api.v2.controllers.slack
 
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.development.testDataBuilder.data.SlackNoUserConnectionTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
@@ -30,8 +30,8 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `user logs in`() {
-    val testData = SlackTestData()
-    testDataService.saveTestData(testData.dataWithoutSlackUserConnection)
+    val testData = SlackNoUserConnectionTestData()
+    testDataService.saveTestData(testData.root)
 
     slackUserLoginUrlProvider.encryptData("ChannelTest", "TEST1", testData.slackWorkspace.id).let {
       performAuthPost("/v2/slack/user-login?data=$it", null).andIsOk

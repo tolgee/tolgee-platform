@@ -14,7 +14,7 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.model.slackIntegration.SlackUserConnection
 
-class SlackTestData() {
+class SlackTestData {
   var user: UserAccount
   var slackConfig: SlackConfig
   var userAccountBuilder: UserAccountBuilder
@@ -121,45 +121,5 @@ class SlackTestData() {
             },
           )
         }.self
-    }
-
-  val dataWithoutSlackUserConnection: TestDataBuilder =
-    TestDataBuilder().apply {
-      userAccountBuilder =
-        addUserAccount {
-          username = "admin"
-        }
-
-      projectBuilder =
-        addProject {
-          name = "projectName"
-          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-        }.build buildProject@{
-          this@buildProject.self.baseLanguage = this@buildProject.addEnglish().self
-        }
-      projectBuilder.addKey("testKey").also { key = it.self }
-        .addTranslation("en", "Hello")
-
-      projectBuilder.addKey("testKey2").also { key2 = it.self }
-        .addTranslation("en", "Hello")
-
-      userAccountBuilder.defaultOrganizationBuilder.addSlackWorkspace {
-        author = userAccountBuilder.self
-        slackTeamId = "slackTeamId"
-        slackTeamName = "slackTeamName"
-        accessToken = "accessToken"
-        organization = userAccountBuilder.defaultOrganizationBuilder.self
-        slackWorkspace = this
-      }
-      organization = userAccountBuilder.defaultOrganizationBuilder.self
-
-      user = userAccountBuilder.self
-
-      projectBuilder.addPermission {
-        project = projectBuilder.self
-        user = user
-        type = ProjectPermissionType.MANAGE
-        scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
-      }
     }
 }
