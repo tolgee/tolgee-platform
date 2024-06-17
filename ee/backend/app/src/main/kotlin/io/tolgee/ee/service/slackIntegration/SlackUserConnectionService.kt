@@ -1,9 +1,12 @@
 package io.tolgee.ee.service.slackIntegration
 
+import io.tolgee.constants.Message
 import io.tolgee.ee.repository.slackIntegration.SlackUserConnectionRepository
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.util.Logging
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -55,7 +58,11 @@ class SlackUserConnectionService(
     val slackUserConnection = SlackUserConnection()
     slackUserConnection.slackUserId = slackId
     slackUserConnection.userAccount = userAccount
-    return slackUserConnectionRepository.saveAndFlush(slackUserConnection)
+    try {
+      return slackUserConnectionRepository.saveAndFlush(slackUserConnection)
+    } catch (e: DataIntegrityViolationException) {
+      throw BadRequestException(Message.TOLGEE_ACCOUNT_ALREADY_CONNECTED)
+    }
   }
 
   private fun delete(connection: SlackUserConnection) {
