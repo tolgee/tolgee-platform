@@ -3,7 +3,7 @@ import { Box, Tooltip, Typography } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
-import { PlanTitleArea, PlanTitleText } from '../common/PlanTitle';
+import { PlanTitleText } from '../common/PlanTitle';
 import { SubscriptionStatus } from '../../common/SubscriptionStatus';
 
 type Status = components['schemas']['SelfHostedEeSubscriptionModel']['status'];
@@ -35,7 +35,7 @@ export const ActivePlanTitle = ({
   );
 
   return (
-    <PlanTitleArea sx={{ mb: 2 }}>
+    <Box sx={{ mb: 2 }}>
       <Box>
         <Box sx={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <PlanTitleText>{name}</PlanTitleText>
@@ -46,13 +46,13 @@ export const ActivePlanTitle = ({
           </Tooltip>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, alignSelf: 'start' }}>
         {createdAt && (
           <Tooltip title={<T keyName="active-plan-subscribed-at-tooltip" />}>
             <Typography variant="caption">{formatDate(createdAt)}</Typography>
           </Tooltip>
         )}
       </Box>
-    </PlanTitleArea>
+    </Box>
   );
 };

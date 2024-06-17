@@ -12,9 +12,19 @@ const StyledTitle = styled(Box)`
   font-weight: 500;
 `;
 
-type Props = { prices: PlanPricesModel; sx?: SxProps; className?: string };
+type Props = {
+  prices: PlanPricesModel;
+  sx?: SxProps;
+  className?: string;
+  hideTitle?: boolean;
+};
 
-export const PayAsYouGoPrices = ({ prices, sx, className }: Props) => {
+export const PayAsYouGoPrices = ({
+  prices,
+  sx,
+  className,
+  hideTitle,
+}: Props) => {
   const { perSeat, perThousandMtCredits, perThousandTranslations } = prices;
   const { t } = useTranslate();
   const formatPrice = useMoneyFormatter();
@@ -27,9 +37,11 @@ export const PayAsYouGoPrices = ({ prices, sx, className }: Props) => {
 
   return (
     <Box display="grid" gap="2px" {...{ sx, className }}>
-      <StyledTitle sx={{ paddingBottom: '2px' }}>
-        <T keyName="billing-plan-pay-as-you-go-price" />
-      </StyledTitle>
+      {!hideTitle && (
+        <StyledTitle sx={{ paddingBottom: '2px' }}>
+          <T keyName="billing-plan-pay-as-you-go-price" />
+        </StyledTitle>
+      )}
 
       {Boolean(perSeat) && (
         <PayAsYouGoRow

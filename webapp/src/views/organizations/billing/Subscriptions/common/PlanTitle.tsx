@@ -1,10 +1,6 @@
 import { SxProps, styled } from '@mui/material';
 import React from 'react';
 
-export const PlanTitleArea = styled('div')`
-  /* grid-area: title; */
-`;
-
 export const PlanTitleText = styled('div')`
   font-size: 24px;
   color: ${({ theme }) => theme.palette.primary.main};
@@ -17,9 +13,5 @@ type Props = {
 };
 
 export const PlanTitle: React.FC<Props> = ({ title, sx, className }) => {
-  return (
-    <PlanTitleArea {...{ sx, className }}>
-      <PlanTitleText>{title}</PlanTitleText>
-    </PlanTitleArea>
-  );
+  return <PlanTitleText {...{ sx, className }}>{title}</PlanTitleText>;
 };

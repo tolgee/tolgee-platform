@@ -10,6 +10,7 @@ const StyledSecondaryPrice = styled(Box)`
   font-size: 13px;
   display: flex;
   justify-content: space-between;
+  gap: 20px;
 `;
 
 export const PayAsYouGoRow = ({ firstPart, secondPart, ...rest }: Props) => {

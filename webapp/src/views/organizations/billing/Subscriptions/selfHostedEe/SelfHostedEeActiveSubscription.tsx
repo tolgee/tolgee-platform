@@ -1,19 +1,37 @@
 import { FC } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
 import { IncludedFeatures } from '../common/IncludedFeatures';
-import { Plan, PlanContent, PlanSubtitle } from '../common/Plan';
-import { PlanInfoArea } from '../common/PlanInfo';
+import {
+  Plan,
+  PlanContent,
+  PlanFeaturesBox,
+  PlanSubtitle,
+} from '../common/Plan';
 import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';
 import { ActivePlanTitle } from './ActivePlanTitle';
 import { PlanDescription } from './PlanDescription';
-import { PlanPrice } from '../cloud/Plans/Price/PlanPrice';
+import { PricePrimary } from '../cloud/Plans/Price/PricePrimary';
+import { PayAsYouGoPrices } from '../cloud/Plans/Price/PayAsYouGoPrices';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
+
+const StyledPlanContent = styled(PlanContent)`
+  display: grid;
+  grid-template-rows: unset;
+  align-items: center;
+`;
+
+const StyledFeatures = styled(IncludedFeatures)`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 16px;
+  margin: 0px;
+`;
 
 type Props = {
   subscription: SelfHostedEeSubscriptionModel;
@@ -33,46 +51,46 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
   );
 
   return (
-    <Plan
-      sx={(theme) => ({
-        border: `1px solid #c39dae`,
-      })}
-      data-cy="self-hosted-ee-active-plan"
-    >
-      <PlanContent>
+    <Plan className="active" data-cy="self-hosted-ee-active-plan">
+      <StyledPlanContent>
         {isNew && <PlanSubtitle>{t('billing_subscription_new')}</PlanSubtitle>}
-        <ActivePlanTitle
-          name={subscription.plan.name}
-          status={subscription.status}
-          createdAt={subscription.createdAt}
-          periodStart={subscription.currentPeriodStart}
-          periodEnd={subscription.currentPeriodEnd}
-        />
+        <Box display="flex" justifyContent="space-between">
+          <ActivePlanTitle
+            name={subscription.plan.name}
+            status={subscription.status}
+            createdAt={subscription.createdAt}
+            periodStart={subscription.currentPeriodStart}
+            periodEnd={subscription.currentPeriodEnd}
+          />
 
-        <SelfHostedEeEstimatedCosts subscription={subscription} />
+          <SelfHostedEeEstimatedCosts subscription={subscription} />
+        </Box>
 
-        <PlanInfoArea>
-          <Box>
-            <PlanDescription
-              free={subscription.plan.free}
-              hasPrice={hasPrice}
-            />
-          </Box>
-          <IncludedFeatures features={subscription.plan.enabledFeatures} />
-        </PlanInfoArea>
-
-        <PlanPrice
+        <Box>
+          <PlanDescription free={subscription.plan.free} hasPrice={hasPrice} />
+        </Box>
+        <PlanFeaturesBox sx={{ gap: '18px' }}>
+          <StyledFeatures features={subscription.plan.enabledFeatures} />
+        </PlanFeaturesBox>
+        <PayAsYouGoPrices
+          sx={{ justifySelf: 'start', mt: 2 }}
+          hideTitle
           prices={subscription.plan.prices}
-          period={period}
-          onPeriodChange={() => {}}
         />
-
-        <SelfHostedEeSubscriptionActions
-          id={subscription.id}
-          licenceKey={subscription.licenseKey}
-          isNew={isNew}
-        />
-      </PlanContent>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mt={1}
+        >
+          <PricePrimary prices={subscription.plan.prices} period={period} />
+          <SelfHostedEeSubscriptionActions
+            id={subscription.id}
+            licenceKey={subscription.licenseKey}
+            isNew={isNew}
+          />
+        </Box>
+      </StyledPlanContent>
     </Plan>
   );
 };

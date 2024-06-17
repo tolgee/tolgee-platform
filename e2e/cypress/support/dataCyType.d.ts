@@ -110,7 +110,6 @@ declare namespace DataCy {
         "billing-plan-price-extra-thousand-strings" |
         "billing-plan-subtitle" |
         "billing-progress-label-item" |
-        "billing-self-hosted-ee-plan" |
         "billing-self-hosted-ee-plan-subscribe-button" |
         "billing-subscriptions-cloud-button" |
         "billing-subscriptions-self-hosted-ee-button" |

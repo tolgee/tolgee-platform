@@ -52,8 +52,7 @@ export const SelfHostedEeSubscriptionActions = ({
   }
 
   return (
-    <Box>
-      <PlanLicenseKey licenseKey={licenceKey} defaultOpen={isNew} />
+    <Box display="flex" gap={1}>
       <LoadingButton
         onClick={onClick}
         variant="outlined"
@@ -63,6 +62,7 @@ export const SelfHostedEeSubscriptionActions = ({
       >
         {t('organization-billing-self-hosted-cancel-subscription-button')}
       </LoadingButton>
+      <PlanLicenseKey licenseKey={licenceKey} defaultOpen={isNew} />
     </Box>
   );
 };

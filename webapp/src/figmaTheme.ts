@@ -124,7 +124,7 @@ export const tolgeePalette = {
       menuDefault: tolgeeColors['grey']['600'],
       menuHover: tolgeeColors['grey']['800'],
       menuSelected: tolgeeColors['pink']['600'],
-      menuSelectedBg: '#1f2d40f',
+      menuSelectedBg: '#1f2d400f',
     },
     state: {
       untranslated: tolgeeColors['grey']['200'],
@@ -145,8 +145,8 @@ export const tolgeePalette = {
       tertiary: '#1f2d4066',
       disabled: '#1f2d4061',
       _states: {
-        hover: '#1f2d408',
-        selected: '#1f2d40f',
+        hover: '#1f2d4008',
+        selected: '#1f2d400f',
         focus: '#1f2d4014',
         focusVisible: '#1f2d404d',
       },
@@ -157,7 +157,7 @@ export const tolgeePalette = {
       light: '#ef6694',
       contrast: '#ffffff',
       _states: {
-        hover: '#ec407aa',
+        hover: '#ec407a0a',
         selected: '#ec407a14',
         focus: '#ec407a1f',
         focusVisible: '#ec407a4d',
@@ -170,7 +170,7 @@ export const tolgeePalette = {
       light: '#33bfae',
       contrast: '#ffffff',
       _states: {
-        hover: '#00af9aa',
+        hover: '#00af9a0a',
         selected: '#00af9a14',
         focus: '#00af9a1f',
         focusVisible: '#00af9a4d',
@@ -179,8 +179,8 @@ export const tolgeePalette = {
     },
     action: {
       active: '#1f2d408f',
-      hover: '#1f2d408',
-      selected: '#1f2d40f',
+      hover: '#1f2d4008',
+      selected: '#1f2d400f',
       focus: '#1f2d4014',
       disabled: '#1f2d4061',
       disabledBackground: '#1f2d401f',
@@ -191,7 +191,7 @@ export const tolgeePalette = {
       light: tolgeeColors['red']['400'],
       contrast: '#ffffff',
       _states: {
-        hover: '#d60027a',
+        hover: '#d600270a',
         selected: '#d6002714',
         focusVisible: '#d600274d',
         outlinedBorder: '#d6002780',
@@ -203,7 +203,7 @@ export const tolgeePalette = {
       light: tolgeeColors['orange']['900'],
       contrast: '#ffffff',
       _states: {
-        hover: '#ef6c00a',
+        hover: '#ef6c000a',
         selected: '#ef6c0014',
         focusVisible: '#ef6c004d',
         outlinedBorder: '#ef6c0080',
@@ -215,7 +215,7 @@ export const tolgeePalette = {
       light: tolgeeColors['lightBlue']['500'],
       contrast: '#ffffff',
       _states: {
-        hover: '#0288d1a',
+        hover: '#0288d10a',
         selected: '#0288d114',
         focusVisible: '#0288d14d',
         outlinedBorder: '#0288d180',
@@ -227,7 +227,7 @@ export const tolgeePalette = {
       light: '#33c781',
       contrast: '#ffffff',
       _states: {
-        hover: '#00b962a',
+        hover: '#00b9620a',
         selected: '#00b96214',
         focusVisible: '#00b9624d',
         outlinedBorder: '#00b96280',
@@ -236,7 +236,7 @@ export const tolgeePalette = {
     common: {
       white_states: {
         main: '#ffffff',
-        hover: '#ffffffa',
+        hover: '#ffffff0a',
         selected: '#ffffff14',
         focus: '#ffffff1f',
         focusVisible: '#ffffff4d',
@@ -244,7 +244,7 @@ export const tolgeePalette = {
       },
       black_states: {
         main: '#1f2d40',
-        hover: '#1f2d40a',
+        hover: '#1f2d400a',
         selected: '#1f2d4014',
         focus: '#1f2d401f',
         focusVisible: '#1f2d404d',
@@ -253,10 +253,10 @@ export const tolgeePalette = {
     },
     background: {
       default: tolgeeColors['lightGrey']['50'],
-      hover: '#1f2d405',
-      selected: '#1f2d40a',
+      hover: '#1f2d4005',
+      selected: '#1f2d400a',
       onDefault: '#ffffff',
-      onDefaultGrey: '#1f2d40a',
+      onDefaultGrey: '#1f2d400a',
       'paper-1': '#ffffff',
       'paper-2': '#ffffff',
       'paper-3': '#f9f9fb',
@@ -289,7 +289,7 @@ export const tolgeePalette = {
     elevation: {
       outlined: '#e0e0e0',
       pricingActive: '#00af9a26',
-      pricing: '#1f2d40d',
+      pricing: '#1f2d400d',
     },
     divider: '#1f2d401f',
     _components: {
@@ -329,7 +329,7 @@ export const tolgeePalette = {
         fill: tolgeeColors['neutral']['white'],
       },
       chip: {
-        defaultFill: '#1f2d40f',
+        defaultFill: '#1f2d400f',
         defaultFocusFill: '#1f2d4033',
         defaultHoverFill: '#1f2d401f',
         defaultCloseFill: '#1f2d40',
@@ -344,7 +344,7 @@ export const tolgeePalette = {
       input: {
         filled: {
           hoverFill: '#1f2d4017',
-          enabledFill: '#1f2d40f',
+          enabledFill: '#1f2d400f',
         },
         outlined: {
           hoverBorder: '#1f2d40',
@@ -457,7 +457,7 @@ export const tolgeePalette = {
     },
     action: {
       active: '#ffffff8f',
-      hover: '#fffffff',
+      hover: '#ffffff0f',
       selected: '#ffffff29',
       focus: '#ffffff1f',
       disabled: '#ffffff61',
@@ -531,10 +531,10 @@ export const tolgeePalette = {
     },
     background: {
       default: tolgeeColors['grey']['900'],
-      hover: '#ffffff5',
-      selected: '#ffffffa',
+      hover: '#ffffff05',
+      selected: '#ffffff0a',
       onDefault: '#182230b2',
-      onDefaultGrey: '#ffffffa',
+      onDefaultGrey: '#ffffff0a',
       'paper-1': tolgeeColors['grey']['800'],
       'paper-2': tolgeeColors['grey']['825'],
       'paper-3': '#243245',
@@ -567,7 +567,7 @@ export const tolgeePalette = {
     elevation: {
       outlined: '#000000',
       pricingActive: '#00af9a33',
-      pricing: '#1f2d40d',
+      pricing: '#1f2d400d',
     },
     divider: '#ffffff1f',
     _components: {
@@ -604,19 +604,19 @@ export const tolgeePalette = {
         actual: '#000000',
       },
       editor: {
-        fill: '#ffffffa',
+        fill: '#ffffff0a',
       },
       chip: {
         defaultFill: '#ffffff1f',
         defaultFocusFill: '#ffffff33',
         defaultHoverFill: '#ffffff29',
         defaultCloseFill: '#ffffff',
-        defaultEnabledBorder: '#2c3c520',
+        defaultEnabledBorder: '#2c3c5200',
         placeHolderPluralFill: tolgeeColors['teal']['700'],
-        placeHolderPluralBorder: '#0083710',
+        placeHolderPluralBorder: '#00837100',
         placeHolderPluralText: tolgeeColors['grey']['50'],
         placeHolder: '#d73a6f80',
-        placeHolderBorder: '#d73a6f0',
+        placeHolderBorder: '#d73a6f00',
         placeHolderText: tolgeeColors['grey']['50'],
       },
       input: {
@@ -627,8 +627,8 @@ export const tolgeePalette = {
         outlined: {
           hoverBorder: '#ffffff',
           enabledBorder: '#ffffff3b',
-          fill: '#ffffff8',
-          focusedFill: '#fffffff',
+          fill: '#ffffff08',
+          focusedFill: '#ffffff0f',
         },
         standard: {
           hoverBorder: '#ffffff',
