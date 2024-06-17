@@ -13,7 +13,7 @@ type ImportSettingModel = components['schemas']['ImportSettingsModel'];
 
 const StyledPanelBox = styled(Box)`
   margin-top: 24px;
-  border: 1px solid ${({ theme }) => theme.palette.tokens.BORDER_SECONDARY};
+  border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
   display: flex;
   width: 1200px;
   padding: 6px 16px;
@@ -22,7 +22,7 @@ const StyledPanelBox = styled(Box)`
   gap: 20px;
   border-radius: 4px;
   background-color: ${({ theme }) =>
-    theme.palette.tokens.SURFACE_BACKGROUND_SECONDARY};
+    theme.palette.tokens.background['paper-3']};
 `;
 
 export const ImportSettingsPanel: FC = (props) => {
@@ -95,7 +95,7 @@ export const ImportSettingsPanel: FC = (props) => {
   return (
     <StyledPanelBox
       sx={(theme) => ({
-        color: theme.palette.tokens.TEXT_PRIMARY,
+        color: theme.palette.tokens.text.primary,
       })}
     >
       {project.icuPlaceholders && (
@@ -142,7 +142,7 @@ const additionalCheckboxProps = {
 };
 
 const StyledLink = styled('a')`
-  color: ${({ theme }) => theme.palette.tokens.ICON_PRIMARY};
+  color: ${({ theme }) => theme.palette.tokens.icon.primary};
 
   .icon {
     font-size: 16px;

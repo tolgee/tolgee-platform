@@ -22,14 +22,18 @@ import {
   RevisionFilterBanner,
   BillingPlan,
 } from './colors';
+import { tolgeeColors, tolgeePalette } from 'figmaTheme';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
-import { colors } from './colors';
 
-const all = { ...colors.light, ...colors.dark };
+type TolgeeTokens =
+  | (typeof tolgeePalette)['Light']
+  | (typeof tolgeePalette)['Dark'];
+
+type TolgeeColors = typeof tolgeeColors;
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -52,7 +56,8 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
-    tokens: typeof all.tokens;
+    tokens: TolgeeTokens;
+    colors: TolgeeColors;
     placeholders: Placeholders;
     languageChips: LanguageChips;
     login: Login;
@@ -79,7 +84,8 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
-    tokens: typeof all.tokens;
+    tokens: TolgeeTokens;
+    colors: TolgeeColors;
     placeholders: Placeholders;
     languageChips: LanguageChips;
     login: Login;

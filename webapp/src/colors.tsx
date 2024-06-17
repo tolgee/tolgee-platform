@@ -1,5 +1,4 @@
 import { grey } from '@mui/material/colors';
-import { ALL_TOKENS } from './tokens';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',
@@ -150,18 +149,6 @@ export type BillingPlan = {
   featuresBg: string;
 };
 
-const getTokensByMode = (mode: 'light' | 'dark') => {
-  const result = {} as Record<keyof typeof ALL_TOKENS, string>;
-  Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
-    if (typeof value === 'string') {
-      result[tokenName] = value;
-    } else {
-      result[tokenName] = value[mode];
-    }
-  });
-  return result;
-};
-
 export const colors = {
   light: {
     white: '#fff',
@@ -252,7 +239,6 @@ export const colors = {
     languageChips: {
       background: '#F6F6F8',
     } satisfies LanguageChips,
-    tokens: getTokensByMode('light'),
     placeholders: {
       variable: {
         border: '#7AD3C1',
@@ -394,7 +380,6 @@ export const colors = {
     languageChips: {
       background: '#243245',
     } satisfies LanguageChips,
-    tokens: getTokensByMode('dark'),
     placeholders: {
       variable: {
         border: '#008371',

@@ -10,6 +10,7 @@ import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
 // @ts-ignore
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import { colors } from './colors';
+import { tolgeeColors, tolgeePalette } from 'figmaTheme';
 
 const LOCALSTORAGE_THEME_MODE = 'themeMode';
 
@@ -61,6 +62,7 @@ const righteousLatinExt = {
 
 const getTheme = (mode: PaletteMode) => {
   const c = mode === 'light' ? colors.light : colors.dark;
+  const tPalette = mode === 'light' ? tolgeePalette.Light : tolgeePalette.Dark;
 
   return createTheme({
     typography: {
@@ -153,7 +155,8 @@ const getTheme = (mode: PaletteMode) => {
       import: c.import,
       exampleBanner: c.exampleBanner,
       tipsBanner: c.tipsBanner,
-      tokens: c.tokens,
+      tokens: tPalette,
+      colors: tolgeeColors,
       placeholders: c.placeholders,
       languageChips: c.languageChips,
       login: c.login,
