@@ -2,7 +2,6 @@ import { CurrentUsage } from '../CurrentUsage/CurrentUsage';
 import { Box, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { PlansCloudList } from './PlansCloudList';
-import { Credits } from './cloud/Plans/Credits/Credits';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../../useOrganization';
 import { BillingPeriodType } from './cloud/Plans/Price/PeriodSwitch';
@@ -92,7 +91,6 @@ export const PlansCloud = () => {
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />
-              <Credits />
             </StyledShoppingGrid>
           </>
         )}

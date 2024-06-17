@@ -14,6 +14,7 @@ import { BillingPeriodType } from './cloud/Plans/Price/PeriodSwitch';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { PlansSelfHostedList } from './PlansSelfHostedList';
+import { StyledBillingSectionTitle } from '../BillingSection';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -137,9 +138,11 @@ export const PlansSelfHosted = () => {
                 )}
             </Box>
 
-            <Typography variant="h6">
-              {t('organization-billing-self-hosted-setup-new')}
-            </Typography>
+            <Box display="flex" justifyContent="center">
+              <StyledBillingSectionTitle>
+                <T keyName="organization_self_hosted_plans_title" />
+              </StyledBillingSectionTitle>
+            </Box>
             <StyledShoppingGrid>
               <PlansSelfHostedList
                 plans={plansLoadable.data._embedded.plans}

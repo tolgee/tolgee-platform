@@ -97,7 +97,6 @@ declare namespace DataCy {
         "billing-actual-used-strings" |
         "billing-estimated-costs" |
         "billing-estimated-costs-open-button" |
-        "billing-extra-credits-buy" |
         "billing-invoice-item-number" |
         "billing-invoice-usage-button" |
         "billing-invoices-list" |
