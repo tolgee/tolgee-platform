@@ -139,17 +139,11 @@ class RateLimitService(
     )
   }
 
-  fun getIEmailVerificationIpRateLimitPolicy(
-    request: HttpServletRequest,
-    email: String?,
-  ): RateLimitPolicy? {
-    if (!rateLimitProperties.emailVerificationRequestLimitEnabled || email.isNullOrEmpty()) return null
-
-    val ip = request.remoteAddr
-    val key = "global.ip.$ip::auth"
+  fun getIEmailVerificationIpRateLimitPolicy(request: HttpServletRequest): RateLimitPolicy? {
+    if (!rateLimitProperties.emailVerificationRequestLimitEnabled) return null
 
     return RateLimitPolicy(
-      key,
+      "global.ip.${request.remoteAddr}::auth",
       rateLimitProperties.emailVerificationRequestLimit,
       Duration.ofMillis(rateLimitProperties.emailVerificationRequestWindow),
       true,
