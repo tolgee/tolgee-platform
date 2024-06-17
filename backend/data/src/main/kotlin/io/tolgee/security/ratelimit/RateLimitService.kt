@@ -139,6 +139,17 @@ class RateLimitService(
     )
   }
 
+  fun getIEmailVerificationIpRateLimitPolicy(request: HttpServletRequest): RateLimitPolicy? {
+    if (!rateLimitProperties.emailVerificationRequestLimitEnabled) return null
+
+    return RateLimitPolicy(
+      "global.ip.${request.remoteAddr}::auth",
+      rateLimitProperties.emailVerificationRequestLimit,
+      Duration.ofMillis(rateLimitProperties.emailVerificationRequestWindow),
+      true,
+    )
+  }
+
   /**
    * Consumes a token from a bucket according to the rate limit policy.
    *
