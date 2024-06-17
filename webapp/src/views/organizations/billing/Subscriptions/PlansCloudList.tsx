@@ -8,6 +8,7 @@ import { FreePlan } from './cloud/Plans/FreePlan';
 import { PlanType } from './cloud/Plans/types';
 import { excludePreviousPlanFeatures } from './common/plansTools';
 import { AllFromPlanFeature } from './common/AllFromPlanFeature';
+import { PlanAction } from './cloud/Plans/PlanAction';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
@@ -107,13 +108,23 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
                 plan={plan}
                 isActive={isActive(plan)}
                 isEnded={isEnded(plan)}
-                organizationHasSomeSubscription={!activeSubscription.plan.free}
                 onPeriodChange={onPeriodChange}
                 period={period}
                 filteredFeatures={filteredFeatures}
                 featuresMinHeight="155px"
                 topFeature={
                   parentPlan && <AllFromPlanFeature planName={parentPlan} />
+                }
+                action={
+                  <PlanAction
+                    isActive={isActive(plan)}
+                    isEnded={isEnded(plan)}
+                    organizationHasSomeSubscription={
+                      !activeSubscription.plan.free
+                    }
+                    period={period}
+                    planId={plan.id}
+                  />
                 }
               />
             )}

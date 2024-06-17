@@ -2,9 +2,10 @@ import { Box, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { PrepareUpgradeDialog } from 'tg.views/organizations/billing/PrepareUpgradeDialog';
 
-import type { usePlan } from './usePlan';
+import { usePlan } from './usePlan';
 import { confirmation } from 'tg.hooks/confirmation';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { BillingPeriodType } from './Price/PeriodSwitch';
 
 export const StyledContainer = styled(Box)`
   justify-self: center;
@@ -17,25 +18,32 @@ export const StyledContainer = styled(Box)`
 `;
 
 type Props = {
-  actions: ReturnType<typeof usePlan>;
   organizationHasSomeSubscription: boolean;
   isActive: boolean;
   isEnded: boolean;
+  planId: number;
+  period: BillingPeriodType;
 };
 
 export const PlanAction = ({
   isActive,
   isEnded,
-  actions: {
+  organizationHasSomeSubscription,
+  planId,
+  period,
+}: Props) => {
+  const {
     cancelMutation,
     prepareUpgradeMutation,
     subscribeMutation,
+    onCancel,
     onPrepareUpgrade,
     onSubscribe,
-    onCancel,
-  },
-  organizationHasSomeSubscription,
-}: Props) => {
+  } = usePlan({
+    planId: planId,
+    period: period,
+  });
+
   const { t } = useTranslate();
 
   const handleCancel = () => {

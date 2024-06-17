@@ -7,6 +7,7 @@ import { CloudPlan } from './cloud/Plans/CloudPlan';
 import { PlanType } from './cloud/Plans/types';
 import { excludePreviousPlanFeatures } from './common/plansTools';
 import { AllFromPlanFeature } from './common/AllFromPlanFeature';
+import { SelfHostedPlanAction } from './selfHostedEe/SelfHostedPlanAction';
 
 const StyledPlanWrapper = styled('div')`
   display: grid;
@@ -67,7 +68,6 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
               plan={plan}
               isActive={false}
               isEnded={false}
-              organizationHasSomeSubscription={false}
               onPeriodChange={onPeriodChange}
               period={period}
               filteredFeatures={filteredFeatures}
@@ -83,6 +83,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
                   />
                 )
               }
+              action={<SelfHostedPlanAction plan={plan} period={period} />}
             />
           </StyledPlanWrapper>
         );

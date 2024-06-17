@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import clsx from 'clsx';
 
-import { usePlan } from './usePlan';
 import { BillingPeriodType } from './Price/PeriodSwitch';
 import {
   PlanFeaturesBox,
@@ -12,7 +11,6 @@ import {
 import { PlanPrice } from './Price/PlanPrice';
 import { IncludedFeatures } from '../../common/IncludedFeatures';
 import { PlanActiveBanner } from '../../common/PlanActiveBanner';
-import { PlanAction } from './PlanAction';
 import { ShowAllFeaturesLink } from '../../common/ShowAllFeaturesLink';
 import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
@@ -23,7 +21,6 @@ type Features = PlanType['enabledFeatures'];
 
 type Props = {
   plan: PlanType;
-  organizationHasSomeSubscription: boolean;
   period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
   isActive: boolean;
@@ -31,11 +28,11 @@ type Props = {
   filteredFeatures: Features;
   topFeature?: React.ReactNode;
   featuresMinHeight?: string;
+  action: React.ReactNode;
 };
 
 export const CloudPlan: FC<Props> = ({
   plan,
-  organizationHasSomeSubscription,
   period,
   onPeriodChange,
   isActive,
@@ -43,9 +40,8 @@ export const CloudPlan: FC<Props> = ({
   filteredFeatures,
   topFeature,
   featuresMinHeight,
+  action,
 }) => {
-  const actions = usePlan({ planId: plan.id, period: period });
-
   return (
     <Plan className={clsx({ active: isActive })} data-cy="billing-plan">
       <PlanActiveBanner isActive={isActive} isEnded={isEnded} />
@@ -76,19 +72,7 @@ export const CloudPlan: FC<Props> = ({
           />
         )}
 
-        {plan.type === 'CONTACT_US' ? (
-          <ContactUsButton />
-        ) : (
-          <PlanAction
-            {...{
-              actions,
-              isActive,
-              isEnded,
-              organizationHasSomeSubscription,
-              plan,
-            }}
-          />
-        )}
+        {plan.type === 'CONTACT_US' ? <ContactUsButton /> : action}
       </PlanContent>
     </Plan>
   );
