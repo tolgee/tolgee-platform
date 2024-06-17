@@ -288,6 +288,8 @@ export const tolgeePalette = {
     },
     elevation: {
       outlined: '#e0e0e0',
+      pricingActive: '#00af9a26',
+      pricing: '#1f2d40d',
     },
     divider: '#1f2d401f',
     _components: {
@@ -564,6 +566,8 @@ export const tolgeePalette = {
     },
     elevation: {
       outlined: '#000000',
+      pricingActive: '#00af9a33',
+      pricing: '#1f2d40d',
     },
     divider: '#ffffff1f',
     _components: {

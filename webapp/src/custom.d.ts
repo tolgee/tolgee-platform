@@ -48,7 +48,6 @@ declare module '@mui/material/styles/createPalette' {
     activity: Activity;
     editor: Editor;
     billingProgress: BillingProgress;
-    billingPlan: BillingPlan;
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;

@@ -8,13 +8,14 @@ export const Plan = styled('div')`
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0px 0px 20px 0px
-    ${({ theme }) => theme.palette.billingPlan.shadow};
-  background: ${({ theme }) => theme.palette.billingPlan.background};
+    ${({ theme }) => theme.palette.tokens.elevation.pricing};
+  background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
 
   &.active {
     box-shadow: 0px 0px 20px 0px
-      ${({ theme }) => theme.palette.billingPlan.activeShadow};
-    border-color: ${({ theme }) => theme.palette.billingPlan.activeBorder};
+      ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
+    border-color: ${({ theme }) =>
+      theme.palette.tokens.secondary._states.outlinedBorder};
   }
 `;
 
@@ -39,8 +40,8 @@ export const PlanSubtitle = styled('div')`
   font-size: 18px;
   text-align: center;
   font-weight: 500;
-  color: ${({ theme }) => theme.palette.billingPlan.subtitleText};
-  background: ${({ theme }) => theme.palette.billingPlan.subtitleBg};
+  color: ${({ theme }) => theme.palette.tokens.secondary.main};
+  background: ${({ theme }) => theme.palette.tokens.secondary._states.selected};
 `;
 
 export const PlanEstimatedCostsArea = styled('div')`
@@ -55,6 +56,6 @@ export const PlanFeaturesBox = styled(Box)`
   display: grid;
   border-radius: 20px;
   padding: 24px 20px;
-  background: ${({ theme }) => theme.palette.billingPlan.featuresBg};
+  background: ${({ theme }) => theme.palette.tokens.background['paper-3']};
   align-self: start;
 `;

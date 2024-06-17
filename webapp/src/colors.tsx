@@ -139,16 +139,6 @@ export type LanguageChips = {
   background: string;
 };
 
-export type BillingPlan = {
-  background: string;
-  shadow: string;
-  activeBorder: string;
-  activeShadow: string;
-  subtitleBg: string;
-  subtitleText: string;
-  featuresBg: string;
-};
-
 export const colors = {
   light: {
     white: '#fff',
@@ -267,15 +257,6 @@ export const colors = {
     input: {
       background: '#ffffff00',
     } satisfies Input,
-    billingPlan: {
-      background: '#FFF',
-      shadow: '#1f2d400c',
-      activeBorder: '#00af9a7f',
-      activeShadow: '#00af9a26',
-      subtitleBg: '#00af9a14',
-      subtitleText: '#00AF9A',
-      featuresBg: '#F9F9FB',
-    } satisfies BillingPlan,
   },
   dark: {
     white: '#dddddd',
@@ -408,14 +389,5 @@ export const colors = {
     input: {
       background: '#ffffff08',
     } satisfies Input,
-    billingPlan: {
-      background: '#27364B',
-      shadow: 'transparent',
-      activeBorder: '#99e5d67f',
-      activeShadow: '#00af9a33',
-      subtitleBg: '#99e5d628',
-      subtitleText: '#99E5D6',
-      featuresBg: '#243245',
-    } satisfies BillingPlan,
   },
 } as const;
