@@ -238,17 +238,20 @@ class SlackExecutor(
     token: String,
     dto: SlackUserLoginDto,
   ) {
-    slackClient.methods(token).chatPostMessage {
-      it.channel(dto.slackChannelId)
-        .blocks {
-          section {
-            markdownText(i18n.translate("slack.common.message.success_login"))
+    val response =
+      slackClient.methods(token).chatPostEphemeral {
+        it.user(dto.slackUserId)
+        it.channel(dto.slackChannelId)
+          .blocks {
+            section {
+              markdownText(i18n.translate("slack.common.message.success_login"))
+            }
+            context {
+              plainText(i18n.translate("slack.common.context.success_login"))
+            }
           }
-          context {
-            plainText(i18n.translate("slack.common.context.success_login"))
-          }
-        }
-    }
+      }
+    response
   }
 
   fun sendBlocksMessage(
