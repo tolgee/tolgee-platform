@@ -29,7 +29,6 @@ const StyledPlanContent = styled(PlanContent)`
 const StyledFeatures = styled(IncludedFeatures)`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: 16px;
   margin: 0px;
 `;
 
