@@ -8,5 +8,5 @@ export type PlanType = Omit<
 > & {
   prices?: CloudPlanModel['prices'];
   includedUsage?: CloudPlanModel['includedUsage'];
-  type: CloudPlanModel['type'] | 'CONTACT_US';
+  type?: CloudPlanModel['type'] | 'CONTACT_US';
 };

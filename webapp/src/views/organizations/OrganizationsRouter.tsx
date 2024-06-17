@@ -15,7 +15,7 @@ import { useOrganization } from './useOrganization';
 import { OrganizationBillingView } from './billing/OrganizationBillingView';
 import { OrganizationInvoicesView } from './billing/Invoices/OrganizationInvoicesView';
 import { OrganizationSubscriptionsView } from './billing/Subscriptions/OrganizationSubscriptionsView';
-import { OrganizationBillingTestClockHelperView } from './billing/Subscriptions/OrganizationBillingTestClockHelperView';
+import { OrganizationBillingTestClockHelperView } from './billing/OrganizationBillingTestClockHelperView';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
 
 const SpecificOrganizationRouter = () => {

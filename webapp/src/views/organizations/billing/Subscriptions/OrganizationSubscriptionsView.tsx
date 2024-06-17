@@ -7,10 +7,10 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../../useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { CloudSubscriptions } from './cloud/CloudSubscriptions';
+import { PlansCloud } from './PlansCloud';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { Box, ButtonGroup } from '@mui/material';
-import { SelfHostedEeSubscriptions } from './selfHostedEe/SelfHostedEeSubscriptions';
+import { PlansSelfHosted } from './PlansSelfHosted';
 import { ButtonGroupRouterItem } from 'tg.component/common/ButtonGroupRouter';
 
 export const OrganizationSubscriptionsView: FunctionComponent = () => {
@@ -100,13 +100,13 @@ export const OrganizationSubscriptionsView: FunctionComponent = () => {
       </Box>
 
       <PrivateRoute exact path={LINKS.ORGANIZATION_SUBSCRIPTIONS.template}>
-        <CloudSubscriptions />
+        <PlansCloud />
       </PrivateRoute>
       <PrivateRoute
         exact
         path={LINKS.ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE.template}
       >
-        <SelfHostedEeSubscriptions />
+        <PlansSelfHosted />
       </PrivateRoute>
     </BaseOrganizationSettingsView>
   );

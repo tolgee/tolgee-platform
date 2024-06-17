@@ -7,7 +7,7 @@ import { ActivePlanTitle } from 'tg.views/organizations/billing/Subscriptions/se
 import { RefreshButton } from './RefreshButton';
 import { ReleaseKeyButton } from './ReleaseKeyButton';
 import { PlanInfoArea } from '../../organizations/billing/Subscriptions/common/PlanInfo';
-import { IncludedFeatures } from '../../organizations/billing/Subscriptions/selfHostedEe/IncludedFeatures';
+import { IncludedFeatures } from '../../organizations/billing/Subscriptions/common/IncludedFeatures';
 import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 import { PlanLicenseKey } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/PlanLicenseKey';

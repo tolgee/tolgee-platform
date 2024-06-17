@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
-import { IncludedFeatures } from './IncludedFeatures';
+import { IncludedFeatures } from '../common/IncludedFeatures';
 import { Plan, PlanContent, PlanSubtitle } from '../common/Plan';
 import { PlanInfoArea } from '../common/PlanInfo';
 import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';

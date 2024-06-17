@@ -1,11 +1,13 @@
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { BillingPeriodType } from './Price/PeriodSwitch';
-import { CloudPlan } from './CloudPlan';
-import { planIsPeriodDependant } from './Price/PricePrimary';
-import { FreePlan } from './FreePlan';
-import { PlanType } from './types';
+import { BillingPeriodType } from './cloud/Plans/Price/PeriodSwitch';
+import { CloudPlan } from './cloud/Plans/CloudPlan';
+import { planIsPeriodDependant } from './cloud/Plans/Price/PricePrimary';
+import { FreePlan } from './cloud/Plans/FreePlan';
+import { PlanType } from './cloud/Plans/types';
+import { excludePreviousPlanFeatures } from './common/plansTools';
+import { AllFromPlanFeature } from './common/AllFromPlanFeature';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
@@ -25,35 +27,11 @@ type BillingPlansProps = {
   onPeriodChange: (period: BillingPeriodType) => void;
 };
 
-function isSubset<T>(set: T[], subset: T[]): boolean {
-  return subset.every((i) => set.includes(i));
-}
-
-function excludePreviousPlanFeatures(prevPaidPlans: PlanType[]) {
-  const [currentPlan, ...previousPlans] = [...prevPaidPlans].reverse();
-  const parentPlan = previousPlans.find((plan) =>
-    isSubset(currentPlan.enabledFeatures, plan.enabledFeatures)
-  );
-
-  if (parentPlan && parentPlan.enabledFeatures.length !== 0) {
-    return {
-      filteredFeatures: currentPlan.enabledFeatures.filter(
-        (i) => !parentPlan.enabledFeatures.includes(i)
-      ),
-      previousPlanName: parentPlan.name,
-    };
-  } else {
-    return {
-      filteredFeatures: currentPlan.enabledFeatures,
-    };
-  }
-}
-
 function isDefaultPlan(plan: PlanType) {
   return plan.free && plan.public;
 }
 
-export const BillingPlans: React.FC<BillingPlansProps> = ({
+export const PlansCloudList: React.FC<BillingPlansProps> = ({
   plans,
   activeSubscription,
   period,
@@ -85,7 +63,10 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
     public: true,
   });
 
-  const prevPaidPlans: PlanType[] = [];
+  const prevPlans: PlanType[] = [];
+  if (defaultPlan) {
+    prevPlans.push(defaultPlan);
+  }
 
   function isActive(plan: PlanType) {
     const planPeriod = plan.free ? undefined : period;
@@ -112,10 +93,12 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
         </StyledFreePlanWrapper>
       )}
       {paidPlans.map((plan) => {
-        prevPaidPlans.push(plan);
+        prevPlans.push(plan);
 
         const { filteredFeatures, previousPlanName } =
-          excludePreviousPlanFeatures(prevPaidPlans);
+          excludePreviousPlanFeatures(prevPlans);
+
+        const parentPlan = previousPlanName ?? defaultPlan?.name;
 
         return (
           <StyledPlanWrapper key={plan.id}>
@@ -128,7 +111,10 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
                 onPeriodChange={onPeriodChange}
                 period={period}
                 filteredFeatures={filteredFeatures}
-                allFromPlanName={previousPlanName ?? defaultPlan?.name}
+                featuresMinHeight="155px"
+                topFeature={
+                  parentPlan && <AllFromPlanFeature planName={parentPlan} />
+                }
               />
             )}
           </StyledPlanWrapper>

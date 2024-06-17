@@ -1,5 +1,5 @@
 import { Box, SxProps, styled } from '@mui/material';
-import { T } from '@tolgee/react';
+
 import { components } from 'tg.service/apiSchema.generated';
 import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';
 import { PlanFeature } from 'tg.component/billing/PlanFeature';
@@ -14,15 +14,15 @@ const StyledListWrapper = styled(Box)`
 `;
 
 type Props = {
-  allFromPlanName?: string | undefined;
   features: Features;
+  topFeature?: React.ReactNode;
   sx?: SxProps;
   className?: string;
 };
 
 export const IncludedFeatures = ({
-  allFromPlanName,
   features,
+  topFeature,
   sx,
   className,
 }: Props) => {
@@ -30,18 +30,7 @@ export const IncludedFeatures = ({
 
   return (
     <StyledListWrapper {...{ sx, className }}>
-      {allFromPlanName && (
-        <PlanFeature
-          bold
-          sx={{ marginBottom: '12px' }}
-          name={
-            <T
-              keyName="billing_subscriptions_all_from_plan_label"
-              params={{ name: allFromPlanName }}
-            />
-          }
-        />
-      )}
+      {topFeature && <Box sx={{ marginBottom: '12px' }}>{topFeature}</Box>}
       {features.map((feature) => (
         <PlanFeature key={feature} name={translateFeature(feature)} />
       ))}

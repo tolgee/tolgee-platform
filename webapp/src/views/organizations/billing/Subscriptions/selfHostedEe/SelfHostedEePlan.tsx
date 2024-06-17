@@ -6,7 +6,7 @@ import { useOrganization } from '../../../useOrganization';
 import { Plan, PlanContent } from '../common/Plan';
 import { PlanTitle } from '../common/PlanTitle';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
-import { IncludedFeatures } from './IncludedFeatures';
+import { IncludedFeatures } from '../common/IncludedFeatures';
 import {
   BillingPeriodType,
   PeriodSwitch,

@@ -1,16 +1,16 @@
-import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
+import { CurrentUsage } from '../CurrentUsage/CurrentUsage';
 import { Box, styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { BillingPlans } from './Plans/BillingPlans';
-import { Credits } from './Plans/Credits/Credits';
+import { PlansCloudList } from './PlansCloudList';
+import { Credits } from './cloud/Plans/Credits/Credits';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { useOrganization } from '../../../useOrganization';
-import { BillingPeriodType } from './Plans/Price/PeriodSwitch';
-import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
+import { useOrganization } from '../../useOrganization';
+import { BillingPeriodType } from './cloud/Plans/Price/PeriodSwitch';
+import { useOrganizationCreditBalance } from '../useOrganizationCreditBalance';
 import { useEffect, useState } from 'react';
-import { planIsPeriodDependant } from './Plans/Price/PricePrimary';
+import { planIsPeriodDependant } from './cloud/Plans/Price/PricePrimary';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
-import { StyledBillingSectionTitle } from '../../BillingSection';
+import { StyledBillingSectionTitle } from '../BillingSection';
 
 const StyledShoppingGrid = styled('div')`
   display: grid;
@@ -19,7 +19,7 @@ const StyledShoppingGrid = styled('div')`
   margin: 16px 0px;
 `;
 
-export const CloudSubscriptions = () => {
+export const PlansCloud = () => {
   const organization = useOrganization();
 
   const [period, setPeriod] = useState<BillingPeriodType>();
@@ -86,7 +86,7 @@ export const CloudSubscriptions = () => {
               </StyledBillingSectionTitle>
             </Box>
             <StyledShoppingGrid>
-              <BillingPlans
+              <PlansCloudList
                 plans={plansLoadable.data._embedded.plans}
                 activeSubscription={activeSubscription.data}
                 onPeriodChange={(period) => setPeriod(period)}

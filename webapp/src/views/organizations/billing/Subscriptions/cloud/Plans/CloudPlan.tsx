@@ -10,7 +10,7 @@ import {
   PlanTitle,
 } from '../../common/Plan';
 import { PlanPrice } from './Price/PlanPrice';
-import { IncludedFeatures } from '../../selfHostedEe/IncludedFeatures';
+import { IncludedFeatures } from '../../common/IncludedFeatures';
 import { PlanActiveBanner } from '../../common/PlanActiveBanner';
 import { PlanAction } from './PlanAction';
 import { ShowAllFeaturesLink } from '../../common/ShowAllFeaturesLink';
@@ -29,7 +29,8 @@ type Props = {
   isActive: boolean;
   isEnded: boolean;
   filteredFeatures: Features;
-  allFromPlanName: string | undefined;
+  topFeature?: React.ReactNode;
+  featuresMinHeight?: string;
 };
 
 export const CloudPlan: FC<Props> = ({
@@ -40,7 +41,8 @@ export const CloudPlan: FC<Props> = ({
   isActive,
   isEnded,
   filteredFeatures,
-  allFromPlanName,
+  topFeature,
+  featuresMinHeight,
 }) => {
   const actions = usePlan({ planId: plan.id, period: period });
 
@@ -53,9 +55,9 @@ export const CloudPlan: FC<Props> = ({
         <PlanFeaturesBox sx={{ gap: '18px' }}>
           {Boolean(plan.enabledFeatures.length) && (
             <IncludedFeatures
-              sx={{ height: '155px' }}
+              sx={{ minHeight: featuresMinHeight }}
               features={filteredFeatures}
-              allFromPlanName={allFromPlanName}
+              topFeature={topFeature}
             />
           )}
           {plan.public && <ShowAllFeaturesLink />}
