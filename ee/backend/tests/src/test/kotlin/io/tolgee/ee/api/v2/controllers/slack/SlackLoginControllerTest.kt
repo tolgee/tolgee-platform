@@ -31,7 +31,7 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
   @Test
   fun `user logs in`() {
     val testData = SlackTestData()
-    testDataService.saveTestData(testData.root)
+    testDataService.saveTestData(testData.dataWithoutSlackUserConnection)
 
     slackUserLoginUrlProvider.encryptData("ChannelTest", "TEST1", testData.slackWorkspace.id).let {
       performAuthPost("/v2/slack/user-login?data=$it", null).andIsOk
