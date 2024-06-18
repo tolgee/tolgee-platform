@@ -40,24 +40,27 @@ class SlackUserConnectionService(
   fun createOrUpdate(
     userAccount: UserAccount,
     slackId: String,
+    slackTeamId: String?,
   ): SlackUserConnection {
-    val old = findBySlackId(slackId) ?: return createUnsafe(userAccount, slackId)
+    val old = findBySlackId(slackId) ?: return createUnsafe(userAccount, slackId, slackTeamId)
 
     if (old.userAccount.id == userAccount.id && old.slackUserId == slackId) {
       return old
     }
 
     delete(old)
-    return createUnsafe(userAccount, slackId)
+    return createUnsafe(userAccount, slackId, slackTeamId)
   }
 
   private fun createUnsafe(
     userAccount: UserAccount,
     slackId: String,
+    slackTeamId: String?,
   ): SlackUserConnection {
     val slackUserConnection = SlackUserConnection()
     slackUserConnection.slackUserId = slackId
     slackUserConnection.userAccount = userAccount
+    slackUserConnection.slackTeamId = slackTeamId ?: ""
     try {
       return slackUserConnectionRepository.saveAndFlush(slackUserConnection)
     } catch (e: DataIntegrityViolationException) {

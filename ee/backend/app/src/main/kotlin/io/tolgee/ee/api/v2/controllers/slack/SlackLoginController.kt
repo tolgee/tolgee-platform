@@ -55,7 +55,11 @@ class SlackLoginController(
     )
 
     val token = getToken(workspace)
-    slackUserConnectionService.createOrUpdate(authenticationFacade.authenticatedUserEntity, decrypted.slackUserId)
+    slackUserConnectionService.createOrUpdate(
+      authenticationFacade.authenticatedUserEntity,
+      decrypted.slackUserId,
+      workspace?.slackTeamId,
+    )
     slackExecutor.sendUserLoginSuccessMessage(token, decrypted)
   }
 
