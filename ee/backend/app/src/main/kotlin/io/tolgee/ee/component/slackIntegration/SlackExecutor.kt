@@ -212,6 +212,7 @@ class SlackExecutor(
     slackChannelId: String,
     slackId: String,
     workspace: OrganizationSlackWorkspace?,
+    slackTeamId: String,
   ): List<LayoutBlock> {
     return withBlocks {
       section {
@@ -226,7 +227,7 @@ class SlackExecutor(
         button {
           text(i18n.translate("slack.common.text.button.connect"), emoji = true)
           value("connect_slack")
-          url(slackUserLoginUrlProvider.getUrl(slackChannelId, slackId, workspace?.id))
+          url(slackUserLoginUrlProvider.getUrl(slackChannelId, slackId, workspace?.id, slackTeamId))
           actionId("button_connect_slack")
           style("primary")
         }

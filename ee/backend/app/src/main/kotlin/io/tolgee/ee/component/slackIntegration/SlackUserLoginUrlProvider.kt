@@ -20,8 +20,9 @@ class SlackUserLoginUrlProvider(
     slackChannelId: String,
     slackUserId: String,
     workspaceId: Long?,
+    slackTeamId: String,
   ): String {
-    val dto = getDto(slackChannelId, slackUserId, workspaceId)
+    val dto = getDto(slackChannelId, slackUserId, workspaceId, slackTeamId)
     val encryptedData = encryptData(dto)
     return "${frontendUrlProvider.url}/slack/connect?data=$encryptedData"
   }
@@ -30,8 +31,9 @@ class SlackUserLoginUrlProvider(
     slackChannelId: String,
     slackUserId: String,
     workspaceId: Long?,
+    slackTeamId: String,
   ): String {
-    val dto = getDto(slackChannelId, slackUserId, workspaceId)
+    val dto = getDto(slackChannelId, slackUserId, workspaceId, slackTeamId)
     return encryptData(dto)
   }
 
@@ -55,11 +57,13 @@ class SlackUserLoginUrlProvider(
     slackChannelId: String,
     slackUserId: String,
     workspaceId: Long?,
+    slackTeamId: String,
   ): SlackUserLoginDto {
     return SlackUserLoginDto(
       slackUserId = slackUserId,
       slackChannelId = slackChannelId,
       workspaceId = workspaceId,
+      slackTeamId = slackTeamId,
     )
   }
 }

@@ -58,7 +58,7 @@ class SlackLoginController(
     slackUserConnectionService.createOrUpdate(
       authenticationFacade.authenticatedUserEntity,
       decrypted.slackUserId,
-      workspace?.slackTeamId,
+      decrypted.slackTeamId,
     )
     slackExecutor.sendUserLoginSuccessMessage(token, decrypted)
   }

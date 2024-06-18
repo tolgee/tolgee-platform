@@ -26,23 +26,29 @@ class SlackUserConnectionService(
     return slackUserConnectionRepository.findByUserAccountId(id)
   }
 
-  fun findBySlackId(slackId: String): SlackUserConnection? {
-    return slackUserConnectionRepository.findBySlackUserId(slackId)
+  fun findBySlackId(
+    slackId: String,
+    slackTeamId: String,
+  ): SlackUserConnection? {
+    return slackUserConnectionRepository.findBySlackUserIdAndSlackTeamId(slackId, slackTeamId)
   }
 
   fun save(slackUserConnection: SlackUserConnection): SlackUserConnection {
     return slackUserConnectionRepository.save(slackUserConnection)
   }
 
-  fun isUserConnected(slackId: String) = findBySlackId(slackId) != null
+  fun isUserConnected(
+    slackId: String,
+    slackTeamId: String,
+  ) = findBySlackId(slackId, slackTeamId) != null
 
   @Transactional
   fun createOrUpdate(
     userAccount: UserAccount,
     slackId: String,
-    slackTeamId: String?,
+    slackTeamId: String,
   ): SlackUserConnection {
-    val old = findBySlackId(slackId) ?: return createUnsafe(userAccount, slackId, slackTeamId)
+    val old = findBySlackId(slackId, slackTeamId) ?: return createUnsafe(userAccount, slackId, slackTeamId)
 
     if (old.userAccount.id == userAccount.id && old.slackUserId == slackId) {
       return old
@@ -73,8 +79,11 @@ class SlackUserConnectionService(
   }
 
   @Transactional
-  fun delete(slackId: String): Boolean {
-    val subscription = findBySlackId(slackId) ?: return false
+  fun delete(
+    slackId: String,
+    slackTeamId: String,
+  ): Boolean {
+    val subscription = findBySlackId(slackId, slackTeamId) ?: return false
     slackUserConnectionRepository.delete(subscription)
     return true
   }

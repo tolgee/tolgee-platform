@@ -24,6 +24,7 @@ class SlackErrorProvider(
         payload.channel_id,
         payload.user_id,
         workspace?.id,
+        payload.team_id,
       )
 
     return withBlocks {

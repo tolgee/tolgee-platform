@@ -36,11 +36,18 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
     val testData = SlackNoUserConnectionTestData()
     testDataService.saveTestData(testData.root)
 
-    slackUserLoginUrlProvider.encryptData("ChannelTest", "TEST1", testData.slackWorkspace.id).let {
+    slackUserLoginUrlProvider.encryptData(
+      "ChannelTest",
+      "TEST1",
+      testData.slackWorkspace.id,
+      testData.slackWorkspace.slackTeamId,
+    ).let {
       performAuthPost("/v2/slack/user-login?data=$it", null).andIsOk
     }
 
-    Assertions.assertThat(slackUserConnectionService.findBySlackId("TEST1")).isNotNull()
+    Assertions.assertThat(
+      slackUserConnectionService.findBySlackId("TEST1", testData.slackWorkspace.slackTeamId),
+    ).isNotNull()
   }
 
   @Test
@@ -48,12 +55,17 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
 
-    slackUserLoginUrlProvider.encryptData("ChannelTest", "TEST1", testData.slackWorkspace.id).let {
+    slackUserLoginUrlProvider.encryptData(
+      "ChannelTest",
+      "TEST1",
+      testData.slackWorkspace.id,
+      testData.slackWorkspace.slackTeamId,
+    ).let {
       performAuthPost("/v2/slack/user-login?data=$it", null).andIsBadRequest
     }
 
     assertThatCode {
-      slackUserConnectionService.findBySlackId("TEST1")
+      slackUserConnectionService.findBySlackId("TEST1", testData.slackWorkspace.slackTeamId)
     }.doesNotThrowAnyException()
   }
 
@@ -62,13 +74,18 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
 
-    slackUserLoginUrlProvider.encryptData("ChannelTest", "slackUserId", testData.slackWorkspace2.id).let {
+    slackUserLoginUrlProvider.encryptData(
+      "ChannelTest",
+      "slackUserId",
+      testData.slackWorkspace2.id,
+      testData.slackWorkspace2.slackTeamId,
+    ).let {
       performAuthPost("/v2/slack/user-login?data=$it", null).andIsOk
     }
 
-    assertThatCode {
-      slackUserConnectionService.findBySlackId("slackUserId")
-    }.isNotNull()
+    Assertions.assertThat(
+      slackUserConnectionService.findBySlackId("slackUserId", testData.slackWorkspace2.slackTeamId),
+    ).isNotNull()
   }
 
   @Test
@@ -76,12 +93,20 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
 
-    slackUserLoginUrlProvider.encryptData("ChannelTest", "slackUserId322", testData.slackWorkspace.id).let {
+    slackUserLoginUrlProvider.encryptData(
+      "ChannelTest",
+      "slackUserId322",
+      testData.slackWorkspace.id,
+      testData.slackWorkspace.slackTeamId,
+    ).let {
       performAuthPost("/v2/slack/user-login?data=$it", null).andIsBadRequest
     }
 
     assertThatCode {
-      slackUserConnectionService.findBySlackId(testData.slackUserConnection.slackTeamId!!)
+      slackUserConnectionService.findBySlackId(
+        testData.slackUserConnection.slackUserId,
+        testData.slackWorkspace.slackTeamId,
+      )
     }.doesNotThrowAnyException()
   }
 }
