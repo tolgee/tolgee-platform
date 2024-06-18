@@ -7,7 +7,7 @@ import { CloudPlan } from '../Plan/CloudPlan';
 import { PlanType } from '../Plan/types';
 import { excludePreviousPlanFeatures } from '../Plan/plansTools';
 import { AllFromPlanFeature } from '../Plan/AllFromPlanFeature';
-import { SelfHostedPlanAction } from './ActiveSubscription/SelfHostedPlanAction';
+import { SelfHostedPlanAction } from './SelfHostedPlanAction';
 
 const StyledPlanWrapper = styled('div')`
   display: grid;

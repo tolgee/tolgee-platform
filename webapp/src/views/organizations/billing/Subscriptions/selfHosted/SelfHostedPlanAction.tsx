@@ -4,8 +4,8 @@ import { Box, styled } from '@mui/material';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { PlanType } from '../../Plan/types';
-import { BillingPeriodType } from '../../Price/PeriodSwitch';
+import { PlanType } from '../Plan/types';
+import { BillingPeriodType } from '../Price/PeriodSwitch';
 
 export const StyledContainer = styled(Box)`
   justify-self: center;
@@ -56,17 +56,17 @@ export const SelfHostedPlanAction = ({ plan, period }: Props) => {
           },
         },
       });
-      return;
-    }
-    subscribeMutation.mutate({
-      path: { organizationId: organization!.id },
-      content: {
-        'application/json': {
-          planId: plan.id,
-          period: period,
+    } else {
+      subscribeMutation.mutate({
+        path: { organizationId: organization!.id },
+        content: {
+          'application/json': {
+            planId: plan.id,
+            period: period,
+          },
         },
-      },
-    });
+      });
+    }
   };
 
   return (

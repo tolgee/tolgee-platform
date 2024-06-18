@@ -56,6 +56,8 @@ export const usePlan = ({ planId, period }: Props) => {
             messaging.error(
               <T keyName="billing_organization_already_subscribed" />
             );
+          } else {
+            data.handleError?.();
           }
         },
       }
