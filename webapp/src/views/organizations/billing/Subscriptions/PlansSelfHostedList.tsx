@@ -78,7 +78,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
                 ) : (
                   <PlanFeature
                     bold
-                    link="https://tolgee.io/pricing#features-table"
+                    link="https://tolgee.io/pricing/self-hosted#features-table"
                     name={t('billing_subscriptions_all_essentials')}
                   />
                 )
