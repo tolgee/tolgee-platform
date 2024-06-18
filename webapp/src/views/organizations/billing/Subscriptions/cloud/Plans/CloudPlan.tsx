@@ -16,6 +16,7 @@ import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
 import { isPlanLegacy } from './utils';
+import { Box } from '@mui/material';
 
 type Features = PlanType['enabledFeatures'];
 
@@ -49,13 +50,11 @@ export const CloudPlan: FC<Props> = ({
         <PlanTitle sx={{ paddingBottom: '20px' }}>{plan.name}</PlanTitle>
 
         <PlanFeaturesBox sx={{ gap: '18px' }}>
-          {Boolean(plan.enabledFeatures.length) && (
-            <IncludedFeatures
-              sx={{ minHeight: featuresMinHeight }}
-              features={filteredFeatures}
-              topFeature={topFeature}
-            />
-          )}
+          <IncludedFeatures
+            sx={{ minHeight: featuresMinHeight }}
+            features={filteredFeatures}
+            topFeature={topFeature}
+          />
           {plan.public && <ShowAllFeaturesLink />}
           <IncludedUsage
             includedUsage={plan.includedUsage}
@@ -65,14 +64,16 @@ export const CloudPlan: FC<Props> = ({
 
         {plan.prices && (
           <PlanPrice
-            sx={{ paddingTop: '20px', paddingBottom: '20px' }}
+            sx={{ paddingTop: '20px' }}
             prices={plan.prices}
             period={period}
             onPeriodChange={onPeriodChange}
           />
         )}
 
-        {plan.type === 'CONTACT_US' ? <ContactUsButton /> : action}
+        <Box sx={{ paddingTop: '20px', justifySelf: 'center' }}>
+          {plan.type === 'CONTACT_US' ? <ContactUsButton /> : action}
+        </Box>
       </PlanContent>
     </Plan>
   );

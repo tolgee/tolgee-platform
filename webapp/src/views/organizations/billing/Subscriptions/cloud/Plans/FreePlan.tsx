@@ -49,6 +49,28 @@ const StyledPlanContent = styled(PlanContent)`
   .seats {
     justify-self: end;
   }
+
+  @container (max-width: 599px) {
+    gap: 8px;
+    grid-template-areas:
+      'title'
+      'features'
+      'strings'
+      'mt-credits'
+      'seats'
+      'price';
+
+    .title,
+    .strings,
+    .mt-credits,
+    .seats,
+    .features {
+      justify-self: start;
+    }
+    .price {
+      justify-self: end;
+    }
+  }
 `;
 
 type Props = {

@@ -79,6 +79,7 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
         <Box
           display="flex"
           justifyContent="space-between"
+          flexWrap="wrap"
           alignItems="center"
           mt={1}
         >
