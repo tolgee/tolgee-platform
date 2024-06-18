@@ -50,7 +50,7 @@ const StyledPlanContent = styled(PlanContent)`
     justify-self: end;
   }
 
-  @container (max-width: 599px) {
+  @container (max-width: 699px) {
     gap: 8px;
     grid-template-areas:
       'title'

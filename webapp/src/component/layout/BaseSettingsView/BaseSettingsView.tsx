@@ -20,6 +20,7 @@ const StyledWrapper = styled('div')`
 const StyledContainer = styled(Container)`
   display: grid;
   padding: 0px !important;
+  container: main-container / inline-size;
 `;
 
 const StyledMenu = styled('div')`
