@@ -3,8 +3,8 @@ import { Box, Tooltip, Typography } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
-import { PlanTitleText } from '../common/PlanTitle';
-import { SubscriptionStatus } from '../../common/SubscriptionStatus';
+import { PlanTitleText } from '../../Plan/PlanTitle';
+import { SubscriptionStatus } from '../../../common/SubscriptionStatus';
 
 type Status = components['schemas']['SelfHostedEeSubscriptionModel']['status'];
 

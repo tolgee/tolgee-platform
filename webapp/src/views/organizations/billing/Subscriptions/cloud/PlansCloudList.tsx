@@ -1,14 +1,16 @@
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { BillingPeriodType } from './cloud/Plans/Price/PeriodSwitch';
-import { CloudPlan } from './cloud/Plans/CloudPlan';
-import { planIsPeriodDependant } from './cloud/Plans/Price/PricePrimary';
-import { FreePlan } from './cloud/Plans/FreePlan';
-import { PlanType } from './cloud/Plans/types';
-import { excludePreviousPlanFeatures } from './common/plansTools';
-import { AllFromPlanFeature } from './common/AllFromPlanFeature';
-import { PlanAction } from './cloud/Plans/PlanAction';
+import { BillingPeriodType } from '../Price/PeriodSwitch';
+import { CloudPlan } from '../Plan/CloudPlan';
+import { FreePlan } from '../Plan/FreePlan';
+import { PlanType } from '../Plan/types';
+import {
+  excludePreviousPlanFeatures,
+  planIsPeriodDependant,
+} from '../Plan/plansTools';
+import { AllFromPlanFeature } from '../Plan/AllFromPlanFeature';
+import { PlanAction } from '../Plan/PlanAction';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 

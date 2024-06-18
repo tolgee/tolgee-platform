@@ -1,16 +1,18 @@
+import { useTranslate } from '@tolgee/react';
+import { Box } from '@mui/material';
+
 import { components } from 'tg.service/apiSchema.generated';
 import {
   Plan,
   PlanContent,
-} from '../../organizations/billing/Subscriptions/common/Plan';
-import { ActivePlanTitle } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/ActivePlanTitle';
+} from 'tg.views/organizations/billing/Subscriptions/Plan/PlanStyles';
+import { PlanInfoArea } from 'tg.views/organizations/billing/Subscriptions/Plan/PlanInfo';
+import { IncludedFeatures } from 'tg.views/organizations/billing/Subscriptions/Plan/IncludedFeatures';
+import { ActivePlanTitle } from 'tg.views/organizations/billing/Subscriptions/selfHosted/ActiveSubscription/ActivePlanTitle';
+import { PlanLicenseKey } from 'tg.views/organizations/billing/Subscriptions/selfHosted/ActiveSubscription/PlanLicenseKey';
+
 import { RefreshButton } from './RefreshButton';
 import { ReleaseKeyButton } from './ReleaseKeyButton';
-import { PlanInfoArea } from '../../organizations/billing/Subscriptions/common/PlanInfo';
-import { IncludedFeatures } from '../../organizations/billing/Subscriptions/common/IncludedFeatures';
-import { useTranslate } from '@tolgee/react';
-import { Box } from '@mui/material';
-import { PlanLicenseKey } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/PlanLicenseKey';
 
 type EeSubscriptionModel = components['schemas']['EeSubscriptionModel'];
 

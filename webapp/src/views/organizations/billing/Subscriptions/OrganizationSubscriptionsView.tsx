@@ -7,10 +7,10 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../../useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { PlansCloud } from './PlansCloud';
+import { PlansCloud } from './cloud/PlansCloud';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { Box, ButtonGroup } from '@mui/material';
-import { PlansSelfHosted } from './PlansSelfHosted';
+import { PlansSelfHosted } from './selfHosted/PlansSelfHosted';
 import { ButtonGroupRouterItem } from 'tg.component/common/ButtonGroupRouter';
 
 export const OrganizationSubscriptionsView: FunctionComponent = () => {

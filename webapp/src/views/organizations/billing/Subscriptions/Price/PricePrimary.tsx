@@ -1,10 +1,12 @@
 import { Box, SxProps, styled } from '@mui/material';
-import { useMoneyFormatter } from 'tg.hooks/useLocale';
-import { BillingPeriodType } from './PeriodSwitch';
-import { components } from 'tg.service/apiSchema.generated';
 import { T } from '@tolgee/react';
+import { useMoneyFormatter } from 'tg.hooks/useLocale';
 
-type PlanPricesModel = components['schemas']['PlanPricesModel'];
+import { BillingPeriodType } from './PeriodSwitch';
+import { PlanType } from '../Plan/types';
+import { planIsPeriodDependant } from '../Plan/plansTools';
+
+type PlanPricesModel = NonNullable<PlanType['prices']>;
 
 const StyledPrimaryPrice = styled(Box)`
   font-size: 24px;
@@ -14,12 +16,6 @@ const StyledPrimaryPrice = styled(Box)`
 const StyledPeriod = styled('span')`
   font-size: 15px;
 `;
-
-export function planIsPeriodDependant(prices: PlanPricesModel | undefined) {
-  return (
-    prices && Boolean(prices.subscriptionYearly || prices.subscriptionMonthly)
-  );
-}
 
 type Props = {
   prices: PlanPricesModel;

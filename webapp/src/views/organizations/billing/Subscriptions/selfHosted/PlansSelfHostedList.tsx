@@ -2,12 +2,12 @@ import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { PlanFeature } from 'tg.component/billing/PlanFeature';
 
-import { BillingPeriodType } from './cloud/Plans/Price/PeriodSwitch';
-import { CloudPlan } from './cloud/Plans/CloudPlan';
-import { PlanType } from './cloud/Plans/types';
-import { excludePreviousPlanFeatures } from './common/plansTools';
-import { AllFromPlanFeature } from './common/AllFromPlanFeature';
-import { SelfHostedPlanAction } from './selfHostedEe/SelfHostedPlanAction';
+import { BillingPeriodType } from '../Price/PeriodSwitch';
+import { CloudPlan } from '../Plan/CloudPlan';
+import { PlanType } from '../Plan/types';
+import { excludePreviousPlanFeatures } from '../Plan/plansTools';
+import { AllFromPlanFeature } from '../Plan/AllFromPlanFeature';
+import { SelfHostedPlanAction } from './ActiveSubscription/SelfHostedPlanAction';
 
 const StyledPlanWrapper = styled('div')`
   display: grid;

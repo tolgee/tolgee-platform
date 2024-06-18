@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { PlanSubtitle } from './Plan';
+import { PlanSubtitle } from './PlanStyles';
 
 type Props = {
   isActive: boolean;

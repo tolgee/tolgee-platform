@@ -8,11 +8,11 @@ import {
   IncludedStrings,
 } from 'tg.component/billing/IncludedItem';
 
-import { Plan, PlanContent } from '../../common/Plan';
-import { PlanTitle } from '../../common/PlanTitle';
-import { PlanActiveBanner } from '../../common/PlanActiveBanner';
+import { Plan, PlanContent } from './PlanStyles';
+import { PlanActiveBanner } from './PlanActiveBanner';
+import { PlanTitle } from './PlanTitle';
 import { PlanType } from './types';
-import { PricePrimary } from './Price/PricePrimary';
+import { PricePrimary } from '../Price/PricePrimary';
 
 const StyledPlanContent = styled(PlanContent)`
   display: grid;

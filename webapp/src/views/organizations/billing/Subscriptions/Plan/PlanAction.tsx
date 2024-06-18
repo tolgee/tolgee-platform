@@ -5,7 +5,7 @@ import { PrepareUpgradeDialog } from 'tg.views/organizations/billing/PrepareUpgr
 import { usePlan } from './usePlan';
 import { confirmation } from 'tg.hooks/confirmation';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { BillingPeriodType } from './Price/PeriodSwitch';
+import { BillingPeriodType } from '../Price/PeriodSwitch';
 
 export const StyledContainer = styled(Box)`
   justify-self: center;

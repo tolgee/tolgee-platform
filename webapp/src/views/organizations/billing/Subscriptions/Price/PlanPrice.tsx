@@ -1,8 +1,9 @@
 import { Box, SxProps, styled } from '@mui/material';
 import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { components } from 'tg.service/apiSchema.generated';
-import { PricePrimary, planIsPeriodDependant } from './PricePrimary';
+import { PricePrimary } from './PricePrimary';
 import { PayAsYouGoPrices } from './PayAsYouGoPrices';
+import { planIsPeriodDependant } from '../Plan/plansTools';
 
 type PlanPricesModel = components['schemas']['PlanPricesModel'];
 

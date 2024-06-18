@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { useOrganization } from '../../../useOrganization';
-import { PlanUsageEstimatedCosts } from '../../common/usage/PlanUsageEstimatedCosts';
+import { useOrganization } from '../../../../useOrganization';
+import { PlanUsageEstimatedCosts } from '../../../common/usage/PlanUsageEstimatedCosts';
 
 export const SelfHostedEeEstimatedCosts: FC<{
   subscription: components['schemas']['SelfHostedEeSubscriptionModel'];

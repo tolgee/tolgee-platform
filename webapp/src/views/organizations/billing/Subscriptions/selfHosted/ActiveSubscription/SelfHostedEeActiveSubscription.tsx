@@ -3,19 +3,19 @@ import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 
-import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
-import { IncludedFeatures } from '../common/IncludedFeatures';
+import { SelfHostedEeSubscriptionActions } from '../../../SelfHostedEeSubscriptionActions';
+import { IncludedFeatures } from '../../Plan/IncludedFeatures';
 import {
   Plan,
   PlanContent,
   PlanFeaturesBox,
   PlanSubtitle,
-} from '../common/Plan';
+} from '../../Plan/PlanStyles';
 import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';
 import { ActivePlanTitle } from './ActivePlanTitle';
 import { PlanDescription } from './PlanDescription';
-import { PricePrimary } from '../cloud/Plans/Price/PricePrimary';
-import { PayAsYouGoPrices } from '../cloud/Plans/Price/PayAsYouGoPrices';
+import { PricePrimary } from '../../Price/PricePrimary';
+import { PayAsYouGoPrices } from '../../Price/PayAsYouGoPrices';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];

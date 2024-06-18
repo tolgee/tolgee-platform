@@ -1,21 +1,16 @@
 import { FC } from 'react';
 import clsx from 'clsx';
 
-import { BillingPeriodType } from './Price/PeriodSwitch';
-import {
-  PlanFeaturesBox,
-  Plan,
-  PlanContent,
-  PlanTitle,
-} from '../../common/Plan';
-import { PlanPrice } from './Price/PlanPrice';
-import { IncludedFeatures } from '../../common/IncludedFeatures';
-import { PlanActiveBanner } from '../../common/PlanActiveBanner';
-import { ShowAllFeaturesLink } from '../../common/ShowAllFeaturesLink';
+import { BillingPeriodType } from '../Price/PeriodSwitch';
+import { PlanFeaturesBox, Plan, PlanContent, PlanTitle } from './PlanStyles';
+import { PlanPrice } from '../Price/PlanPrice';
+import { IncludedFeatures } from './IncludedFeatures';
+import { PlanActiveBanner } from './PlanActiveBanner';
+import { ShowAllFeaturesLink } from './ShowAllFeaturesLink';
 import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
-import { isPlanLegacy } from './utils';
+import { isPlanLegacy } from './plansTools';
 import { Box } from '@mui/material';
 
 type Features = PlanType['enabledFeatures'];

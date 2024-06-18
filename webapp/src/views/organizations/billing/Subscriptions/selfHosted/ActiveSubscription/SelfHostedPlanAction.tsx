@@ -1,11 +1,11 @@
 import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
-import { useOrganization } from '../../../useOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { PlanType } from '../cloud/Plans/types';
-import { BillingPeriodType } from '../cloud/Plans/Price/PeriodSwitch';
+import { PlanType } from '../../Plan/types';
+import { BillingPeriodType } from '../../Price/PeriodSwitch';
 
 export const StyledContainer = styled(Box)`
   justify-self: center;

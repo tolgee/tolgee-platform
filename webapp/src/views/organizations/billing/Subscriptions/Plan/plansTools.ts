@@ -1,4 +1,4 @@
-import { PlanType } from '../cloud/Plans/types';
+import { PlanType } from './types';
 
 export function isSubset<T>(set: T[], subset: T[]): boolean {
   return subset.every((i) => set.includes(i));
@@ -23,4 +23,15 @@ export function excludePreviousPlanFeatures(prevPaidPlans: PlanType[]) {
       filteredFeatures: currentPlan.enabledFeatures,
     };
   }
+}
+
+export function isPlanLegacy(plan: PlanType) {
+  const slots = plan.includedUsage?.translationSlots;
+  return slots !== undefined && slots !== -1;
+}
+
+export function planIsPeriodDependant(prices: PlanType['prices'] | undefined) {
+  return (
+    prices && Boolean(prices.subscriptionYearly || prices.subscriptionMonthly)
+  );
 }

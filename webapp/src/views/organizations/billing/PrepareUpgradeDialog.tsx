@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useUpgradePlan } from './Subscriptions/cloud/Plans/useUpgradePlan';
+import { useUpgradePlan } from './Subscriptions/Plan/useUpgradePlan';
 import { useOrganization } from '../useOrganization';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 

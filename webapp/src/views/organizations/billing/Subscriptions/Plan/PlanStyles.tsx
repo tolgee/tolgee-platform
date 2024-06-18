@@ -44,14 +44,6 @@ export const PlanSubtitle = styled('div')`
   background: ${({ theme }) => theme.palette.tokens.secondary._states.selected};
 `;
 
-export const PlanEstimatedCostsArea = styled('div')`
-  /* grid-area: estimated-costs; */
-`;
-
-export const PlanEstimatedCosts = styled(PlanEstimatedCostsArea)`
-  justify-self: end;
-`;
-
 export const PlanFeaturesBox = styled(Box)`
   display: grid;
   border-radius: 20px;

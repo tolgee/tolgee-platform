@@ -1,12 +1,12 @@
 import { T, useTranslate } from '@tolgee/react';
+import { LoadingButton } from '@mui/lab';
+import { Box } from '@mui/material';
 
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useOrganization } from '../useOrganization';
-import { LoadingButton } from '@mui/lab';
-import { PlanLicenseKey } from './Subscriptions/selfHostedEe/PlanLicenseKey';
-import { Box } from '@mui/material';
+import { PlanLicenseKey } from './Subscriptions/selfHosted/ActiveSubscription/PlanLicenseKey';
 
 type Props = {
   id: number;
