@@ -10,6 +10,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
+import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
@@ -169,6 +170,15 @@ class TestDataService(
     saveOrganizationRoles(builder)
     saveOrganizationAvatars(builder)
     saveAllMtCreditBuckets(builder)
+    saveSlackWorkspaces(builder)
+  }
+
+  private fun saveSlackWorkspaces(builder: TestDataBuilder) {
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationBuilder.data.slackWorkspaces.map { it.self }.forEach {
+        entityManager.persist(it)
+      }
+    }
   }
 
   private fun saveOrganizationAvatars(builder: TestDataBuilder) {
@@ -210,6 +220,7 @@ class TestDataService(
     saveContentStorages(builder)
     saveContentDeliveryConfigs(builder)
     saveWebhookConfigs(builder)
+    saveSlackConfigs(builder)
     saveAutomations(builder)
     saveImportSettings(builder)
   }
@@ -224,6 +235,17 @@ class TestDataService(
   private fun saveWebhookConfigs(builder: ProjectBuilder) {
     builder.data.webhookConfigs.forEach {
       entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveSlackConfigs(builder: ProjectBuilder) {
+    builder.data.slackConfigs.forEach {
+      entityManager.persist(it.self)
+    }
+
+    builder.data.slackConfigs.forEach { slackConfig ->
+      val messages = slackConfig.data.slackMessages.map { it.self }.toMutableList()
+      messages.forEach { entityManager.persist(it) }
     }
   }
 
@@ -415,10 +437,17 @@ class TestDataService(
     saveUserAvatars(userAccountBuilders)
     saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
     saveUserPats(userAccountBuilders.flatMap { it.data.pats })
+    saveUserSlackConnections(userAccountBuilders.flatMap { it.data.slackUserConnections })
   }
 
   private fun saveUserPats(data: List<PatBuilder>) {
     data.forEach { patService.save(it.self) }
+  }
+
+  private fun saveUserSlackConnections(data: List<SlackUserConnectionBuilder>) {
+    data.forEach {
+      entityManager.persist(it.self)
+    }
   }
 
   private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {

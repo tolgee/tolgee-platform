@@ -2,6 +2,8 @@ package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
+import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackUserConnection
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -93,6 +95,12 @@ data class UserAccount(
    */
   @ColumnDefault("false")
   var isDemo: Boolean = false
+
+  @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
+  var slackUserConnection: MutableList<SlackUserConnection> = mutableListOf()
+
+  @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
+  var slackConfig: MutableList<SlackConfig> = mutableListOf()
 
   constructor(
     id: Long?,

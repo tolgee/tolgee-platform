@@ -202,6 +202,13 @@ class LanguageService(
     return self.getProjectLanguages(project.id).singleOrNull { tag == it.tag }
   }
 
+  fun getByTag(
+    tag: String,
+    project: Project,
+  ): LanguageDto {
+    return findByTag(tag, project) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
   fun findByTag(
     tag: String?,
     projectId: Long,

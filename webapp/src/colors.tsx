@@ -94,6 +94,11 @@ export type ExampleBanner = {
   border: string;
 };
 
+export type RevisionFilterBanner = {
+  background: string;
+  highlightText: string;
+};
+
 export type TipsBanner = {
   background: string;
 };
@@ -207,6 +212,10 @@ export const colors = {
       mainText: '#004437',
       linkText: '#009B85',
     },
+    revisionFilterBanner: {
+      background: '#00AF9A14',
+      highlightText: '#00AF9A',
+    } satisfies RevisionFilterBanner,
     quickStart: {
       highlight: '#F7F8FB',
       circleNormal: '#E7EBF5',
@@ -338,6 +347,10 @@ export const colors = {
       mainText: '#BEF4E9',
       linkText: '#dddddd',
     },
+    revisionFilterBanner: {
+      background: '#99E5D629',
+      highlightText: '#99E5D6',
+    } satisfies RevisionFilterBanner,
     quickStart: {
       highlight: '#233043',
       circleNormal: '#2c3c52',

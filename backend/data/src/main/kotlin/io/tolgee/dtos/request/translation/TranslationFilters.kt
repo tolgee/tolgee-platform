@@ -88,4 +88,10 @@ To filter default namespace, set to empty string.
     example = "en-US",
   )
   var filterNotOutdatedLanguage: List<String>? = null
+
+  @field:Parameter(
+    description = "Selects only key affected by activity with specidfied revision ID",
+    example = "1234567",
+  )
+  var filterRevisionId: List<Long>? = null
 }

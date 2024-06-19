@@ -49,9 +49,11 @@ const StyledPaper = styled(Paper)`
   display: grid;
   grid-template-columns: 1fr;
   background: ${({ theme }) => theme.palette.login.backgroundPrimary};
+
   &.split {
     grid-template-columns: 1fr 1fr;
   }
+
   @media ${FULL_PAGE_BREAK_POINT} {
     box-shadow: none;
     background: none;
@@ -70,6 +72,7 @@ const StyledPrimaryContent = styled(StyledContent)`
   display: grid;
   align-content: start;
   padding: 60px;
+
   &.split {
     padding-right: 45px;
   }
@@ -77,6 +80,7 @@ const StyledPrimaryContent = styled(StyledContent)`
 
 const StyledSecondaryContent = styled(StyledContent)`
   align-content: end;
+
   &.split {
     padding-left: 45px;
   }
@@ -85,7 +89,7 @@ const StyledSecondaryContent = styled(StyledContent)`
 type Props = {
   windowTitle: string;
   alerts?: React.ReactNode;
-  title: React.ReactNode;
+  title?: React.ReactNode;
   subtitle?: React.ReactNode;
   primaryContent: React.ReactNode;
   secondaryContent?: React.ReactNode;
@@ -113,7 +117,7 @@ export const CompactView: React.FC<Props> = ({
         <StyledAlerts>{alerts}</StyledAlerts>
         <StyledPaper className={clsx({ split })}>
           <StyledPrimaryContent className={clsx({ split })}>
-            <Typography variant="h4">{title}</Typography>
+            {title && <Typography variant="h4">{title}</Typography>}
             {subtitle && (
               <Typography
                 sx={{ mt: 0.5 }}

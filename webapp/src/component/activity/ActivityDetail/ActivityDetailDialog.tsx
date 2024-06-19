@@ -1,81 +1,54 @@
-import { useMemo, useState } from 'react';
-import { useTranslate, T } from '@tolgee/react';
-import {
-  DialogContent,
-  DialogTitle,
-  DialogActions,
-  FormControlLabel,
-  Switch,
-  styled,
-  Button,
-} from '@mui/material';
-import { Dialog, DialogProps } from '@mui/material';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogProps } from '@mui/material';
 
-import { ActivityTitle } from '../ActivityTitle';
-import { buildActivity } from '../activityTools';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { ActivityDetailContent } from './ActivityDetailContent';
 import { ActivityModel } from '../types';
-import { ActivityDetail } from './ActivityDetail';
-
-const StyledDialogTitle = styled(DialogTitle)`
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 15px;
-  max-width: 100%;
-`;
-
-const StyledDialogContent = styled(DialogContent)`
-  min-width: 40vw;
-  max-width: 1000px;
-  min-height: 40vh;
-`;
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
 
 type Props = DialogProps & {
-  data: ActivityModel;
+  detailId: number;
+  data: ActivityModel | undefined;
   initialDiffEnabled: boolean;
   onClose: () => void;
 };
 
 export const ActivityDetailDialog: React.FC<Props> = ({
   data,
+  detailId,
   initialDiffEnabled,
   ...dialogProps
 }) => {
-  const activity = useMemo(() => buildActivity(data), [data]);
-  const filteredActivity = useMemo(() => buildActivity(data, true), [data]);
+  const project = useProject();
   const [diffEnabled, setDiffEnabled] = useState(initialDiffEnabled);
-
   const toggleDiff = () => {
     setDiffEnabled(!diffEnabled);
   };
 
-  const { t } = useTranslate();
+  const detailLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/activity/revisions/{revisionId}',
+    method: 'get',
+    path: { projectId: project.id, revisionId: detailId },
+    options: { enabled: !data },
+  });
+
+  const detailData = data || detailLoadable.data;
 
   return (
-    <Dialog {...dialogProps}>
-      <StyledDialogTitle>
-        <span>
-          <ActivityTitle activity={filteredActivity} />
-        </span>
-        <FormControlLabel
-          control={
-            <Switch size="small" checked={diffEnabled} onChange={toggleDiff} />
-          }
-          label={t('dashboard_activity_differences')}
-          labelPlacement="start"
-        />
-      </StyledDialogTitle>
-      <StyledDialogContent>
-        <ActivityDetail
-          data={data}
-          activity={activity}
+    <Dialog {...dialogProps} data-cy="activity-detail-dialog">
+      {detailLoadable.isLoading ? (
+        <DialogContent>
+          <BoxLoading />
+        </DialogContent>
+      ) : (
+        <ActivityDetailContent
+          data={detailData!}
+          onClose={dialogProps.onClose}
+          onToggleDiff={toggleDiff}
           diffEnabled={diffEnabled}
         />
-      </StyledDialogContent>
-      <DialogActions>
-        <Button onClick={dialogProps?.onClose}>
-          <T keyName="global_close_button" />
-        </Button>
-      </DialogActions>
+      )}
     </Dialog>
   );
 };

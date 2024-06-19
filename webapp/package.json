@@ -46,6 +46,7 @@
     "react-google-recaptcha-v3": "1.9.5",
     "react-gtm-module": "^2.0.11",
     "react-helmet": "^6.1.0",
+    "react-intersection-observer": "^9.10.1",
     "react-list": "^0.8.17",
     "react-markdown": "^8.0.4",
     "react-qr-code": "^2.0.7",

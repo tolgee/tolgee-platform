@@ -3,12 +3,14 @@ package io.tolgee.activity
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
-import io.tolgee.activity.projectActivityView.ProjectActivityViewByPageableProvider
-import io.tolgee.activity.projectActivityView.ProjectActivityViewByRevisionProvider
+import io.tolgee.activity.projectActivity.ModificationsByRevisionsProvider
+import io.tolgee.activity.projectActivity.ProjectActivityViewByPageableProvider
+import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.util.Logging
@@ -101,7 +103,7 @@ class ActivityService(
   }
 
   @Transactional
-  fun getProjectActivity(
+  fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
   ): Page<ProjectActivityView> {
@@ -113,10 +115,22 @@ class ActivityService(
   }
 
   @Transactional
-  fun getProjectActivity(revisionId: Long): ProjectActivityView? {
+  fun findProjectActivity(revisionId: Long): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
-      revisionId,
+      revisionId = revisionId,
+    ).get()
+  }
+
+  @Transactional
+  fun findProjectActivity(
+    projectId: Long,
+    revisionId: Long,
+  ): ProjectActivityView? {
+    return ProjectActivityViewByRevisionProvider(
+      applicationContext = applicationContext,
+      revisionId = revisionId,
+      projectId = projectId,
     ).get()
   }
 
@@ -130,5 +144,16 @@ class ActivityService(
       pageable = pageable,
       ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD),
     )
+  }
+
+  fun getRevisionModifications(
+    projectId: Long,
+    revisionId: Long,
+    pageable: Pageable,
+    filterEntityClass: List<String>?,
+  ): Page<ModifiedEntityView> {
+    val provider =
+      ModificationsByRevisionsProvider(applicationContext, projectId, listOf(revisionId), pageable, filterEntityClass)
+    return provider.get()
   }
 }

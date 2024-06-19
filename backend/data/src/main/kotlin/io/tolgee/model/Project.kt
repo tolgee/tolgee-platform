@@ -10,26 +10,11 @@ import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.OrderBy
-import jakarta.persistence.PostLoad
-import jakarta.persistence.PrePersist
-import jakarta.persistence.PreUpdate
-import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
+import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
@@ -38,6 +23,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import java.util.*
+import kotlin.jvm.Transient
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
@@ -120,6 +106,9 @@ class Project(
 
   @OneToMany(orphanRemoval = true, mappedBy = "project")
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
+
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
+  var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true

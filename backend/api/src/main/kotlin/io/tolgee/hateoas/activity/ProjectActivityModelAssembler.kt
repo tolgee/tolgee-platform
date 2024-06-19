@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class ProjectActivityModelAssembler(
   private val avatarService: AvatarService,
+  private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
 ) : RepresentationModelAssemblerSupport<ProjectActivityView, ProjectActivityModel>(
     ApiKeyController::class.java,
     ProjectActivityModel::class.java,
@@ -43,13 +44,7 @@ class ProjectActivityModelAssembler(
       ?.map { entry ->
         entry.key to
           entry.value.map {
-            ModifiedEntityModel(
-              entityId = it.entityId,
-              description = it.description,
-              modifications = it.modifications,
-              relations = it.describingRelations,
-              exists = it.exists,
-            )
+            modifiedEntityModelAssembler.toModel(it)
           }
       }?.toMap()
 }

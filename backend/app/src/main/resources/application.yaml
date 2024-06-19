@@ -21,13 +21,13 @@ spring:
           batch_size: 1000
         order_inserts: true
         order_updates: true
-        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
         types:
           print:
             banner: false
         enhancer:
           enableLazyInitialization: true
           enableDirtyTracking: true
+        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
   batch:
     job:
       enabled: false
@@ -63,4 +63,3 @@ management:
     web:
       exposure:
         include: health,info,prometheus
-

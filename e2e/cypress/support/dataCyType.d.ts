@@ -4,7 +4,9 @@ declare namespace DataCy {
         "account-security-set-password-instructions-sent" |
         "active-plan-license-key-input" |
         "activity-compact" |
+        "activity-compact-detail-button" |
         "activity-detail" |
+        "activity-detail-dialog" |
         "add-box" |
         "administration-access-message" |
         "administration-cloud-plan-field-auto-assign-to-selected" |

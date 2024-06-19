@@ -163,6 +163,7 @@ export const HistoryItem: React.FC<Props> = ({
           open={detailOpen}
           onClose={() => setDetailOpen(false)}
           initialDiffEnabled={showDifferences}
+          detailId={0}
           data={mapHistoryToActivity(entry)}
         />
       )}

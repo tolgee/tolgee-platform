@@ -19,6 +19,7 @@ import {
   LanguageChips,
   Login,
   Input,
+  RevisionFilterBanner,
 } from './colors';
 
 declare module '*.svg' {
@@ -55,6 +56,7 @@ declare module '@mui/material/styles/createPalette' {
     languageChips: LanguageChips;
     login: Login;
     input: Input;
+    revisionFilterBanner: RevisionFilterBanner;
   }
 
   interface PaletteOptions {
@@ -82,6 +84,7 @@ declare module '@mui/material/styles/createPalette' {
     languageChips: LanguageChips;
     login: Login;
     input: Input;
+    revisionFilterBanner: RevisionFilterBanner;
   }
 }
 

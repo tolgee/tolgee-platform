@@ -1,13 +1,8 @@
 package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
-import io.tolgee.model.ApiKey
-import io.tolgee.model.AutoTranslationConfig
-import io.tolgee.model.Language
-import io.tolgee.model.Organization
-import io.tolgee.model.Permission
-import io.tolgee.model.Project
-import io.tolgee.model.Screenshot
+import io.tolgee.development.testDataBuilder.builders.slack.SlackConfigBuilder
+import io.tolgee.model.*
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
@@ -18,6 +13,7 @@ import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.core.io.ClassPathResource
@@ -56,6 +52,7 @@ class ProjectBuilder(
     var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
     var importSettings: ImportSettings? = null
+    var slackConfigs = mutableListOf<SlackConfigBuilder>()
   }
 
   var data = DATA()
@@ -174,6 +171,8 @@ class ProjectBuilder(
   fun addContentDeliveryConfig(ft: FT<ContentDeliveryConfig>) = addOperation(data.contentDeliveryConfigs, ft)
 
   fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
+
+  fun addSlackConfig(ft: FT<SlackConfig>) = addOperation(data.slackConfigs, ft)
 
   fun setImportSettings(ft: FT<ImportSettings>) {
     data.importSettings = ImportSettings(this.self).apply(ft)

@@ -159,6 +159,7 @@ const getTheme = (mode: PaletteMode) => {
       languageChips: c.languageChips,
       login: c.login,
       input: c.input,
+      revisionFilterBanner: c.revisionFilterBanner,
     },
     mixins: {
       toolbar: {

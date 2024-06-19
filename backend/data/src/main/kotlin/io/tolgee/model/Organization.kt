@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -60,4 +61,7 @@ class Organization(
   override var avatarHash: String? = null
 
   override var deletedAt: Date? = null
+
+  @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, orphanRemoval = true)
+  var organizationSlackWorkspace: MutableList<OrganizationSlackWorkspace> = mutableListOf()
 }
