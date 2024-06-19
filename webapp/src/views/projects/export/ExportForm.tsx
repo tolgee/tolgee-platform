@@ -6,15 +6,9 @@ import { Box, styled } from '@mui/material';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { EXPORTABLE_STATES, StateType } from 'tg.constants/translationStates';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { StateSelector } from 'tg.views/projects/export/components/StateSelector';
-import { LanguageSelector } from 'tg.views/projects/export/components/LanguageSelector';
-import { FormatSelector } from 'tg.views/projects/export/components/FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { SupportArraysSelector } from './components/SupportArraysSelector';
 import {
   formatGroups,
   getFormatById,
@@ -22,15 +16,15 @@ import {
   normalizeSelectedMessageFormat,
 } from './components/formatGroups';
 import { downloadExported } from './downloadExported';
-import { MessageFormatSelector } from './components/MessageFormatSelector';
 import { useExportHelper } from 'tg.hooks/useExportHelper';
+import { ExportFormContent } from './ExportFormContent';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
     (a, b) => EXPORTABLE_STATES.indexOf(a) - EXPORTABLE_STATES.indexOf(b)
   );
 
-const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
+export const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
   'TRANSLATED',
   'REVIEWED',
 ]);
@@ -73,10 +67,6 @@ const StyledForm = styled('form')`
   & .ns {
     grid-area: ns;
   }
-`;
-
-const StyledOptions = styled('div')`
-  display: grid;
 `;
 
 export const ExportForm = () => {
@@ -228,30 +218,13 @@ export const ExportForm = () => {
           message={t('quick_start_item_export_form_hint')}
         >
           <StyledForm onSubmit={handleSubmit}>
-            <StateSelector className="states" />
-            <LanguageSelector className="langs" languages={allowedLanguages} />
-            <FormatSelector className="format" />
-            {getFormatById(values.format).defaultSupportArrays && (
-              <>
-                <StyledOptions className="options">
-                  <SupportArraysSelector />
-                </StyledOptions>
-              </>
-            )}
-            <MessageFormatSelector className="messageFormat" />
-            <NsSelector className="ns" namespaces={allNamespaces} />
-            <div className="submit">
-              <LoadingButton
-                data-cy="export-submit-button"
-                loading={isSubmitting}
-                variant="contained"
-                color="primary"
-                type="submit"
-                disabled={!isValid}
-              >
-                {t('export_translations_export_label')}
-              </LoadingButton>
-            </div>
+            <ExportFormContent
+              values={values}
+              allLanguages={allowedLanguages}
+              allNamespaces={allNamespaces}
+              isSubmitting={isSubmitting}
+              isValid={isValid}
+            />
           </StyledForm>
         </QuickStartHighlight>
       )}

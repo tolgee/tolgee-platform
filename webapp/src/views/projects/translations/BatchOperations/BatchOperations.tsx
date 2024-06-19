@@ -20,6 +20,7 @@ import { OperationMachineTranslate } from './OperationMachineTranslate';
 import { BatchActions, BatchJobModel } from './types';
 import { OperationPreTranslate } from './OperationPreTranslate';
 import { SelectAllCheckbox } from './SelectAllCheckbox';
+import { OperationExportTranslations } from './OperationExportTranslations';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -82,12 +83,27 @@ export const BatchOperations = ({ open, onClose }: Props) => {
   const [operation, setOperation] = useState<BatchActions>();
   const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
 
+  function onCloseOnly() {
+    selectionClear();
+    setOperation(undefined);
+    onClose();
+  }
+
+  function onFinished() {
+    refetchTranslations();
+    selectionClear();
+    setOperation(undefined);
+    onClose();
+  }
+
   const sharedProps = {
     disabled: !selection.length,
     onStart: (operation: BatchJobModel) => {
       setRunningOperation(operation);
       refetchBatchJobs();
     },
+    onClose: onCloseOnly,
+    onFinished,
   };
 
   function pickOperation() {
@@ -112,14 +128,9 @@ export const BatchOperations = ({ open, onClose }: Props) => {
         return <OperationCopyTranslations {...sharedProps} />;
       case 'clear_translations':
         return <OperationClearTranslations {...sharedProps} />;
+      case 'export_translations':
+        return <OperationExportTranslations {...sharedProps} />;
     }
-  }
-
-  function onFinished() {
-    refetchTranslations();
-    selectionClear();
-    setOperation(undefined);
-    onClose();
   }
 
   return (
