@@ -1,3 +1,10 @@
+# [3.65.0](https://github.com/tolgee/tolgee-platform/compare/v3.64.8...v3.65.0) (2024-06-19)
+
+
+### Features
+
+* Slack integration ([#2247](https://github.com/tolgee/tolgee-platform/issues/2247)) ([93d56ee](https://github.com/tolgee/tolgee-platform/commit/93d56ee90f981eecbabfe08537fd86da7735b268))
+
 ## [3.64.8](https://github.com/tolgee/tolgee-platform/compare/v3.64.7...v3.64.8) (2024-06-13)
 
 
