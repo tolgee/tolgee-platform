@@ -2,7 +2,12 @@ import { FC } from 'react';
 import clsx from 'clsx';
 
 import { BillingPeriodType } from '../Price/PeriodSwitch';
-import { PlanFeaturesBox, Plan, PlanContent, PlanTitle } from './PlanStyles';
+import {
+  PlanFeaturesBox,
+  PlanContainer,
+  PlanContent,
+  PlanTitle,
+} from './PlanStyles';
 import { PlanPrice } from '../Price/PlanPrice';
 import { IncludedFeatures } from './IncludedFeatures';
 import { PlanActiveBanner } from './PlanActiveBanner';
@@ -27,7 +32,7 @@ type Props = {
   action: React.ReactNode;
 };
 
-export const CloudPlan: FC<Props> = ({
+export const Plan: FC<Props> = ({
   plan,
   period,
   onPeriodChange,
@@ -39,7 +44,10 @@ export const CloudPlan: FC<Props> = ({
   action,
 }) => {
   return (
-    <Plan className={clsx({ active: isActive })} data-cy="billing-plan">
+    <PlanContainer
+      className={clsx({ active: isActive })}
+      data-cy="billing-plan"
+    >
       <PlanActiveBanner isActive={isActive} isEnded={isEnded} />
       <PlanContent>
         <PlanTitle sx={{ paddingBottom: '20px' }}>{plan.name}</PlanTitle>
@@ -70,6 +78,6 @@ export const CloudPlan: FC<Props> = ({
           {plan.type === 'CONTACT_US' ? <ContactUsButton /> : action}
         </Box>
       </PlanContent>
-    </Plan>
+    </PlanContainer>
   );
 };

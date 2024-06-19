@@ -8,7 +8,7 @@ import {
   IncludedStrings,
 } from 'tg.component/billing/IncludedItem';
 
-import { Plan, PlanContent } from './PlanStyles';
+import { PlanContainer, PlanContent } from './PlanStyles';
 import { PlanActiveBanner } from './PlanActiveBanner';
 import { PlanTitle } from './PlanTitle';
 import { PlanType } from './types';
@@ -82,7 +82,10 @@ type Props = {
 export const FreePlan = ({ plan, isActive, isEnded }: Props) => {
   const { t } = useTranslate();
   return (
-    <Plan className={clsx({ active: isActive })} data-cy="billing-plan">
+    <PlanContainer
+      className={clsx({ active: isActive })}
+      data-cy="billing-plan"
+    >
       <PlanActiveBanner isActive={isActive} isEnded={isEnded} />
 
       <StyledPlanContent>
@@ -118,6 +121,6 @@ export const FreePlan = ({ plan, isActive, isEnded }: Props) => {
           </>
         )}
       </StyledPlanContent>
-    </Plan>
+    </PlanContainer>
   );
 };

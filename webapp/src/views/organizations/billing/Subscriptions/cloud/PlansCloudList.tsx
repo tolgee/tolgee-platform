@@ -2,7 +2,7 @@ import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { BillingPeriodType } from '../Price/PeriodSwitch';
-import { CloudPlan } from '../Plan/CloudPlan';
+import { Plan } from '../Plan/Plan';
 import { FreePlan } from '../Plan/FreePlan';
 import { PlanType } from '../Plan/types';
 import {
@@ -106,7 +106,7 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
         return (
           <StyledPlanWrapper key={plan.id}>
             {activeSubscription && (
-              <CloudPlan
+              <Plan
                 plan={plan}
                 isActive={isActive(plan)}
                 isEnded={isEnded(plan)}

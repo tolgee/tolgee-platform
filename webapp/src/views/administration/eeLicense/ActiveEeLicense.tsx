@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import {
-  Plan,
+  PlanContainer,
   PlanContent,
 } from 'tg.views/organizations/billing/Subscriptions/Plan/PlanStyles';
 import { PlanInfoArea } from 'tg.views/organizations/billing/Subscriptions/Plan/PlanInfo';
@@ -24,7 +24,7 @@ export const ActiveEeLicense = ({ info }: Props) => {
   const { t } = useTranslate();
 
   return (
-    <Plan data-cy="self-hosted-ee-active-plan">
+    <PlanContainer data-cy="self-hosted-ee-active-plan">
       <PlanContent>
         <ActivePlanTitle name={info.name} status={info.status} />
         <RefreshButton />
@@ -42,6 +42,6 @@ export const ActiveEeLicense = ({ info }: Props) => {
           <PlanLicenseKey licenseKey={info.licenseKey} defaultOpen={false} />
         </Box>
       </PlanContent>
-    </Plan>
+    </PlanContainer>
   );
 };

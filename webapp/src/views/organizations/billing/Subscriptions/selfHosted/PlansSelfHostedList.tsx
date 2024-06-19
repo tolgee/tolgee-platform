@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { PlanFeature } from 'tg.component/billing/PlanFeature';
 
 import { BillingPeriodType } from '../Price/PeriodSwitch';
-import { CloudPlan } from '../Plan/CloudPlan';
+import { Plan } from '../Plan/Plan';
 import { PlanType } from '../Plan/types';
 import { excludePreviousPlanFeatures } from '../Plan/plansTools';
 import { AllFromPlanFeature } from '../Plan/AllFromPlanFeature';
@@ -64,7 +64,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
 
         return (
           <StyledPlanWrapper key={plan.id}>
-            <CloudPlan
+            <Plan
               plan={plan}
               isActive={false}
               isEnded={false}

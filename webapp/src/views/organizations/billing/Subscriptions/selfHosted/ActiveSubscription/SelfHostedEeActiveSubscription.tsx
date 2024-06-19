@@ -6,7 +6,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { SelfHostedEeSubscriptionActions } from '../../../SelfHostedEeSubscriptionActions';
 import { IncludedFeatures } from '../../Plan/IncludedFeatures';
 import {
-  Plan,
+  PlanContainer,
   PlanContent,
   PlanFeaturesBox,
   PlanSubtitle,
@@ -50,7 +50,7 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
   );
 
   return (
-    <Plan className="active" data-cy="self-hosted-ee-active-plan">
+    <PlanContainer className="active" data-cy="self-hosted-ee-active-plan">
       <StyledPlanContent>
         {isNew && <PlanSubtitle>{t('billing_subscription_new')}</PlanSubtitle>}
         <Box display="flex" justifyContent="space-between">
@@ -91,6 +91,6 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
           />
         </Box>
       </StyledPlanContent>
-    </Plan>
+    </PlanContainer>
   );
 };

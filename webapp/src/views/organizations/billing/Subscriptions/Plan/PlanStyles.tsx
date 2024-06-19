@@ -1,6 +1,6 @@
 import { Box, styled } from '@mui/material';
 
-export const Plan = styled('div')`
+export const PlanContainer = styled('div')`
   display: grid;
   position: relative;
   border: 1px solid ${({ theme }) => theme.palette.background.paper};
