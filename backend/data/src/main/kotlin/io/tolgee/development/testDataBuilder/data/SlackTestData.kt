@@ -14,7 +14,7 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.model.slackIntegration.SlackUserConnection
 
-class SlackTestData() {
+class SlackTestData {
   var user: UserAccount
   var slackConfig: SlackConfig
   var userAccountBuilder: UserAccountBuilder
@@ -24,6 +24,8 @@ class SlackTestData() {
   var key: Key
   var key2: Key
   lateinit var slackWorkspace: OrganizationSlackWorkspace
+  lateinit var slackWorkspace2: OrganizationSlackWorkspace
+
   lateinit var slackUserConnection: SlackUserConnection
 
   val root: TestDataBuilder =
@@ -37,6 +39,7 @@ class SlackTestData() {
         userAccount = userAccountBuilder.self
         slackUserId = "slackUserId"
         slackUserConnection = this
+        slackTeamId = "slackTeamId"
       }
 
       projectBuilder =
@@ -60,6 +63,16 @@ class SlackTestData() {
         organization = userAccountBuilder.defaultOrganizationBuilder.self
         slackWorkspace = this
       }
+
+      userAccountBuilder.defaultOrganizationBuilder.addSlackWorkspace {
+        author = userAccountBuilder.self
+        slackTeamId = "slackTeamId2"
+        slackTeamName = "slackTeamName2"
+        accessToken = "accessToken"
+        organization = userAccountBuilder.defaultOrganizationBuilder.self
+        slackWorkspace2 = this
+      }
+
       organization = userAccountBuilder.defaultOrganizationBuilder.self
 
       user = userAccountBuilder.self

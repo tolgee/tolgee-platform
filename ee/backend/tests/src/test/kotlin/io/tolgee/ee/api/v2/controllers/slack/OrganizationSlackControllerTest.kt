@@ -91,6 +91,8 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
   @Test
   fun `connection works`() {
     slackWorkspaceService.delete(testData.slackWorkspace)
+    slackWorkspaceService.delete(testData.slackWorkspace2)
+
     Assertions.assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id)).isEmpty()
 
     slackProperties.clientId = "clientId"

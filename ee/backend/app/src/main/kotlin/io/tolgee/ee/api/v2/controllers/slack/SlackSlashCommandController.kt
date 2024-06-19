@@ -91,7 +91,7 @@ class SlackSlashCommandController(
 
         "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackResponseString
 
-        "logout" -> logout(payload.user_id).asSlackResponseString
+        "logout" -> logout(payload.user_id, payload.team_id).asSlackResponseString
         else -> {
           throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
         }
@@ -113,8 +113,11 @@ class SlackSlashCommandController(
     return this?.toLongOrNull() ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
   }
 
-  private fun logout(slackId: String): SlackMessageDto {
-    if (!slackUserConnectionService.delete(slackId)) {
+  private fun logout(
+    slackId: String,
+    slackTeamId: String,
+  ): SlackMessageDto {
+    if (!slackUserConnectionService.delete(slackId, slackTeamId)) {
       return SlackMessageDto(text = "Not logged in")
     }
 
@@ -122,7 +125,7 @@ class SlackSlashCommandController(
   }
 
   private fun listOfSubscriptions(payload: SlackCommandDto): List<LayoutBlock> {
-    slackUserConnectionService.findBySlackId(payload.user_id)
+    slackUserConnectionService.findBySlackId(payload.user_id, payload.team_id)
       ?: throw SlackErrorException(slackErrorProvider.getUserNotConnectedError(payload))
 
     if (slackConfigService.getAllByChannelId(payload.channel_id).isEmpty()) {
@@ -135,7 +138,7 @@ class SlackSlashCommandController(
   private fun login(payload: SlackCommandDto): SlackMessageDto {
     checkFeatureEnabled(payload.team_id)
 
-    if (slackUserConnectionService.isUserConnected(payload.user_id)) {
+    if (slackUserConnectionService.isUserConnected(payload.user_id, payload.team_id)) {
       return SlackMessageDto(text = i18n.translate("slack.common.message.already_logged_in"))
     }
 
@@ -147,6 +150,7 @@ class SlackSlashCommandController(
           payload.channel_id,
           payload.user_id,
           workspace,
+          payload.team_id,
         ),
     )
   }
@@ -272,7 +276,7 @@ class SlackSlashCommandController(
 
   private fun getUserAccount(payload: SlackCommandDto): UserAccount {
     val slackUserConnection =
-      slackUserConnectionService.findBySlackId(payload.user_id)
+      slackUserConnectionService.findBySlackId(payload.user_id, payload.team_id)
         ?: throw SlackErrorException(slackErrorProvider.getUserNotConnectedError(payload))
 
     return slackUserConnection.userAccount
