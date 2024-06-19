@@ -132,7 +132,11 @@ export const SlackApp = () => {
           <T keyName="slack_app_description" />
         </div>
 
-        <Link>
+        <Link
+          href="https://tolgee.io/platform/integrations/slack_integration/about"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           <T keyName="slack_app_docs_link" />
         </Link>
       </StyledHeader>
