@@ -5,10 +5,10 @@ import {
 } from '../../../common/permissions/main';
 
 describe('Permissions per language 1', () => {
-  it('translations.state-edit', () => {
+  it('translations.view', () => {
     visitProjectWithPermissions({
-      scopes: ['translations.view', 'translations.state-edit'],
-      stateChangeLanguageTags: ['de'],
+      scopes: ['translations.view'],
+      viewLanguageTags: ['en', 'de'],
     }).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
@@ -19,11 +19,10 @@ describe('Permissions per language 1', () => {
     });
   });
 
-  it('combined translations.edit and translations.state-edit', () => {
+  it('translations.edit', () => {
     visitProjectWithPermissions({
-      scopes: ['translations.edit', 'translations.state-edit'],
-      translateLanguageTags: ['cs'],
-      stateChangeLanguageTags: ['de'],
+      scopes: ['translations.edit'],
+      translateLanguageTags: ['de'],
     }).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,

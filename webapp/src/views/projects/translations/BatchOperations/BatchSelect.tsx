@@ -125,9 +125,9 @@ export const BatchSelect = ({ value, onChange }: Props) => {
         <React.Fragment key={o.id}>
           {o.divider && <StyledSeparator />}
           {o.enabled === false ? (
-            <ListItemButton data-cy="batch-select-item" disabled={true}>
+            <ListItem data-cy="batch-select-item" disabled={true}>
               {o.label}
-            </ListItemButton>
+            </ListItem>
           ) : (
             <ListItem {...props} data-cy="batch-select-item">
               {o.label}
