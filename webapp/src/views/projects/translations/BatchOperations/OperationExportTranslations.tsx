@@ -20,6 +20,7 @@ import { Formik, FormikErrors } from 'formik';
 import { T, useTranslate } from '@tolgee/react';
 import { downloadExported } from 'tg.views/projects/export/downloadExported';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { getPreselectedLanguages } from './getPreselectedLanguages';
 
 const StyledForm = styled('form')`
   display: grid;
@@ -67,6 +68,9 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
   const [dialogOpen, setDialogOpen] = useState(true);
   const project = useProject();
   const allLanguages = useTranslationsSelector((c) => c.languages) || [];
+  const translationsLanguages = useTranslationsSelector(
+    (c) => c.translationsLanguages
+  );
   const selection = useTranslationsSelector((c) => c.selection);
 
   const defaultFormat = formatGroups[0].formats[0];
@@ -95,7 +99,10 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
         <Formik
           initialValues={{
             states: EXPORT_DEFAULT_STATES,
-            languages: [] as string[],
+            languages: getPreselectedLanguages(
+              allLanguages,
+              translationsLanguages ?? []
+            ),
             format: defaultFormat.id,
             nested: false,
             supportArrays: defaultFormat.defaultSupportArrays || false,

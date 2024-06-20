@@ -13,8 +13,8 @@ import { login } from '../../common/apiCalls/common';
 import { selectNamespace } from '../../common/namespace';
 import { assertHasState } from '../../common/state';
 import {
+  assertExportLanguagesSelected,
   checkZipContent,
-  exportToggleLanguage,
   getFileName,
 } from '../../common/export';
 
@@ -102,14 +102,14 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   it('will pre-translate with TM', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Pre-translate by TM');
-    selectLanguage();
+    assertLanguagesSelected(['German']);
     executeBatchOperation();
   });
 
   it('will Machine translate', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Machine translation');
-    selectLanguage();
+    assertLanguagesSelected(['German']);
     executeBatchOperation();
     getCell('en translated with GOOGLE from en to de').should('be.visible');
     cy.gcy('translations-auto-translated-indicator').should('exist');
@@ -137,7 +137,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   it('will export selected keys', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Export translations');
-    exportToggleLanguage('English');
+    assertExportLanguagesSelected(['English', 'German']);
     cy.gcy('export-submit-button').click();
 
     cy.verifyDownload(getFileName('test_project', 'zip'));
@@ -164,4 +164,20 @@ function selectLanguage(language = 'German') {
   cy.gcy('translations-language-select-item').contains(language).click();
   dismissMenu();
   cy.gcy('translations-language-select-item').should('not.exist');
+}
+
+function assertLanguagesSelected(languages: string[]) {
+  cy.gcy('batch-operations-section')
+    .findDcy('translations-language-select-form-control')
+    .click();
+
+  languages.forEach((language) => {
+    cy.gcy('translations-language-select-item')
+      .contains(language)
+      .closestDcy('translations-language-select-item')
+      .should('be.visible')
+      .find('input')
+      .should('be.checked');
+  });
+  dismissMenu();
 }

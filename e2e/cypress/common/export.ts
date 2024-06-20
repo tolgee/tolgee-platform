@@ -49,6 +49,19 @@ export const exportToggleLanguage = (lang: string) => {
   dismissMenu();
 };
 
+export function assertExportLanguagesSelected(languages: string[]) {
+  cy.gcy('export-language-selector').click();
+
+  languages.forEach((language) => {
+    cy.gcy('export-language-selector-item')
+      .contains(language)
+      .closestDcy('export-language-selector-item')
+      .should('be.visible')
+      .find('input')
+      .should('be.checked');
+  });
+  dismissMenu();
+}
 export const exportSelectFormat = (format: string) => {
   cy.gcy('export-format-selector').click();
   cy.gcy('export-format-selector-item').contains(format).click();
