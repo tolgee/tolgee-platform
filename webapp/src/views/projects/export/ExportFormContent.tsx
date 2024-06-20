@@ -1,7 +1,5 @@
 import { styled } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
 import { StateType } from 'tg.constants/translationStates';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { MessageFormat, getFormatById } from './components/formatGroups';
@@ -32,18 +30,13 @@ type Props = {
   values: FormValues;
   allLanguages: LanguageModel[];
   allNamespaces?: string[] | undefined;
-  isSubmitting: boolean;
-  isValid: boolean;
 };
 
 export const ExportFormContent = ({
   values,
   allLanguages,
   allNamespaces,
-  isSubmitting,
-  isValid,
 }: Props) => {
-  const { t } = useTranslate();
   return (
     <>
       <StateSelector className="states" />
@@ -58,18 +51,6 @@ export const ExportFormContent = ({
       )}
       <MessageFormatSelector className="messageFormat" />
       <NsSelector className="ns" namespaces={allNamespaces} />
-      <div className="submit">
-        <LoadingButton
-          data-cy="export-submit-button"
-          loading={isSubmitting}
-          variant="contained"
-          color="primary"
-          type="submit"
-          disabled={!isValid}
-        >
-          {t('export_translations_export_label')}
-        </LoadingButton>
-      </div>
     </>
   );
 };

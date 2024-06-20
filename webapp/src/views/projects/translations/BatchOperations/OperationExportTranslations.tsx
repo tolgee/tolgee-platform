@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogTitle, styled } from '@mui/material';
+import { Box, Button, Dialog, DialogTitle, styled } from '@mui/material';
 
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
@@ -19,6 +19,7 @@ import {
 import { Formik, FormikErrors } from 'formik';
 import { T, useTranslate } from '@tolgee/react';
 import { downloadExported } from 'tg.views/projects/export/downloadExported';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const StyledForm = styled('form')`
   display: grid;
@@ -157,12 +158,22 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
         >
           {({ values, handleSubmit, isSubmitting, isValid }) => (
             <StyledForm onSubmit={handleSubmit}>
-              <ExportFormContent
-                values={values}
-                allLanguages={allLanguages}
-                isSubmitting={isSubmitting}
-                isValid={isValid}
-              />
+              <ExportFormContent values={values} allLanguages={allLanguages} />
+              <Box className="submit" display="flex" gap={1}>
+                <Button onClick={() => setDialogOpen(false)}>
+                  {t('global_cancel_button')}
+                </Button>
+                <LoadingButton
+                  data-cy="export-submit-button"
+                  loading={isSubmitting}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  disabled={!isValid}
+                >
+                  {t('export_translations_export_label')}
+                </LoadingButton>
+              </Box>
             </StyledForm>
           )}
         </Formik>

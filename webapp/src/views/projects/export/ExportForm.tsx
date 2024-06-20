@@ -18,6 +18,7 @@ import {
 import { downloadExported } from './downloadExported';
 import { useExportHelper } from 'tg.hooks/useExportHelper';
 import { ExportFormContent } from './ExportFormContent';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -222,9 +223,19 @@ export const ExportForm = () => {
               values={values}
               allLanguages={allowedLanguages}
               allNamespaces={allNamespaces}
-              isSubmitting={isSubmitting}
-              isValid={isValid}
             />
+            <div className="submit">
+              <LoadingButton
+                data-cy="export-submit-button"
+                loading={isSubmitting}
+                variant="contained"
+                color="primary"
+                type="submit"
+                disabled={!isValid}
+              >
+                {t('export_translations_export_label')}
+              </LoadingButton>
+            </div>
           </StyledForm>
         </QuickStartHighlight>
       )}

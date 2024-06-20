@@ -12,8 +12,14 @@ import { TestDataStandardResponse } from '../../common/apiCalls/testData/generat
 import { login } from '../../common/apiCalls/common';
 import { selectNamespace } from '../../common/namespace';
 import { assertHasState } from '../../common/state';
+import {
+  checkZipContent,
+  exportToggleLanguage,
+  getFileName,
+} from '../../common/export';
 
 describe('Batch jobs', { scrollBehavior: false }, () => {
+  const downloadsFolder = Cypress.config('downloadsFolder');
   let project: TestDataStandardResponse['projects'][number] = null;
 
   beforeEach(() => {
@@ -126,6 +132,23 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
       .findDcy('translation-text')
       .contains('en')
       .should('exist');
+  });
+
+  it('will export selected keys', () => {
+    cy.gcy('translations-row-checkbox').first().click();
+    selectOperation('Export translations');
+    exportToggleLanguage('English');
+    cy.gcy('export-submit-button').click();
+
+    checkZipContent({
+      path: downloadsFolder + '/',
+      file: getFileName('test_project', 'zip'),
+      filesContent: {
+        'en.json': (content) => {
+          expect(JSON.parse(content)).to.deep.equal({ 'a-key': 'en' });
+        },
+      },
+    });
   });
 
   const visit = () => {
