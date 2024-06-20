@@ -4,7 +4,6 @@ import { PaletteColorOptions } from '@mui/material';
 import {
   Tooltip,
   Activity,
-  BillingProgress,
   Cell,
   Editor,
   Emphasis,
@@ -47,7 +46,6 @@ declare module '@mui/material/styles/createPalette' {
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;
-    billingProgress: BillingProgress;
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
@@ -75,7 +73,6 @@ declare module '@mui/material/styles/createPalette' {
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;
-    billingProgress: BillingProgress;
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;

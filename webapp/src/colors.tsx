@@ -51,14 +51,6 @@ export type Activity = {
   addedHighlight: string;
 };
 
-export type BillingProgress = {
-  background: string;
-  low: string;
-  over: string;
-  sufficient: string;
-  overForbidden: string;
-};
-
 export type Marker = {
   primary: string;
   secondary: string;
@@ -174,13 +166,6 @@ export const colors = {
       other: '#002bff',
       main: '#2C3C52',
     } satisfies Editor,
-    billingProgress: {
-      background: '#C4C4C4',
-      low: '#E80000',
-      over: '#ffce00',
-      overForbidden: '#970000',
-      sufficient: '#17AD18',
-    } satisfies BillingProgress,
     globalLoading: '#c9a2b5',
     marker: {
       primary: '#ff0000',
@@ -306,13 +291,6 @@ export const colors = {
       other: '#99aaff',
       main: '#eeeeee',
     } satisfies Editor,
-    billingProgress: {
-      background: '#565656',
-      low: '#ca0000',
-      over: '#ffce00',
-      overForbidden: '#980000',
-      sufficient: '#1e991e',
-    } satisfies BillingProgress,
     globalLoading: '#ff6995',
     marker: {
       primary: '#ff0000',

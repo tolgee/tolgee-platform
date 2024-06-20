@@ -148,7 +148,6 @@ const getTheme = (mode: PaletteMode) => {
       activity: c.activity,
       emphasis: c.emphasis,
       editor: c.editor,
-      billingProgress: c.billingProgress,
       globalLoading: createColor(c.globalLoading),
       marker: c.marker,
       topBanner: c.topBanner,

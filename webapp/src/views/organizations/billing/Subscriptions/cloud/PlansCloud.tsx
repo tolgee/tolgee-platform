@@ -72,11 +72,10 @@ export const PlansCloud = () => {
         creditBalance.data &&
         period && (
           <>
-            <Box mb={2}>
+            <Box>
               <CurrentUsage
                 activeSubscription={activeSubscription.data}
                 usage={usage.data}
-                balance={creditBalance.data}
               />
             </Box>
             <Box display="flex" justifyContent="center">

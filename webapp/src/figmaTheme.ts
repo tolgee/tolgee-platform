@@ -367,6 +367,19 @@ export const tolgeePalette = {
         importantLink: tolgeeColors['pink']['500'],
         importantLinkHover: tolgeeColors['pink']['600'],
       },
+      progressbar: {
+        background: tolgeeColors['grey']['50'],
+        pricing: {
+          low: tolgeeColors['red']['400'],
+          over: tolgeeColors['yellow']['500'],
+          overForbidden: tolgeeColors['red']['800'],
+          sufficient: tolgeeColors['teal']['500'],
+        },
+        task: {
+          inProgress: tolgeeColors['lightBlue']['500'],
+          done: tolgeeColors['green']['600'],
+        },
+      },
       rating: {
         activeFill: '#ffb400',
         enabledBorder: '#1f2d403b',
@@ -644,6 +657,19 @@ export const tolgeePalette = {
         importantColor: tolgeeColors['pink']['200'],
         importantLink: tolgeeColors['pink']['50'],
         importantLinkHover: tolgeeColors['grey']['50'],
+      },
+      progressbar: {
+        background: tolgeeColors['grey']['700'],
+        pricing: {
+          low: tolgeeColors['red']['400'],
+          over: tolgeeColors['yellow']['500'],
+          overForbidden: tolgeeColors['red']['600'],
+          sufficient: tolgeeColors['teal']['400'],
+        },
+        task: {
+          inProgress: tolgeeColors['lightBlue']['700'],
+          done: tolgeeColors['green']['600'],
+        },
       },
       rating: {
         activeFill: '#ffb400',

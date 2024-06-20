@@ -14,7 +14,6 @@ export const StyledMetrics = styled('div')`
 
 const StyledName = styled(Box)`
   grid-column: 0;
-  padding-right: 10px;
   font-size: 15px;
 `;
 

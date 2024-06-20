@@ -10,7 +10,8 @@ const DOT_SIZE = 8;
 const StyledContainer = styled(Box)`
   display: grid;
   border-radius: 4px;
-  background: ${({ theme }) => theme.palette.billingProgress.background};
+  background: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.background};
   overflow: hidden;
   transition: all 0.5s ease-in-out;
   position: relative;
@@ -21,10 +22,12 @@ const StyledContainer = styled(Box)`
 
 const StyledProgress = styled(Box)`
   border-radius: 4px;
-  background: ${({ theme }) => theme.palette.tokens.secondary.main};
+  background: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.pricing.sufficient};
   transition: all 0.5s ease-in-out;
   &.critical {
-    background: ${({ theme }) => theme.palette.billingProgress.low};
+    background: ${({ theme }) =>
+      theme.palette.tokens._components.progressbar.pricing.low};
   }
 `;
 
@@ -34,9 +37,11 @@ const StyledExtra = styled(Box)`
   right: 0px;
   top: 0px;
   bottom: 0px;
-  background: ${({ theme }) => theme.palette.billingProgress.overForbidden};
+  background: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.pricing.overForbidden};
   &.canGoOver {
-    background: ${({ theme }) => theme.palette.billingProgress.over};
+    background: ${({ theme }) =>
+      theme.palette.tokens._components.progressbar.pricing.over};
   }
 `;
 
@@ -100,7 +105,7 @@ export const BillingProgress: React.FC<Props> = ({
           params={{ value: maxValue }}
         />
       ),
-      color: theme.palette.billingProgress.background,
+      color: theme.palette.tokens._components.progressbar.background,
     });
   }
 
@@ -113,8 +118,8 @@ export const BillingProgress: React.FC<Props> = ({
         />
       ),
       color: critical
-        ? theme.palette.billingProgress.low
-        : theme.palette.tokens.secondary.main,
+        ? theme.palette.tokens._components.progressbar.pricing.low
+        : theme.palette.tokens._components.progressbar.pricing.sufficient,
     });
   }
 
@@ -124,8 +129,8 @@ export const BillingProgress: React.FC<Props> = ({
         <T keyName="billing-progress-label-over" params={{ value: extra }} />
       ),
       color: canGoOver
-        ? theme.palette.billingProgress.over
-        : theme.palette.billingProgress.overForbidden,
+        ? theme.palette.tokens._components.progressbar.pricing.over
+        : theme.palette.tokens._components.progressbar.pricing.overForbidden,
     });
   }
 
