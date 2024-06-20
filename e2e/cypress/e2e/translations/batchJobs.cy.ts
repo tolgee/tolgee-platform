@@ -140,6 +140,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     exportToggleLanguage('English');
     cy.gcy('export-submit-button').click();
 
+    cy.verifyDownload(getFileName('test_project', 'zip'));
     checkZipContent({
       path: downloadsFolder + '/',
       file: getFileName('test_project', 'zip'),
