@@ -1,3 +1,10 @@
+## [3.65.1](https://github.com/tolgee/tolgee-platform/compare/v3.65.0...v3.65.1) (2024-06-20)
+
+
+### Bug Fixes
+
+* add link to docs ([#2376](https://github.com/tolgee/tolgee-platform/issues/2376)) ([db917bd](https://github.com/tolgee/tolgee-platform/commit/db917bdd98dfc414fdae4b48d69ab93465525bad))
+
 # [3.65.0](https://github.com/tolgee/tolgee-platform/compare/v3.64.8...v3.65.0) (2024-06-19)
 
 
