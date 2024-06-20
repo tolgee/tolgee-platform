@@ -10,7 +10,7 @@ export const PlanContainer = styled('div')`
   box-shadow: 0px 0px 20px 0px
     ${({ theme }) => theme.palette.tokens.elevation.pricing};
   background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
-
+  border-color: ${({ theme }) => theme.palette.tokens.border.soft};
   &.active {
     box-shadow: 0px 0px 20px 0px
       ${({ theme }) => theme.palette.tokens.elevation.pricingActive};

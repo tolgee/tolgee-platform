@@ -4,7 +4,7 @@ import { T } from '@tolgee/react';
 export const ContactUsButton = () => {
   return (
     <Button
-      size="small"
+      size="medium"
       variant="outlined"
       color="primary"
       sx={{ justifySelf: 'center' }}

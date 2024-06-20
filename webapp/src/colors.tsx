@@ -57,7 +57,6 @@ export type BillingProgress = {
   over: string;
   sufficient: string;
   overForbidden: string;
-  separator: string;
 };
 
 export type Marker = {
@@ -181,7 +180,6 @@ export const colors = {
       over: '#ffce00',
       overForbidden: '#970000',
       sufficient: '#17AD18',
-      separator: '#656565',
     } satisfies BillingProgress,
     globalLoading: '#c9a2b5',
     marker: {
@@ -314,7 +312,6 @@ export const colors = {
       over: '#ffce00',
       overForbidden: '#980000',
       sufficient: '#1e991e',
-      separator: '#656565',
     } satisfies BillingProgress,
     globalLoading: '#ff6995',
     marker: {

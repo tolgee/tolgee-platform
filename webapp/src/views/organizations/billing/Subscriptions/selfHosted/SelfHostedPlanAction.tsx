@@ -75,7 +75,7 @@ export const SelfHostedPlanAction = ({ plan, period }: Props) => {
         data-cy="billing-self-hosted-ee-plan-subscribe-button"
         variant="contained"
         color="primary"
-        size="small"
+        size="medium"
         loading={subscribeMutation.isLoading}
         onClick={onSubscribe}
       >

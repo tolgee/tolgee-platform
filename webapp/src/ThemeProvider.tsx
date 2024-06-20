@@ -68,6 +68,7 @@ const getTheme = (mode: PaletteMode) => {
     typography: {
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+      htmlFontSize: 15,
       h1: {
         fontSize: 42,
         fontWeight: 300,
@@ -123,7 +124,7 @@ const getTheme = (mode: PaletteMode) => {
     },
     palette: {
       mode,
-      primary: createColor(c.primary),
+      primary: createColor(tPalette.primary.main),
       primaryText: c.primaryText,
       secondary: createColor(c.secondary),
       default: createColor(c.default),
@@ -132,8 +133,8 @@ const getTheme = (mode: PaletteMode) => {
         white: c.white,
       },
       text: {
-        primary: c.text,
-        secondary: c.textSecondary,
+        primary: tPalette.text.primary,
+        secondary: tPalette.text.secondary,
       },
       divider1: c.divider1,
       tile: c.tile,

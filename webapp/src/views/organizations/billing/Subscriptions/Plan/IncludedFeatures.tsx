@@ -8,7 +8,6 @@ type Features = components['schemas']['EeSubscriptionModel']['enabledFeatures'];
 
 const StyledListWrapper = styled(Box)`
   display: grid;
-  margin-top: 8px;
   gap: 4px 8px;
   align-content: start;
 `;

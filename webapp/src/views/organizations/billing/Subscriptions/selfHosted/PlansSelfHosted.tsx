@@ -21,7 +21,7 @@ type SelfHostedEeSubscriptionModel =
 
 const StyledShoppingGrid = styled('div')`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 16px;
   margin: 16px 0px;
 `;
@@ -29,7 +29,7 @@ const StyledShoppingGrid = styled('div')`
 const StyledActive = styled('div')`
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(min(550px, 100%), 1fr));
+  grid-template-columns: 1fr;
 `;
 
 export const PlansSelfHosted = () => {

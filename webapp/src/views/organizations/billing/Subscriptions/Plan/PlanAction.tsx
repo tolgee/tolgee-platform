@@ -90,7 +90,7 @@ export const PlanAction = ({
         data-cy="billing-plan-action-button"
         variant="contained"
         color="primary"
-        size="small"
+        size="medium"
         loading={loading}
         onClick={onClick}
       >

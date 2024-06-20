@@ -32,7 +32,7 @@ export function PlanFeature({ name, link, bold, title, sx, className }: Props) {
 
   return (
     <Box display="flex" gap={0.5} alignItems="center" {...{ sx, className }}>
-      <Check style={{ fontSize: 16 }} />
+      <Check style={{ fontSize: 15 }} />
       <Typography sx={{ wordBreak: 'break-word' }} fontSize={14}>
         {item}
       </Typography>

@@ -21,7 +21,7 @@ const StyledContainer = styled(Box)`
 
 const StyledProgress = styled(Box)`
   border-radius: 4px;
-  background: ${({ theme }) => theme.palette.billingProgress.sufficient};
+  background: ${({ theme }) => theme.palette.tokens.secondary.main};
   transition: all 0.5s ease-in-out;
   &.critical {
     background: ${({ theme }) => theme.palette.billingProgress.low};
@@ -114,7 +114,7 @@ export const BillingProgress: React.FC<Props> = ({
       ),
       color: critical
         ? theme.palette.billingProgress.low
-        : theme.palette.billingProgress.sufficient,
+        : theme.palette.tokens.secondary.main,
     });
   }
 
@@ -147,10 +147,13 @@ export const BillingProgress: React.FC<Props> = ({
         height={height}
         {...boxProps}
       >
-        <StyledProgress
-          width={`${progressLength}%`}
-          className={clsx({ critical })}
-        />
+        {Boolean(progressLength) && (
+          <StyledProgress
+            width={`${progressLength}%`}
+            className={clsx({ critical })}
+            minWidth={'6px'}
+          />
+        )}
         {Boolean(extra) && (
           <StyledExtra
             width={`${extraProgressLength}%`}

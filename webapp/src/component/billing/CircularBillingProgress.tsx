@@ -21,7 +21,7 @@ const StyledCircleContent = styled('circle')`
   stroke-linecap: round;
   transform-origin: 50% 50%;
   stroke-dasharray: ${CIRCUIT};
-  stroke: ${({ theme }) => theme.palette.billingProgress.sufficient};
+  stroke: ${({ theme }) => theme.palette.tokens.secondary.main};
   &.critical {
     stroke: ${({ theme }) => theme.palette.billingProgress.low};
   }
