@@ -20,9 +20,10 @@ export const StyledContainer = styled(Box)`
 type Props = {
   plan: PlanType;
   period: BillingPeriodType;
+  custom?: boolean;
 };
 
-export const SelfHostedPlanAction = ({ plan, period }: Props) => {
+export const SelfHostedPlanAction = ({ plan, period, custom }: Props) => {
   const { t } = useTranslate();
 
   const organization = useOrganization();
@@ -74,7 +75,7 @@ export const SelfHostedPlanAction = ({ plan, period }: Props) => {
       <LoadingButton
         data-cy="billing-self-hosted-ee-plan-subscribe-button"
         variant="contained"
-        color="primary"
+        color={custom ? 'info' : 'primary'}
         size="medium"
         loading={subscribeMutation.isLoading}
         onClick={onSubscribe}

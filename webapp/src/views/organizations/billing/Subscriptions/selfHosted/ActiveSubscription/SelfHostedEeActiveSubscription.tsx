@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box, styled } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 import { SelfHostedEeSubscriptionActions } from '../../../SelfHostedEeSubscriptionActions';
@@ -44,6 +44,9 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
   const period = subscription.currentBillingPeriod;
   const { t } = useTranslate();
 
+  const theme = useTheme();
+  const highlightColor = theme.palette.primary.main;
+
   const hasPrice = Boolean(
     subscription.plan.prices.subscriptionMonthly ||
       subscription.plan.prices.subscriptionYearly
@@ -83,7 +86,11 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
           alignItems="center"
           mt={1}
         >
-          <PricePrimary prices={subscription.plan.prices} period={period} />
+          <PricePrimary
+            prices={subscription.plan.prices}
+            period={period}
+            highlightColor={highlightColor}
+          />
           <SelfHostedEeSubscriptionActions
             id={subscription.id}
             licenceKey={subscription.licenseKey}

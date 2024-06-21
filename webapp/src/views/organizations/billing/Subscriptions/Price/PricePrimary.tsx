@@ -10,7 +10,6 @@ type PlanPricesModel = NonNullable<PlanType['prices']>;
 
 const StyledPrimaryPrice = styled(Box)`
   font-size: 24px;
-  color: ${({ theme }) => theme.palette.primary.main};
 `;
 
 const StyledPeriod = styled('span')`
@@ -20,11 +19,18 @@ const StyledPeriod = styled('span')`
 type Props = {
   prices: PlanPricesModel;
   period: BillingPeriodType;
+  highlightColor: string;
   sx?: SxProps;
   className?: string;
 };
 
-export const PricePrimary = ({ prices, period, sx, className }: Props) => {
+export const PricePrimary = ({
+  prices,
+  period,
+  highlightColor,
+  sx,
+  className,
+}: Props) => {
   const { subscriptionMonthly, subscriptionYearly } = prices;
   const formatMoney = useMoneyFormatter();
 
@@ -36,6 +42,7 @@ export const PricePrimary = ({ prices, period, sx, className }: Props) => {
   return (
     <StyledPrimaryPrice
       data-cy="billing-plan-monthly-price"
+      color={highlightColor}
       {...{ sx, className }}
     >
       {subscriptionPrice === 0 ? (

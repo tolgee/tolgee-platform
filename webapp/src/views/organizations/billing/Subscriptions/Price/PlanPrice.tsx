@@ -15,6 +15,7 @@ type Props = {
   prices: PlanPricesModel;
   period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
+  highlightColor: string;
   sx?: SxProps;
   className?: string;
 };
@@ -23,6 +24,7 @@ export const PlanPrice: React.FC<Props> = ({
   prices,
   period,
   onPeriodChange,
+  highlightColor,
   sx,
   className,
 }) => {
@@ -37,6 +39,7 @@ export const PlanPrice: React.FC<Props> = ({
         sx={{ justifySelf: 'center' }}
         period={period}
         prices={prices}
+        highlightColor={highlightColor}
       />
       <PayAsYouGoPrices sx={{ paddingTop: '20px' }} prices={prices} />
     </StyledPrice>

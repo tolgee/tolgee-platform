@@ -58,9 +58,9 @@ export const CurrentUsage: FC<Props> = ({ activeSubscription, usage }) => {
   } = getProgressData(usage);
 
   return (
-    <StyledBillingSection gridArea="usage" maxWidth={650}>
+    <StyledBillingSection gridArea="usage" maxWidth={750}>
       <StyledContent>
-        <StyledBillingSectionTitle sx={{ mb: '12px' }}>
+        <StyledBillingSectionTitle sx={{ mb: '12px', maxWidth: 260 }}>
           {t('billing_actual_title')}
         </StyledBillingSectionTitle>
         <StyledBillingSectionSubtitle>

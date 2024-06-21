@@ -11,6 +11,10 @@ export const PlanContainer = styled('div')`
     ${({ theme }) => theme.palette.tokens.elevation.pricing};
   background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
   border-color: ${({ theme }) => theme.palette.tokens.border.soft};
+  &.custom {
+    border-color: ${({ theme }) =>
+      theme.palette.tokens.info._states.outlinedBorder};
+  }
   &.active {
     box-shadow: 0px 0px 20px 0px
       ${({ theme }) => theme.palette.tokens.elevation.pricingActive};
@@ -29,11 +33,11 @@ export const PlanContent = styled('div')`
 export const PlanTitle = styled('div')`
   justify-self: center;
   font-size: 24px;
-  color: ${({ theme }) => theme.palette.primary.main};
 `;
 
 export const PlanSubtitle = styled('div')`
   position: absolute;
+  gap: 4px;
   top: 0px;
   left: 0px;
   right: 0px;

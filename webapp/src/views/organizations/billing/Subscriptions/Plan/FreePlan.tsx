@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Box, styled } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { PlanFeature } from 'tg.component/billing/PlanFeature';
 import {
@@ -75,18 +75,17 @@ const StyledPlanContent = styled(PlanContent)`
 
 type Props = {
   plan: PlanType;
-  isActive: boolean;
-  isEnded: boolean;
+  active: boolean;
+  ended: boolean;
 };
 
-export const FreePlan = ({ plan, isActive, isEnded }: Props) => {
+export const FreePlan = ({ plan, active, ended }: Props) => {
   const { t } = useTranslate();
+  const theme = useTheme();
+  const highlightColor = theme.palette.primary.main;
   return (
-    <PlanContainer
-      className={clsx({ active: isActive })}
-      data-cy="billing-plan"
-    >
-      <PlanActiveBanner isActive={isActive} isEnded={isEnded} />
+    <PlanContainer className={clsx({ active })} data-cy="billing-plan">
+      <PlanActiveBanner active={active} ended={ended} />
 
       <StyledPlanContent>
         <Box className="title">
@@ -101,7 +100,11 @@ export const FreePlan = ({ plan, isActive, isEnded }: Props) => {
         </Box>
         {plan.prices && (
           <Box className="price">
-            <PricePrimary prices={plan.prices} period="MONTHLY" />
+            <PricePrimary
+              prices={plan.prices}
+              period="MONTHLY"
+              highlightColor={highlightColor}
+            />
           </Box>
         )}
 
@@ -110,14 +113,20 @@ export const FreePlan = ({ plan, isActive, isEnded }: Props) => {
             <IncludedStrings
               className="strings"
               count={plan.includedUsage.translations}
+              highlightColor={highlightColor}
             />
 
             <IncludedCreadits
               className="mt-credits"
               count={plan.includedUsage.mtCredits}
+              highlightColor={highlightColor}
             />
 
-            <IncludedSeats className="seats" count={plan.includedUsage.seats} />
+            <IncludedSeats
+              className="seats"
+              count={plan.includedUsage.seats}
+              highlightColor={highlightColor}
+            />
           </>
         )}
       </StyledPlanContent>

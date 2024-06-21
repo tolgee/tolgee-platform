@@ -16,7 +16,7 @@ import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
 import { isPlanLegacy } from './plansTools';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 
 type Features = PlanType['enabledFeatures'];
 
@@ -24,33 +24,39 @@ type Props = {
   plan: PlanType;
   period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
-  isActive: boolean;
-  isEnded: boolean;
+  active: boolean;
+  ended: boolean;
   filteredFeatures: Features;
   topFeature?: React.ReactNode;
   featuresMinHeight?: string;
   action: React.ReactNode;
+  custom?: boolean;
 };
 
 export const Plan: FC<Props> = ({
   plan,
   period,
   onPeriodChange,
-  isActive,
-  isEnded,
+  active,
+  ended,
   filteredFeatures,
   topFeature,
   featuresMinHeight,
   action,
+  custom,
 }) => {
+  const theme = useTheme();
+  const highlightColor = custom
+    ? theme.palette.tokens.info.main
+    : theme.palette.tokens.primary.main;
+
   return (
-    <PlanContainer
-      className={clsx({ active: isActive })}
-      data-cy="billing-plan"
-    >
-      <PlanActiveBanner isActive={isActive} isEnded={isEnded} />
+    <PlanContainer className={clsx({ active, custom })} data-cy="billing-plan">
+      <PlanActiveBanner active={active} ended={ended} custom={custom} />
       <PlanContent>
-        <PlanTitle sx={{ paddingBottom: '20px' }}>{plan.name}</PlanTitle>
+        <PlanTitle sx={{ paddingBottom: '20px', color: highlightColor }}>
+          {plan.name}
+        </PlanTitle>
 
         <PlanFeaturesBox sx={{ gap: '18px' }}>
           <IncludedFeatures
@@ -62,6 +68,7 @@ export const Plan: FC<Props> = ({
           <IncludedUsage
             includedUsage={plan.includedUsage}
             isLegacy={isPlanLegacy(plan)}
+            highlightColor={highlightColor}
           />
         </PlanFeaturesBox>
 
@@ -71,6 +78,7 @@ export const Plan: FC<Props> = ({
             prices={plan.prices}
             period={period}
             onPeriodChange={onPeriodChange}
+            highlightColor={highlightColor}
           />
         )}
 

@@ -124,11 +124,13 @@ const getTheme = (mode: PaletteMode) => {
     },
     palette: {
       mode,
-      primary: createColor(tPalette.primary.main),
+      primary: tPalette.primary,
       primaryText: c.primaryText,
-      secondary: createColor(c.secondary),
+      secondary: tPalette.secondary,
       default: createColor(c.default),
-      info: createColor(c.info),
+      info: tPalette.info,
+      warning: tPalette.warning,
+      error: tPalette.error,
       common: {
         white: c.white,
       },

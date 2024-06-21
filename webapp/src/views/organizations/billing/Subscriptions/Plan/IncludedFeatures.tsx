@@ -1,7 +1,7 @@
 import { Box, SxProps, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';
+import { useFeatures } from 'tg.translationTools/useFeatures';
 import { PlanFeature } from 'tg.component/billing/PlanFeature';
 
 type Features = components['schemas']['EeSubscriptionModel']['enabledFeatures'];
@@ -25,14 +25,16 @@ export const IncludedFeatures = ({
   sx,
   className,
 }: Props) => {
-  const translateFeature = useFeatureTranslation();
+  const featuresObject = useFeatures();
 
   return (
     <StyledListWrapper {...{ sx, className }}>
       {topFeature && <Box sx={{ marginBottom: '12px' }}>{topFeature}</Box>}
-      {features.map((feature) => (
-        <PlanFeature key={feature} name={translateFeature(feature)} />
-      ))}
+      {Object.entries(featuresObject)
+        .filter(([key]) => features.includes(key as any))
+        .map(([feature, translation]) => (
+          <PlanFeature key={feature} name={translation} />
+        ))}
     </StyledListWrapper>
   );
 };

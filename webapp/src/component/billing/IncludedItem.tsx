@@ -5,18 +5,20 @@ import { StringSlotsHint, StringsHint } from './Hints';
 
 export const IncludedItemContainer = styled(Box)``;
 
-export const StyledQuantity = styled('span')`
-  color: ${({ theme }) => theme.palette.primary.main};
+export const StyledQuantity = styled(Box)`
+  display: inline;
 `;
 
 type IncludedItemProps = {
   count: number;
   sx?: SxProps;
   className?: string;
+  highlightColor: string;
 };
 
 export const IncludedStringSlots = ({
   count,
+  highlightColor,
   sx,
   className,
 }: IncludedItemProps) => {
@@ -25,7 +27,7 @@ export const IncludedStringSlots = ({
       <T
         keyName="billing_subscription_included_slots_strings"
         params={{
-          highlight: <StyledQuantity />,
+          highlight: <StyledQuantity color={highlightColor} />,
           quantity: count,
           hint: <StringSlotsHint />,
         }}
@@ -36,6 +38,7 @@ export const IncludedStringSlots = ({
 
 export const IncludedStrings = ({
   count,
+  highlightColor,
   sx,
   className,
 }: IncludedItemProps) => {
@@ -45,7 +48,7 @@ export const IncludedStrings = ({
         <T
           keyName="billing_subscription_included_strings_unlimited"
           params={{
-            highlight: <StyledQuantity />,
+            highlight: <StyledQuantity color={highlightColor} />,
             hint: <StringsHint />,
           }}
         />
@@ -53,7 +56,7 @@ export const IncludedStrings = ({
         <T
           keyName="billing_subscription_included_strings"
           params={{
-            highlight: <StyledQuantity />,
+            highlight: <StyledQuantity color={highlightColor} />,
             quantity: count,
             hint: <StringsHint />,
           }}
@@ -65,6 +68,7 @@ export const IncludedStrings = ({
 
 export const IncludedCreadits = ({
   count,
+  highlightColor,
   sx,
   className,
 }: IncludedItemProps) => {
@@ -74,7 +78,7 @@ export const IncludedCreadits = ({
         <T
           keyName="billing_subscription_included_credits_unlimited"
           params={{
-            highlight: <StyledQuantity />,
+            highlight: <StyledQuantity color={highlightColor} />,
             hint: <MtHint />,
           }}
         />
@@ -82,7 +86,7 @@ export const IncludedCreadits = ({
         <T
           keyName="billing_subscription_included_credits"
           params={{
-            highlight: <StyledQuantity />,
+            highlight: <StyledQuantity color={highlightColor} />,
             quantity: count,
             hint: <MtHint />,
           }}
@@ -92,14 +96,19 @@ export const IncludedCreadits = ({
   );
 };
 
-export const IncludedSeats = ({ count, sx, className }: IncludedItemProps) => {
+export const IncludedSeats = ({
+  count,
+  highlightColor,
+  sx,
+  className,
+}: IncludedItemProps) => {
   return (
     <IncludedItemContainer {...{ sx, className }}>
       {count === -1 ? (
         <T
           keyName="billing_subscription_included_seats_unlimited"
           params={{
-            highlight: <StyledQuantity />,
+            highlight: <StyledQuantity color={highlightColor} />,
             hint: <span />,
           }}
         />
@@ -107,7 +116,7 @@ export const IncludedSeats = ({ count, sx, className }: IncludedItemProps) => {
         <T
           keyName="billing_subscription_included_seats"
           params={{
-            highlight: <StyledQuantity />,
+            highlight: <StyledQuantity color={highlightColor} />,
             quantity: count,
             hint: <span />,
           }}

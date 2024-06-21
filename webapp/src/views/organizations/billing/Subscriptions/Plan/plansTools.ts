@@ -4,8 +4,12 @@ export function isSubset<T>(set: T[], subset: T[]): boolean {
   return subset.every((i) => set.includes(i));
 }
 
-export function excludePreviousPlanFeatures(prevPaidPlans: PlanType[]) {
-  const [currentPlan, ...previousPlans] = [...prevPaidPlans].reverse();
+export function excludePreviousPlanFeatures(
+  currentPlan: PlanType,
+  prevPlans: PlanType[]
+) {
+  const previousPlans = [...prevPlans].reverse();
+
   const parentPlan = previousPlans.find(
     (plan) =>
       plan.public && isSubset(currentPlan.enabledFeatures, plan.enabledFeatures)

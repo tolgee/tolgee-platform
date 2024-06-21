@@ -2,7 +2,7 @@ import { Box, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { PrepareUpgradeDialog } from 'tg.views/organizations/billing/PrepareUpgradeDialog';
 
-import { usePlan } from './usePlan';
+import { usePlan } from '../Plan/usePlan';
 import { confirmation } from 'tg.hooks/confirmation';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BillingPeriodType } from '../Price/PeriodSwitch';
@@ -19,15 +19,17 @@ export const StyledContainer = styled(Box)`
 
 type Props = {
   organizationHasSomeSubscription: boolean;
-  isActive: boolean;
-  isEnded: boolean;
+  active: boolean;
+  ended: boolean;
+  custom?: boolean;
   planId: number;
   period: BillingPeriodType;
 };
 
 export const PlanAction = ({
-  isActive,
-  isEnded,
+  active,
+  ended,
+  custom,
   organizationHasSomeSubscription,
   planId,
   period,
@@ -55,13 +57,13 @@ export const PlanAction = ({
   };
 
   function getLabelAndAction() {
-    if (isActive && !isEnded) {
+    if (active && !ended) {
       return {
         loading: cancelMutation.isLoading,
         onClick: handleCancel,
         label: t('billing_plan_cancel'),
       };
-    } else if (isActive && isEnded) {
+    } else if (active && ended) {
       return {
         loading: prepareUpgradeMutation.isLoading,
         onClick: () => onPrepareUpgrade(),
@@ -89,7 +91,7 @@ export const PlanAction = ({
       <LoadingButton
         data-cy="billing-plan-action-button"
         variant="contained"
-        color="primary"
+        color={custom ? 'info' : 'primary'}
         size="medium"
         loading={loading}
         onClick={onClick}

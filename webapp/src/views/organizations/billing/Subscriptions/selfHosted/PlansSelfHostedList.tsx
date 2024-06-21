@@ -24,10 +24,12 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
   period,
   onPeriodChange,
 }) => {
-  const paidPlans = [...plans];
   const { t } = useTranslate();
+  const publicPlans = plans.filter((p) => p.public);
+  const customPlans = plans.filter((p) => !p.public);
+
   // add enterprise plan
-  paidPlans.push({
+  publicPlans.push({
     id: -1,
     type: 'CONTACT_US',
     name: 'Enterprise',
@@ -52,22 +54,38 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
     public: true,
   });
 
-  const prevPaidPlans: PlanType[] = [];
+  const parentForPublic: PlanType[] = [];
+  const parentForCustom: PlanType[] = publicPlans;
+
+  const combinedPlans = [
+    ...customPlans.map((plan) => ({
+      plan,
+      custom: true,
+      ...excludePreviousPlanFeatures(plan, parentForCustom),
+    })),
+    ...publicPlans.map((plan) => {
+      const featuresInfo = excludePreviousPlanFeatures(plan, parentForPublic);
+      parentForPublic.push(plan);
+      return {
+        plan,
+        custom: false,
+        ...featuresInfo,
+      };
+    }),
+  ];
 
   return (
     <>
-      {paidPlans.map((plan) => {
-        prevPaidPlans.push(plan);
-
-        const { filteredFeatures, previousPlanName } =
-          excludePreviousPlanFeatures(prevPaidPlans);
+      {combinedPlans.map((info) => {
+        const { filteredFeatures, previousPlanName, custom, plan } = info;
 
         return (
           <StyledPlanWrapper key={plan.id}>
             <Plan
               plan={plan}
-              isActive={false}
-              isEnded={false}
+              active={false}
+              ended={false}
+              custom={custom}
               onPeriodChange={onPeriodChange}
               period={period}
               filteredFeatures={filteredFeatures}
@@ -83,7 +101,13 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
                   />
                 )
               }
-              action={<SelfHostedPlanAction plan={plan} period={period} />}
+              action={
+                <SelfHostedPlanAction
+                  plan={plan}
+                  period={period}
+                  custom={custom}
+                />
+              }
             />
           </StyledPlanWrapper>
         );

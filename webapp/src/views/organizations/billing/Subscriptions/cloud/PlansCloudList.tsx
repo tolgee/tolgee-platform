@@ -10,7 +10,7 @@ import {
   planIsPeriodDependant,
 } from '../Plan/plansTools';
 import { AllFromPlanFeature } from '../Plan/AllFromPlanFeature';
-import { PlanAction } from '../Plan/PlanAction';
+import { PlanAction } from './CloudPlanAction';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
@@ -30,21 +30,18 @@ type BillingPlansProps = {
   onPeriodChange: (period: BillingPeriodType) => void;
 };
 
-function isDefaultPlan(plan: PlanType) {
-  return plan.free && plan.public;
-}
-
 export const PlansCloudList: React.FC<BillingPlansProps> = ({
   plans,
   activeSubscription,
   period,
   onPeriodChange,
 }) => {
-  const defaultPlan = plans.find((p) => isDefaultPlan(p));
-  const paidPlans = plans.filter((p) => p !== defaultPlan);
+  const defaultPlan = plans.find((p) => p.free && p.public);
+  const publicPlans = plans.filter((p) => p !== defaultPlan && p.public);
+  const customPlans = plans.filter((p) => !p.public);
 
   // add enterprise plan
-  paidPlans.push({
+  publicPlans.push({
     id: -1,
     type: 'CONTACT_US',
     name: 'Enterprise',
@@ -66,10 +63,13 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
     public: true,
   });
 
-  const prevPlans: PlanType[] = [];
+  const parentForPublic: PlanType[] = [];
+  const parentForCustom: PlanType[] = [];
   if (defaultPlan) {
-    prevPlans.push(defaultPlan);
+    parentForPublic.push(defaultPlan);
+    parentForCustom.push(defaultPlan);
   }
+  publicPlans.forEach((p) => parentForCustom.push(p));
 
   function isActive(plan: PlanType) {
     const planPeriod = plan.free ? undefined : period;
@@ -84,43 +84,58 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
     return isActive(plan) && activeSubscription.cancelAtPeriodEnd;
   }
 
+  const combinedPlans = [
+    ...customPlans.map((plan) => ({
+      plan,
+      custom: true,
+      ...excludePreviousPlanFeatures(plan, parentForCustom),
+    })),
+    ...publicPlans.map((plan) => {
+      const featuresInfo = excludePreviousPlanFeatures(plan, parentForPublic);
+      parentForPublic.push(plan);
+      return {
+        plan,
+        custom: false,
+        ...featuresInfo,
+      };
+    }),
+  ];
+
   return (
     <>
       {defaultPlan && (
         <StyledFreePlanWrapper>
           <FreePlan
             plan={defaultPlan}
-            isActive={isActive(defaultPlan)}
-            isEnded={isEnded(defaultPlan)}
+            active={isActive(defaultPlan)}
+            ended={isEnded(defaultPlan)}
           />
         </StyledFreePlanWrapper>
       )}
-      {paidPlans.map((plan) => {
-        prevPlans.push(plan);
+      {combinedPlans.map((info) => {
+        const { filteredFeatures, previousPlanName, plan, custom } = info;
 
-        const { filteredFeatures, previousPlanName } =
-          excludePreviousPlanFeatures(prevPlans);
-
-        const parentPlan = previousPlanName ?? defaultPlan?.name;
-
+        const parentPlan = previousPlanName;
         return (
           <StyledPlanWrapper key={plan.id}>
             {activeSubscription && (
               <Plan
                 plan={plan}
-                isActive={isActive(plan)}
-                isEnded={isEnded(plan)}
+                active={isActive(plan)}
+                ended={isEnded(plan)}
                 onPeriodChange={onPeriodChange}
                 period={period}
                 filteredFeatures={filteredFeatures}
                 featuresMinHeight="155px"
+                custom={custom}
                 topFeature={
                   parentPlan && <AllFromPlanFeature planName={parentPlan} />
                 }
                 action={
                   <PlanAction
-                    isActive={isActive(plan)}
-                    isEnded={isEnded(plan)}
+                    active={isActive(plan)}
+                    ended={isEnded(plan)}
+                    custom={custom}
                     organizationHasSomeSubscription={
                       !activeSubscription.plan.free
                     }
