@@ -164,7 +164,6 @@ const getTheme = (mode: PaletteMode) => {
       login: c.login,
       input: c.input,
       revisionFilterBanner: c.revisionFilterBanner,
-      billingPlan: c.billingPlan,
     },
     mixins: {
       toolbar: {

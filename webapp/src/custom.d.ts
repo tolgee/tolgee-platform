@@ -19,7 +19,6 @@ import {
   Login,
   Input,
   RevisionFilterBanner,
-  BillingPlan,
 } from './colors';
 import { tolgeeColors, tolgeePalette } from 'figmaTheme';
 
@@ -87,7 +86,6 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
-    billingPlan: BillingPlan;
   }
 }
 

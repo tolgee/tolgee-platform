@@ -4,15 +4,6 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type Feature =
   components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
-// case 'GRANULAR_PERMISSIONS':
-//   return (
-//     <FeatureLink
-//       newTab
-//       href="https://tolgee.io/platform/projects_and_organizations/members#granular-permissions"
-//     >
-//       {t('billing_subscriptions_granular_permissions_feature')}
-//     </FeatureLink>
-//   );
 
 export function useFeatures() {
   const { t } = useTranslate();
@@ -41,6 +32,7 @@ export function useFeatures() {
     PRIORITIZED_FEATURE_REQUESTS: t(
       'billing_subscriptions_prioritized_feature_requests'
     ),
+    SLACK_INTEGRATION: t('billing_subscriptions_slack_integration'),
   } as const satisfies Record<Feature, string>;
 }
 
