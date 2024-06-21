@@ -3,18 +3,18 @@ import { useLocation } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, styled, Typography } from '@mui/material';
 
-import { useOrganization } from '../../../useOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-
-import { SelfHostedEeActiveSubscription } from './ActiveSubscription/SelfHostedEeActiveSubscription';
-import { BillingPeriodType } from '../Price/PeriodSwitch';
+import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
+
 import { PlansSelfHostedList } from './PlansSelfHostedList';
 import { StyledBillingSectionTitle } from '../../BillingSection';
+import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];

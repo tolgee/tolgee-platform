@@ -5,19 +5,21 @@ import { Box } from '@mui/material';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
-import { useOrganization } from '../useOrganization';
-import { PlanLicenseKey } from './Subscriptions/selfHosted/ActiveSubscription/PlanLicenseKey';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { PlanLicenseKey } from 'tg.component/billing/ActiveSubscription/PlanLicenseKey';
 
 type Props = {
   id: number;
   licenceKey: string | undefined;
   isNew: boolean;
+  custom: boolean;
 };
 
 export const SelfHostedEeSubscriptionActions = ({
   id,
   licenceKey,
   isNew,
+  custom,
 }: Props) => {
   const { t } = useTranslate();
 
@@ -58,11 +60,15 @@ export const SelfHostedEeSubscriptionActions = ({
         variant="outlined"
         loading={cancelMutation.isLoading}
         size="small"
-        color="primary"
+        color={custom ? 'info' : 'primary'}
       >
         {t('organization-billing-self-hosted-cancel-subscription-button')}
       </LoadingButton>
-      <PlanLicenseKey licenseKey={licenceKey} defaultOpen={isNew} />
+      <PlanLicenseKey
+        licenseKey={licenceKey}
+        defaultOpen={isNew}
+        custom={custom}
+      />
     </Box>
   );
 };

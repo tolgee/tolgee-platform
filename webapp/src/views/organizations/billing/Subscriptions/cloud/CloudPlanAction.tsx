@@ -2,10 +2,10 @@ import { Box, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { PrepareUpgradeDialog } from 'tg.views/organizations/billing/PrepareUpgradeDialog';
 
-import { usePlan } from '../Plan/usePlan';
+import { usePlan } from 'tg.component/billing/Plan/usePlan';
 import { confirmation } from 'tg.hooks/confirmation';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { BillingPeriodType } from '../Price/PeriodSwitch';
+import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
 
 export const StyledContainer = styled(Box)`
   justify-self: center;

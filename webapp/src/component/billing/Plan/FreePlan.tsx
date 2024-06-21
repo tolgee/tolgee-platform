@@ -89,7 +89,7 @@ export const FreePlan = ({ plan, active, ended }: Props) => {
 
       <StyledPlanContent>
         <Box className="title">
-          <PlanTitle title={plan.name} />
+          <PlanTitle sx={{ color: highlightColor }} title={plan.name} />
         </Box>
         <Box className="features" display="flex" gap="4px">
           <PlanFeature

@@ -1,12 +1,12 @@
 import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { PlanFeature } from 'tg.component/billing/PlanFeature';
+import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
+import { Plan } from 'tg.component/billing/Plan/Plan';
+import { PlanType } from 'tg.component/billing/Plan/types';
+import { excludePreviousPlanFeatures } from 'tg.component/billing/Plan/plansTools';
+import { AllFromPlanFeature } from 'tg.component/billing/Plan/AllFromPlanFeature';
 
-import { BillingPeriodType } from '../Price/PeriodSwitch';
-import { Plan } from '../Plan/Plan';
-import { PlanType } from '../Plan/types';
-import { excludePreviousPlanFeatures } from '../Plan/plansTools';
-import { AllFromPlanFeature } from '../Plan/AllFromPlanFeature';
 import { SelfHostedPlanAction } from './SelfHostedPlanAction';
 
 const StyledPlanWrapper = styled('div')`

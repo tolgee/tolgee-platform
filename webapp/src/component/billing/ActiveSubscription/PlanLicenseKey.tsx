@@ -12,9 +12,10 @@ import { ClipboardCopyInput } from 'tg.component/common/ClipboardCopyInput';
 type Props = {
   licenseKey?: string;
   defaultOpen: boolean;
+  custom?: boolean;
 };
 
-export const PlanLicenseKey = ({ licenseKey, defaultOpen }: Props) => {
+export const PlanLicenseKey = ({ licenseKey, defaultOpen, custom }: Props) => {
   useEffect(() => {
     if (defaultOpen) {
       setOpen(true);
@@ -32,7 +33,7 @@ export const PlanLicenseKey = ({ licenseKey, defaultOpen }: Props) => {
       <Button
         onClick={() => setOpen(true)}
         size="small"
-        color="primary"
+        color={custom ? 'info' : 'primary'}
         variant="contained"
       >
         <T keyName="active-plan-license-key-button" />
