@@ -42,6 +42,7 @@ export const PatsView: FunctionComponent = () => {
       <BaseUserSettingsView
         windowTitle={t('pats_title')}
         title={t('pats_title')}
+        addLabel={t('pats_add')}
         loading={list.isFetching}
         navigation={[[t('user_menu_pats'), LINKS.USER_PATS.build()]]}
         hideChildrenOnLoading={false}

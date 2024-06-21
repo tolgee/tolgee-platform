@@ -42,6 +42,7 @@ export const BaseSettingsView: React.FC<Props> = ({
   addLinkTo,
   maxWidth = 'normal',
   onAdd,
+  addLabel,
   ...otherProps
 }) => {
   const containerMaxWidth = getBaseViewWidth(maxWidth);
@@ -62,6 +63,7 @@ export const BaseSettingsView: React.FC<Props> = ({
                 {(addLinkTo || onAdd) && (
                   <Box>
                     <BaseViewAddButton
+                      label={addLabel}
                       addLinkTo={addLinkTo}
                       onClick={onAdd}
                     ></BaseViewAddButton>
