@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
@@ -25,6 +26,7 @@ import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.UserAccountService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -47,12 +49,13 @@ class V2UserController(
   private val jwtService: JwtService,
   private val mfaService: MfaService,
   private val emailVerificationService: EmailVerificationService,
+  @Qualifier("requestActivityHolder") private val request: ActivityHolder,
 ) {
   @Operation(
     summary = "Resend email verification",
     description = "Resends email verification email to currently authenticated user.",
   )
-  @GetMapping("/send-email-verification")
+  @PostMapping("/send-email-verification")
   fun sendEmailVerification(request: HttpServletRequest) {
     val user = authenticationFacade.authenticatedUserEntity
     emailVerificationService.resendEmailVerification(user, request)
@@ -76,8 +79,9 @@ class V2UserController(
   fun updateUser(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
+    request: HttpServletRequest,
   ): PrivateUserAccountModel {
-    val userAccount = userAccountService.update(authenticationFacade.authenticatedUserEntity, dto!!)
+    val userAccount = userAccountService.update(authenticationFacade.authenticatedUserEntity, dto!!, request)
     val view =
       userAccountService.findActiveView(userAccount.id)
         ?: throw IllegalStateException("User not found")
@@ -143,7 +147,8 @@ class V2UserController(
   fun updateUserOld(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
-  ): PrivateUserAccountModel = updateUser(dto)
+    request: HttpServletRequest,
+  ): PrivateUserAccountModel = updateUser(dto, request)
 
   @GetMapping("/single-owned-organizations")
   @Operation(
