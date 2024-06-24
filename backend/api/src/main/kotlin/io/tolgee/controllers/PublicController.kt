@@ -57,7 +57,6 @@ class PublicController(
     loginRequest: LoginRequest,
   ): JwtAuthenticationResponse {
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
-    // emailVerificationService.check(userAccount)
     mfaService.checkMfa(userAccount, loginRequest.otp)
 
     // two factor passed, so we can generate super token
