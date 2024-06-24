@@ -22,24 +22,14 @@ import io.tolgee.security.thirdParty.GithubOAuthDelegate
 import io.tolgee.security.thirdParty.GoogleOAuthDelegate
 import io.tolgee.security.thirdParty.OAuth2Delegate
 import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.security.MfaService
-import io.tolgee.service.security.ReCaptchaValidationService
-import io.tolgee.service.security.SignUpService
-import io.tolgee.service.security.UserAccountService
-import io.tolgee.service.security.UserCredentialsService
+import io.tolgee.service.security.*
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -67,7 +57,7 @@ class PublicController(
     loginRequest: LoginRequest,
   ): JwtAuthenticationResponse {
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
-    emailVerificationService.check(userAccount)
+    // emailVerificationService.check(userAccount)
     mfaService.checkMfa(userAccount, loginRequest.otp)
 
     // two factor passed, so we can generate super token

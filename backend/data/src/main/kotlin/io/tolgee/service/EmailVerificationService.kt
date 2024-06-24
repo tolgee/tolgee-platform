@@ -70,15 +70,43 @@ class EmailVerificationService(
   fun resendEmailVerification(
     userAccount: UserAccount,
     request: HttpServletRequest,
+    callbackUrl: String? = null,
+    newEmail: String? = null,
   ) {
-    val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request)
+    val email = newEmail ?: userAccount.username
+    val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request, email)
 
     if (policy != null) {
       rateLimitService.consumeBucketUnless(policy) {
-        createForUser(userAccount)
-        ifVerified(userAccount)
+        createForUser(userAccount, callbackUrl, email)
+        isVerified(userAccount)
       }
     }
+  }
+
+  @Transactional
+  fun fakeSend(
+    userAccount: UserAccount,
+    callbackUrl: String? = null,
+    newEmail: String? = null,
+  ) {
+    val code = "123"
+
+    val emailVerification =
+      userAccount.emailVerification?.also {
+        it.newEmail = newEmail
+        it.code = code
+      } ?: EmailVerification(userAccount = userAccount, code = code, newEmail = newEmail)
+
+    emailVerificationRepository.save(emailVerification)
+    userAccount.emailVerification = emailVerification
+  }
+
+  fun isVerified(userAccount: UserAccount): Boolean {
+    return !(
+      tolgeeProperties.authentication.needsEmailVerification &&
+        userAccount.emailVerification != null
+    )
   }
 
   fun check(userAccount: UserAccount) {
@@ -88,11 +116,6 @@ class EmailVerificationService(
     ) {
       throw AuthenticationException(io.tolgee.constants.Message.EMAIL_NOT_VERIFIED)
     }
-  }
-
-  fun ifVerified(userAccount: UserAccount): Boolean {
-    return tolgeeProperties.authentication.needsEmailVerification &&
-      userAccount.emailVerification != null
   }
 
   @Transactional
