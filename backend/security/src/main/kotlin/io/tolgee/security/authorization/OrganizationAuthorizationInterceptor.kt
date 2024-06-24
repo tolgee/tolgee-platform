@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
