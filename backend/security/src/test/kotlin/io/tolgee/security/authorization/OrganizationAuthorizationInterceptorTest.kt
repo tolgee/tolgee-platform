@@ -26,6 +26,7 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationRoleService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -50,12 +51,15 @@ class OrganizationAuthorizationInterceptorTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
+  private val emailVerificationService = Mockito.mock(EmailVerificationService::class.java)
+
   private val organizationAuthenticationInterceptor =
     OrganizationAuthorizationInterceptor(
       authenticationFacade,
       organizationRoleService,
       requestContextService,
       Mockito.mock(OrganizationHolder::class.java),
+      emailVerificationService,
     )
 
   private val mockMvc =
