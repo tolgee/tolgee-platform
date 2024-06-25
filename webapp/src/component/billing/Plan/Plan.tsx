@@ -51,7 +51,7 @@ export const Plan: FC<Props> = ({
     : theme.palette.tokens.primary.main;
 
   return (
-    <PlanContainer className={clsx({ active, custom })} data-cy="billing-plan">
+    <PlanContainer className={clsx({ active })} data-cy="billing-plan">
       <PlanActiveBanner active={active} ended={ended} custom={custom} />
       <PlanContent>
         <PlanTitle sx={{ paddingBottom: '20px', color: highlightColor }}>
