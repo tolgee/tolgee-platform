@@ -1,3 +1,10 @@
+## [3.66.1](https://github.com/tolgee/tolgee-platform/compare/v3.66.0...v3.66.1) (2024-06-25)
+
+
+### Bug Fixes
+
+* .po with ICU should not escape ICU params ([#2387](https://github.com/tolgee/tolgee-platform/issues/2387)) ([d64aa51](https://github.com/tolgee/tolgee-platform/commit/d64aa51023b8687c672ec0571c2ba55f45a6b529))
+
 # [3.66.0](https://github.com/tolgee/tolgee-platform/compare/v3.65.2...v3.66.0) (2024-06-25)
 
 
