@@ -1014,7 +1014,7 @@
   "project_permission_information_text_base_permission_after" : "Dit betekent dat elke gebruiker ten minste deze toestemming heeft. U kunt het niet lager instellen dan dat.",
   "project_permission_information_text_base_permission_before" : "Dit project maakt deel uit van een organisatie waarvoor basisrechten zijn ingesteld op:",
   "project_permissions_revoke_user_access_message" : "Weet u zeker dat u de toegang voor gebruiker {userName} wilt intrekken?",
-  "projects_add_button" : "Project toevoegen",
+  "projects_add_button" : "Project",
   "projects_empty" : "Geen projecten",
   "projects_empty_action" : "Project toevoegen",
   "project_settings_base_language" : "Basistaal",

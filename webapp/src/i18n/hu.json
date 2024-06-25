@@ -1016,7 +1016,7 @@
   "project_permission_information_text_base_permission_after" : "Ez azt jelenti, hogy minden felhasználónak legalább ez a jogosultsága van. Nem állíthatja alacsonyabbra ennél.",
   "project_permission_information_text_base_permission_before" : "Ez a projekt azon szervezet része, amelynek alap jogosultságai a következők:",
   "project_permissions_revoke_user_access_message" : "Valóban vissza akarod vonni a felhasználó {userName} hozzáférését?",
-  "projects_add_button" : "Projekt hozzáadása",
+  "projects_add_button" : "Projekt",
   "projects_empty" : "Nincsenek projektek",
   "projects_empty_action" : "Projekt hozzáadása",
   "project_settings_base_language" : "Alap nyelv",
