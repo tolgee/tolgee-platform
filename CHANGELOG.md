@@ -1,3 +1,11 @@
+# [3.66.0](https://github.com/tolgee/tolgee-platform/compare/v3.65.2...v3.66.0) (2024-06-25)
+
+
+### Features
+
+* export as batch operation ([#2378](https://github.com/tolgee/tolgee-platform/issues/2378)) ([0cf66ad](https://github.com/tolgee/tolgee-platform/commit/0cf66ad0c2758a1a7caec0db8a42d46b3319f3b9))
+* unify add buttons labels ([#2380](https://github.com/tolgee/tolgee-platform/issues/2380)) ([10dee8a](https://github.com/tolgee/tolgee-platform/commit/10dee8a8c65403e5fd83149307e9d84e62c82d4b))
+
 ## [3.65.2](https://github.com/tolgee/tolgee-platform/compare/v3.65.1...v3.65.2) (2024-06-25)
 
 

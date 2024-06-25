@@ -307,7 +307,7 @@
   "billing-progress-label-unused" : "Prepaid: {value, number}",
   "billing-progress-label-used" : "Gebruikt van abonnement: {value, number}",
   "billing_subscription_active" : "Actief abonnement",
-  "billing_subscription_cancelled" : "Abonnement wordt geannuleerd",
+  "billing_subscription_cancelled" : "Abonnement geannuleerd",
   "billing_subscription_new" : "Nieuw",
   "billing_subscriptions_account_manager_feature" : "Accountmanager",
   "billing_subscriptions_ai_prompt_customization" : "AI-aanpassing",
