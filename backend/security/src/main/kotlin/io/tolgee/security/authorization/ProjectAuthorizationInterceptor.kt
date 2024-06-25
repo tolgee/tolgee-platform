@@ -59,16 +59,10 @@ class ProjectAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val user = authenticationFacade.authenticatedUserEntity
+    val user = authenticationFacade.authenticatedUser
+    checkEmailVerificationOrThrow(emailVerificationService::isVerified, user, handler)
 
-    if (!emailVerificationService.isVerified(
-        user,
-      ) && !handler.hasMethodAnnotation(BypassEmailVerification::class.java)
-    ) {
-      throw PermissionException(Message.EMAIL_NOT_VERIFIED)
-    }
-
-    val userId = authenticationFacade.authenticatedUser.id
+    val userId = user.id
     val project =
       requestContextService.getTargetProject(request)
         // Two possible scenarios: we're on a "global" route, or the project was not found.

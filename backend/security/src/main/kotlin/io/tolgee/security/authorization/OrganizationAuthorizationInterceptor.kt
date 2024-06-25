@@ -16,7 +16,6 @@
 
 package io.tolgee.security.authorization
 
-import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
@@ -56,14 +55,8 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val user = authenticationFacade.authenticatedUserEntity
-
-    if (!emailVerificationService.isVerified(
-        user,
-      ) && !handler.hasMethodAnnotation(BypassEmailVerification::class.java)
-    ) {
-      throw PermissionException(Message.EMAIL_NOT_VERIFIED)
-    }
+    val user = authenticationFacade.authenticatedUser
+    checkEmailVerificationOrThrow(emailVerificationService::isVerified, user, handler)
 
     val userId = user.id
     val organization =
