@@ -12,7 +12,10 @@ import io.tolgee.formats.importCommon.BaseImportRawDataConverter
 import io.tolgee.formats.importCommon.ImportMessageConvertor
 import io.tolgee.formats.pluralData.PluralData
 
-class PoToIcuMessageConvertor(private val paramConvertorFactory: (() -> ToIcuPlaceholderConvertor)?) :
+class PoToIcuMessageConvertor(
+  private val canContainIcu: Boolean = false,
+  private val paramConvertorFactory: (() -> ToIcuPlaceholderConvertor)?,
+) :
   ImportMessageConvertor {
   override fun convert(
     rawData: Any?,
@@ -22,7 +25,7 @@ class PoToIcuMessageConvertor(private val paramConvertorFactory: (() -> ToIcuPla
   ): MessageConvertorResult {
     val baseImportRawDataConverter =
       BaseImportRawDataConverter(
-        canContainIcu = false,
+        canContainIcu = canContainIcu,
         toIcuPlaceholderConvertorFactory = paramConvertorFactory,
         convertPlaceholders = convertPlaceholders,
         isProjectIcuEnabled = isProjectIcuEnabled,
