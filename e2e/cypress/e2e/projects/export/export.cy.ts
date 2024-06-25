@@ -4,6 +4,7 @@ import {
   createExportableProject,
   exportSelectFormat,
   exportToggleLanguage,
+  getFileName,
   visitExport,
 } from '../../../common/export';
 
@@ -30,7 +31,7 @@ describe('Export Basics', () => {
 
   it('exports all to zip by default', () => {
     cy.gcy('export-submit-button').click();
-    cy.verifyDownload(getFileName('zip'));
+    cy.verifyDownload(getFileName('Test project', 'zip'));
   });
 
   it('exports one language to json', () => {
@@ -38,13 +39,12 @@ describe('Export Basics', () => {
 
     cy.gcy('export-submit-button').click();
 
-    cy.readFile(downloadsFolder + '/' + getFileName('json', 'en')).should(
-      'deep.equal',
-      {
-        'test.array[0]': 'Test english',
-        'test.test': 'Test english',
-      }
-    );
+    cy.readFile(
+      downloadsFolder + '/' + getFileName('Test project', 'json', 'en')
+    ).should('deep.equal', {
+      'test.array[0]': 'Test english',
+      'test.test': 'Test english',
+    });
   });
 
   it('exports with nested structure', () => {
@@ -52,7 +52,7 @@ describe('Export Basics', () => {
     exportSelectFormat('Structured JSON');
 
     cy.gcy('export-submit-button').click();
-    const fileName = getFileName('json', 'cs');
+    const fileName = getFileName('Test project', 'json', 'cs');
     cy.verifyDownload(fileName);
 
     const getFile = () => cy.readFile(downloadsFolder + '/' + fileName);
@@ -68,7 +68,7 @@ describe('Export Basics', () => {
     cy.waitForDom();
     cy.gcy('export-submit-button').click();
 
-    const fileName = getFileName('json', 'cs');
+    const fileName = getFileName('Test project', 'json', 'cs');
     cy.verifyDownload(fileName);
 
     cy.readFile(downloadsFolder + '/' + fileName)
@@ -84,16 +84,10 @@ describe('Export Basics', () => {
     exportSelectFormat('XLIFF');
 
     cy.gcy('export-submit-button').click();
-    cy.verifyDownload(getFileName('xliff', 'en'));
+    cy.verifyDownload(getFileName('Test project', 'xliff', 'en'));
   });
 
   afterEach(() => {
     deleteProject(projectId);
   });
 });
-
-const getFileName = (extension: string, language?: string) => {
-  const dateStr = '_' + new Date().toISOString().split('T')[0];
-  const languageStr = language ? `_${language}` : '';
-  return `Test project${languageStr}${dateStr}.${extension}`;
-};

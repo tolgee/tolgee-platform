@@ -12,8 +12,14 @@ import { TestDataStandardResponse } from '../../common/apiCalls/testData/generat
 import { login } from '../../common/apiCalls/common';
 import { selectNamespace } from '../../common/namespace';
 import { assertHasState } from '../../common/state';
+import {
+  assertExportLanguagesSelected,
+  checkZipContent,
+  getFileName,
+} from '../../common/export';
 
 describe('Batch jobs', { scrollBehavior: false }, () => {
+  const downloadsFolder = Cypress.config('downloadsFolder');
   let project: TestDataStandardResponse['projects'][number] = null;
 
   beforeEach(() => {
@@ -96,14 +102,14 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   it('will pre-translate with TM', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Pre-translate by TM');
-    selectLanguage();
+    assertLanguagesSelected(['German']);
     executeBatchOperation();
   });
 
   it('will Machine translate', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Machine translation');
-    selectLanguage();
+    assertLanguagesSelected(['German']);
     executeBatchOperation();
     getCell('en translated with GOOGLE from en to de').should('be.visible');
     cy.gcy('translations-auto-translated-indicator').should('exist');
@@ -128,6 +134,24 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
       .should('exist');
   });
 
+  it('will export selected keys', () => {
+    cy.gcy('translations-row-checkbox').first().click();
+    selectOperation('Export translations');
+    assertExportLanguagesSelected(['English', 'German']);
+    cy.gcy('export-submit-button').click();
+
+    cy.verifyDownload(getFileName('test_project', 'zip'));
+    checkZipContent({
+      path: downloadsFolder + '/',
+      file: getFileName('test_project', 'zip'),
+      filesContent: {
+        'en.json': (content) => {
+          expect(JSON.parse(content)).to.deep.equal({ 'a-key': 'en' });
+        },
+      },
+    });
+  });
+
   const visit = () => {
     visitTranslations(project.id);
   };
@@ -140,4 +164,20 @@ function selectLanguage(language = 'German') {
   cy.gcy('translations-language-select-item').contains(language).click();
   dismissMenu();
   cy.gcy('translations-language-select-item').should('not.exist');
+}
+
+function assertLanguagesSelected(languages: string[]) {
+  cy.gcy('batch-operations-section')
+    .findDcy('translations-language-select-form-control')
+    .click();
+
+  languages.forEach((language) => {
+    cy.gcy('translations-language-select-item')
+      .contains(language)
+      .closestDcy('translations-language-select-item')
+      .should('be.visible')
+      .find('input')
+      .should('be.checked');
+  });
+  dismissMenu();
 }

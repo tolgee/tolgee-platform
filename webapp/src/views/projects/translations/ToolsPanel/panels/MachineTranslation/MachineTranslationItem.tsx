@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Skeleton, styled } from '@mui/material';
+import { styled } from '@mui/material';
 
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
@@ -12,6 +12,7 @@ import {
   useVariantExample,
 } from '../../common/useExtractedPlural';
 import { T } from '@tolgee/react';
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 
 const StyledItem = styled('div')`
   padding: ${({ theme }) => theme.spacing(0.5, 0.75)};
@@ -124,7 +125,7 @@ export const MachineTranslationItem = ({
           <TranslatedError code={error} />
         </StyledError>
       ) : !data && isFetching ? (
-        <Skeleton variant="text" />
+        <LoadingSkeletonFadingIn variant="text" />
       ) : null}
     </StyledItem>
   );
