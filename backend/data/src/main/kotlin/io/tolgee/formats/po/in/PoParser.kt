@@ -178,7 +178,9 @@ class PoParser(
         currentSequenceEnd()
       }
       quoted = !quoted
+      return
     }
+    currentSequence.append(this)
   }
 
   private fun currentSequenceEnd() {
