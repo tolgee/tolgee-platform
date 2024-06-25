@@ -8,7 +8,6 @@ type PlanPricesModel = components['schemas']['PlanPricesModel'];
 
 const StyledTitle = styled(Box)`
   text-align: center;
-  font-size: 13px;
   font-weight: 500;
 `;
 

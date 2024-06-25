@@ -24,7 +24,7 @@ type CloudSubscriptionModel =
 type UsageModel = components['schemas']['PublicUsageModel'];
 
 const StyledPositive = styled('span')`
-  color: ${({ theme }) => theme.palette.success.main};
+  color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 const StyledNegative = styled('span')`

@@ -7,7 +7,6 @@ type Props = React.ComponentProps<typeof Box> & {
 };
 
 const StyledSecondaryPrice = styled(Box)`
-  font-size: 13px;
   display: flex;
   justify-content: space-between;
   gap: 20px;
