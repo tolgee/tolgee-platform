@@ -79,7 +79,7 @@ class EmailVerificationService(
 
     if (policy != null) {
       rateLimitService.consumeBucketUnless(policy) {
-        createForUser(userAccount, callbackUrl, email)
+        fakeSend(userAccount, callbackUrl, email)
         isVerified(userAccount)
       }
     }
@@ -101,6 +101,14 @@ class EmailVerificationService(
 
     emailVerificationRepository.save(emailVerification)
     userAccount.emailVerification = emailVerification
+    userAccountService.saveAndFlush(userAccount)
+  }
+
+  fun isVerified(userAccount: UserAccountDto): Boolean {
+    return !(
+      tolgeeProperties.authentication.needsEmailVerification &&
+        userAccount.emailVerification != null
+    )
   }
 
   fun isVerified(userAccount: UserAccount): Boolean {
