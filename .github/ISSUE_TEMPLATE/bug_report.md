@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-** Versions and environmen **
+**Versions and environment**
 - Tolgee Platform version: [e.g. 2.63.1]
 - Environment: Docker version, Java Version, OS, etc.
 - Browser: (In cases of UI issues)
