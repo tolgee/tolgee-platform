@@ -1014,7 +1014,7 @@
   "project_permission_information_text_base_permission_after" : "这意味着每个用户至少拥有此权限。您不能将其设置得比这更低。",
   "project_permission_information_text_base_permission_before" : "此项目是组织的一部分，其基本权限设置为：",
   "project_permissions_revoke_user_access_message" : "您确定要撤销用户 {userName} 的访问权限吗？",
-  "projects_add_button" : "添加项目",
+  "projects_add_button" : "项目",
   "projects_empty" : "暂无项目",
   "projects_empty_action" : "添加项目",
   "project_settings_base_language" : "原始语言",

@@ -1,3 +1,10 @@
+## [3.65.2](https://github.com/tolgee/tolgee-platform/compare/v3.65.1...v3.65.2) (2024-06-25)
+
+
+### Bug Fixes
+
+* .po parser ignores escaped quotes ([#2386](https://github.com/tolgee/tolgee-platform/issues/2386)) ([2bd8e24](https://github.com/tolgee/tolgee-platform/commit/2bd8e24c44102c947a5f5b668932ec71275cd9bd))
+
 ## [3.65.1](https://github.com/tolgee/tolgee-platform/compare/v3.65.0...v3.65.1) (2024-06-20)
 
 

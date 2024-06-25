@@ -1014,7 +1014,7 @@
   "project_permission_information_text_base_permission_after" : "Dette betyr at hver bruker har minst denne tillatelsen. Du kan ikke sette den lavere enn det.",
   "project_permission_information_text_base_permission_before" : "Dette prosjektet er en del av en organisasjon som har grunnleggende tillatelser satt til:",
   "project_permissions_revoke_user_access_message" : "Ønsker du virkelig å tilbakekalle tilgangen for brukeren {userName}?",
-  "projects_add_button" : "Legg til prosjekt",
+  "projects_add_button" : "Prosjekt",
   "projects_empty" : "Ingen prosjekter",
   "projects_empty_action" : "Legg til prosjekt",
   "project_settings_base_language" : "Grunnspråk",

@@ -1013,7 +1013,7 @@
   "project_permission_information_text_base_permission_after" : "Isso significa que todo usuário tem pelo menos essa permissão. Você não pode defini-la abaixo disso.",
   "project_permission_information_text_base_permission_before" : "Este projeto faz parte de uma organização que tem as permissões básicas definidas como:",
   "project_permissions_revoke_user_access_message" : "Você realmente deseja revogar o acesso do usuário {userName}?",
-  "projects_add_button" : "Adicionar projeto",
+  "projects_add_button" : "Projeto",
   "projects_empty" : "Nenhum projeto",
   "projects_empty_action" : "Adicionar projeto",
   "project_settings_base_language" : "Idioma base",
