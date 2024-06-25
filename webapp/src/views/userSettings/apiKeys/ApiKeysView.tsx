@@ -45,6 +45,7 @@ export const ApiKeysView: FunctionComponent = () => {
         windowTitle={t('api_keys_title')}
         title={t('api_keys_title')}
         loading={list.isFetching}
+        addLabel={t('api_keys_add')}
         navigation={[[t('user_menu_api_keys'), LINKS.USER_API_KEYS.build()]]}
         hideChildrenOnLoading={false}
         addLinkTo={LINKS.USER_API_KEYS_GENERATE.build()}
