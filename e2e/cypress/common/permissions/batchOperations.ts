@@ -88,6 +88,7 @@ export function testBatchOperations(projectInfo: ProjectInfo) {
           checkTargetLanguages(translateLanguageIds, projectInfo);
         },
       ],
+      'Export translations': ['translations.view'],
       'Add tags': ['keys.edit'],
       'Remove tags': ['keys.edit'],
       'Change namespace': ['keys.edit'],

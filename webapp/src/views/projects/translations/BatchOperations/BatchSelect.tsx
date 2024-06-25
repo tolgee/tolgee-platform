@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import {
   Autocomplete,
   ListItem,
-  styled,
   TextField,
+  styled,
   useTheme,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
@@ -26,20 +26,14 @@ type Props = {
 export const BatchSelect = ({ value, onChange }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
-  const permissions = useProjectPermissions();
-  const canEditKey = permissions.satisfiesPermission('keys.edit');
-  const canDeleteKey = permissions.satisfiesPermission('keys.delete');
-  const canMachineTranslate = permissions.satisfiesPermission(
-    'translations.batch-machine'
-  );
-  const canPretranslate = permissions.satisfiesPermission(
-    'translations.batch-by-tm'
-  );
-  const canChangeState = permissions.satisfiesPermission(
-    'translations.state-edit'
-  );
-  const canEditTranslations =
-    permissions.satisfiesPermission('translations.edit');
+  const { satisfiesPermission } = useProjectPermissions();
+  const canEditKey = satisfiesPermission('keys.edit');
+  const canDeleteKey = satisfiesPermission('keys.delete');
+  const canMachineTranslate = satisfiesPermission('translations.batch-machine');
+  const canPretranslate = satisfiesPermission('translations.batch-by-tm');
+  const canChangeState = satisfiesPermission('translations.state-edit');
+  const canViewTranslations = satisfiesPermission('translations.view');
+  const canEditTranslations = satisfiesPermission('translations.edit');
 
   const options: {
     id: BatchActions;
@@ -76,6 +70,11 @@ export const BatchSelect = ({ value, onChange }: Props) => {
       id: 'clear_translations',
       label: t('batch_operation_clear_translations'),
       enabled: canEditTranslations,
+    },
+    {
+      id: 'export_translations',
+      label: t('batch_operations_export_translations'),
+      enabled: canViewTranslations,
     },
     {
       id: 'add_tags',
