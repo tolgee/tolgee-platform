@@ -175,6 +175,7 @@ class ProjectBuilder(
   fun addWebhookConfig(ft: FT<WebhookConfig>) = addOperation(data.webhookConfigs, ft)
 
   fun addSlackConfig(ft: FT<SlackConfig>) = addOperation(data.slackConfigs, ft)
+
   fun addBatchJob(ft: FT<BatchJob>) = addOperation(data.batchJobs, ft)
 
   fun setImportSettings(ft: FT<ImportSettings>) {

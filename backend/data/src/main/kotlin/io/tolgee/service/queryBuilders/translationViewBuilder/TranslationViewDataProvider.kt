@@ -49,7 +49,7 @@ class TranslationViewDataProvider(
     }
     return PageImpl(views, pageable, count)
   }
-  
+
   private fun createFailedKeysInJobTempTable(filterFailedKeysOfJob: Long?) {
     if (filterFailedKeysOfJob == null) {
       return
@@ -73,7 +73,7 @@ class TranslationViewDataProvider(
             )
             SELECT DISTINCT (target -> 'keyId')\:\:bigint AS key_id
             FROM unsuccessful_targets;
-      """
+      """,
     )
       .setParameter("batchJobId", filterFailedKeysOfJob)
       .executeUpdate()
@@ -83,7 +83,6 @@ class TranslationViewDataProvider(
     em.createNativeQuery("DROP TABLE IF EXISTS temp_unsuccessful_job_keys")
       .executeUpdate()
   }
-
 
   fun getSelectAllKeys(
     projectId: Long,
