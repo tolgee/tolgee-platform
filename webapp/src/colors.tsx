@@ -62,6 +62,12 @@ export type TopBanner = {
   linkText: string;
 };
 
+export type EmailNotVerifiedBanner = {
+  background: string;
+  mainText: string;
+  tittleText: string;
+};
+
 export type Tile = {
   background: string;
   backgroundHover: string;
@@ -180,6 +186,11 @@ export const colors = {
       background: '#BEF4E9',
       mainText: '#004437',
       linkText: '#009B85',
+    },
+    emailNotVerifiedBanner: {
+      background: '#FDECF2',
+      mainText: '#EC407A',
+      tittleText: '#A82D57',
     },
     revisionFilterBanner: {
       background: '#00AF9A14',
@@ -305,6 +316,11 @@ export const colors = {
       background: '#008371',
       mainText: '#BEF4E9',
       linkText: '#dddddd',
+    },
+    emailNotVerifiedBanner: {
+      background: '#822343',
+      mainText: '#FDECF2',
+      tittleText: '#F6A7C2',
     },
     revisionFilterBanner: {
       background: '#99E5D629',
