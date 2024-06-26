@@ -35,7 +35,7 @@ export const PrefilterFailedJob = ({ jobId }: Props) => {
     <PrefilterContainer
       title={<T keyName="failed_job_filter_indicator_label" />}
       content={
-        <Box display="flex" gap={1} fontSize={14} fontWeight="500">
+        <Box display="flex" gap={1} fontSize={14} fontWeight="700">
           <Box>
             {Intl.DateTimeFormat(tolgee.getLanguage(), {
               timeStyle: 'short',
