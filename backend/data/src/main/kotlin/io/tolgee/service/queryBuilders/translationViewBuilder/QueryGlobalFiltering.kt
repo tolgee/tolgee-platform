@@ -9,8 +9,8 @@ import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
-import io.tolgee.model.key.UnsuccessfulJobKey_
 import io.tolgee.model.temp.UnsuccessfulJobKey
+import io.tolgee.model.temp.UnsuccessfulJobKey_
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.JoinType
