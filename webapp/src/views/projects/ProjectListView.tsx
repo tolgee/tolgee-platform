@@ -20,6 +20,7 @@ import {
 import {OrganizationSwitch} from 'tg.component/organizationSwitch/OrganizationSwitch';
 import {Usage} from 'tg.component/billing/Usage';
 import {QuickStartHighlight} from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import {useGlobalContext} from 'tg.globalContext/GlobalContext';
 import {EmailVerificationPage} from 'tg.component/EmailVerificationPage';
 
 const StyledWrapper = styled('div')`
