@@ -87,19 +87,24 @@ export const OperationsList = ({ data }: Props) => {
               sx={{
                 gridColumn: '1 / -1',
                 mt: 0,
-                justifyContent: 'space-between',
+                gap: 0.5,
               }}
-              color={theme.palette.error.main}
             >
-              <TranslatedError code={o.errorMessage} />
-              <StyledLink
-                component={Link}
-                to={`${LINKS.PROJECT_TRANSLATIONS.build({
-                  [PARAMS.PROJECT_ID]: project.id,
-                })}?failedJob=${o.id}`}
-              >
-                {t('batch_operation_show_failed_keys')}
-              </StyledLink>
+              <Box color={theme.palette.error.main}>
+                <TranslatedError code={o.errorMessage} />
+              </Box>
+              <div>
+                (
+                <StyledLink
+                  component={Link}
+                  to={`${LINKS.PROJECT_TRANSLATIONS.build({
+                    [PARAMS.PROJECT_ID]: project.id,
+                  })}?failedJob=${o.id}`}
+                >
+                  {t('batch_operation_show_failed_keys')}
+                </StyledLink>
+                )
+              </div>
             </StyledCell>
           )}
         </React.Fragment>
