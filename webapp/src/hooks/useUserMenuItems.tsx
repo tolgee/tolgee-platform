@@ -2,7 +2,7 @@ import {useTranslate} from '@tolgee/react';
 import {useLocation} from 'react-router-dom';
 
 import {LINKS} from '../constants/links';
-import {useConfig, useUser} from 'tg.globalContext/helpers';
+import {useConfig, useIsEmailVerified, useUser} from 'tg.globalContext/helpers';
 
 export class UserMenuItem {
   constructor(
@@ -18,7 +18,7 @@ export const useUserMenuItems = (): UserMenuItem[] => {
 
   const config = useConfig();
   const user = useUser();
-  const isEmailVerified = user !== undefined && user.emailAwaitingVerification === null || !config.needsEmailVerification;
+  const isEmailVerified = useIsEmailVerified();
 
   const userSettings =
     !config.authentication || !user
