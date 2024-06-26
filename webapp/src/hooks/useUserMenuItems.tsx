@@ -1,8 +1,8 @@
 import {useTranslate} from '@tolgee/react';
 import {useLocation} from 'react-router-dom';
 
-import {LINKS} from '../constants/links';
-import {useConfig, useIsEmailVerified, useUser,} from 'tg.globalContext/helpers';
+import { LINKS } from '../constants/links';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 
 export class UserMenuItem {
   constructor(
