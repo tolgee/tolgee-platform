@@ -52,7 +52,6 @@ apply plugin: 'org.hibernate.orm'
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 idea {
