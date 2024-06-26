@@ -1,15 +1,29 @@
-import { T, useTranslate } from '@tolgee/react';
-import { assertUnreachable } from 'tg.fixtures/assertUnreachable';
-import { components } from 'tg.service/apiSchema.generated';
-import { Announcement } from './Announcement';
-import { BannerLink } from './BannerLink';
+import {T, useTranslate} from '@tolgee/react';
+import {useTheme} from '@mui/material';
+import {assertUnreachable} from 'tg.fixtures/assertUnreachable';
+import {components} from 'tg.service/apiSchema.generated';
+import {Announcement} from './Announcement';
+import {BannerLink} from './BannerLink';
+import {useIsEmailVerified} from 'tg.globalContext/helpers';
+import {MailIcon, MailIconDark} from "tg.component/CustomIcons";
 
 type AnnouncementDtoType = components['schemas']['AnnouncementDto']['type'];
 
 export function useAnnouncement() {
   const { t } = useTranslate();
-
+  const isEmailVerified = useIsEmailVerified();
+  const theme = useTheme();
   return function AnnouncementWrapper(value: AnnouncementDtoType) {
+    if (!isEmailVerified) {
+        return (
+            <Announcement
+                content={t('announcement_verify_email')}
+                title="Verify email now"
+                icon={theme.palette.mode === 'dark' ? <MailIconDark /> : <MailIcon />}
+            />
+        );
+    }
+
     switch (value) {
       case 'FEATURE_BATCH_OPERATIONS':
         return (

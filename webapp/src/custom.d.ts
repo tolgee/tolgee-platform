@@ -1,31 +1,32 @@
 import API from '@openreplay/tracker';
-import { PaletteColor } from '@mui/material/styles';
-import { PaletteColorOptions } from '@mui/material';
+import {PaletteColor} from '@mui/material/styles';
+import {PaletteColorOptions} from '@mui/material';
 import {
-  Tooltip,
   Activity,
   BillingProgress,
   Cell,
+  colors,
   Editor,
+  EmailNotVerifiedBanner,
   Emphasis,
   ExampleBanner,
+  Input,
+  LanguageChips,
+  Login,
   Marker,
   Navbar,
   Placeholders,
   QuickStart,
   Tile,
   TipsBanner,
+  Tooltip,
   TopBanner,
-  LanguageChips,
-  Login,
-  Input,
 } from './colors';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
-import { colors } from './colors';
 
 const all = { ...colors.light, ...colors.dark };
 
@@ -46,6 +47,7 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
+    emailNotVerifiedBanner: EmailNotVerifiedBanner;
     quickStart: QuickStart;
     import: typeof all.import;
     exampleBanner: ExampleBanner;
@@ -73,6 +75,7 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
+    emailNotVerifiedBanner: EmailNotVerifiedBanner;
     quickStart: QuickStart;
     import: typeof all.import;
     exampleBanner: ExampleBanner;

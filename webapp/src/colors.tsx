@@ -1,5 +1,5 @@
-import { grey } from '@mui/material/colors';
-import { ALL_TOKENS } from './tokens';
+import {grey} from '@mui/material/colors';
+import {ALL_TOKENS} from './tokens';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',
@@ -70,6 +70,12 @@ export type TopBanner = {
   background: string;
   mainText: string;
   linkText: string;
+};
+
+export type EmailNotVerifiedBanner = {
+  background: string;
+  mainText: string;
+  tittleText: string;
 };
 
 export type Tile = {
@@ -207,6 +213,11 @@ export const colors = {
       mainText: '#004437',
       linkText: '#009B85',
     },
+    emailNotVerifiedBanner: {
+      background: '#FDECF2',
+      mainText: '#EC407A',
+      tittleText: '#A82D57',
+    },
     quickStart: {
       highlight: '#F7F8FB',
       circleNormal: '#E7EBF5',
@@ -337,6 +348,11 @@ export const colors = {
       background: '#008371',
       mainText: '#BEF4E9',
       linkText: '#dddddd',
+    },
+    emailNotVerifiedBanner: {
+      background: '#822343',
+      mainText: '#FDECF2',
+      tittleText: '#F6A7C2',
     },
     quickStart: {
       highlight: '#233043',

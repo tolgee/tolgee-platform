@@ -1,13 +1,10 @@
-import { styled } from '@mui/material';
-import { useEffect, useRef } from 'react';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { useAnnouncement } from './useAnnouncement';
-
-import { Close } from '@mui/icons-material';
-import { useResizeObserver } from 'usehooks-ts';
+import {styled} from '@mui/material';
+import {useEffect, useRef} from 'react';
+import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
+import {useAnnouncement} from './useAnnouncement';
+import {useIsEmailVerified} from 'tg.globalContext/helpers';
+import {Close} from '@mui/icons-material';
+import {useResizeObserver} from 'usehooks-ts';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -17,9 +14,9 @@ const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 50px 1fr 50px;
   width: 100%;
-  background: ${({ theme }) => theme.palette.topBanner.background};
+  background: ${({ theme}) => useIsEmailVerified() ? theme.palette.topBanner.background : theme.palette.emailNotVerifiedBanner.background};
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
-  color: ${({ theme }) => theme.palette.topBanner.mainText};
+  color: ${({ theme }) => useIsEmailVerified() ? theme.palette.topBanner.mainText : theme.palette.emailNotVerifiedBanner.mainText};
   font-size: 15px;
   font-weight: 700;
   @container (max-width: 899px) {
@@ -44,6 +41,7 @@ const StyledCloseButton = styled('div')`
 `;
 
 export function TopBanner() {
+
   const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
   const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
