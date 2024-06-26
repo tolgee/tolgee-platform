@@ -11,11 +11,10 @@ import {useApiQuery} from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import {Button, styled} from '@mui/material';
 import {Link} from 'react-router-dom';
-import {useIsAdmin, usePreferredOrganization} from 'tg.globalContext/helpers';
+import {useIsAdmin, useIsEmailVerified, usePreferredOrganization} from 'tg.globalContext/helpers';
 import {OrganizationSwitch} from 'tg.component/organizationSwitch/OrganizationSwitch';
 import {Usage} from 'tg.component/billing/Usage';
 import {QuickStartHighlight} from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import {useGlobalContext} from 'tg.globalContext/GlobalContext';
 import {EmailVerificationPage} from 'tg.component/EmailVerificationPage';
 
 const StyledWrapper = styled('div')`
@@ -32,7 +31,7 @@ export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const { preferredOrganization } = usePreferredOrganization();
-  const isEmailVerified = useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification === null || !c.initialData.serverConfiguration.needsEmailVerification);
+  const isEmailVerified = useIsEmailVerified();
 
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',

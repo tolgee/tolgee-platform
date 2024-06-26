@@ -1,6 +1,6 @@
-import { components } from 'tg.service/apiSchema.generated';
+import {components} from 'tg.service/apiSchema.generated';
 
-import { useGlobalActions, useGlobalContext } from './GlobalContext';
+import {useGlobalActions, useGlobalContext} from './GlobalContext';
 
 export type Feature =
   components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
@@ -11,6 +11,8 @@ export const useConfig = () =>
   useGlobalContext((c) => c.initialData.serverConfiguration);
 
 export const useUser = () => useGlobalContext((c) => c.initialData.userInfo);
+
+export const useIsEmailVerified = () => useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification === null || !c.initialData.serverConfiguration.needsEmailVerification);
 
 export const useIsAdmin = () =>
   useGlobalContext((c) => c.initialData.userInfo?.globalServerRole === 'ADMIN');
