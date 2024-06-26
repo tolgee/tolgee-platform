@@ -1,5 +1,4 @@
 import { grey } from '@mui/material/colors';
-import { ALL_TOKENS } from './tokens';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',
@@ -50,15 +49,6 @@ export type Activity = {
   removed: string;
   added: string;
   addedHighlight: string;
-};
-
-export type BillingProgress = {
-  background: string;
-  low: string;
-  over: string;
-  sufficient: string;
-  overForbidden: string;
-  separator: string;
 };
 
 export type Marker = {
@@ -140,18 +130,6 @@ export type LanguageChips = {
   background: string;
 };
 
-const getTokensByMode = (mode: 'light' | 'dark') => {
-  const result = {} as Record<keyof typeof ALL_TOKENS, string>;
-  Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
-    if (typeof value === 'string') {
-      result[tokenName] = value;
-    } else {
-      result[tokenName] = value[mode];
-    }
-  });
-  return result;
-};
-
 export const colors = {
   light: {
     white: '#fff',
@@ -188,15 +166,6 @@ export const colors = {
       other: '#002bff',
       main: '#2C3C52',
     } satisfies Editor,
-    billingProgress: {
-      background: '#C4C4C4',
-      low: '#E80000',
-      over: '#ffce00',
-      overForbidden: '#970000',
-      sufficient: '#17AD18',
-      separator: '#656565',
-    } satisfies BillingProgress,
-    billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
     marker: {
       primary: '#ff0000',
@@ -243,7 +212,6 @@ export const colors = {
     languageChips: {
       background: '#F6F6F8',
     } satisfies LanguageChips,
-    tokens: getTokensByMode('light'),
     placeholders: {
       variable: {
         border: '#7AD3C1',
@@ -323,15 +291,6 @@ export const colors = {
       other: '#99aaff',
       main: '#eeeeee',
     } satisfies Editor,
-    billingProgress: {
-      background: '#565656',
-      low: '#ca0000',
-      over: '#ffce00',
-      overForbidden: '#980000',
-      sufficient: '#1e991e',
-      separator: '#656565',
-    } satisfies BillingProgress,
-    billingPlan: '#233043',
     globalLoading: '#ff6995',
     marker: {
       primary: '#ff0000',
@@ -377,7 +336,6 @@ export const colors = {
     languageChips: {
       background: '#243245',
     } satisfies LanguageChips,
-    tokens: getTokensByMode('dark'),
     placeholders: {
       variable: {
         border: '#008371',

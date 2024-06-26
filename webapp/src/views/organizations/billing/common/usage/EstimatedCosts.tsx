@@ -3,7 +3,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { FC, useState } from 'react';
 import { useMoneyFormatter } from 'tg.hooks/useLocale';
 import { useTranslate } from '@tolgee/react';
-import { Box, Tooltip, Typography } from '@mui/material';
+import { Box, Tooltip } from '@mui/material';
 import { UsageDialogButton } from './UsageDialogButton';
 
 export type EstimatedCostsProps = {
@@ -33,9 +33,7 @@ export const EstimatedCosts: FC<EstimatedCostsProps> = ({
     >
       <Box>
         <Tooltip title={t('active-plan-estimated-costs-description')}>
-          <Typography variant="caption">
-            {t('active-plan-estimated-costs-title')}
-          </Typography>
+          <Box>{t('active-plan-estimated-costs-title')}</Box>
         </Tooltip>
         <Box textAlign="right" display="flex" alignItems="center">
           {formatMoney(estimatedCosts || 0)}

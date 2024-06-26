@@ -7,14 +7,13 @@ import { useNumberFormatter } from 'tg.hooks/useLocale';
 export const StyledMetrics = styled('div')`
   display: grid;
   grid-template-columns: auto auto 2fr;
-  gap: 4px 8px;
+  gap: 6px 8px;
   margin: 16px 0px;
   max-width: 650px;
 `;
 
 const StyledName = styled(Box)`
   grid-column: 0;
-  padding-right: 10px;
   font-size: 15px;
 `;
 
@@ -31,7 +30,7 @@ const StyledValue = styled('span')`
     color: ${({ theme }) => theme.palette.warning.main};
   }
   &.sufficient {
-    color: ${({ theme }) => theme.palette.success.main};
+    color: ${({ theme }) => theme.palette.tokens.secondary.main};
   }
 `;
 

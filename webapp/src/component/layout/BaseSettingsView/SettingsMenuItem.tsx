@@ -11,7 +11,7 @@ const StyledItem = styled('div')`
     display: flex;
     padding: 6px 12px;
     cursor: pointer;
-    color: ${({ theme }) => theme.palette.emphasis[600]};
+    color: ${({ theme }) => theme.palette.tokens.text.primary};
     outline: 0;
     transition: all 0.2s ease-in-out;
     text-decoration: none;

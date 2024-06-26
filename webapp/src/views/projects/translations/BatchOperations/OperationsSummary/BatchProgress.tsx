@@ -3,7 +3,8 @@ import { Box, styled } from '@mui/material';
 const StyledContainer = styled(Box)`
   display: grid;
   border-radius: 4px;
-  background: ${({ theme }) => theme.palette.billingProgress.background};
+  background: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.background};
   overflow: hidden;
   transition: all 0.5s ease-in-out;
   position: relative;
@@ -12,7 +13,8 @@ const StyledContainer = styled(Box)`
 
 const StyledProgress = styled(Box)`
   border-radius: 4px;
-  background: ${({ theme }) => theme.palette.billingProgress.sufficient};
+  background: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.task.inProgress};
   transition: all 0.5s ease-in-out;
   height: 8px;
 `;
