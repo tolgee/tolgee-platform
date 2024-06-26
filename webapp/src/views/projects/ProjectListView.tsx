@@ -32,7 +32,7 @@ export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const { preferredOrganization } = usePreferredOrganization();
-  const isEmailVerified = useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification === null);
+  const isEmailVerified = useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification === null || !c.initialData.serverConfiguration.needsEmailVerification);
 
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
@@ -56,8 +56,6 @@ export const ProjectListView = () => {
     preferredOrganization?.currentUserRole === 'OWNER';
 
   const isAdmin = useIsAdmin();
-
-
 
   const isAdminAccess = !preferredOrganization?.currentUserRole && isAdmin;
 

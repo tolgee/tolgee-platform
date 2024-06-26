@@ -1,8 +1,8 @@
-import { useTranslate } from '@tolgee/react';
-import { useLocation } from 'react-router-dom';
+import {useTranslate} from '@tolgee/react';
+import {useLocation} from 'react-router-dom';
 
-import { LINKS } from '../constants/links';
-import { useConfig, useUser } from 'tg.globalContext/helpers';
+import {LINKS} from '../constants/links';
+import {useConfig, useUser} from 'tg.globalContext/helpers';
 
 export class UserMenuItem {
   constructor(
@@ -18,6 +18,7 @@ export const useUserMenuItems = (): UserMenuItem[] => {
 
   const config = useConfig();
   const user = useUser();
+  const isEmailVerified = user !== undefined && user.emailAwaitingVerification === null || !config.needsEmailVerification;
 
   const userSettings =
     !config.authentication || !user
@@ -28,6 +29,14 @@ export const useUserMenuItems = (): UserMenuItem[] => {
             label: t('user_menu_user_settings'),
           },
         ];
+
+  if(!isEmailVerified) {
+    return [
+        ...userSettings
+    ].map((i) => {
+      return new UserMenuItem(i.link, i.label, location.pathname === i.link);
+    });
+  }
 
   return [
     ...userSettings,
