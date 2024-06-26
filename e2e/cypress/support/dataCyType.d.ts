@@ -97,7 +97,6 @@ declare namespace DataCy {
         "billing-actual-used-strings" |
         "billing-estimated-costs" |
         "billing-estimated-costs-open-button" |
-        "billing-extra-credits-buy" |
         "billing-invoice-item-number" |
         "billing-invoice-usage-button" |
         "billing-invoices-list" |
@@ -106,13 +105,11 @@ declare namespace DataCy {
         "billing-plan" |
         "billing-plan-action-button" |
         "billing-plan-monthly-price" |
-        "billing-plan-price-per-seat-extra" |
-        "billing-plan-price-per-thousand-mt-credits-extra" |
-        "billing-plan-price-per-thousand-strings-extra" |
+        "billing-plan-price-extra-seat" |
+        "billing-plan-price-extra-thousand-mt-credits" |
+        "billing-plan-price-extra-thousand-strings" |
         "billing-plan-subtitle" |
-        "billing-plan-title" |
         "billing-progress-label-item" |
-        "billing-self-hosted-ee-plan" |
         "billing-self-hosted-ee-plan-subscribe-button" |
         "billing-subscriptions-cloud-button" |
         "billing-subscriptions-self-hosted-ee-button" |

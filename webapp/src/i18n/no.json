@@ -307,7 +307,7 @@
   "billing-progress-label-unused" : "Forhåndsbetalt: {value, number}",
   "billing-progress-label-used" : "Brukt fra abonnement: {value, number}",
   "billing_subscription_active" : "Aktiv plan",
-  "billing_subscription_cancelled" : "Abonnementet vil bli kansellert",
+  "billing_subscription_cancelled" : "Abonnement kansellert",
   "billing_subscription_new" : "Ny",
   "billing_subscriptions_account_manager_feature" : "Kontosjef",
   "billing_subscriptions_ai_prompt_customization" : "AI-tilpasning",

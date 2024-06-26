@@ -14,7 +14,7 @@ import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { StringsHint } from 'tg.component/billing/StringsHint';
+import { StringsHint } from 'tg.component/billing/Hints';
 
 const StyledTiles = styled(Box)`
   display: grid;

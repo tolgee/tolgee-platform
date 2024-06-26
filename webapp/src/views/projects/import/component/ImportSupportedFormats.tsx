@@ -23,7 +23,7 @@ const TechLogo = ({
   return (
     <Box
       sx={(theme) => ({
-        color: theme.palette.tokens.TEXT_SECONDARY,
+        color: theme.palette.tokens.text.secondary,
         height: height || '20px',
         width,
       })}
@@ -61,7 +61,7 @@ export const ImportSupportedFormats = () => {
       <Typography
         variant="body1"
         sx={(theme) => ({
-          color: theme.palette.tokens.TEXT_SECONDARY,
+          color: theme.palette.tokens.text.secondary,
           marginBottom: '16px',
           marginTop: '16px',
           textAlign: 'center',
@@ -111,10 +111,10 @@ const StyledItem = styled('div')`
   align-items: center;
   gap: 4px;
   border-radius: 12px;
-  border: 1px solid ${({ theme }) => theme.palette.tokens.BORDER_SECONDARY};
-  color: ${({ theme }) => theme.palette.tokens.TEXT_SECONDARY};
+  border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
+  color: ${({ theme }) => theme.palette.tokens.text.secondary};
   background-color: ${({ theme }) =>
-    theme.palette.tokens.SURFACE_BACKGROUND_SECONDARY};
+    theme.palette.tokens.background['paper-2']};
   font-size: 15px;
 `;
 

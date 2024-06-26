@@ -322,7 +322,7 @@
   "billing-progress-label-unused" : "Prepaid: {value, number}",
   "billing-progress-label-used" : "Used from subscription: {value, number}",
   "billing_subscription_active" : "Active plan",
-  "billing_subscription_cancelled" : "Subscription will be cancelled",
+  "billing_subscription_cancelled" : "Subscription cancelled",
   "billing_subscription_custom" : "Custom for you",
   "billing_subscription_included_credits" : "<highlight>{quantity, number}</highlight> <hint>MT credits</hint> included",
   "billing_subscription_included_credits_unlimited" : "<highlight>Unlimited</highlight> <hint>MT credits</hint>",

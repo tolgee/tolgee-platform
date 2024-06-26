@@ -307,7 +307,7 @@
   "billing-progress-label-unused" : "预付费：{value, number}",
   "billing-progress-label-used" : "订阅中已使用：{value, number}",
   "billing_subscription_active" : "当前套餐",
-  "billing_subscription_cancelled" : "订阅将被取消",
+  "billing_subscription_cancelled" : "订阅已取消",
   "billing_subscription_new" : "新建",
   "billing_subscriptions_account_manager_feature" : "客户经理",
   "billing_subscriptions_ai_prompt_customization" : "AI 定制",

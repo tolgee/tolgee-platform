@@ -9,7 +9,8 @@ const CIRCUIT = RADIUS * Math.PI * 2;
 const StyledCircleBackground = styled('circle')`
   fill: none;
   stroke-width: 17px;
-  stroke: ${({ theme }) => theme.palette.billingProgress.background};
+  stroke: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.background};
   &.extra {
     stroke: transparent;
   }
@@ -21,9 +22,11 @@ const StyledCircleContent = styled('circle')`
   stroke-linecap: round;
   transform-origin: 50% 50%;
   stroke-dasharray: ${CIRCUIT};
-  stroke: ${({ theme }) => theme.palette.billingProgress.sufficient};
+  stroke: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.pricing.sufficient};
   &.critical {
-    stroke: ${({ theme }) => theme.palette.billingProgress.low};
+    stroke: ${({ theme }) =>
+      theme.palette.tokens._components.progressbar.pricing.low};
   }
 `;
 
@@ -31,9 +34,11 @@ const StyledCircleContentOver = styled(StyledCircleContent)`
   stroke-width: 17px;
   stroke-linecap: unset;
   stroke-linecap: round;
-  stroke: ${({ theme }) => theme.palette.billingProgress.overForbidden};
+  stroke: ${({ theme }) =>
+    theme.palette.tokens._components.progressbar.pricing.overForbidden};
   &.canGoOver {
-    stroke: ${({ theme }) => theme.palette.billingProgress.over};
+    stroke: ${({ theme }) =>
+      theme.palette.tokens._components.progressbar.pricing.over};
   }
 `;
 

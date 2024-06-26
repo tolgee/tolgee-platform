@@ -311,10 +311,6 @@ export class Validation {
       is: false,
       then: Yup.string().required(),
     }),
-    forOrganizationIds: Yup.array().when('public', {
-      is: false,
-      then: Yup.array().min(1),
-    }),
     prices: Yup.object().when('type', {
       is: 'PAY_AS_YOU_GO',
       then: Yup.object({
@@ -330,10 +326,6 @@ export class Validation {
     stripeProductId: Yup.string().when('free', {
       is: false,
       then: Yup.string().required(),
-    }),
-    forOrganizationIds: Yup.array().when('public', {
-      is: false,
-      then: Yup.array().min(1),
     }),
   });
 

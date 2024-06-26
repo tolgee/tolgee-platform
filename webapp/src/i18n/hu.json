@@ -307,7 +307,7 @@
   "billing-progress-label-unused" : "Előre fizetett: {value, number}",
   "billing-progress-label-used" : "Felhasználva az előfizetésből: {value, number}",
   "billing_subscription_active" : "Aktív terv",
-  "billing_subscription_cancelled" : "Az előfizetés törlésre kerül",
+  "billing_subscription_cancelled" : "Az előfizetés lemondva",
   "billing_subscription_new" : "Új",
   "billing_subscriptions_account_manager_feature" : "Fiókkezelő",
   "billing_subscriptions_ai_prompt_customization" : "AI testreszabása",

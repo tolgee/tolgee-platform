@@ -52,7 +52,11 @@ class ProjectStatsController(
 
     val totals = projectStatsService.computeProjectTotals(baseLanguage, languageStats)
 
-    val statsLanguagePairs = languageStats.map { it to languages[it.languageId]!! }
+    val statsLanguagePairs =
+      languageStats.mapNotNull {
+        val language = languages[it.languageId] ?: return@mapNotNull null
+        it to language
+      }
 
     return ProjectStatsModel(
       projectId = projectStats.id,
