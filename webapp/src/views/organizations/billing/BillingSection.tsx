@@ -25,14 +25,3 @@ export const StyledBillingSectionHeader = styled('div')`
   flex-wrap: wrap;
   align-items: center;
 `;
-
-export const StyledActionArea = styled(Box)`
-  grid-area: action;
-  justify-self: end;
-  align-self: end;
-  gap: 8px;
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  white-space: nowrap;
-`;

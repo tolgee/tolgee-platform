@@ -307,7 +307,7 @@
   "billing-progress-label-unused" : "Pré-pago: {value, number}",
   "billing-progress-label-used" : "Usado da assinatura: {value, number}",
   "billing_subscription_active" : "Plano ativo",
-  "billing_subscription_cancelled" : "A assinatura será cancelada",
+  "billing_subscription_cancelled" : "Assinatura cancelada",
   "billing_subscription_new" : "Novo",
   "billing_subscriptions_account_manager_feature" : "Gerenciador de contas",
   "billing_subscriptions_ai_prompt_customization" : "Personalização de IA",

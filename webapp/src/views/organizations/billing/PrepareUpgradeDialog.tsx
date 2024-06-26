@@ -11,8 +11,8 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useUpgradePlan } from './Subscriptions/cloud/Plans/useUpgradePlan';
-import { useOrganization } from '../useOrganization';
+import { useUpgradePlan } from 'tg.component/billing/Plan/useUpgradePlan';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 
 type PrepareUpgradeDialogProps = {

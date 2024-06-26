@@ -322,7 +322,7 @@
   "billing-progress-label-unused" : "Preplătit: {value, number}",
   "billing-progress-label-used" : "Folosit din abonament: {value, number}",
   "billing_subscription_active" : "Plan activ",
-  "billing_subscription_cancelled" : "Abonamentul va fi anulat",
+  "billing_subscription_cancelled" : "Abonament anulat",
   "billing_subscription_custom" : "Personalizat pentru tine",
   "billing_subscription_included_credits" : "<number>{quantity}</number> <hint>credite MT</hint> incluse",
   "billing_subscription_included_credits_unlimited" : "<highlight>Nelimitat</highlight> <hint>credite MT</hint>",

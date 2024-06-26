@@ -311,7 +311,7 @@
   "billing-progress-label-unused" : "Vorausbezahlt: {value, number}",
   "billing-progress-label-used" : "Verwendet aus Abonnement: {value, number}",
   "billing_subscription_active" : "Aktiver Plan",
-  "billing_subscription_cancelled" : "Das Abonnement wird gekündigt",
+  "billing_subscription_cancelled" : "Abonnement gekündigt",
   "billing_subscription_custom" : "Für Sie angepasst",
   "billing_subscription_new" : "Neu",
   "billing_subscriptions_account_manager_feature" : "Account-Manager",

@@ -322,7 +322,7 @@
   "billing-progress-label-unused" : "Forudbetalt: {value, number}",
   "billing-progress-label-used" : "Brugt fra abonnement: {value, number}",
   "billing_subscription_active" : "Aktiv plan",
-  "billing_subscription_cancelled" : "Abonnementet vil blive annulleret",
+  "billing_subscription_cancelled" : "Abonnement annulleret",
   "billing_subscription_custom" : "Tilpasset til dig",
   "billing_subscription_included_credits" : "<highlight>{quantity}</highlight> <hint>MT-kreditter</hint> inkluderet",
   "billing_subscription_included_credits_unlimited" : "<highlight>Ubegrænsede</highlight> <hint>MT-kreditter</hint>",

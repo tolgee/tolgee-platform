@@ -322,7 +322,7 @@
   "billing-progress-label-unused" : "Předplaceno: {value, number}",
   "billing-progress-label-used" : "Využito z předplatného: {value, number}",
   "billing_subscription_active" : "Aktivní plán",
-  "billing_subscription_cancelled" : "Předplatné bude zrušeno",
+  "billing_subscription_cancelled" : "Předplatné zrušeno",
   "billing_subscription_custom" : "Přizpůsobeno pro vás",
   "billing_subscription_included_credits" : "<highlight>{quantity, number}</highlight> zahrnutých <hint>MT kreditů</hint>",
   "billing_subscription_included_credits_unlimited" : "<highlight>Neomezeně</highlight> <hint>MT kreditů</hint>",

@@ -114,6 +114,7 @@ class PoFileProcessor(
       PoFormatDetector().detectByFlag(flag)
         ?.let { return it }
     }
+
     return detectedFormat
   }
 

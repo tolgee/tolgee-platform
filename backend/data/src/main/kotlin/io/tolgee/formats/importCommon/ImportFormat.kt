@@ -68,7 +68,11 @@ enum class ImportFormat(
   ),
   PO_ICU(
     ImportFileFormat.PO,
-    messageConvertorOrNull = PoToIcuMessageConvertor(paramConvertorFactory = null),
+    messageConvertorOrNull =
+      PoToIcuMessageConvertor(
+        canContainIcu = true,
+        paramConvertorFactory = null,
+      ),
   ),
   PO_RUBY(
     ImportFileFormat.PO,

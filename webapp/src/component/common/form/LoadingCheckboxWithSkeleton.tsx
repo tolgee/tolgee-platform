@@ -28,7 +28,7 @@ const StyledLabel = styled('div')`
 `;
 
 const StyledHelpIcon = styled(HelpOutline)`
-  color: ${({ theme }) => theme.palette.tokens.ICON_PRIMARY};
+  color: ${({ theme }) => theme.palette.tokens.icon.primary};
   font-size: 16px;
 `;
 

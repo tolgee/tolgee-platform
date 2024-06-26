@@ -4,7 +4,6 @@ import { PaletteColorOptions } from '@mui/material';
 import {
   Tooltip,
   Activity,
-  BillingProgress,
   Cell,
   Editor,
   Emphasis,
@@ -21,14 +20,18 @@ import {
   Input,
   RevisionFilterBanner,
 } from './colors';
+import { tolgeeColors, tolgeePalette } from 'figmaTheme';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
-import { colors } from './colors';
 
-const all = { ...colors.light, ...colors.dark };
+type TolgeeTokens =
+  | (typeof tolgeePalette)['Light']
+  | (typeof tolgeePalette)['Dark'];
+
+type TolgeeColors = typeof tolgeeColors;
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -42,8 +45,6 @@ declare module '@mui/material/styles/createPalette' {
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;
-    billingProgress: BillingProgress;
-    billingPlan: PaletteColor;
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
@@ -51,7 +52,8 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
-    tokens: typeof all.tokens;
+    tokens: TolgeeTokens;
+    colors: TolgeeColors;
     placeholders: Placeholders;
     languageChips: LanguageChips;
     login: Login;
@@ -70,8 +72,6 @@ declare module '@mui/material/styles/createPalette' {
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;
-    billingProgress: BillingProgress;
-    billingPlan: PaletteColorOptions;
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
@@ -79,7 +79,8 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
-    tokens: typeof all.tokens;
+    tokens: TolgeeTokens;
+    colors: TolgeeColors;
     placeholders: Placeholders;
     languageChips: LanguageChips;
     login: Login;
