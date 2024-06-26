@@ -1,3 +1,15 @@
+# [3.67.0](https://github.com/tolgee/tolgee-platform/compare/v3.66.1...v3.67.0) (2024-06-26)
+
+
+### Bug Fixes
+
+* possible NPE on language stats when language soft deleted ([#2389](https://github.com/tolgee/tolgee-platform/issues/2389)) ([59bd9a4](https://github.com/tolgee/tolgee-platform/commit/59bd9a43b6030dd19399b5db0adaa658ba9a7b3b))
+
+
+### Features
+
+* new pricing plans design ([#2374](https://github.com/tolgee/tolgee-platform/issues/2374)) ([6f5762b](https://github.com/tolgee/tolgee-platform/commit/6f5762b6179b702d664d43bf85c45e89c726f131))
+
 ## [3.66.1](https://github.com/tolgee/tolgee-platform/compare/v3.66.0...v3.66.1) (2024-06-25)
 
 
