@@ -1980,10 +1980,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -2155,11 +2155,11 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2297,15 +2297,15 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
-      username?: string;
-      /** Format: int64 */
-      projectId: number;
+      projectName: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      username?: string;
       description: string;
       scopes: string[];
     };
@@ -3502,6 +3502,7 @@ export interface components {
       postHogApiKey?: string;
       postHogHost?: string;
       contentDeliveryConfigured: boolean;
+      userSourceField: boolean;
       slack: components["schemas"]["SlackDTO"];
     };
     SlackDTO: {
@@ -3607,20 +3608,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       translation?: string;
-      description?: string;
+      baseTranslation?: string;
       namespace?: string;
+      description?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       translation?: string;
-      description?: string;
+      baseTranslation?: string;
       namespace?: string;
+      description?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4170,11 +4171,11 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4303,15 +4304,15 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
-      username?: string;
-      /** Format: int64 */
-      projectId: number;
+      projectName: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      username?: string;
       description: string;
       scopes: string[];
     };
