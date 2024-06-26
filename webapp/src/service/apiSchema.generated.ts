@@ -498,6 +498,10 @@ export interface paths {
     post: operations["create_12"];
   };
   "/v2/organizations/{organizationId}/slack/connect": {
+    /**
+     * This endpoint allows the owner of an organization to connect a Slack workspace to their organization.
+     * Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.
+     */
     post: operations["connectWorkspace"];
   };
   "/v2/image-upload": {
@@ -728,9 +732,11 @@ export interface paths {
     get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/slack/workspaces": {
+    /** Returns a list of workspaces connected to the organization */
     get: operations["getConnectedWorkspaces"];
   };
   "/v2/organizations/{organizationId}/slack/get-connect-url": {
+    /** Returns URL to which user should be redirected to connect Slack workspace */
     get: operations["connectToSlack"];
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
@@ -808,6 +814,7 @@ export interface paths {
     delete: operations["removeUser"];
   };
   "/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}": {
+    /** Disconnects a workspace from the organization */
     delete: operations["disconnectWorkspace"];
   };
   "/v2/invitations/{invitationId}": {
@@ -1047,6 +1054,7 @@ export interface components {
         | "slack_invalid_command"
         | "slack_not_subscribed_yet"
         | "slack_connection_failed"
+        | "tolgee_account_already_connected"
         | "slack_not_configured"
         | "slack_workspace_already_connected"
         | "slack_connection_error";
@@ -1123,6 +1131,29 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1154,29 +1185,6 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1972,10 +1980,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -2144,14 +2152,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
+      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2289,17 +2297,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      projectId: number;
-      scopes: string[];
+      projectName: string;
+      userFullName?: string;
       username?: string;
       /** Format: int64 */
-      lastUsedAt?: number;
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       description: string;
-      userFullName?: string;
-      projectName: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2846,6 +2854,7 @@ export interface components {
         | "slack_invalid_command"
         | "slack_not_subscribed_yet"
         | "slack_connection_failed"
+        | "tolgee_account_already_connected"
         | "slack_not_configured"
         | "slack_workspace_already_connected"
         | "slack_connection_error";
@@ -3451,18 +3460,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
       /** @example btforg */
       slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3494,7 +3503,6 @@ export interface components {
       postHogHost?: string;
       contentDeliveryConfigured: boolean;
       slack: components["schemas"]["SlackDTO"];
-      userSourceField: boolean;
     };
     SlackDTO: {
       enabled: boolean;
@@ -3599,20 +3607,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
       translation?: string;
       description?: string;
       namespace?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
       translation?: string;
       description?: string;
       namespace?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4159,14 +4167,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
+      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4295,17 +4303,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      projectId: number;
-      scopes: string[];
+      projectName: string;
+      userFullName?: string;
       username?: string;
       /** Format: int64 */
-      lastUsedAt?: number;
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       description: string;
-      userFullName?: string;
-      projectName: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -7576,6 +7584,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -12731,6 +12741,10 @@ export interface operations {
       };
     };
   };
+  /**
+   * This endpoint allows the owner of an organization to connect a Slack workspace to their organization.
+   * Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.
+   */
   connectWorkspace: {
     parameters: {
       path: {
@@ -15140,6 +15154,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
       };
       path: {
         projectId: number;
@@ -15236,6 +15252,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
       };
       path: {
         projectId: number;
@@ -16015,6 +16033,7 @@ export interface operations {
       };
     };
   };
+  /** Returns a list of workspaces connected to the organization */
   getConnectedWorkspaces: {
     parameters: {
       path: {
@@ -16062,6 +16081,7 @@ export interface operations {
       };
     };
   };
+  /** Returns URL to which user should be redirected to connect Slack workspace */
   connectToSlack: {
     parameters: {
       path: {
@@ -17110,6 +17130,7 @@ export interface operations {
       };
     };
   };
+  /** Disconnects a workspace from the organization */
   disconnectWorkspace: {
     parameters: {
       path: {

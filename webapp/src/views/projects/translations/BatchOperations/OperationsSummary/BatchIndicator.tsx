@@ -1,4 +1,4 @@
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, SxProps } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useBatchOperationStatusTranslate } from 'tg.translationTools/useBatchOperationStatusTranslate';

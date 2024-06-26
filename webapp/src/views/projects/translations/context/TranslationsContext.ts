@@ -32,6 +32,7 @@ import { useTagsService } from './services/useTagsService';
 import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
 import { useWebsocketService } from './services/useWebsocketService';
+import { PrefilterType } from '../prefilters/usePrefilter';
 
 type Props = {
   projectId: number;
@@ -41,7 +42,7 @@ type Props = {
   keyNamespace?: string;
   updateLocalStorageLanguages?: boolean;
   pageSize?: number;
-  revisionFilter?: number;
+  prefilter?: PrefilterType;
 };
 
 export const [
@@ -90,7 +91,7 @@ export const [
     // when initial langs are null, fetching is postponed
     initialLangs: initialLangs,
     baseLang: props.baseLang,
-    revisionFilter: props.revisionFilter,
+    prefilter: props.prefilter,
   });
 
   const { setEventBlockers } = useWebsocketService(translationService);
@@ -274,6 +275,7 @@ export const [
     elementsRef: viewRefs.elementsRef,
     reactList: viewRefs.reactList,
     sidePanelOpen,
+    prefilter: props.prefilter,
   };
 
   return [state, actions];
