@@ -1,7 +1,7 @@
-import {Button, styled, Typography, useTheme} from '@mui/material';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {messageService} from 'tg.service/MessageService';
-import {T} from '@tolgee/react';
+import { Button, styled, Typography, useTheme } from '@mui/material';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { messageService } from 'tg.service/MessageService';
+import { T } from '@tolgee/react';
 import React from 'react';
 
 const StyledContainer = styled('div')`

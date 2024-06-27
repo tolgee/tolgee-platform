@@ -1,7 +1,7 @@
-import {styled} from '@mui/material';
-import {useTranslate} from '@tolgee/react';
-import {TadaIcon} from 'tg.component/CustomIcons';
-import {BannerLink} from './BannerLink';
+import { styled } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+import { TadaIcon } from 'tg.component/CustomIcons';
+import { BannerLink } from './BannerLink';
 
 type Props = {
   content: React.ReactNode;

@@ -1,12 +1,12 @@
-import React, {useState} from 'react';
-import {IconButton, MenuItem, Popover, styled} from '@mui/material';
-import {Link} from 'react-router-dom';
+import React, { useState } from 'react';
+import { IconButton, MenuItem, Popover, styled } from '@mui/material';
+import { Link } from 'react-router-dom';
 
-import {useUserMenuItems} from 'tg.hooks/useUserMenuItems';
-import {UserAvatar} from 'tg.component/common/avatar/UserAvatar';
+import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
+import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 
-import {ThemeItem} from './ThemeItem';
-import {LanguageItem} from './LanguageItem';
+import { ThemeItem } from './ThemeItem';
+import { LanguageItem } from './LanguageItem';
 
 const StyledIconButton = styled(IconButton)`
   width: 40px;

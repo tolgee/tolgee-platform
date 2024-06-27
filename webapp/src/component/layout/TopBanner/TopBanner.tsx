@@ -1,10 +1,13 @@
-import {styled} from '@mui/material';
-import {useEffect, useRef} from 'react';
-import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
-import {useAnnouncement} from './useAnnouncement';
-import {useIsEmailVerified} from 'tg.globalContext/helpers';
-import {Close} from '@mui/icons-material';
-import {useResizeObserver} from 'usehooks-ts';
+import { styled } from '@mui/material';
+import { useEffect, useRef } from 'react';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { useAnnouncement } from './useAnnouncement';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
+import { Close } from '@mui/icons-material';
+import { useResizeObserver } from 'usehooks-ts';
 
 const StyledContainer = styled('div')`
   position: fixed;

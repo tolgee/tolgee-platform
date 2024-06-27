@@ -1,9 +1,13 @@
 import React from 'react';
 
-import {useConfig, useIsEmailVerified, useUser,} from 'tg.globalContext/helpers';
-import {UserMissingMenu} from './UserMissingMenu';
-import {UserPresentMenu} from './UserPresentMenu';
-import {UserUnverifiedEmailMenu} from './UserUnverifiedEmailMenu';
+import {
+  useConfig,
+  useIsEmailVerified,
+  useUser,
+} from 'tg.globalContext/helpers';
+import { UserMissingMenu } from './UserMissingMenu';
+import { UserPresentMenu } from './UserPresentMenu';
+import { UserUnverifiedEmailMenu } from './UserUnverifiedEmailMenu';
 
 export const UserMenu: React.FC = () => {
   const config = useConfig();

@@ -1,10 +1,10 @@
-import {BaseViewProps} from 'tg.component/layout/BaseView';
-import {LINKS} from 'tg.constants/links';
+import { BaseViewProps } from 'tg.component/layout/BaseView';
+import { LINKS } from 'tg.constants/links';
 
-import {useTranslate} from '@tolgee/react';
-import {BaseSettingsView} from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
-import {SettingsMenuItem} from 'tg.component/layout/BaseSettingsView/SettingsMenu';
-import {useConfig, useIsEmailVerified} from 'tg.globalContext/helpers';
+import { useTranslate } from '@tolgee/react';
+import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
+import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
+import { useConfig, useIsEmailVerified } from 'tg.globalContext/helpers';
 
 type Props = BaseViewProps;
 

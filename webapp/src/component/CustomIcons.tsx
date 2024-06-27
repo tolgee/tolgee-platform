@@ -1,5 +1,5 @@
-import React, {ComponentProps} from 'react';
-import {SvgIcon} from '@mui/material';
+import React, { ComponentProps } from 'react';
+import { SvgIcon } from '@mui/material';
 
 import ExportSvg from '../svgs/icons/export.svg?react';
 import ImportSvg from '../svgs/icons/import.svg?react';

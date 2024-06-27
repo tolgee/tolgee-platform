@@ -1,6 +1,6 @@
-import {components} from 'tg.service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 
-import {useGlobalActions, useGlobalContext} from './GlobalContext';
+import { useGlobalActions, useGlobalContext } from './GlobalContext';
 
 export type Feature =
   components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
