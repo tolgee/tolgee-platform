@@ -20,7 +20,7 @@ const StyledTitle = styled('div')`
   display: flex;
   gap: 12px;
   align-items: center;
-  color: ${({ theme }) => theme.palette.emailNotVerifiedBanner.tittleText};
+  color: ${({ theme }) => theme.palette.emailNotVerifiedBanner.titleText};
 `;
 
 const StyledWrappableContent = styled('div')`
