@@ -53,7 +53,9 @@ export const EmailVerificationPage = ({ email }) => {
                 <T keyName="verify_email_title" />
             </StyledHeader>
             <StyledDescription variant="body1">
-                <T keyName="verify_email_description" />
+                <T keyName="verify_email_description"
+                   params={{ email: email}}
+                />
             </StyledDescription>
             <StyledImg src={imageSrc} alt="Verify email" />
             <StyledHint variant="body2">
