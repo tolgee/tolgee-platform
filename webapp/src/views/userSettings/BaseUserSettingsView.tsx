@@ -14,7 +14,7 @@ export const BaseUserSettingsView: React.FC<Props> = ({
   ...otherProps
 }) => {
   const { t } = useTranslate();
-  const { authentication, needsEmailVerification } = useConfig();
+  const { authentication } = useConfig();
   const isEmailVerified = useIsEmailVerified();
 
   const menuItems: SettingsMenuItem[] = authentication
