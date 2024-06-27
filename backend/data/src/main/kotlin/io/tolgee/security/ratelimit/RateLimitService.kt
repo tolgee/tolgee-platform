@@ -146,7 +146,7 @@ class RateLimitService(
     if (!rateLimitProperties.emailVerificationRequestLimitEnabled || email.isNullOrEmpty()) return null
 
     val ip = request.remoteAddr
-    val key = "global.ip.$ip.email.$email::auth"
+    val key = "global.ip.$ip::auth"
 
     return RateLimitPolicy(
       key,
