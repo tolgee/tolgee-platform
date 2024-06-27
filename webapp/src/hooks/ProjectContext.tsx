@@ -78,8 +78,10 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
 
     const changeHandler = ({ data }: BatchJobProgress) => {
       const exists = batchOperations?.find((job) => job.id === data.jobId);
+      let shouldRefetch = false;
       if (!exists) {
         if (!knownJobs.includes(data.jobId)) {
+          shouldRefetch = true;
           // only refetch jobs first time we see unknown job
           setKnownJobs((jobs) => [...jobs, data.jobId]);
           setBatchOperations((jobs) => [
@@ -92,12 +94,15 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
               errorMessage: data.errorMessage,
             },
           ]);
-          batchJobsLoadable.refetch();
         }
       } else {
         setBatchOperations((jobs) =>
           jobs?.map((job) => {
             if (job.id === data.jobId) {
+              if (data.status === 'FAILED' && data.status !== job.status) {
+                // load error message
+                shouldRefetch = true;
+              }
               return {
                 ...job,
                 totalItems: data.total ?? job.totalItems,
@@ -109,6 +114,9 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
             return job;
           })
         );
+      }
+      if (shouldRefetch) {
+        batchJobsLoadable.refetch({ fetching: true });
       }
     };
 
