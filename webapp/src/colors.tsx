@@ -65,7 +65,7 @@ export type TopBanner = {
 export type EmailNotVerifiedBanner = {
   background: string;
   mainText: string;
-  tittleText: string;
+  titleText: string;
 };
 
 export type Tile = {
@@ -190,7 +190,7 @@ export const colors = {
     emailNotVerifiedBanner: {
       background: '#FDECF2',
       mainText: '#EC407A',
-      tittleText: '#A82D57',
+      titleText: '#A82D57',
     },
     revisionFilterBanner: {
       background: '#00AF9A14',
@@ -320,7 +320,7 @@ export const colors = {
     emailNotVerifiedBanner: {
       background: '#822343',
       mainText: '#FDECF2',
-      tittleText: '#F6A7C2',
+      titleText: '#F6A7C2',
     },
     revisionFilterBanner: {
       background: '#99E5D629',
