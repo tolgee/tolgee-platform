@@ -300,6 +300,10 @@ export interface paths {
     /** Set's the global role on the Tolgee Platform server. */
     put: operations["setRole"];
   };
+  "/v2/user/send-email-verification": {
+    /** Resends email verification email to currently authenticated user. */
+    post: operations["sendEmailVerification"];
+  };
   "/v2/user/generate-super-token": {
     /** Generates new JWT token permitted to sensitive operations */
     post: operations["getSuperToken"];
@@ -780,6 +784,7 @@ export interface components {
         | "third_party_auth_no_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
+        | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "username_already_exists"
@@ -1623,8 +1628,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1890,10 +1895,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -2061,15 +2066,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2206,16 +2211,16 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
-      username?: string;
       description: string;
+      userFullName?: string;
+      projectName: string;
+      username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -2392,6 +2397,7 @@ export interface components {
         | "third_party_auth_no_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
+        | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "username_already_exists"
@@ -3242,18 +3248,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3386,9 +3392,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       description?: string;
-      namespace?: string;
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -3396,9 +3402,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       description?: string;
-      namespace?: string;
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3497,6 +3503,7 @@ export interface components {
         | "CREATE_LANGUAGE"
         | "EDIT_LANGUAGE"
         | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
         | "CREATE_PROJECT"
         | "EDIT_PROJECT"
         | "NAMESPACE_EDIT"
@@ -3936,15 +3943,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4059,16 +4066,16 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
-      username?: string;
       description: string;
+      userFullName?: string;
+      projectName: string;
+      username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
     };
     PagedModelUserAccountModel: {
@@ -9102,6 +9109,45 @@ export interface operations {
         role: "USER" | "ADMIN";
       };
     };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Resends email verification email to currently authenticated user. */
+  sendEmailVerification: {
     responses: {
       /** OK */
       200: unknown;
