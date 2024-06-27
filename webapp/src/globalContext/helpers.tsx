@@ -14,6 +14,8 @@ export const useUser = () => useGlobalContext((c) => c.initialData.userInfo);
 
 export const useIsEmailVerified = () => useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification === null || !c.initialData.serverConfiguration.needsEmailVerification);
 
+export const useEmailAwaitingVerification = () => useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification);
+
 export const useIsAdmin = () =>
   useGlobalContext((c) => c.initialData.userInfo?.globalServerRole === 'ADMIN');
 

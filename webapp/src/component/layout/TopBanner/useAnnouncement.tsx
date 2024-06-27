@@ -18,7 +18,7 @@ export function useAnnouncement() {
         return (
             <Announcement
                 content={t('announcement_verify_email')}
-                title="Verify email now"
+                title={t('verify_email_now_title')}
                 icon={theme.palette.mode === 'dark' ? <MailIconDark /> : <MailIcon />}
             />
         );

@@ -300,6 +300,10 @@ export interface paths {
     /** Set's the global role on the Tolgee Platform server. */
     put: operations["setRole"];
   };
+  "/v2/user/send-email-verification": {
+    /** Resends email verification email to currently authenticated user. */
+    post: operations["sendEmailVerification"];
+  };
   "/v2/user/generate-super-token": {
     /** Generates new JWT token permitted to sensitive operations */
     post: operations["getSuperToken"];
@@ -851,6 +855,7 @@ export interface components {
         | "third_party_auth_no_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
+        | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "username_already_exists"
@@ -2650,6 +2655,7 @@ export interface components {
         | "third_party_auth_no_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
+        | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "username_already_exists"
@@ -9340,6 +9346,45 @@ export interface operations {
         role: "USER" | "ADMIN";
       };
     };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Resends email verification email to currently authenticated user. */
+  sendEmailVerification: {
     responses: {
       /** OK */
       200: unknown;

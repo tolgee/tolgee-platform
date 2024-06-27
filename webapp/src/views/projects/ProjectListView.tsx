@@ -11,7 +11,12 @@ import {useApiQuery} from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import {Button, styled} from '@mui/material';
 import {Link} from 'react-router-dom';
-import {useIsAdmin, useIsEmailVerified, usePreferredOrganization} from 'tg.globalContext/helpers';
+import {
+  useEmailAwaitingVerification,
+  useIsAdmin,
+  useIsEmailVerified,
+  usePreferredOrganization
+} from 'tg.globalContext/helpers';
 import {OrganizationSwitch} from 'tg.component/organizationSwitch/OrganizationSwitch';
 import {Usage} from 'tg.component/billing/Usage';
 import {QuickStartHighlight} from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
@@ -92,7 +97,7 @@ export const ProjectListView = () => {
           loading={listPermitted.isFetching}
         >
             {!isEmailVerified ? (
-                <EmailVerificationPage email={`userEmail` || ''} />
+                <EmailVerificationPage email={ useEmailAwaitingVerification() } />
             ) : (
                 <PaginatedHateoasList
                     wrapperComponentProps={{ className: 'listWrapper' }}
