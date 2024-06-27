@@ -1,12 +1,12 @@
-import { messageService } from 'tg.service/MessageService';
-import { T } from '@tolgee/react';
-import { GlobalError } from 'tg.error/GlobalError';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import {messageService} from 'tg.service/MessageService';
+import {T} from '@tolgee/react';
+import {GlobalError} from 'tg.error/GlobalError';
+import {TranslatedError} from 'tg.translationTools/TranslatedError';
 import * as Sentry from '@sentry/browser';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { RequestOptions } from './ApiHttpService';
-import { globalContext } from 'tg.globalContext/globalActions';
-import { LINKS } from 'tg.constants/links';
+import {parseErrorResponse} from 'tg.fixtures/errorFIxtures';
+import {RequestOptions} from './ApiHttpService';
+import {globalContext} from 'tg.globalContext/globalActions';
+import {LINKS} from 'tg.constants/links';
 
 export const handleApiError = (
   r: Response,
@@ -51,6 +51,12 @@ export const handleApiError = (
     messageService.error(<T keyName="resource_not_found_message" />);
     return;
   }
+
+  if (r.status == 429) {
+    messageService.error(<T keyName="too_many_requests" />);
+    return;
+  }
+
   if (r.status == 400 && !options.disableErrorNotification) {
     const parsed = parseErrorResponse(resObject);
     parsed.forEach((message) =>
