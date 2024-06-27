@@ -79,7 +79,7 @@ class EmailVerificationService(
 
     if (policy != null) {
       rateLimitService.consumeBucketUnless(policy) {
-        fakeSend(userAccount, callbackUrl, email)
+        createForUser(userAccount, callbackUrl, email)
         isVerified(userAccount)
       }
     }
