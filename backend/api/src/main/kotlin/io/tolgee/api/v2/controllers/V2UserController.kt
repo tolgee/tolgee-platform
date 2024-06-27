@@ -19,6 +19,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.payload.JwtAuthenticationResponse
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.organization.OrganizationService
@@ -56,6 +57,7 @@ class V2UserController(
     description = "Resends email verification email to currently authenticated user.",
   )
   @PostMapping("/send-email-verification")
+  @RateLimited(limit = 5, refillDurationInMs = 600_000)
   fun sendEmailVerification(request: HttpServletRequest) {
     val user = authenticationFacade.authenticatedUserEntity
     emailVerificationService.resendEmailVerification(user, request)
