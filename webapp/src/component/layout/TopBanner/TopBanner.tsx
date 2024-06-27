@@ -48,6 +48,7 @@ export function TopBanner() {
 
   const getAnnouncement = useAnnouncement();
   const announcement = bannerType && getAnnouncement(bannerType);
+  const showCloseButton = useIsEmailVerified()
 
   useResizeObserver({
     ref: bannerRef,
@@ -69,7 +70,7 @@ export function TopBanner() {
     <StyledContainer ref={bannerRef} data-cy="top-banner">
       <div />
       <StyledContent data-cy="top-banner-content">{announcement}</StyledContent>
-      <StyledCloseButton
+      {showCloseButton && (<StyledCloseButton
         role="button"
         tabIndex={0}
         onClick={() => dismissAnnouncement()}
@@ -77,6 +78,7 @@ export function TopBanner() {
       >
         <Close />
       </StyledCloseButton>
+      )}
     </StyledContainer>
   );
 }
