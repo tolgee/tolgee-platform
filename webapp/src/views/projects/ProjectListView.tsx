@@ -1,27 +1,26 @@
-import {useState} from 'react';
-import {T, useTranslate} from '@tolgee/react';
+import { useState } from 'react';
+import { T, useTranslate } from '@tolgee/react';
 
-import {EmptyListMessage} from 'tg.component/common/EmptyListMessage';
-import {PaginatedHateoasList} from 'tg.component/common/list/PaginatedHateoasList';
-import {BaseView} from 'tg.component/layout/BaseView';
-import {BaseViewAddButton} from 'tg.component/layout/BaseViewAddButton';
-import {DashboardPage} from 'tg.component/layout/DashboardPage';
-import {LINKS} from 'tg.constants/links';
-import {useApiQuery} from 'tg.service/http/useQueryApi';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { BaseView } from 'tg.component/layout/BaseView';
+import { BaseViewAddButton } from 'tg.component/layout/BaseViewAddButton';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
+import { LINKS } from 'tg.constants/links';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
-import {Button, styled} from '@mui/material';
-import {Link} from 'react-router-dom';
+import { Button, styled } from '@mui/material';
+import { Link } from 'react-router-dom';
 import {
-    useEmailAwaitingVerification,
-    useIsAdmin,
-    useIsEmailVerified,
-    usePreferredOrganization,
+  useEmailAwaitingVerification,
+  useIsAdmin,
+  useIsEmailVerified,
+  usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import {OrganizationSwitch} from 'tg.component/organizationSwitch/OrganizationSwitch';
-import {Usage} from 'tg.component/billing/Usage';
-import {QuickStartHighlight} from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import {useGlobalContext} from 'tg.globalContext/GlobalContext';
-import {EmailVerificationPage} from 'tg.component/EmailVerificationPage';
+import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
+import { Usage } from 'tg.component/billing/Usage';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { EmailVerificationPage } from 'tg.component/EmailVerificationPage';
 
 const StyledWrapper = styled('div')`
   display: flex;
