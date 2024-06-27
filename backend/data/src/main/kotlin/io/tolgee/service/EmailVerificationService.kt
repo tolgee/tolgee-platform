@@ -74,26 +74,15 @@ class EmailVerificationService(
     callbackUrl: String? = null,
     newEmail: String? = null,
   ) {
-    createForUser(userAccount, callbackUrl, newEmail)
-  }
+    val email = newEmail ?: userAccount.username
+    val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request, email)
 
-  @Transactional
-  fun fakeSend(
-    userAccount: UserAccount,
-    callbackUrl: String? = null,
-    newEmail: String? = null,
-  ) {
-    val code = "123"
-
-    val emailVerification =
-      userAccount.emailVerification?.also {
-        it.newEmail = newEmail
-        it.code = code
-      } ?: EmailVerification(userAccount = userAccount, code = code, newEmail = newEmail)
-
-    emailVerificationRepository.save(emailVerification)
-    userAccount.emailVerification = emailVerification
-    userAccountService.saveAndFlush(userAccount)
+    if (policy != null) {
+      rateLimitService.consumeBucketUnless(policy) {
+        fakeSend(userAccount, callbackUrl, email)
+        isVerified(userAccount)
+      }
+    }
   }
 
   fun isVerified(userAccount: UserAccountDto): Boolean {
