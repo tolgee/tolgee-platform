@@ -14,9 +14,15 @@ const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 50px 1fr 50px;
   width: 100%;
-  background: ${({ theme}) => useIsEmailVerified() ? theme.palette.topBanner.background : theme.palette.emailNotVerifiedBanner.background};
+  background: ${({ theme }) =>
+    useIsEmailVerified()
+      ? theme.palette.topBanner.background
+      : theme.palette.emailNotVerifiedBanner.background};
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
-  color: ${({ theme }) => useIsEmailVerified() ? theme.palette.topBanner.mainText : theme.palette.emailNotVerifiedBanner.mainText};
+  color: ${({ theme }) =>
+    useIsEmailVerified()
+      ? theme.palette.topBanner.mainText
+      : theme.palette.emailNotVerifiedBanner.mainText};
   font-size: 15px;
   font-weight: 700;
   @container (max-width: 899px) {
@@ -41,14 +47,13 @@ const StyledCloseButton = styled('div')`
 `;
 
 export function TopBanner() {
-
   const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
   const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
 
   const getAnnouncement = useAnnouncement();
   const announcement = bannerType && getAnnouncement(bannerType);
-  const showCloseButton = useIsEmailVerified()
+  const showCloseButton = useIsEmailVerified();
 
   useResizeObserver({
     ref: bannerRef,
@@ -70,14 +75,15 @@ export function TopBanner() {
     <StyledContainer ref={bannerRef} data-cy="top-banner">
       <div />
       <StyledContent data-cy="top-banner-content">{announcement}</StyledContent>
-      {showCloseButton && (<StyledCloseButton
-        role="button"
-        tabIndex={0}
-        onClick={() => dismissAnnouncement()}
-        data-cy="top-banner-dismiss-button"
-      >
-        <Close />
-      </StyledCloseButton>
+      {showCloseButton && (
+        <StyledCloseButton
+          role="button"
+          tabIndex={0}
+          onClick={() => dismissAnnouncement()}
+          data-cy="top-banner-dismiss-button"
+        >
+          <Close />
+        </StyledCloseButton>
       )}
     </StyledContainer>
   );

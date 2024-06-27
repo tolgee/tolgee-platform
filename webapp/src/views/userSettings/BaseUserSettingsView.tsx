@@ -17,8 +17,7 @@ export const BaseUserSettingsView: React.FC<Props> = ({
   const { authentication, needsEmailVerification } = useConfig();
   const isEmailVerified = useIsEmailVerified();
 
-
-    const menuItems: SettingsMenuItem[] = authentication
+  const menuItems: SettingsMenuItem[] = authentication
     ? [
         {
           link: LINKS.USER_PROFILE.build(),
@@ -31,17 +30,17 @@ export const BaseUserSettingsView: React.FC<Props> = ({
       ]
     : [];
 
-    if(isEmailVerified) {
-        menuItems.push({
-            link: LINKS.USER_API_KEYS.build(),
-            label: t('user_menu_api_keys'),
-        });
+  if (isEmailVerified) {
+    menuItems.push({
+      link: LINKS.USER_API_KEYS.build(),
+      label: t('user_menu_api_keys'),
+    });
 
-        menuItems.push({
-            link: LINKS.USER_PATS.build(),
-            label: t('user_menu_pats'),
-        });
-    }
+    menuItems.push({
+      link: LINKS.USER_PATS.build(),
+      label: t('user_menu_pats'),
+    });
+  }
 
   return (
     <BaseSettingsView

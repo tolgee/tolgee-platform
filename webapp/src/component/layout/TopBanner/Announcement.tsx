@@ -35,7 +35,7 @@ export const Announcement = ({ content, link, icon, title }: Props) => {
   return (
     <StyledWrappableContent>
       <StyledContent>
-        {icon ? icon: <TadaIcon />}
+        {icon ? icon : <TadaIcon />}
         {title && <StyledTitle>{title}</StyledTitle>}
         <div>{content}</div>
       </StyledContent>
