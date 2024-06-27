@@ -89,6 +89,7 @@ class TranslationViewDataProvider(
     languages: Set<LanguageDto>,
     params: TranslationFilters = TranslationFilters(),
   ): MutableList<Long> {
+    createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
         cb = em.criteriaBuilder,
@@ -98,7 +99,9 @@ class TranslationViewDataProvider(
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
         entityManager = em,
       )
-    return em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
+    val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
+    deleteFailedKeysInJobTempTable()
+    return result
   }
 
   private fun getTranslationsViewQueryBuilder(
