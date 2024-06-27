@@ -15,7 +15,7 @@ import {
   useEmailAwaitingVerification,
   useIsAdmin,
   useIsEmailVerified,
-  usePreferredOrganization
+  usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import {OrganizationSwitch} from 'tg.component/organizationSwitch/OrganizationSwitch';
 import {Usage} from 'tg.component/billing/Usage';
@@ -78,7 +78,8 @@ export const ProjectListView = () => {
           maxWidth={1000}
           allCentered
           addComponent={
-            (addAllowed && isEmailVerified) && (
+            addAllowed &&
+            isEmailVerified && (
               <QuickStartHighlight itemKey="add_project">
                 <BaseViewAddButton
                   addLinkTo={LINKS.PROJECT_ADD.build()}
@@ -89,41 +90,45 @@ export const ProjectListView = () => {
           }
           addLabel={t('projects_add_button')}
           hideChildrenOnLoading={false}
-          navigation={ isEmailVerified ? [
-            [<OrganizationSwitch key={0} />],
-            [t('projects_title'), LINKS.PROJECTS.build()],
-          ] : undefined}
+          navigation={
+            isEmailVerified
+              ? [
+                  [<OrganizationSwitch key={0} />],
+                  [t('projects_title'), LINKS.PROJECTS.build()],
+                ]
+              : undefined
+          }
           navigationRight={<Usage />}
           loading={listPermitted.isFetching}
         >
-            {!isEmailVerified ? (
-                <EmailVerificationPage email={ useEmailAwaitingVerification() } />
-            ) : (
-                <PaginatedHateoasList
-                    wrapperComponentProps={{ className: 'listWrapper' }}
-                    onPageChange={setPage}
-                    loadable={listPermitted}
-                    renderItem={(r) => <DashboardProjectListItem key={r.id} {...r} />}
-                    emptyPlaceholder={
-                        <EmptyListMessage
-                            loading={listPermitted.isFetching}
-                            hint={
-                                isOrganizationOwner ? (
-                                    <Button
-                                        component={Link}
-                                        to={LINKS.PROJECT_ADD.build()}
-                                        color="primary"
-                                    >
-                                        <T keyName="projects_empty_action" />
-                                    </Button>
-                                ) : undefined
-                            }
-                        >
-                            <T keyName="projects_empty" />
-                        </EmptyListMessage>
-                    }
-                />
-            )}
+          {!isEmailVerified ? (
+            <EmailVerificationPage email={useEmailAwaitingVerification()} />
+          ) : (
+            <PaginatedHateoasList
+              wrapperComponentProps={{ className: 'listWrapper' }}
+              onPageChange={setPage}
+              loadable={listPermitted}
+              renderItem={(r) => <DashboardProjectListItem key={r.id} {...r} />}
+              emptyPlaceholder={
+                <EmptyListMessage
+                  loading={listPermitted.isFetching}
+                  hint={
+                    isOrganizationOwner ? (
+                      <Button
+                        component={Link}
+                        to={LINKS.PROJECT_ADD.build()}
+                        color="primary"
+                      >
+                        <T keyName="projects_empty_action" />
+                      </Button>
+                    ) : undefined
+                  }
+                >
+                  <T keyName="projects_empty" />
+                </EmptyListMessage>
+              }
+            />
+          )}
         </BaseView>
       </DashboardPage>
     </StyledWrapper>

@@ -43,10 +43,10 @@ export const ProjectsIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={ProjectsSvg} {...props} />
 );
 export const MailIcon: React.FC<IconProps> = (props) => (
-    <CustomIcon icon={MailSvg} {...props} />
+  <CustomIcon icon={MailSvg} {...props} />
 );
 export const MailIconDark: React.FC<IconProps> = (props) => (
-    <CustomIcon icon={MailDarkSvg} {...props} />
+  <CustomIcon icon={MailDarkSvg} {...props} />
 );
 export const SettingsIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={SettingsSvg} {...props} />
