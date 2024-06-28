@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, styled, useTheme } from '@mui/material';
+import { Box, Link as MuiLink, styled, useTheme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { BatchIndicator } from './BatchIndicator';
@@ -8,6 +8,9 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useBatchOperationTypeTranslate } from 'tg.translationTools/useBatchOperationTypeTranslation';
 import { OperationAbortButton } from './OperationAbortButton';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useProject } from 'tg.hooks/useProject';
+import { Link } from 'react-router-dom';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 
@@ -27,12 +30,19 @@ const StyledCell = styled(Box)`
   white-space: nowrap;
 `;
 
+const StyledLink = styled(MuiLink)`
+  color: ${({ theme }) => theme.palette.text.primary};
+  text-decoration: underline;
+  cursor: pointer;
+` as typeof MuiLink;
+
 type Props = {
   data: BatchJobModel[];
 };
 
 export const OperationsList = ({ data }: Props) => {
   const tolgee = useTolgee(['language']);
+  const project = useProject();
   const translateType = useBatchOperationTypeTranslate();
   const theme = useTheme();
   const { t } = useTranslate();
@@ -74,10 +84,27 @@ export const OperationsList = ({ data }: Props) => {
           </StyledCell>
           {o.errorMessage && (
             <StyledCell
-              sx={{ gridColumn: '1 / -1', mt: 0 }}
-              color={theme.palette.error.main}
+              sx={{
+                gridColumn: '1 / -1',
+                mt: 0,
+                gap: 0.5,
+              }}
             >
-              <TranslatedError code={o.errorMessage} />
+              <Box color={theme.palette.error.main}>
+                <TranslatedError code={o.errorMessage} />
+              </Box>
+              <div>
+                (
+                <StyledLink
+                  component={Link}
+                  to={`${LINKS.PROJECT_TRANSLATIONS.build({
+                    [PARAMS.PROJECT_ID]: project.id,
+                  })}?failedJob=${o.id}`}
+                >
+                  {t('batch_operation_show_failed_keys')}
+                </StyledLink>
+                )
+              </div>
             </StyledCell>
           )}
         </React.Fragment>

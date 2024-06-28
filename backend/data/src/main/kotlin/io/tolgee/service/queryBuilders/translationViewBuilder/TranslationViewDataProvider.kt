@@ -41,6 +41,7 @@ class TranslationViewDataProvider(
 
     // reset the value
     em.createNativeQuery("SET join_collapse_limit TO DEFAULT").executeUpdate()
+    deleteFailedKeysInJobTempTable()
 
     val keyIds = views.map { it.keyId }
     tagService.getTagsForKeyIds(keyIds).let { tagMap ->
@@ -54,9 +55,33 @@ class TranslationViewDataProvider(
       return
     }
 
-    em.createNativeQuery("select from create_unsuccessful_job_keys_temp(:jobId)")
-      .setParameter("jobId", filterFailedKeysOfJob)
-      .singleResult
+    em.createNativeQuery(
+      """
+        CREATE TEMP TABLE temp_unsuccessful_job_keys AS
+            WITH unsuccessful_targets AS (
+                SELECT *
+                FROM (
+                         SELECT jsonb_array_elements(bj.target) AS target
+                         FROM tolgee_batch_job bj
+                         WHERE bj.id = :batchJobId
+                     ) AS targets
+                WHERE targets.target NOT IN (
+                    SELECT jsonb_array_elements(tbje.success_targets)
+                    FROM tolgee_batch_job_chunk_execution tbje
+                    WHERE tbje.batch_job_id = :batchJobId
+                  )
+            )
+            SELECT DISTINCT (target -> 'keyId')\:\:bigint AS key_id
+            FROM unsuccessful_targets;
+      """,
+    )
+      .setParameter("batchJobId", filterFailedKeysOfJob)
+      .executeUpdate()
+  }
+
+  private fun deleteFailedKeysInJobTempTable() {
+    em.createNativeQuery("DROP TABLE IF EXISTS temp_unsuccessful_job_keys")
+      .executeUpdate()
   }
 
   fun getSelectAllKeys(
@@ -64,6 +89,7 @@ class TranslationViewDataProvider(
     languages: Set<LanguageDto>,
     params: TranslationFilters = TranslationFilters(),
   ): MutableList<Long> {
+    createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
         cb = em.criteriaBuilder,
@@ -73,7 +99,9 @@ class TranslationViewDataProvider(
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
         entityManager = em,
       )
-    return em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
+    val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
+    deleteFailedKeysInJobTempTable()
+    return result
   }
 
   private fun getTranslationsViewQueryBuilder(
