@@ -30,6 +30,7 @@
       [
         "@semantic-release/github",
         {
+          "successComment": false,
           "assets": [
             {
               "path": "./build/libs/tolgee.jar",
