@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { IconButton, MenuItem, Popover, styled } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React, {useState} from 'react';
+import {IconButton, MenuItem, Popover, styled} from '@mui/material';
+import {Link} from 'react-router-dom';
 
-import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
-import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
+import {useUserMenuItems} from 'tg.hooks/useUserMenuItems';
+import {UserAvatar} from 'tg.component/common/avatar/UserAvatar';
 
-import { ThemeItem } from './ThemeItem';
-import { LanguageItem } from './LanguageItem';
+import {ThemeItem} from './ThemeItem';
+import {LanguageItem} from './LanguageItem';
+import {T} from '@tolgee/react';
+import {useGlobalActions} from 'tg.globalContext/GlobalContext';
 
 const StyledIconButton = styled(IconButton)`
   width: 40px;
@@ -31,6 +33,7 @@ const StyledDivider = styled('div')`
 export const UserUnverifiedEmailMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const userMenuItems = useUserMenuItems();
+  const { logout } = useGlobalActions();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -85,6 +88,9 @@ export const UserUnverifiedEmailMenu = () => {
         <StyledDivider />
         <LanguageItem />
         <ThemeItem />
+        <MenuItem onClick={() => logout()} data-cy="user-menu-logout">
+          <T keyName="user_menu_logout" />
+        </MenuItem>
       </StyledPopover>
     </div>
   );
