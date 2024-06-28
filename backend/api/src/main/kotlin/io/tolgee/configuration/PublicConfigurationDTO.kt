@@ -33,6 +33,7 @@ class PublicConfigurationDTO(
   val postHogApiKey: String? = properties.postHog.apiKey
   val postHogHost: String? = properties.postHog.host
   val contentDeliveryConfigured: Boolean = properties.contentDelivery.publicUrlPrefix != null
+  val userSourceField: Boolean = properties.userSourceField
   val slack: SlackDTO =
     SlackDTO(
       enabled = (

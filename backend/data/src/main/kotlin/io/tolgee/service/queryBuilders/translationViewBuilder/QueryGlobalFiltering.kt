@@ -9,15 +9,20 @@ import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
+import io.tolgee.model.temp.UnsuccessfulJobKey
+import io.tolgee.model.temp.UnsuccessfulJobKey_
+import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Subquery
 import java.util.*
 
 class QueryGlobalFiltering(
   private val params: TranslationFilters,
   private val queryBase: QueryBase<*>,
   private val cb: CriteriaBuilder,
+  private val entityManager: EntityManager,
 ) {
   fun apply() {
     filterTag()
@@ -30,6 +35,18 @@ class QueryGlobalFiltering(
     filterHasNoScreenshot()
     filterSearch()
     filterRevisionId()
+    filterFailedTargets()
+  }
+
+  private fun filterFailedTargets() {
+    if (params.filterFailedKeysOfJob != null) {
+      val subquery: Subquery<Long> = queryBase.query.subquery(Long::class.java)
+      val unsuccessfulJobKey = subquery.from(UnsuccessfulJobKey::class.java)
+      subquery.select(unsuccessfulJobKey.get(UnsuccessfulJobKey_.keyId))
+      queryBase.whereConditions.add(
+        queryBase.keyIdExpression.`in`(subquery),
+      )
+    }
   }
 
   private fun filterSearch() {
