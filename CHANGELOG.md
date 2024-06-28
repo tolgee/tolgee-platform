@@ -1,3 +1,10 @@
+# [3.68.0](https://github.com/tolgee/tolgee-platform/compare/v3.67.0...v3.68.0) (2024-06-28)
+
+
+### Features
+
+* Add filter for failed keys in batch operation ([#2355](https://github.com/tolgee/tolgee-platform/issues/2355)) ([f7b0e13](https://github.com/tolgee/tolgee-platform/commit/f7b0e134b95fea4301a339d2949ac0c93d16eae5))
+
 # [3.67.0](https://github.com/tolgee/tolgee-platform/compare/v3.66.1...v3.67.0) (2024-06-26)
 
 
