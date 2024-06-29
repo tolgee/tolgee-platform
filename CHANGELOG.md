@@ -1,3 +1,17 @@
+## [3.68.1](https://github.com/tolgee/tolgee-platform/compare/v3.68.0...v3.68.1) (2024-06-28)
+
+
+### Bug Fixes
+
+* improve release flow ([b101a18](https://github.com/tolgee/tolgee-platform/commit/b101a18fa898e572ea1bbdd86a1a0a3bcc86eda0))
+
+# [3.68.0](https://github.com/tolgee/tolgee-platform/compare/v3.67.0...v3.68.0) (2024-06-28)
+
+
+### Features
+
+* Add filter for failed keys in batch operation ([#2355](https://github.com/tolgee/tolgee-platform/issues/2355)) ([f7b0e13](https://github.com/tolgee/tolgee-platform/commit/f7b0e134b95fea4301a339d2949ac0c93d16eae5))
+
 # [3.67.0](https://github.com/tolgee/tolgee-platform/compare/v3.66.1...v3.67.0) (2024-06-26)
 
 

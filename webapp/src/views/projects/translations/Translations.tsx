@@ -25,19 +25,16 @@ import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
-import { RevisionFilterIndicator } from './ActivityFilterIndicator';
+import { Prefilter } from './prefilters/Prefilter';
 
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 1fr auto;
 `;
 
-type Props = {
-  revisionId: number | undefined;
-};
-
-export const Translations = (props: Props) => {
+export const Translations = () => {
   const { setQuickStartOpen, quickStartForceFloating } = useGlobalActions();
+  const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
   const { t } = useTranslate();
@@ -153,9 +150,7 @@ export const Translations = (props: Props) => {
       wrapperProps={{ pb: 0 }}
     >
       <BatchOperationsChangeIndicator />
-      {props.revisionId !== undefined && (
-        <RevisionFilterIndicator revisionId={props.revisionId} />
-      )}
+      {prefilter && <Prefilter prefilter={prefilter} />}
       <TranslationsHeader />
       <StyledContainer>
         {translationsEmpty ? (

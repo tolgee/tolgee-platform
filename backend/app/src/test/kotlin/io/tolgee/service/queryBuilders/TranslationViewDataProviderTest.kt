@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -96,6 +97,29 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
     val key = result.content.find { it.keyName == "commented_key" }!!
     assertThat(key.translations["de"]?.commentCount).isEqualTo(4)
     assertThat(key.translations["de"]?.unresolvedCommentCount).isEqualTo(2)
+  }
+
+  @Test
+  fun `returns failed keys`() {
+    val testData = TranslationsTestData()
+    val job = testData.addFailedBatchJob()
+    testDataService.saveTestData(testData.root)
+    val result =
+      translationViewDataProvider.getData(
+        projectId = testData.project.id,
+        languages =
+          languageService.dtosFromEntities(
+            listOf(testData.germanLanguage),
+            testData.project.id,
+          ).toSet(),
+        PageRequest.of(0, 10),
+        params =
+          GetTranslationsParams().apply {
+            filterFailedKeysOfJob = job.id
+          },
+      )
+    result.content.assert.hasSize(1)
+    result.content[0].keyName.assert.isEqualTo("A key")
   }
 
   private fun generateCommentStatesTestData(): TranslationsTestData {

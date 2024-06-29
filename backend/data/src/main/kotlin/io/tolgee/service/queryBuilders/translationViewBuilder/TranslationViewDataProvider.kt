@@ -27,6 +27,8 @@ class TranslationViewDataProvider(
     // otherwise it takes forever for postgres to plan the execution
     em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
 
+    createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
+
     var translationsViewQueryBuilder = getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor)
     val count = em.createQuery(translationsViewQueryBuilder.countQuery).singleResult
 
@@ -39,6 +41,7 @@ class TranslationViewDataProvider(
 
     // reset the value
     em.createNativeQuery("SET join_collapse_limit TO DEFAULT").executeUpdate()
+    deleteFailedKeysInJobTempTable()
 
     val keyIds = views.map { it.keyId }
     tagService.getTagsForKeyIds(keyIds).let { tagMap ->
@@ -47,11 +50,46 @@ class TranslationViewDataProvider(
     return PageImpl(views, pageable, count)
   }
 
+  private fun createFailedKeysInJobTempTable(filterFailedKeysOfJob: Long?) {
+    if (filterFailedKeysOfJob == null) {
+      return
+    }
+
+    em.createNativeQuery(
+      """
+        CREATE TEMP TABLE temp_unsuccessful_job_keys AS
+            WITH unsuccessful_targets AS (
+                SELECT *
+                FROM (
+                         SELECT jsonb_array_elements(bj.target) AS target
+                         FROM tolgee_batch_job bj
+                         WHERE bj.id = :batchJobId
+                     ) AS targets
+                WHERE targets.target NOT IN (
+                    SELECT jsonb_array_elements(tbje.success_targets)
+                    FROM tolgee_batch_job_chunk_execution tbje
+                    WHERE tbje.batch_job_id = :batchJobId
+                  )
+            )
+            SELECT DISTINCT (target -> 'keyId')\:\:bigint AS key_id
+            FROM unsuccessful_targets;
+      """,
+    )
+      .setParameter("batchJobId", filterFailedKeysOfJob)
+      .executeUpdate()
+  }
+
+  private fun deleteFailedKeysInJobTempTable() {
+    em.createNativeQuery("DROP TABLE IF EXISTS temp_unsuccessful_job_keys")
+      .executeUpdate()
+  }
+
   fun getSelectAllKeys(
     projectId: Long,
     languages: Set<LanguageDto>,
     params: TranslationFilters = TranslationFilters(),
   ): MutableList<Long> {
+    createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
         cb = em.criteriaBuilder,
@@ -59,8 +97,11 @@ class TranslationViewDataProvider(
         languages = languages,
         params = params,
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
+        entityManager = em,
       )
-    return em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
+    val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
+    deleteFailedKeysInJobTempTable()
+    return result
   }
 
   private fun getTranslationsViewQueryBuilder(
@@ -76,5 +117,6 @@ class TranslationViewDataProvider(
     params = params,
     sort = pageable.sort,
     cursor = cursor?.let { CursorUtil.parseCursor(it) },
+    entityManager = em,
   )
 }

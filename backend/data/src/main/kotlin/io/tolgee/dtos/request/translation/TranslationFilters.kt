@@ -94,4 +94,9 @@ To filter default namespace, set to empty string.
     example = "1234567",
   )
   var filterRevisionId: List<Long>? = null
+
+  @field:Parameter(
+    description = "Select only keys which were not successfully translated by batch job with provided id",
+  )
+  var filterFailedKeysOfJob: Long? = null
 }
