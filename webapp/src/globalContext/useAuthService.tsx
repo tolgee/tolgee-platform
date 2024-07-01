@@ -1,23 +1,17 @@
-import { useState } from 'react';
-import { T } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
+import {useState} from 'react';
+import {T} from '@tolgee/react';
+import {useHistory} from 'react-router-dom';
 
-import { securityService } from 'tg.service/SecurityService';
-import {
-  ADMIN_JWT_LOCAL_STORAGE_KEY,
-  tokenService,
-} from 'tg.service/TokenService';
-import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useInitialDataService } from './useInitialDataService';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import {
-  INVITATION_CODE_STORAGE_KEY,
-  InvitationCodeService,
-} from 'tg.service/InvitationCodeService';
-import { messageService } from 'tg.service/MessageService';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import {securityService} from 'tg.service/SecurityService';
+import {ADMIN_JWT_LOCAL_STORAGE_KEY, tokenService,} from 'tg.service/TokenService';
+import {components} from 'tg.service/apiSchema.generated';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {useInitialDataService} from './useInitialDataService';
+import {LINKS, PARAMS} from 'tg.constants/links';
+import {INVITATION_CODE_STORAGE_KEY, InvitationCodeService,} from 'tg.service/InvitationCodeService';
+import {messageService} from 'tg.service/MessageService';
+import {TranslatedError} from 'tg.translationTools/TranslatedError';
+import {useLocalStorageState} from 'tg.hooks/useLocalStorageState';
 
 type LoginRequest = components['schemas']['LoginRequest'];
 type JwtAuthenticationResponse =
@@ -245,6 +239,9 @@ export const useAuthService = (
     setInvitationCode,
     redirectTo(url: string) {
       history.replace(LINKS.AFTER_LOGIN.build());
+    },
+    redirectToUnverifiedView() {
+      history.replace(LINKS.EMAIL_NOT_VERIFIED.build());
     },
   };
 
