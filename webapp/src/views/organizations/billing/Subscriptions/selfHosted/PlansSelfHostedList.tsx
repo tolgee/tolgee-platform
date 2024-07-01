@@ -37,6 +37,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
       'ACCOUNT_MANAGER',
       'PREMIUM_SUPPORT',
       'DEDICATED_SLACK_CHANNEL',
+      'SLACK_INTEGRATION',
       'DEPLOYMENT_ASSISTANCE',
       'ASSISTED_UPDATES',
       'BACKUP_CONFIGURATION',
