@@ -1,18 +1,19 @@
-import { messageService } from 'tg.service/MessageService';
-import { T } from '@tolgee/react';
-import { GlobalError } from 'tg.error/GlobalError';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import {messageService} from 'tg.service/MessageService';
+import {T} from '@tolgee/react';
+import {GlobalError} from 'tg.error/GlobalError';
+import {TranslatedError} from 'tg.translationTools/TranslatedError';
 import * as Sentry from '@sentry/browser';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { RequestOptions } from './ApiHttpService';
-import { globalContext } from 'tg.globalContext/globalActions';
-import { LINKS } from 'tg.constants/links';
+import {parseErrorResponse} from 'tg.fixtures/errorFIxtures';
+import {RequestOptions} from './ApiHttpService';
+import {globalContext} from 'tg.globalContext/globalActions';
+import {LINKS} from 'tg.constants/links';
 
 export const handleApiError = (
   r: Response,
   resObject: any,
   init: RequestInit | undefined,
-  options: RequestOptions
+  options: RequestOptions,
+  currentPath: string
 ) => {
   if (r.status >= 500) {
     const message =
@@ -29,6 +30,15 @@ export const handleApiError = (
       return;
     }
     if (r.status == 403) {
+      const emailVerificationTemplate = /^\/login\/verify_email\/\d+\/\d+$/;
+
+      if (resObject?.code === 'email_not_verified') {
+        if (emailVerificationTemplate.test(currentPath)) return;
+
+        globalContext.actions?.redirectToUnverifiedView();
+        return;
+      }
+
       if (init?.method === undefined || init?.method === 'get') {
         globalContext.actions?.redirectTo(LINKS.AFTER_LOGIN.build());
       }
