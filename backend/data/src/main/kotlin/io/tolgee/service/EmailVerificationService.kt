@@ -74,7 +74,7 @@ class EmailVerificationService(
     callbackUrl: String? = null,
     newEmail: String? = null,
   ) {
-    val email = newEmail ?: userAccount.username
+    val email = newEmail ?: getEmail(userAccount)
     val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request, email)
 
     if (policy != null) {
@@ -83,6 +83,10 @@ class EmailVerificationService(
         isVerified(userAccount)
       }
     }
+  }
+
+  fun getEmail(userAccount: UserAccount): String {
+    return userAccount.emailVerification?.newEmail ?: userAccount.username
   }
 
   fun isVerified(userAccount: UserAccountDto): Boolean {
