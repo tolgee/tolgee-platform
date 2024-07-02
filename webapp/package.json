@@ -15,7 +15,7 @@
     "@mui/icons-material": "^5.5.1",
     "@mui/lab": "^5.0.0-alpha.75",
     "@mui/material": "^5.5.3",
-    "@mui/x-date-pickers": "5.0.0-beta.6",
+    "@mui/x-date-pickers": "5.0.0",
     "@openreplay/tracker": "^3.5.4",
     "@sentry/browser": "^7.80.0",
     "@stomp/stompjs": "^6.1.2",
