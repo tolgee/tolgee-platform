@@ -270,6 +270,12 @@ export class LINKS {
   );
 
   /**
+   * Email not verified
+   */
+
+  static EMAIL_NOT_VERIFIED = Link.ofRoot('email-not-verified');
+
+  /**
    * Project stuff
    */
 

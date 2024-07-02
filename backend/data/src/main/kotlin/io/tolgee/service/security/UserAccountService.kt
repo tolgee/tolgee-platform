@@ -27,6 +27,7 @@ import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
+import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
@@ -376,6 +377,7 @@ class UserAccountService(
   fun update(
     userAccount: UserAccount,
     dto: UserUpdateRequestDto,
+    request: HttpServletRequest,
   ): UserAccount {
     // Current password required to change email or password
     if (dto.email != userAccount.username) {
@@ -389,7 +391,7 @@ class UserAccountService(
     }
 
     val old = UserAccountDto.fromEntity(userAccount)
-    updateUserEmail(userAccount, dto)
+    updateUserEmail(userAccount, dto, request)
     userAccount.name = dto.name
 
     publishUserInfoUpdatedEvent(old, userAccount)
@@ -417,6 +419,7 @@ class UserAccountService(
   private fun updateUserEmail(
     userAccount: UserAccount,
     dto: UserUpdateRequestDto,
+    request: HttpServletRequest,
   ) {
     if (userAccount.username != dto.email) {
       if (!emailValidator.isValid(dto.email, null)) {
@@ -426,7 +429,7 @@ class UserAccountService(
 
       this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
-        emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)
+        emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, dto.email)
       } else {
         userAccount.username = dto.email
       }

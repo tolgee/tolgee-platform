@@ -59,8 +59,9 @@ export class ApiHttpService {
             if (r.status >= 400) {
               const responseData = await ApiHttpService.getResObject(r);
               const resultError = new ApiError('Api error', responseData);
+              const currentPath = location.pathname;
               resultError.setErrorHandler(() =>
-                handleApiError(r, responseData, init, options)
+                handleApiError(r, responseData, init, options, currentPath)
               );
               if (r.status === 400) {
                 errorAction(responseData.code);

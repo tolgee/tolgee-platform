@@ -42,8 +42,7 @@ class SignUpService(
     }
 
     emailVerificationService.createForUser(user, dto.callbackUrl)
-
-    return null
+    return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
   }
 
   fun signUp(

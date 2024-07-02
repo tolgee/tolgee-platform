@@ -153,6 +153,7 @@ const getTheme = (mode: PaletteMode) => {
       globalLoading: createColor(c.globalLoading),
       marker: c.marker,
       topBanner: c.topBanner,
+      emailNotVerifiedBanner: c.emailNotVerifiedBanner,
       quickStart: c.quickStart,
       import: c.import,
       exampleBanner: c.exampleBanner,

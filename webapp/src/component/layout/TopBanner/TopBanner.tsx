@@ -5,7 +5,7 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { useAnnouncement } from './useAnnouncement';
-
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 import { Close } from '@mui/icons-material';
 import { useResizeObserver } from 'usehooks-ts';
 
@@ -17,9 +17,15 @@ const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 50px 1fr 50px;
   width: 100%;
-  background: ${({ theme }) => theme.palette.topBanner.background};
+  background: ${({ theme }) =>
+    useIsEmailVerified()
+      ? theme.palette.topBanner.background
+      : theme.palette.emailNotVerifiedBanner.background};
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
-  color: ${({ theme }) => theme.palette.topBanner.mainText};
+  color: ${({ theme }) =>
+    useIsEmailVerified()
+      ? theme.palette.topBanner.mainText
+      : theme.palette.emailNotVerifiedBanner.mainText};
   font-size: 15px;
   font-weight: 700;
   @container (max-width: 899px) {
@@ -50,6 +56,7 @@ export function TopBanner() {
 
   const getAnnouncement = useAnnouncement();
   const announcement = bannerType && getAnnouncement(bannerType);
+  const showCloseButton = useIsEmailVerified();
 
   useResizeObserver({
     ref: bannerRef,
@@ -71,14 +78,16 @@ export function TopBanner() {
     <StyledContainer ref={bannerRef} data-cy="top-banner">
       <div />
       <StyledContent data-cy="top-banner-content">{announcement}</StyledContent>
-      <StyledCloseButton
-        role="button"
-        tabIndex={0}
-        onClick={() => dismissAnnouncement()}
-        data-cy="top-banner-dismiss-button"
-      >
-        <Close />
-      </StyledCloseButton>
+      {showCloseButton && (
+        <StyledCloseButton
+          role="button"
+          tabIndex={0}
+          onClick={() => dismissAnnouncement()}
+          data-cy="top-banner-dismiss-button"
+        >
+          <Close />
+        </StyledCloseButton>
+      )}
     </StyledContainer>
   );
 }

@@ -12,11 +12,13 @@ import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.GitHubAuthUtil
+import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
@@ -127,7 +129,8 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     val updatedUser =
       executeInNewTransaction {
         val updatedUser = userAccountService.get(user.id)
-        userAccountService.update(userAccountService.get(user.id), updateRequestDto)
+        val request = mock<HttpServletRequest>()
+        userAccountService.update(userAccountService.get(user.id), updateRequestDto, request)
         updatedUser
       }
     Thread.sleep(100)

@@ -15,6 +15,7 @@ import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
+import { EmailNotVerifiedView } from 'tg.component/EmailNotVerifiedView';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
@@ -78,6 +79,9 @@ const RecaptchaProvider: FC = (props) => {
 
 export const RootRouter = () => (
   <Switch>
+    <PrivateRoute exact path={LINKS.EMAIL_NOT_VERIFIED.template}>
+      <EmailNotVerifiedView />
+    </PrivateRoute>
     <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
       <SlackConnectView />
     </PrivateRoute>

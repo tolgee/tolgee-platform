@@ -48,6 +48,7 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
+    emailNotVerifiedBanner: EmailNotVerifiedBanner;
     quickStart: QuickStart;
     import: typeof all.import;
     exampleBanner: ExampleBanner;
@@ -75,6 +76,7 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
+    emailNotVerifiedBanner: EmailNotVerifiedBanner;
     quickStart: QuickStart;
     import: typeof all.import;
     exampleBanner: ExampleBanner;

@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
@@ -18,25 +19,20 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.payload.JwtAuthenticationResponse
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.UserAccountService
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -52,7 +48,19 @@ class V2UserController(
   private val passwordEncoder: PasswordEncoder,
   private val jwtService: JwtService,
   private val mfaService: MfaService,
+  private val emailVerificationService: EmailVerificationService,
+  @Qualifier("requestActivityHolder") private val request: ActivityHolder,
 ) {
+  @Operation(
+    summary = "Resend email verification",
+    description = "Resends email verification email to currently authenticated user.",
+  )
+  @PostMapping("/send-email-verification")
+  fun sendEmailVerification(request: HttpServletRequest) {
+    val user = authenticationFacade.authenticatedUserEntity
+    emailVerificationService.resendEmailVerification(user, request)
+  }
+
   @Operation(
     summary = "Get user info",
     description = "Returns information about currently authenticated user.",
@@ -71,8 +79,9 @@ class V2UserController(
   fun updateUser(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
+    request: HttpServletRequest,
   ): PrivateUserAccountModel {
-    val userAccount = userAccountService.update(authenticationFacade.authenticatedUserEntity, dto!!)
+    val userAccount = userAccountService.update(authenticationFacade.authenticatedUserEntity, dto!!, request)
     val view =
       userAccountService.findActiveView(userAccount.id)
         ?: throw IllegalStateException("User not found")
@@ -138,7 +147,8 @@ class V2UserController(
   fun updateUserOld(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
-  ): PrivateUserAccountModel = updateUser(dto)
+    request: HttpServletRequest,
+  ): PrivateUserAccountModel = updateUser(dto, request)
 
   @GetMapping("/single-owned-organizations")
   @Operation(
