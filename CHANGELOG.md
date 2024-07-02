@@ -1,3 +1,11 @@
+## [3.68.2](https://github.com/tolgee/tolgee-platform/compare/v3.68.1...v3.68.2) (2024-07-02)
+
+
+### Bug Fixes
+
+* enterprise pricing plan ([#2395](https://github.com/tolgee/tolgee-platform/issues/2395)) ([cb1f6ae](https://github.com/tolgee/tolgee-platform/commit/cb1f6ae8c7718dbf3818674210b0fbbe7178870d))
+* fix release ([a3ec46f](https://github.com/tolgee/tolgee-platform/commit/a3ec46f174c2477cda68682173d90691a2857e24))
+
 ## [3.68.1](https://github.com/tolgee/tolgee-platform/compare/v3.68.0...v3.68.1) (2024-06-28)
 
 
