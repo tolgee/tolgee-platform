@@ -1,13 +1,16 @@
-import {FunctionComponent} from 'react';
-import {Box, styled} from '@mui/material';
+import { FunctionComponent } from 'react';
+import { Box, styled } from '@mui/material';
 
-import {TopBar} from './TopBar/TopBar';
-import {TopBanner} from './TopBanner/TopBanner';
-import {TopSpacer} from './TopSpacer';
-import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
-import {RightSidePanel} from './RightSidePanel';
-import {QuickStartGuide} from './QuickStartGuide/QuickStartGuide';
-import {useIsEmailVerified} from "tg.globalContext/helpers";
+import { TopBar } from './TopBar/TopBar';
+import { TopBanner } from './TopBanner/TopBanner';
+import { TopSpacer } from './TopSpacer';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { RightSidePanel } from './RightSidePanel';
+import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 
 const StyledMain = styled(Box)`
   display: flex;
@@ -91,15 +94,17 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {quickStartEnabled && (quickStartOpen || quickStartFloating) && isEmailVerified && (
-          <RightSidePanel
-            open={quickStartOpen}
-            onClose={() => setQuickStartOpen(false)}
-            floating={quickStartFloating}
-          >
-            <QuickStartGuide />
-          </RightSidePanel>
-        )}
+        {quickStartEnabled &&
+          (quickStartOpen || quickStartFloating) &&
+          isEmailVerified && (
+            <RightSidePanel
+              open={quickStartOpen}
+              onClose={() => setQuickStartOpen(false)}
+              floating={quickStartFloating}
+            >
+              <QuickStartGuide />
+            </RightSidePanel>
+          )}
       </Box>
     </>
   );
