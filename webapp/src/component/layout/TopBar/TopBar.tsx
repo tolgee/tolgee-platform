@@ -1,17 +1,21 @@
-import {Link} from 'react-router-dom';
-import {Box, styled, useTheme} from '@mui/material';
+import { Link } from 'react-router-dom';
+import { Box, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
-import {useGlobalContext} from 'tg.globalContext/GlobalContext';
-import {useConfig, useIsEmailVerified, useUser,} from 'tg.globalContext/helpers';
-import {TolgeeLogo} from 'tg.component/common/icons/TolgeeLogo';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import {
+  useConfig,
+  useIsEmailVerified,
+  useUser,
+} from 'tg.globalContext/helpers';
+import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 
-import {UserMenu} from '../../security/UserMenu/UserMenu';
-import {AdminInfo} from './AdminInfo';
-import {QuickStartTopBarButton} from '../QuickStartGuide/QuickStartTopBarButton';
-import {LanguageMenu} from 'tg.component/layout/TopBar/LanguageMenu';
+import { UserMenu } from '../../security/UserMenu/UserMenu';
+import { AdminInfo } from './AdminInfo';
+import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
+import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
 
 export const TOP_BAR_HEIGHT = 52;
 

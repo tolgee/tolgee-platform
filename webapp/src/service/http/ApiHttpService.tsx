@@ -1,12 +1,12 @@
-import {LINKS} from 'tg.constants/links';
-import {GlobalError} from 'tg.error/GlobalError';
+import { LINKS } from 'tg.constants/links';
+import { GlobalError } from 'tg.error/GlobalError';
 
-import {tokenService} from '../TokenService';
-import {getUtmCookie} from 'tg.fixtures/utmCookie';
-import {handleApiError} from './handleApiError';
-import {ApiError} from './ApiError';
-import {errorAction} from './errorAction';
-import {globalContext} from 'tg.globalContext/globalActions';
+import { tokenService } from '../TokenService';
+import { getUtmCookie } from 'tg.fixtures/utmCookie';
+import { handleApiError } from './handleApiError';
+import { ApiError } from './ApiError';
+import { errorAction } from './errorAction';
+import { globalContext } from 'tg.globalContext/globalActions';
 
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
