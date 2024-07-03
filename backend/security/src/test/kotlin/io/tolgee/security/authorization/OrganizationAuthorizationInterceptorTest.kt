@@ -78,6 +78,7 @@ class OrganizationAuthorizationInterceptorTest {
 
     Mockito.`when`(userAccount.id).thenReturn(1337L)
     Mockito.`when`(organization.id).thenReturn(1337L)
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(true)
   }
 
   @AfterEach
@@ -136,8 +137,31 @@ class OrganizationAuthorizationInterceptorTest {
     mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsOk
   }
 
+  @Test
+  fun `rejects access if the user does not have a verified email`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+      .thenReturn(true)
+
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(false)
+    mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsForbidden
+  }
+
+  @Test
+  fun `not throw when annotated by email verification bypass`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+      .thenReturn(true)
+
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(false)
+    mockMvc.perform(get("/v2/organizations/email-bypass")).andIsOk
+  }
+
   @RestController
   class TestController {
+    @GetMapping("/v2/organizations/email-bypass")
+    @BypassEmailVerification
+    @UseDefaultPermissions
+    fun emailBypass() = "hello!"
+
     @GetMapping("/v2/organizations")
     @IsGlobalRoute
     fun getAll() = "hello!"
