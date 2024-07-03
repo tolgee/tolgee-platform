@@ -1,4 +1,4 @@
-import { useTranslate } from '@tolgee/react';
+import {useTranslate} from '@tolgee/react';
 
 export function useErrorTranslation() {
   const { t } = useTranslate();
@@ -123,6 +123,8 @@ export function useErrorTranslation() {
         return t('slack_not_configured');
       case 'slack_workspace_already_connected':
         return t('slack_workspace_already_connected');
+      case 'email_already_verified':
+          return t('email_already_verified');
       default:
         return code;
     }

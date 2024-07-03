@@ -74,6 +74,10 @@ class EmailVerificationService(
     callbackUrl: String? = null,
     newEmail: String? = null,
   ) {
+    if (newEmail == null && isVerified(userAccount)) {
+      throw BadRequestException(io.tolgee.constants.Message.EMAIL_ALREADY_VERIFIED)
+    }
+
     val email = newEmail ?: getEmail(userAccount)
     val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request, email)
 
