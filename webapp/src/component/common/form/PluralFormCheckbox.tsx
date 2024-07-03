@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Field, useFormikContext } from 'formik';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import {
   Box,
   Checkbox,
@@ -13,6 +12,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { FieldError, FieldLabel } from 'tg.component/FormField';
 
 import { LabelHint } from '../LabelHint';
+import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 function isParameterDefault(value: string | undefined) {
   return value === undefined || value === 'value';
@@ -62,11 +62,7 @@ export const PluralFormCheckbox = ({
               disabled={!isPlural}
               data-cy="key-plural-checkbox-expand"
             >
-              {expanded ? (
-                <ExpandLess fontSize="small" />
-              ) : (
-                <ExpandMore fontSize="small" />
-              )}
+              {expanded ? <ChevronUp /> : <ChevronDown />}
             </IconButton>
           </Box>
         )}

@@ -52,6 +52,8 @@ export const exportToggleLanguage = (lang: string) => {
 export function assertExportLanguagesSelected(languages: string[]) {
   cy.gcy('export-language-selector').click();
 
+  cy.gcy('export-language-selector-item').should('be.visible');
+
   languages.forEach((language) => {
     cy.gcy('export-language-selector-item')
       .contains(language)

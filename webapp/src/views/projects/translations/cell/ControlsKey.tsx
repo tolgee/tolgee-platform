@@ -1,7 +1,7 @@
 import React from 'react';
 import { T } from '@tolgee/react';
-import { CameraAlt, Edit } from '@mui/icons-material';
-import { styled } from '@mui/material';
+import { Camera01, Edit02 } from '@untitled-ui/icons-react';
+import { styled, useTheme } from '@mui/material';
 
 import { CELL_SHOW_ON_HOVER } from './styles';
 import { ControlsButton } from './ControlsButton';
@@ -31,6 +31,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
 }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canViewScreenshots = satisfiesPermission('screenshots.view');
+  const theme = useTheme();
 
   // right section
   const displayEdit = editEnabled && onEdit;
@@ -45,7 +46,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
           className={CELL_SHOW_ON_HOVER}
           tooltip={<T keyName="translations_cell_edit" />}
         >
-          <Edit fontSize="small" />
+          <Edit02 />
         </ControlsButton>
       )}
       {displayScreenshots && (
@@ -60,9 +61,8 @@ export const ControlsKey: React.FC<ControlsProps> = ({
               : CELL_SHOW_ON_HOVER
           }
         >
-          <CameraAlt
-            fontSize="small"
-            color={screenshotsPresent ? 'primary' : undefined}
+          <Camera01
+            color={screenshotsPresent ? theme.palette.primary.main : undefined}
           />
         </ControlsButton>
       )}

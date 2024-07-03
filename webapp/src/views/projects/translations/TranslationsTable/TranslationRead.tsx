@@ -61,6 +61,7 @@ export const TranslationRead: React.FC<Props> = ({
     canChangeState,
     editEnabled,
     keyData,
+    setAssignedTaskState,
   } = tools;
 
   const toggleEdit = () => {
@@ -110,6 +111,8 @@ export const TranslationRead: React.FC<Props> = ({
         active={active}
         lastFocusable={lastFocusable}
         className="controls"
+        tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
+        onTaskStateChange={setAssignedTaskState}
       />
     </StyledContainer>
   );

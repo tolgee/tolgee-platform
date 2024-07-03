@@ -1,7 +1,7 @@
-import { default as React, FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { Box, FormControl, MenuItem, Select, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -27,8 +27,8 @@ const StyledScopes = styled('div')`
   font-style: italic;
 `;
 
-const StyledAddIcon = styled(Add)`
-  marginright: ${({ theme }) => theme.spacing(1)};
+const StyledAddIcon = styled(Plus)`
+  margin-left: ${({ theme }) => theme.spacing(0.5)};
 `;
 
 export const ApiKeySelector: FC<{
@@ -92,7 +92,7 @@ export const ApiKeySelector: FC<{
             >
               <StyledItemWrapper className="addItem">
                 <T keyName="api_key_selector_create_new" />
-                <StyledAddIcon fontSize="small" />
+                <StyledAddIcon width={20} height={20} />
               </StyledItemWrapper>
             </MenuItem>
           </Select>

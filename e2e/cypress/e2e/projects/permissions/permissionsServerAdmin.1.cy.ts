@@ -13,10 +13,10 @@ import {
 } from '../../../common/shared';
 
 describe('Server admin 1', { retries: { runMode: 5 } }, () => {
-  it('admin', () => {
+  it('Server admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin
-      login('admin', 'admin');
+      login('Server admin', 'admin');
 
       // check that admin has no warning banner on his home page
       switchToOrganization('admin');
@@ -42,6 +42,7 @@ describe('Server admin 1', { retries: { runMode: 5 } }, () => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': SKIP,
+        'project-menu-item-tasks': SKIP,
         'project-menu-item-settings': SKIP,
         'project-menu-item-languages': SKIP,
         'project-menu-item-members': SKIP,

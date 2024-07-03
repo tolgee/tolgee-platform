@@ -48,13 +48,13 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
   const moveMutation = useApiMutation({
     url: '/internal/time/{dateTimeString}' as any,
     method: 'put',
-    invalidatePrefix: '/internal/test-clock-helper',
+    invalidatePrefix: '/internal/test-clock-helper' as any,
   });
 
   const resetMutation = useApiMutation({
     url: '/internal/time' as any,
     method: 'delete',
-    invalidatePrefix: '/internal/test-clock-helper',
+    invalidatePrefix: '/internal/test-clock-helper' as any,
   });
 
   const info = infoLoadable.data;

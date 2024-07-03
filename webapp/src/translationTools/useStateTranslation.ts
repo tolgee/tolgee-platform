@@ -1,12 +1,10 @@
 import { useTranslate } from '@tolgee/react';
+import { TranslationStateType } from 'tg.ee/task/components/taskCreate/TranslationStateFilter';
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
-import { components } from 'tg.service/apiSchema.generated';
-
-type State = components['schemas']['TranslationViewModel']['state'];
 
 export function useStateTranslation() {
   const { t } = useTranslate();
-  return function (state: State) {
+  return function (state: TranslationStateType) {
     switch (state) {
       case 'UNTRANSLATED':
         return t('translation_state_untranslated');
@@ -20,8 +18,11 @@ export function useStateTranslation() {
       case 'DISABLED':
         return t('translation_state_disabled');
 
+      case 'OUTDATED':
+        return t('translation_state_outdated');
+
       default:
-        exhaustiveMatchingGuard(state);
+        return exhaustiveMatchingGuard(state);
     }
   };
 }

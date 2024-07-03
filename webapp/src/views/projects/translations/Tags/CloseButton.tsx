@@ -1,8 +1,7 @@
 import { styled } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 
-const StyledCloseIcon = styled(Close)`
-  font-size: 20px;
+const StyledCloseIcon = styled(XClose)`
   cursor: pointer;
   padding: 2px;
   color: ${({ theme }) => theme.palette.text.secondary};

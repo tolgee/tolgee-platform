@@ -62,6 +62,7 @@ class ProjectStatsController(
       projectId = projectStats.id,
       languageCount = languageStats.size,
       keyCount = projectStats.keyCount,
+      taskCount = projectStats.taskCount,
       baseWordsCount = totals.baseWordsCount,
       translatedPercentage = totals.translatedPercent,
       reviewedPercentage = totals.reviewedPercent,

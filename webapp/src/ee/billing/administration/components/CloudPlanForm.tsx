@@ -1,9 +1,7 @@
 import {
   Box,
   Checkbox,
-  FormControl,
   FormControlLabel,
-  InputLabel,
   MenuItem,
   Switch,
   Typography,
@@ -102,84 +100,79 @@ export function CloudPlanForm({
     >
       {({ values, errors, setFieldValue }) => (
         <Form>
-          <Box mb={3}>
+          <Box mb={3} pt={2}>
             <TextField
-              sx={{ mt: 2 }}
               name="name"
               size="small"
               label={t('administration_cloud_plan_field_name')}
               fullWidth
               data-cy="administration-cloud-plan-field-name"
             />
-            <Box display="flex" gap={2} sx={{ mt: 2 }}>
-              <FormControl sx={{ flexBasis: '50%' }} variant="standard">
-                <InputLabel shrink>
-                  {t('administration_cloud_plan_field_type')}
-                </InputLabel>
-                <Select
-                  name="type"
-                  size="small"
-                  fullWidth
-                  sx={{ flexBasis: '50%' }}
-                  data-cy="administration-cloud-plan-field-type"
-                  renderValue={(val) =>
-                    typeOptions.find((o) => o.value === val)?.label
-                  }
-                >
-                  {typeOptions.map(({ value, label }) => (
-                    <MenuItem
-                      key={value}
-                      value={value}
-                      data-cy="administration-cloud-plan-field-type-item"
-                    >
-                      {label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Field name="stripeProductId">
-                {({ meta, field, form }: FieldProps) => (
-                  <FormControl
-                    sx={{
-                      flexBasis: '50%',
-                      alignItems: 'stretch',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-around',
-                    }}
-                    variant="standard"
-                    error={!!meta.error && meta.touched}
-                    data-cy="administration-cloud-plan-field-stripe-product"
+            <Box
+              sx={{
+                display: 'grid',
+                gap: 2,
+                mt: 2,
+                gridTemplateColumns: '1fr 1fr',
+              }}
+            >
+              <Select
+                label={t('administration_cloud_plan_field_type')}
+                name="type"
+                size="small"
+                fullWidth
+                minHeight={false}
+                sx={{ flexBasis: '50%' }}
+                data-cy="administration-cloud-plan-field-type"
+                renderValue={(val) =>
+                  typeOptions.find((o) => o.value === val)?.label
+                }
+              >
+                {typeOptions.map(({ value, label }) => (
+                  <MenuItem
+                    key={value}
+                    value={value}
+                    data-cy="administration-cloud-plan-field-type-item"
                   >
-                    <InputLabel shrink>
-                      {t('administration_cloud_plan_field_stripe_product')}
-                    </InputLabel>
-                    <SearchSelect
-                      compareFunction={(prompt, label) =>
-                        label.toLowerCase().includes(prompt.toLowerCase())
-                      }
-                      SelectProps={{
-                        size: 'small',
-                        fullWidth: true,
-                        variant: 'outlined',
-                      }}
-                      value={field.value}
-                      onChange={(val) => form.setFieldValue(field.name, val)}
-                      items={
-                        products?.map(({ id, name }) => ({
-                          value: id,
-                          name: `${id} ${name}`,
-                        })) || []
-                      }
-                    />
-                  </FormControl>
+                    {label}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Field name="stripeProductId">
+                {({ field, form }: FieldProps) => (
+                  <SearchSelect
+                    compareFunction={(prompt, label) =>
+                      label.toLowerCase().includes(prompt.toLowerCase())
+                    }
+                    SelectProps={{
+                      label: t(
+                        'administration_cloud_plan_field_stripe_product'
+                      ),
+                      size: 'small',
+                      fullWidth: true,
+                      variant: 'outlined',
+                    }}
+                    value={field.value}
+                    onChange={(val) => form.setFieldValue(field.name, val)}
+                    items={
+                      products?.map(({ id, name }) => ({
+                        value: id,
+                        name: `${id} ${name}`,
+                      })) || []
+                    }
+                  />
                 )}
               </Field>
             </Box>
             <Typography sx={{ mt: 2 }}>
               {t('administration_cloud_plan_form_prices_title')}
             </Typography>
-            <Box display="flex" gap={2} sx={{ mt: 1 }}>
+            <Box
+              display="grid"
+              gridTemplateColumns="repeat(4, 1fr)"
+              gap={2}
+              sx={{ mt: 1 }}
+            >
               <TextField
                 name="prices.subscriptionMonthly"
                 size="small"
@@ -223,7 +216,12 @@ export function CloudPlanForm({
             <Typography sx={{ mt: 2 }}>
               {t('administration_cloud_plan_form_limits_title')}
             </Typography>
-            <Box display="flex" gap={2} sx={{ mt: 1 }}>
+            <Box
+              display="grid"
+              gridTemplateColumns="repeat(4, 1fr)"
+              gap={2}
+              sx={{ mt: 1 }}
+            >
               <TextField
                 name="includedUsage.mtCredits"
                 size="small"

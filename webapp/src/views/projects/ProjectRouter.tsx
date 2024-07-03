@@ -1,8 +1,14 @@
+import React from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { ProjectContext } from 'tg.hooks/ProjectContext';
+import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
+import { ProjectTasksView } from 'tg.ee/task/views/projectTasks/ProjectTasksView';
+import { ActivityDetailRedirect } from 'tg.component/security/ActivityDetailRedirect';
+import { LanguageSettingsView } from 'tg.views/projects/languages/LanguageSettingsView';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 import { ProjectPage } from './ProjectPage';
 import { ExportView } from './export/ExportView';
@@ -10,15 +16,11 @@ import { ImportView } from './import/ImportView';
 import { ProjectMembersView } from './members/ProjectMembersView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { TranslationsView } from './translations/TranslationsView';
-import { LanguageSettingsView } from 'tg.views/projects/languages/LanguageSettingsView';
 import { SingleKeyView } from './translations/SingleKeyView';
-import React from 'react';
-import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
-import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
-import { ActivityDetailRedirect } from 'tg.component/security/ActivityDetailRedirect';
+import { TaskRedirect } from './TaskRedirect';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -47,6 +49,10 @@ export const ProjectRouter = () => {
 
             <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
               <TranslationsView />
+            </Route>
+
+            <Route path={LINKS.PROJECT_TASKS.template}>
+              <ProjectTasksView />
             </Route>
 
             <Route path={LINKS.PROJECT_EDIT.template}>
@@ -83,6 +89,10 @@ export const ProjectRouter = () => {
 
             <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
               <ActivityDetailRedirect />
+            </Route>
+
+            <Route path={LINKS.GO_TO_PROJECT_TASK.template}>
+              <TaskRedirect />
             </Route>
 
             {/*

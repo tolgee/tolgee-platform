@@ -11,6 +11,8 @@ import { getTextWidth } from 'tg.fixtures/getTextWidth';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 import { BatchActions } from './types';
+import { useTranslationsSelector } from '../context/TranslationsContext';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 const StyledSeparator = styled('div')`
   width: 100%;
@@ -27,6 +29,9 @@ export const BatchSelect = ({ value, onChange }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
+  const prefilteredTask = useTranslationsSelector(
+    (c) => c.prefilter?.task !== undefined
+  );
   const canEditKey = satisfiesPermission('keys.edit');
   const canDeleteKey = satisfiesPermission('keys.delete');
   const canMachineTranslate = satisfiesPermission('translations.batch-machine');
@@ -34,12 +39,17 @@ export const BatchSelect = ({ value, onChange }: Props) => {
   const canChangeState = satisfiesPermission('translations.state-edit');
   const canViewTranslations = satisfiesPermission('translations.view');
   const canEditTranslations = satisfiesPermission('translations.edit');
+  const canEditTasks = satisfiesPermission('tasks.edit');
+
+  const { features } = useEnabledFeatures();
+  const taskFeature = features.includes('TASKS');
 
   const options: {
     id: BatchActions;
     label: string;
     divider?: boolean;
     enabled?: boolean;
+    hidden?: boolean;
   }[] = [
     {
       id: 'machine_translate',
@@ -75,6 +85,25 @@ export const BatchSelect = ({ value, onChange }: Props) => {
       id: 'export_translations',
       label: t('batch_operations_export_translations'),
       enabled: canViewTranslations,
+    },
+    {
+      id: 'task_create',
+      label: t('batch_operations_create_task'),
+      divider: true,
+      enabled: canEditTasks,
+      hidden: !taskFeature,
+    },
+    {
+      id: 'task_add_keys',
+      label: t('batch_operations_task_add_keys'),
+      enabled: canEditTasks,
+      hidden: prefilteredTask || !taskFeature,
+    },
+    {
+      id: 'task_remove_keys',
+      label: t('batch_operations_task_remove_keys'),
+      enabled: canEditTasks,
+      hidden: !prefilteredTask || !taskFeature,
     },
     {
       id: 'add_tags',
@@ -134,7 +163,7 @@ export const BatchSelect = ({ value, onChange }: Props) => {
           )}
         </React.Fragment>
       )}
-      options={options}
+      options={options.filter((o) => !o.hidden)}
       renderInput={(params) => {
         return (
           <TextField {...params} placeholder={t('batch_select_placeholder')} />

@@ -1,4 +1,4 @@
-import { FilterList } from '@mui/icons-material';
+import { FilterLines } from '@untitled-ui/icons-react';
 import { Button, styled, useMediaQuery } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -58,7 +58,7 @@ export const PrefilterContainer = ({ content, title }: Props) => {
   return (
     <StyledContainer>
       <StyledLabel>
-        <FilterList color="inherit" />
+        <FilterLines />
         <StyledLabelText>{title}</StyledLabelText>
       </StyledLabel>
       {!isSmall && content}

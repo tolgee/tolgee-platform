@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { MoreVert } from '@mui/icons-material';
+import { DotsVertical } from '@untitled-ui/icons-react';
 import { Box, IconButton, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -118,7 +118,7 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
           size="small"
           onClick={() => onDetailOpen(data)}
         >
-          <MoreVert />
+          <DotsVertical />
         </IconButton>
       </StyledAction>
     </StyledContainer>

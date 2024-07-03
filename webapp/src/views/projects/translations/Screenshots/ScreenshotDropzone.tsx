@@ -2,12 +2,13 @@ import clsx from 'clsx';
 import React, { FunctionComponent, useState } from 'react';
 import { Box, styled } from '@mui/material';
 import { green, red } from '@mui/material/colors';
-import { Backup, HighlightOff } from '@mui/icons-material';
+import { XCircle } from '@untitled-ui/icons-react';
 
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 import { MAX_FILE_COUNT } from './ScreenshotGallery';
+import { Dropzone } from 'tg.component/CustomIcons';
 
 export interface ScreenshotDropzoneProps {
   validateAndUpload: (files: File[]) => void;
@@ -33,20 +34,22 @@ const StyledDropZoneValidation = styled(Box)`
   }
 `;
 
-const StyledValidIcon = styled(Backup)`
+const StyledValidIcon = styled(Dropzone)`
   filter: drop-shadow(1px 1px 0px ${green[200]})
     drop-shadow(-1px 1px 0px ${green[200]})
     drop-shadow(1px -1px 0px ${green[200]})
     drop-shadow(-1px -1px 0px ${green[200]});
-  font-size: 100px;
+  width: 100px;
+  height: 100px;
   color: ${({ theme }) => theme.palette.common.white};
 `;
 
-const StyledInvalidIcon = styled(HighlightOff)`
+const StyledInvalidIcon = styled(XCircle)`
   filter: drop-shadow(1px 1px 0px ${red[200]})
     drop-shadow(-1px 1px 0px ${red[200]}) drop-shadow(1px -1px 0px ${red[200]})
     drop-shadow(-1px -1px 0px ${red[200]});
-  font-size: 100px;
+  width: 100px;
+  height: 100px;
   color: ${({ theme }) => theme.palette.common.white};
 `;
 

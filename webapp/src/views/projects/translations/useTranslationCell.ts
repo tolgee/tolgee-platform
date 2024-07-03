@@ -18,6 +18,11 @@ import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
+export type SaveProps = {
+  preventTaskResolution?: boolean;
+  after?: AfterCommand;
+};
+
 type Props = {
   keyData: DeletableKeyWithTranslationsModelType;
   language: LanguageModel;
@@ -41,6 +46,7 @@ export const useTranslationCell = ({
     changeField,
     setEditForce,
     setTranslationState,
+    setTaskState,
     updateEdit,
   } = useTranslationsActions();
 
@@ -81,9 +87,10 @@ export const useTranslationCell = ({
     });
   };
 
-  const handleSave = (after?: AfterCommand) => {
+  const handleSave = ({ after, preventTaskResolution }: SaveProps) => {
     changeField({
       after,
+      preventTaskResolution,
       onSuccess: () => onSaveSuccess?.(value),
     });
   };
@@ -140,6 +147,18 @@ export const useTranslationCell = ({
 
   const translation = langTag ? keyData?.translations[langTag] : undefined;
 
+  const firstTask = keyData.tasks?.find((t) => t.languageTag === language.tag);
+
+  const setAssignedTaskState = (done: boolean) => {
+    if (firstTask) {
+      setTaskState({
+        keyId: keyData.keyId,
+        taskNumber: firstTask.number,
+        done,
+      });
+    }
+  };
+
   const setState = () => {
     if (!translation) {
       return;
@@ -159,14 +178,15 @@ export const useTranslationCell = ({
     updateEdit({ activeVariant });
   }
 
-  const canChangeState = satisfiesLanguageAccess(
-    'translations.state-edit',
-    language.id
-  );
+  const canChangeState =
+    (firstTask?.userAssigned && firstTask.type === 'REVIEW') ||
+    satisfiesLanguageAccess('translations.state-edit', language.id);
 
   const disabled = translation?.state === 'DISABLED';
   const editEnabled =
-    satisfiesLanguageAccess('translations.edit', language.id) && !disabled;
+    ((firstTask?.userAssigned && firstTask.type === 'TRANSLATE') ||
+      satisfiesLanguageAccess('translations.edit', language.id)) &&
+    !disabled;
 
   return {
     keyId,
@@ -179,6 +199,7 @@ export const useTranslationCell = ({
     setEditValueString,
     setState,
     setVariant,
+    setAssignedTaskState,
     value,
     editVal: isEditing ? cursor : undefined,
     isEditing,

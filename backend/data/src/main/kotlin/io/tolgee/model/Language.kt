@@ -7,6 +7,7 @@ import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.events.OnLanguagePrePersist
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -78,6 +79,9 @@ class Language : StandardAuditModel(), ILanguage, SoftDeletable {
 
   @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
   var stats: LanguageStats? = null
+
+  @OneToMany(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
+  var tasks: MutableList<Task> = mutableListOf()
 
   @field:Size(max = 2000)
   @ActivityLoggedProp

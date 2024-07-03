@@ -1,5 +1,5 @@
 import { Box, IconButton, styled } from '@mui/material';
-import { Close, Edit } from '@mui/icons-material';
+import { XClose, Edit02 } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -49,14 +49,14 @@ export const PreparedLanguage: React.FC<
             className="editButton"
             onClick={props.onEdit}
           >
-            <Edit />
+            <Edit02 />
           </StyledIconButton>
           <StyledIconButton
             size="small"
             onClick={props.onReset}
             data-cy="languages-create-cancel-prepared-button"
           >
-            <Close />
+            <XClose />
           </StyledIconButton>
         </Box>
       </StyledContainer>

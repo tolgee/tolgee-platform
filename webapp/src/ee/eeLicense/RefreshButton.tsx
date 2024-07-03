@@ -2,7 +2,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { Box, IconButton, Tooltip } from '@mui/material';
-import { Refresh } from '@mui/icons-material';
+import { RefreshCcw01 } from '@untitled-ui/icons-react';
 
 export const RefreshButton = () => {
   const { t } = useTranslate();
@@ -33,7 +33,7 @@ export const RefreshButton = () => {
           disabled={refreshMutation.isLoading}
           size="small"
         >
-          <Refresh />
+          <RefreshCcw01 />
         </IconButton>
       </Tooltip>
     </Box>

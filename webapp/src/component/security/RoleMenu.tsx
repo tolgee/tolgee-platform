@@ -7,7 +7,7 @@ import {
   styled,
   Tooltip,
 } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 
 import { OrganizationRoleType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';

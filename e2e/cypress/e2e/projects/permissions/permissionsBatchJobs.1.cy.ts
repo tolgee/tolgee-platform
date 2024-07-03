@@ -9,9 +9,6 @@ describe('Batch jobs permissions 1', () => {
   it('translations.batch-machine', () => {
     visitProjectWithPermissions({
       scopes: ['translations.batch-machine'],
-      viewLanguageTags: ['en', 'cs'],
-      translateLanguageTags: ['cs'],
-      stateChangeLanguageTags: ['en'],
     }).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,

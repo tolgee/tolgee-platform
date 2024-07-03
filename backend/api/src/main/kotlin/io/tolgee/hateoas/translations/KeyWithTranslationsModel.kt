@@ -45,4 +45,6 @@ open class KeyWithTranslationsModel(
     """,
   )
   val translations: Map<String, TranslationViewModel>,
+  @Schema(description = "Tasks related to this key")
+  val tasks: List<KeyTaskViewModel>?,
 ) : RepresentationModel<KeyWithTranslationsModel>()

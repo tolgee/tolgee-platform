@@ -8,7 +8,7 @@ import {
   Select,
   styled,
 } from '@mui/material';
-import { Add, Clear } from '@mui/icons-material';
+import { Plus, XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 
@@ -35,7 +35,7 @@ const StyledItemContent = styled('div')`
   align-items: center;
 `;
 
-const StyledAddIcon = styled(Add)`
+const StyledPlusIcon = styled(Plus)`
   margin-right: ${({ theme }) => theme.spacing(1)};
   margin-left: -2px;
 `;
@@ -77,7 +77,7 @@ export const LanguageSelector: React.FC<{
 
   items.push(
     <StyledItem key={0} value={NEW_LANGUAGE_VALUE} className="addNewItem">
-      <StyledAddIcon fontSize="small" />
+      <StyledPlusIcon width={18} height={18} />
       <T keyName="import_result_language_menu_add_new" />
     </StyledItem>
   );
@@ -103,7 +103,7 @@ export const LanguageSelector: React.FC<{
                   size="small"
                   data-cy="import-row-language-select-clear-button"
                 >
-                  <Clear />
+                  <XClose />
                 </IconButton>
               </StyledInputAdornment>
             ) : (

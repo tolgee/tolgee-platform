@@ -4,7 +4,10 @@ import {
   useTranslationsSelector,
   useTranslationsActions,
 } from '../context/TranslationsContext';
-import { encodeFilter, toggleFilter } from '../Filters/tools';
+import {
+  encodeFilter,
+  toggleFilter,
+} from 'tg.component/translation/translationFilters/tools';
 import { Tag } from './Tag';
 
 type TagModel = components['schemas']['TagModel'];

@@ -7,7 +7,7 @@ import {
   Tab,
   styled,
 } from '@mui/material';
-import { useTranslate, T, TFnType } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 import { Formik } from 'formik';
 import { Button } from '@mui/material';
 import { getFirstPluralParameter } from '@tginternal/editor';
@@ -131,7 +131,7 @@ export const KeyEditModal: React.FC<Props> = ({
     <Formik
       initialValues={initialValues}
       enableReinitialize
-      validationSchema={Validation.KEY_SETTINGS_FORM(t as TFnType)}
+      validationSchema={Validation.KEY_SETTINGS_FORM(t)}
       onSubmit={async (values, helpers) => {
         const custom = JSON.parse(values.custom);
         try {

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { T } from '@tolgee/react';
 import { MenuItem, ListItemText } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationPopover } from 'tg.component/organizationSwitch/OrganizationPopover';

@@ -70,6 +70,8 @@ export class LINKS {
    * Authentication
    */
 
+  static MY_TASKS = Link.ofRoot('my-tasks');
+
   static LOGIN = Link.ofRoot('login');
 
   static OAUTH_RESPONSE = Link.ofParent(
@@ -293,6 +295,8 @@ export class LINKS {
     'single'
   );
 
+  static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
+
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 
   static PROJECT_WEBSOCKETS_PREVIEW = Link.ofParent(
@@ -355,6 +359,8 @@ export class LINKS {
     LINKS.PROJECT,
     'activity-detail'
   );
+
+  static GO_TO_PROJECT_TASK = Link.ofParent(LINKS.PROJECT, 'task');
 
   /**
    * Slack

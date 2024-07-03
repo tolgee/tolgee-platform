@@ -21,6 +21,7 @@ const StyledContainer = styled(Container)`
   display: grid;
   padding: 0px !important;
   container: main-container / inline-size;
+  grid-template-rows: auto 1fr;
 `;
 
 const StyledMenu = styled('div')`

@@ -73,9 +73,8 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
     >
       {({ values, errors, setFieldValue }) => (
         <Form>
-          <Box mb={3}>
+          <Box mb={3} mt={3}>
             <TextField
-              sx={{ mt: 2 }}
               name="name"
               size="small"
               label={t('administration_ee_plan_field_name')}

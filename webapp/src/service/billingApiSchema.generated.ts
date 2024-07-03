@@ -344,7 +344,10 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids";
+        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
+        | "task_not_found"
+        | "task_not_finished"
+        | "task_not_open";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -397,6 +400,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "TASKS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -445,6 +449,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "TASKS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -521,6 +526,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "TASKS"
       )[];
       prices: components["schemas"]["PlanPricesRequest"];
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
@@ -556,6 +562,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "TASKS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -583,6 +590,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "TASKS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesRequest"];
@@ -619,6 +627,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "TASKS"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -813,6 +822,8 @@ export interface components {
         | "content-delivery.manage"
         | "content-delivery.publish"
         | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
       )[];
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
@@ -2551,6 +2562,7 @@ export interface operations {
             | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
             | "AI_PROMPT_CUSTOMIZATION"
             | "SLACK_INTEGRATION"
+            | "TASKS"
           )[];
         };
       };

@@ -19,7 +19,6 @@ declare namespace DataCy {
         "administration-cloud-plan-field-price-per-thousand-translations" |
         "administration-cloud-plan-field-price-yearly" |
         "administration-cloud-plan-field-public" |
-        "administration-cloud-plan-field-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
         "administration-cloud-plan-organization-assign-switch" |
@@ -73,6 +72,8 @@ declare namespace DataCy {
         "api-key-list-item-regenerate-button" |
         "api-keys-create-edit-dialog" |
         "api-keys-project-select-item" |
+        "assignee-search-select-popover" |
+        "assignee-select" |
         "auto-avatar-img" |
         "avatar-image" |
         "avatar-menu-open-button" |
@@ -89,6 +90,7 @@ declare namespace DataCy {
         "batch-operations-section" |
         "batch-operations-select" |
         "batch-operations-submit-button" |
+        "batch-progress" |
         "batch-select-item" |
         "billing-actual-extra-credits" |
         "billing-actual-period" |
@@ -137,6 +139,13 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "create-task-field-description" |
+        "create-task-field-languages" |
+        "create-task-field-languages-item" |
+        "create-task-field-name" |
+        "create-task-field-type" |
+        "create-task-field-type-item" |
+        "create-task-submit" |
         "dashboard-projects-list-item" |
         "default-namespace-select" |
         "delete-user-button" |
@@ -159,7 +168,6 @@ declare namespace DataCy {
         "export-message-format-selector-item" |
         "export-namespace-selector" |
         "export-namespace-selector-item" |
-        "export-nested-selector" |
         "export-state-selector" |
         "export-state-selector-item" |
         "export-submit-button" |
@@ -261,6 +269,7 @@ declare namespace DataCy {
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
         "language-modify-form" |
+        "language-select-popover" |
         "languages-add-dialog-submit" |
         "languages-create-autocomplete-field" |
         "languages-create-autocomplete-suggested-option" |
@@ -372,6 +381,7 @@ declare namespace DataCy {
         "project-dashboard-language-menu" |
         "project-dashboard-language-menu-export" |
         "project-dashboard-language-menu-settings" |
+        "project-dashboard-languages-edit" |
         "project-dashboard-members" |
         "project-dashboard-members-count" |
         "project-dashboard-progress" |
@@ -380,6 +390,7 @@ declare namespace DataCy {
         "project-dashboard-strings" |
         "project-dashboard-strings-count" |
         "project-dashboard-tags" |
+        "project-dashboard-task-count" |
         "project-dashboard-text" |
         "project-dashboard-translated-percentage" |
         "project-delete-button" |
@@ -400,10 +411,12 @@ declare namespace DataCy {
         "project-menu-item-members" |
         "project-menu-item-projects" |
         "project-menu-item-settings" |
+        "project-menu-item-tasks" |
         "project-menu-item-translations" |
         "project-menu-items" |
         "project-mt-dialog-settings-inherited" |
         "project-name-field" |
+        "project-select" |
         "project-settings" |
         "project-settings-button" |
         "project-settings-delete-button" |
@@ -470,6 +483,45 @@ declare namespace DataCy {
         "storage-subtitle" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
+        "task-date-picker" |
+        "task-detail" |
+        "task-detail-author" |
+        "task-detail-characters" |
+        "task-detail-closed-at" |
+        "task-detail-created-at" |
+        "task-detail-download-report" |
+        "task-detail-field-description" |
+        "task-detail-field-name" |
+        "task-detail-keys" |
+        "task-detail-project" |
+        "task-detail-submit" |
+        "task-detail-user-characters" |
+        "task-detail-user-keys" |
+        "task-detail-user-words" |
+        "task-detail-words" |
+        "task-item" |
+        "task-item-detail" |
+        "task-item-menu" |
+        "task-label-name" |
+        "task-preview" |
+        "task-preview-alert" |
+        "task-preview-characters" |
+        "task-preview-keys" |
+        "task-preview-language" |
+        "task-preview-words" |
+        "task-select" |
+        "task-select-item" |
+        "task-select-search" |
+        "task-state" |
+        "task-tooltip-action-detail" |
+        "task-tooltip-action-translations" |
+        "task-tooltip-content" |
+        "tasks-filter-menu" |
+        "tasks-header-add-task" |
+        "tasks-header-filter-select" |
+        "tasks-header-show-closed" |
+        "tasks-view-board-button" |
+        "tasks-view-list-button" |
         "this-is-the-element" |
         "top-banner" |
         "top-banner-content" |
@@ -504,6 +556,7 @@ declare namespace DataCy {
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
+        "translations-cell-task-button" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
         "translations-filter-clear-all" |
@@ -524,6 +577,8 @@ declare namespace DataCy {
         "translations-row-checkbox" |
         "translations-select-all-button" |
         "translations-shortcuts-command" |
+        "translations-state-filter" |
+        "translations-state-filter-option" |
         "translations-state-indicator" |
         "translations-table-cell" |
         "translations-table-cell-language" |
@@ -533,6 +588,7 @@ declare namespace DataCy {
         "translations-tag-close" |
         "translations-tag-input" |
         "translations-tags-add" |
+        "translations-task-indicator" |
         "translations-toolbar-counter" |
         "translations-toolbar-to-top" |
         "translations-view-list" |
@@ -542,12 +598,15 @@ declare namespace DataCy {
         "user-delete-organization-message-item" |
         "user-menu-language-switch" |
         "user-menu-logout" |
+        "user-menu-my-tasks" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |
         "user-menu-server-administration" |
         "user-menu-theme-switch" |
         "user-menu-user-settings" |
         "user-profile" |
+        "user-switch-item" |
+        "user-switch-search" |
         "webhook-form-cancel" |
         "webhook-form-delete" |
         "webhook-form-save" |

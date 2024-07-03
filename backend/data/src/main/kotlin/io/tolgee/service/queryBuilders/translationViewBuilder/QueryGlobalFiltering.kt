@@ -9,6 +9,8 @@ import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
+import io.tolgee.model.task.TaskKey_
+import io.tolgee.model.task.Task_
 import io.tolgee.model.temp.UnsuccessfulJobKey
 import io.tolgee.model.temp.UnsuccessfulJobKey_
 import jakarta.persistence.EntityManager
@@ -36,6 +38,7 @@ class QueryGlobalFiltering(
     filterSearch()
     filterRevisionId()
     filterFailedTargets()
+    filterTask()
   }
 
   private fun filterFailedTargets() {
@@ -137,6 +140,17 @@ class QueryGlobalFiltering(
       val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
       queryBase.whereConditions.add(tagsJoin.get(Tag_.name).`in`(params.filterTag))
+    }
+  }
+
+  private fun filterTask() {
+    if (params.filterTaskNumber != null) {
+      val translationTaskJoin =
+        queryBase.root
+          .join(Key_.tasks, JoinType.LEFT)
+          .join(TaskKey_.task, JoinType.LEFT)
+
+      queryBase.whereConditions.add(translationTaskJoin.get(Task_.number).`in`(params.filterTaskNumber))
     }
   }
 

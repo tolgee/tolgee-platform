@@ -1,17 +1,18 @@
-import { CheckCircleOutlined, CheckCircle } from '@mui/icons-material';
+import { CheckCircleBroken } from '@untitled-ui/icons-react';
+import { CheckCircleDash } from 'tg.component/CustomIcons';
 import { components } from 'tg.service/apiSchema.generated';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-type StateButtonProps = React.ComponentProps<typeof CheckCircleOutlined> & {
+type StateButtonProps = React.ComponentProps<typeof CheckCircleBroken> & {
   state: State | undefined;
 };
 
 export const StateIcon = ({ state, ...props }: StateButtonProps) => {
   switch (state) {
     case 'REVIEWED':
-      return <CheckCircle {...props} />;
+      return <CheckCircleDash {...props} />;
     default:
-      return <CheckCircleOutlined {...props} />;
+      return <CheckCircleBroken {...props} />;
   }
 };

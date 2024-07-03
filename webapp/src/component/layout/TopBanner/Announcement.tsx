@@ -1,6 +1,6 @@
 import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { TadaIcon } from 'tg.component/CustomIcons';
+import { Tada } from 'tg.component/CustomIcons';
 import { BannerLink } from './BannerLink';
 
 type Props = {
@@ -36,7 +36,7 @@ export const Announcement = ({ content, link, icon, title }: Props) => {
   return (
     <StyledWrappableContent>
       <StyledContent>
-        {icon ? icon : <TadaIcon />}
+        {icon ? icon : <Tada />}
         {title && <StyledTitle>{title}</StyledTitle>}
         <div>{content}</div>
       </StyledContent>

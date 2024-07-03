@@ -32,6 +32,8 @@ import {
   SetEdit,
 } from '../types';
 import { getPluralVariants } from '@tginternal/editor';
+import { useTaskService } from './useTaskService';
+import { PrefilterType } from '../../prefilters/usePrefilter';
 
 /**
  * Kinda hacky way how to update react-list size cache, when editor gets open
@@ -61,6 +63,8 @@ type KeyWithTranslationsModelType =
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
   viewRefs: ReturnType<typeof useRefsService>;
+  taskService: ReturnType<typeof useTaskService>;
+  prefilter: PrefilterType | undefined;
 };
 
 function generateCurrentValue(
@@ -106,7 +110,12 @@ function serializeVariants(
     .join('<%>');
 }
 
-export const useEditService = ({ translations, viewRefs }: Props) => {
+export const useEditService = ({
+  translations,
+  viewRefs,
+  taskService,
+  prefilter,
+}: Props) => {
   const [position, setPosition] = useState<Edit | undefined>(undefined);
   const currentIndex = useMemo(() => {
     return translations.fixedTranslations?.findIndex(
@@ -367,8 +376,30 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
         { keyId, value: { keyName: value } },
       ]);
     }
-    doAfterCommand(data.after);
+
+    if (language && !data.preventTaskResolution && prefilter?.task) {
+      const key = translations.fixedTranslations?.find(
+        (k) => k.keyId === keyId
+      );
+      const task = key?.tasks?.find((t) => t.languageTag === language);
+
+      if (
+        task &&
+        prefilter.task === task.number &&
+        !task.done &&
+        task.userAssigned &&
+        task.type === 'TRANSLATE'
+      ) {
+        await taskService.setTaskTranslationState({
+          keyId: position.keyId,
+          taskNumber: task.number,
+          done: true,
+        });
+      }
+    }
+
     data.onSuccess?.();
+    doAfterCommand(data.after);
   };
 
   const doAfterCommand = (command?: AfterCommand) => {

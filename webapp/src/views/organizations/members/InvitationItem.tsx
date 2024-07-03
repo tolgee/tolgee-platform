@@ -1,6 +1,6 @@
 import { T, useTranslate } from '@tolgee/react';
 import { IconButton, styled, Tooltip } from '@mui/material';
-import { Link, Clear } from '@mui/icons-material';
+import { Link02, XClose } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -90,7 +90,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             size="small"
             onClick={handleGetLink}
           >
-            <Link />
+            <Link02 />
           </IconButton>
         </Tooltip>
 
@@ -100,7 +100,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             size="small"
             onClick={handleCancel}
           >
-            <Clear />
+            <XClose />
           </IconButton>
         </Tooltip>
       </StyledItemActions>

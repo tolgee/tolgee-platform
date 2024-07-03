@@ -12,6 +12,7 @@ import { testExport } from './export';
 import { testIntegration } from './integration';
 import { testKeys } from './keys';
 import { testMembers } from './members';
+import { testMyTasks } from './myTasks';
 import {
   getProjectInfo,
   pageAcessibleWithoutErrors,
@@ -55,8 +56,9 @@ export function checkPermissions(projectInfo: ProjectInfo, settings: Settings) {
           testDashboard(projectInfo);
           break;
         case 'project-menu-item-translations':
-          testKeys(projectInfo);
+          testMyTasks(projectInfo);
           testTranslations(projectInfo);
+          testKeys(projectInfo);
           testBatchOperations(projectInfo);
           break;
         case 'project-menu-item-members':

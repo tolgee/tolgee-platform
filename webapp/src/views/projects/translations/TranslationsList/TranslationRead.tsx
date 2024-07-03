@@ -9,6 +9,7 @@ import { TranslationLanguage } from './TranslationLanguage';
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
     'language    controls-t '
     'translation translation '
@@ -65,6 +66,7 @@ export const TranslationRead: React.FC<Props> = ({
     canChangeState,
     keyData,
     editEnabled,
+    setAssignedTaskState,
   } = tools;
 
   const toggleEdit = () => {
@@ -99,6 +101,8 @@ export const TranslationRead: React.FC<Props> = ({
         onEdit={() => handleOpen()}
         onComments={() => handleOpen('comments')}
         commentsCount={translation?.commentCount}
+        tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
+        onTaskStateChange={setAssignedTaskState}
         unresolvedCommentCount={translation?.unresolvedCommentCount}
         stateChangeEnabled={canChangeState}
         editEnabled={editable}

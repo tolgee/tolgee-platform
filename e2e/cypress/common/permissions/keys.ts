@@ -2,6 +2,7 @@ import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permiss
 import { deleteSelected } from '../batchOperations';
 import { waitForGlobalLoading } from '../loading';
 import { confirmStandard, dismissMenu } from '../shared';
+import { getCell } from '../state';
 import { createTag } from '../tags';
 import { createTranslation, editCell } from '../translations';
 import { getLanguageId, getLanguages, ProjectInfo } from './shared';
@@ -35,7 +36,10 @@ export function testKeys(info: ProjectInfo) {
 
   if (scopes.includes('screenshots.view')) {
     cy.gcy('translations-table-cell').first().focus();
-    cy.gcy('translations-cell-screenshots-button').should('exist').click();
+    cy.gcy('translations-cell-screenshots-button')
+      .first()
+      .should('exist')
+      .click();
     cy.gcy('screenshot-thumbnail').should('be.visible');
     if (scopes.includes('screenshots.delete')) {
       cy.gcy('screenshot-thumbnail').trigger('mouseover');
@@ -56,7 +60,7 @@ export function testKeys(info: ProjectInfo) {
     !scopes.includes('translations.edit') &&
     scopes.includes('translations.view')
   ) {
-    cy.gcy('translations-table-cell-translation').first().click();
+    getCell('German text 1').click();
     cy.gcy('global-editor').should('not.exist');
   }
 
