@@ -104,6 +104,7 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(apiKey.projectId).thenReturn(1337L)
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
     Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(true)
   }
 
   @AfterEach
