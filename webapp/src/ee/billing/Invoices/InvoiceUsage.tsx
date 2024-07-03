@@ -5,7 +5,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import { DataUsage } from '@mui/icons-material';
+import { PieChart01 } from '@untitled-ui/icons-react';
 import { FC, useState } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useTranslate } from '@tolgee/react';
@@ -49,7 +49,7 @@ export const InvoiceUsage: FC<{
               aria-label={t('billing_invoices_show_usage_button')}
             >
               <Tooltip title={t('billing_invoices_show_usage_button')}>
-                <DataUsage />
+                <PieChart01 />
               </Tooltip>
             </IconButton>
           </Box>

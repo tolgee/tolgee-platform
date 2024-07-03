@@ -187,6 +187,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                           fullWidth
                           name="projectId"
                           label="Project"
+                          minHeight={false}
                           renderValue={(v) =>
                             projects.data?._embedded?.projects?.find(
                               (r) => r.id === v

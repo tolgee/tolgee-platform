@@ -1,6 +1,6 @@
 import { ComponentProps, FunctionComponent, useRef, useState } from 'react';
 import { Button, styled, Tooltip, Popover, Checkbox } from '@mui/material';
-import { ArrowDropDown, CheckBoxOutlineBlank } from '@mui/icons-material';
+import { ArrowDropDown, CheckBoxOutlineBlank } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
@@ -140,8 +140,8 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             maxWidth={400}
             renderOption={(renderProps, option) => (
               <CompactMenuItem
-                key={option.value}
                 {...renderProps}
+                key={option.value}
                 data-cy="search-select-item"
                 disabled={disabledLanguages.includes(option.value)}
               >

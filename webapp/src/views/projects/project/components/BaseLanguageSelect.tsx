@@ -39,6 +39,7 @@ export const BaseLanguageSelect: FC<{
         sx={{ mt: 0 }}
         name={props.name}
         size="small"
+        minHeight={false}
         renderValue={(v) => {
           const language = availableLanguages.find(
             (lang) => lang![valueKey] === v

@@ -1,4 +1,4 @@
-import { Edit } from '@mui/icons-material';
+import { Edit02 } from '@untitled-ui/icons-react';
 import { Box, IconButton, Link as MuiLink, styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
@@ -42,11 +42,10 @@ export const ProjectDescription: React.FC<Props> = ({ description }) => {
         <StyledTileEdit>
           <IconButton
             component={Link}
-            size="small"
             color="inherit"
             to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: project.id })}
           >
-            <Edit fontSize="small" />
+            <Edit02 width={20} height={20} />
           </IconButton>
         </StyledTileEdit>
       )}

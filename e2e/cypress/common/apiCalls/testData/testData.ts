@@ -104,6 +104,8 @@ export const formerUserTestData = generateTestDataObject('former-user');
 
 export const namespaces = generateTestDataObject('namespaces');
 
+export const tasks = generateTestDataObject('task');
+
 export const batchJobs = generateTestDataObject('batch-jobs');
 
 export const sensitiveOperationProtectionTestData = {

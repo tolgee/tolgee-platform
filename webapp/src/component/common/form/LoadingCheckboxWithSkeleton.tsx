@@ -7,7 +7,7 @@ import {
   styled,
   Tooltip,
 } from '@mui/material';
-import { HelpOutline } from '@mui/icons-material';
+import { HelpCircle } from '@untitled-ui/icons-react';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 export type LoadingCheckboxWithSkeletonProps = {
@@ -27,9 +27,9 @@ const StyledLabel = styled('div')`
   align-items: center;
 `;
 
-const StyledHelpIcon = styled(HelpOutline)`
+const StyledHelpIcon = styled(HelpCircle)`
   color: ${({ theme }) => theme.palette.tokens.icon.primary};
-  font-size: 16px;
+  width: 16px;
 `;
 
 export const LoadingCheckboxWithSkeleton: FC<

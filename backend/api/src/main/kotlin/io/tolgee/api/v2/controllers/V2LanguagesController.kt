@@ -12,6 +12,7 @@ import io.tolgee.component.LanguageValidator
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.LanguageRequest
+import io.tolgee.dtos.request.language.LanguageFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
@@ -95,8 +96,10 @@ class V2LanguagesController(
   fun getAll(
     @PathVariable("projectId") pathProjectId: Long?,
     @ParameterObject @SortDefault("tag") pageable: Pageable,
+    @ParameterObject
+    filters: LanguageFilters,
   ): PagedModel<LanguageModel> {
-    val data = languageService.getPaged(projectHolder.project.id, pageable)
+    val data = languageService.getPaged(projectHolder.project.id, pageable, filters)
     return pagedAssembler.toModel(data, languageModelAssembler)
   }
 

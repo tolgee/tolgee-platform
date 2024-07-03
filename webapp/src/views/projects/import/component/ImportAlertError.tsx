@@ -12,7 +12,7 @@ import {
   Collapse,
   IconButton,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -73,7 +73,7 @@ export const ImportAlertError: FunctionComponent<{
                   setCollapsed(true);
                 }}
               >
-                <CloseIcon fontSize="inherit" />
+                <XClose />
               </IconButton>
             </>
           }

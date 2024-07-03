@@ -1,6 +1,6 @@
 import React, { ComponentProps, FunctionComponent } from 'react';
 import { Button, Tooltip } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { PermissionModalProps, PermissionsModal } from './PermissionsModal';
 import { useRoleTranslations } from 'tg.component/PermissionsSettings/useRoleTranslations';
 

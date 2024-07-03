@@ -6,7 +6,7 @@ import {
   TextField,
   styled,
 } from '@mui/material';
-import { Add, Clear, Search } from '@mui/icons-material';
+import { Plus, XClose, SearchSm } from '@untitled-ui/icons-react';
 import { Autocomplete } from '@mui/material';
 import { suggest } from '@tginternal/language-util';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
@@ -43,7 +43,7 @@ const getOptions = (input: string): AutocompleteOption[] => {
         gap={1}
         alignItems="center"
       >
-        <Add fontSize="small" />
+        <Plus fontSize="small" />
         <T keyName="language_field_autocomplete_label_new_language" />
       </Box>
     ),
@@ -96,8 +96,8 @@ export const LanguageAutocomplete: FC<{
           </StyledMenuItem>
         ) : (
           <StyledMenuItem
-            key={option.languageId}
             {...props}
+            key={option.languageId}
             data-cy="languages-create-autocomplete-suggested-option"
           >
             {itemContent}
@@ -121,13 +121,13 @@ export const LanguageAutocomplete: FC<{
             style: { paddingRight: 0 },
             startAdornment: (
               <InputAdornment position="end">
-                <Search />
+                <SearchSm width={20} height={20} />
               </InputAdornment>
             ),
             endAdornment: props.onClear ? (
               <InputAdornment position="end">
                 <IconButton size="small" onClick={props.onClear}>
-                  <Clear />
+                  <XClose />
                 </IconButton>
               </InputAdornment>
             ) : undefined,

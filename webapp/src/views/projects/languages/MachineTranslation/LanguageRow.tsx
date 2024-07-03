@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, IconButton } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { Settings } from '@mui/icons-material';
+import { Settings01 } from '@untitled-ui/icons-react';
 
 import { LanguageItem } from '../LanguageItem';
 import {
@@ -83,7 +83,7 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
           data-cy="machine-translations-settings-language-options"
           data-cy-language={rowData.settings.language?.tag || 'default'}
         >
-          <Settings />
+          <Settings01 />
         </IconButton>
       </Box>
       {settingsOpen && (

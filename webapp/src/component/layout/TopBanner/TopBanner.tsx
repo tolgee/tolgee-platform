@@ -6,7 +6,7 @@ import {
 } from 'tg.globalContext/GlobalContext';
 import { useAnnouncement } from './useAnnouncement';
 import { useIsEmailVerified } from 'tg.globalContext/helpers';
-import { Close } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 import { useResizeObserver } from 'usehooks-ts';
 import { Announcement } from 'tg.component/layout/TopBanner/Announcement';
 import { useTranslate } from '@tolgee/react';
@@ -116,7 +116,7 @@ export function TopBanner() {
           onClick={() => dismissAnnouncement()}
           data-cy="top-banner-dismiss-button"
         >
-          <Close />
+          <XClose />
         </StyledCloseButton>
       )}
     </StyledContainer>

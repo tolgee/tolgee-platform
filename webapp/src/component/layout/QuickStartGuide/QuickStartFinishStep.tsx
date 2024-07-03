@@ -1,7 +1,7 @@
 import { Box, styled, useTheme } from '@mui/material';
 import { StyledLink } from './StyledComponents';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { TadaIcon } from 'tg.component/CustomIcons';
+import { Tada } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled(Box)`
@@ -35,8 +35,10 @@ export const QuickStartFinishStep = () => {
   return (
     <StyledContainer data-cy="quick-start-finish-step">
       <StyledIndex>
-        <TadaIcon
-          sx={{ fontSize: 20, color: theme.palette.quickStart.finishIcon }}
+        <Tada
+          width={20}
+          height={20}
+          color={theme.palette.quickStart.finishIcon}
         />
       </StyledIndex>
       <Box display="grid">

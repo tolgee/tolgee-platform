@@ -11,7 +11,7 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce';
 
@@ -242,7 +242,7 @@ export const OrganizationPopover: React.FC<Props> = ({
                       sx={{ ml: 0.5 }}
                       data-cy="organization-switch-new"
                     >
-                      <Add />
+                      <Plus />
                     </IconButton>
                   </Tooltip>
                 )}

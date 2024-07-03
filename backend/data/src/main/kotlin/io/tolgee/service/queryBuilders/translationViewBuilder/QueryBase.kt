@@ -20,6 +20,7 @@ import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
+import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
@@ -39,6 +40,7 @@ class QueryBase<T>(
   params: TranslationFilters,
   private var isKeyIdsQuery: Boolean = false,
   private val entityManager: EntityManager,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)

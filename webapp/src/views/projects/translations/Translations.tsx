@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, Dialog, styled, useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -26,6 +26,7 @@ import { TranslationsToolbar } from './TranslationsToolbar';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { Prefilter } from './prefilters/Prefilter';
+import { TaskDetail } from 'tg.ee/task/components/TaskDetail';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -92,6 +93,8 @@ export const Translations = () => {
       };
     }
   }, [sidePanelOpen, quickStartEnabled]);
+
+  const [taskDetail, setTaskDetail] = useUrlSearchState('taskDetail');
 
   const renderPlaceholder = () =>
     memoizedFiltersOrSearchApplied ? (
@@ -163,6 +166,19 @@ export const Translations = () => {
         {toolsPanelOpen && <FloatingToolsPanel />}
       </StyledContainer>
       <TranslationsToolbar />
+      {taskDetail !== undefined && (
+        <Dialog
+          open={true}
+          onClose={() => setTaskDetail(undefined)}
+          maxWidth="xl"
+        >
+          <TaskDetail
+            taskNumber={Number(taskDetail)}
+            onClose={() => setTaskDetail(undefined)}
+            projectId={project.id}
+          />
+        </Dialog>
+      )}
     </BaseProjectView>
   );
 };

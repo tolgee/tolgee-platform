@@ -20,7 +20,7 @@ import {
   TABLE_LAST_CELL,
   TABLE_TOP_ROW,
 } from './tableStyles';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { LanguagesAddDialog } from 'tg.component/languages/LanguagesAddDialog';
 
 export const ProjectLanguages = () => {
@@ -68,7 +68,7 @@ export const ProjectLanguages = () => {
               <Button
                 color="primary"
                 variant="contained"
-                startIcon={<Add />}
+                startIcon={<Plus width={19} height={19} />}
                 onClick={() => setAddLanguageOpen(true)}
                 data-cy="project-settings-languages-add"
               >

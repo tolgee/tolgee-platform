@@ -7,7 +7,7 @@ import { signUpService } from '../service/SignUpService';
 import { checkParamNameIsValid } from '@tginternal/editor';
 import { validateObject } from 'tg.fixtures/validateObject';
 
-type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
+type TranslateFunction = TFnType<DefaultParamType, string, TranslationKey>;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
@@ -38,7 +38,7 @@ Yup.setLocale({
 });
 
 export class Validation {
-  static readonly USER_PASSWORD = (t: TFunType) =>
+  static readonly USER_PASSWORD = (t: TranslateFunction) =>
     Yup.string().min(8).max(50).required();
 
   static readonly RESET_PASSWORD_REQUEST = Yup.object().shape({
@@ -57,7 +57,7 @@ export class Validation {
       }
     }, signUpService.validateEmail);
 
-  static readonly SIGN_UP = (t: TFunType, orgRequired: boolean) =>
+  static readonly SIGN_UP = (t: TranslateFunction, orgRequired: boolean) =>
     Yup.object().shape({
       password: Validation.USER_PASSWORD(t),
       name: Yup.string().required(),
@@ -93,13 +93,13 @@ export class Validation {
           : Yup.string().email().required(),
     });
 
-  static readonly USER_PASSWORD_CHANGE = (t: TFunType) =>
+  static readonly USER_PASSWORD_CHANGE = (t: TranslateFunction) =>
     Yup.object().shape({
       currentPassword: Yup.string().max(50).required(),
       password: Validation.USER_PASSWORD(t),
     });
 
-  static readonly PASSWORD_RESET = (t: TFunType) =>
+  static readonly PASSWORD_RESET = (t: TranslateFunction) =>
     Yup.object().shape({
       password: Validation.USER_PASSWORD(t),
     });
@@ -153,7 +153,10 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = (t: TFunType, existingTags?: string[]) =>
+  static readonly LANGUAGE_TAG = (
+    t: TranslateFunction,
+    existingTags?: string[]
+  ) =>
     Yup.string()
       .required()
       .max(20)
@@ -168,7 +171,7 @@ export class Validation {
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = (t: TFunType, existingTags?: string[]) =>
+  static readonly LANGUAGE = (t: TranslateFunction, existingTags?: string[]) =>
     Yup.object().shape({
       name: Validation.LANGUAGE_NAME,
       originalName: Validation.LANGUAGE_ORIGINAL_NAME,
@@ -225,7 +228,7 @@ export class Validation {
   }
 
   static readonly ORGANIZATION_CREATE_OR_EDIT = (
-    t: TFunType,
+    t: TranslateFunction,
     slugInitialValue?: string
   ) => {
     const slugSyncValidation = Validation.slugValidation(3, 60).required();
@@ -257,7 +260,7 @@ export class Validation {
     });
   };
 
-  static readonly INVITE_DIALOG_PROJECT = (t: TFunType) =>
+  static readonly INVITE_DIALOG_PROJECT = (t: TranslateFunction) =>
     Yup.object({
       permission: Yup.string(),
       permissionLanguages: Yup.array(Yup.string()),
@@ -271,7 +274,7 @@ export class Validation {
       ),
     });
 
-  static readonly INVITE_DIALOG_ORGANIZATION = (t: TFunType) =>
+  static readonly INVITE_DIALOG_ORGANIZATION = (t: TranslateFunction) =>
     Yup.object({
       permission: Yup.string(),
       type: Yup.string(),
@@ -375,7 +378,7 @@ export class Validation {
     url: Yup.string().required().max(255),
   });
 
-  static readonly NEW_KEY_FORM = (t: TFnType) =>
+  static readonly NEW_KEY_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
       name: Yup.string().required(),
       pluralParameter: Yup.string().when('isPlural', {
@@ -388,13 +391,27 @@ export class Validation {
       }),
     });
 
-  static readonly KEY_SETTINGS_FORM = (t: TFnType) =>
+  static readonly KEY_SETTINGS_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
       custom: Yup.string().test(
         'invalid-custom-values',
         t('validation_invalid_custom_values'),
         validateObject
       ),
+    });
+
+  static readonly CREATE_TASK_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+      languages: Yup.array(Yup.number()).min(
+        1,
+        t('validation_no_language_selected')
+      ),
+    });
+
+  static readonly UPDATE_TASK_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
     });
 }
 

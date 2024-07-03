@@ -96,7 +96,7 @@ When no languages provided, it translates only untranslated languages.""",
     languagesToTranslate: Set<String>,
   ) {
     keyService.checkInProject(key, projectHolder.project.id)
-    securityService.checkLanguageTranslatePermissionsByTag(languagesToTranslate, projectHolder.project.id)
+    securityService.checkLanguageTranslatePermissionsByTag(languagesToTranslate, projectHolder.project.id, key.id)
   }
 
   private fun getAllLanguagesToTranslate(): Set<String> {

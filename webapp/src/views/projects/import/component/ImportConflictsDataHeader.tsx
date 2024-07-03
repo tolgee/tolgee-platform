@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import {
   Box,
   Button,
@@ -7,7 +7,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { DoneAll } from '@mui/icons-material';
+import { CheckDone01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
@@ -62,7 +62,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
     <Button
       data-cy="import-resolution-dialog-accept-old-button"
       fullWidth={isSmOrLower}
-      startIcon={<DoneAll />}
+      startIcon={<CheckDone01 />}
       variant="outlined"
       color="inherit"
       onClick={keepAllExisting}
@@ -74,7 +74,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
     <Button
       data-cy="import-resolution-dialog-accept-imported-button"
       fullWidth={isSmOrLower}
-      startIcon={<DoneAll />}
+      startIcon={<CheckDone01 />}
       variant="outlined"
       color="inherit"
       onClick={overrideAll}

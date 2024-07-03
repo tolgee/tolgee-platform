@@ -12,3 +12,14 @@ export function getPreselectedLanguages(
       .filter((tag) => preselected?.includes(tag)) ?? []
   );
 }
+
+export function getPreselectedLanguagesIds(
+  allLanguages: LanguageModel[],
+  preselected: string[]
+) {
+  return (
+    allLanguages
+      .filter(({ tag }) => preselected?.includes(tag))
+      .map((l) => l.id) ?? []
+  );
+}

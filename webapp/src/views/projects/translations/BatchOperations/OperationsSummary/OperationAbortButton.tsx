@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { Box, styled } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useOperationCancel } from './useOperationCancel';
@@ -42,7 +42,7 @@ export function OperationAbortButton({ operation }: Props) {
       className={clsx({ disabled: loading })}
     >
       {!loading ? (
-        <Close fontSize="small" color="inherit" />
+        <XClose width={18} height={18} />
       ) : (
         <SpinnerProgress size={18} />
       )}

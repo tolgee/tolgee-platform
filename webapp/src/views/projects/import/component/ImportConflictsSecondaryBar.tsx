@@ -6,7 +6,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material';
-import { CheckCircle, Warning } from '@mui/icons-material';
+import { CheckCircle, AlertTriangle } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
@@ -53,7 +53,7 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
               {resolvedCount !== undefined ? resolvedCount : '??'}
             </Typography>
 
-            <Warning className={clsx('validIcon', 'conflictsIcon')} />
+            <AlertTriangle className={clsx('validIcon', 'conflictsIcon')} />
 
             <Typography
               variant="body1"

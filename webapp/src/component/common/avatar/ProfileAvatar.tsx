@@ -1,6 +1,6 @@
 import { Box, IconButton, styled } from '@mui/material';
 import React, { createRef, FC, useRef, useState } from 'react';
-import EditIcon from '@mui/icons-material/Edit';
+import { Edit02 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { ReactCropperElement } from 'react-cropper';
 import { messageService } from 'tg.service/MessageService';
@@ -136,7 +136,7 @@ export const ProfileAvatar: FC<{
               ref={editAvatarRef as any}
               className="button"
             >
-              <EditIcon />
+              <Edit02 />
             </StyledEditButton>
           </EditButtonWrapper>
         )}

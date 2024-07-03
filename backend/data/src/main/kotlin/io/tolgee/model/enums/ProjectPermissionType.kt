@@ -65,5 +65,9 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       values().forEach { value -> result[value.name] = value.availableScopes }
       return result.toMap()
     }
+
+    fun findByScope(scope: Scope): List<ProjectPermissionType> {
+      return values().filter { it.availableScopes.contains(scope) }
+    }
   }
 }

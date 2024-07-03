@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { Box, Button, Typography } from '@mui/material';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -75,7 +75,7 @@ export const StorageList = () => {
           variant="contained"
           color="primary"
           onClick={() => setFormOpen(true)}
-          startIcon={<Add />}
+          startIcon={<Plus width={19} height={19} />}
           data-cy="storage-add-item-button"
           disabled={!canManage || !isEnabled}
         >

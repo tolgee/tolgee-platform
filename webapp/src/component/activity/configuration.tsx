@@ -327,4 +327,60 @@ export const actionsConfiguration: Partial<
       return <T keyName="activity_complex_tag_operation" params={params} />;
     },
   },
+  TASK_CREATE: {
+    label() {
+      return <T keyName="activity_task_create" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
+  TASKS_CREATE: {
+    label() {
+      return <T keyName="activity_tasks_create" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
+  TASK_UPDATE: {
+    label() {
+      return <T keyName="activity_task_update" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
+  TASK_FINISH: {
+    label() {
+      return <T keyName="activity_task_finish" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
+  TASK_CLOSE: {
+    label() {
+      return <T keyName="activity_task_close" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
+  TASK_REOPEN: {
+    label() {
+      return <T keyName="activity_task_reopen" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
+  TASK_KEYS_UPDATE: {
+    label() {
+      return <T keyName="activity_task_keys_update" />;
+    },
+    entities: {
+      Task: [],
+    },
+  },
 };

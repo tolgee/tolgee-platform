@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useTranslate } from '@tolgee/react';
 import { Checkbox, styled, Tooltip, Box } from '@mui/material';
-import { Bolt } from '@mui/icons-material';
+import { Zap } from '@untitled-ui/icons-react';
 
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { components } from 'tg.service/apiSchema.generated';
@@ -98,11 +98,15 @@ const StyledTags = styled('div')`
   min-height: 28px;
 `;
 
-const StyledBolt = styled(Bolt)`
+const StyledContextButton = styled(Box)`
   position: absolute;
   bottom: 12px;
   left: 12px;
-  font-size: 16px;
+`;
+
+const StyledBolt = styled(Zap)`
+  width: 14px;
+  height: 14px;
 `;
 
 type Props = {
@@ -220,11 +224,14 @@ export const CellKey: React.FC<Props> = ({
             </>
           )}
           {data.contextPresent && (
-            <Box role="button" onClick={() => handleOpen('context')}>
-              <Tooltip title={t('key-context-present-hint')}>
+            <Tooltip title={t('key-context-present-hint')}>
+              <StyledContextButton
+                role="button"
+                onClick={() => handleOpen('context')}
+              >
                 <StyledBolt />
-              </Tooltip>
-            </Box>
+              </StyledContextButton>
+            </Tooltip>
           )}
         </>
 
