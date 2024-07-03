@@ -33,6 +33,7 @@ export const SimpleList = <
       onPageChange: (page: number) => void;
     };
     renderItem: (item: DataItem) => ReactNode;
+    itemSeparator?: () => ReactNode;
   } & OverridableListWrappers<WrapperComponent, ListComponent>
 ) => {
   const { data, pagination } = props;
@@ -50,6 +51,7 @@ export const SimpleList = <
           {data.map((item, index) => (
             <React.Fragment key={(item as any).id || index}>
               {props.renderItem(item)}
+              {index < data.length - 1 && props.itemSeparator?.()}
             </React.Fragment>
           ))}
         </ListWrapper>

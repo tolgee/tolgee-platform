@@ -412,8 +412,15 @@ class KeyService(
     return result
   }
 
-  fun find(id: List<Long>): List<Key> {
+  fun find(id: Collection<Long>): List<Key> {
     return keyRepository.findAllByIdIn(id)
+  }
+
+  fun find(
+    projectId: Long,
+    ids: Collection<Long>,
+  ): List<Key> {
+    return keyRepository.findAllByProjectIdAndIdIn(projectId, ids)
   }
 
   @Transactional

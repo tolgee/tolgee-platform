@@ -106,8 +106,8 @@ export function SearchSelectContent<T extends React.Key>({
           PaperComponent={PaperComponent}
           renderOption={(props, option) => (
             <StyledCompactMenuItem
-              key={option.value}
               {...props}
+              key={option.value}
               selected={option.value === selected}
               data-cy="search-select-item"
             >

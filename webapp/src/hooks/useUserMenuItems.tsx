@@ -41,6 +41,10 @@ export const useUserMenuItems = (): UserMenuItem[] => {
   }
 
   return [
+    {
+      link: LINKS.MY_TASKS.build(),
+      label: t('user_menu_my_tasks'),
+    },
     ...userSettings,
     {
       link: LINKS.USER_API_KEYS.build(),

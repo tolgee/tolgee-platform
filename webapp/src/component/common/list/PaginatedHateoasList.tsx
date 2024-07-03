@@ -32,6 +32,7 @@ export const PaginatedHateoasList = <
 >(
   props: {
     renderItem: (itemData: TItem) => ReactNode;
+    itemSeparator?: () => ReactNode;
     loadable: UseQueryResult<TData, any>;
     title?: ReactNode;
     sortBy?: string[];
@@ -111,6 +112,7 @@ export const PaginatedHateoasList = <
           }
           data={items}
           renderItem={props.renderItem}
+          itemSeparator={props.itemSeparator}
           wrapperComponent={props.wrapperComponent}
           wrapperComponentProps={props.wrapperComponentProps}
           listComponent={props.listComponent}

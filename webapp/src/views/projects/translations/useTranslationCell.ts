@@ -18,6 +18,11 @@ import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
+export type SaveProps = {
+  resolveTaskId?: number;
+  after?: AfterCommand;
+};
+
 type Props = {
   keyData: DeletableKeyWithTranslationsModelType;
   language: LanguageModel;
@@ -41,6 +46,7 @@ export const useTranslationCell = ({
     changeField,
     setEditForce,
     setTranslationState,
+    setTaskState,
     updateEdit,
   } = useTranslationsActions();
 
@@ -81,9 +87,10 @@ export const useTranslationCell = ({
     });
   };
 
-  const handleSave = (after?: AfterCommand) => {
+  const handleSave = ({ after, resolveTaskId }: SaveProps) => {
     changeField({
       after,
+      resolveTaskId,
       onSuccess: () => onSaveSuccess?.(value),
     });
   };
@@ -137,6 +144,14 @@ export const useTranslationCell = ({
     }
   };
 
+  const setAssignedTaskState = (done: boolean) => {
+    setTaskState({
+      keyId: keyData.keyId,
+      taskId: translation!.assignedTaskId!,
+      done,
+    });
+  };
+
   function setVariant(activeVariant: string | undefined) {
     updateEdit({ activeVariant });
   }
@@ -161,6 +176,7 @@ export const useTranslationCell = ({
     setEditValueString,
     setState,
     setVariant,
+    setAssignedTaskState,
     value,
     editVal: isEditing ? cursor : undefined,
     isEditing,

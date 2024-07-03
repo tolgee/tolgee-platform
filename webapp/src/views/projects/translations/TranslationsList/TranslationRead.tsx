@@ -65,6 +65,7 @@ export const TranslationRead: React.FC<Props> = ({
     canChangeState,
     keyData,
     editEnabled,
+    setAssignedTaskState,
   } = tools;
 
   const toggleEdit = () => {
@@ -99,6 +100,8 @@ export const TranslationRead: React.FC<Props> = ({
         onEdit={() => handleOpen()}
         onComments={() => handleOpen('comments')}
         commentsCount={translation?.commentCount}
+        assignedTaskId={translation?.assignedTaskId}
+        onTaskStateChange={setAssignedTaskState}
         unresolvedCommentCount={translation?.unresolvedCommentCount}
         stateChangeEnabled={canChangeState}
         editEnabled={editable}

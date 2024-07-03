@@ -21,6 +21,9 @@ import { BatchActions, BatchJobModel } from './types';
 import { OperationPreTranslate } from './OperationPreTranslate';
 import { SelectAllCheckbox } from './SelectAllCheckbox';
 import { OperationExportTranslations } from './OperationExportTranslations';
+import { OperationTaskCreate } from './OperationTaskCreate';
+import { OperationTaskAddKeys } from './OperationTaskAddKeys';
+import { OperationTaskRemoveKeys } from './OperationTaskRemoveKeys';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -118,6 +121,12 @@ export const BatchOperations = ({ open, onClose }: Props) => {
         return <OperationMarkAsTranslated {...sharedProps} />;
       case 'mark_as_reviewed':
         return <OperationMarkAsReviewed {...sharedProps} />;
+      case 'task_create':
+        return <OperationTaskCreate {...sharedProps} />;
+      case 'task_add_keys':
+        return <OperationTaskAddKeys {...sharedProps} />;
+      case 'task_remove_keys':
+        return <OperationTaskRemoveKeys {...sharedProps} />;
       case 'add_tags':
         return <OperationAddTags {...sharedProps} />;
       case 'remove_tags':

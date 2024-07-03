@@ -71,6 +71,11 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   )
   fun getAllByKeyIdIn(keyIds: Collection<Long>): Collection<Translation>
 
+  fun findAllByLanguageIdAndKeyIdIn(
+    languageId: Long,
+    ids: Collection<Long>,
+  ): List<Translation>
+
   @Query(
     """from Translation t 
     join fetch t.key k 

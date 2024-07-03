@@ -120,6 +120,7 @@ export function CloudPlanForm({
                   name="type"
                   size="small"
                   fullWidth
+                  minHeight={false}
                   sx={{ flexBasis: '50%' }}
                   data-cy="administration-cloud-plan-field-type"
                   renderValue={(val) =>

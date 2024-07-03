@@ -1,19 +1,15 @@
 import { FunctionComponent } from 'react';
-import {
-  InputLabel,
-  TextField as MUITextField,
-  styled,
-  textFieldClasses,
-} from '@mui/material';
+import { InputLabel, TextField as MUITextField, styled } from '@mui/material';
+import React from 'react';
 
-const StyledContainer = styled('div')`
+export const StyledContainer = styled('div')`
   display: grid;
-  .${textFieldClasses.root} {
-    margin-top: 4px;
+  label {
+    margin-bottom: 4px;
   }
 `;
 
-const StyledInputLabel = styled(InputLabel)`
+export const StyledInputLabel = styled(InputLabel)`
   font-size: 14px;
   font-weight: 500px;
 `;
@@ -22,17 +18,20 @@ export type TextFieldProps = React.ComponentProps<typeof MUITextField> & {
   minHeight?: boolean;
 };
 
-export const TextField: FunctionComponent<TextFieldProps> = (props) => {
-  const { label, minHeight = true, sx, ...otherProps } = props;
-  return (
-    <StyledContainer>
-      {label && <StyledInputLabel>{label}</StyledInputLabel>}
-      <MUITextField
-        variant="outlined"
-        size="small"
-        sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
-        {...otherProps}
-      />
-    </StyledContainer>
-  );
-};
+export const TextField: FunctionComponent<TextFieldProps> = React.forwardRef(
+  function TextField(props, ref) {
+    const { label, minHeight = true, sx, ...otherProps } = props;
+    return (
+      <StyledContainer>
+        {label && <StyledInputLabel>{label}</StyledInputLabel>}
+        <MUITextField
+          ref={ref}
+          variant="outlined"
+          size="small"
+          sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
+          {...otherProps}
+        />
+      </StyledContainer>
+    );
+  }
+);

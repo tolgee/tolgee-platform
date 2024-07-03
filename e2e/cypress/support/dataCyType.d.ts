@@ -73,6 +73,7 @@ declare namespace DataCy {
         "api-key-list-item-regenerate-button" |
         "api-keys-create-edit-dialog" |
         "api-keys-project-select-item" |
+        "assignee-select" |
         "auto-avatar-img" |
         "avatar-image" |
         "avatar-menu-open-button" |
@@ -400,6 +401,7 @@ declare namespace DataCy {
         "project-menu-item-members" |
         "project-menu-item-projects" |
         "project-menu-item-settings" |
+        "project-menu-item-tasks" |
         "project-menu-item-translations" |
         "project-menu-items" |
         "project-mt-dialog-settings-inherited" |
@@ -504,6 +506,7 @@ declare namespace DataCy {
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
+        "translations-cell-task-button" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
         "translations-filter-clear-all" |
@@ -548,6 +551,8 @@ declare namespace DataCy {
         "user-menu-theme-switch" |
         "user-menu-user-settings" |
         "user-profile" |
+        "user-switch-item" |
+        "user-switch-search" |
         "webhook-form-cancel" |
         "webhook-form-delete" |
         "webhook-form-save" |

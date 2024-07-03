@@ -49,6 +49,7 @@ export const DefaultNamespaceSelect: FC<{
         sx={{ mt: 0 }}
         name={props.name}
         size="small"
+        minHeight={false}
         displayEmpty={true}
         renderValue={(v) => {
           return (

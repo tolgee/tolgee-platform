@@ -72,7 +72,7 @@ export const ExpirationDateField = ({
                   helpers.setValue(new Date(newValue).getTime());
                 }
               }}
-              renderInput={(params) => <MuiTextField {...params} />}
+              slots={{ textField: MuiTextField }}
             />
           </Box>
         )}
