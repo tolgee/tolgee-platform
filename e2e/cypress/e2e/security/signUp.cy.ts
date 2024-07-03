@@ -1,4 +1,4 @@
-import {HOST} from '../../common/constants';
+import { HOST } from '../../common/constants';
 import {
   createProject,
   deleteAllEmails,
@@ -18,7 +18,7 @@ import {
   setRecaptchaSiteKey,
   v2apiFetch,
 } from '../../common/apiCalls/common';
-import {assertMessage, gcy} from '../../common/shared';
+import { assertMessage, gcy } from '../../common/shared';
 import {
   checkAnonymousIdSet,
   checkAnonymousIdUnset,
@@ -28,8 +28,8 @@ import {
   signUpAfter,
   visitSignUp,
 } from '../../common/login';
-import {ProjectDTO} from '../../../../webapp/src/service/response.types';
-import {waitForGlobalLoading} from '../../common/loading';
+import { ProjectDTO } from '../../../../webapp/src/service/response.types';
+import { waitForGlobalLoading } from '../../common/loading';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
@@ -91,9 +91,7 @@ context('Sign up', () => {
       }).as('signUp');
       fillAndSubmitSignUpForm(TEST_USERNAME);
       cy.wait(['@signUp']);
-      cy.contains(
-          'Thank you for signing up!'
-      ).should('be.visible');
+      cy.contains('Thank you for signing up!').should('be.visible');
 
       cy.contains('Verify your email now');
       setProperty('recaptcha.siteKey', recaptchaSiteKey);
@@ -118,9 +116,7 @@ context('Sign up', () => {
     }).as('signUp');
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.wait(['@signUp']);
-    cy.contains(
-      'Thank you for signing up!'
-    ).should('be.visible');
+    cy.contains('Thank you for signing up!').should('be.visible');
 
     cy.contains('Verify your email now');
 
@@ -140,9 +136,7 @@ context('Sign up', () => {
 
   it('Signs up and resend email verification', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
-    cy.contains(
-        'Thank you for signing up!'
-    ).should('be.visible');
+    cy.contains('Thank you for signing up!').should('be.visible');
 
     cy.contains('Verify your email now');
 
