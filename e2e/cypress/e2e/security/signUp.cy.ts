@@ -1,4 +1,4 @@
-import { HOST } from '../../common/constants';
+import {HOST} from '../../common/constants';
 import {
   createProject,
   deleteAllEmails,
@@ -18,7 +18,7 @@ import {
   setRecaptchaSiteKey,
   v2apiFetch,
 } from '../../common/apiCalls/common';
-import { assertMessage } from '../../common/shared';
+import {assertMessage, gcy} from '../../common/shared';
 import {
   checkAnonymousIdSet,
   checkAnonymousIdUnset,
@@ -28,8 +28,8 @@ import {
   signUpAfter,
   visitSignUp,
 } from '../../common/login';
-import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import { waitForGlobalLoading } from '../../common/loading';
+import {ProjectDTO} from '../../../../webapp/src/service/response.types';
+import {waitForGlobalLoading} from '../../common/loading';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
@@ -92,8 +92,10 @@ context('Sign up', () => {
       fillAndSubmitSignUpForm(TEST_USERNAME);
       cy.wait(['@signUp']);
       cy.contains(
-        'Thank you for signing up. To verify your email please follow instructions sent to provided email address.'
+          'Thank you for signing up!'
       ).should('be.visible');
+
+      cy.contains('Verify your email now');
       setProperty('recaptcha.siteKey', recaptchaSiteKey);
     });
   });
@@ -117,8 +119,11 @@ context('Sign up', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.wait(['@signUp']);
     cy.contains(
-      'Thank you for signing up. To verify your email please follow instructions sent to provided email address.'
+      'Thank you for signing up!'
     ).should('be.visible');
+
+    cy.contains('Verify your email now');
+
     getUser(TEST_USERNAME).then((u) => {
       expect(u[0]).be.equal(TEST_USERNAME);
       expect(u[1]).be.not.null;
@@ -131,6 +136,18 @@ context('Sign up', () => {
     });
     checkAnonymousIdUnset();
     checkAnonymousUserIdentified();
+  });
+
+  it('Signs up and resend email verification', () => {
+    fillAndSubmitSignUpForm(TEST_USERNAME);
+    cy.contains(
+        'Thank you for signing up!'
+    ).should('be.visible');
+
+    cy.contains('Verify your email now');
+
+    gcy('resend-email-button').click();
+    cy.contains('Your verification link has been resent.');
   });
 
   it('Signs up without email verification', () => {
