@@ -81,7 +81,7 @@
     "load-translations": "tolgee pull",
     "check-translations": "tolgee extract check",
     "tag-keys:deprecated": "tolgee tag --filter-not-extracted --filter-tag production --tag deprecated",
-    "tag-keys:production": "tolgee tag --filter-extracted --tag production --untag 'draft: *' --untag-other production",
+    "tag-keys:production": "tolgee tag --filter-extracted --tag production --untag deprecated 'draft: *' --untag-other production",
     "tag-keys": "npm run tag-keys:deprecated && npm run tag-keys:production",
     "prepare": "npm run --prefix .. init-husky && node ./scripts/updateBranchInfo.mjs"
   },
@@ -110,7 +110,7 @@
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
     "@tginternal/language-util": "^1.1.1",
-    "@tolgee/cli": "^2.0.0",
+    "@tolgee/cli": "^2.1.2",
     "@types/diff": "^5.0.2",
     "@types/jest": "^26.0.24",
     "@types/node": "^18.19.4",

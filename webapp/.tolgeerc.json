@@ -2,6 +2,7 @@
   "$schema": "https://tolgee.io/cli-schema.json",
   "projectId": 1,
   "patterns": ["./src/**/*.ts?(x)"],
+  "strictNamespace": false,
   "pull": {
     "path": "./src/i18n"
   }
