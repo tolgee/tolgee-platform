@@ -61,12 +61,14 @@ export class Validation {
     Yup.object().shape({
       password: Validation.USER_PASSWORD(t),
       name: Yup.string().required(),
-      email: Yup.string().email().required().test(
-        'checkEmailUnique',
-        // @tolgee-key validation_email_not_unique
-        t('validation_email_not_unique'),
-        Validation.createEmailValidation()
-      ),
+      email: Yup.string()
+        .email()
+        .required()
+        .test(
+          'checkEmailUnique',
+          t('validation_email_not_unique'),
+          Validation.createEmailValidation()
+        ),
       organizationName: orgRequired
         ? Yup.string().min(3).max(50).required()
         : Yup.string(),
@@ -158,11 +160,9 @@ export class Validation {
       .test({
         name: 'language-tag-exists',
         test: (value) => !existingTags?.includes(value!),
-        // @tolgee-key validation_language_tag_exists
         message: t('validation_language_tag_exists'),
       })
       .matches(/^[^,]*$/, {
-        // @tolgee-key validation_cannot_contain_coma
         message: t('validation_cannot_contain_coma'),
       });
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
@@ -195,12 +195,10 @@ export class Validation {
       name: Yup.string().required().min(3).max(50),
       languages: Yup.array()
         .required()
-        // @tolgee-key project_creation_add_at_least_one_language
         .min(1, t('project_creation_add_at_least_one_language'))
         .of(Validation.LANGUAGE(t, []).nullable())
         .test(
           'language-repeated',
-          // @tolgee-key create_project_validation_language_repeated
           t('create_project_validation_language_repeated'),
           (values) =>
             new Set(values?.map((i) => i?.name)).size ==
@@ -252,7 +250,6 @@ export class Validation {
       name: Yup.string().required().min(3).max(50),
       slug: slugSyncValidation.test(
         'slugUnique',
-        // @tolgee-key validation_slug_not_unique
         t('validation_slug_not_unique'),
         slugUniqueDebouncedAsyncValidation
       ),
@@ -268,12 +265,9 @@ export class Validation {
       text: Yup.string().when('type', (val: string) =>
         val === 'email'
           ? Yup.string()
-              // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
-              // @tolgee-key Validation - required field
               .required(t('Validation - required field'))
-          : // @tolgee-key Validation - required field
-            Yup.string().required(t('Validation - required field'))
+          : Yup.string().required(t('Validation - required field'))
       ),
     });
 
@@ -284,12 +278,9 @@ export class Validation {
       text: Yup.string().when('type', (val: string) =>
         val === 'email'
           ? Yup.string()
-              // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
-              // @tolgee-key Validation - required field
               .required(t('Validation - required field'))
-          : // @tolgee-key Validation - required field
-            Yup.string().required(t('Validation - required field'))
+          : Yup.string().required(t('Validation - required field'))
       ),
     });
 
@@ -391,7 +382,6 @@ export class Validation {
         is: true,
         then: Yup.string().test(
           'invalid-plural-parameter',
-          // @tolgee-key validation_invalid_plural_parameter
           t('validation_invalid_plural_parameter'),
           (value) => checkParamNameIsValid(value ?? '')
         ),
@@ -402,7 +392,6 @@ export class Validation {
     Yup.object().shape({
       custom: Yup.string().test(
         'invalid-custom-values',
-        // @tolgee-key validation_invalid_plural_parameter
         t('validation_invalid_custom_values'),
         validateObject
       ),
