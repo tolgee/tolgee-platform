@@ -1,14 +1,14 @@
-import { Button, styled, Typography, useTheme } from '@mui/material';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { messageService } from 'tg.service/MessageService';
-import { T, useTranslate } from '@tolgee/react';
-import { useEmailAwaitingVerification } from 'tg.globalContext/helpers';
-import { LINKS } from 'tg.constants/links';
-import { Usage } from 'tg.component/billing/Usage';
-import { StyledWrapper } from 'tg.component/searchSelect/SearchStyled';
-import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { BaseView } from 'tg.component/layout/BaseView';
-import { Redirect } from 'react-router-dom';
+import {Button, styled, Typography, useTheme} from '@mui/material';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {messageService} from 'tg.service/MessageService';
+import {T, useTranslate} from '@tolgee/react';
+import {useEmailAwaitingVerification} from 'tg.globalContext/helpers';
+import {LINKS} from 'tg.constants/links';
+import {Usage} from 'tg.component/billing/Usage';
+import {StyledWrapper} from 'tg.component/searchSelect/SearchStyled';
+import {DashboardPage} from 'tg.component/layout/DashboardPage';
+import {BaseView} from 'tg.component/layout/BaseView';
+import {Redirect} from 'react-router-dom';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -88,7 +88,7 @@ export const EmailNotVerifiedView = () => {
             </StyledDescription>
             <StyledImg src={imageSrc} alt="Verify email" />
             <StyledHint variant="body2">
-              <T keyName="didnt_receive_email_hint" />
+              <T keyName="verify_email_didnt_receive_email_hint" />
             </StyledHint>
             <Button
               variant="contained"
@@ -99,7 +99,7 @@ export const EmailNotVerifiedView = () => {
                   {
                     onSuccess: () => {
                       messageService.success(
-                        <T keyName="email_resend_message" />
+                        <T keyName="verify_email_resend_message" />
                       );
                     },
                   }

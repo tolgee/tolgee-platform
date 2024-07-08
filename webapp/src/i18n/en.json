@@ -1400,13 +1400,4 @@
   "webhook_update_title" : "Edit webhook",
   "wrong_current_password" : "Wrong current password entered",
   "your_email_was_changed_verification_message" : "When you change your email, new email will be set after its verification.",
-  "announcement_verify_email" : "We have already sent you a verification email.",
-  "didnt_receive_email_hint" : "Didn't receive the email?",
-  "email_already_verified" : "The email is already verified. ",
-  "email_resend_message" : "Your verification link has been resent.",
-  "too_many_requests" : "Too many requests. Please try again later.",
-  "verify_email_description" : "The final step is to verify your email. After verification, you will be able to use the platform.\nPlease check your inbox at <b>{email}</b>.",
-  "verify_email_now_title" : "Verify your email now",
-  "verify_email_resend_button" : "resend verification email",
-  "verify_email_title" : "Verify your email address"
 }
