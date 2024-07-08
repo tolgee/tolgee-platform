@@ -1,4 +1,4 @@
-import { grey } from '@mui/material/colors';
+import {grey} from '@mui/material/colors';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',
@@ -60,12 +60,6 @@ export type TopBanner = {
   background: string;
   mainText: string;
   linkText: string;
-};
-
-export type EmailNotVerifiedBanner = {
-  background: string;
-  mainText: string;
-  titleText: string;
 };
 
 export type Tile = {
@@ -186,11 +180,6 @@ export const colors = {
       background: '#BEF4E9',
       mainText: '#004437',
       linkText: '#009B85',
-    },
-    emailNotVerifiedBanner: {
-      background: '#FDECF2',
-      mainText: '#EC407A',
-      titleText: '#A82D57',
     },
     revisionFilterBanner: {
       background: '#00AF9A14',
@@ -316,11 +305,6 @@ export const colors = {
       background: '#008371',
       mainText: '#BEF4E9',
       linkText: '#dddddd',
-    },
-    emailNotVerifiedBanner: {
-      background: '#822343',
-      mainText: '#FDECF2',
-      titleText: '#F6A7C2',
     },
     revisionFilterBanner: {
       background: '#99E5D629',

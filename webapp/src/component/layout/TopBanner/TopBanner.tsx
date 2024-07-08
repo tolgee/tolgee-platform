@@ -21,9 +21,8 @@ const StyledContainer = styled('div')`
   }
 
   &.email-not-verified {
-    color: ${(props) => props.theme.palette.emailNotVerifiedBanner.mainText};
-    background: ${(props) => props.theme.palette.emailNotVerifiedBanner.background};
-
+    color: ${(props) => props.theme.palette.tokens._components.noticeBar.importantLink};
+    background: ${(props) => props.theme.palette.tokens._components.noticeBar.importantFill};
   }
   font-size: 15px;
   font-weight: 700;

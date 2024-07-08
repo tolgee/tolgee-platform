@@ -1,16 +1,16 @@
-import React, { useContext, useState } from 'react';
-import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import React, {useContext, useState} from 'react';
+import {createTheme, PaletteMode, useMediaQuery} from '@mui/material';
+import {ThemeProvider as MuiThemeProvider} from '@mui/material/styles';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
+import {TOP_BAR_HEIGHT} from 'tg.component/layout/TopBar/TopBar';
 // @ts-ignore
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
 // @ts-ignore
 import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
 // @ts-ignore
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
-import { colors } from './colors';
-import { tolgeeColors, tolgeePalette } from 'figmaTheme';
+import {colors} from './colors';
+import {tolgeeColors, tolgeePalette} from 'figmaTheme';
 
 const LOCALSTORAGE_THEME_MODE = 'themeMode';
 
@@ -153,7 +153,6 @@ const getTheme = (mode: PaletteMode) => {
       globalLoading: createColor(c.globalLoading),
       marker: c.marker,
       topBanner: c.topBanner,
-      emailNotVerifiedBanner: c.emailNotVerifiedBanner,
       quickStart: c.quickStart,
       import: c.import,
       exampleBanner: c.exampleBanner,

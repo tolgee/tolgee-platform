@@ -1,26 +1,26 @@
 import API from '@openreplay/tracker';
-import { PaletteColor } from '@mui/material/styles';
-import { PaletteColorOptions } from '@mui/material';
+import {PaletteColor} from '@mui/material/styles';
+import {PaletteColorOptions} from '@mui/material';
 import {
-  Tooltip,
-  Activity,
-  Cell,
-  Editor,
-  Emphasis,
-  ExampleBanner,
-  Marker,
-  Navbar,
-  Placeholders,
-  QuickStart,
-  Tile,
-  TipsBanner,
-  TopBanner,
-  LanguageChips,
-  Login,
-  Input,
-  RevisionFilterBanner,
+    Activity,
+    Cell,
+    Editor,
+    Emphasis,
+    ExampleBanner,
+    Input,
+    LanguageChips,
+    Login,
+    Marker,
+    Navbar,
+    Placeholders,
+    QuickStart,
+    RevisionFilterBanner,
+    Tile,
+    TipsBanner,
+    Tooltip,
+    TopBanner,
 } from './colors';
-import { tolgeeColors, tolgeePalette } from 'figmaTheme';
+import {tolgeeColors, tolgeePalette} from 'figmaTheme';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
@@ -76,7 +76,6 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
-    emailNotVerifiedBanner: EmailNotVerifiedBanner;
     quickStart: QuickStart;
     import: typeof all.import;
     exampleBanner: ExampleBanner;

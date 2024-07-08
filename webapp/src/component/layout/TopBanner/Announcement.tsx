@@ -1,7 +1,7 @@
-import { styled } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
-import { TadaIcon } from 'tg.component/CustomIcons';
-import { BannerLink } from './BannerLink';
+import {styled} from '@mui/material';
+import {useTranslate} from '@tolgee/react';
+import {TadaIcon} from 'tg.component/CustomIcons';
+import {BannerLink} from './BannerLink';
 
 type Props = {
   content: React.ReactNode;
@@ -20,7 +20,7 @@ const StyledTitle = styled('div')`
   display: flex;
   gap: 12px;
   align-items: center;
-  color: ${({ theme }) => theme.palette.emailNotVerifiedBanner.titleText};
+  color: ${({ theme }) => theme.palette.tokens._components.noticeBar.importantColor};
 `;
 
 const StyledWrappableContent = styled('div')`
