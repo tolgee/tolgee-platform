@@ -6,6 +6,7 @@ package io.tolgee.service
 
 import io.tolgee.component.email.EmailVerificationSender
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.user.OnUserEmailVerifiedFirst
 import io.tolgee.events.user.OnUserUpdated
@@ -123,10 +124,10 @@ class EmailVerificationService(
   ) {
     val user = userAccountService.findActive(userId) ?: throw NotFoundException()
     val old = UserAccountDto.fromEntity(user)
-    val emailVerification = user.emailVerification
+    val emailVerification = user.emailVerification ?: throw BadRequestException(Message.EMAIL_ALREADY_VERIFIED)
 
-    if (emailVerification == null || emailVerification.code != code) {
-      throw NotFoundException()
+    if (emailVerification.code != code) {
+      throw BadRequestException(Message.EMAIL_VERIFICATION_CODE_NOT_VALID)
     }
 
     val newEmail = user.emailVerification?.newEmail
