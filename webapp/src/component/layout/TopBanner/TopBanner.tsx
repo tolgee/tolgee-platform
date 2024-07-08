@@ -1,13 +1,10 @@
-import { styled } from '@mui/material';
-import { useEffect, useRef } from 'react';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { useAnnouncement } from './useAnnouncement';
-import { useIsEmailVerified } from 'tg.globalContext/helpers';
-import { Close } from '@mui/icons-material';
-import { useResizeObserver } from 'usehooks-ts';
+import {styled} from '@mui/material';
+import {useEffect, useRef} from 'react';
+import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
+import {useAnnouncement} from './useAnnouncement';
+import {useIsEmailVerified} from 'tg.globalContext/helpers';
+import {Close} from '@mui/icons-material';
+import {useResizeObserver} from 'usehooks-ts';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -17,15 +14,17 @@ const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 50px 1fr 50px;
   width: 100%;
-  background: ${({ theme }) =>
-    useIsEmailVerified()
-      ? theme.palette.topBanner.background
-      : theme.palette.emailNotVerifiedBanner.background};
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
-  color: ${({ theme }) =>
-    useIsEmailVerified()
-      ? theme.palette.topBanner.mainText
-      : theme.palette.emailNotVerifiedBanner.mainText};
+  &.email-verified {
+    color: ${(props) => props.theme.palette.topBanner.mainText};
+    background: ${(props) => props.theme.palette.topBanner.background};
+  }
+
+  &.email-not-verified {
+    color: ${(props) => props.theme.palette.emailNotVerifiedBanner.mainText};
+    background: ${(props) => props.theme.palette.emailNotVerifiedBanner.background};
+
+  }
   font-size: 15px;
   font-weight: 700;
   @container (max-width: 899px) {
@@ -55,8 +54,10 @@ export function TopBanner() {
   const bannerRef = useRef<HTMLDivElement>(null);
 
   const getAnnouncement = useAnnouncement();
+  const isEmailVerified = useIsEmailVerified();
   const announcement = bannerType && getAnnouncement(bannerType);
-  const showCloseButton = useIsEmailVerified();
+  const showCloseButton = isEmailVerified;
+  const containerClassName = isEmailVerified ? 'email-verified' : 'email-not-verified';
 
   useResizeObserver({
     ref: bannerRef,
@@ -75,7 +76,11 @@ export function TopBanner() {
   }
 
   return (
-    <StyledContainer ref={bannerRef} data-cy="top-banner">
+    <StyledContainer
+        ref={bannerRef}
+        data-cy="top-banner"
+        className={containerClassName}
+    >
       <div />
       <StyledContent data-cy="top-banner-content">{announcement}</StyledContent>
       {showCloseButton && (
