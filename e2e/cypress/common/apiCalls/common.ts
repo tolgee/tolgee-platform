@@ -1,6 +1,6 @@
-import { API_URL, PASSWORD, USERNAME } from '../constants';
-import { ArgumentTypes, Scope } from '../types';
-import { components } from '../../../../webapp/src/service/apiSchema.generated';
+import {API_URL, PASSWORD, USERNAME} from '../constants';
+import {ArgumentTypes, Scope} from '../types';
+import {components} from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 
@@ -351,6 +351,16 @@ export const getParsedEmailVerification = () =>
       text: r[0].text,
     };
   });
+
+export const getParsedEmailVerificationByIndex = (index: number) =>
+    getAllEmails().then((r) => {
+      return {
+        verifyEmailLink: r[index].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+        fromAddress: r[index].from.value[0].address,
+        toAddress: r[index].to.value[0].address,
+        text: r[index].text,
+      };
+    });
 
 export const getParsedEmailInvitationLink = () =>
   getAllEmails().then(

@@ -1,4 +1,4 @@
-import { HOST } from '../../common/constants';
+import {HOST} from '../../common/constants';
 import {
   createProject,
   deleteAllEmails,
@@ -8,6 +8,7 @@ import {
   enableEmailVerification,
   enableRegistration,
   getParsedEmailVerification,
+  getParsedEmailVerificationByIndex,
   getRecaptchaSiteKey,
   getUser,
   login,
@@ -18,7 +19,7 @@ import {
   setRecaptchaSiteKey,
   v2apiFetch,
 } from '../../common/apiCalls/common';
-import { assertMessage, gcy } from '../../common/shared';
+import {assertMessage, gcy} from '../../common/shared';
 import {
   checkAnonymousIdSet,
   checkAnonymousIdUnset,
@@ -28,8 +29,8 @@ import {
   signUpAfter,
   visitSignUp,
 } from '../../common/login';
-import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import { waitForGlobalLoading } from '../../common/loading';
+import {ProjectDTO} from '../../../../webapp/src/service/response.types';
+import {waitForGlobalLoading} from '../../common/loading';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
@@ -77,7 +78,6 @@ context('Sign up', () => {
   afterEach(() => {
     signUpAfter(TEST_USERNAME);
   });
-
   describe('without recaptcha', () => {
     beforeEach(() => {
       setRecaptchaSiteKey(null);
@@ -142,6 +142,21 @@ context('Sign up', () => {
 
     gcy('resend-email-button').click();
     cy.contains('Your verification link has been resent.');
+
+    // Emails sent after registration are no longer valid
+    getParsedEmailVerificationByIndex(1).then((r) => {
+      cy.wrap(r.fromAddress).should('contain', 'no-reply@tolgee.io');
+      cy.wrap(r.toAddress).should('contain', TEST_USERNAME);
+      cy.visit(r.verifyEmailLink);
+      assertMessage('Validation code or link is invalid');
+    });
+
+    getParsedEmailVerificationByIndex(0).then((r) => {
+      cy.wrap(r.fromAddress).should('contain', 'no-reply@tolgee.io');
+      cy.wrap(r.toAddress).should('contain', TEST_USERNAME);
+      cy.visit(r.verifyEmailLink);
+      assertMessage('Email was verified');
+    });
   });
 
   it('Signs up without email verification', () => {
