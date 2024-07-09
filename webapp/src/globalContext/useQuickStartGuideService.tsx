@@ -1,13 +1,10 @@
-import { useMediaQuery } from '@mui/material';
-import { useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import {
-  HighlightItem,
-  ItemStep,
-} from 'tg.component/layout/QuickStartGuide/enums';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import type { useInitialDataService } from './useInitialDataService';
+import {useMediaQuery} from '@mui/material';
+import {useState} from 'react';
+import {useRouteMatch} from 'react-router-dom';
+import {HighlightItem, ItemStep,} from 'tg.component/layout/QuickStartGuide/enums';
+import {LINKS, PARAMS} from 'tg.constants/links';
+import {useApiQuery} from 'tg.service/http/useQueryApi';
+import type {useInitialDataService} from './useInitialDataService';
 
 export const useQuickStartGuideService = (
   initialData: ReturnType<typeof useInitialDataService>
@@ -21,7 +18,8 @@ export const useQuickStartGuideService = (
   const projectIdParam = match?.params[PARAMS.PROJECT_ID];
   const projectId = isNaN(projectIdParam) ? undefined : projectIdParam;
   const [floatingOpen, setFloatingOpen] = useState(false);
-
+  const isVerified = initialData.state?.userInfo?.emailAwaitingVerification === null ||
+      !initialData.state?.serverConfiguration.needsEmailVerification
   const organizationSlug = initialData.state?.preferredOrganization?.slug;
   const isOwner =
     initialData.state?.preferredOrganization?.currentUserRole === 'OWNER';
@@ -32,7 +30,7 @@ export const useQuickStartGuideService = (
     path: { slug: organizationSlug! },
     query: { size: 1, sort: ['id,desc'] },
     options: {
-      enabled: projectId === undefined && Boolean(organizationSlug),
+      enabled: projectId === undefined && Boolean(organizationSlug) && isVerified,
     },
   });
 
