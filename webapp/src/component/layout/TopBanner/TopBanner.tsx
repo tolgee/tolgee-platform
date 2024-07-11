@@ -7,6 +7,7 @@ import {Close} from '@mui/icons-material';
 import {useResizeObserver} from 'usehooks-ts';
 import {Announcement} from "tg.component/layout/TopBanner/Announcement";
 import {useTranslate} from "@tolgee/react";
+import {tokenService} from "tg.service/TokenService";
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -53,14 +54,16 @@ export function TopBanner() {
   const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
   const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslate();
+  const isAuthenticated = tokenService.getToken() !== undefined;
 
   const getAnnouncement = useAnnouncement();
   const isEmailVerified = useIsEmailVerified();
   const announcement = bannerType && getAnnouncement(bannerType);
   const showCloseButton = isEmailVerified;
   const containerClassName = isEmailVerified ? 'email-verified' : 'email-not-verified';
-  const mailImage = useTheme().palette.mode === 'dark' ? "/images/mailDark.svg" : "/images/mailLight.svg"
+  const theme = useTheme();
+  const mailImage = theme.palette.mode === 'dark' ? "/images/mailDark.svg" : "/images/mailLight.svg";
+  const { t } = useTranslate();
 
   useResizeObserver({
     ref: bannerRef,
@@ -74,7 +77,7 @@ export function TopBanner() {
     setTopBannerHeight(height ?? 0);
   }, [announcement, isEmailVerified]);
 
-  if (!announcement && isEmailVerified) {
+  if (!announcement && (isEmailVerified || !isAuthenticated)) {
     return null;
   }
 
@@ -90,7 +93,7 @@ export function TopBanner() {
             <Announcement
                 content={t('verify_email_announcement')}
                 title={t('verify_email_now_title')}
-                icon={<img src={mailImage} />}
+                icon={<img src={mailImage} alt="Mail Icon" />}
             />
         ) : announcement
       }</StyledContent>
