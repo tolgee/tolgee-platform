@@ -5,9 +5,9 @@ import {useAnnouncement} from './useAnnouncement';
 import {useIsEmailVerified} from 'tg.globalContext/helpers';
 import {Close} from '@mui/icons-material';
 import {useResizeObserver} from 'usehooks-ts';
-import {Announcement} from "tg.component/layout/TopBanner/Announcement";
-import {useTranslate} from "@tolgee/react";
-import {tokenService} from "tg.service/TokenService";
+import {Announcement} from 'tg.component/layout/TopBanner/Announcement';
+import {useTranslate} from '@tolgee/react';
+import {tokenService} from 'tg.service/TokenService';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -24,8 +24,10 @@ const StyledContainer = styled('div')`
   }
 
   &.email-not-verified {
-    color: ${(props) => props.theme.palette.tokens._components.noticeBar.importantLink};
-    background: ${(props) => props.theme.palette.tokens._components.noticeBar.importantFill};
+    color: ${(props) =>
+      props.theme.palette.tokens._components.noticeBar.importantLink};
+    background: ${(props) =>
+      props.theme.palette.tokens._components.noticeBar.importantFill};
   }
   font-size: 15px;
   font-weight: 700;
@@ -60,9 +62,14 @@ export function TopBanner() {
   const isEmailVerified = useIsEmailVerified();
   const announcement = bannerType && getAnnouncement(bannerType);
   const showCloseButton = isEmailVerified;
-  const containerClassName = isEmailVerified ? 'email-verified' : 'email-not-verified';
+  const containerClassName = isEmailVerified
+    ? 'email-verified'
+    : 'email-not-verified';
   const theme = useTheme();
-  const mailImage = theme.palette.mode === 'dark' ? "/images/mailDark.svg" : "/images/mailLight.svg";
+  const mailImage =
+    theme.palette.mode === 'dark'
+      ? '/images/mailDark.svg'
+      : '/images/mailLight.svg';
   const { t } = useTranslate();
 
   useResizeObserver({
@@ -83,20 +90,22 @@ export function TopBanner() {
 
   return (
     <StyledContainer
-        ref={bannerRef}
-        data-cy="top-banner"
-        className={containerClassName}
+      ref={bannerRef}
+      data-cy="top-banner"
+      className={containerClassName}
     >
       <div />
-      <StyledContent data-cy="top-banner-content">{
-        !isEmailVerified ? (
-            <Announcement
-                content={t('verify_email_announcement')}
-                title={t('verify_email_now_title')}
-                icon={<img src={mailImage} alt="Mail Icon" />}
-            />
-        ) : announcement
-      }</StyledContent>
+      <StyledContent data-cy="top-banner-content">
+        {!isEmailVerified ? (
+          <Announcement
+            content={t('verify_email_announcement')}
+            title={t('verify_email_now_title')}
+            icon={<img src={mailImage} alt="Mail Icon" />}
+          />
+        ) : (
+          announcement
+        )}
+      </StyledContent>
       {showCloseButton && (
         <StyledCloseButton
           role="button"

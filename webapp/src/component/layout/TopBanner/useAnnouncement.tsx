@@ -18,7 +18,6 @@ export function useAnnouncement() {
   const isEmailVerified = useIsEmailVerified();
   const theme = useTheme();
   return function AnnouncementWrapper(value: AnnouncementDtoType) {
-
     switch (value) {
       case 'FEATURE_BATCH_OPERATIONS':
         return (

@@ -12,7 +12,7 @@ export const handleApiError = (
   r: Response,
   resObject: any,
   init: RequestInit | undefined,
-  options: RequestOptions,
+  options: RequestOptions
 ) => {
   if (r.status >= 500) {
     const message =
@@ -29,7 +29,6 @@ export const handleApiError = (
       return;
     }
     if (r.status == 403) {
-
       if (resObject?.code === 'email_not_verified') {
         globalContext.actions?.redirectToUnverifiedView();
         return;

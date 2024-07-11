@@ -20,7 +20,8 @@ const StyledTitle = styled('div')`
   display: flex;
   gap: 12px;
   align-items: center;
-  color: ${({ theme }) => theme.palette.tokens._components.noticeBar.importantColor};
+  color: ${({ theme }) =>
+    theme.palette.tokens._components.noticeBar.importantColor};
 `;
 
 const StyledWrappableContent = styled('div')`
