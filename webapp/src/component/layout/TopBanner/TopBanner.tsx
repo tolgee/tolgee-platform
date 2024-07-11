@@ -1,10 +1,12 @@
-import {styled} from '@mui/material';
+import {styled, useTheme} from '@mui/material';
 import {useEffect, useRef} from 'react';
 import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
 import {useAnnouncement} from './useAnnouncement';
 import {useIsEmailVerified} from 'tg.globalContext/helpers';
 import {Close} from '@mui/icons-material';
 import {useResizeObserver} from 'usehooks-ts';
+import {Announcement} from "tg.component/layout/TopBanner/Announcement";
+import {useTranslate} from "@tolgee/react";
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -51,12 +53,14 @@ export function TopBanner() {
   const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
   const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslate();
 
   const getAnnouncement = useAnnouncement();
   const isEmailVerified = useIsEmailVerified();
   const announcement = bannerType && getAnnouncement(bannerType);
   const showCloseButton = isEmailVerified;
   const containerClassName = isEmailVerified ? 'email-verified' : 'email-not-verified';
+  const mailImage = useTheme().palette.mode === 'dark' ? "/images/mailDark.svg" : "/images/mailLight.svg"
 
   useResizeObserver({
     ref: bannerRef,
@@ -68,9 +72,9 @@ export function TopBanner() {
   useEffect(() => {
     const height = bannerRef.current?.offsetHeight;
     setTopBannerHeight(height ?? 0);
-  }, [announcement]);
+  }, [announcement, isEmailVerified]);
 
-  if (!announcement) {
+  if (!announcement && isEmailVerified) {
     return null;
   }
 
@@ -81,7 +85,15 @@ export function TopBanner() {
         className={containerClassName}
     >
       <div />
-      <StyledContent data-cy="top-banner-content">{announcement}</StyledContent>
+      <StyledContent data-cy="top-banner-content">{
+        !isEmailVerified ? (
+            <Announcement
+                content={t('verify_email_announcement')}
+                title={t('verify_email_now_title')}
+                icon={<img src={mailImage} />}
+            />
+        ) : announcement
+      }</StyledContent>
       {showCloseButton && (
         <StyledCloseButton
           role="button"

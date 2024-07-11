@@ -18,17 +18,6 @@ export function useAnnouncement() {
   const isEmailVerified = useIsEmailVerified();
   const theme = useTheme();
   return function AnnouncementWrapper(value: AnnouncementDtoType) {
-    if (!isEmailVerified) {
-      const mailImage = theme.palette.mode === 'dark' ? "/images/mailDark.svg" : "/images/mailLight.svg"
-
-      return (
-        <Announcement
-          content={t('verify_email_announcement')}
-          title={t('verify_email_now_title')}
-          icon={<StyledImage src={mailImage} />}
-        />
-      );
-    }
 
     switch (value) {
       case 'FEATURE_BATCH_OPERATIONS':
