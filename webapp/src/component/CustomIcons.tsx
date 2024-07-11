@@ -1,5 +1,5 @@
-import React, { ComponentProps } from 'react';
-import { SvgIcon } from '@mui/material';
+import React, {ComponentProps} from 'react';
+import {SvgIcon} from '@mui/material';
 
 import ExportSvg from '../svgs/icons/export.svg?react';
 import ImportSvg from '../svgs/icons/import.svg?react';
@@ -16,8 +16,6 @@ import DropZoneSvg from '../svgs/icons/dropzone.svg?react';
 import QSFinishedSvg from '../svgs/icons/qs-finished.svg?react';
 import StarsSvg from '../svgs/icons/stars.svg?react';
 import SlackSvg from '../svgs/icons/slack.svg?react';
-import MailSvg from '../svgs/icons/mail.svg?react';
-import MailDarkSvg from '../svgs/icons/mailDark.svg?react';
 
 type IconProps = ComponentProps<typeof SvgIcon>;
 
@@ -41,12 +39,6 @@ export const ImportIcon: React.FC<IconProps> = (props) => (
 );
 export const ProjectsIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={ProjectsSvg} {...props} />
-);
-export const MailIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={MailSvg} {...props} />
-);
-export const MailIconDark: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={MailDarkSvg} {...props} />
 );
 export const SettingsIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={SettingsSvg} {...props} />

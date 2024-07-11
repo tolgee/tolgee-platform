@@ -1,13 +1,17 @@
 import {T, useTranslate} from '@tolgee/react';
-import {useTheme} from '@mui/material';
+import {styled, useTheme} from '@mui/material';
 import {assertUnreachable} from 'tg.fixtures/assertUnreachable';
 import {components} from 'tg.service/apiSchema.generated';
 import {Announcement} from './Announcement';
 import {BannerLink} from './BannerLink';
 import {useIsEmailVerified} from 'tg.globalContext/helpers';
-import {MailIcon, MailIconDark} from 'tg.component/CustomIcons';
 
 type AnnouncementDtoType = components['schemas']['AnnouncementDto']['type'];
+
+const StyledImage = styled('img')`
+  opacity: 0.7;
+  max-width: 100%;
+`;
 
 export function useAnnouncement() {
   const { t } = useTranslate();
@@ -15,11 +19,13 @@ export function useAnnouncement() {
   const theme = useTheme();
   return function AnnouncementWrapper(value: AnnouncementDtoType) {
     if (!isEmailVerified) {
+      const mailImage = theme.palette.mode === 'dark' ? "/images/mailDark.svg" : "/images/mailLight.svg"
+
       return (
         <Announcement
           content={t('verify_email_announcement')}
           title={t('verify_email_now_title')}
-          icon={theme.palette.mode === 'dark' ? <MailIconDark /> : <MailIcon />}
+          icon={<StyledImage src={mailImage} />}
         />
       );
     }
