@@ -1,4 +1,4 @@
-import {grey} from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',

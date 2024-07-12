@@ -1,13 +1,16 @@
-import {styled, useTheme} from '@mui/material';
-import {useEffect, useRef} from 'react';
-import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
-import {useAnnouncement} from './useAnnouncement';
-import {useIsEmailVerified} from 'tg.globalContext/helpers';
-import {Close} from '@mui/icons-material';
-import {useResizeObserver} from 'usehooks-ts';
-import {Announcement} from 'tg.component/layout/TopBanner/Announcement';
-import {useTranslate} from '@tolgee/react';
-import {tokenService} from 'tg.service/TokenService';
+import { styled, useTheme } from '@mui/material';
+import { useEffect, useRef } from 'react';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { useAnnouncement } from './useAnnouncement';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
+import { Close } from '@mui/icons-material';
+import { useResizeObserver } from 'usehooks-ts';
+import { Announcement } from 'tg.component/layout/TopBanner/Announcement';
+import { useTranslate } from '@tolgee/react';
+import { tokenService } from 'tg.service/TokenService';
 
 const StyledContainer = styled('div')`
   position: fixed;

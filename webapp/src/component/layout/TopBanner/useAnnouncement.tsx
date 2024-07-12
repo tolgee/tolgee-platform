@@ -1,10 +1,10 @@
-import {T, useTranslate} from '@tolgee/react';
-import {styled, useTheme} from '@mui/material';
-import {assertUnreachable} from 'tg.fixtures/assertUnreachable';
-import {components} from 'tg.service/apiSchema.generated';
-import {Announcement} from './Announcement';
-import {BannerLink} from './BannerLink';
-import {useIsEmailVerified} from 'tg.globalContext/helpers';
+import { T, useTranslate } from '@tolgee/react';
+import { styled, useTheme } from '@mui/material';
+import { assertUnreachable } from 'tg.fixtures/assertUnreachable';
+import { components } from 'tg.service/apiSchema.generated';
+import { Announcement } from './Announcement';
+import { BannerLink } from './BannerLink';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 
 type AnnouncementDtoType = components['schemas']['AnnouncementDto']['type'];
 

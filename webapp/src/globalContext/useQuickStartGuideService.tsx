@@ -1,10 +1,13 @@
-import {useMediaQuery} from '@mui/material';
-import {useState} from 'react';
-import {useRouteMatch} from 'react-router-dom';
-import {HighlightItem, ItemStep,} from 'tg.component/layout/QuickStartGuide/enums';
-import {LINKS, PARAMS} from 'tg.constants/links';
-import {useApiQuery} from 'tg.service/http/useQueryApi';
-import type {useInitialDataService} from './useInitialDataService';
+import { useMediaQuery } from '@mui/material';
+import { useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import {
+  HighlightItem,
+  ItemStep,
+} from 'tg.component/layout/QuickStartGuide/enums';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import type { useInitialDataService } from './useInitialDataService';
 
 export const useQuickStartGuideService = (
   initialData: ReturnType<typeof useInitialDataService>
