@@ -1,13 +1,13 @@
-import { FunctionComponent } from 'react';
-import { T } from '@tolgee/react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import {FunctionComponent} from 'react';
+import {T} from '@tolgee/react';
+import {useHistory, useRouteMatch} from 'react-router-dom';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { messageService } from 'tg.service/MessageService';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import {LINKS, PARAMS} from 'tg.constants/links';
+import {messageService} from 'tg.service/MessageService';
+import {useApiQuery} from 'tg.service/http/useQueryApi';
 
-import { FullPageLoading } from 'tg.component/common/FullPageLoading';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {FullPageLoading} from 'tg.component/common/FullPageLoading';
+import {useGlobalActions} from 'tg.globalContext/GlobalContext';
 
 interface OAuthRedirectionHandlerProps {}
 
@@ -16,7 +16,7 @@ export const EmailVerificationHandler: FunctionComponent<
 > = () => {
   const match = useRouteMatch();
   const history = useHistory();
-  const { handleAfterLogin } = useGlobalActions();
+  const { handleAfterLogin, refetchInitialData } = useGlobalActions();
 
   useApiQuery({
     url: '/api/public/verify_email/{userId}/{code}',
@@ -28,6 +28,7 @@ export const EmailVerificationHandler: FunctionComponent<
     options: {
       onSuccess(data) {
         messageService.success(<T keyName="email_verified_message" />);
+        refetchInitialData();
         handleAfterLogin(data);
       },
       onSettled() {
