@@ -285,7 +285,7 @@ export class LINKS {
    * Visible with view permissions
    */
 
-  static AFTER_LOGIN = LINKS.PROJECTS;
+  static AFTER_LOGIN = LINKS.ROOT;
 
   static PROJECT = Link.ofParent(LINKS.PROJECTS, p(PARAMS.PROJECT_ID));
 
