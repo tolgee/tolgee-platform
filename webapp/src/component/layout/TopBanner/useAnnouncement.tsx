@@ -1,5 +1,4 @@
 import { T, useTranslate } from '@tolgee/react';
-import { styled } from '@mui/material';
 import { assertUnreachable } from 'tg.fixtures/assertUnreachable';
 import { components } from 'tg.service/apiSchema.generated';
 import { Announcement } from './Announcement';
