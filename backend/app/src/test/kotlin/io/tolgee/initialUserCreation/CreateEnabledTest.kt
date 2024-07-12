@@ -9,8 +9,11 @@ import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.model.Project
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
@@ -58,9 +61,22 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var initialUserCreatorCommandLineRunner: InitialUserCreatorCommandLineRunner
 
+  @Autowired
+  lateinit var projectService: ProjectService
+
   @BeforeAll
   fun callTheRunner() {
     initialUserCreatorCommandLineRunner.run()
+  }
+
+  @Test
+  fun `creates demo project for initial user`() {
+    val johny = userAccountService.findActive("johny")
+    assertThat(johny!!.organizationRoles).hasSize(1)
+    assertThat(johny.organizationRoles[0].type).isEqualTo(OrganizationRoleType.OWNER)
+    val organization = johny.organizationRoles[0].organization!!
+    val projects = projectService.findAllInOrganization(organizationId = organization.id)
+    assertThat(projects).contains(Project(name = "Demo project"))
   }
 
   @Test
