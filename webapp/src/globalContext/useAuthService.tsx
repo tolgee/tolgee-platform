@@ -246,9 +246,6 @@ export const useAuthService = (
     redirectTo(url: string) {
       history.replace(LINKS.AFTER_LOGIN.build());
     },
-    redirectToUnverifiedView() {
-      history.replace(LINKS.EMAIL_NOT_VERIFIED.build());
-    },
   };
 
   return { state, actions };
