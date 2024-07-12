@@ -30,7 +30,7 @@ export const handleApiError = (
     }
     if (r.status == 403) {
       if (resObject?.code === 'email_not_verified') {
-        globalContext.actions?.redirectToUnverifiedView();
+        globalContext.actions?.redirectTo(LINKS.ROOT.build());
         return;
       }
 
