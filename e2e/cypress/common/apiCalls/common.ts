@@ -1,6 +1,6 @@
-import {API_URL, PASSWORD, USERNAME} from '../constants';
-import {ArgumentTypes, Scope} from '../types';
-import {components} from '../../../../webapp/src/service/apiSchema.generated';
+import { API_URL, PASSWORD, USERNAME } from '../constants';
+import { ArgumentTypes, Scope } from '../types';
+import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 

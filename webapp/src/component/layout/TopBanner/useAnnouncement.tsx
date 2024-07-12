@@ -1,22 +1,14 @@
 import { T, useTranslate } from '@tolgee/react';
-import { styled, useTheme } from '@mui/material';
+import { styled } from '@mui/material';
 import { assertUnreachable } from 'tg.fixtures/assertUnreachable';
 import { components } from 'tg.service/apiSchema.generated';
 import { Announcement } from './Announcement';
 import { BannerLink } from './BannerLink';
-import { useIsEmailVerified } from 'tg.globalContext/helpers';
 
 type AnnouncementDtoType = components['schemas']['AnnouncementDto']['type'];
 
-const StyledImage = styled('img')`
-  opacity: 0.7;
-  max-width: 100%;
-`;
-
 export function useAnnouncement() {
   const { t } = useTranslate();
-  const isEmailVerified = useIsEmailVerified();
-  const theme = useTheme();
   return function AnnouncementWrapper(value: AnnouncementDtoType) {
     switch (value) {
       case 'FEATURE_BATCH_OPERATIONS':
