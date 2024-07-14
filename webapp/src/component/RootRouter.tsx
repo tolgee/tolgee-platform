@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 import { LINKS } from 'tg.constants/links';
@@ -122,6 +122,9 @@ export const RootRouter = () => (
     </PrivateRoute>
     <RequirePreferredOrganization>
       <Switch>
+        <PrivateRoute exact path={LINKS.PROJECTS.template}>
+          <Redirect to={LINKS.ROOT.template} />
+        </PrivateRoute>
         <PrivateRoute path={LINKS.PROJECTS.template}>
           <ProjectsRouter />
         </PrivateRoute>

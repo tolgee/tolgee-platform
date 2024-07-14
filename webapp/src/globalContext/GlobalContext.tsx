@@ -22,10 +22,14 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
     const quickStart = useQuickStartGuideService(initialData);
 
     const wsClient = useWebsocketService(auth.state.jwtToken);
-
+    const isVerified =
+      initialData.state?.userInfo?.emailAwaitingVerification === null ||
+      !initialData.state?.serverConfiguration.needsEmailVerification;
     const organizationUsage = useOrganizationUsageService({
       organization: initialData.state?.preferredOrganization,
-      enabled: Boolean(initialData.state?.serverConfiguration?.billing.enabled),
+      enabled:
+        Boolean(initialData.state?.serverConfiguration?.billing.enabled) &&
+        isVerified,
     });
 
     const layout = useLayoutService();
