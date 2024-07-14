@@ -9,8 +9,8 @@ import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.repository.QuickStartRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.project.ProjectService
@@ -64,6 +64,9 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var projectService: ProjectService
 
+  @Autowired
+  lateinit var quickStartRepository: QuickStartRepository
+
   @BeforeAll
   fun callTheRunner() {
     initialUserCreatorCommandLineRunner.run()
@@ -76,7 +79,7 @@ class CreateEnabledTest : AbstractTransactionalTest() {
     assertThat(johny.organizationRoles[0].type).isEqualTo(OrganizationRoleType.OWNER)
     val organization = johny.organizationRoles[0].organization!!
     val projects = projectService.findAllInOrganization(organizationId = organization.id)
-    assertThat(projects).contains(Project(name = "Demo project"))
+    assertThat(projects[0].name).isEqualTo("Demo project")
   }
 
   @Test
@@ -125,7 +128,7 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   fun cleanUp() {
     (fileStorage as InMemoryFileStorage).clear()
     resetInitialPassword()
-
+    quickStartRepository.deleteAll()
     val initial = userAccountService.findActive("johny")!!
     userAccountRepository.delete(initial)
   }
