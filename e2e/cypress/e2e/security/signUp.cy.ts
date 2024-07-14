@@ -157,6 +157,7 @@ context('Sign up', () => {
       cy.visit(r.verifyEmailLink);
       assertMessage('Email was verified');
     });
+    cy.contains('Projects').should('be.visible');
   });
 
   it('Signs up without email verification', () => {
