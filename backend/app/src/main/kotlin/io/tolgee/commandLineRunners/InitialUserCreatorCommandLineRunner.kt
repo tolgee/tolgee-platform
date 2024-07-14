@@ -10,7 +10,6 @@ import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
-import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.core.annotation.Order
@@ -28,7 +27,6 @@ class InitialUserCreatorCommandLineRunner(
   private val passwordEncoder: PasswordEncoder,
   private val internalProperties: InternalProperties,
   private val quickStartService: QuickStartService,
-  private val applicationContext: ApplicationContext,
 ) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
