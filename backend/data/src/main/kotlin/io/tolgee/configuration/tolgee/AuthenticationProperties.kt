@@ -119,8 +119,12 @@ class AuthenticationProperties(
         "When enabled, all images are served with an access token valid for\n" +
         "a set period of time to prevent unauthorized access to images.",
   )
-  var createDemoForInitialUser: Boolean = true,
   var securedImageRetrieval: Boolean = false,
+  @DocProperty(
+    description =
+      "When enabled, creates Demo project and quick start guide for inital user\n",
+  )
+  var createDemoForInitialUser: Boolean = true,
   @DocProperty(
     description = "Expiration time of a generated image access token in milliseconds.",
     defaultExplanation = "= 10 minutes",
