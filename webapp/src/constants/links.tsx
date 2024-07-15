@@ -64,10 +64,11 @@ export enum PARAMS {
 }
 
 export class LINKS {
+  static ROOT = Link.ofRoot('');
+
   /**
    * Authentication
    */
-  static ROOT = Link.ofRoot('');
 
   static LOGIN = Link.ofRoot('login');
 
