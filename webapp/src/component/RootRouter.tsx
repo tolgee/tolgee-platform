@@ -79,11 +79,6 @@ const RecaptchaProvider: FC = (props) => {
 
 export const RootRouter = () => (
   <Switch>
-    <RequirePreferredOrganization>
-      <PrivateRoute exact path={LINKS.ROOT.template}>
-        <RootView />
-      </PrivateRoute>
-    </RequirePreferredOrganization>
     <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
       <SlackConnectView />
     </PrivateRoute>
@@ -124,6 +119,9 @@ export const RootRouter = () => (
     </PrivateRoute>
     <RequirePreferredOrganization>
       <Switch>
+        <PrivateRoute exact path={LINKS.ROOT.template}>
+          <RootView />
+        </PrivateRoute>
         <PrivateRoute exact path={LINKS.PROJECTS.template}>
           <Redirect to={LINKS.ROOT.template} />
         </PrivateRoute>
