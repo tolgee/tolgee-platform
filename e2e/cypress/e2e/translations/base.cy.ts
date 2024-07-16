@@ -66,6 +66,7 @@ describe('Translations Base', () => {
         key: 'Test key 2',
         translation: 'Translated test key 2',
       });
+      cy.contains('Key created').should('be.visible');
       cy.wait(100);
       cy.xpath(getAnyContainingText('Key', 'a'))
         .xpath(getClosestContainingText('Test key 2'))
