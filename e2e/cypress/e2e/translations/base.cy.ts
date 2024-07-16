@@ -8,7 +8,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { deleteProject, setProperty } from '../../common/apiCalls/common';
+import { deleteProject } from '../../common/apiCalls/common';
 import {
   getAnyContainingText,
   getClosestContainingText,
@@ -20,7 +20,6 @@ describe('Translations Base', () => {
 
   beforeEach(() => {
     translationsBeforeEach().then((p) => (project = p));
-    setProperty('authentication.createDemoForInitialUser', false);
   });
 
   afterEach(() => {
@@ -67,6 +66,7 @@ describe('Translations Base', () => {
         key: 'Test key 2',
         translation: 'Translated test key 2',
       });
+      cy.wait(100);
       cy.xpath(getAnyContainingText('Key', 'a'))
         .xpath(getClosestContainingText('Test key 2'))
         .scrollIntoView()
