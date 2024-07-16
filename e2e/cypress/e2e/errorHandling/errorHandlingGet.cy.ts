@@ -35,7 +35,7 @@ describe('Error handling', () => {
   it('Handles 404 by redirect', () => {
     cy.visit(`${HOST}/organizations/not-existant/profile`);
     assertMessage('Not found');
-    cy.url().should('include', '/projects');
+    cy.url().should('include', '/');
   });
 
   it('Handles 401 by logout', () => {

@@ -2,23 +2,23 @@ import API from '@openreplay/tracker';
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
 import {
-  Tooltip,
   Activity,
   Cell,
   Editor,
   Emphasis,
   ExampleBanner,
+  Input,
+  LanguageChips,
+  Login,
   Marker,
   Navbar,
   Placeholders,
   QuickStart,
+  RevisionFilterBanner,
   Tile,
   TipsBanner,
+  Tooltip,
   TopBanner,
-  LanguageChips,
-  Login,
-  Input,
-  RevisionFilterBanner,
 } from './colors';
 import { tolgeeColors, tolgeePalette } from 'figmaTheme';
 
@@ -48,6 +48,7 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
+    emailNotVerifiedBanner: EmailNotVerifiedBanner;
     quickStart: QuickStart;
     import: typeof all.import;
     exampleBanner: ExampleBanner;

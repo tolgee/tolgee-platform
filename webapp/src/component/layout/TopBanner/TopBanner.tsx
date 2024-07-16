@@ -1,13 +1,16 @@
-import { styled } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
 import { useEffect, useRef } from 'react';
 import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { useAnnouncement } from './useAnnouncement';
-
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 import { Close } from '@mui/icons-material';
 import { useResizeObserver } from 'usehooks-ts';
+import { Announcement } from 'tg.component/layout/TopBanner/Announcement';
+import { useTranslate } from '@tolgee/react';
+import { tokenService } from 'tg.service/TokenService';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -17,9 +20,18 @@ const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 50px 1fr 50px;
   width: 100%;
-  background: ${({ theme }) => theme.palette.topBanner.background};
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
-  color: ${({ theme }) => theme.palette.topBanner.mainText};
+  &.email-verified {
+    color: ${(props) => props.theme.palette.topBanner.mainText};
+    background: ${(props) => props.theme.palette.topBanner.background};
+  }
+
+  &.email-not-verified {
+    color: ${(props) =>
+      props.theme.palette.tokens._components.noticeBar.importantLink};
+    background: ${(props) =>
+      props.theme.palette.tokens._components.noticeBar.importantFill};
+  }
   font-size: 15px;
   font-weight: 700;
   @container (max-width: 899px) {
@@ -47,9 +59,21 @@ export function TopBanner() {
   const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
   const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
+  const isAuthenticated = tokenService.getToken() !== undefined;
 
   const getAnnouncement = useAnnouncement();
+  const isEmailVerified = useIsEmailVerified();
   const announcement = bannerType && getAnnouncement(bannerType);
+  const showCloseButton = isEmailVerified;
+  const containerClassName = isEmailVerified
+    ? 'email-verified'
+    : 'email-not-verified';
+  const theme = useTheme();
+  const mailImage =
+    theme.palette.mode === 'dark'
+      ? '/images/mailDark.svg'
+      : '/images/mailLight.svg';
+  const { t } = useTranslate();
 
   useResizeObserver({
     ref: bannerRef,
@@ -61,24 +85,40 @@ export function TopBanner() {
   useEffect(() => {
     const height = bannerRef.current?.offsetHeight;
     setTopBannerHeight(height ?? 0);
-  }, [announcement]);
+  }, [announcement, isEmailVerified]);
 
-  if (!announcement) {
+  if (!announcement && (isEmailVerified || !isAuthenticated)) {
     return null;
   }
 
   return (
-    <StyledContainer ref={bannerRef} data-cy="top-banner">
+    <StyledContainer
+      ref={bannerRef}
+      data-cy="top-banner"
+      className={containerClassName}
+    >
       <div />
-      <StyledContent data-cy="top-banner-content">{announcement}</StyledContent>
-      <StyledCloseButton
-        role="button"
-        tabIndex={0}
-        onClick={() => dismissAnnouncement()}
-        data-cy="top-banner-dismiss-button"
-      >
-        <Close />
-      </StyledCloseButton>
+      <StyledContent data-cy="top-banner-content">
+        {!isEmailVerified ? (
+          <Announcement
+            content={t('verify_email_announcement')}
+            title={t('verify_email_now_title')}
+            icon={<img src={mailImage} alt="Mail Icon" />}
+          />
+        ) : (
+          announcement
+        )}
+      </StyledContent>
+      {showCloseButton && (
+        <StyledCloseButton
+          role="button"
+          tabIndex={0}
+          onClick={() => dismissAnnouncement()}
+          data-cy="top-banner-dismiss-button"
+        >
+          <Close />
+        </StyledCloseButton>
+      )}
     </StyledContainer>
   );
 }

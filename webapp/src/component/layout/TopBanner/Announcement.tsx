@@ -6,12 +6,22 @@ import { BannerLink } from './BannerLink';
 type Props = {
   content: React.ReactNode;
   link?: string;
+  icon?: React.ReactNode;
+  title?: string;
 };
 
 const StyledContent = styled('div')`
   display: flex;
   gap: 12px;
   align-items: center;
+`;
+
+const StyledTitle = styled('div')`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: ${({ theme }) =>
+    theme.palette.tokens._components.noticeBar.importantColor};
 `;
 
 const StyledWrappableContent = styled('div')`
@@ -21,12 +31,13 @@ const StyledWrappableContent = styled('div')`
   flex-wrap: wrap;
 `;
 
-export const Announcement = ({ content, link }: Props) => {
+export const Announcement = ({ content, link, icon, title }: Props) => {
   const { t } = useTranslate();
   return (
     <StyledWrappableContent>
       <StyledContent>
-        <TadaIcon />
+        {icon ? icon : <TadaIcon />}
+        {title && <StyledTitle>{title}</StyledTitle>}
         <div>{content}</div>
       </StyledContent>
       {link && (

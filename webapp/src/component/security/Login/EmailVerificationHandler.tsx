@@ -16,7 +16,7 @@ export const EmailVerificationHandler: FunctionComponent<
 > = () => {
   const match = useRouteMatch();
   const history = useHistory();
-  const { handleAfterLogin } = useGlobalActions();
+  const { handleAfterLogin, refetchInitialData } = useGlobalActions();
 
   useApiQuery({
     url: '/api/public/verify_email/{userId}/{code}',
@@ -28,6 +28,7 @@ export const EmailVerificationHandler: FunctionComponent<
     options: {
       onSuccess(data) {
         messageService.success(<T keyName="email_verified_message" />);
+        refetchInitialData();
         handleAfterLogin(data);
       },
       onSettled() {

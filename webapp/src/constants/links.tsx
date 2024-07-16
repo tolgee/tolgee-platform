@@ -64,10 +64,11 @@ export enum PARAMS {
 }
 
 export class LINKS {
+  static ROOT = Link.ofRoot('');
+
   /**
    * Authentication
    */
-  static ROOT = Link.ofRoot('');
 
   static LOGIN = Link.ofRoot('login');
 
@@ -279,7 +280,7 @@ export class LINKS {
    * Visible with view permissions
    */
 
-  static AFTER_LOGIN = LINKS.PROJECTS;
+  static AFTER_LOGIN = LINKS.ROOT;
 
   static PROJECT = Link.ofParent(LINKS.PROJECTS, p(PARAMS.PROJECT_ID));
 
