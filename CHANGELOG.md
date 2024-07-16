@@ -1,3 +1,10 @@
+# [3.69.0](https://github.com/tolgee/tolgee-platform/compare/v3.68.2...v3.69.0) (2024-07-16)
+
+
+### Features
+
+* Ability to resend registration email ([#2382](https://github.com/tolgee/tolgee-platform/issues/2382)) ([7017824](https://github.com/tolgee/tolgee-platform/commit/701782435a2d3b6ac6038a7d2e23efd5d095f97a))
+
 ## [3.68.2](https://github.com/tolgee/tolgee-platform/compare/v3.68.1...v3.68.2) (2024-07-02)
 
 
