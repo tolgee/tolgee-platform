@@ -10,6 +10,7 @@ import {
 } from 'tg.globalContext/GlobalContext';
 import { RightSidePanel } from './RightSidePanel';
 import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 
 const StyledMain = styled(Box)`
   display: flex;
@@ -54,6 +55,8 @@ export const DashboardPage: FunctionComponent<Props> = ({
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
 
+  const isEmailVerified = useIsEmailVerified();
+
   const { setQuickStartOpen } = useGlobalActions();
   const quickStartEnabled = useGlobalContext(
     (c) => c.quickStartGuide.enabled && c.initialData.userInfo
@@ -91,15 +94,17 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {quickStartEnabled && (quickStartOpen || quickStartFloating) && (
-          <RightSidePanel
-            open={quickStartOpen}
-            onClose={() => setQuickStartOpen(false)}
-            floating={quickStartFloating}
-          >
-            <QuickStartGuide />
-          </RightSidePanel>
-        )}
+        {quickStartEnabled &&
+          (quickStartOpen || quickStartFloating) &&
+          isEmailVerified && (
+            <RightSidePanel
+              open={quickStartOpen}
+              onClose={() => setQuickStartOpen(false)}
+              floating={quickStartFloating}
+            >
+              <QuickStartGuide />
+            </RightSidePanel>
+          )}
       </Box>
     </>
   );

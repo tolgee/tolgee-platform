@@ -6,6 +6,7 @@ package io.tolgee.service
 
 import io.tolgee.component.email.EmailVerificationSender
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.user.OnUserEmailVerifiedFirst
 import io.tolgee.events.user.OnUserUpdated
@@ -15,7 +16,9 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.EmailVerification
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.EmailVerificationRepository
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.security.UserAccountService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
@@ -29,6 +32,7 @@ class EmailVerificationService(
   private val emailVerificationRepository: EmailVerificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val emailVerificationSender: EmailVerificationSender,
+  private val rateLimitService: RateLimitService,
 ) {
   @Lazy
   @Autowired
@@ -52,6 +56,7 @@ class EmailVerificationService(
 
       emailVerificationRepository.save(emailVerification)
       userAccount.emailVerification = emailVerification
+      userAccountService.saveAndFlush(userAccount)
 
       if (newEmail != null) {
         emailVerificationSender.sendEmailVerification(userAccount.id, newEmail, resultCallbackUrl, code, false)
@@ -61,6 +66,46 @@ class EmailVerificationService(
       return emailVerification
     }
     return null
+  }
+
+  @Transactional
+  fun resendEmailVerification(
+    userAccount: UserAccount,
+    request: HttpServletRequest,
+    callbackUrl: String? = null,
+    newEmail: String? = null,
+  ) {
+    if (newEmail == null && isVerified(userAccount)) {
+      throw BadRequestException(io.tolgee.constants.Message.EMAIL_ALREADY_VERIFIED)
+    }
+
+    val email = newEmail ?: getEmail(userAccount)
+    val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request, email)
+
+    if (policy != null) {
+      rateLimitService.consumeBucketUnless(policy) {
+        createForUser(userAccount, callbackUrl, email)
+        isVerified(userAccount)
+      }
+    }
+  }
+
+  fun getEmail(userAccount: UserAccount): String {
+    return userAccount.emailVerification?.newEmail ?: userAccount.username
+  }
+
+  fun isVerified(userAccount: UserAccountDto): Boolean {
+    return !(
+      tolgeeProperties.authentication.needsEmailVerification &&
+        userAccount.emailVerification != null
+    )
+  }
+
+  fun isVerified(userAccount: UserAccount): Boolean {
+    return !(
+      tolgeeProperties.authentication.needsEmailVerification &&
+        userAccount.emailVerification != null
+    )
   }
 
   fun check(userAccount: UserAccount) {
@@ -79,10 +124,10 @@ class EmailVerificationService(
   ) {
     val user = userAccountService.findActive(userId) ?: throw NotFoundException()
     val old = UserAccountDto.fromEntity(user)
-    val emailVerification = user.emailVerification
+    val emailVerification = user.emailVerification ?: throw BadRequestException(Message.EMAIL_ALREADY_VERIFIED)
 
-    if (emailVerification == null || emailVerification.code != code) {
-      throw NotFoundException()
+    if (emailVerification.code != code) {
+      throw BadRequestException(Message.EMAIL_VERIFICATION_CODE_NOT_VALID)
     }
 
     val newEmail = user.emailVerification?.newEmail

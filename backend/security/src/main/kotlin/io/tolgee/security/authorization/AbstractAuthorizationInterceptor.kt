@@ -16,6 +16,9 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.PermissionException
 import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -58,5 +61,18 @@ abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
   private fun isGlobal(handler: HandlerMethod): Boolean {
     val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
     return annotation != null
+  }
+
+  fun checkEmailVerificationOrThrow(
+    isEmailVerified: (UserAccountDto) -> Boolean,
+    userAccount: UserAccountDto,
+    handler: HandlerMethod,
+  ) {
+    if (!isEmailVerified(
+        userAccount,
+      ) && !handler.hasMethodAnnotation(BypassEmailVerification::class.java)
+    ) {
+      throw PermissionException(Message.EMAIL_NOT_VERIFIED)
+    }
   }
 }

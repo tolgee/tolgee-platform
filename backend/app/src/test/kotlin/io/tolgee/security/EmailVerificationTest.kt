@@ -43,12 +43,12 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
-  fun doesNotLoginWhenNotVerified() {
+  fun loginWhenNotVerified() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     emailVerificationService.createForUser(createUser)
 
     val response = doAuthentication(initialUsername, initialPassword)
-    assertThat(response.andReturn()).error().hasCode("email_not_verified")
+    assertThat(response.andReturn().response.status).isEqualTo(200)
   }
 
   @Test
@@ -84,7 +84,7 @@ class EmailVerificationTest : AbstractControllerTest() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
     mvc.perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
-      .andExpect(status().isNotFound).andReturn()
+      .andExpect(status().isBadRequest).andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification!!.id!!)).isPresent
   }
@@ -139,11 +139,6 @@ class EmailVerificationTest : AbstractControllerTest() {
   private fun getMessageContent(): String {
     emailTestUtil.verifyEmailSent()
     return emailTestUtil.messageContents.single()
-  }
-
-  @Test
-  fun signUpDoesNotReturnToken() {
-    assertThat(perform().response.contentAsString).isEqualTo("")
   }
 
   @Test

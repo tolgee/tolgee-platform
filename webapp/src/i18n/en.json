@@ -1407,5 +1407,5 @@
   "webhook_test_success" : "Test request sent to the webhook successfully",
   "webhook_update_title" : "Edit webhook",
   "wrong_current_password" : "Wrong current password entered",
-  "your_email_was_changed_verification_message" : "When you change your email, new email will be set after its verification."
+  "your_email_was_changed_verification_message" : "When you change your email, new email will be set after its verification.",
 }

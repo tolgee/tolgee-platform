@@ -123,6 +123,10 @@ export function useErrorTranslation() {
         return t('slack_not_configured');
       case 'slack_workspace_already_connected':
         return t('slack_workspace_already_connected');
+      case 'email_already_verified':
+        return t('verify_email_already_verified');
+      case 'email_verification_code_not_valid':
+        return t('verify_email_verification_code_not_valid');
       default:
         return code;
     }

@@ -435,6 +435,7 @@ declare namespace DataCy {
         "quick-start-step" |
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
+        "resend-email-button" |
         "screenshot-image" |
         "screenshot-thumbnail" |
         "screenshot-thumbnail-delete" |
