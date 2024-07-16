@@ -8,7 +8,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { deleteProject } from '../../common/apiCalls/common';
+import { deleteProject, setProperty } from '../../common/apiCalls/common';
 import {
   getAnyContainingText,
   getClosestContainingText,
@@ -20,6 +20,7 @@ describe('Translations Base', () => {
 
   beforeEach(() => {
     translationsBeforeEach().then((p) => (project = p));
+    setProperty('authentication.createDemoForInitialUser', false);
   });
 
   afterEach(() => {
