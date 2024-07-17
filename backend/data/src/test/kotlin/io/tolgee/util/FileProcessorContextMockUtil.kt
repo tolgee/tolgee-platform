@@ -60,6 +60,7 @@ class FileProcessorContextMockUtil {
     object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = false
       override var convertPlaceholdersToIcu: Boolean = convertPlaceholders
+      override var onlyUpdateWithoutAdd: Boolean = false
     }
 
   private fun mockApplicationContext(): ApplicationContext {

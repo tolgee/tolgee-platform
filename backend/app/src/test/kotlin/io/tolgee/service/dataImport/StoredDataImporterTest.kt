@@ -25,6 +25,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
     object : IImportSettings {
       override var convertPlaceholdersToIcu: Boolean = true
       override var overrideKeyDescriptions: Boolean = false
+      override var onlyUpdateWithoutAdd: Boolean = false
     }
 
   @BeforeEach
