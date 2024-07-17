@@ -1,3 +1,10 @@
+# [3.70.0](https://github.com/tolgee/tolgee-platform/compare/v3.69.0...v3.70.0) (2024-07-17)
+
+
+### Features
+
+* demo project for self hosted ([#2410](https://github.com/tolgee/tolgee-platform/issues/2410)) ([43a4c1a](https://github.com/tolgee/tolgee-platform/commit/43a4c1a04d254e0af03d2ae93cdd493306f6ef2d))
+
 # [3.69.0](https://github.com/tolgee/tolgee-platform/compare/v3.68.2...v3.69.0) (2024-07-16)
 
 
