@@ -105,7 +105,6 @@ class StoredDataImporter(
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
     }
-
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
@@ -152,6 +151,17 @@ class StoredDataImporter(
       val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
       if (otherKeys.isNotEmpty()) {
         keyService.deleteMultiple(otherKeys.map { it.value.id })
+      }
+    }
+    if (importSettings.onlyUpdateWithoutAdd) {
+      val existingKeys = importDataManager.existingKeys.entries.map { it.value }
+      val savedKeys = keysToSave.values
+      val keysToDelete =
+        savedKeys.filter { savedKey ->
+          !existingKeys.contains(savedKey)
+        }
+      if (keysToDelete.isNotEmpty()) {
+        keyService.deleteMultiple(keysToDelete.map { it.id })
       }
     }
   }
