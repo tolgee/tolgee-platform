@@ -26,4 +26,7 @@ class ImportSettings(
 
   @ColumnDefault("true")
   override var convertPlaceholdersToIcu: Boolean = true
+
+  @ColumnDefault("false")
+  override var onlyUpdateWithoutAdd: Boolean = false
 }

@@ -27,6 +27,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
 
   override var overrideKeyDescriptions: Boolean = false
   override var convertPlaceholdersToIcu: Boolean = true
+  override var onlyUpdateWithoutAdd: Boolean = false
 
   @get:Schema(
     description = "Definition of mapping for each file to import.",

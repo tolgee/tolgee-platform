@@ -132,6 +132,18 @@ export const ImportSettingsPanel: FC = (props) => {
         }
         {...additionalCheckboxProps}
       />
+      <LoadingCheckboxWithSkeleton
+          loading={loadingItems.has('onlyUpdateWithoutAdd')}
+          onChange={(e) => {
+            onChange('onlyUpdateWithoutAdd', e.target.checked);
+          }}
+          data-cy={''}
+          hint={t('import_only_update_without_add_key_label_hint')}
+          label={t('import_only_update_without_add_key_label')}
+          checked={state?.onlyUpdateWithoutAdd}
+
+          {...additionalCheckboxProps}
+      />
     </StyledPanelBox>
   );
 };
