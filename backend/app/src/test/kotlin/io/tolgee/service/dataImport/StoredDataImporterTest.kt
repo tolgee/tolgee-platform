@@ -164,4 +164,48 @@ class StoredDataImporterTest : AbstractSpringTest() {
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(forceKeptTranslation.text).isEqualTo("What a text")
   }
+
+  @Test
+  fun `only updates old keys but does not add new ones when option enabled`() {
+    defaultImportSettings.onlyUpdateWithoutAdd = true
+    storedDataImporter =
+      StoredDataImporter(
+        applicationContext,
+        importTestData.import,
+        ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
+      )
+    importTestData.addImportKeyThatDoesntExistInProject()
+    testDataService.saveTestData(importTestData.root)
+    login()
+
+    storedDataImporter.doImport()
+    val projectId = importTestData.root.data.projects[0].self.id
+    val importedKey = keyService.find(projectId, "I'm new key in project", null)
+    assertThat(importedKey).isNull()
+
+    val forceOverriddenTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id
+    val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId)!!
+    assertThat(forceOverriddenTranslation.text).isEqualTo("Imported text")
+  }
+
+  @Test
+  fun `add new key when option disabled`() {
+    defaultImportSettings.onlyUpdateWithoutAdd = false
+    storedDataImporter =
+      StoredDataImporter(
+        applicationContext,
+        importTestData.import,
+        ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
+      )
+    importTestData.addImportKeyThatDoesntExistInProject()
+    testDataService.saveTestData(importTestData.root)
+    login()
+
+    storedDataImporter.doImport()
+    val projectId = importTestData.root.data.projects[0].self.id
+    val importedKey = keyService.find(projectId, "I'm new key in project", null)
+    assertThat(importedKey).isNotNull()
+  }
 }
