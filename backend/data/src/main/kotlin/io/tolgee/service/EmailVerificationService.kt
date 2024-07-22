@@ -95,10 +95,7 @@ class EmailVerificationService(
   }
 
   fun isVerified(userAccount: UserAccountDto): Boolean {
-    return !(
-      tolgeeProperties.authentication.needsEmailVerification &&
-        userAccount.emailVerification != null
-    )
+    return !tolgeeProperties.authentication.needsEmailVerification || userAccount.emailVerified
   }
 
   fun isVerified(userAccount: UserAccount): Boolean {
@@ -133,8 +130,9 @@ class EmailVerificationService(
     val newEmail = user.emailVerification?.newEmail
     setNewEmailIfChanged(newEmail, user)
 
-    userAccountService.saveAndFlush(user)
+    user.emailVerification = null
     emailVerificationRepository.delete(emailVerification)
+    userAccountService.saveAndFlush(user)
 
     val isFirstEmailVerification = newEmail == null
     val isEmailChange = newEmail != null

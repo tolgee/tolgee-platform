@@ -1,6 +1,5 @@
 package io.tolgee.dtos.cacheable
 
-import io.tolgee.model.EmailVerification
 import io.tolgee.model.UserAccount
 import java.io.Serializable
 import java.util.*
@@ -14,7 +13,7 @@ data class UserAccountDto(
   val avatarHash: String?,
   val deleted: Boolean,
   val tokensValidNotBefore: Date?,
-  val emailVerification: EmailVerification? = null,
+  val emailVerified: Boolean,
 ) : Serializable {
   companion object {
     fun fromEntity(entity: UserAccount) =
@@ -27,7 +26,7 @@ data class UserAccountDto(
         avatarHash = entity.avatarHash,
         deleted = entity.deletedAt != null,
         tokensValidNotBefore = entity.tokensValidNotBefore,
-        emailVerification = entity.emailVerification,
+        emailVerified = entity.emailVerification == null,
       )
   }
 
