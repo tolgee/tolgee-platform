@@ -1,3 +1,10 @@
+## [3.70.1](https://github.com/tolgee/tolgee-platform/compare/v3.70.0...v3.70.1) (2024-07-22)
+
+
+### Bug Fixes
+
+* signup autocomplete fields ([#2414](https://github.com/tolgee/tolgee-platform/issues/2414)) ([2a18592](https://github.com/tolgee/tolgee-platform/commit/2a18592414c381a7864af35902de87695fc7095c))
+
 # [3.70.0](https://github.com/tolgee/tolgee-platform/compare/v3.69.0...v3.70.0) (2024-07-17)
 
 
