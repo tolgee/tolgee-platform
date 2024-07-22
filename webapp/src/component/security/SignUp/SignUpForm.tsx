@@ -122,7 +122,11 @@ export const SignUpForm = (props: Props) => {
       >
         <StyledInputFields>
           <Error loadable={props.loadable} />
-          <TextField name="email" label={<T keyName="sign_up_form_email" />} />
+          <TextField
+            name="email"
+            label={<T keyName="sign_up_form_email" />}
+            autoComplete="email"
+          />
           <PasswordFieldWithValidation
             label={<PasswordLabel />}
             inputProps={{ type: showPassword ? 'text' : 'password' }}
@@ -150,17 +154,20 @@ export const SignUpForm = (props: Props) => {
             }}
           />
           <TextField
+            autoComplete="name"
             name="name"
             label={<T keyName="sign_up_form_full_name" />}
           />
           {orgRequired && (
             <TextField
+              autoComplete="organization"
               name="organizationName"
               label={<T keyName="sign_up_form_organization_name" />}
             />
           )}
           {userSourceField && (
             <TextField
+              autoComplete="off"
               name="userSource"
               label={<T keyName="sign_up_form_user_source" />}
             />
