@@ -326,12 +326,15 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       mapOf(
         "expiresAt" to null,
       ),
-    ).andIsOk.andAssertThatJson {
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.startsWith("tgpak_").hasSizeGreaterThan(20)
     }
 
-    val key = apiKeyService.get(testData.usersKey.id)
-    key.key.assert.isNull()
-    key.keyHash.assert.isNotEqualTo(oldKeyHash)
+    executeInNewTransaction {
+      entityManager.clear()
+      val key = apiKeyService.get(testData.usersKey.id)
+      key.key.assert.isNull()
+      key.keyHash.assert.isNotEqualTo(oldKeyHash)
+    }
   }
 }
