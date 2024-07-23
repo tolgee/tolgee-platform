@@ -121,10 +121,12 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
       val org = project.organizationOwner
       performSetScopesBaseOrganization(org).andIsOk
 
-      organizationService.get(org.id).basePermission.scopes.assert.containsExactlyInAnyOrder(
-        Scope.TRANSLATIONS_EDIT,
-        Scope.TRANSLATIONS_STATE_EDIT,
-      )
+      executeInNewTransaction {
+        organizationService.get(org.id).basePermission.scopes.assert.containsExactlyInAnyOrder(
+          Scope.TRANSLATIONS_EDIT,
+          Scope.TRANSLATIONS_STATE_EDIT,
+        )
+      }
     }
   }
 
