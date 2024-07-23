@@ -22,6 +22,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         left join r.defaultNamespace dn
         left join Permission p on p.project = r and p.user.id = :userAccountId
         left join Organization o on r.organizationOwner = o
+        left join fetch o.basePermission
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
         """
   }
