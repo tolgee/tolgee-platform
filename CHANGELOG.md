@@ -1,3 +1,10 @@
+## [3.70.2](https://github.com/tolgee/tolgee-platform/compare/v3.70.1...v3.70.2) (2024-07-23)
+
+
+### Bug Fixes
+
+* Remove EmailVerification entity from UserAccountDto ([#2415](https://github.com/tolgee/tolgee-platform/issues/2415)) ([9755d7c](https://github.com/tolgee/tolgee-platform/commit/9755d7c76680f53d9a667853d396cef535b94fb7))
+
 ## [3.70.1](https://github.com/tolgee/tolgee-platform/compare/v3.70.0...v3.70.1) (2024-07-22)
 
 
