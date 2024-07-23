@@ -104,3 +104,13 @@ dependencyManagement {
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
+
+hibernate {
+    hibernate {
+        enhancement {
+            enableDirtyTracking = false
+            enableAssociationManagement = false
+            enableExtendedEnhancement = false
+        }
+    }
+}

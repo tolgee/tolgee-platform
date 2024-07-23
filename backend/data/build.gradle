@@ -238,3 +238,11 @@ ktlint {
         exclude("**/PluralData.kt")
     }
 }
+
+hibernate {
+    enhancement {
+        enableDirtyTracking = false
+        enableAssociationManagement = false
+        enableExtendedEnhancement = false
+    }
+}
