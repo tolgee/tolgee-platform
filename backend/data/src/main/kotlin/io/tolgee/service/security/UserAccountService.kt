@@ -90,12 +90,14 @@ class UserAccountService(
   }
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
+  @Transactional
   fun findDto(id: Long): UserAccountDto? {
     return userAccountRepository.findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
   }
 
+  @Transactional
   fun getDto(id: Long): UserAccountDto {
     return self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
