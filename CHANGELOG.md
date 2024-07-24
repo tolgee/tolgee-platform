@@ -1,3 +1,10 @@
+## [3.70.3](https://github.com/tolgee/tolgee-platform/compare/v3.70.2...v3.70.3) (2024-07-24)
+
+
+### Performance Improvements
+
+* Make lazy initialization enabled back again ([#2417](https://github.com/tolgee/tolgee-platform/issues/2417)) ([f3c3359](https://github.com/tolgee/tolgee-platform/commit/f3c3359af48b91fdf6ab971fae8608a57d7f4b1c))
+
 ## [3.70.2](https://github.com/tolgee/tolgee-platform/compare/v3.70.1...v3.70.2) (2024-07-23)
 
 
