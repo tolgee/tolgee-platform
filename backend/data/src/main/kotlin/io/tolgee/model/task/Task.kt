@@ -31,18 +31,18 @@ class Task {
   @Enumerated(EnumType.STRING)
   var type: TaskType = TaskType.TRANSLATE
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   lateinit var language: Language
 
   var dueDate: Date? = null
 
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   var assignees: MutableSet<UserAccount> = mutableSetOf()
 
   @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
   var translations: MutableSet<TaskTranslation> = mutableSetOf()
 
-  @ManyToOne(fetch = FetchType.EAGER, optional = true)
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
   var author: UserAccount? = null
 
   var createdAt: Date = Date()

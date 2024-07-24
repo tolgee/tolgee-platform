@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.task
 
 import io.tolgee.hateoas.language.LanguageModel
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.hateoas.userAccount.UserAccountModel
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
@@ -15,11 +16,11 @@ class TaskModel(
   var type: TaskType = TaskType.TRANSLATE,
   var language: LanguageModel,
   var dueDate: Long? = null,
-  var assignees: MutableSet<UserAccountModel> = mutableSetOf(),
+  var assignees: MutableSet<SimpleUserAccountModel> = mutableSetOf(),
   var totalItems: Long = 0,
   var doneItems: Long = 0,
   var baseWordCount: Long = 0,
-  var author: UserAccountModel? = null,
+  var author: SimpleUserAccountModel? = null,
   var createdAt: Long = 0,
   var closedAt: Long? = null,
   var state: TaskState = TaskState.IN_PROGRESS,

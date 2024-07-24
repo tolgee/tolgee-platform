@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import java.util.*
@@ -51,14 +52,16 @@ class TaskService(
     project: Project,
     pageable: Pageable,
   ): Page<Task> {
-    return taskRepository.getAllByProjectId(project.id, pageable)
+    val pagedTasks = taskRepository.getAllByProjectId(project.id, pageable)
+    return PageImpl(taskRepository.getByIdsWithAllPrefetched(pagedTasks.content.map { it.id }), pageable, pagedTasks.totalElements)
   }
 
   fun getUserTasksPaged(
     userId: Long,
     pageable: Pageable,
   ): Page<Task> {
-    return taskRepository.getAllByAssignee(userId, pageable)
+    val pagedTasks = taskRepository.getAllByAssignee(userId, pageable)
+    return PageImpl(taskRepository.getByIdsWithAllPrefetched(pagedTasks.content.map { it.id }), pageable, pagedTasks.totalElements)
   }
 
   @Transactional

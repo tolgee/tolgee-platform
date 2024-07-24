@@ -1,11 +1,6 @@
 package io.tolgee.model
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 
@@ -21,7 +16,7 @@ data class EmailVerification(
   var newEmail: String? = null,
 ) : AuditModel() {
   @Suppress("JoinDeclarationAndAssignment")
-  @OneToOne(optional = false)
+  @OneToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var userAccount: UserAccount
 
   constructor(

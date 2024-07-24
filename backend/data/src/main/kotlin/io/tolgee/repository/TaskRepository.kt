@@ -27,8 +27,6 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     """
      select t
      from Task t
-        left join fetch t.project
-        left join fetch t.assignees
         left join t.assignees u
      where u.id = :userId
     """,
@@ -37,6 +35,19 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     userId: Long,
     pageable: Pageable,
   ): Page<Task>
+
+  @Query(
+    """
+      select t
+      from Task t
+        left join fetch t.assignees
+        left join fetch t.author
+        left join fetch t.project
+        left join fetch t.language
+      where t.id in :ids
+    """
+  )
+  fun getByIdsWithAllPrefetched(ids: Collection<Long>): List<Task>
 
   fun findByProjectOrderByIdDesc(project: Project): List<Task>
 
