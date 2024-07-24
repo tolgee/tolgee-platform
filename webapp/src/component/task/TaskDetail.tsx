@@ -9,7 +9,7 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { TaskDatePicker } from './TaskDatePicker';
-import { UserSearchSelect } from './assigneeSelect/UserSearchSelect';
+import { AssigneeSearchSelect } from './assigneeSelect/AssigneeSearchSelect';
 import { TaskLabel } from './TaskLabel';
 import { messageService } from 'tg.service/MessageService';
 import { TaskInfoItem } from './TaskInfoItem';
@@ -127,7 +127,7 @@ export const TaskDetail = ({ task, onClose, project }: Props) => {
                 label={t('task_detail_field_name')}
                 fullWidth
               />
-              <UserSearchSelect
+              <AssigneeSearchSelect
                 label={t('task_detail_field_assignees')}
                 value={values.assignees}
                 onChange={(value) => setFieldValue('assignees', value)}

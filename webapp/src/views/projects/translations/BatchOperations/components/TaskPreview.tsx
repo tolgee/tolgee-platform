@@ -7,7 +7,7 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { useTranslate } from '@tolgee/react';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { Warning } from '@mui/icons-material';
-import { UserSearchSelect } from 'tg.component/task/assigneeSelect/UserSearchSelect';
+import { AssigneeSearchSelect } from 'tg.component/task/assigneeSelect/UserSearchSelect';
 import { User } from 'tg.component/task/assigneeSelect/types';
 
 type TaskType = components['schemas']['TaskModel']['type'];
@@ -107,7 +107,7 @@ export const TaskPreview = ({
           </StyledMetric>
         </Box>
       </Box>
-      <UserSearchSelect
+      <AssigneeSearchSelect
         value={assigness}
         project={project}
         onChange={onUpdateAssignees}

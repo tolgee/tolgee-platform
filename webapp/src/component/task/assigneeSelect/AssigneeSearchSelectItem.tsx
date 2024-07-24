@@ -17,7 +17,10 @@ type Props = {
   size?: number;
 };
 
-export const UserSearchSelectItem: React.FC<Props> = ({ data, size = 24 }) => {
+export const AssigneeSearchSelectItem: React.FC<Props> = ({
+  data,
+  size = 24,
+}) => {
   return (
     <StyledOrgItem>
       <Box>

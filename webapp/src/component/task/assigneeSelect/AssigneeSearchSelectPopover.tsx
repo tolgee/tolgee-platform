@@ -14,7 +14,7 @@ import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
-import { UserSearchSelectItem } from './UserSearchSelectItem';
+import { AssigneeSearchSelectItem } from './AssigneeSearchSelectItem';
 import { User } from './types';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -65,7 +65,7 @@ type Props = {
   project: SimpleProjectModel;
 };
 
-export const UserSearchSelectPopover: React.FC<Props> = ({
+export const AssigneeSearchSelectPopover: React.FC<Props> = ({
   open,
   onClose,
   onSelect,
@@ -180,7 +180,7 @@ export const UserSearchSelectPopover: React.FC<Props> = ({
                   selected={Boolean(selection.find((u) => u.id === option.id))}
                   data-cy="user-switch-item"
                 >
-                  <UserSearchSelectItem data={option} />
+                  <AssigneeSearchSelectItem data={option} />
                 </MenuItem>
                 {usersLoadable.hasNextPage &&
                   option.id === items![items!.length - 1].id && (

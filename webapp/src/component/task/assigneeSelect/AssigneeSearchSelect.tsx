@@ -12,7 +12,7 @@ import { ArrowDropDown, Clear } from '@mui/icons-material';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/TextField';
-import { UserSearchSelectPopover } from './UserSearchSelectPopover';
+import { AssigneeSearchSelectPopover } from './AssigneeSearchSelectPopover';
 import { User } from './types';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -54,7 +54,7 @@ type Props = {
   project: SimpleProjectModel;
 };
 
-export const UserSearchSelect: React.FC<Props> = ({
+export const AssigneeSearchSelect: React.FC<Props> = ({
   value,
   onChange,
   label,
@@ -125,7 +125,7 @@ export const UserSearchSelect: React.FC<Props> = ({
           }}
         />
 
-        <UserSearchSelectPopover
+        <AssigneeSearchSelectPopover
           open={isOpen}
           onClose={handleClose}
           selected={value}
