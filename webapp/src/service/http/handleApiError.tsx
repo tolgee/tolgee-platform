@@ -65,7 +65,12 @@ export const handleApiError = (
 
   if (r.status == 429) {
     const { retryAfter }: RateLimitResponseBody = resObject;
-    messageService.error(<T keyName="too_many_requests_retry_after" params={{retryAfterSeconds: retryAfter}} />);
+    messageService.error(
+      <T
+        keyName="too_many_requests_retry_after"
+        params={{ retryAfterSeconds: retryAfter }}
+      />
+    );
     return;
   }
 
