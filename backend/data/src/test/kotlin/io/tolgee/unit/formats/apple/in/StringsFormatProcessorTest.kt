@@ -115,6 +115,16 @@ class StringsFormatProcessorTest {
     )
   }
 
+  @Test
+  fun `works with utf-16`() {
+    mockUtil.mockIt(
+      "Localizable.strings",
+      "src/test/resources/import/apple/utf-16.strings",
+    )
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+  }
+
   private fun processFile() {
     StringsFileProcessor(mockUtil.fileProcessorContext).process()
   }
