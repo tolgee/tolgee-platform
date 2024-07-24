@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, Redirect } from 'react-router-dom';
-import { styled, useMediaQuery, Link as MuiLink } from '@mui/material';
+import { Link as MuiLink, styled, useMediaQuery } from '@mui/material';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -9,8 +9,6 @@ import {
   CompactView,
   SPLIT_CONTENT_BREAK_POINT,
 } from 'tg.component/layout/CompactView';
-
-import { Alert } from '../../common/Alert';
 import { DashboardPage } from '../../layout/DashboardPage';
 import { SignUpForm } from './SignUpForm';
 import { SignUpProviders } from './SignUpProviders';
@@ -76,13 +74,7 @@ export const SignUpView: FunctionComponent = () => {
             />
           }
           primaryContent={
-            signUpMutation.isSuccess && config.needsEmailVerification ? (
-              <Alert severity="success">
-                <T keyName="sign_up_success_needs_verification_message" />
-              </Alert>
-            ) : (
-              <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
-            )
+            <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
           }
           secondaryContent={
             <StyledRightPart>
