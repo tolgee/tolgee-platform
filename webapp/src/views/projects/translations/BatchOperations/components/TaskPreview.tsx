@@ -7,7 +7,7 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { useTranslate } from '@tolgee/react';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { Warning } from '@mui/icons-material';
-import { AssigneeSearchSelect } from 'tg.component/task/assigneeSelect/UserSearchSelect';
+import { AssigneeSearchSelect } from 'tg.component/task/assigneeSelect/AssigneeSearchSelect';
 import { User } from 'tg.component/task/assigneeSelect/types';
 
 type TaskType = components['schemas']['TaskModel']['type'];

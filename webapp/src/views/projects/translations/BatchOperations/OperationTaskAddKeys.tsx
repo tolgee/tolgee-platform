@@ -3,20 +3,19 @@ import { useTranslate } from '@tolgee/react';
 
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { TextField } from 'tg.component/common/TextField';
 
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { OperationContainer } from './components/OperationContainer';
 import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
 import { OperationProps } from './types';
 import { messageService } from 'tg.service/MessageService';
-import { usePrefilter } from '../prefilters/usePrefilter';
+import { TaskSearchSelect } from 'tg.component/task/taskSelect/TaskSearchSelect';
+import { Task } from 'tg.component/task/taskSelect/types';
 
 type Props = OperationProps;
 
 export const OperationTaskAddKeys = ({ disabled, onFinished }: Props) => {
-  const prefilter = usePrefilter();
-  const [task, setTask] = useState(prefilter.task ? prefilter.task : undefined);
+  const [task, setTask] = useState<Task | null>(null);
   const project = useProject();
   const { t } = useTranslate();
 
@@ -44,10 +43,12 @@ export const OperationTaskAddKeys = ({ disabled, onFinished }: Props) => {
 
   return (
     <OperationContainer>
-      <TextField
-        minHeight={false}
+      <TaskSearchSelect
+        label={null}
         value={task}
-        onChange={(e) => setTask(Number(e.currentTarget.value))}
+        onChange={(value) => setTask(value)}
+        project={project}
+        sx={{ width: 250 }}
       />
       <BatchOperationsSubmit
         disabled={disabled}

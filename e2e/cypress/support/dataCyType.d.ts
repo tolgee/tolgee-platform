@@ -472,6 +472,8 @@ declare namespace DataCy {
         "storage-subtitle" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
+        "task-select-item" |
+        "task-select-search" |
         "this-is-the-element" |
         "top-banner" |
         "top-banner-content" |
