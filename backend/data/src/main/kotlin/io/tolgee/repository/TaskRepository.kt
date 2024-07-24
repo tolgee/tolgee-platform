@@ -3,6 +3,8 @@ package io.tolgee.repository
 import io.tolgee.model.Project
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskId
+import io.tolgee.model.views.KeysScopeView
+import io.tolgee.model.views.TaskScopeView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -44,10 +46,10 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
         left join fetch t.author
         left join fetch t.project
         left join fetch t.language
-      where t.id in :ids
+      where t in :tasks
     """
   )
-  fun getByIdsWithAllPrefetched(ids: Collection<Long>): List<Task>
+  fun getByIdsWithAllPrefetched(tasks: Collection<Task>): List<Task>
 
   fun findByProjectOrderByIdDesc(project: Project): List<Task>
 
@@ -76,32 +78,39 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
   ): List<Long>
 
   @Query(
-    nativeQuery = true,
-    value = """
-      select count(key.id) as keyCount, sum(translation.character_count) as characterCount, sum(translation.word_count) as wordCount
-      from key
-        left join translation on translation.key_id = key.id
-      where key.project_id = :projectId
-        and (translation.language_id = :baseLangId or translation.id is NULL)
-        and key.id in :keyIds
-    """,
+    """
+      select count(k.id) as keyCount, coalesce(sum(t.characterCount), 0) as characterCount, coalesce(sum(t.wordCount), 0) as wordCount
+      from Key k
+        left join k.translations as t
+      where k.project.id = :projectId
+        and (t.language.id = :baseLangId or t.id is NULL)
+        and k.id in :keyIds
+    """
   )
   fun calculateScope(
     projectId: Long,
     baseLangId: Long,
     keyIds: Collection<Long>,
-  ): List<Array<Any>>
+  ): KeysScopeView
 
   @Query(
     value = """
-          SELECT t.id
-          FROM task t
-          JOIN task_translation tt ON tt.task_id = t.id
-          WHERE tt.translation_id = :translationId
-          ORDER BY t.type ASC
-          LIMIT 1
-        """,
-    nativeQuery = true,
+      select
+          tk.id as taskId,
+          count(t.id) as totalItems,
+          coalesce(sum(case when tt.done then 1 else 0 end), 0) as doneItems,
+          coalesce(sum(bt.characterCount), 0) as baseCharacterCount,
+          coalesce(sum(bt.wordCount), 0) as baseWordCount
+      from Task tk
+          left join tk.project p
+          left join tk.translations tt
+          left join tt.translation t
+          left join tt.translation bt on (bt.key.id = t.key.id and bt.language.id = p.baseLanguage.id)
+      where tk in :tasks
+      group by tk.id
+    """,
   )
-  fun findFirstTaskIdByTranslationId(translationId: Long): Long?
+  fun getTasksScopes(
+    tasks: Collection<Task>
+  ): List<TaskScopeView>
 }

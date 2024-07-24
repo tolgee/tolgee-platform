@@ -1,7 +1,9 @@
 package io.tolgee.model.views
 
-data class TaskScopeView(
-  val keyCount: Long = 0L,
-  val characterCount: Long = 0L,
-  val wordCount: Long = 0L,
-)
+interface TaskScopeView {
+  val taskId: Long?
+  val totalItems: Long
+  val doneItems: Long
+  val baseCharacterCount: Long
+  val baseWordCount: Long
+}

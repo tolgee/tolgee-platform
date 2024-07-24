@@ -15,7 +15,8 @@ import io.tolgee.model.task.TaskId
 import io.tolgee.model.task.TaskTranslation
 import io.tolgee.model.task.TaskTranslationId
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.views.TaskScopeView
+import io.tolgee.model.views.KeysScopeView
+import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.repository.TaskRepository
 import io.tolgee.repository.TaskTranslationRepository
 import io.tolgee.repository.TranslationRepository
@@ -51,17 +52,19 @@ class TaskService(
   fun getAllPaged(
     project: Project,
     pageable: Pageable,
-  ): Page<Task> {
+  ): Page<TaskWithScopeView> {
     val pagedTasks = taskRepository.getAllByProjectId(project.id, pageable)
-    return PageImpl(taskRepository.getByIdsWithAllPrefetched(pagedTasks.content.map { it.id }), pageable, pagedTasks.totalElements)
+    val withPrefetched = taskRepository.getByIdsWithAllPrefetched(pagedTasks.content)
+    return PageImpl(getTasksWithScope(withPrefetched), pageable, pagedTasks.totalElements)
   }
 
   fun getUserTasksPaged(
     userId: Long,
     pageable: Pageable,
-  ): Page<Task> {
+  ): Page<TaskWithScopeView> {
     val pagedTasks = taskRepository.getAllByAssignee(userId, pageable)
-    return PageImpl(taskRepository.getByIdsWithAllPrefetched(pagedTasks.content.map { it.id }), pageable, pagedTasks.totalElements)
+    val withPrefetched = taskRepository.getByIdsWithAllPrefetched(pagedTasks.content)
+    return PageImpl(getTasksWithScope(withPrefetched), pageable, pagedTasks.totalElements)
   }
 
   @Transactional
@@ -75,12 +78,14 @@ class TaskService(
   fun createTask(
     project: Project,
     dto: CreateTaskRequest,
-  ): Task {
+  ): TaskWithScopeView {
     var lastErr = DataIntegrityViolationException("Error")
     repeat(100) {
       // necessary for proper transaction creation
       try {
-        return taskService.createTaskInTransaction(project, dto)
+        val task = taskService.createTaskInTransaction(project, dto)
+        entityManager.flush()
+        return getTasksWithScope(listOf(task)).first()
       } catch (e: DataIntegrityViolationException) {
         lastErr = e
       }
@@ -130,7 +135,7 @@ class TaskService(
     projectEntity: Project,
     taskId: Long,
     dto: UpdateTaskRequest,
-  ): Task {
+  ): TaskWithScopeView {
     val task =
       taskRepository.findById(TaskId(projectEntity, taskId)).or {
         throw NotFoundException(Message.TASK_NOT_FOUND)
@@ -160,9 +165,9 @@ class TaskService(
       task.state = it
     }
 
-    taskRepository.save(task)
+    taskRepository.saveAndFlush(task)
 
-    return task
+    return getTasksWithScope(listOf(task)).first()
   }
 
   @Transactional
@@ -179,9 +184,10 @@ class TaskService(
   fun getTask(
     projectEntity: Project,
     taskId: Long,
-  ): Task {
+  ): TaskWithScopeView {
     val taskComposedId = TaskId(projectEntity, taskId)
-    return taskRepository.getReferenceById(taskComposedId)
+    val task = taskRepository.getReferenceById(taskComposedId)
+    return getTasksWithScope(listOf(task)).first()
   }
 
   @Transactional
@@ -265,7 +271,7 @@ class TaskService(
   fun calculateScope(
     projectEntity: Project,
     dto: CalculateScopeRequest,
-  ): TaskScopeView {
+  ): KeysScopeView {
     val language = languageService.get(dto.language, projectEntity.id)
     val relevantKeys =
       taskRepository.getKeysWithoutTask(
@@ -274,17 +280,10 @@ class TaskService(
         dto.type.toString(),
         dto.keys!!,
       )
-    val result =
-      taskRepository.calculateScope(
-        projectEntity.id,
-        projectEntity.baseLanguage!!.id,
-        relevantKeys,
-      )
-    val (keyCount, characterCount, wordCount) = result[0]
-    return TaskScopeView(
-      keyCount = (keyCount as? Number)?.toLong() ?: 0L,
-      characterCount = (characterCount as? Number)?.toLong() ?: 0L,
-      wordCount = (wordCount as? Number)?.toLong() ?: 0L,
+    return taskRepository.calculateScope(
+      projectEntity.id,
+      projectEntity.baseLanguage!!.id,
+      relevantKeys,
     )
   }
 
@@ -354,5 +353,31 @@ class TaskService(
     translationService.saveAll(newTranslations)
     entityManager.flush()
     return allTranslations
+  }
+
+  private fun getTasksWithScope(tasks: Collection<Task>): List<TaskWithScopeView> {
+    val scopes = taskRepository.getTasksScopes(tasks)
+    return tasks.map { task ->
+      val scope = scopes.find { it.taskId == task.id }!!
+      TaskWithScopeView(
+        project = task.project,
+        id = task.id,
+        name = task.name,
+        description = task.description,
+        type = task.type,
+        language = task.language,
+        dueDate = task.dueDate,
+        assignees = task.assignees,
+        translations = task.translations,
+        author = task.author!!,
+        createdAt = task.createdAt,
+        state = task.state,
+        closedAt = task.closedAt,
+        totalItems = scope.totalItems,
+        doneItems = scope.doneItems,
+        baseWordCount = scope.baseWordCount,
+        baseCharacterCount = scope.baseCharacterCount,
+      )
+    }
   }
 }

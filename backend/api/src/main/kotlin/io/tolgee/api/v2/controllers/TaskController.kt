@@ -9,7 +9,9 @@ import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
 import io.tolgee.model.task.Task
 import io.tolgee.model.views.ExtendedUserAccountInProject
+import io.tolgee.model.views.KeysScopeView
 import io.tolgee.model.views.TaskScopeView
+import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -36,7 +38,7 @@ import org.springframework.web.bind.annotation.*
 class TaskController(
   private val taskService: TaskService,
   private val taskModelAssembler: TaskModelAssembler,
-  private val pagedTaskResourcesAssembler: PagedResourcesAssembler<Task>,
+  private val pagedTaskResourcesAssembler: PagedResourcesAssembler<TaskWithScopeView>,
   private val projectHolder: ProjectHolder,
   private val userAccountService: UserAccountService,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
@@ -62,8 +64,7 @@ class TaskController(
     @RequestBody @Valid
     dto: CreateTaskRequest,
   ): TaskModel {
-    val id = taskService.createTask(projectHolder.projectEntity, dto).id
-    val task = taskService.getTask(projectHolder.projectEntity, id)
+    val task = taskService.createTask(projectHolder.projectEntity, dto)
 
     return taskModelAssembler.toModel(task)
   }
@@ -151,7 +152,7 @@ class TaskController(
   fun calculateScope(
     @RequestBody @Valid
     dto: CalculateScopeRequest,
-  ): TaskScopeView {
+  ): KeysScopeView {
     return taskService.calculateScope(projectHolder.projectEntity, dto)
   }
 

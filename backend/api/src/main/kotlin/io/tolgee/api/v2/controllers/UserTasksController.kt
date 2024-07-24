@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.hateoas.task.TaskWithProjectModel
 import io.tolgee.hateoas.task.TaskWithProjectModelAssembler
 import io.tolgee.model.task.Task
+import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.UseDefaultPermissions
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 class UserTasksController(
   val taskService: TaskService,
   val authenticationFacade: AuthenticationFacade,
-  private val pagedTaskResourcesAssembler: PagedResourcesAssembler<Task>,
+  private val pagedTaskResourcesAssembler: PagedResourcesAssembler<TaskWithScopeView>,
   private val taskWithProjectModelAssembler: TaskWithProjectModelAssembler,
 ) {
   @GetMapping("")
