@@ -1,3 +1,11 @@
+## [3.70.4](https://github.com/tolgee/tolgee-platform/compare/v3.70.3...v3.70.4) (2024-07-24)
+
+
+### Bug Fixes
+
+* Regenerate never expiring API key / PAT ([#2419](https://github.com/tolgee/tolgee-platform/issues/2419)) ([2e9a3f2](https://github.com/tolgee/tolgee-platform/commit/2e9a3f2307c0ad8e2109cd9b249aeac214606d66))
+* Support utf-16 in .strings files ([#2416](https://github.com/tolgee/tolgee-platform/issues/2416)) ([aa55cc0](https://github.com/tolgee/tolgee-platform/commit/aa55cc0fae1cdf6379ae7afc248efc2777c7f5ea))
+
 ## [3.70.3](https://github.com/tolgee/tolgee-platform/compare/v3.70.2...v3.70.3) (2024-07-24)
 
 
