@@ -77,6 +77,7 @@ class TaskTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
             )
           project = projectBuilder.self
           language = englishLanguage
+          author = projectUser.self
         }
 
       translationsInTask.forEach { it ->

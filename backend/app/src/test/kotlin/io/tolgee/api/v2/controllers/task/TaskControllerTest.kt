@@ -40,7 +40,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `creates new task`() {
-    val keys = testData.keysInTask.map { it.self.id }.toMutableSet()
+    val keys = testData.keysOutOfTask.map { it.self.id }.toMutableSet()
     performProjectAuthPost(
       "tasks",
       CreateTaskRequest(
