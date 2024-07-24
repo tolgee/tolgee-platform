@@ -93,6 +93,7 @@ class Project(
   override var avatarHash: String? = null
 
   @Transient
+  @Column(insertable = false, updatable = false)
   override var disableActivityLogging = false
 
   @OneToMany(orphanRemoval = true, mappedBy = "project")

@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
@@ -24,6 +25,7 @@ class Pat(
   @Temporal(value = TemporalType.TIMESTAMP)
   var lastUsedAt: Date? = null,
   @Transient
+  @Column(insertable = false, updatable = false)
   var token: String? = null,
 ) : StandardAuditModel() {
   @ManyToOne
