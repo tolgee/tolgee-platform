@@ -99,9 +99,11 @@ class ActivityRevision : java.io.Serializable {
    * This flag is set to true when the instance is initialized by the interceptor.
    */
   @Transient
+  @Column(insertable = false, updatable = false)
   var isInitializedByInterceptor: Boolean = false
 
   @Transient
+  @Column(insertable = false, updatable = false)
   var cancelledBatchJobExecutionCount: Int? = null
 
   companion object {
