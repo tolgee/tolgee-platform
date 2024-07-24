@@ -8,6 +8,12 @@ import { RequestOptions } from './ApiHttpService';
 import { globalContext } from 'tg.globalContext/globalActions';
 import { LINKS } from 'tg.constants/links';
 
+interface RateLimitResponseBody {
+  message: string;
+  retryAfter: number;
+  global: boolean;
+}
+
 export const handleApiError = (
   r: Response,
   resObject: any,
@@ -58,7 +64,8 @@ export const handleApiError = (
   }
 
   if (r.status == 429) {
-    messageService.error(<T keyName="too_many_requests" />);
+    const { retryAfter }: RateLimitResponseBody = resObject;
+    messageService.error(<T keyName="too_many_requests_retry_after" params={{retryAfterSeconds: retryAfter}} />);
     return;
   }
 
