@@ -71,7 +71,7 @@ export const EmailNotVerifiedView = () => {
   const [enabled, setEnabled] = useState(false);
   const [delay, setDelay] = useState(0);
 
-  const { reStartTimer, clearTimer, remainingTime } = useTimerCountdown({
+  const { reStartTimer, remainingTime } = useTimerCountdown({
     callback: () => {
       setEnabled(false);
     },
