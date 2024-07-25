@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, ListProps, PaperProps, styled } from '@mui/material';
+import { Checkbox, Dialog, ListProps, PaperProps, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
@@ -24,6 +24,8 @@ export const ProjectTasksView = () => {
   const project = useProject();
   const { t } = useTranslate();
   const [page, setPage] = useState(0);
+  const [search, setSearch] = useState('');
+  const [showClosed, setShowClosed] = useState(false);
 
   const [detail, setDetail] = useState<TaskModel>();
 
@@ -38,6 +40,8 @@ export const ProjectTasksView = () => {
     query: {
       size: 20,
       page,
+      search,
+      filterNotState: showClosed ? undefined : ['CLOSED', 'DONE'],
     },
     options: {
       keepPreviousData: true,
@@ -58,9 +62,15 @@ export const ProjectTasksView = () => {
         ],
       ]}
     >
+      <Checkbox
+        checked={showClosed}
+        onChange={(e) => setShowClosed(e.target.checked)}
+      />
       <PaginatedHateoasList
         loadable={tasksLoadable}
         onPageChange={setPage}
+        searchText={search}
+        onSearchChange={setSearch}
         listComponentProps={
           {
             sx: {

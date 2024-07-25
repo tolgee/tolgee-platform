@@ -3,6 +3,8 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.task.*
+import io.tolgee.dtos.request.translation.GetTranslationsParams
+import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.hateoas.task.TaskModel
 import io.tolgee.hateoas.task.TaskModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
@@ -20,9 +22,12 @@ import io.tolgee.service.TaskService
 import io.tolgee.service.security.UserAccountService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.beans.propertyeditors.CustomCollectionEditor
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -50,11 +55,13 @@ class TaskController(
   @AllowApiAccess
   fun getTasks(
     @ParameterObject
+    filters: TaskFilters,
+    @ParameterObject
     pageable: Pageable,
     @RequestParam("search", required = false)
     search: String?,
   ): PagedModel<TaskModel> {
-    val tasks = taskService.getAllPaged(projectHolder.projectEntity, pageable, search)
+    val tasks = taskService.getAllPaged(projectHolder.projectEntity, pageable, search, filters)
     return pagedTaskResourcesAssembler.toModel(tasks, taskModelAssembler)
   }
 

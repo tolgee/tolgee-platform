@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.request.task.TaskFilters
 import io.tolgee.model.Project
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskId
@@ -17,17 +18,28 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     """
      select t
      from Task t
-     where t.project.id = :projectId and 
-        (
+     where
+        t.project.id = :projectId 
+        and (
             lower(t.name) like lower(concat('%', cast(:search as text),'%')) 
             or cast(:search as text) is null
         )
+        and (
+            cast(:#{#filters.filterNotState} as text) is null
+            or t.state not in :#{#filters.filterNotState}
+        )
+        and (
+            cast(:#{#filters.filterState} as text) is null
+            or t.state in :#{#filters.filterState}
+        )
+        
     """,
   )
   fun getAllByProjectId(
     projectId: Long,
     pageable: Pageable,
     search: String?,
+    filters: TaskFilters
   ): Page<Task>
 
   @Query(
