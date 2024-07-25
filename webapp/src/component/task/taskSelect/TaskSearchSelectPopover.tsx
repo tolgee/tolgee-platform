@@ -167,7 +167,7 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
               <React.Fragment key={option.id}>
                 <MenuItem
                   {...props}
-                  selected={Boolean()}
+                  selected={option.id === selected?.id}
                   data-cy="task-select-item"
                 >
                   <TaskSearchSelectItem data={option} />

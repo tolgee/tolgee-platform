@@ -29,7 +29,7 @@ export const OperationTaskAddKeys = ({ disabled, onFinished }: Props) => {
   function handleAddKeys() {
     addTaskKeysLoadable.mutate(
       {
-        path: { projectId: project.id, taskId: Number(task) },
+        path: { projectId: project.id, taskId: task!.id },
         content: { 'application/json': { addKeys: selection } },
       },
       {

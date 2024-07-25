@@ -7,6 +7,7 @@ import {
   Box,
   styled,
   Button,
+  Checkbox,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce';
@@ -173,28 +174,38 @@ export const AssigneeSearchSelectPopover: React.FC<Props> = ({
             getOptionLabel={(u) => u.name || ''}
             PopperComponent={PopperComponent}
             PaperComponent={PaperComponent}
-            renderOption={(props, option) => (
-              <React.Fragment key={option.id}>
-                <MenuItem
-                  {...props}
-                  selected={Boolean(selection.find((u) => u.id === option.id))}
-                  data-cy="user-switch-item"
-                >
-                  <AssigneeSearchSelectItem data={option} />
-                </MenuItem>
-                {usersLoadable.hasNextPage &&
-                  option.id === items![items!.length - 1].id && (
-                    <Box display="flex" justifyContent="center" mt={0.5}>
-                      <Button
-                        size="small"
-                        onClick={() => usersLoadable.fetchNextPage()}
-                      >
-                        {t('global_load_more')}
-                      </Button>
-                    </Box>
-                  )}
-              </React.Fragment>
-            )}
+            renderOption={(props, option) => {
+              const selected = Boolean(
+                selection.find((u) => u.id === option.id)
+              );
+              return (
+                <React.Fragment key={option.id}>
+                  <MenuItem
+                    {...props}
+                    selected={selected}
+                    data-cy="user-switch-item"
+                  >
+                    <Checkbox
+                      checked={selected}
+                      size="small"
+                      sx={{ marginLeft: -1, marginRight: 0.5 }}
+                    />
+                    <AssigneeSearchSelectItem data={option} />
+                  </MenuItem>
+                  {usersLoadable.hasNextPage &&
+                    option.id === items![items!.length - 1].id && (
+                      <Box display="flex" justifyContent="center" mt={0.5}>
+                        <Button
+                          size="small"
+                          onClick={() => usersLoadable.fetchNextPage()}
+                        >
+                          {t('global_load_more')}
+                        </Button>
+                      </Box>
+                    )}
+                </React.Fragment>
+              );
+            }}
             onChange={(_, newValue) => {
               setSelection(newValue);
             }}
