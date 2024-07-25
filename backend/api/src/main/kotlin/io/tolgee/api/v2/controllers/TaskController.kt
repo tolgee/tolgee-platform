@@ -51,8 +51,10 @@ class TaskController(
   fun getTasks(
     @ParameterObject
     pageable: Pageable,
+    @RequestParam("search", required = false)
+    search: String?,
   ): PagedModel<TaskModel> {
-    val tasks = taskService.getAllPaged(projectHolder.projectEntity, pageable)
+    val tasks = taskService.getAllPaged(projectHolder.projectEntity, pageable, search)
     return pagedTaskResourcesAssembler.toModel(tasks, taskModelAssembler)
   }
 

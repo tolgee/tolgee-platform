@@ -17,12 +17,22 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     """
      select t
      from Task t
-     where t.project.id = :projectId
+     where t.project.id = :projectId and 
+        (
+            (
+                lower(t.name) like lower(concat('%', cast(:search as text),'%')) 
+                or lower(t.description) like lower(concat('%', cast(:search as text),'%'))
+            ) 
+            or cast(:search as text) is null
+        )
+        
+
     """,
   )
   fun getAllByProjectId(
     projectId: Long,
     pageable: Pageable,
+    search: String?,
   ): Page<Task>
 
   @Query(
