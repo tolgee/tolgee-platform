@@ -9,6 +9,8 @@ import { StyledWrapper } from 'tg.component/searchSelect/SearchStyled';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { Redirect } from 'react-router-dom';
+import { useState } from 'react';
+import { useTimerCountdown } from 'tg.fixtures/useTimerCountdown';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -66,6 +68,18 @@ export const EmailNotVerifiedView = () => {
     method: 'post',
   });
 
+  const [enabled, setEnabled] = useState(false);
+  const [delay, setDelay] = useState(0);
+
+  const { reStartTimer, clearTimer, remainingTime } = useTimerCountdown({
+    callback: () => {
+      setEnabled(false);
+    },
+    delay: delay,
+    enabled,
+  });
+  const remainingSeconds = Math.floor(remainingTime / 1000);
+
   return (
     <StyledWrapper>
       <DashboardPage>
@@ -93,6 +107,7 @@ export const EmailNotVerifiedView = () => {
             <Button
               variant="contained"
               data-cy="resend-email-button"
+              disabled={enabled}
               onClick={() =>
                 resendEmail.mutate(
                   {},
@@ -102,12 +117,29 @@ export const EmailNotVerifiedView = () => {
                         <T keyName="verify_email_resend_message" />
                       );
                     },
+                    onError: (data) => {
+                      if (data.code === 'rate_limited') {
+                        const retryAfter = (data.params?.[0] as number)!!;
+                        setDelay(retryAfter);
+                        setEnabled(true);
+                        reStartTimer();
+                      } else {
+                        data.handleError?.();
+                      }
+                    },
                   }
                 )
               }
               color="primary"
             >
-              <T keyName="verify_email_resend_button" />
+              {enabled ? (
+                <T
+                  keyName="verify_email_resend_button_with_seconds"
+                  params={{ seconds: remainingSeconds }}
+                />
+              ) : (
+                <T keyName="verify_email_resend_button" />
+              )}
             </Button>
           </StyledContainer>
         </BaseView>

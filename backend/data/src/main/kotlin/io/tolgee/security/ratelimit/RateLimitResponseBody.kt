@@ -16,10 +16,8 @@
 
 package io.tolgee.security.ratelimit
 
-import io.tolgee.constants.Message
-
 data class RateLimitResponseBody(
-  val message: Message,
+  val code: String,
   val retryAfter: Long,
   val global: Boolean,
 )

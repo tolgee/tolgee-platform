@@ -7,12 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.ErrorException
-import io.tolgee.exceptions.ErrorResponseBody
-import io.tolgee.exceptions.ErrorResponseTyped
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.security.ratelimit.RateLimitResponseBody
+import io.tolgee.exceptions.*
 import io.tolgee.security.ratelimit.RateLimitedException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
@@ -235,9 +230,11 @@ class ExceptionHandlers {
   }
 
   @ExceptionHandler(RateLimitedException::class)
-  fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
+  fun handleRateLimited(ex: RateLimitedException): ResponseEntity<ErrorResponseBody> {
+    val params = listOf(ex.retryAfter, ex.global)
+
     return ResponseEntity(
-      RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
+      ErrorResponseBody(Message.RATE_LIMITED.code, params),
       HttpStatus.TOO_MANY_REQUESTS,
     )
   }
