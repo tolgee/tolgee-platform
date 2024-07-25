@@ -8,12 +8,6 @@ import { RequestOptions } from './ApiHttpService';
 import { globalContext } from 'tg.globalContext/globalActions';
 import { LINKS } from 'tg.constants/links';
 
-interface RateLimitResponseBody {
-  message: string;
-  retryAfter: number;
-  global: boolean;
-}
-
 export const handleApiError = (
   r: Response,
   resObject: any,
