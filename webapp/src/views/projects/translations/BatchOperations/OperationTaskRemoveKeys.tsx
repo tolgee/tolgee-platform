@@ -50,7 +50,7 @@ export const OperationTaskRemoveKeys = ({ disabled, onFinished }: Props) => {
         value={task}
         onChange={(value) => setTask(value)}
         project={project}
-        sx={{ width: 250 }}
+        sx={{ width: 280 }}
       />
       <BatchOperationsSubmit
         disabled={disabled}

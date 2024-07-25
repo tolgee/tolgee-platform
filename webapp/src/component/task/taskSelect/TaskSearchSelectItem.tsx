@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, styled } from '@mui/material';
+import { styled } from '@mui/material';
 
 import { Task } from './types';
+import { TaskLabel } from '../TaskLabel';
 
 const StyledOrgItem = styled('div')`
   display: grid;
@@ -18,7 +19,7 @@ type Props = {
 export const TaskSearchSelectItem: React.FC<Props> = ({ data }) => {
   return (
     <StyledOrgItem>
-      <Box>{data.name}</Box>
+      <TaskLabel task={data} />
     </StyledOrgItem>
   );
 };

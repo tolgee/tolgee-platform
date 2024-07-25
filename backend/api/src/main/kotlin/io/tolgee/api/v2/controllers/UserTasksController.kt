@@ -14,18 +14,15 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/user-tasks"])
 @Tag(name = "User tasks")
 class UserTasksController(
-  val taskService: TaskService,
-  val authenticationFacade: AuthenticationFacade,
+  private val taskService: TaskService,
+  private val authenticationFacade: AuthenticationFacade,
   private val pagedTaskResourcesAssembler: PagedResourcesAssembler<TaskWithScopeView>,
   private val taskWithProjectModelAssembler: TaskWithProjectModelAssembler,
 ) {
@@ -36,9 +33,11 @@ class UserTasksController(
   fun getTasks(
     @ParameterObject
     pageable: Pageable,
+    @RequestParam("search", required = false)
+    search: String?,
   ): PagedModel<TaskWithProjectModel> {
     val user = authenticationFacade.authenticatedUser
-    val tasks = taskService.getUserTasksPaged(user.id, pageable)
+    val tasks = taskService.getUserTasksPaged(user.id, pageable, search)
     return pagedTaskResourcesAssembler.toModel(tasks, taskWithProjectModelAssembler)
   }
 }

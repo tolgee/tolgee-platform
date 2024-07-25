@@ -7,14 +7,14 @@ import {
   SxProps,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { ArrowDropDown, Clear } from '@mui/icons-material';
+import { ArrowDropDown } from '@mui/icons-material';
 
-import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/TextField';
 import { TaskSearchSelectPopover } from './TaskSearchSelectPopover';
 import { Task } from './types';
 import React from 'react';
+import { TaskLabel } from '../TaskLabel';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
@@ -80,16 +80,12 @@ export const TaskSearchSelect: React.FC<Props> = ({
     setIsOpen(false);
   };
 
-  const handleClear = () => {
-    onChange?.(null);
-  };
-
   return (
     <>
       <Box display="grid" {...{ sx, className }}>
         <TextField
           variant="outlined"
-          value={value?.name}
+          value={value ? <TaskLabel task={value} /> : ''}
           data-cy="assignee-select"
           minHeight={false}
           label={label}
@@ -105,15 +101,6 @@ export const TaskSearchSelect: React.FC<Props> = ({
             margin: 'dense',
             endAdornment: (
               <Box sx={{ display: 'flex', marginRight: -0.5 }}>
-                {Boolean(value) && (
-                  <StyledClearButton
-                    size="small"
-                    onClick={stopAndPrevent(handleClear)}
-                    tabIndex={-1}
-                  >
-                    <Clear fontSize="small" />
-                  </StyledClearButton>
-                )}
                 <StyledClearButton
                   size="small"
                   onClick={handleClick}

@@ -19,14 +19,9 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
      from Task t
      where t.project.id = :projectId and 
         (
-            (
-                lower(t.name) like lower(concat('%', cast(:search as text),'%')) 
-                or lower(t.description) like lower(concat('%', cast(:search as text),'%'))
-            ) 
+            lower(t.name) like lower(concat('%', cast(:search as text),'%')) 
             or cast(:search as text) is null
         )
-        
-
     """,
   )
   fun getAllByProjectId(
@@ -40,12 +35,17 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
      select t
      from Task t
         left join t.assignees u
-     where u.id = :userId
+     where u.id = :userId and 
+        (
+            lower(t.name) like lower(concat('%', cast(:search as text),'%')) 
+            or cast(:search as text) is null
+        )
     """,
   )
   fun getAllByAssignee(
     userId: Long,
     pageable: Pageable,
+    search: String?
   ): Page<Task>
 
   @Query(
