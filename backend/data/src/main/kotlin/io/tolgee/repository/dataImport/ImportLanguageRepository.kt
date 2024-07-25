@@ -17,16 +17,20 @@ import java.util.*
 interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
   companion object {
     private const val VIEW_BASE_QUERY = """
-            select il.id as id, il.name as name, el.id as existingLanguageId, 
-            el.tag as existingLanguageTag, el.name as existingLanguageName,
-            if.name as importFileName, if.id as importFileId,
-            if.namespace as namespace,
-            (select count(*) from if.issues) as importFileIssueCount,
-            count(it) as totalCount, 
-            sum(case when it.conflict is null then 0 else 1 end) as conflictCount,
-            sum(case when (it.conflict is null or it.resolvedHash is null) then 0 else 1 end) as resolvedCount
-            from ImportLanguage il join il.file if left join il.existingLanguage el left 
-            join il.translations it on it.isSelectedToImport = true
+select il.id as id, il.name as name, el.id as existingLanguageId, 
+       el.tag as existingLanguageTag, el.name as existingLanguageName,
+       if.name as importFileName, if.id as importFileId,
+       if.namespace as namespace,
+       count(distinct iss.id) as importFileIssueCount,
+       count(distinct it.id) as totalCount, 
+       sum(case when it.conflict is null then 0 else 1 end) as conflictCount,
+       sum(case when (it.conflict is null or it.resolvedHash is null) then 0 else 1 end) as resolvedCount
+from ImportTranslation it
+        join it.key ik
+        left join ik.file.languages il on il.file.id = ik.file.id 
+        left join il.file if
+        left join if.issues iss 
+        left join il.existingLanguage el
         """
 
     private const val VIEW_GROUP_BY = """
@@ -44,8 +48,8 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
 
   @Query(
     """
-            $VIEW_BASE_QUERY
-            where if.import.id = :importId
+      $VIEW_BASE_QUERY
+      where (if.import.id = :importId) and (ik.shouldBeImported) and (it.isSelectedToImport = true)
             $VIEW_GROUP_BY
             order by il.id
             """,
@@ -65,8 +69,8 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
 
   @Query(
     """
-            $VIEW_BASE_QUERY
-            where il.id = :languageId
+      $VIEW_BASE_QUERY
+      where (il.id = :languageId) and (ik.shouldBeImported) and (it.isSelectedToImport = true)
             $VIEW_GROUP_BY
             """,
   )

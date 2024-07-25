@@ -3432,4 +3432,11 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1721931077891-1">
+        <addColumn tableName="import_key">
+            <column defaultValueBoolean="true" name="should_be_imported" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
