@@ -1984,15 +1984,15 @@ export interface components {
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If true, only updates keys, skipping the creation of new keys */
-      onlyUpdateWithoutAdd: boolean;
+      createNewKeys: boolean;
     };
     ImportSettingsModel: {
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
       /** @description If true, only updates keys, skipping the creation of new keys */
-      onlyUpdateWithoutAdd: boolean;
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
+      createNewKeys: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -3064,7 +3064,7 @@ export interface components {
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If true, only updates keys, skipping the creation of new keys */
-      onlyUpdateWithoutAdd: boolean;
+      createNewKeys: boolean;
       /** @description Definition of mapping for each file to import. */
       fileMappings: components["schemas"]["ImportFileMapping"][];
       /** @description Keys created by this import will be tagged with these tags. It add tags only to new keys. The keys that already exist will not be tagged. */

@@ -368,14 +368,14 @@ class ImportDataManager(
       applyConvertPlaceholdersChange(newSettings.convertPlaceholdersToIcu)
     }
 
-    if (oldSettings.onlyUpdateWithoutAdd != newSettings.onlyUpdateWithoutAdd) {
-      applyKeyCreateChange(newSettings.onlyUpdateWithoutAdd)
+    if (oldSettings.createNewKeys != newSettings.createNewKeys) {
+      applyKeyCreateChange(newSettings.createNewKeys)
     }
   }
 
-  fun applyKeyCreateChange(onlyUpdateWithoutAdd: Boolean) {
+  fun applyKeyCreateChange(createNewKeys: Boolean) {
     storedKeys.forEach { (_, key) ->
-      if (!onlyUpdateWithoutAdd) {
+      if (createNewKeys) {
         key.shouldBeImported = true
       } else {
         key.shouldBeImported = keyService.find(

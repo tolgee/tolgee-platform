@@ -3418,21 +3418,14 @@
     <changeSet author="huglx (generated)" id="1718704326054-19">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="slack_config" constraintName="FKsgau8dxyxblao9sa16fnka0t1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1721127144581-1">
-        <createTable tableName="temp_unsuccessful_job_keys">
-            <column name="key_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="temp_unsuccessful_job_keysPK"/>
-            </column>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1721127144581-2">
+    <changeSet author="huglx (generated)" id="1721986584324-2">
         <addColumn tableName="import_settings">
-            <column defaultValueBoolean="false" name="only_update_without_add" type="boolean">
+            <column defaultValueBoolean="true" name="create_new_keys" type="boolean">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1721931077891-1">
+    <changeSet author="huglx (generated)" id="1721986584324-3">
         <addColumn tableName="import_key">
             <column defaultValueBoolean="true" name="should_be_imported" type="boolean">
                 <constraints nullable="false"/>

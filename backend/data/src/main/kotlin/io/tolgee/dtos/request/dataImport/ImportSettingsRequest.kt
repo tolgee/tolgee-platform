@@ -9,5 +9,5 @@ class ImportSettingsRequest(
   @NotNull
   override var convertPlaceholdersToIcu: Boolean,
   @NotNull
-  override var onlyUpdateWithoutAdd: Boolean,
+  override var createNewKeys: Boolean,
 ) : IImportSettings

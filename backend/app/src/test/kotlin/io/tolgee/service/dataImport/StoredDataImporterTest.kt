@@ -25,7 +25,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
     object : IImportSettings {
       override var convertPlaceholdersToIcu: Boolean = true
       override var overrideKeyDescriptions: Boolean = false
-      override var onlyUpdateWithoutAdd: Boolean = false
+      override var createNewKeys: Boolean = true
     }
 
   @BeforeEach
@@ -167,7 +167,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
 
   @Test
   fun `only updates old keys but does not add new ones when option enabled`() {
-    defaultImportSettings.onlyUpdateWithoutAdd = true
+    defaultImportSettings.createNewKeys = true
     storedDataImporter =
       StoredDataImporter(
         applicationContext,
@@ -191,7 +191,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
 
   @Test
   fun `add new key when option disabled`() {
-    defaultImportSettings.onlyUpdateWithoutAdd = false
+    defaultImportSettings.createNewKeys = false
     storedDataImporter =
       StoredDataImporter(
         applicationContext,

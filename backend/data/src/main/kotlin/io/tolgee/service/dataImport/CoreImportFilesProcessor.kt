@@ -271,7 +271,7 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.shouldImportKey(keyName: String): Boolean {
-    if (!importSettings.onlyUpdateWithoutAdd) {
+    if (importSettings.createNewKeys) {
       return true
     }
     val n = this.getNamespaceToPreselect()

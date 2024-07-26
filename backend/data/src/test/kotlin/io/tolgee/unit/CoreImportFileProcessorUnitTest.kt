@@ -76,7 +76,7 @@ class CoreImportFileProcessorUnitTest {
           ImportSettingsRequest(
             overrideKeyDescriptions = false,
             convertPlaceholdersToIcu = true,
-            onlyUpdateWithoutAdd = false,
+            createNewKeys = false,
           ),
       )
 

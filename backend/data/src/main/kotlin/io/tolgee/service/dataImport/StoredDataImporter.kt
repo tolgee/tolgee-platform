@@ -242,7 +242,7 @@ class StoredDataImporter(
   private fun ImportLanguage.prepareImport() {
     importDataManager.populateStoredTranslations(this)
     importDataManager.handleConflicts(true)
-    importDataManager.applyKeyCreateChange(importSettings.onlyUpdateWithoutAdd)
+    importDataManager.applyKeyCreateChange(importSettings.createNewKeys)
     importDataManager.getStoredTranslations(this).forEach { it.doImport() }
   }
 

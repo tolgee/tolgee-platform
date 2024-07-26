@@ -29,7 +29,7 @@ data class FileProcessorContext(
   val importSettings: IImportSettings =
     object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = false
-      override var onlyUpdateWithoutAdd: Boolean = false
+      override var createNewKeys: Boolean = true
       override var convertPlaceholdersToIcu: Boolean = true
     },
   val projectIcuPlaceholdersEnabled: Boolean = true,
