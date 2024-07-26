@@ -373,7 +373,7 @@ class ImportDataManager(
     }
   }
 
-  private fun applyKeyCreateChange(onlyUpdateWithoutAdd: Boolean) {
+  fun applyKeyCreateChange(onlyUpdateWithoutAdd: Boolean) {
     storedKeys.forEach { (_, key) ->
       if (!onlyUpdateWithoutAdd) {
         key.shouldBeImported = true
