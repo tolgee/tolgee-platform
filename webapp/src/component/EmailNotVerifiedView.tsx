@@ -119,7 +119,7 @@ export const EmailNotVerifiedView = () => {
                     },
                     onError: (data) => {
                       if (data.code === 'rate_limited') {
-                        const retryAfter = (data.params?.[0] as number)!!;
+                        const retryAfter = (data.params?.[0] ?? 0) as number;
                         setDelay(retryAfter);
                         setEnabled(true);
                         reStartTimer();
