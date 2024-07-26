@@ -45,4 +45,9 @@ open class TaskFilters {
     description = """Filter tasks without project""",
   )
   var filterNotProject: List<Long>? = null
+
+  @field:Parameter(
+    description = """Filter tasks by language""",
+  )
+  var filterLanguage: List<Long>? = null
 }

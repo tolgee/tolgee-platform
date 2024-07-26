@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Checkbox, Dialog, ListProps, PaperProps, styled } from '@mui/material';
+import { Dialog, ListProps, PaperProps, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
@@ -11,6 +11,7 @@ import { TaskDetail } from 'tg.component/task/TaskDetail';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { BaseProjectView } from '../BaseProjectView';
+import { TasksHeader } from './TasksHeader';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -26,6 +27,7 @@ export const ProjectTasksView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [showClosed, setShowClosed] = useState(false);
+  const [filterLanguages, setFilterLanguages] = useState<number[]>([]);
 
   const [detail, setDetail] = useState<TaskModel>();
 
@@ -42,6 +44,7 @@ export const ProjectTasksView = () => {
       page,
       search,
       filterNotState: showClosed ? undefined : ['CLOSED', 'DONE'],
+      filterLanguage: filterLanguages,
     },
     options: {
       keepPreviousData: true,
@@ -62,15 +65,17 @@ export const ProjectTasksView = () => {
         ],
       ]}
     >
-      <Checkbox
-        checked={showClosed}
-        onChange={(e) => setShowClosed(e.target.checked)}
+      <TasksHeader
+        sx={{ mb: '20px', mt: '-12px' }}
+        onSearchChange={setSearch}
+        showClosed={showClosed}
+        onShowClosedChange={setShowClosed}
+        filterLanguages={filterLanguages}
+        onFilterLanguagesChange={setFilterLanguages}
       />
       <PaginatedHateoasList
         loadable={tasksLoadable}
         onPageChange={setPage}
-        searchText={search}
-        onSearchChange={setSearch}
         listComponentProps={
           {
             sx: {

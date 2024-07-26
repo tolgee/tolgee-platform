@@ -52,6 +52,10 @@ const val FILTERS = """
         :#{#filters.filterNotProject} is null
         or t.project.id not in :#{#filters.filterNotProject}
     )
+    and (
+        :#{#filters.filterLanguage} is null
+        or t.language.id in :#{#filters.filterLanguage}
+    )
 """
 
 @Repository

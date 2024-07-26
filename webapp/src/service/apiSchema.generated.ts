@@ -1149,6 +1149,21 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1180,21 +1195,6 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1773,8 +1773,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2040,10 +2040,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2203,14 +2203,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2350,15 +2350,15 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
+      username?: string;
+      description: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      projectId: number;
-      username?: string;
-      description: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -3501,17 +3501,17 @@ export interface components {
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3654,20 +3654,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
       description?: string;
+      baseTranslation?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
       description?: string;
+      baseTranslation?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4216,14 +4216,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4344,15 +4344,15 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
+      username?: string;
+      description: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      projectId: number;
-      username?: string;
-      description: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -10525,6 +10525,8 @@ export interface operations {
         filterProject?: number[];
         /** Filter tasks without project */
         filterNotProject?: number[];
+        /** Filter tasks by language */
+        filterLanguage?: number[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -13506,6 +13508,8 @@ export interface operations {
         filterProject?: number[];
         /** Filter tasks without project */
         filterNotProject?: number[];
+        /** Filter tasks by language */
+        filterLanguage?: number[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
