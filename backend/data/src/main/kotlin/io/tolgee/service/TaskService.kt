@@ -63,9 +63,10 @@ class TaskService(
   fun getUserTasksPaged(
     userId: Long,
     pageable: Pageable,
-    search: String?
+    search: String?,
+    filters: TaskFilters
   ): Page<TaskWithScopeView> {
-    val pagedTasks = taskRepository.getAllByAssignee(userId, pageable, search)
+    val pagedTasks = taskRepository.getAllByAssignee(userId, pageable, search, filters)
     val withPrefetched = taskRepository.getByIdsWithAllPrefetched(pagedTasks.content)
     return PageImpl(getTasksWithScope(withPrefetched), pageable, pagedTasks.totalElements)
   }

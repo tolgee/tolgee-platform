@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.request.task.TaskFilters
 import io.tolgee.hateoas.task.TaskWithProjectModel
 import io.tolgee.hateoas.task.TaskWithProjectModelAssembler
 import io.tolgee.model.task.Task
@@ -32,12 +33,14 @@ class UserTasksController(
   @AllowApiAccess
   fun getTasks(
     @ParameterObject
+    filters: TaskFilters,
+    @ParameterObject
     pageable: Pageable,
     @RequestParam("search", required = false)
     search: String?,
   ): PagedModel<TaskWithProjectModel> {
     val user = authenticationFacade.authenticatedUser
-    val tasks = taskService.getUserTasksPaged(user.id, pageable, search)
+    val tasks = taskService.getUserTasksPaged(user.id, pageable, search, filters)
     return pagedTaskResourcesAssembler.toModel(tasks, taskWithProjectModelAssembler)
   }
 }

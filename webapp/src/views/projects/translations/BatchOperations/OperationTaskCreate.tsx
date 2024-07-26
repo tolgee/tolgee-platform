@@ -128,7 +128,7 @@ export const OperationTaskCreate = ({ disabled, onFinished }: Props) => {
               description: values.description,
               languageId: languageId,
               dueDate: values.dueDate,
-              assignees: [],
+              assignees: values.assignees[languageId]?.map((u) => u.id) ?? [],
               keys: selection,
             }));
             createTasksLoadable.mutate(

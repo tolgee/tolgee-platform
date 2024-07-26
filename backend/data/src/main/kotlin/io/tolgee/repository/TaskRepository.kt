@@ -12,27 +12,59 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
+const val SEARCH = """
+    (
+        cast(:search as text) is null
+        or lower(t.name) like lower(concat('%', cast(:search as text),'%'))
+    )
+"""
+
+const val FILTERS = """
+    (
+        :#{#filters.filterNotState} is null
+        or t.state not in :#{#filters.filterNotState}
+    )
+    and (
+        :#{#filters.filterState} is null
+        or t.state in :#{#filters.filterState}
+    )
+    and (
+        :#{#filters.filterAssignee} is null
+        or u.id in :#{#filters.filterAssignee}
+    )
+    and (
+        :#{#filters.filterType} is null
+        or t.type in :#{#filters.filterType}
+    )
+    and (
+        :#{#filters.filterId} is null
+        or t.id in :#{#filters.filterId}
+    )
+    and (
+        :#{#filters.filterNotId} is null
+        or t.id not in :#{#filters.filterNotId}
+    )
+    and (
+        :#{#filters.filterProject} is null
+        or t.project.id in :#{#filters.filterProject}
+    )
+    and (
+        :#{#filters.filterNotProject} is null
+        or t.project.id not in :#{#filters.filterNotProject}
+    )
+"""
+
 @Repository
 interface TaskRepository : JpaRepository<Task, TaskId> {
   @Query(
     """
      select t
      from Task t
+        left join t.assignees u
      where
-        t.project.id = :projectId 
-        and (
-            lower(t.name) like lower(concat('%', cast(:search as text),'%')) 
-            or cast(:search as text) is null
-        )
-        and (
-            cast(:#{#filters.filterNotState} as text) is null
-            or t.state not in :#{#filters.filterNotState}
-        )
-        and (
-            cast(:#{#filters.filterState} as text) is null
-            or t.state in :#{#filters.filterState}
-        )
-        
+        t.project.id = :projectId
+        and $SEARCH
+        and $FILTERS
     """,
   )
   fun getAllByProjectId(
@@ -47,17 +79,16 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
      select t
      from Task t
         left join t.assignees u
-     where u.id = :userId and 
-        (
-            lower(t.name) like lower(concat('%', cast(:search as text),'%')) 
-            or cast(:search as text) is null
-        )
+     where u.id = :userId 
+        and $SEARCH
+        and $FILTERS
     """,
   )
   fun getAllByAssignee(
     userId: Long,
     pageable: Pageable,
-    search: String?
+    search: String?,
+    filters: TaskFilters
   ): Page<Task>
 
   @Query(

@@ -1149,21 +1149,6 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1195,6 +1180,21 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1773,8 +1773,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2040,10 +2040,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2200,17 +2200,17 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      description: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      updatedAt: number;
-      /** Format: int64 */
-      createdAt: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      description: string;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2346,19 +2346,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      description: string;
       /** Format: int64 */
       id: number;
       projectName: string;
       userFullName?: string;
-      username?: string;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      projectId: number;
+      username?: string;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -3496,22 +3496,22 @@ export interface components {
         | "SLACK_INTEGRATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3572,9 +3572,9 @@ export interface components {
       defaultFileStructureTemplate: string;
     };
     DocItem: {
-      description?: string;
       name: string;
       displayName?: string;
+      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -3651,23 +3651,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
       namespace?: string;
+      description?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
       namespace?: string;
+      description?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4213,17 +4213,17 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      description: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      updatedAt: number;
-      /** Format: int64 */
-      createdAt: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      description: string;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4340,19 +4340,19 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
-      description: string;
       /** Format: int64 */
       id: number;
       projectName: string;
       userFullName?: string;
-      username?: string;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      projectId: number;
+      username?: string;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -10509,6 +10509,22 @@ export interface operations {
   getTasks_1: {
     parameters: {
       query: {
+        /** Filter tasks by state */
+        filterState?: ("IN_PROGRESS" | "DONE" | "CLOSED")[];
+        /** Filter tasks without state */
+        filterNotState?: ("IN_PROGRESS" | "DONE" | "CLOSED")[];
+        /** Filter tasks by assignee */
+        filterAssignee?: number[];
+        /** Filter tasks by type */
+        filterType?: ("TRANSLATE" | "REVIEW")[];
+        /** Filter tasks by id */
+        filterId?: number[];
+        /** Filter tasks without id */
+        filterNotId?: number[];
+        /** Filter tasks by project */
+        filterProject?: number[];
+        /** Filter tasks without project */
+        filterNotProject?: number[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -10516,10 +10532,6 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
-        /** Filter tasks with the state */
-        filterState?: ("IN_PROGRESS" | "DONE" | "CLOSED")[];
-        /** Filter tasks without the state */
-        filterNotState?: ("IN_PROGRESS" | "DONE" | "CLOSED")[];
       };
       path: {
         projectId: number;
@@ -13478,6 +13490,22 @@ export interface operations {
   getTasks: {
     parameters: {
       query: {
+        /** Filter tasks by state */
+        filterState?: ("IN_PROGRESS" | "DONE" | "CLOSED")[];
+        /** Filter tasks without state */
+        filterNotState?: ("IN_PROGRESS" | "DONE" | "CLOSED")[];
+        /** Filter tasks by assignee */
+        filterAssignee?: number[];
+        /** Filter tasks by type */
+        filterType?: ("TRANSLATE" | "REVIEW")[];
+        /** Filter tasks by id */
+        filterId?: number[];
+        /** Filter tasks without id */
+        filterNotId?: number[];
+        /** Filter tasks by project */
+        filterProject?: number[];
+        /** Filter tasks without project */
+        filterNotProject?: number[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
