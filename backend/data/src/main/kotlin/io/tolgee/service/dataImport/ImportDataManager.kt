@@ -384,7 +384,9 @@ class ImportDataManager(
           getSafeNamespace(key.file.namespace),
         ) != null
       }
-      importService.saveKey(key)
+      if (saveData) {
+        importService.saveKey(key)
+      }
     }
   }
 
