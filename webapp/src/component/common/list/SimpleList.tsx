@@ -34,6 +34,7 @@ export const SimpleList = <
     };
     renderItem: (item: DataItem) => ReactNode;
     itemSeparator?: () => ReactNode;
+    getKey?: (item: DataItem) => any;
   } & OverridableListWrappers<WrapperComponent, ListComponent>
 ) => {
   const { data, pagination } = props;
@@ -49,7 +50,9 @@ export const SimpleList = <
       <Wrapper {...wrapperProps}>
         <ListWrapper data-cy="global-list-items" {...props.listComponentProps}>
           {data.map((item, index) => (
-            <React.Fragment key={(item as any).id || index}>
+            <React.Fragment
+              key={props.getKey?.(item) ?? (item as any).id ?? index}
+            >
               {props.renderItem(item)}
               {index < data.length - 1 && props.itemSeparator?.()}
             </React.Fragment>

@@ -345,7 +345,13 @@ class UserAccountService(
     exceptUserId: Long? = null,
     filters: UserAccountFilters? = null,
   ): Page<UserAccountInProjectView> {
-    return userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId, filters)
+    return userAccountRepository.getAllInProject(
+      projectId,
+      pageable,
+      search = search,
+      exceptUserId,
+      filters ?: UserAccountFilters(),
+    )
   }
 
   fun getAllInProjectWithPermittedLanguages(

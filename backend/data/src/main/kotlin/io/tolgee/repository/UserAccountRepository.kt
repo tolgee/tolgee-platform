@@ -135,7 +135,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     pageable: Pageable,
     search: String? = "",
     exceptUserId: Long? = null,
-    filters: UserAccountFilters? = null,
+    filters: UserAccountFilters,
   ): Page<UserAccountInProjectView>
 
   @Query(

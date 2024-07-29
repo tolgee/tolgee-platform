@@ -40,6 +40,7 @@ export const PaginatedHateoasList = <
     onSearchChange?: (value: string) => void;
     onPageChange?: (value: number) => void;
     emptyPlaceholder?: React.ReactNode;
+    getKey?: (value: TItem) => any;
   } & OverridableListWrappers<WrapperComponent, ListComponent>
 ) => {
   const { loadable } = props;
@@ -117,6 +118,7 @@ export const PaginatedHateoasList = <
           wrapperComponentProps={props.wrapperComponentProps}
           listComponent={props.listComponent}
           listComponentProps={props.listComponentProps}
+          getKey={props.getKey}
         />
       ) : (
         !loadable.isLoading &&

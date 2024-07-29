@@ -29,7 +29,7 @@ export const TaskMenu = ({
   const deleteMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskId}',
     method: 'delete',
-    invalidatePrefix: '/v2/projects/{projectId}/tasks',
+    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });
 
   function handleDelete() {
