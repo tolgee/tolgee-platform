@@ -4,6 +4,6 @@ export const filterEmpty = (filter: TaskFilterType) => {
   return (
     !filter.assignees?.length &&
     !filter.languages?.length &&
-    !filter.type?.length
+    !filter.types?.length
   );
 };
