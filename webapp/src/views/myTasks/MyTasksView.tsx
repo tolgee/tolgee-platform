@@ -18,6 +18,9 @@ import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasL
 import { TaskItem } from 'tg.component/task/TaskItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { TaskDetail } from 'tg.component/task/TaskDetail';
+import { MyTasksHeader } from './MyTasksHeader';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { TaskFilterType } from 'tg.component/task/taskFilter/TaskFilterPopover';
 
 type TaskWithProjectModel = components['schemas']['TaskWithProjectModel'];
 
@@ -32,6 +35,26 @@ export const MyTasksView = () => {
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState<TaskWithProjectModel>();
 
+  const [search, setSearch] = useState('');
+  const [showClosed, setShowClosed] = useState(false);
+
+  const [projects, setProjects] = useUrlSearchState('project', {
+    array: true,
+  });
+  const [types, setTypes] = useUrlSearchState('type', {
+    array: true,
+  });
+
+  const filter: TaskFilterType = {
+    projects: projects?.map((p) => Number(p)),
+    types: types as any[],
+  };
+
+  function setFilter(val: TaskFilterType) {
+    setProjects(val.projects?.map((p) => String(p)));
+    setTypes(val.types?.map((l) => String(l)));
+  }
+
   function handleDetailClose() {
     setDetail(undefined);
   }
@@ -42,6 +65,11 @@ export const MyTasksView = () => {
     query: {
       size: 20,
       page,
+      search,
+      sort: ['createdAt'],
+      filterNotState: showClosed ? undefined : ['CLOSED', 'DONE'],
+      filterProject: filter.projects,
+      filterType: filter.types,
     },
     options: {
       keepPreviousData: true,
@@ -61,6 +89,14 @@ export const MyTasksView = () => {
         <Box sx={{ mt: '20px', mb: 2, display: 'flex' }}>
           <Typography variant="h6">{t('my_tasks_title')}</Typography>
         </Box>
+        <MyTasksHeader
+          sx={{ mb: '20px', mt: '-12px' }}
+          onSearchChange={setSearch}
+          showClosed={showClosed}
+          onShowClosedChange={setShowClosed}
+          filter={filter}
+          onFilterChange={setFilter}
+        />
         <PaginatedHateoasList
           loadable={tasksLoadable}
           onPageChange={setPage}

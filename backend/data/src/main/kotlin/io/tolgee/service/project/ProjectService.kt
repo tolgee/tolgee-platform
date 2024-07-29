@@ -9,6 +9,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
@@ -364,12 +365,14 @@ class ProjectService(
     pageable: Pageable,
     search: String?,
     organizationId: Long? = null,
+    filters: ProjectFilters? = null,
   ): Page<ProjectWithLanguagesView> {
     return findPermittedInOrganizationPaged(
       pageable = pageable,
       search = search,
       organizationId = organizationId,
       userAccountId = authenticationFacade.authenticatedUser.id,
+      filters = filters
     )
   }
 
@@ -378,6 +381,7 @@ class ProjectService(
     search: String?,
     organizationId: Long? = null,
     userAccountId: Long,
+    filters: ProjectFilters? = ProjectFilters()
   ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages =
       projectRepository.findAllPermitted(
@@ -385,6 +389,7 @@ class ProjectService(
         pageable,
         search,
         organizationId,
+        filters ?: ProjectFilters()
       )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
   }

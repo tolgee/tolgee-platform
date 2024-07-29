@@ -1,5 +1,5 @@
 import { ArrowDropDown, Close } from '@mui/icons-material';
-import { Box, IconButton, styled, SxProps } from '@mui/material';
+import { Box, IconButton, styled, SxProps, Tooltip } from '@mui/material';
 import { useRef, useState } from 'react';
 import { TextField } from 'tg.component/common/TextField';
 import { FakeInput } from 'tg.component/FakeInput';
@@ -31,9 +31,25 @@ const StyledContent = styled(Box)`
 type Props = {
   value: TaskFilterType;
   onChange: (value: TaskFilterType) => void;
-  project: SimpleProjectModel;
+  project?: SimpleProjectModel;
   sx?: SxProps;
   className?: string;
+};
+
+const FilterTooltip = ({
+  title,
+  children,
+}: {
+  title: string | undefined;
+  children: React.ReactNode;
+}) => {
+  return (
+    <Tooltip title={title}>
+      <Box display="flex" alignItems="center">
+        {children}
+      </Box>
+    </Tooltip>
+  );
 };
 
 export const TaskFilter = ({
@@ -50,18 +66,33 @@ export const TaskFilter = ({
   const usersLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/possible-assignees',
     method: 'get',
-    path: { projectId: project.id },
-    query: { size: 1000, filterId: value.assignees },
+    path: { projectId: project?.id ?? 0 },
+    query: { size: 10000, filterId: value.assignees },
     options: {
-      enabled: Boolean(value.assignees?.length),
+      enabled: Boolean(value.assignees?.length) && Boolean(project),
+      keepPreviousData: true,
     },
   });
 
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
     method: 'get',
-    path: { projectId: project.id },
+    path: { projectId: project?.id ?? 0 },
     query: { size: 10000 },
+    options: {
+      enabled: Boolean(project),
+      keepPreviousData: true,
+    },
+  });
+
+  const projectsLoadable = useApiQuery({
+    url: '/v2/projects',
+    method: 'get',
+    query: { size: 10000, filterId: value.projects },
+    options: {
+      enabled: !project,
+      keepPreviousData: true,
+    },
   });
 
   const languages = languagesLoadable.data?._embedded?.languages ?? [];
@@ -76,25 +107,42 @@ export const TaskFilter = ({
         {usersLoadable.data?._embedded?.users
           ?.filter((u) => value.assignees?.includes(u.id))
           ?.map((user) => (
-            <AvatarImg
-              key={user.id}
-              owner={{
-                name: user.name,
-                avatar: user.avatar,
-                type: 'USER',
-                id: user.id,
-              }}
-              size={24}
-            />
+            <FilterTooltip title={user.name} key={user.id}>
+              <AvatarImg
+                owner={{
+                  name: user.name,
+                  avatar: user.avatar,
+                  type: 'USER',
+                  id: user.id,
+                }}
+                size={24}
+              />
+            </FilterTooltip>
           ))}
         {languages
           ?.filter((l) => value.languages?.includes(l.id))
           .map((language) => (
-            <FlagImage
+            <FilterTooltip
+              title={`${language.name} (${language.tag})`}
               key={language.id}
-              flagEmoji={language.flagEmoji!}
-              height={20}
-            />
+            >
+              <FlagImage flagEmoji={language.flagEmoji!} height={20} />
+            </FilterTooltip>
+          ))}
+        {projectsLoadable.data?._embedded?.projects
+          ?.filter((p) => value.projects?.includes(p.id))
+          .map((project) => (
+            <FilterTooltip title={project.name} key={project.id}>
+              <AvatarImg
+                owner={{
+                  name: project.name,
+                  avatar: project.avatar,
+                  type: 'PROJECT',
+                  id: project.id,
+                }}
+                size={24}
+              />
+            </FilterTooltip>
           ))}
         {value.types?.map((type) => (
           <TaskTypeChip key={type} type={type} />

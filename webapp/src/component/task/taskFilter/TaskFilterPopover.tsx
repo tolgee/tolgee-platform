@@ -13,6 +13,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
 import { SubfilterAssignees } from './SubfilterAssignees';
 import { SubfilterLanguages } from './SubfilterLanguages';
+import { SubfilterProjects } from './SubfilterProjects';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 type TaskType = components['schemas']['TaskModel']['type'];
@@ -27,6 +28,7 @@ const StyledListSubheader = styled(ListSubheader)`
 export type TaskFilterType = {
   languages?: number[];
   assignees?: number[];
+  projects?: number[];
   types?: TaskType[];
 };
 
@@ -36,7 +38,7 @@ type Props = {
   onClose: () => void;
   open: boolean;
   anchorEl: HTMLElement;
-  project: SimpleProjectModel;
+  project?: SimpleProjectModel;
   languages: LanguageModel[];
 };
 
@@ -86,17 +88,29 @@ export const TaskFilterPopover: React.FC<Props> = ({
         },
       }}
     >
-      <SubfilterAssignees
-        value={value.assignees ?? []}
-        onChange={(assignees) => handleChange({ ...value, assignees })}
-        project={project}
-      />
-      <SubfilterLanguages
-        value={value.languages ?? []}
-        onChange={(languages) => handleChange({ ...value, languages })}
-        languages={languages ?? []}
-        project={project}
-      />
+      {project && (
+        <SubfilterAssignees
+          value={value.assignees ?? []}
+          onChange={(assignees) => handleChange({ ...value, assignees })}
+          project={project}
+        />
+      )}
+
+      {project && (
+        <SubfilterLanguages
+          value={value.languages ?? []}
+          onChange={(languages) => handleChange({ ...value, languages })}
+          languages={languages ?? []}
+          project={project}
+        />
+      )}
+
+      {!project && (
+        <SubfilterProjects
+          value={value.projects ?? []}
+          onChange={(projects) => handleChange({ ...value, projects })}
+        />
+      )}
 
       <StyledListSubheader disableSticky>
         {t('task_filter_type_label')}

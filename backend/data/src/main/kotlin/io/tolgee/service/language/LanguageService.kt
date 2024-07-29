@@ -339,9 +339,9 @@ class LanguageService(
   fun getPaged(
     projectId: Long,
     pageable: Pageable,
-    filters: LanguageFilters? = null
+    filters: LanguageFilters?
   ): Page<LanguageDto> {
-    return this.languageRepository.findAllByProjectId(projectId, pageable, filters)
+    return this.languageRepository.findAllByProjectId(projectId, pageable, filters ?: LanguageFilters())
   }
 
   fun findByIdIn(ids: Iterable<Long>): List<Language> {
