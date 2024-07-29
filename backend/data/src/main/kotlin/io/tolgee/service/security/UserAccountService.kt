@@ -9,6 +9,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
+import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
@@ -342,8 +343,9 @@ class UserAccountService(
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null,
+    filters: UserAccountFilters? = null
   ): Page<UserAccountInProjectView> {
-    return userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId)
+    return userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId, filters)
   }
 
   fun getAllInProjectWithPermittedLanguages(
@@ -351,8 +353,9 @@ class UserAccountService(
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null,
+    filters: UserAccountFilters? = null,
   ): Page<ExtendedUserAccountInProject> {
-    val users = getAllInProject(projectId, pageable, search, exceptUserId)
+    val users = getAllInProject(projectId, pageable, search, exceptUserId, filters)
     val organizationBasePermission = organizationService.getProjectOwner(projectId = projectId).basePermission
 
     val permittedLanguageMap =

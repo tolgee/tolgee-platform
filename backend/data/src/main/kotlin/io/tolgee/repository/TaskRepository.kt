@@ -12,14 +12,14 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
-const val SEARCH = """
+const val TASK_SEARCH = """
     (
         cast(:search as text) is null
         or lower(t.name) like lower(concat('%', cast(:search as text),'%'))
     )
 """
 
-const val FILTERS = """
+const val TASK_FILTERS = """
     (
         :#{#filters.filterNotState} is null
         or t.state not in :#{#filters.filterNotState}
@@ -67,8 +67,8 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
         left join t.assignees u
      where
         t.project.id = :projectId
-        and $SEARCH
-        and $FILTERS
+        and $TASK_SEARCH
+        and $TASK_FILTERS
     """,
   )
   fun getAllByProjectId(
@@ -84,8 +84,8 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
      from Task t
         left join t.assignees u
      where u.id = :userId 
-        and $SEARCH
-        and $FILTERS
+        and $TASK_SEARCH
+        and $TASK_FILTERS
     """,
   )
   fun getAllByAssignee(

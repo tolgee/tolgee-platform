@@ -9,8 +9,8 @@ type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
-  value: LanguageModel[];
-  onChange: (value: LanguageModel[]) => void;
+  value: number[];
+  onChange: (value: number[]) => void;
   project: SimpleProjectModel;
   languages: LanguageModel[];
 };
@@ -24,11 +24,11 @@ export const SubfilterLanguages = ({
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
-  const handleLanguageToggle = (language: LanguageModel) => () => {
-    if (value.find((item) => item.id === language.id)) {
-      onChange(value.filter((item) => item.id !== language.id));
+  const handleLanguageToggle = (id: number) => () => {
+    if (value.includes(id)) {
+      onChange(value.filter((l) => l !== id));
     } else {
-      onChange([...value, language]);
+      onChange([...value, id]);
     }
   };
 
@@ -60,10 +60,10 @@ export const SubfilterLanguages = ({
             <MenuItem
               key={lang.tag}
               value={lang.tag}
-              onClick={handleLanguageToggle(lang)}
+              onClick={handleLanguageToggle(lang.id)}
             >
               <Checkbox
-                checked={Boolean(value?.find((l) => l.id === lang.id))}
+                checked={value?.includes(lang.id)}
                 size="small"
                 edge="start"
                 disableRipple

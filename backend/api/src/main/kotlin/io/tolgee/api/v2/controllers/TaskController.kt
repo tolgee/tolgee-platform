@@ -170,6 +170,8 @@ class TaskController(
   @AllowApiAccess
   fun getPossibleAssignees(
     @ParameterObject
+    filters: UserAccountFilters,
+    @ParameterObject
     pageable: Pageable,
     @RequestParam("search", required = false)
     search: String?,
@@ -179,6 +181,8 @@ class TaskController(
         projectHolder.projectEntity.id,
         pageable,
         search,
+        null,
+        filters,
       )
     return pagedUserResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
   }

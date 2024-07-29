@@ -13,6 +13,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { BaseProjectView } from '../BaseProjectView';
 import { TasksHeader } from './TasksHeader';
 import { TaskFilterType } from 'tg.component/task/taskFilter/TaskFilterPopover';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -28,7 +29,27 @@ export const ProjectTasksView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [showClosed, setShowClosed] = useState(false);
-  const [filter, setFilter] = useState<TaskFilterType>({});
+  const [assignees, setAssignees] = useUrlSearchState('assignee', {
+    array: true,
+  });
+  const [languages, setLanguages] = useUrlSearchState('language', {
+    array: true,
+  });
+  const [types, setTypes] = useUrlSearchState('type', {
+    array: true,
+  });
+
+  const filter: TaskFilterType = {
+    assignees: assignees?.map((a) => Number(a)),
+    languages: languages?.map((l) => Number(l)),
+    types: types as any[],
+  };
+
+  function setFilter(val: TaskFilterType) {
+    setAssignees(val.assignees?.map((a) => String(a)));
+    setLanguages(val.languages?.map((l) => String(l)));
+    setTypes(val.types?.map((l) => String(l)));
+  }
 
   const [detail, setDetail] = useState<TaskModel>();
 
@@ -46,9 +67,9 @@ export const ProjectTasksView = () => {
       search,
       sort: ['createdAt'],
       filterNotState: showClosed ? undefined : ['CLOSED', 'DONE'],
-      filterAssignee: filter.assignees?.map((a) => a.id),
-      filterLanguage: filter.languages?.map((l) => l.id),
-      filterType: filter.type,
+      filterAssignee: filter.assignees,
+      filterLanguage: filter.languages,
+      filterType: filter.types,
     },
     options: {
       keepPreviousData: true,

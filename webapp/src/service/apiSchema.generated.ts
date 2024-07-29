@@ -1141,14 +1141,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1163,6 +1155,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1773,8 +1773,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2040,10 +2040,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2206,11 +2206,11 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2348,16 +2348,16 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
       username?: string;
-      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -3500,17 +3500,17 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      /** @example btforg */
+      slug: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example btforg */
-      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
@@ -3654,20 +3654,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      translation?: string;
+      baseTranslation?: string;
       namespace?: string;
       description?: string;
-      baseTranslation?: string;
-      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
+      translation?: string;
+      baseTranslation?: string;
       namespace?: string;
       description?: string;
-      baseTranslation?: string;
-      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4219,11 +4219,11 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4342,16 +4342,16 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
       username?: string;
-      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {
@@ -12530,6 +12530,10 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        /** Filter languages by id */
+        filterId?: number[];
+        /** Filter languages without id */
+        filterNotId?: number[];
       };
     };
     responses: {
@@ -14152,6 +14156,10 @@ export interface operations {
   getPossibleAssignees: {
     parameters: {
       query: {
+        /** Filter users by id */
+        filterId?: number[];
+        /** Filter users without id */
+        filterNotId?: number[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */

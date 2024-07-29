@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.UserAccountView
+import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -11,6 +12,18 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
+
+
+const val USER_FILTERS = """
+    (
+        :#{#filters.filterId} is null
+        or ua.id in :#{#filters.filterId}
+    )
+    and (
+        :#{#filters.filterNotId} is null
+        or ua.id not in :#{#filters.filterNotId}
+    )
+"""
 
 @Repository
 interface UserAccountRepository : JpaRepository<UserAccount, Long> {
@@ -115,6 +128,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         and ua.deletedAt is null
+        and $USER_FILTERS
     """,
   )
   fun getAllInProject(
@@ -122,6 +136,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     pageable: Pageable,
     search: String? = "",
     exceptUserId: Long? = null,
+    filters: UserAccountFilters? = null
   ): Page<UserAccountInProjectView>
 
   @Query(
