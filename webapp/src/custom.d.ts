@@ -1,9 +1,9 @@
-import API from '@openreplay/tracker';
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
 import {
   Activity,
   Cell,
+  colors,
   Editor,
   Emphasis,
   ExampleBanner,
@@ -96,9 +96,10 @@ declare module '@mui/material/Button' {
   }
 }
 
-declare global {
-  interface Window {
-    openReplayTracker?: API;
+declare module '@mui/material/ButtonBase' {
+  interface ButtonBaseOwnProps<TProps, T extends React.ElementType<TProps>>
+    extends TProps {
+    component?: T;
   }
 }
 

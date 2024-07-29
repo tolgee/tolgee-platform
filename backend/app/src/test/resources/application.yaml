@@ -40,6 +40,8 @@ spring:
     enabled: false
   datasource:
     maximum-pool-size: 100
+  jooq:
+    sql-dialect: postgres
 tolgee:
   slack:
     token: fakeToken
@@ -95,3 +97,5 @@ logging:
     io.tolgee.component.reporting.BusinessEventPublisher: DEBUG
     io.tolgee.ExceptionHandlers: DEBUG
     io.tolgee.component.reporting.ReportingService: DEBUG
+    org.jooq.tools.LoggerListener: DEBUG
+    org.jooq.Constants: off

@@ -3418,4 +3418,125 @@
     <changeSet author="huglx (generated)" id="1718704326054-19">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="slack_config" constraintName="FKsgau8dxyxblao9sa16fnka0t1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-1">
+        <createSequence incrementBy="50" sequenceName="sequence_notifications" startValue="1"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-2">
+        <createTable tableName="notification_preferences">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_preferencesPK"/>
+            </column>
+            <column name="disabled_notifications" type="VARCHAR[]">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT"/>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-3">
+        <createTable tableName="user_notification">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_notificationPK"/>
+            </column>
+            <column name="last_updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="marked_done_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="unread" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="batch_job_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="recipient_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-4">
+        <createTable tableName="user_notification_modified_entities">
+            <column name="user_notification_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="modified_entities_activity_revision_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="modified_entities_entity_class" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="modified_entities_entity_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-5">
+        <addUniqueConstraint columnNames="user_account_id, project_id" constraintName="notification_preferences_user_project" tableName="notification_preferences"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-6">
+        <createIndex indexName="notification_preferences_project" tableName="notification_preferences">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-7">
+        <createIndex indexName="notification_preferences_user" tableName="notification_preferences">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="user_notification" constraintName="FK2gliribr7nknr0qms15ks64hd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-9">
+        <addForeignKeyConstraint baseColumnNames="modified_entities_activity_revision_id,modified_entities_entity_class,modified_entities_entity_id" baseTableName="user_notification_modified_entities" constraintName="FK4ag04pw1ppym8n7hprpbpp560" deferrable="false" initiallyDeferred="false" referencedColumnNames="activity_revision_id,entity_class,entity_id" referencedTableName="activity_modified_entity" validate="true" onUpdate="CASCADE"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-10">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="notification_preferences" constraintName="FK6uqc1xgpn1cxipa5bd0pixne4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-11">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="notification_preferences" constraintName="FKgaffnriusq5egt8q947bau17b" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-12">
+        <addForeignKeyConstraint baseColumnNames="user_notification_id" baseTableName="user_notification_modified_entities" constraintName="FKopjr5qv4o5sujws56m56uwnp9" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_notification" validate="true"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-13">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="user_notification" constraintName="FKsk666dbq7bkk3vbru0g0eir80" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tolgee_batch_job" validate="true"/>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1701635886941-14">
+        <addForeignKeyConstraint baseColumnNames="recipient_id" baseTableName="user_notification" constraintName="FKtrh0lg36wbpag2rwgn4btv4dd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-1">
+        <createTable tableName="activity_group">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_groupPK"/>
+            </column>
+            <column name="author_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="type" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-2">
+        <createTable tableName="activity_revision_activity_groups">
+            <column name="activity_revisions_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_groups_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-3">
+        <createIndex indexName="IDXcg7y08d599p7jxdebbxwavak0" tableName="activity_revision">
+            <column name="timestamp"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-4">
+        <addForeignKeyConstraint baseColumnNames="activity_revisions_id" baseTableName="activity_revision_activity_groups" constraintName="FK61mk7dao9gvk65tgg736cmqsc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-5">
+        <addForeignKeyConstraint baseColumnNames="activity_groups_id" baseTableName="activity_revision_activity_groups" constraintName="FK932a1x2vub7nsnm6f338tg3pj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_group" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1717158514937-6">
+        <dropPrimaryKey constraintName="user_notification_modified_entities_pkey" tableName="user_notification_modified_entities"/>
+    </changeSet>
 </databaseChangeLog>

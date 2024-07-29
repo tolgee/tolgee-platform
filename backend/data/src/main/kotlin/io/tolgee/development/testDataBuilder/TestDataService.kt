@@ -112,6 +112,14 @@ class TestDataService(
 
     executeInNewTransaction(transactionManager) {
       saveProjectData(builder)
+
+      // These depend on users and projects, so they must be stored only after all the projects have been stored.
+      builder.data.userAccounts.forEach {
+        it.data.notificationPreferences.forEach { entityBuilder ->
+          entityManager.persist(entityBuilder.self)
+        }
+      }
+
       finalize()
     }
 
@@ -375,7 +383,7 @@ class TestDataService(
   }
 
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
-    val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
+    val metas = keyBuilders.mapNotNull { it.data.meta?.self }
     tagService.saveAll(metas.flatMap { it.tags })
     keyMetaService.saveAll(metas)
   }

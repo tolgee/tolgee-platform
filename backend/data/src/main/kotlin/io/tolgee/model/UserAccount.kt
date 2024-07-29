@@ -4,6 +4,8 @@ import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
+import io.tolgee.model.notifications.NotificationPreferences
+import io.tolgee.model.notifications.UserNotification
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -19,6 +21,7 @@ import jakarta.persistence.OrderBy
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
+import org.hibernate.annotations.Where
 import java.util.*
 
 @Entity
@@ -102,6 +105,17 @@ data class UserAccount(
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackConfig: MutableList<SlackConfig> = mutableListOf()
 
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "recipient")
+  var userNotifications: MutableList<UserNotification> = mutableListOf()
+
+  @Where(clause = "project_id IS NOT NULL")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
+  var projectNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
+  @Where(clause = "project_id IS NULL")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
+  private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
   constructor(
     id: Long?,
     username: String?,
@@ -121,6 +135,9 @@ data class UserAccount(
     this.thirdPartyAuthId = thirdPartyAuthId
     this.resetPasswordCode = resetPasswordCode
   }
+
+  val globalNotificationPreferences: NotificationPreferences?
+    get() = _globalNotificationPreferences.firstOrNull()
 
   enum class Role {
     USER,

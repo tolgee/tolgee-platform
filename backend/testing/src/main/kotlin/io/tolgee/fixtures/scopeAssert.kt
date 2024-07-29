@@ -4,9 +4,10 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.unpack
 import io.tolgee.testing.assertions.Assertions
+import io.tolgee.testing.satisfies
 import org.assertj.core.api.ObjectArrayAssert
 
-fun ObjectArrayAssert<Scope>.equalsPermissionType(permissionType: ProjectPermissionType): ObjectArrayAssert<Scope>? {
+fun ObjectArrayAssert<Scope>.equalsPermissionType(permissionType: ProjectPermissionType): ObjectArrayAssert<Scope> {
   return this.satisfies {
     Assertions.assertThat(it.unpack()).containsExactlyInAnyOrder(*permissionType.availableScopes.unpack())
   }

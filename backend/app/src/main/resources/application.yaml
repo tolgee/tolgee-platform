@@ -33,6 +33,10 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
+  datasource:
+    auto-commit: false
+  jooq:
+    sql-dialect: postgres
 tolgee:
   authentication:
     enabled: false
@@ -63,3 +67,6 @@ management:
     web:
       exposure:
         include: health,info,prometheus
+logging:
+  level:
+    org.jooq.Constants: off

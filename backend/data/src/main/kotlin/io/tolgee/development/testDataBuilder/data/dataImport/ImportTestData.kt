@@ -343,6 +343,7 @@ class ImportTestData {
         line = 10
         fromImport = true
       }
+      description = "This is a key"
     }
 
     projectBuilder.data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {

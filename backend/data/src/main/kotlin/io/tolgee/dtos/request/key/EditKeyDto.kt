@@ -14,7 +14,7 @@ data class EditKeyDto(
   @field:Length(max = 2000)
   var name: String = "",
   @field:Length(max = ValidationConstants.MAX_NAMESPACE_LENGTH)
-  @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
+  @Schema(description = "The namespace of the key. (When empty or null, no namespace will be used)")
   @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   var namespace: String? = null,
   @Size(max = 2000)

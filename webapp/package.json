@@ -5,18 +5,16 @@
   "type": "module",
   "dependencies": {
     "@codemirror/lang-json": "6.0.0",
-    "@dicebear/avatars": "4.10.2",
-    "@dicebear/avatars-identicon-sprites": "4.10.2",
-    "@dicebear/avatars-initials-sprites": "4.10.2",
-    "@emotion/react": "^11.11.1",
+    "@dicebear/core": "^7.0.4",
+    "@dicebear/identicon": "^7.0.4",
+    "@dicebear/initials": "^7.0.4",
+    "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@formatjs/icu-messageformat-parser": "^2.0.8",
-    "@mdx-js/rollup": "^3.0.0",
-    "@mui/icons-material": "^5.5.1",
-    "@mui/lab": "^5.0.0-alpha.75",
-    "@mui/material": "^5.5.3",
-    "@mui/x-date-pickers": "5.0.0-beta.6",
-    "@openreplay/tracker": "^3.5.4",
+    "@mui/icons-material": "^5.15.7",
+    "@mui/lab": "^5.0.0-alpha.163",
+    "@mui/material": "^5.15.7",
+    "@mui/x-date-pickers": "^5.0.20",
     "@sentry/browser": "^7.80.0",
     "@stomp/stompjs": "^6.1.2",
     "@tginternal/editor": "^1.15.1",
@@ -32,15 +30,11 @@
     "dotenv-flow": "4.0.1",
     "formik": "^2.2.9",
     "intl-messageformat": "^9.8.1",
-    "node-fetch": "3.3.0",
     "notistack": "^2.0.4",
     "posthog-js": "^1.96.1",
-    "prism-react-renderer": "1.2.1",
-    "prism-svelte": "0.4.7",
+    "prism-react-renderer": "^2.3.1",
     "react": "^17.0.1",
-    "react-cropper": "2.1.8",
-    "react-dnd": "^14.0.2",
-    "react-dnd-html5-backend": "^14.0.0",
+    "react-cropper": "^2.3.3",
     "react-dom": "^17.0.2",
     "react-draggable": "^4.4.3",
     "react-google-recaptcha-v3": "1.9.5",
@@ -52,7 +46,7 @@
     "react-qr-code": "^2.0.7",
     "react-query": "^3.39.2",
     "react-router-dom": "^5.2.0",
-    "recharts": "2.1.9",
+    "recharts": "^2.11.0",
     "reflect-metadata": "^0.1.13",
     "regenerator-runtime": "^0.13.9",
     "sockjs-client": "^1.6.1",
@@ -104,7 +98,7 @@
     ]
   },
   "devDependencies": {
-    "@mdx-js/loader": "1.6.22",
+    "@mdx-js/rollup": "^3.0.0",
     "@sentry/types": "^6.5.1",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
@@ -129,13 +123,21 @@
     "husky": "^9.0.11",
     "openapi-typescript": "^4.0.2",
     "prettier": "^2.3.1",
-    "redux-devtools-extension": "^2.13.9",
+    "@redux-devtools/extension": "^3.3.0",
     "rehype-highlight": "^7.0.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.3.3",
-    "vite-plugin-node-polyfills": "^0.19.0",
+    "vite": "^5.0.12",
     "vite-plugin-static-copy": "^1.0.0",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.2.3"
+  },
+  "overrides": {
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    },
+    "@mdx-js/rollup": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
   }
 }

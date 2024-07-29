@@ -22,6 +22,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.language.LanguageService
@@ -194,7 +195,7 @@ class PermissionService(
 
   fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
-    organizationBasePermission: IPermission,
+    organizationBasePermission: IPermission?,
     directPermission: IPermission?,
     userRole: UserAccount.Role? = null,
   ): ComputedPermissionDto {
@@ -202,7 +203,7 @@ class PermissionService(
       when {
         organizationRole == OrganizationRoleType.OWNER -> ComputedPermissionDto.ORGANIZATION_OWNER
         directPermission != null -> ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
-        organizationRole == OrganizationRoleType.MEMBER ->
+        organizationRole == OrganizationRoleType.MEMBER && organizationBasePermission != null ->
           ComputedPermissionDto(
             organizationBasePermission,
             ComputedPermissionOrigin.ORGANIZATION_BASE,
@@ -214,6 +215,14 @@ class PermissionService(
     return userRole?.let {
       computed.getAdminPermissions(userRole)
     } ?: computed
+  }
+
+  fun computeProjectPermission(userProjectMetadataView: UserProjectMetadataView): ComputedPermissionDto {
+    return computeProjectPermission(
+      userProjectMetadataView.organizationRole,
+      userProjectMetadataView.basePermissions,
+      userProjectMetadataView.permissions,
+    )
   }
 
   fun createForInvitation(

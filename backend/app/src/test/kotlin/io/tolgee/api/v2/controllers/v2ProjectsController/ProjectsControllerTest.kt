@@ -83,24 +83,26 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("[0].organizationOwner.name").isEqualTo("test_username")
           node("[0].directPermission.scopes").isPermissionScopes(ProjectPermissionType.MANAGE)
           node("[0].computedPermission.scopes").isPermissionScopes(ProjectPermissionType.MANAGE)
-          node("[0].stats.translationStatePercentages").isEqualTo(
-            """
-        {
-          "UNTRANSLATED": 100.0,
-          "TRANSLATED": 0,
-          "REVIEWED": 0
-        }
-      """,
-          )
-          node("[1].stats.translationStatePercentages").isEqualTo(
-            """
-        {
-          "UNTRANSLATED": 25.0,
-          "TRANSLATED": 75.0,
-          "REVIEWED": 0.0
-        }
-      """,
-          )
+          node("[0].stats.translationStatePercentages")
+            .isEqualTo(
+              """
+                {
+                  "UNTRANSLATED": 100.0,
+                  "TRANSLATED": 0,
+                  "REVIEWED": 0
+                }
+              """,
+            )
+          node("[1].stats.translationStatePercentages")
+            .isEqualTo(
+              """
+                {
+                  "UNTRANSLATED": 25.0,
+                  "TRANSLATED": 75.0,
+                  "REVIEWED": 0
+                }
+              """,
+            )
         }
       }
   }

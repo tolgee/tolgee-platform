@@ -55,7 +55,6 @@ class EmailTestUtil() {
 
   val assertEmailTo: AbstractStringAssert<*>
     get() {
-      @Suppress("CAST_NEVER_SUCCEEDS")
       return Assertions.assertThat(messageArgumentCaptor.firstValue.getHeader("To")[0] as String)
     }
 }

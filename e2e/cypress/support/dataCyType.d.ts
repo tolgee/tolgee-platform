@@ -185,6 +185,8 @@ declare namespace DataCy {
         "global-list-pagination" |
         "global-list-search" |
         "global-loading" |
+        "global-notifications-button" |
+        "global-notifications-count" |
         "global-paginated-list" |
         "global-plus-button" |
         "global-search-field" |

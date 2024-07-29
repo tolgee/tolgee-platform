@@ -100,12 +100,13 @@ dependencies {
         exclude group: 'io.netty', module: 'netty-codec-http'
     }
     testImplementation('io.netty:netty-codec-http:4.1.108.Final')
-
+    testImplementation libs.springJooq
 
     /**
      * MISC
      */
     implementation libs.commonsCodec
+    implementation libs.commonsText
     implementation libs.amazonS3
     implementation libs.amazonSTS
     implementation libs.icu4j

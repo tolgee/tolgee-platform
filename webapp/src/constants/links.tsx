@@ -162,6 +162,18 @@ export class LINKS {
   );
 
   /**
+   * Notifications
+   */
+
+  static NOTIFICATIONS = Link.ofRoot('notifications');
+
+  static NOTIFICATIONS_INBOX = Link.ofParent(LINKS.NOTIFICATIONS, 'inbox');
+
+  static NOTIFICATIONS_UNREAD = Link.ofParent(LINKS.NOTIFICATIONS, 'unread');
+
+  static NOTIFICATIONS_DONE = Link.ofParent(LINKS.NOTIFICATIONS, 'done');
+
+  /**
    * Administration
    */
 

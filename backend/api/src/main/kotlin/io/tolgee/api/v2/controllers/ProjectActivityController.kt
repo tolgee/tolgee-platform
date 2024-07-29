@@ -44,7 +44,7 @@ class ProjectActivityController(
   private val modificationResourcesAssembler: PagedResourcesAssembler<ModifiedEntityView>,
   private val projectActivityModelAssembler: ProjectActivityModelAssembler,
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
-) {
+  ) {
   @Operation(summary = "Get project activity")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
@@ -52,7 +52,7 @@ class ProjectActivityController(
   fun getActivity(
     @ParameterObject pageable: Pageable,
   ): PagedModel<ProjectActivityModel> {
-    val views = activityService.findProjectActivity(projectId = projectHolder.project.id, pageable)
+    val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
 
@@ -64,7 +64,7 @@ class ProjectActivityController(
     @PathVariable revisionId: Long,
   ): ProjectActivityModel {
     val views =
-      activityService.findProjectActivity(projectId = projectHolder.project.id, revisionId)
+      activityService.getProjectActivity(projectId = projectHolder.project.id, revisionId)
         ?: throw NotFoundException()
     return projectActivityModelAssembler.toModel(views)
   }
@@ -90,5 +90,19 @@ class ProjectActivityController(
         filterEntityClass,
       )
     return modificationResourcesAssembler.toModel(page, modifiedEntityModelAssembler)
+  }
+
+  @Operation(
+    summary = "Get project activity groups",
+    description = "This endpoints returns the activity grouped by time windows so it's easier to read on the frontend.",
+  )
+  @GetMapping("/groups", produces = [MediaTypes.HAL_JSON_VALUE])
+  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @AllowApiAccess
+  fun getActivityGroups(
+    @ParameterObject pageable: Pageable,
+  ): PagedModel<ProjectActivityModel> {
+    val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
+    return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
 }

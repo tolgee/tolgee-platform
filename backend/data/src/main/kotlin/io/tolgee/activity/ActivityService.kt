@@ -3,6 +3,7 @@ package io.tolgee.activity
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.activity.groups.ActivityGroupService
 import io.tolgee.activity.projectActivity.ModificationsByRevisionsProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
@@ -31,6 +32,7 @@ class ActivityService(
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
   private val objectMapper: ObjectMapper,
   private val jdbcTemplate: JdbcTemplate,
+  private val activityGroupService: ActivityGroupService,
 ) : Logging {
   @Transactional
   fun storeActivityData(
@@ -44,6 +46,9 @@ class ActivityService(
 
     persistedDescribingRelations(mergedActivityRevision)
     mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
+
+    activityGroupService.addToGroup(activityRevision, modifiedEntities)
+
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
   }
 
@@ -103,7 +108,7 @@ class ActivityService(
   }
 
   @Transactional
-  fun findProjectActivity(
+  fun getProjectActivity(
     projectId: Long,
     pageable: Pageable,
   ): Page<ProjectActivityView> {
@@ -115,17 +120,9 @@ class ActivityService(
   }
 
   @Transactional
-  fun findProjectActivity(revisionId: Long): ProjectActivityView? {
-    return ProjectActivityViewByRevisionProvider(
-      applicationContext = applicationContext,
-      revisionId = revisionId,
-    ).get()
-  }
-
-  @Transactional
-  fun findProjectActivity(
+  fun getProjectActivity(
     projectId: Long,
-    revisionId: Long,
+    revisionId: Long
   ): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
