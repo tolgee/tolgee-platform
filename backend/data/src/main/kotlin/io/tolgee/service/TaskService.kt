@@ -53,7 +53,7 @@ class TaskService(
     project: Project,
     pageable: Pageable,
     search: String?,
-    filters: TaskFilters
+    filters: TaskFilters,
   ): Page<TaskWithScopeView> {
     val pagedTasks = taskRepository.getAllByProjectId(project.id, pageable, search, filters)
     val withPrefetched = taskRepository.getByIdsWithAllPrefetched(pagedTasks.content)
@@ -64,7 +64,7 @@ class TaskService(
     userId: Long,
     pageable: Pageable,
     search: String?,
-    filters: TaskFilters
+    filters: TaskFilters,
   ): Page<TaskWithScopeView> {
     val pagedTasks = taskRepository.getAllByAssignee(userId, pageable, search, filters)
     val withPrefetched = taskRepository.getByIdsWithAllPrefetched(pagedTasks.content)
@@ -72,7 +72,10 @@ class TaskService(
   }
 
   @Transactional
-  fun createMultipleTasks(project: Project, dtos: Collection<CreateTaskRequest>) {
+  fun createMultipleTasks(
+    project: Project,
+    dtos: Collection<CreateTaskRequest>,
+  ) {
     dtos.forEach {
       createTask(project, it)
     }
@@ -225,9 +228,10 @@ class TaskService(
       val translationIdsToAdd = translationsToAdd.map { it.id }.toMutableSet()
       val existingTranslations = task.translations.map { it.translation.id }.toMutableSet()
       val nonExistingTranslationIds = translationIdsToAdd.subtract(existingTranslations).toMutableSet()
-      val taskTranslationsToAdd = translationsToAdd
-        .filter { nonExistingTranslationIds.contains(it.id) }
-        .map { TaskTranslation(task, it) }
+      val taskTranslationsToAdd =
+        translationsToAdd
+          .filter { nonExistingTranslationIds.contains(it.id) }
+          .map { TaskTranslation(task, it) }
       task.translations = task.translations.union(taskTranslationsToAdd).toMutableSet()
       taskTranslationRepository.saveAll(taskTranslationsToAdd)
     }

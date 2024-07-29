@@ -4,8 +4,6 @@ import io.tolgee.api.v2.controllers.TaskController
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
-import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
-import io.tolgee.model.task.Task
 import io.tolgee.model.views.TaskWithScopeView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -25,14 +23,14 @@ class TaskModelAssembler(
       description = entity.description,
       type = entity.type,
       language =
-      entity.language.let {
-        languageModelAssembler.toModel(
-          LanguageDto.fromEntity(
-            it,
-            entity.project.baseLanguage?.id,
-          ),
-        )
-      },
+        entity.language.let {
+          languageModelAssembler.toModel(
+            LanguageDto.fromEntity(
+              it,
+              entity.project.baseLanguage?.id,
+            ),
+          )
+        },
       dueDate = entity.dueDate?.time,
       assignees = entity.assignees.map { simpleUserAccountModelAssembler.toModel(it) }.toMutableSet(),
       author = entity.author?.let { simpleUserAccountModelAssembler.toModel(it) },
@@ -44,5 +42,4 @@ class TaskModelAssembler(
       state = entity.state,
     )
   }
-
 }

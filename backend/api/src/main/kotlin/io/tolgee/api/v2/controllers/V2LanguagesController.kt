@@ -97,7 +97,7 @@ class V2LanguagesController(
     @PathVariable("projectId") pathProjectId: Long?,
     @ParameterObject @SortDefault("tag") pageable: Pageable,
     @ParameterObject
-    filters: LanguageFilters
+    filters: LanguageFilters,
   ): PagedModel<LanguageModel> {
     val data = languageService.getPaged(projectHolder.project.id, pageable, filters)
     return pagedAssembler.toModel(data, languageModelAssembler)

@@ -13,7 +13,6 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
 
-
 const val USER_FILTERS = """
     (
         :#{#filters.filterId} is null
@@ -136,7 +135,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     pageable: Pageable,
     search: String? = "",
     exceptUserId: Long? = null,
-    filters: UserAccountFilters? = null
+    filters: UserAccountFilters? = null,
   ): Page<UserAccountInProjectView>
 
   @Query(

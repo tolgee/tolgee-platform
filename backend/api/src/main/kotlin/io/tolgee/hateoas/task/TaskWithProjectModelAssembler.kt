@@ -5,8 +5,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
-import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
-import io.tolgee.model.task.Task
 import io.tolgee.model.views.TaskWithScopeView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -20,7 +18,6 @@ class TaskWithProjectModelAssembler(
     TaskController::class.java,
     TaskWithProjectModel::class.java,
   ) {
-
   override fun toModel(entity: TaskWithScopeView): TaskWithProjectModel {
     return TaskWithProjectModel(
       id = entity.id,
@@ -28,14 +25,14 @@ class TaskWithProjectModelAssembler(
       description = entity.description,
       type = entity.type,
       language =
-      entity.language.let {
-        languageModelAssembler.toModel(
-          LanguageDto.fromEntity(
-            it,
-            entity.project.baseLanguage?.id,
-          ),
-        )
-      },
+        entity.language.let {
+          languageModelAssembler.toModel(
+            LanguageDto.fromEntity(
+              it,
+              entity.project.baseLanguage?.id,
+            ),
+          )
+        },
       dueDate = entity.dueDate?.time,
       assignees = entity.assignees.map { simpleUserAccountModelAssembler.toModel(it) }.toMutableSet(),
       author = entity.author?.let { simpleUserAccountModelAssembler.toModel(it) },

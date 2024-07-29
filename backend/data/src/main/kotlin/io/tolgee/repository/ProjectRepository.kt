@@ -79,7 +79,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     pageable: Pageable,
     @Param("search") search: String? = null,
     organizationId: Long? = null,
-    filters: ProjectFilters
+    filters: ProjectFilters,
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>

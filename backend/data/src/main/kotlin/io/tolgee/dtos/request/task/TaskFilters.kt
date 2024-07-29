@@ -1,7 +1,6 @@
 package io.tolgee.dtos.request.task
 
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 

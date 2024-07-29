@@ -372,7 +372,7 @@ class ProjectService(
       search = search,
       organizationId = organizationId,
       userAccountId = authenticationFacade.authenticatedUser.id,
-      filters = filters
+      filters = filters,
     )
   }
 
@@ -381,7 +381,7 @@ class ProjectService(
     search: String?,
     organizationId: Long? = null,
     userAccountId: Long,
-    filters: ProjectFilters? = ProjectFilters()
+    filters: ProjectFilters? = ProjectFilters(),
   ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages =
       projectRepository.findAllPermitted(
@@ -389,7 +389,7 @@ class ProjectService(
         pageable,
         search,
         organizationId,
-        filters ?: ProjectFilters()
+        filters ?: ProjectFilters(),
       )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
   }

@@ -63,7 +63,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   fun findAllByProjectId(
     projectId: Long?,
     pageable: Pageable,
-    filters: LanguageFilters
+    filters: LanguageFilters,
   ): Page<LanguageDto>
 
   fun findAllByTagInAndProjectId(

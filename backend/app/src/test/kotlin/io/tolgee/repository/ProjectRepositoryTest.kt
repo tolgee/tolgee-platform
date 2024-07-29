@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.development.DbPopulatorReal
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Project
@@ -52,7 +53,12 @@ class ProjectRepositoryTest {
   fun findAllPermittedPaged() {
     val users = dbPopulatorReal.createUsersAndOrganizations()
     dbPopulatorReal.createBase("No org project", users[3].username)
-    val result = projectRepository.findAllPermitted(users[3].id, PageRequest.of(0, 20, Sort.by(Sort.Order.asc("id"))))
+    val result =
+      projectRepository.findAllPermitted(
+        users[3].id,
+        PageRequest.of(0, 20, Sort.by(Sort.Order.asc("id"))),
+        filters = ProjectFilters(),
+      )
     assertThat(result).hasSize(10)
     assertThat(result.content[0].organizationOwner?.name).isNotNull
     assertThat(result.content[8].organizationOwner?.slug).isNotNull

@@ -7,7 +7,6 @@ import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import jakarta.persistence.*
 import jakarta.validation.constraints.Size
-import org.hibernate.annotations.Formula
 import java.util.*
 
 @Entity

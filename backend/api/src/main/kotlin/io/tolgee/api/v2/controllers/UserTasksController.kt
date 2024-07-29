@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.task.TaskFilters
 import io.tolgee.hateoas.task.TaskWithProjectModel
 import io.tolgee.hateoas.task.TaskWithProjectModelAssembler
-import io.tolgee.model.task.Task
 import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade

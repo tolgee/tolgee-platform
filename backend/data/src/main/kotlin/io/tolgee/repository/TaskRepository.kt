@@ -75,7 +75,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     projectId: Long,
     pageable: Pageable,
     search: String?,
-    filters: TaskFilters
+    filters: TaskFilters,
   ): Page<Task>
 
   @Query(
@@ -92,7 +92,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     userId: Long,
     pageable: Pageable,
     search: String?,
-    filters: TaskFilters
+    filters: TaskFilters,
   ): Page<Task>
 
   @Query(
@@ -104,7 +104,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
         left join fetch t.project
         left join fetch t.language
       where t in :tasks
-    """
+    """,
   )
   fun getByIdsWithAllPrefetched(tasks: Collection<Task>): List<Task>
 
@@ -142,7 +142,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
       where k.project.id = :projectId
         and (t.language.id = :baseLangId or t.id is NULL)
         and k.id in :keyIds
-    """
+    """,
   )
   fun calculateScope(
     projectId: Long,
@@ -167,7 +167,5 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
       group by tk.id
     """,
   )
-  fun getTasksScopes(
-    tasks: Collection<Task>
-  ): List<TaskScopeView>
+  fun getTasksScopes(tasks: Collection<Task>): List<TaskScopeView>
 }

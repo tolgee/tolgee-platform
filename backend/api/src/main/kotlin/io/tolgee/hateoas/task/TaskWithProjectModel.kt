@@ -3,7 +3,6 @@ package io.tolgee.hateoas.task
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.project.SimpleProjectModel
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
-import io.tolgee.hateoas.userAccount.UserAccountModel
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import org.springframework.hateoas.RepresentationModel

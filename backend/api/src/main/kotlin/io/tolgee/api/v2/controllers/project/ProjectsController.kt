@@ -121,7 +121,7 @@ class ProjectsController(
     pageable: Pageable,
     @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {
-    val projects = projectService.findPermittedInOrganizationPaged(pageable, search, filters=filters)
+    val projects = projectService.findPermittedInOrganizationPaged(pageable, search, filters = filters)
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
   }
 

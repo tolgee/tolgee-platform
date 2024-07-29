@@ -38,7 +38,7 @@ class CursorUtilUnitTest {
                 mtProvider = null,
                 commentCount = 0,
                 unresolvedCommentCount = 1,
-                assignedTaskId = 1
+                assignedTaskId = 1,
               ),
           ),
         contextPresent = false,

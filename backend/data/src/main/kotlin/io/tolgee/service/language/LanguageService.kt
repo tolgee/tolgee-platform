@@ -339,7 +339,7 @@ class LanguageService(
   fun getPaged(
     projectId: Long,
     pageable: Pageable,
-    filters: LanguageFilters?
+    filters: LanguageFilters?,
   ): Page<LanguageDto> {
     return this.languageRepository.findAllByProjectId(projectId, pageable, filters ?: LanguageFilters())
   }
