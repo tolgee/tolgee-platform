@@ -1,4 +1,4 @@
-import { Button, styled, Typography, useTheme } from '@mui/material';
+import { Link as MuiLink, styled, Typography, useTheme } from '@mui/material';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { T, useTranslate } from '@tolgee/react';
@@ -32,11 +32,21 @@ const StyledHeader = styled(Typography)`
 const StyledDescription = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.primary}
   margin-bottom: 40px;
+  text-align: center;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 60%;
 `;
 
-const StyledHint = styled(Typography)`
-  margin-bottom: 20px;
-  font-weight: bold;
+export const StyledLink = styled(MuiLink)`
+  cursor: pointer;
+  font-weight: 400;
+
+  &.disabled {
+    color: ${({ theme }) => theme.palette.emphasis[400]};
+    pointer-events: none;
+  }
 `;
 
 const StyledImg = styled('img')`
@@ -44,8 +54,13 @@ const StyledImg = styled('img')`
   margin-bottom: 30px;
 `;
 
-const StyledEnabled = styled('span')`
+const BoldSpan = styled('span')`
   font-weight: 500;
+`;
+
+const InactiveLinkSpan = styled('span')`
+  font-weight: 300;
+  color: ${({ theme }) => theme.palette.text.disabled};
 `;
 
 export const EmailNotVerifiedView = () => {
@@ -67,6 +82,21 @@ export const EmailNotVerifiedView = () => {
     url: '/v2/user/send-email-verification',
     method: 'post',
   });
+
+  const handleResendEmail = () => {
+    resendEmail.mutate(
+      {},
+      {
+        onSuccess: () => {
+          setDelay(10000);
+          setEnabled(true);
+          reStartTimer();
+
+          messageService.success(<T keyName="verify_email_resend_message" />);
+        },
+      }
+    );
+  };
 
   const [enabled, setEnabled] = useState(false);
   const [delay, setDelay] = useState(0);
@@ -92,49 +122,34 @@ export const EmailNotVerifiedView = () => {
         >
           <StyledContainer>
             <StyledHeader variant="h4">
-              <T keyName="verify_email_title" />
+              <T keyName="verify_email_check_inbox" />
             </StyledHeader>
             <StyledDescription variant="body1" mb={2}>
               <T
-                keyName="verify_email_description"
-                params={{ email: email, b: <StyledEnabled /> }}
+                keyName="verify_email_we_sent_email"
+                params={{ email: email, b: <BoldSpan /> }}
               />
             </StyledDescription>
             <StyledImg src={imageSrc} alt="Verify email" />
-            <StyledHint variant="body2">
-              <T keyName="verify_email_didnt_receive_email_hint" />
-            </StyledHint>
-            <Button
-              variant="contained"
-              data-cy="resend-email-button"
-              disabled={enabled}
-              onClick={() =>
-                resendEmail.mutate(
-                  {},
-                  {
-                    onSuccess: () => {
-                      setDelay(60000);
-                      setEnabled(true);
-                      reStartTimer();
 
-                      messageService.success(
-                        <T keyName="verify_email_resend_message" />
-                      );
-                    },
-                  }
-                )
-              }
-              color="primary"
-            >
+            <StyledDescription variant="body1">
               {enabled ? (
                 <T
-                  keyName="verify_email_resend_button_with_seconds"
-                  params={{ seconds: remainingSeconds }}
+                  keyName="verify_email_resend_link_retry_after"
+                  params={{
+                    seconds: remainingSeconds,
+                    link: <StyledLink className="disabled"></StyledLink>,
+                  }}
                 />
               ) : (
-                <T keyName="verify_email_resend_button" />
+                <T
+                  keyName="verify_email_resend_link"
+                  params={{
+                    link: <StyledLink data-cy="resend-email-button" onClick={handleResendEmail}></StyledLink>,
+                  }}
+                />
               )}
-            </Button>
+            </StyledDescription>
           </StyledContainer>
         </BaseView>
       </DashboardPage>

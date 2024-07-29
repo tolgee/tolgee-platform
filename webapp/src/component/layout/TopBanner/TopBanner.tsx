@@ -101,8 +101,8 @@ export function TopBanner() {
       <StyledContent data-cy="top-banner-content">
         {!isEmailVerified ? (
           <Announcement
-            content={t('verify_email_announcement')}
-            title={t('verify_email_now_title')}
+            content={null}
+            title={t('verify_email_account_not_verified_title')}
             icon={<img src={mailImage} alt="Mail Icon" />}
           />
         ) : (
