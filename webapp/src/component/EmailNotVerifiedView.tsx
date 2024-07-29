@@ -113,19 +113,13 @@ export const EmailNotVerifiedView = () => {
                   {},
                   {
                     onSuccess: () => {
+                      setDelay(60000);
+                      setEnabled(true);
+                      reStartTimer();
+
                       messageService.success(
                         <T keyName="verify_email_resend_message" />
                       );
-                    },
-                    onError: (data) => {
-                      if (data.code === 'rate_limited') {
-                        const retryAfter = (data.params?.[0] ?? 0) as number;
-                        setDelay(retryAfter);
-                        setEnabled(true);
-                        reStartTimer();
-                      } else {
-                        data.handleError?.();
-                      }
                     },
                   }
                 )
