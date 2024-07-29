@@ -17,7 +17,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.GetMapping

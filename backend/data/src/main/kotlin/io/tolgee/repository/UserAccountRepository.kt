@@ -54,7 +54,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     ua.id,
     ua.username,
     ua.name,
-    ev.newEmail,
+    case when ev is not null then coalesce(ev.newEmail, ua.username) else null end,
     ua.avatarHash,
     ua.accountType,
     ua.role,
@@ -170,7 +170,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     value = """
-    select count(ua) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null
+    select count(ua) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null and ua.isDemo = false
   """,
   )
   fun countAllEnabled(): Long
@@ -201,6 +201,15 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """,
   )
   fun findActiveWithFetchedDataByUserNames(usernames: List<String>): List<UserAccount>
+
+  @Query(
+    """
+    from UserAccount ua 
+    left join fetch ua.organizationRoles
+    where ua.username in :usernames and ua.deletedAt is null and ua.isDemo = true
+  """,
+  )
+  fun findDemoByUsernames(usernames: List<String>): List<UserAccount>
 
   @Query(
     """

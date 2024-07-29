@@ -104,7 +104,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
                 onClick={handleAddTranslation}
                 data-cy="translations-add-button"
               >
-                <T keyName="translation_add" />
+                <T keyName="key_add" />
               </Button>
             </QuickStartHighlight>
           )}

@@ -14,7 +14,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.web.bind.annotation.CrossOrigin

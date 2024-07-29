@@ -72,21 +72,18 @@ export const StorageFormS3 = ({
           <DialogContent>
             <TextField
               size="small"
-              variant="standard"
               name="name"
               label={t('storage_form_name')}
               data-cy="storage-form-name"
             />
             <TextField
               size="small"
-              variant="standard"
               name="s3ContentStorageConfig.bucketName"
               label="Bucket name"
               data-cy="storage-form-s3-bucket-name"
             />
             <TextField
               size="small"
-              variant="standard"
               name="s3ContentStorageConfig.accessKey"
               label="Access key"
               placeholder={keepAsIsPlaceholder}
@@ -95,7 +92,6 @@ export const StorageFormS3 = ({
             />
             <TextField
               size="small"
-              variant="standard"
               name="s3ContentStorageConfig.secretKey"
               label="Secret key"
               placeholder={keepAsIsPlaceholder}
@@ -104,21 +100,18 @@ export const StorageFormS3 = ({
             />
             <TextField
               size="small"
-              variant="standard"
               name="s3ContentStorageConfig.endpoint"
               label="Endpoint"
               data-cy="storage-form-s3-endpoint"
             />
             <TextField
               size="small"
-              variant="standard"
               name="s3ContentStorageConfig.signingRegion"
               label="Signing region"
               data-cy="storage-form-s3-signing-region"
             />
             <TextField
               size="small"
-              variant="standard"
               name="publicUrlPrefix"
               label={t('storage_form_public_url_prefix')}
               data-cy="storage-form-public-url-prefix"

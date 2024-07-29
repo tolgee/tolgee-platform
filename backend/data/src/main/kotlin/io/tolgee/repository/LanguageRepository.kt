@@ -12,11 +12,25 @@ import java.util.*
 
 @Repository
 interface LanguageRepository : JpaRepository<Language, Long> {
+  @Query(
+    """
+    select l
+    from Language l
+    where l.name = :name and l.project = :project and l.deletedAt is null
+  """,
+  )
   fun findByNameAndProject(
     name: String?,
     project: Project,
   ): Optional<Language>
 
+  @Query(
+    """
+    select l
+    from Language l
+    where l.project.id = :projectId and l.deletedAt is null
+  """,
+  )
   fun findAllByProjectId(projectId: Long?): Set<Language>
 
   @Query(
@@ -31,7 +45,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
       coalesce((l.id = l.project.baseLanguage.id), false)
     )
     from Language l
-    where l.project.id = :projectId
+    where l.project.id = :projectId and l.deletedAt is null
   """,
   )
   fun findAllByProjectId(
@@ -46,6 +60,13 @@ interface LanguageRepository : JpaRepository<Language, Long> {
 
   fun deleteAllByProjectId(projectId: Long?)
 
+  @Query(
+    """
+    select l
+    from Language l
+    where l.project.id = :projectId and l.id in :languageIds and l.deletedAt is null
+  """,
+  )
   fun findAllByProjectIdAndIdInOrderById(
     projectId: Long,
     languageIds: List<Long>,
@@ -55,13 +76,22 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     """
     select l
     from Language l
-    where l.project.id = :projectId and l.id in :languageId
+    where l.project.id = :projectId and l.id in :languageId and l.deletedAt is null
   """,
   )
   fun find(
     languageId: Long,
     projectId: Long,
   ): Language?
+
+  @Query(
+    """
+    select l
+    from Language l
+    where l.id = :languageId and l.deletedAt is null
+  """,
+  )
+  fun find(languageId: Long): Language?
 
   @Query(
     """
@@ -74,7 +104,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
       l.aiTranslatorPromptDescription,
       coalesce((l.id = l.project.baseLanguage.id), false)
     )
-    from Language l where l.project.id = :projectId
+    from Language l where l.project.id = :projectId and l.deletedAt is null
   """,
   )
   fun findAllDtosByProjectId(projectId: Long): List<LanguageDto>

@@ -4,7 +4,9 @@ declare namespace DataCy {
         "account-security-set-password-instructions-sent" |
         "active-plan-license-key-input" |
         "activity-compact" |
+        "activity-compact-detail-button" |
         "activity-detail" |
+        "activity-detail-dialog" |
         "add-box" |
         "administration-access-message" |
         "administration-cloud-plan-field-auto-assign-to-selected" |
@@ -95,7 +97,6 @@ declare namespace DataCy {
         "billing-actual-used-strings" |
         "billing-estimated-costs" |
         "billing-estimated-costs-open-button" |
-        "billing-extra-credits-buy" |
         "billing-invoice-item-number" |
         "billing-invoice-usage-button" |
         "billing-invoices-list" |
@@ -104,13 +105,11 @@ declare namespace DataCy {
         "billing-plan" |
         "billing-plan-action-button" |
         "billing-plan-monthly-price" |
-        "billing-plan-price-per-seat-extra" |
-        "billing-plan-price-per-thousand-mt-credits-extra" |
-        "billing-plan-price-per-thousand-strings-extra" |
+        "billing-plan-price-extra-seat" |
+        "billing-plan-price-extra-thousand-mt-credits" |
+        "billing-plan-price-extra-thousand-strings" |
         "billing-plan-subtitle" |
-        "billing-plan-title" |
         "billing-progress-label-item" |
-        "billing-self-hosted-ee-plan" |
         "billing-self-hosted-ee-plan-subscribe-button" |
         "billing-subscriptions-cloud-button" |
         "billing-subscriptions-self-hosted-ee-button" |
@@ -438,6 +437,7 @@ declare namespace DataCy {
         "quick-start-step" |
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
+        "resend-email-button" |
         "screenshot-image" |
         "screenshot-thumbnail" |
         "screenshot-thumbnail-delete" |

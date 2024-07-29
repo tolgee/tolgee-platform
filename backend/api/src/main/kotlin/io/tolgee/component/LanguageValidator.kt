@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.validators.ValidationError
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.model.Project
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import org.springframework.stereotype.Component
 import java.util.*
 

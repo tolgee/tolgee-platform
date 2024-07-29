@@ -85,6 +85,13 @@ class KeyService(
     return keyRepository.getByNameAndNamespace(projectId, name, namespace)
   }
 
+  fun find(
+    projectId: Long,
+    translationId: Long,
+  ): Optional<Key> {
+    return keyRepository.searchKey(projectId, translationId)
+  }
+
   fun get(id: Long): Key {
     return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
   }
@@ -392,7 +399,18 @@ class KeyService(
 
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
 
-  fun getKeysWithTagsById(keysIds: Iterable<Long>): Set<Key> = keyRepository.getWithTagsByIds(keysIds)
+  fun getKeysWithTagsById(
+    projectId: Long,
+    keysIds: Iterable<Long>,
+  ): Set<Key> {
+    val result = keyRepository.getWithTagsByIds(projectId, keysIds)
+
+    if (keysIds.count() != result.count()) {
+      throw NotFoundException(Message.KEY_NOT_FOUND)
+    }
+
+    return result
+  }
 
   fun find(id: List<Long>): List<Key> {
     return keyRepository.findAllByIdIn(id)
@@ -443,7 +461,7 @@ class KeyService(
       translation.state = TranslationState.DISABLED
       translationService.save(translation)
     }
-    return languages
+    return languages.sortedBy { languageIds.indexOf(it.id) }
   }
 
   fun getViewsByKeyIds(ids: List<Long>): List<KeyView> {

@@ -1,5 +1,4 @@
 import { grey } from '@mui/material/colors';
-import { ALL_TOKENS } from './tokens';
 
 const customGrey: Emphasis = {
   50: '#f0f2f4',
@@ -52,14 +51,6 @@ export type Activity = {
   addedHighlight: string;
 };
 
-export type BillingProgress = {
-  background: string;
-  low: string;
-  over: string;
-  sufficient: string;
-  separator: string;
-};
-
 export type Marker = {
   primary: string;
   secondary: string;
@@ -93,6 +84,11 @@ export type ExampleBanner = {
   border: string;
 };
 
+export type RevisionFilterBanner = {
+  background: string;
+  highlightText: string;
+};
+
 export type TipsBanner = {
   background: string;
 };
@@ -122,20 +118,16 @@ export type QuickStart = {
   finishCircle: string;
 };
 
-export type LanguageChips = {
+export type Login = {
+  backgroundPrimary: string;
+};
+
+export type Input = {
   background: string;
 };
 
-const getTokensByMode = (mode: 'light' | 'dark') => {
-  const result = {} as Record<keyof typeof ALL_TOKENS, string>;
-  Object.entries(ALL_TOKENS).map(([tokenName, value]) => {
-    if (typeof value === 'string') {
-      result[tokenName] = value;
-    } else {
-      result[tokenName] = value[mode];
-    }
-  });
-  return result;
+export type LanguageChips = {
+  background: string;
 };
 
 export const colors = {
@@ -174,14 +166,6 @@ export const colors = {
       other: '#002bff',
       main: '#2C3C52',
     } satisfies Editor,
-    billingProgress: {
-      background: '#C4C4C4',
-      low: '#E80000',
-      over: '#ffce00',
-      sufficient: '#17AD18',
-      separator: '#656565',
-    },
-    billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
     marker: {
       primary: '#ff0000',
@@ -197,6 +181,10 @@ export const colors = {
       mainText: '#004437',
       linkText: '#009B85',
     },
+    revisionFilterBanner: {
+      background: '#00AF9A14',
+      highlightText: '#00AF9A',
+    } satisfies RevisionFilterBanner,
     quickStart: {
       highlight: '#F7F8FB',
       circleNormal: '#E7EBF5',
@@ -224,7 +212,6 @@ export const colors = {
     languageChips: {
       background: '#F6F6F8',
     } satisfies LanguageChips,
-    tokens: getTokensByMode('light'),
     placeholders: {
       variable: {
         border: '#7AD3C1',
@@ -247,6 +234,12 @@ export const colors = {
         text: '#808080',
       },
     } satisfies Placeholders,
+    login: {
+      backgroundPrimary: '#fff',
+    } satisfies Login,
+    input: {
+      background: '#ffffff00',
+    } satisfies Input,
   },
   dark: {
     white: '#dddddd',
@@ -298,14 +291,6 @@ export const colors = {
       other: '#99aaff',
       main: '#eeeeee',
     } satisfies Editor,
-    billingProgress: {
-      background: '#565656',
-      low: '#ca0000',
-      over: '#ffce00',
-      sufficient: '#1e991e',
-      separator: '#656565',
-    },
-    billingPlan: '#233043',
     globalLoading: '#ff6995',
     marker: {
       primary: '#ff0000',
@@ -321,6 +306,10 @@ export const colors = {
       mainText: '#BEF4E9',
       linkText: '#dddddd',
     },
+    revisionFilterBanner: {
+      background: '#99E5D629',
+      highlightText: '#99E5D6',
+    } satisfies RevisionFilterBanner,
     quickStart: {
       highlight: '#233043',
       circleNormal: '#2c3c52',
@@ -347,7 +336,6 @@ export const colors = {
     languageChips: {
       background: '#243245',
     } satisfies LanguageChips,
-    tokens: getTokensByMode('dark'),
     placeholders: {
       variable: {
         border: '#008371',
@@ -370,5 +358,11 @@ export const colors = {
         text: '#acacac',
       },
     } satisfies Placeholders,
+    login: {
+      backgroundPrimary: '#ffffff0a',
+    } satisfies Login,
+    input: {
+      background: '#ffffff08',
+    } satisfies Input,
   },
 } as const;

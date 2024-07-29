@@ -46,3 +46,6 @@ msgstr "aaa"
 # and other
 msgid "no_newline_between2_with_hashed"
 msgstr "aaa"
+
+msgid "This is a \"quote\""
+msgstr "Dies ist ein \"zitat\""

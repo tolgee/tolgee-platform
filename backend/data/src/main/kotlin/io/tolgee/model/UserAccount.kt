@@ -2,6 +2,8 @@ package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
+import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.notifications.NotificationPreferences
 import io.tolgee.model.notifications.UserNotification
 import jakarta.persistence.CascadeType
@@ -91,6 +93,18 @@ data class UserAccount(
   @ColumnDefault("true")
   var passwordChanged: Boolean = true
 
+  /**
+   * Whether user is created only to be used as a part of demo data
+   */
+  @ColumnDefault("false")
+  var isDemo: Boolean = false
+
+  @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
+  var slackUserConnection: MutableList<SlackUserConnection> = mutableListOf()
+
+  @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
+  var slackConfig: MutableList<SlackConfig> = mutableListOf()
+
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "recipient")
   var userNotifications: MutableList<UserNotification> = mutableListOf()
 
@@ -101,6 +115,26 @@ data class UserAccount(
   @Where(clause = "project_id IS NULL")
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
   private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
+  constructor(
+    id: Long?,
+    username: String?,
+    password: String?,
+    name: String?,
+    permissions: MutableSet<Permission>,
+    role: Role = Role.USER,
+    accountType: AccountType = AccountType.LOCAL,
+    thirdPartyAuthType: String?,
+    thirdPartyAuthId: String?,
+    resetPasswordCode: String?,
+  ) : this(id = 0L, username = "", password, name = "") {
+    this.permissions = permissions
+    this.role = role
+    this.accountType = accountType
+    this.thirdPartyAuthType = thirdPartyAuthType
+    this.thirdPartyAuthId = thirdPartyAuthId
+    this.resetPasswordCode = resetPasswordCode
+  }
 
   val globalNotificationPreferences: NotificationPreferences?
     get() = _globalNotificationPreferences.firstOrNull()

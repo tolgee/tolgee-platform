@@ -25,7 +25,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.UserProjectMetadataView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService

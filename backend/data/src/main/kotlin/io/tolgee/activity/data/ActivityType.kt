@@ -87,6 +87,11 @@ enum class ActivityType(
   CREATE_LANGUAGE,
   EDIT_LANGUAGE,
   DELETE_LANGUAGE(restrictEntitiesInList = arrayOf(Language::class)),
+
+  /**
+   * When language is deleted permanently, this happens asynchronously after language is deleted
+   */
+  HARD_DELETE_LANGUAGE(hideInList = true),
   CREATE_PROJECT,
   EDIT_PROJECT,
   NAMESPACE_EDIT,
@@ -109,4 +114,5 @@ enum class ActivityType(
   WEBHOOK_CONFIG_CREATE,
   WEBHOOK_CONFIG_UPDATE,
   WEBHOOK_CONFIG_DELETE,
+  COMPLEX_TAG_OPERATION(onlyCountsInList = true),
 }

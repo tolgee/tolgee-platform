@@ -5,7 +5,7 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.model.batch.params.PreTranslationByTmJobParams
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 

@@ -21,6 +21,7 @@
     "cypress-file-upload": "^5.0.8",
     "cypress-promise": "^1.1.0",
     "cypress-xpath": "^2.0.0",
+    "decompress": "^4.2.1",
     "dotenv": "^16.0.1",
     "eslint": "^8.19.0",
     "eslint-plugin-no-only-tests": "^2.6.0",

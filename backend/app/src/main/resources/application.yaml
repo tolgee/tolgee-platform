@@ -10,23 +10,24 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+    async:
+      request-timeout: 180000
   jpa:
     properties:
       hibernate:
         order_by:
           default_null_ordering: first
         jdbc:
-          batch_size: 50
-          batch_versioned_data: true
+          batch_size: 1000
         order_inserts: true
         order_updates: true
-        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
         types:
           print:
             banner: false
         enhancer:
           enableLazyInitialization: true
           enableDirtyTracking: true
+        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
   batch:
     job:
       enabled: false

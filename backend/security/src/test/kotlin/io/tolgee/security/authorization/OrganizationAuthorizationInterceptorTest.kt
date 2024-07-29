@@ -26,6 +26,7 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationRoleService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -50,12 +51,15 @@ class OrganizationAuthorizationInterceptorTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
+  private val emailVerificationService = Mockito.mock(EmailVerificationService::class.java)
+
   private val organizationAuthenticationInterceptor =
     OrganizationAuthorizationInterceptor(
       authenticationFacade,
       organizationRoleService,
       requestContextService,
       Mockito.mock(OrganizationHolder::class.java),
+      emailVerificationService,
     )
 
   private val mockMvc =
@@ -74,6 +78,7 @@ class OrganizationAuthorizationInterceptorTest {
 
     Mockito.`when`(userAccount.id).thenReturn(1337L)
     Mockito.`when`(organization.id).thenReturn(1337L)
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(true)
   }
 
   @AfterEach
@@ -132,8 +137,31 @@ class OrganizationAuthorizationInterceptorTest {
     mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsOk
   }
 
+  @Test
+  fun `rejects access if the user does not have a verified email`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+      .thenReturn(true)
+
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(false)
+    mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsForbidden
+  }
+
+  @Test
+  fun `not throw when annotated by email verification bypass`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+      .thenReturn(true)
+
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(false)
+    mockMvc.perform(get("/v2/organizations/email-bypass")).andIsOk
+  }
+
   @RestController
   class TestController {
+    @GetMapping("/v2/organizations/email-bypass")
+    @BypassEmailVerification
+    @UseDefaultPermissions
+    fun emailBypass() = "hello!"
+
     @GetMapping("/v2/organizations")
     @IsGlobalRoute
     fun getAll() = "hello!"

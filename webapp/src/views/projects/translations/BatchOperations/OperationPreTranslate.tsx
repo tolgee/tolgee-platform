@@ -8,6 +8,7 @@ import { OperationProps } from './types';
 import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
 import { OperationContainer } from './components/OperationContainer';
 import { BatchOperationsLanguagesSelect } from './components/BatchOperationsLanguagesSelect';
+import { getPreselectedLanguages } from './getPreselectedLanguages';
 
 type Props = OperationProps;
 
@@ -15,10 +16,15 @@ export const OperationPreTranslate = ({ disabled, onStart }: Props) => {
   const project = useProject();
   const allLanguages = useTranslationsSelector((c) => c.languages) || [];
   const selection = useTranslationsSelector((c) => c.selection);
+  const translationsLanguages = useTranslationsSelector(
+    (c) => c.translationsLanguages
+  );
 
   const languages = allLanguages.filter((l) => !l.base);
 
-  const [selectedLangs, setSelectedLangs] = useState<string[]>([]);
+  const [selectedLangs, setSelectedLangs] = useState<string[]>(
+    getPreselectedLanguages(languages, translationsLanguages ?? [])
+  );
 
   const batchLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm',

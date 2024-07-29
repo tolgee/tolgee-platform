@@ -8,6 +8,7 @@ import {
   enableEmailVerification,
   enableRegistration,
   getParsedEmailVerification,
+  getParsedEmailVerificationByIndex,
   getRecaptchaSiteKey,
   getUser,
   login,
@@ -18,7 +19,7 @@ import {
   setRecaptchaSiteKey,
   v2apiFetch,
 } from '../../common/apiCalls/common';
-import { assertMessage } from '../../common/shared';
+import { assertMessage, gcy } from '../../common/shared';
 import {
   checkAnonymousIdSet,
   checkAnonymousIdUnset,
@@ -77,7 +78,6 @@ context('Sign up', () => {
   afterEach(() => {
     signUpAfter(TEST_USERNAME);
   });
-
   describe('without recaptcha', () => {
     beforeEach(() => {
       setRecaptchaSiteKey(null);
@@ -91,9 +91,9 @@ context('Sign up', () => {
       }).as('signUp');
       fillAndSubmitSignUpForm(TEST_USERNAME);
       cy.wait(['@signUp']);
-      cy.contains(
-        'Thank you for signing up. To verify your email please follow instructions sent to provided email address.'
-      ).should('be.visible');
+      cy.contains('Thank you for signing up!').should('be.visible');
+
+      cy.contains('Verify your email now');
       setProperty('recaptcha.siteKey', recaptchaSiteKey);
     });
   });
@@ -116,9 +116,10 @@ context('Sign up', () => {
     }).as('signUp');
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.wait(['@signUp']);
-    cy.contains(
-      'Thank you for signing up. To verify your email please follow instructions sent to provided email address.'
-    ).should('be.visible');
+    cy.contains('Thank you for signing up!').should('be.visible');
+
+    cy.contains('Verify your email now');
+
     getUser(TEST_USERNAME).then((u) => {
       expect(u[0]).be.equal(TEST_USERNAME);
       expect(u[1]).be.not.null;
@@ -131,6 +132,32 @@ context('Sign up', () => {
     });
     checkAnonymousIdUnset();
     checkAnonymousUserIdentified();
+  });
+
+  it('Signs up and resend email verification', () => {
+    fillAndSubmitSignUpForm(TEST_USERNAME);
+    cy.contains('Thank you for signing up!').should('be.visible');
+
+    cy.contains('Verify your email now');
+
+    gcy('resend-email-button').click();
+    cy.contains('Your verification link has been resent.');
+
+    // Emails sent after registration are no longer valid
+    getParsedEmailVerificationByIndex(1).then((r) => {
+      cy.wrap(r.fromAddress).should('contain', 'no-reply@tolgee.io');
+      cy.wrap(r.toAddress).should('contain', TEST_USERNAME);
+      cy.visit(r.verifyEmailLink);
+      assertMessage('Validation code or link is invalid');
+    });
+
+    getParsedEmailVerificationByIndex(0).then((r) => {
+      cy.wrap(r.fromAddress).should('contain', 'no-reply@tolgee.io');
+      cy.wrap(r.toAddress).should('contain', TEST_USERNAME);
+      cy.visit(r.verifyEmailLink);
+      assertMessage('Email was verified');
+    });
+    cy.contains('Projects').should('be.visible');
   });
 
   it('Signs up without email verification', () => {

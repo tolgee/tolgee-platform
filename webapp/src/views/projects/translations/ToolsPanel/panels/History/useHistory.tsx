@@ -61,5 +61,10 @@ export const useHistory = ({ keyId, translation, language }: Props) => {
 
   historyItems.reverse();
 
-  return { fetchMore, historyItems, hasNextPage: history.hasNextPage };
+  return {
+    fetchMore,
+    historyItems,
+    hasNextPage: history.hasNextPage,
+    loading: history.isLoading,
+  };
 };

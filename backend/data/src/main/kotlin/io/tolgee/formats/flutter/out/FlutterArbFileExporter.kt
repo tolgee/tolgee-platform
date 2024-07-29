@@ -7,13 +7,14 @@ import io.tolgee.formats.flutter.FLUTTER_ARB_FILE_PLACEHOLDERS_CUSTOM_KEY
 import io.tolgee.formats.flutter.FlutterArbModel
 import io.tolgee.formats.flutter.FlutterArbTranslationModel
 import io.tolgee.formats.toIcuPluralString
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class FlutterArbFileExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   private val baseLanguageTag: String,
   private val objectMapper: ObjectMapper,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
@@ -64,20 +65,24 @@ class FlutterArbFileExporter(
   }
 
   private fun getModel(translation: ExportTranslationView): FlutterArbModel {
-    val path = getFilePath(translation.languageTag)
+    val path = getFilePath(translation)
     return fileUnits.computeIfAbsent(path) {
       FlutterArbModel(
-        locale = convertLanguageTag(translation.languageTag),
+        locale = filePathProvider.getSnakeLanguageTag(translation.languageTag),
       )
     }
   }
 
-  private fun getFilePath(languageTag: String): String {
-    val tagPart = convertLanguageTag(languageTag)
-    return "app_$tagPart.$fileExtension"
+  private fun getFilePath(translation: ExportTranslationView): String {
+    return filePathProvider.getFilePath(namespace = translation.key.namespace, languageTag = translation.languageTag)
   }
 
-  private fun convertLanguageTag(languageTag: String) = languageTag.replace("-", "_")
+  private val filePathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      "arb",
+    )
+  }
 
   private fun getConvertedMessage(translation: ExportTranslationView): String? {
     translation.text ?: return null
@@ -97,9 +102,6 @@ class FlutterArbFileExporter(
 
     return converted.singleResult!!
   }
-
-  override val fileExtension: String
-    get() = "arb"
 
   override fun produceFiles(): Map<String, InputStream> {
     return getModels().map { (path, model) ->

@@ -1,12 +1,13 @@
+import { useEffect } from 'react';
 import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-
+import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { GoToBilling } from 'tg.component/GoToBilling';
 import { stringHash } from 'tg.fixtures/stringHash';
+
 import { useMTStreamed } from './useMTStreamed';
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
-import { useEffect } from 'react';
 import { MachineTranslationItem } from './MachineTranslationItem';
 
 const StyledContainer = styled('div')`
@@ -83,6 +84,16 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   useEffect(() => {
     setItemsCount(arrayResults.length);
   }, [arrayResults.length]);
+
+  if (machineLoadable.isLoading && !data) {
+    return (
+      <StyledContainer>
+        <TabMessage>
+          <LoadingSkeletonFadingIn variant="text" />
+        </TabMessage>
+      </StyledContainer>
+    );
+  }
 
   return (
     <StyledContainer>

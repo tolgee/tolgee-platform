@@ -139,8 +139,8 @@ class PoFileExporterTest {
   fun `escapes correctly`() {
     val exporter = getEscapingTestExporter()
     val files = exporter.produceFiles().map { it.key to it.value.bufferedReader().readText() }.toMap()
-    val cs = files["en.po"]
-    cs.assert.isEqualTo(
+    val en = files["en.po"]
+    en.assert.isEqualTo(
       """
       msgid ""
       msgstr ""
@@ -160,7 +160,20 @@ class PoFileExporterTest {
     )
   }
 
-  private fun getSimpleExporter() =
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getSimpleExporter(
+        params =
+          getExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+    val files = exporter.produceFiles()
+    files["en/hello.po"].assert.isNotNull()
+  }
+
+  private fun getSimpleExporter(params: ExportParams = getExportParams()) =
     getExporter(
       listOf(
         ExportTranslationView(
@@ -185,6 +198,7 @@ class PoFileExporterTest {
           "cs",
         ),
       ),
+      params = params,
     )
 
   private fun getPluralsExporter() =
@@ -337,15 +351,20 @@ class PoFileExporterTest {
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
+    params: ExportParams = getExportParams(),
   ): PoFileExporter {
     val baseLanguageMock = mock<ILanguage>()
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
     return PoFileExporter(
       translations = translations,
-      exportParams = ExportParams().also { it.messageFormat = ExportMessageFormat.PHP_SPRINTF },
+      exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       baseLanguage = baseLanguageMock,
       baseTranslationsProvider = { listOf() },
     )
+  }
+
+  private fun getExportParams(): ExportParams {
+    return ExportParams().also { it.messageFormat = ExportMessageFormat.PHP_SPRINTF }
   }
 }

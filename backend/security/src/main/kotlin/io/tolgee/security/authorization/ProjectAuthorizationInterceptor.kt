@@ -26,11 +26,13 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
@@ -47,6 +49,8 @@ class ProjectAuthorizationInterceptor(
   private val projectHolder: ProjectHolder,
   private val organizationHolder: OrganizationHolder,
   private val activityHolder: ActivityHolder,
+  @Lazy
+  private val emailVerificationService: EmailVerificationService,
 ) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -55,7 +59,10 @@ class ProjectAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val userId = authenticationFacade.authenticatedUser.id
+    val user = authenticationFacade.authenticatedUser
+    checkEmailVerificationOrThrow(emailVerificationService::isVerified, user, handler)
+
+    val userId = user.id
     val project =
       requestContextService.getTargetProject(request)
         // Two possible scenarios: we're on a "global" route, or the project was not found.

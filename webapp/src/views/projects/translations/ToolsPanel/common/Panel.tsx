@@ -77,7 +77,7 @@ export const Panel = ({
 
   return (
     <StyledContainer data-cy="translation-panel" data-cy-id={id}>
-      <StyledHeader>
+      <StyledHeader onMouseDown={(e) => e.preventDefault()}>
         {icon}
         <StyledName>{name}</StyledName>
         {typeof itemsCount === 'number' || ItemsCountComponent ? (

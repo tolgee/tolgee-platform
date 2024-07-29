@@ -10,6 +10,7 @@ import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
 // @ts-ignore
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import { colors } from './colors';
+import { tolgeeColors, tolgeePalette } from 'figmaTheme';
 
 const LOCALSTORAGE_THEME_MODE = 'themeMode';
 
@@ -61,11 +62,13 @@ const righteousLatinExt = {
 
 const getTheme = (mode: PaletteMode) => {
   const c = mode === 'light' ? colors.light : colors.dark;
+  const tPalette = mode === 'light' ? tolgeePalette.Light : tolgeePalette.Dark;
 
   return createTheme({
     typography: {
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+      htmlFontSize: 15,
       h1: {
         fontSize: 42,
         fontWeight: 300,
@@ -121,17 +124,19 @@ const getTheme = (mode: PaletteMode) => {
     },
     palette: {
       mode,
-      primary: createColor(c.primary),
+      primary: tPalette.primary,
       primaryText: c.primaryText,
-      secondary: createColor(c.secondary),
+      secondary: tPalette.secondary,
       default: createColor(c.default),
-      info: createColor(c.info),
+      info: tPalette.info,
+      warning: tPalette.warning,
+      error: tPalette.error,
       common: {
         white: c.white,
       },
       text: {
-        primary: c.text,
-        secondary: c.textSecondary,
+        primary: tPalette.text.primary,
+        secondary: tPalette.text.secondary,
       },
       divider1: c.divider1,
       tile: c.tile,
@@ -145,8 +150,6 @@ const getTheme = (mode: PaletteMode) => {
       activity: c.activity,
       emphasis: c.emphasis,
       editor: c.editor,
-      billingProgress: c.billingProgress,
-      billingPlan: createColor(c.billingPlan),
       globalLoading: createColor(c.globalLoading),
       marker: c.marker,
       topBanner: c.topBanner,
@@ -154,9 +157,13 @@ const getTheme = (mode: PaletteMode) => {
       import: c.import,
       exampleBanner: c.exampleBanner,
       tipsBanner: c.tipsBanner,
-      tokens: c.tokens,
+      tokens: tPalette,
+      colors: tolgeeColors,
       placeholders: c.placeholders,
       languageChips: c.languageChips,
+      login: c.login,
+      input: c.input,
+      revisionFilterBanner: c.revisionFilterBanner,
     },
     mixins: {
       toolbar: {
@@ -172,6 +179,15 @@ const getTheme = (mode: PaletteMode) => {
             borderRadius: '11px',
             color: c.tooltip.text,
             backgroundColor: c.tooltip.background,
+          },
+        },
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            '&.MuiOutlinedInput-root': {
+              backgroundColor: c.input.background,
+            },
           },
         },
       },

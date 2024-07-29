@@ -107,7 +107,7 @@ class OrganizationProjectController(
     @RequestParam("search") search: String?,
     @PathVariable("slug") organizationSlug: String,
   ): PagedModel<ProjectWithStatsModel> {
-    return organizationService.find(organizationSlug)?.let { organization ->
+    return organizationService.findDto(organizationSlug)?.let { organization ->
       return getAllWithStatistics(pageable, search, organization.id)
     } ?: throw NotFoundException()
   }

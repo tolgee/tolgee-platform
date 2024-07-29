@@ -83,8 +83,16 @@ jobs:
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: npm run release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOLGEE_MACHINE_PAT }}
           VERSION: ${{ steps.version.outputs.VERSION }}
+
+      - name: Tag production and deprecated keys in platform
+        if: ${{ steps.version.outputs.VERSION != '' }}
+        run: "npm run tag-keys"
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+        working-directory: ./webapp
+
 
       - uses: actions/upload-artifact@v3
         if: always()

@@ -55,7 +55,6 @@ class ModifiedEntitiesViewProvider(
     return modifiedEntities.map entities@{ entity ->
       val relations = getRelations(entity)
       ModifiedEntityView(
-        activityRevision = entity.activityRevision,
         entityClass = entity.entityClass,
         entityId = entity.entityId,
         exists = entityExistences[entity.entityClass to entity.entityId],

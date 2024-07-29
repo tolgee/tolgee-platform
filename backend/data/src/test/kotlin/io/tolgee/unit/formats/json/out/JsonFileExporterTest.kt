@@ -8,6 +8,7 @@ import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
@@ -183,6 +184,29 @@ class JsonFileExporterTest {
     |}
       """.trimMargin(),
     )
+  }
+
+  @Test
+  fun `honors the provided fileStructureTemplate`() {
+    val exporter =
+      getExporter(
+        translations =
+          buildExportTranslationList {
+            add(
+              languageTag = "cs",
+              keyName = "item",
+              text = "A",
+            )
+          }.translations,
+        exportParams =
+          ExportParams().also {
+            it.fileStructureTemplate = "{languageTag}/hello/{namespace}.{extension}"
+          },
+      )
+
+    val files = exporter.produceFiles()
+
+    files["cs/hello.json"].assert.isNotNull()
   }
 
   private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {

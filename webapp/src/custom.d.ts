@@ -1,30 +1,37 @@
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
 import {
-  Tooltip,
   Activity,
-  BillingProgress,
   Cell,
   colors,
   Editor,
   Emphasis,
   ExampleBanner,
+  Input,
+  LanguageChips,
+  Login,
   Marker,
   Navbar,
   Placeholders,
   QuickStart,
+  RevisionFilterBanner,
   Tile,
   TipsBanner,
+  Tooltip,
   TopBanner,
-  LanguageChips,
 } from './colors';
+import { tolgeeColors, tolgeePalette } from 'figmaTheme';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
 
-const all = { ...colors.light, ...colors.dark };
+type TolgeeTokens =
+  | (typeof tolgeePalette)['Light']
+  | (typeof tolgeePalette)['Dark'];
+
+type TolgeeColors = typeof tolgeeColors;
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -38,18 +45,21 @@ declare module '@mui/material/styles/createPalette' {
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;
-    billingProgress: BillingProgress;
-    billingPlan: PaletteColor;
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
+    emailNotVerifiedBanner: EmailNotVerifiedBanner;
     quickStart: QuickStart;
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
-    tokens: typeof all.tokens;
+    tokens: TolgeeTokens;
+    colors: TolgeeColors;
     placeholders: Placeholders;
     languageChips: LanguageChips;
+    login: Login;
+    input: Input;
+    revisionFilterBanner: RevisionFilterBanner;
   }
 
   interface PaletteOptions {
@@ -63,8 +73,6 @@ declare module '@mui/material/styles/createPalette' {
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;
-    billingProgress: BillingProgress;
-    billingPlan: PaletteColorOptions;
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
@@ -72,9 +80,13 @@ declare module '@mui/material/styles/createPalette' {
     import: typeof all.import;
     exampleBanner: ExampleBanner;
     tipsBanner: TipsBanner;
-    tokens: typeof all.tokens;
+    tokens: TolgeeTokens;
+    colors: TolgeeColors;
     placeholders: Placeholders;
     languageChips: LanguageChips;
+    login: Login;
+    input: Input;
+    revisionFilterBanner: RevisionFilterBanner;
   }
 }
 

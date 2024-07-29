@@ -18,6 +18,7 @@ import {
   KeyUpdateData,
   UpdateTranslation,
 } from '../types';
+import { PrefilterType } from '../../prefilters/usePrefilter';
 
 const MAX_LANGUAGES = 10;
 const PAGE_SIZE = 60;
@@ -50,6 +51,7 @@ type Props = {
   pageSize?: number;
   updateLocalStorageLanguages?: boolean;
   baseLang: string | undefined;
+  prefilter?: PrefilterType;
 };
 
 const addBaseIfMissing = (languages: string[] | undefined, base: string) => {
@@ -130,7 +132,7 @@ export const useTranslationsService = (props: Props) => {
       ? [props.keyNamespace]
       : parsedFilters.filterNamespace;
 
-  const requestQuery = {
+  const requestQuery: TranslationsQueryType = {
     ...query,
     // smuggle in base lang if not present
     languages: addBaseIfMissing(query.languages, props.baseLang!),
@@ -139,6 +141,11 @@ export const useTranslationsService = (props: Props) => {
     filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
     search: urlSearch as string,
+    filterRevisionId:
+      props.prefilter?.activity !== undefined
+        ? [props.prefilter?.activity]
+        : undefined,
+    filterFailedKeysOfJob: props.prefilter?.failedJob,
   };
 
   const translations = useApiInfiniteQuery({

@@ -6,6 +6,8 @@ import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import java.io.BufferedInputStream
+import java.nio.charset.Charset
 
 class StringsFileProcessor(
   override val context: FileProcessorContext,
@@ -23,7 +25,10 @@ class StringsFileProcessor(
   }
 
   private fun parseFileToContext() {
-    context.file.data.decodeToString().forEachIndexed { index, char ->
+    val bufferedInputStream = context.file.data.inputStream().buffered()
+    val encoding = detectEncoding(bufferedInputStream)
+    val string = bufferedInputStream.reader(encoding).use { it.readText() }
+    string.forEachIndexed { index, char ->
       if (!wasLastCharEscape && char == '\\') {
         wasLastCharEscape = true
         return@forEachIndexed
@@ -147,6 +152,19 @@ class StringsFileProcessor(
     private val importFormat = ImportFormat.STRINGS
 
     private val messageConvertor = importFormat.messageConvertor
+  }
+
+  fun detectEncoding(inputStream: BufferedInputStream): Charset {
+    inputStream.mark(3) // Mark the current position in the input stream
+    val bom = ByteArray(2)
+    inputStream.read(bom, 0, 2)
+    inputStream.reset() // Reset to the marked position
+
+    return when {
+      bom[0] == 0xFE.toByte() && bom[1] == 0xFF.toByte() -> Charsets.UTF_16BE
+      bom[0] == 0xFF.toByte() && bom[1] == 0xFE.toByte() -> Charsets.UTF_16LE
+      else -> Charsets.UTF_8
+    }
   }
 
   enum class State {

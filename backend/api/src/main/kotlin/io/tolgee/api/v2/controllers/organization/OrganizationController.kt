@@ -154,6 +154,7 @@ class OrganizationController(
     @ParameterObject
     @SortDefault(sort = ["id"])
     pageable: Pageable,
+    @ParameterObject
     params: OrganizationRequestParamsDto,
   ): PagedModel<OrganizationModel>? {
     val organizations = organizationService.findPermittedPaged(pageable, params)

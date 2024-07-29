@@ -23,7 +23,7 @@ const StyledWrapper = styled(Box)`
   opacity: 0;
   transition: opacity 0.2s;
   background-color: ${({ theme }) =>
-    theme.palette.tokens.SURFACE_BACKGROUND_DRAG_DROP};
+    theme.palette.tokens.background['paper-1']};
 
   &:before {
     content: '';

@@ -352,6 +352,16 @@ export const getParsedEmailVerification = () =>
     };
   });
 
+export const getParsedEmailVerificationByIndex = (index: number) =>
+  getAllEmails().then((r) => {
+    return {
+      verifyEmailLink: r[index].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+      fromAddress: r[index].from.value[0].address,
+      toAddress: r[index].to.value[0].address,
+      text: r[index].text,
+    };
+  });
+
 export const getParsedEmailInvitationLink = () =>
   getAllEmails().then(
     (emails) =>

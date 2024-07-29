@@ -50,6 +50,7 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
     val runningJob = createRunningJob()
     val pendingJob = createPendingJob()
     val dontTouchJob = createDontTouchJob()
+    val successWithRetriedChunks = createSuccessWithRetriedChunks()
 
     waitForNotThrowing(timeout = 2000, pollTime = 100) {
       batchJobService.getJobDto(cancelledJob.id).status.assert.isEqualTo(BatchJobStatus.CANCELLED)
@@ -59,6 +60,7 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
       batchJobService.getJobDto(runningJob.id).status.assert.isEqualTo(BatchJobStatus.RUNNING)
       batchJobService.getJobDto(pendingJob.id).status.assert.isEqualTo(BatchJobStatus.PENDING)
       batchJobService.getJobDto(dontTouchJob.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
+      batchJobService.getJobDto(successWithRetriedChunks.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
     }
   }
 
@@ -105,6 +107,7 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
       BatchJobStatus.RUNNING,
       setOf(
         BatchJobChunkExecutionStatus.CANCELLED,
+        BatchJobChunkExecutionStatus.FAILED,
         BatchJobChunkExecutionStatus.SUCCESS,
       ),
     )
@@ -114,9 +117,22 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
       testData.project,
       BatchJobStatus.RUNNING,
       setOf(
-        BatchJobChunkExecutionStatus.CANCELLED,
         BatchJobChunkExecutionStatus.SUCCESS,
         BatchJobChunkExecutionStatus.FAILED,
+      ),
+    )
+
+  private fun createSuccessWithRetriedChunks() =
+    stuckBatchJobTestUtil.createBatchJobWithExecutionStatuses(
+      testData.project,
+      BatchJobStatus.RUNNING,
+      mapOf(
+        1 to
+          listOf(
+            BatchJobChunkExecutionStatus.FAILED,
+            BatchJobChunkExecutionStatus.FAILED,
+            BatchJobChunkExecutionStatus.SUCCESS,
+          ),
       ),
     )
 }

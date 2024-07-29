@@ -8,7 +8,6 @@ type AnnouncementDtoType = components['schemas']['AnnouncementDto']['type'];
 
 export function useAnnouncement() {
   const { t } = useTranslate();
-
   return function AnnouncementWrapper(value: AnnouncementDtoType) {
     switch (value) {
       case 'FEATURE_BATCH_OPERATIONS':
@@ -66,6 +65,13 @@ export function useAnnouncement() {
               <T keyName="announcement_visual_editor_and_formats_support" />
             }
             link="https://tolgee.io/blog/releasing-visual-editor-and-formats-support"
+          />
+        );
+      case 'FEATURE_CLI_2':
+        return (
+          <Announcement
+            content={<T keyName="announcement_cli_2" />}
+            link="https://tolgee.io/blog/cli-2-features"
           />
         );
 

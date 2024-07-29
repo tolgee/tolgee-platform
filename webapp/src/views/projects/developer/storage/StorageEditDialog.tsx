@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, ButtonGroup, Dialog, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  styled,
+} from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -16,6 +23,11 @@ type ContentStorageRequest = components['schemas']['ContentStorageRequest'];
 type ContentStorageModel = components['schemas']['ContentStorageModel'];
 type StorageTestResult = components['schemas']['StorageTestResult'];
 type BucketType = 's3' | 'azure';
+
+const StyledDialogTitle = styled(DialogTitle)`
+  width: 85vw;
+  max-width: 700px;
+`;
 
 type Props = {
   onClose: () => void;
@@ -161,9 +173,9 @@ export const StorageEditDialog = ({ onClose, data }: Props) => {
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm">
-      <DialogTitle>
+      <StyledDialogTitle>
         {data ? t('storage_update_title') : t('storage_create_title')}
-      </DialogTitle>
+      </StyledDialogTitle>
       <Box px={3}>
         <ButtonGroup size="small">
           <Button

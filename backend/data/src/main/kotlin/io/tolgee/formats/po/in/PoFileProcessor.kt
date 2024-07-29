@@ -105,11 +105,21 @@ class PoFileProcessor(
   }
 
   private fun getMessageFormat(poParsedTranslation: PoParsedTranslation): ImportFormat {
+    val formatFromMapping = formatFromMapping
+    if (formatFromMapping != null) {
+      return formatFromMapping
+    }
+
     poParsedTranslation.meta.flags.forEach { flag ->
       PoFormatDetector().detectByFlag(flag)
         ?.let { return it }
     }
+
     return detectedFormat
+  }
+
+  private val formatFromMapping by lazy {
+    context.mapping?.format
   }
 
   private val detectedFormat by lazy {

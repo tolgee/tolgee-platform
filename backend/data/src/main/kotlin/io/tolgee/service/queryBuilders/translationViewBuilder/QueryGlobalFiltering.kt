@@ -1,18 +1,28 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.model.activity.ActivityDescribingEntity
+import io.tolgee.model.activity.ActivityDescribingEntity_
+import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.activity.ActivityModifiedEntity_
+import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
+import io.tolgee.model.temp.UnsuccessfulJobKey
+import io.tolgee.model.temp.UnsuccessfulJobKey_
+import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Subquery
 import java.util.*
 
 class QueryGlobalFiltering(
   private val params: TranslationFilters,
   private val queryBase: QueryBase<*>,
   private val cb: CriteriaBuilder,
+  private val entityManager: EntityManager,
 ) {
   fun apply() {
     filterTag()
@@ -24,6 +34,19 @@ class QueryGlobalFiltering(
     filterHasScreenshot()
     filterHasNoScreenshot()
     filterSearch()
+    filterRevisionId()
+    filterFailedTargets()
+  }
+
+  private fun filterFailedTargets() {
+    if (params.filterFailedKeysOfJob != null) {
+      val subquery: Subquery<Long> = queryBase.query.subquery(Long::class.java)
+      val unsuccessfulJobKey = subquery.from(UnsuccessfulJobKey::class.java)
+      subquery.select(unsuccessfulJobKey.get(UnsuccessfulJobKey_.keyId))
+      queryBase.whereConditions.add(
+        queryBase.keyIdExpression.`in`(subquery),
+      )
+    }
   }
 
   private fun filterSearch() {
@@ -114,6 +137,39 @@ class QueryGlobalFiltering(
       val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
       queryBase.whereConditions.add(tagsJoin.get(Tag_.name).`in`(params.filterTag))
+    }
+  }
+
+  private fun filterRevisionId() {
+    if (!params.filterRevisionId.isNullOrEmpty()) {
+      val modifiedEntitySubquery = queryBase.query.subquery(Long::class.java)
+      val meRoot = modifiedEntitySubquery.from(ActivityModifiedEntity::class.java)
+      modifiedEntitySubquery.select(meRoot.get(ActivityModifiedEntity_.entityId))
+      modifiedEntitySubquery.where(
+        cb.and(
+          cb.equal(meRoot.get(ActivityModifiedEntity_.entityClass), "Key"),
+          meRoot.get(ActivityModifiedEntity_.activityRevision).get(ActivityRevision_.id).`in`(params.filterRevisionId),
+        ),
+      )
+
+      val describingEntitySubquery = queryBase.query.subquery(Long::class.java)
+      val deRoot = describingEntitySubquery.from(ActivityDescribingEntity::class.java)
+      describingEntitySubquery.select(deRoot.get(ActivityDescribingEntity_.entityId))
+      describingEntitySubquery.where(
+        cb.and(
+          cb.equal(deRoot.get(ActivityDescribingEntity_.entityClass), "Key"),
+          deRoot.get(
+            ActivityDescribingEntity_.activityRevision,
+          ).get(ActivityRevision_.id).`in`(params.filterRevisionId),
+        ),
+      )
+
+      queryBase.whereConditions.add(
+        cb.or(
+          queryBase.root.get(Key_.id).`in`(modifiedEntitySubquery),
+          queryBase.root.get(Key_.id).`in`(describingEntitySubquery),
+        ),
+      )
     }
   }
 }

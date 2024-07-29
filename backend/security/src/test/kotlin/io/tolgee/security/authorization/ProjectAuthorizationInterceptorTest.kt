@@ -33,6 +33,7 @@ import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import org.junit.jupiter.api.AfterEach
@@ -64,6 +65,8 @@ class ProjectAuthorizationInterceptorTest {
 
   private val apiKey = Mockito.mock(ApiKeyDto::class.java)
 
+  private val emailVerificationService = Mockito.mock(EmailVerificationService::class.java)
+
   private val projectAuthenticationInterceptor =
     ProjectAuthorizationInterceptor(
       authenticationFacade,
@@ -73,6 +76,7 @@ class ProjectAuthorizationInterceptorTest {
       Mockito.mock(ProjectHolder::class.java),
       Mockito.mock(OrganizationHolder::class.java),
       Mockito.mock(ActivityHolder::class.java, Mockito.RETURNS_DEEP_STUBS),
+      emailVerificationService,
     )
 
   private val mockMvc =
@@ -100,6 +104,7 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(apiKey.projectId).thenReturn(1337L)
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
     Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(true)
   }
 
   @AfterEach

@@ -1,5 +1,8 @@
 import { FC } from 'react';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useIsEmailVerified,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { T, useTranslate } from '@tolgee/react';
@@ -12,6 +15,10 @@ export const RequirePreferredOrganization: FC = (props) => {
 
   const { preferredOrganization, isFetching } = usePreferredOrganization();
 
+  const isEmailVerified = useIsEmailVerified();
+  if (!isEmailVerified) {
+    return <>{props.children}</>;
+  }
   if (allowPrivate && !preferredOrganization && isFetching) {
     return null;
   }
@@ -20,7 +27,7 @@ export const RequirePreferredOrganization: FC = (props) => {
     return (
       <DashboardPage>
         <CompactView
-          content={
+          primaryContent={
             <>
               <T keyName={'no-permissions-on-the-server'} />
             </>

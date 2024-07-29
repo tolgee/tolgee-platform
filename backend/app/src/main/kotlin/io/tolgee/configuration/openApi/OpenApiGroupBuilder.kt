@@ -148,7 +148,7 @@ class OpenApiGroupBuilder(
           it.key to orders.first()
         }.toMap()
 
-      val tagsMap = openApi.tags.associateBy { it.name }.toMutableMap()
+      val tagsMap = openApi?.tags?.associateBy { it.name }?.toMutableMap() ?: mutableMapOf()
       tagOrders.forEach { (tagName, order) ->
         val tag =
           tagsMap.computeIfAbsent(tagName) {
@@ -159,7 +159,7 @@ class OpenApiGroupBuilder(
         tag.addExtension("x-order", order)
       }
 
-      openApi.tags.forEach {
+      openApi.tags?.forEach {
         val order = tagOrders[it.name] ?: return@forEach
         it.addExtension("x-order", order)
       }

@@ -29,10 +29,22 @@ export const handleApiError = (
       return;
     }
     if (r.status == 403) {
+      if (resObject?.code === 'email_not_verified') {
+        globalContext.actions?.redirectTo(LINKS.ROOT.build());
+        return;
+      }
+
       if (init?.method === undefined || init?.method === 'get') {
         globalContext.actions?.redirectTo(LINKS.AFTER_LOGIN.build());
       }
-      messageService.error(<T keyName="operation_not_permitted_error" />);
+
+      messageService.error(
+        resObject?.code ? (
+          <TranslatedError code={resObject?.code} />
+        ) : (
+          <T keyName="operation_not_permitted_error" />
+        )
+      );
       Sentry.captureException(new Error('Operation not permitted'));
       return;
     }
@@ -44,6 +56,12 @@ export const handleApiError = (
     messageService.error(<T keyName="resource_not_found_message" />);
     return;
   }
+
+  if (r.status == 429) {
+    messageService.error(<T keyName="too_many_requests" />);
+    return;
+  }
+
   if (r.status == 400 && !options.disableErrorNotification) {
     const parsed = parseErrorResponse(resObject);
     parsed.forEach((message) =>

@@ -1,20 +1,40 @@
+import React, { FC } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+
 import { LINKS } from 'tg.constants/links';
 import { PrivateRoute } from './common/PrivateRoute';
 import { NotificationsRouter } from 'tg.views/notifications/NotificationsRouter';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
-import React, { FC } from 'react';
 import { useConfig } from 'tg.globalContext/helpers';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
-import { OrganizationBillingRedirect } from './security/OrganizationRedirectHandler';
+
+import { PrivateRoute } from './common/PrivateRoute';
+import { OrganizationBillingRedirect } from './security/OrganizationBillingRedirect';
 import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
+import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
+import { RootView } from 'tg.views/RootView';
 
 const LoginRouter = React.lazy(() => import('./security/Login/LoginRouter'));
+
+const SlackConnectView = React.lazy(
+  () =>
+    import(
+      /* webpackChunkName: "slack-connect-view" */ './slack/SlackConnectView'
+    )
+);
+
+const SlackConnectedView = React.lazy(
+  () =>
+    import(
+      /* webpackChunkName: "slack-connected-view" */ './slack/SlackConnectedView'
+    )
+);
+
 const SignUpView = React.lazy(() => import('./security/SignUp/SignUpView'));
 
 const PasswordResetSetView = React.lazy(
@@ -45,6 +65,12 @@ const RecaptchaProvider: FC = (props) => {
 
 export const RootRouter = () => (
   <Switch>
+    <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
+      <SlackConnectView />
+    </PrivateRoute>
+    <PrivateRoute exact path={LINKS.SLACK_CONNECTED.template}>
+      <SlackConnectedView />
+    </PrivateRoute>
     <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
       <PasswordResetView />
     </Route>
@@ -68,6 +94,9 @@ export const RootRouter = () => (
     <PrivateRoute path={LINKS.GO_TO_SELF_HOSTED_BILLING.template}>
       <OrganizationBillingRedirect selfHosted={true} />
     </PrivateRoute>
+    <PrivateRoute path={LINKS.GO_TO_PREFERRED_ORGANIZATION.template}>
+      <PreferredOrganizationRedirect />
+    </PrivateRoute>
     <PrivateRoute path={LINKS.USER_SETTINGS.template}>
       <UserSettingsRouter />
     </PrivateRoute>
@@ -80,7 +109,10 @@ export const RootRouter = () => (
     <RequirePreferredOrganization>
       <Switch>
         <PrivateRoute exact path={LINKS.ROOT.template}>
-          <Redirect to={LINKS.PROJECTS.template} />
+          <RootView />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.PROJECTS.template}>
+          <Redirect to={LINKS.ROOT.template} />
         </PrivateRoute>
         <PrivateRoute path={LINKS.PROJECTS.template}>
           <ProjectsRouter />

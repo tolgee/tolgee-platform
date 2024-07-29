@@ -13,7 +13,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext

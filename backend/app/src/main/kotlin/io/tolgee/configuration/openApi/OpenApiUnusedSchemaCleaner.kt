@@ -64,6 +64,9 @@ class OpenApiUnusedSchemaCleaner(private val openApi: OpenAPI) {
     this.nameFromRef?.let { names.add(it) }
     this.properties?.values?.forEach { names.addAll(it.getAllNamesRecursively()) }
     this.additionalItems?.let { names.addAll(it.getAllNamesRecursively()) }
+    this.oneOf?.forEach { names.addAll(it.getAllNamesRecursively()) }
+    this.anyOf?.forEach { names.addAll(it.getAllNamesRecursively()) }
+    this.allOf?.forEach { names.addAll(it.getAllNamesRecursively()) }
     (this.additionalProperties as? Schema<*>)?.let { names.addAll(it.getAllNamesRecursively()) }
     names.addAll(this.items.getAllNamesRecursively())
     return names

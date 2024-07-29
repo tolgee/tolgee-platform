@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
+import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
@@ -15,6 +16,7 @@ import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.flushAndClear
@@ -27,8 +29,17 @@ class StoredDataImporter(
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
   private val reportStatus: (ImportApplicationStatus) -> Unit = {},
   private val importSettings: IImportSettings,
+  // for single step import, we provide import data manager
+  private val _importDataManager: ImportDataManager? = null,
+  private val isSingleStepImport: Boolean = false,
 ) {
-  private val importDataManager = ImportDataManager(applicationContext, import)
+  private val importDataManager by lazy {
+    if (_importDataManager != null) {
+      return@lazy _importDataManager
+    }
+    ImportDataManager(applicationContext, import)
+  }
+
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
 
@@ -45,6 +56,8 @@ class StoredDataImporter(
    */
   private val keysToSave = mutableMapOf<Pair<String?, String>, Key>()
 
+  private val keyMetasToSave: MutableList<KeyMeta> = mutableListOf()
+
   /**
    * We need to persist data after everything is checked for resolved conflicts since
    * thrown ImportConflictNotResolvedException commits the transaction
@@ -55,20 +68,29 @@ class StoredDataImporter(
 
   private val namespacesToSave = mutableMapOf<String?, Namespace>()
 
+  private val newKeys = mutableListOf<Key>()
+
   /**
    * Keys where base translation was changed, so we need to set outdated flag on all translations
    */
   val outdatedFlagKeys: MutableList<Long> = mutableListOf()
 
   /**
-   * This metas are merged, so there is only one meta for one key!!!
+   * These are all keyMetas from all the keys to import. If multiple keys have same name and
+   * namespace, the meta is merged to one, so there is only one meta for one key!!!
    *
-   * It can be used only when we are finally importing the data, before that we cannot merge it,
-   * since namespace can be changed
+   * It can be used only when we are finally importing the data. Before that, we cannot merge it.
    */
   private val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
     val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
-    keyMetaService.getWithFetchedData(this.import).forEach { currentKeyMeta ->
+    val metasToMerge =
+      if (isSingleStepImport) {
+        importDataManager.storedKeys.map { it.value.keyMeta }.filterNotNull()
+      } else {
+        keyMetaService.getWithFetchedData(this.import)
+      }
+
+    metasToMerge.forEach { currentKeyMeta ->
       val mapKey = currentKeyMeta.importKey!!.file.namespace to currentKeyMeta.importKey!!.name
       result[mapKey] = result[mapKey]?.let { existingKeyMeta ->
         keyMetaService.import(existingKeyMeta, currentKeyMeta)
@@ -96,7 +118,7 @@ class StoredDataImporter(
 
     handlePluralization()
 
-    saveMetaData(keyEntitiesToSave)
+    saveKeyMetaData(keyEntitiesToSave)
 
     reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
 
@@ -108,7 +130,30 @@ class StoredDataImporter(
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
 
+    tagNewKeys()
+
+    entityManager.flush()
+
+    deleteOtherKeys()
+
     entityManager.flushAndClear()
+  }
+
+  private fun tagNewKeys() {
+    (importSettings as? SingleStepImportRequest)?.tagNewKeys?.let { tagNewKeys ->
+      tagService.tagKeys(newKeys.associateWith { tagNewKeys })
+    }
+  }
+
+  private fun deleteOtherKeys() {
+    if ((importSettings as? SingleStepImportRequest)?.removeOtherKeys == true) {
+      val existingKeys = importDataManager.existingKeys.entries
+      val importedKeys = importDataManager.storedKeys.entries.map { (pair) -> Pair(pair.first.namespace, pair.second) }
+      val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
+      if (otherKeys.isNotEmpty()) {
+        keyService.deleteMultiple(otherKeys.map { it.value.id })
+      }
+    }
   }
 
   private fun handlePluralization() {
@@ -117,7 +162,8 @@ class StoredDataImporter(
     saveKeys(handler.keysToSave)
   }
 
-  private fun saveMetaData(keyEntitiesToSave: Collection<Key>) {
+  private fun saveKeyMetaData(keyEntitiesToSave: Collection<Key>) {
+    keyMetaService.saveAll(keyMetasToSave)
     keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
     }.also { keyMetaService.saveAllComments(it) }
@@ -176,6 +222,7 @@ class StoredDataImporter(
           }
           // assign new meta
           newKey.keyMeta = keyMeta
+          keyMetasToSave.add(keyMeta)
         }
       }
     }
@@ -222,12 +269,8 @@ class StoredDataImporter(
       return keysToSave.computeIfAbsent(this.key.file.namespace to this.key.name) {
         // or get it from conflict or create new one
         val newKey =
-          this.conflict?.key
-            ?: importDataManager.existingKeys[this.key.file.namespace to this.key.name]
-            ?: Key(name = this.key.name).apply {
-              project = import.project
-              namespace = getNamespace(this@existingKey.key.file.namespace)
-            }
+          importDataManager.existingKeys[this.key.file.namespace to this.key.name]
+            ?: createNewKey(this.key.name, this.key.file.namespace)
         newKey
       }
     }
@@ -237,16 +280,26 @@ class StoredDataImporter(
     keyName: String,
   ): Key {
     return keysToSave.computeIfAbsent(namespace to keyName) {
-      importDataManager.existingKeys[namespace to keyName] ?: Key(name = keyName).apply {
-        project = import.project
-        this.namespace = getNamespace(namespace)
-      }
+      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace)
+    }
+  }
+
+  private fun createNewKey(
+    name: String,
+    namespace: String?,
+  ): Key {
+    return Key(name = name).apply {
+      project = import.project
+      this.namespace = getNamespace(namespace)
+      newKeys.add(this)
     }
   }
 
   private fun ImportTranslation.checkConflictResolved() {
     if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
-      importDataManager.saveAllStoredTranslations()
+      if (importDataManager.saveData) {
+        importDataManager.saveAllStoredTranslations()
+      }
       throw ImportConflictNotResolvedException(
         mutableListOf(this.key.name, this.language.name, this.text).filterNotNull().toMutableList(),
       )
@@ -258,5 +311,9 @@ class StoredDataImporter(
     return importDataManager.existingNamespaces[name] ?: namespacesToSave.computeIfAbsent(name) {
       Namespace(name, import.project)
     }
+  }
+
+  private val tagService by lazy {
+    applicationContext.getBean(TagService::class.java)
   }
 }

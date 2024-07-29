@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file datatype="plaintext" original="Localizable.strings" source-language="en" target-language="en">
+    <header>
+      <tool tool-id="tolgee.io" tool-name="Tolgee"/>
+    </header>
+    <body>
+      <trans-unit id="controller">
+        <source xml:space="preserve">You have %@ items</source>
+        <target xml:space="preserve">You have %@ items</target>
+      </trans-unit>
+      <trans-unit id="desk">
+        <source xml:space="preserve">Desk</source>
+        <target xml:space="preserve">Desk</target>
+      </trans-unit>
+      <trans-unit id="keyboard">
+        <source xml:space="preserve">Keyboard</source>
+        <target xml:space="preserve">Keyboard</target>
+      </trans-unit>
+      <trans-unit id="mouse">
+        <source xml:space="preserve">Mouse</source>
+        <target xml:space="preserve">Mouse</target>
+      </trans-unit>
+      <trans-unit id="remote">
+        <source xml:space="preserve">Remote</source>
+        <target xml:space="preserve">Remote</target>
+      </trans-unit>
+      <trans-unit id="screen">
+        <source xml:space="preserve">Screen</source>
+        <target xml:space="preserve">Screen</target>
+      </trans-unit>
+      <trans-unit id="test">
+        <source xml:space="preserve">conflict!</source>
+        <target xml:space="preserve">conflict!</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

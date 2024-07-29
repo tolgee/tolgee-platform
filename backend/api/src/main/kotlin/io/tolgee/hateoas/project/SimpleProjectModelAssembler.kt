@@ -5,7 +5,7 @@ import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.service.AvatarService
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 

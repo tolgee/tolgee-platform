@@ -13,6 +13,7 @@ data class UserAccountDto(
   val avatarHash: String?,
   val deleted: Boolean,
   val tokensValidNotBefore: Date?,
+  val emailVerified: Boolean,
 ) : Serializable {
   companion object {
     fun fromEntity(entity: UserAccount) =
@@ -25,6 +26,7 @@ data class UserAccountDto(
         avatarHash = entity.avatarHash,
         deleted = entity.deletedAt != null,
         tokensValidNotBefore = entity.tokensValidNotBefore,
+        emailVerified = entity.emailVerification == null,
       )
   }
 

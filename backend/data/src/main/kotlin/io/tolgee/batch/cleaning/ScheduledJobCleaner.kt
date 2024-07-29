@@ -86,6 +86,10 @@ class ScheduledJobCleaner(
     val chunkIncompleteStatuses = BatchJobChunkExecutionStatus.entries.filter { !it.completed }.map { it.name }
     val jobIncompleteStatuses = BatchJobStatus.entries.filter { !it.completed }.map { it.name }
 
+    // In this query we are looking for jobs
+    // - that have incomplete status
+    // - have all chunks completed
+    // - and we are obtaining the resulting chunk status by preferably filtering out chunks which have success status
     val data =
       entityManager.createNativeQuery(
         """
@@ -93,16 +97,22 @@ class ScheduledJobCleaner(
         from tolgee_batch_job tbj
                  left join tolgee_batch_job_chunk_execution tbjce
                            on tbj.id = tbjce.batch_job_id and tbjce.status in :chunkIncompleteStatuses
-                 left join tolgee_batch_job_chunk_execution tbjce2 
+                 left join tolgee_batch_job_chunk_execution tbjce2
                            on tbj.id = tbjce2.batch_job_id
+                 left join tolgee_batch_job_chunk_execution tbjce_success
+                           on tbj.id = tbjce_success.batch_job_id 
+                             and tbjce_success.status = :successStatus 
+                             and tbjce2.chunk_number = tbjce_success.chunk_number  
+                             and tbjce_success.id <> tbjce2.id
         where tbj.status in :jobIncompleteStatuses
-          and tbjce.id is null
+          and tbjce.id is null and tbjce_success.id is null
         group by  tbj.id, tbj.project_id, tbjce2.status
       """,
         Array<Any>::class.java,
       )
         .setParameter("chunkIncompleteStatuses", chunkIncompleteStatuses)
         .setParameter("jobIncompleteStatuses", jobIncompleteStatuses)
+        .setParameter("successStatus", BatchJobChunkExecutionStatus.SUCCESS.name)
         .resultList as List<Array<Any>>
 
     return data.groupBy { it[0] }.map { rawDataList ->

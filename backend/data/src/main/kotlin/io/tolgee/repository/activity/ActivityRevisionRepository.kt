@@ -62,4 +62,14 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """,
   )
   fun getProjectDailyActivity(projectId: Long): List<Array<Any>>
+
+  @Query(
+    """
+    from ActivityRevision ar where ar.id = :revisionId and (ar.projectId = :projectId or :projectId is null) 
+  """,
+  )
+  fun find(
+    projectId: Long?,
+    revisionId: Long,
+  ): ActivityRevision?
 }

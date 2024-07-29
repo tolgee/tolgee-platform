@@ -49,6 +49,19 @@ export const exportToggleLanguage = (lang: string) => {
   dismissMenu();
 };
 
+export function assertExportLanguagesSelected(languages: string[]) {
+  cy.gcy('export-language-selector').click();
+
+  languages.forEach((language) => {
+    cy.gcy('export-language-selector-item')
+      .contains(language)
+      .closestDcy('export-language-selector-item')
+      .should('be.visible')
+      .find('input')
+      .should('be.checked');
+  });
+  dismissMenu();
+}
 export const exportSelectFormat = (format: string) => {
   cy.gcy('export-format-selector').click();
   cy.gcy('export-format-selector-item').contains(format).click();
@@ -251,3 +264,31 @@ const messageFormatParamMap = {
 type MessageFormat = components['schemas']['ExportParams']['messageFormat'];
 
 type SupportedMessageFormat = keyof typeof messageFormatParamMap;
+
+export const getFileName = (
+  projectName: string,
+  extension: string,
+  language?: string
+) => {
+  const dateStr = '_' + new Date().toISOString().split('T')[0];
+  const languageStr = language ? `_${language}` : '';
+  return `${projectName}${languageStr}${dateStr}.${extension}`;
+};
+
+type ZipContentProps = {
+  path: string;
+  file: string;
+  filesContent: Record<string, (content: string) => void>;
+};
+
+export function checkZipContent({ path, file, filesContent }: ZipContentProps) {
+  cy.task('unzipping', {
+    path,
+    file,
+  }).then((result: any) => {
+    Object.entries(filesContent).map(([name, callback]) => {
+      const file = result.find((i) => i.path === name);
+      callback(Buffer.from(file.data.data).toString());
+    });
+  });
+}

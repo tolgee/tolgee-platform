@@ -8,6 +8,9 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.batch.BatchJobChunkExecutionStatus
+import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
@@ -90,6 +93,7 @@ class TranslationsTestData {
             auto = true
           }.build {
             addTag("Lame tag")
+            addTag("Some other tag")
           }
         }
         projectBuilder = this
@@ -439,6 +443,22 @@ class TranslationsTestData {
         }
       }
     }
+  }
+
+  fun addFailedBatchJob(): BatchJob {
+    return projectBuilder.addBatchJob {
+      status = BatchJobStatus.FAILED
+    }.build {
+      this.targetProvider = {
+        listOf(mapOf("keyId" to aKey.id, "languageId" to germanLanguage.id))
+      }
+      addChunkExecution {
+        this.retry = false
+        status = BatchJobChunkExecutionStatus.FAILED
+      }.build {
+        this.successfulTargetsProvider = { emptyList() }
+      }
+    }.self
   }
 
   fun addPluralKey(): Key {

@@ -1,0 +1,9 @@
+version: 2
+authtoken: [YOUR_AUTH_TOKEN]
+tunnels:
+  backend:
+    proto: http
+    addr: 8080
+  frontend:
+    proto: http
+    addr: 8081

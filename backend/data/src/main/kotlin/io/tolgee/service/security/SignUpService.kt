@@ -35,24 +35,24 @@ class SignUpService(
     }
 
     val user = dtoToEntity(dto)
-    signUp(user, dto.invitationCode, dto.organizationName)
+    signUp(user, dto.invitationCode, dto.organizationName, dto.userSource)
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {
       return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
     }
 
     emailVerificationService.createForUser(user, dto.callbackUrl)
-
-    return null
+    return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
   }
 
   fun signUp(
     entity: UserAccount,
     invitationCode: String?,
     organizationName: String?,
+    userSource: String? = null,
   ): UserAccount {
     val invitation = findAndCheckInvitationOnRegistration(invitationCode)
-    val user = userAccountService.createUser(entity)
+    val user = userAccountService.createUser(entity, userSource)
     if (invitation != null) {
       invitationService.accept(invitation.code, user)
     }

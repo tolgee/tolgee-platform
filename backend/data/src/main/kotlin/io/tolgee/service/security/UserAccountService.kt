@@ -1,6 +1,7 @@
 package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -29,6 +30,7 @@ import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
+import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
@@ -93,26 +95,65 @@ class UserAccountService(
   }
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
+  @Transactional
   fun findDto(id: Long): UserAccountDto? {
     return userAccountRepository.findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
   }
 
+  @Transactional
   fun getDto(id: Long): UserAccountDto {
     return self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
+  fun getOrCreateDemoUsers(demoUsers: List<DemoProjectData.DemoUser>): Map<String, UserAccount> {
+    val usernames = demoUsers.map { it.username }
+    val existingUsers = userAccountRepository.findDemoByUsernames(usernames)
+    return demoUsers.associate { demoUser ->
+      val existingUser =
+        existingUsers.find { existingUser -> demoUser.username == existingUser.username }
+          ?: createDemoUser(demoUser)
+      demoUser.username to existingUser
+    }
+  }
+
+  private fun createDemoUser(demoUser: DemoProjectData.DemoUser): UserAccount {
+    val user = UserAccount()
+    user.username = demoUser.username
+    user.name = demoUser.name
+    user.isDemo = true
+    user.disabledAt = currentDateProvider.date
+
+    setDemoUserAvatar(demoUser, user)
+
+    return save(user)
+  }
+
+  private fun setDemoUserAvatar(
+    demoUser: DemoProjectData.DemoUser,
+    user: UserAccount,
+  ) {
+    val stream =
+      javaClass.getResourceAsStream("/demoProject/userAvatars/${demoUser.avatarFileName}")
+        ?: throw IllegalArgumentException("Demo user avatar doesn't exist")
+
+    avatarService.setAvatar(user, stream)
+  }
+
   @Transactional
-  fun createUser(userAccount: UserAccount): UserAccount {
+  fun createUser(
+    userAccount: UserAccount,
+    userSource: String? = null,
+  ): UserAccount {
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
     userAccountRepository.saveAndFlush(userAccount)
-    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
     return userAccount
   }
 
   @Transactional
-  fun createUser(
+  fun createUserWithPassword(
     userAccount: UserAccount,
     rawPassword: String,
   ): UserAccount {
@@ -351,6 +392,7 @@ class UserAccountService(
   fun update(
     userAccount: UserAccount,
     dto: UserUpdateRequestDto,
+    request: HttpServletRequest,
   ): UserAccount {
     // Current password required to change email or password
     if (dto.email != userAccount.username) {
@@ -364,7 +406,7 @@ class UserAccountService(
     }
 
     val old = UserAccountDto.fromEntity(userAccount)
-    updateUserEmail(userAccount, dto)
+    updateUserEmail(userAccount, dto, request)
     userAccount.name = dto.name
 
     publishUserInfoUpdatedEvent(old, userAccount)
@@ -392,6 +434,7 @@ class UserAccountService(
   private fun updateUserEmail(
     userAccount: UserAccount,
     dto: UserUpdateRequestDto,
+    request: HttpServletRequest,
   ) {
     if (userAccount.username != dto.email) {
       if (!emailValidator.isValid(dto.email, null)) {
@@ -401,7 +444,7 @@ class UserAccountService(
 
       this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
-        emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)
+        emailVerificationService.resendEmailVerification(userAccount, request, dto.callbackUrl, dto.email)
       } else {
         userAccount.username = dto.email
       }

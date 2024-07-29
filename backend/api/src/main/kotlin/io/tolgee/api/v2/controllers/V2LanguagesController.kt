@@ -21,7 +21,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject

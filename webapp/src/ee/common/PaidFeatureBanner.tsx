@@ -1,5 +1,4 @@
 import { Alert, AlertTitle, Box, Button } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
 import { useFeatureMissingExplanation } from './useFeatureMissingExplanation';
 import { Link } from 'react-router-dom';
 
@@ -8,12 +7,8 @@ type Props = {
   customMessage?: string;
 };
 
-export const PaidFeatureBanner = ({ customTitle, customMessage }: Props) => {
-  const { t } = useTranslate();
-
+export const PaidFeatureBanner = ({ customMessage, customTitle }: Props) => {
   const { message, actionTitle, link } = useFeatureMissingExplanation();
-
-  const combinedMessage = customMessage ?? message;
 
   return (
     <Alert
@@ -34,8 +29,10 @@ export const PaidFeatureBanner = ({ customTitle, customMessage }: Props) => {
         ) : undefined
       }
     >
-      <AlertTitle>{customTitle ?? t('paid-feature-banner-title')}</AlertTitle>
-      {combinedMessage && <Box>{combinedMessage}</Box>}
+      <AlertTitle sx={{ mb: customMessage ? undefined : 0, pb: 0 }}>
+        {customTitle ?? message}
+      </AlertTitle>
+      {customMessage && <Box>{customMessage}</Box>}
     </Alert>
   );
 };

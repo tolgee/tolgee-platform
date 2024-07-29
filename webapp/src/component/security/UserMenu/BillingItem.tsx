@@ -38,7 +38,8 @@ export const BillingItem: React.FC<Props> = ({
         {progressData && (
           <CircularBillingProgress
             size={22}
-            percent={progressData.moreCriticalProgress}
+            value={progressData.moreCriticalProgress}
+            maxValue={1}
             canGoOver={progressData.isPayAsYouGo}
           />
         )}

@@ -138,6 +138,7 @@ export const CdDialog = ({ onClose, data }: Props) => {
                       label={t('content_delivery_form_name_label')}
                       variant="standard"
                       data-cy="content-delivery-form-name"
+                      minHeight={false}
                     />
                   </Box>
                   <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>

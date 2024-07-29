@@ -4,9 +4,9 @@ import io.tolgee.component.machineTranslation.metadata.ExampleItem
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
-import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
-import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
@@ -77,33 +77,31 @@ class MetadataProvider(
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
-    return translationService.getTranslationMemorySuggestions(
-      sourceTranslationText = text,
+    return translationMemoryService.getSuggestions(
+      baseTranslationText = text,
       isPlural = isPlural,
-      key = null,
+      keyId = keyId,
       targetLanguage = targetLanguage,
-      pageable = PageRequest.of(0, 5),
-    ).content
-      .filter { it.keyId != keyId }
-      .map {
-        ExampleItem(
-          key = it.keyName,
-          keyNamespace = it.keyNamespace,
-          source = it.baseTranslationText,
-          target = it.targetTranslationText,
-        )
-      }
+      pageable = Pageable.ofSize(5),
+    ).content.map {
+      ExampleItem(
+        key = it.keyName,
+        keyNamespace = it.keyNamespace,
+        source = it.baseTranslationText,
+        target = it.targetTranslationText,
+      )
+    }
   }
 
   private val bigMetaService: BigMetaService by lazy {
     context.applicationContext.getBean(BigMetaService::class.java)
   }
 
-  private val translationService: TranslationService by lazy {
-    context.applicationContext.getBean(TranslationService::class.java)
-  }
-
   private val entityManager: EntityManager by lazy {
     context.applicationContext.getBean(EntityManager::class.java)
+  }
+
+  private val translationMemoryService: TranslationMemoryService by lazy {
+    context.applicationContext.getBean(TranslationMemoryService::class.java)
   }
 }

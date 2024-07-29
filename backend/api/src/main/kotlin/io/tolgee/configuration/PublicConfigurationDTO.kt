@@ -8,8 +8,7 @@ import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
-  @Schema(hidden = true)
-  properties: TolgeeProperties,
+  @Schema(hidden = true) properties: TolgeeProperties,
   val machineTranslationServices: MtServicesDTO,
   val billing: PublicBillingConfigurationDTO,
   val version: String,
@@ -34,6 +33,15 @@ class PublicConfigurationDTO(
   val postHogApiKey: String? = properties.postHog.apiKey
   val postHogHost: String? = properties.postHog.host
   val contentDeliveryConfigured: Boolean = properties.contentDelivery.publicUrlPrefix != null
+  val userSourceField: Boolean = properties.userSourceField
+  val slack: SlackDTO =
+    SlackDTO(
+      enabled = (
+        properties.slack.signingSecret != null &&
+          (properties.slack.clientId != null || properties.slack.token != null)
+      ),
+      connected = properties.slack.token != null,
+    )
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
@@ -61,6 +69,11 @@ class PublicConfigurationDTO(
   data class MtServiceDTO(
     val enabled: Boolean,
     val defaultEnabledForProject: Boolean,
+  )
+
+  data class SlackDTO(
+    val enabled: Boolean,
+    val connected: Boolean,
   )
 
   init {

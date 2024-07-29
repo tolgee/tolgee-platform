@@ -28,7 +28,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.notifications.NotificationType
 import io.tolgee.notifications.dto.NotificationCreateDto
 import io.tolgee.notifications.events.NotificationCreateEvent
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.ApplicationEventPublisher
@@ -71,6 +71,7 @@ class ActivityEventListener(
       ActivityType.KEY_TAGS_EDIT,
       ActivityType.KEY_NAME_EDIT,
       ActivityType.BATCH_TAG_KEYS,
+      ActivityType.COMPLEX_TAG_OPERATION,
       ActivityType.BATCH_UNTAG_KEYS,
       ActivityType.BATCH_SET_KEYS_NAMESPACE,
       ->
@@ -133,7 +134,8 @@ class ActivityEventListener(
       ActivityType.WEBHOOK_CONFIG_CREATE,
       ActivityType.WEBHOOK_CONFIG_UPDATE,
       ActivityType.WEBHOOK_CONFIG_DELETE,
-      null,
+      ActivityType.HARD_DELETE_LANGUAGE,
+      null
       -> {}
     }
   }

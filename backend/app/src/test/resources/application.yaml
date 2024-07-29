@@ -13,10 +13,10 @@ spring:
           batch_size: 1000
         order_inserts: true
         order_updates: true
-        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
         enhancer:
           enableLazyInitialization: true
           enableDirtyTracking: true
+        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -43,6 +43,9 @@ spring:
   jooq:
     sql-dialect: postgres
 tolgee:
+  slack:
+    token: fakeToken
+    signingSecret: fakeSecret
   postgres-autostart:
     enabled: true
     container-name: tolgee_backend_tests_postgres_main
@@ -83,6 +86,7 @@ tolgee:
     server: http://localhost:8080
   batch:
     concurrency: 10
+
 logging:
   level:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG

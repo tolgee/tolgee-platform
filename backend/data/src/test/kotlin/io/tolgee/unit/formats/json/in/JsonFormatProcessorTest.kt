@@ -1,6 +1,9 @@
 package io.tolgee.unit.formats.json.`in`
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.dtos.request.SingleStepImportRequest
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
@@ -172,6 +175,22 @@ class JsonFormatProcessorTest {
           "%D this is java {1, number}",
         ),
     )
+  }
+
+  @Test
+  fun `respects provided format`() {
+    mockUtil.mockIt("en.json", "src/test/resources/import/json/icu.json")
+    mockUtil.fileProcessorContext.params =
+      SingleStepImportRequest().also {
+        it.fileMappings = listOf(ImportFileMapping(fileName = "en.json", format = ImportFormat.JSON_PHP))
+      }
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        // it's escaped, because php cannot contain ICU
+        hasText("'{'param'}'")
+      }
   }
 
   private fun mockPlaceholderConversionTestFile(

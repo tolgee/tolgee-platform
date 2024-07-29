@@ -12,8 +12,8 @@ import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.PlanTranslationLimitExceeded
 import io.tolgee.exceptions.TranslationSpendingLimitExceeded
-import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.AutoTranslationService
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component

@@ -5,18 +5,19 @@ import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
 import io.tolgee.formats.getPluralData
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
 import io.tolgee.model.ILanguage
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class PoFileExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
   private val projectIcuPlaceholdersSupport: Boolean = true,
 ) : FileExporter {
-  override val fileExtension: String = "po"
+  val fileExtension: String = "po"
 
   private val preparedResult: LinkedHashMap<String, StringBuilder> = LinkedHashMap()
 
@@ -55,10 +56,17 @@ class PoFileExporter(
   }
 
   private fun getResultStringBuilder(translation: ExportTranslationView): StringBuilder {
-    val path = translation.getFilePath()
+    val path = filePathProvider.getFilePath(translation)
     return preparedResult.computeIfAbsent(path) {
       initPoFile(translation)
     }
+  }
+
+  private val filePathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      fileExtension,
+    )
   }
 
   private fun initPoFile(translation: ExportTranslationView): StringBuilder {

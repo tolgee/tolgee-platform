@@ -11,45 +11,40 @@ import {
   StyledBillingSectionSubtitleSmall,
   StyledBillingSectionTitle,
 } from '../BillingSection';
-import { PlanMetric, StyledMetrics } from './PlanMetric';
+import { PlanMetric } from './PlanMetric';
 import { MtHint } from 'tg.component/billing/MtHint';
 import { EstimatedCosts } from '../common/usage/EstimatedCosts';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../../useOrganization';
 import { getProgressData } from 'tg.component/billing/utils';
-import { StringsHint } from 'tg.component/billing/StringsHint';
+import { StringsHint } from 'tg.component/billing/Hints';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
 type UsageModel = components['schemas']['PublicUsageModel'];
-type CreditBalanceModel = components['schemas']['CreditBalanceModel'];
 
 const StyledPositive = styled('span')`
-  color: ${({ theme }) => theme.palette.success.main};
+  color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 const StyledNegative = styled('span')`
   color: ${({ theme }) => theme.palette.error.main};
 `;
 
-const StyledHeader = styled('div')`
-  display: flex;
-  align-items: baseline;
-  gap: 0px 24px;
+const StyledContent = styled('div')`
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 6px 16px;
   flex-wrap: wrap;
+  margin: 4px 0px 32px 0px;
 `;
 
 type Props = {
   activeSubscription: CloudSubscriptionModel;
   usage: UsageModel;
-  balance: CreditBalanceModel;
 };
 
-export const CurrentUsage: FC<Props> = ({
-  activeSubscription,
-  usage,
-  balance,
-}) => {
+export const CurrentUsage: FC<Props> = ({ activeSubscription, usage }) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
@@ -63,9 +58,9 @@ export const CurrentUsage: FC<Props> = ({
   } = getProgressData(usage);
 
   return (
-    <StyledBillingSection gridArea="usage" maxWidth={650}>
-      <StyledHeader>
-        <StyledBillingSectionTitle>
+    <StyledBillingSection gridArea="usage" maxWidth={750}>
+      <StyledContent>
+        <StyledBillingSectionTitle sx={{ mb: '12px', maxWidth: 260 }}>
           {t('billing_actual_title')}
         </StyledBillingSectionTitle>
         <StyledBillingSectionSubtitle>
@@ -89,8 +84,7 @@ export const CurrentUsage: FC<Props> = ({
               />
             )}
         </Box>
-      </StyledHeader>
-      <StyledMetrics>
+
         <PlanMetric
           name={
             usesSlots ? (
@@ -159,7 +153,7 @@ export const CurrentUsage: FC<Props> = ({
             </Box>
           </>
         )}
-      </StyledMetrics>
+      </StyledContent>
     </StyledBillingSection>
   );
 };

@@ -64,10 +64,11 @@ export enum PARAMS {
 }
 
 export class LINKS {
+  static ROOT = Link.ofRoot('');
+
   /**
    * Authentication
    */
-  static ROOT = Link.ofRoot('');
 
   static LOGIN = Link.ofRoot('login');
 
@@ -98,6 +99,8 @@ export class LINKS {
 
   static GO_TO_CLOUD_BILLING = Link.ofRoot('billing');
   static GO_TO_SELF_HOSTED_BILLING = Link.ofRoot('billing-self-hosted');
+
+  static GO_TO_PREFERRED_ORGANIZATION = Link.ofRoot('preferred-organization');
 
   /**
    * Authenticated user stuff
@@ -269,6 +272,17 @@ export class LINKS {
   );
 
   /**
+   * Slack
+   */
+
+  static ORGANIZATION_APPS = Link.ofParent(LINKS.ORGANIZATION, 'apps');
+
+  static ORGANIZATION_APPS_SLACK_OAUTH_SUCCESS = Link.ofParent(
+    LINKS.ORGANIZATION_APPS,
+    'slack-oauth2-success'
+  );
+
+  /**
    * Project stuff
    */
 
@@ -278,7 +292,7 @@ export class LINKS {
    * Visible with view permissions
    */
 
-  static AFTER_LOGIN = LINKS.PROJECTS;
+  static AFTER_LOGIN = LINKS.ROOT;
 
   static PROJECT = Link.ofParent(LINKS.PROJECTS, p(PARAMS.PROJECT_ID));
 
@@ -348,4 +362,17 @@ export class LINKS {
   );
   static PROJECT_STORAGE = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'storage');
   static PROJECT_WEBHOOKS = Link.ofParent(LINKS.PROJECT_DEVELOPER, 'webhooks');
+
+  static GO_TO_PROJECT_ACTIVITY_DETAIL = Link.ofParent(
+    LINKS.PROJECT,
+    'activity-detail'
+  );
+
+  /**
+   * Slack
+   */
+
+  static SLACK = Link.ofRoot('slack');
+  static SLACK_CONNECT = Link.ofParent(LINKS.SLACK, 'connect');
+  static SLACK_CONNECTED = Link.ofParent(LINKS.SLACK, 'connected');
 }

@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -40,7 +41,7 @@ class Organization(
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null,
 ) : ModelWithAvatar, AuditModel(), SoftDeletable {
-  @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true)
+  @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
   lateinit var basePermission: Permission
 
   @JsonIgnore
@@ -60,4 +61,7 @@ class Organization(
   override var avatarHash: String? = null
 
   override var deletedAt: Date? = null
+
+  @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, orphanRemoval = true)
+  var organizationSlackWorkspace: MutableList<OrganizationSlackWorkspace> = mutableListOf()
 }

@@ -5,7 +5,11 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useConfig, useUser } from 'tg.globalContext/helpers';
+import {
+  useConfig,
+  useIsEmailVerified,
+  useUser,
+} from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 
 import { UserMenu } from '../../security/UserMenu/UserMenu';
@@ -78,6 +82,7 @@ export const TopBar: React.FC<Props> = ({
   const user = useUser();
 
   const theme = useTheme();
+  const isEmailVerified = useIsEmailVerified();
 
   return (
     <StyledAppBar
@@ -120,7 +125,7 @@ export const TopBar: React.FC<Props> = ({
             debuggingCustomerAccount={isDebuggingCustomerAccount}
           />
         </Box>
-        <QuickStartTopBarButton />
+        {isEmailVerified && <QuickStartTopBarButton />}
         {!user && <LanguageMenu />}
         {user && (
           <>

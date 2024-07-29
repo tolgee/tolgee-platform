@@ -27,7 +27,7 @@ import io.tolgee.notifications.NotificationType
 import io.tolgee.notifications.UserNotificationService
 import io.tolgee.notifications.dto.UserNotificationParamsDto
 import io.tolgee.notifications.events.NotificationCreateEvent
-import io.tolgee.service.LanguageService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging

@@ -11,12 +11,12 @@ import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
 class YamlFileExporter(
-  override val translations: List<ExportTranslationView>,
-  override val exportParams: IExportParams,
+  val translations: List<ExportTranslationView>,
+  val exportParams: IExportParams,
   objectMapper: ObjectMapper,
   projectIcuPlaceholdersSupport: Boolean,
 ) : FileExporter {
-  override val fileExtension: String = exportParams.format.extension
+  private val fileExtension: String = exportParams.format.extension
 
   private val messageFormat =
     when (exportParams.format) {

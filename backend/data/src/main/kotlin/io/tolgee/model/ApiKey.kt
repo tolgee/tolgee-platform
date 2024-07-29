@@ -47,6 +47,7 @@ class ApiKey(
    * Encoded key with project id
    */
   @Transient
+  @Column(insertable = false, updatable = false)
   var encodedKey: String? = null
 
   @ManyToOne

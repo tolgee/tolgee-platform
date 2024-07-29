@@ -1,14 +1,11 @@
-import {
-  Typography,
-  Paper,
-  IconButton,
-  GlobalStyles,
-  styled,
-} from '@mui/material';
-import { ArrowBack } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
+import { Typography, Paper, styled, useMediaQuery, Box } from '@mui/material';
+import clsx from 'clsx';
+
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { CompactFooter } from './CompactFooter';
+
+export const SPLIT_CONTENT_BREAK_POINT = '(max-width: 900px)';
+export const FULL_PAGE_BREAK_POINT = '(max-width: 550px)';
 
 const StyledContainer = styled('div')`
   width: 100%;
@@ -18,6 +15,10 @@ const StyledContainer = styled('div')`
   justify-items: stretch;
   grid-template-rows: 1fr auto;
   padding: 0 32px 0 32px;
+  @media ${FULL_PAGE_BREAK_POINT} {
+    padding: 0px;
+    background: ${({ theme }) => theme.palette.login.backgroundPrimary};
+  }
 `;
 
 const StyledInner = styled('div')`
@@ -27,93 +28,112 @@ const StyledInner = styled('div')`
   justify-self: center;
   margin: ${({ theme }) => theme.spacing(1, 0, 6, 0)};
   padding: ${({ theme }) => theme.spacing(0, 4, 0, 4)};
-  @media (max-width: 800px) {
-    padding: 0;
+  @media ${FULL_PAGE_BREAK_POINT} {
+    padding: 0px;
+    margin: 0px;
+    width: 100% !important;
   }
 `;
 
 const StyledAlerts = styled('div')`
   display: flex;
   flex-direction: column;
-  min-height: 100px;
-  @media (max-width: 800px) {
-    min-height: 55px;
+  min-height: 70px;
+  @media ${FULL_PAGE_BREAK_POINT} {
+    min-height: 50px;
   }
-  justify-content: flex-end;
+  justify-content: center;
 `;
 
 const StyledPaper = styled(Paper)`
-  display: flex;
-  align-items: stretch;
-  padding: ${({ theme }) => theme.spacing(4, 0, 6, 0)};
-  margin-top: ${({ theme }) => theme.spacing(2)};
-  position: relative;
-  overflow: hidden;
-`;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: ${({ theme }) => theme.palette.login.backgroundPrimary};
 
-const StyledVerticalSpace = styled('div')`
-  display: flex;
-  width: ${({ theme }) => theme.spacing(7)};
-  align-items: flex-start;
-  justify-content: center;
-  margin-top: -7px;
-  flex-shrink: 0;
+  &.split {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media ${FULL_PAGE_BREAK_POINT} {
+    box-shadow: none;
+    background: none;
+  }
 `;
 
 const StyledContent = styled('div')`
-  flex-grow: 1;
+  display: grid;
+  padding: 60px;
+  @media ${SPLIT_CONTENT_BREAK_POINT} {
+    padding: 35px;
+  }
+`;
+
+const StyledPrimaryContent = styled(StyledContent)`
+  display: grid;
+  align-content: start;
+  padding: 60px;
+
+  &.split {
+    padding-right: 45px;
+  }
+`;
+
+const StyledSecondaryContent = styled(StyledContent)`
+  align-content: end;
+
+  &.split {
+    padding-left: 45px;
+  }
 `;
 
 type Props = {
   windowTitle: string;
-  backLink?: string | (() => void);
   alerts?: React.ReactNode;
-  title: React.ReactNode;
-  content: React.ReactNode;
+  title?: React.ReactNode;
+  subtitle?: React.ReactNode;
+  primaryContent: React.ReactNode;
+  secondaryContent?: React.ReactNode;
   maxWidth?: number;
 };
 
 export const CompactView: React.FC<Props> = ({
   windowTitle,
-  content,
+  primaryContent,
+  secondaryContent,
   title,
+  subtitle,
   alerts,
-  backLink,
-  maxWidth = 430,
+  maxWidth = 550,
 }) => {
+  const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
+
   useWindowTitle(windowTitle);
 
-  const buttonProps =
-    typeof backLink === 'function'
-      ? { onClick: backLink }
-      : { to: backLink || '', component: Link };
+  const split = !isSmall && Boolean(secondaryContent);
 
   return (
-    <StyledContainer>
-      <GlobalStyles
-        styles={(theme) => ({
-          body: {
-            backgroundColor: theme.palette.emphasis[50] + ' !important',
-          },
-        })}
-      />
+    <StyledContainer className={clsx({ split })}>
       <StyledInner style={{ width: `min(${maxWidth}px, 100%)` }}>
         <StyledAlerts>{alerts}</StyledAlerts>
-        <StyledPaper>
-          <StyledVerticalSpace>
-            {backLink && (
-              <IconButton {...buttonProps} size="medium">
-                <ArrowBack />
-              </IconButton>
+        <StyledPaper className={clsx({ split })}>
+          <StyledPrimaryContent className={clsx({ split })}>
+            {title && <Typography variant="h4">{title}</Typography>}
+            {subtitle && (
+              <Typography
+                sx={{ mt: 0.5 }}
+                color="textSecondary"
+                variant="body2"
+              >
+                {subtitle}
+              </Typography>
             )}
-          </StyledVerticalSpace>
-          <StyledContent>
-            <Typography color="textSecondary" variant="h5">
-              {title}
-            </Typography>
-            <div>{content}</div>
-          </StyledContent>
-          <StyledVerticalSpace />
+            <Box mt={2}>{primaryContent}</Box>
+          </StyledPrimaryContent>
+          {secondaryContent && (
+            <StyledSecondaryContent className={clsx({ split })}>
+              {secondaryContent}
+            </StyledSecondaryContent>
+          )}
         </StyledPaper>
       </StyledInner>
       <CompactFooter />

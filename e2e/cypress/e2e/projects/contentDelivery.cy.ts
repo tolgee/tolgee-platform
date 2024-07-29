@@ -57,7 +57,7 @@ describe('Content delivery', () => {
     selectContentStorage('Default');
     gcy('content-delivery-form-custom-slug').should('not.exist');
     selectContentStorage('Azure');
-    gcy('content-delivery-form-custom-slug').type('my-slug');
+    gcy('content-delivery-form-custom-slug').find('input').type('my-slug');
     saveForm();
     waitForGlobalLoading();
     openEditDialog('Custom slug');
@@ -150,7 +150,7 @@ describe('Content delivery', () => {
     gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
       .findDcy('content-delivery-item-edit')
       .click();
-    cy.gcy('content-delivery-form-name').clear().type(name);
+    cy.gcy('content-delivery-form-name').find('input').clear().type(name);
     cy.gcy('content-delivery-auto-publish-checkbox').click();
     cy.gcy('content-delivery-form-save').click();
     waitForGlobalLoading();
@@ -200,7 +200,7 @@ function selectContentStorage(storage = 'Azure') {
 }
 
 function fillContentDeliveryConfigForm(name: string) {
-  cy.gcy('content-delivery-form-name').clear().type(name);
+  cy.gcy('content-delivery-form-name').find('input').clear().type(name);
   selectContentStorage();
 }
 

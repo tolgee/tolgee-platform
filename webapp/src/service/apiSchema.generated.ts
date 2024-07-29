@@ -49,12 +49,12 @@ export interface paths {
     put: operations["setFinishedState"];
   };
   "/v2/projects/{projectId}": {
-    get: operations["get_3"];
+    get: operations["get_4"];
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
   "/v2/projects/{projectId}/webhook-configs/{id}": {
-    get: operations["get_4"];
+    get: operations["get_5"];
     put: operations["update"];
     delete: operations["delete_1"];
   };
@@ -94,19 +94,19 @@ export interface paths {
     put: operations["complexEdit"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
-    get: operations["get_5"];
+    get: operations["get_6"];
     put: operations["edit"];
   };
   "/v2/projects/{projectId}/invite": {
     put: operations["inviteUser"];
   };
   "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
-    get: operations["get_7"];
+    get: operations["get_8"];
     put: operations["update_3"];
     delete: operations["delete_6"];
   };
   "/v2/projects/{projectId}/content-delivery-configs/{id}": {
-    get: operations["get_8"];
+    get: operations["get_9"];
     put: operations["update_4"];
     /** Immediately publishes content to the configured Content Delivery */
     post: operations["post"];
@@ -117,6 +117,9 @@ export interface paths {
     get: operations["getAutoTranslationSettings"];
     /** Sets default auto-translation settings for project (deprecated: use per language config with null language id) */
     put: operations["setAutoTranslationSettings"];
+  };
+  "/v2/projects/{projectId}/tag-complex": {
+    put: operations["executeComplexTagOperation"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/tags": {
     /** Tags a key with tag. If tag with provided name doesn't exist, it is created */
@@ -160,7 +163,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/import-settings": {
     /** Returns import settings for the authenticated user and the project. */
-    get: operations["get_9"];
+    get: operations["get_10"];
     /** Stores import settings for the authenticated user and the project. */
     put: operations["store"];
   };
@@ -175,7 +178,7 @@ export interface paths {
     put: operations["setState"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_13"];
+    get: operations["get_14"];
     put: operations["update_5"];
     delete: operations["delete_8"];
   };
@@ -202,7 +205,7 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_15"];
+    get: operations["get_16"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
@@ -227,7 +230,7 @@ export interface paths {
     put: operations["setPromptProjectCustomization"];
   };
   "/v2/pats/{id}": {
-    get: operations["get_17"];
+    get: operations["get_18"];
     /** Updates Personal Access Token */
     put: operations["update_7"];
     /** Deletes Personal Access Token */
@@ -250,7 +253,7 @@ export interface paths {
     put: operations["setBasePermissions_1"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_19"];
+    get: operations["get_20"];
     put: operations["update_8"];
     /** Deletes organization and all its data including projects */
     delete: operations["delete_11"];
@@ -266,15 +269,6 @@ export interface paths {
   "/v2/organizations/{id}/avatar": {
     put: operations["uploadAvatar_2"];
     delete: operations["removeAvatar_2"];
-  };
-  "/v2/notifications/preferences/project/{id}": {
-    get: operations["getPerProjectPreferences"];
-    put: operations["updatePerProjectPreferences"];
-    delete: operations["deletePerProjectPreferences"];
-  };
-  "/v2/notifications/preferences/global": {
-    get: operations["getGlobalPreferences"];
-    put: operations["updateGlobalPreferences"];
   };
   "/v2/ee-license/set-license-key": {
     put: operations["setLicenseKey"];
@@ -306,6 +300,10 @@ export interface paths {
     /** Set's the global role on the Tolgee Platform server. */
     put: operations["setRole"];
   };
+  "/v2/user/send-email-verification": {
+    /** Resends email verification email to currently authenticated user. */
+    post: operations["sendEmailVerification"];
+  };
   "/v2/user/generate-super-token": {
     /** Generates new JWT token permitted to sensitive operations */
     post: operations["getSuperToken"];
@@ -316,11 +314,30 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
+  "/v2/slack/user-login": {
+    /** Pairs user account with slack account. */
+    post: operations["userLogin"];
+  };
   "/v2/public/translator/translate": {
     post: operations["translate"];
   };
   "/v2/public/telemetry/report": {
     post: operations["report"];
+  };
+  "/v2/public/slack": {
+    post: operations["slackCommand"];
+  };
+  "/v2/public/slack/on-event": {
+    /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
+    post: operations["onInteractivityEvent"];
+  };
+  "/v2/public/slack/on-bot-event": {
+    /**
+     * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
+     *
+     * Heads up! The events have to be configured via Slack App configuration in Event Subscription section.
+     */
+    post: operations["fetchBotEvent"];
   };
   "/v2/public/licensing/subscription": {
     post: operations["getMySubscription"];
@@ -427,6 +444,10 @@ export interface paths {
     /** Clear translation values for provided keys in selected languages. */
     post: operations["clearTranslations"];
   };
+  "/v2/projects/{projectId}/single-step-import": {
+    /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
+    post: operations["doImport"];
+  };
   "/v2/projects/{projectId}/import": {
     /** Prepares provided files to import. */
     post: operations["addFiles"];
@@ -480,26 +501,12 @@ export interface paths {
     get: operations["getAll_10"];
     post: operations["create_12"];
   };
-  "/v2/notifications/unmark-as-done": {
-    post: operations["unmarkNotificationsAsDone"];
-  };
-  "/v2/notifications/preferences/project/{id}/subscribe": {
-    post: operations["subscribeToProject"];
-  };
-  "/v2/notifications/mark-as-unread": {
-    post: operations["markNotificationsAsUnread"];
-  };
-  "/v2/notifications/mark-as-read": {
-    post: operations["markNotificationsAsRead"];
-  };
-  "/v2/notifications/mark-as-read/all": {
-    post: operations["markAllNotificationsAsRead"];
-  };
-  "/v2/notifications/mark-as-done": {
-    post: operations["markNotificationsAsDone"];
-  };
-  "/v2/notifications/mark-as-done/all": {
-    post: operations["markAllNotificationsAsDone"];
+  "/v2/organizations/{organizationId}/slack/connect": {
+    /**
+     * This endpoint allows the owner of an organization to connect a Slack workspace to their organization.
+     * Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.
+     */
+    post: operations["connectWorkspace"];
   };
   "/v2/image-upload": {
     post: operations["upload"];
@@ -547,6 +554,16 @@ export interface paths {
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
   };
+  "/v2/slack/user-login-info": {
+    /**
+     * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
+     *
+     * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
+     *
+     * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
+     */
+    get: operations["getInfo_3"];
+  };
   "/v2/public/scope-info/roles": {
     get: operations["getRoles"];
   };
@@ -555,15 +572,18 @@ export interface paths {
   };
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
-    get: operations["getInfo_3"];
+    get: operations["getInfo_4"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data required by the UI to load */
     get: operations["get_1"];
   };
+  "/v2/public/export-info/formats": {
+    get: operations["get_2"];
+  };
   "/v2/public/configuration-properties": {
     /** Return server configuration properties documentation */
-    get: operations["get_2"];
+    get: operations["get_3"];
   };
   "/v2/projects/{projectId}/users": {
     /** Returns all project users, who have permission to access project */
@@ -590,6 +610,12 @@ export interface paths {
   };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
+  };
+  "/v2/projects/{projectId}/activity/revisions/{revisionId}/modified-entities": {
+    get: operations["getModifiedEntitiesByRevision"];
+  };
+  "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
+    get: operations["getSingleRevision"];
   };
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
@@ -635,7 +661,7 @@ export interface paths {
     get: operations["currentJobs"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
-    get: operations["get_11"];
+    get: operations["get_12"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
     get: operations["list_3"];
@@ -689,7 +715,7 @@ export interface paths {
     get: operations["getCurrent"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_18"];
+    get: operations["get_19"];
   };
   "/v2/organizations/{slug}/projects": {
     /** Returns all organization projects the user has access to */
@@ -709,6 +735,14 @@ export interface paths {
   "/v2/organizations/{organizationId}/usage": {
     get: operations["getUsage"];
   };
+  "/v2/organizations/{organizationId}/slack/workspaces": {
+    /** Returns a list of workspaces connected to the organization */
+    get: operations["getConnectedWorkspaces"];
+  };
+  "/v2/organizations/{organizationId}/slack/get-connect-url": {
+    /** Returns URL to which user should be redirected to connect Slack workspace */
+    get: operations["connectToSlack"];
+  };
   "/v2/organizations/{organizationId}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
     get: operations["getAllWithStatistics_2"];
@@ -721,21 +755,15 @@ export interface paths {
     /** Returns all organization projects the user has access to */
     get: operations["getAllProjects_1"];
   };
-  "/v2/notifications": {
-    get: operations["getNotifications"];
-  };
-  "/v2/notifications/preferences": {
-    get: operations["getAllPreferences"];
-  };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
   "/v2/ee-license/info": {
-    get: operations["getInfo_4"];
+    get: operations["getInfo_5"];
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
-    get: operations["get_20"];
+    get: operations["get_21"];
   };
   "/v2/api-keys/current": {
     /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
@@ -789,6 +817,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
   };
+  "/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}": {
+    /** Disconnects a workspace from the organization */
+    delete: operations["disconnectWorkspace"];
+  };
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
@@ -802,6 +834,241 @@ export interface paths {
 
 export interface components {
   schemas: {
+    ErrorResponseTyped: {
+      code:
+        | "unauthenticated"
+        | "api_access_forbidden"
+        | "api_key_not_found"
+        | "invalid_api_key"
+        | "invalid_project_api_key"
+        | "project_api_key_expired"
+        | "bad_credentials"
+        | "mfa_enabled"
+        | "invalid_otp_code"
+        | "mfa_not_enabled"
+        | "can_not_revoke_own_permissions"
+        | "data_corrupted"
+        | "invitation_code_does_not_exist_or_expired"
+        | "language_tag_exists"
+        | "language_name_exists"
+        | "language_not_found"
+        | "operation_not_permitted"
+        | "registrations_not_allowed"
+        | "project_not_found"
+        | "resource_not_found"
+        | "scope_not_found"
+        | "key_exists"
+        | "third_party_auth_error_message"
+        | "third_party_auth_no_email"
+        | "third_party_auth_no_sub"
+        | "third_party_auth_unknown_error"
+        | "email_already_verified"
+        | "third_party_unauthorized"
+        | "third_party_google_workspace_mismatch"
+        | "username_already_exists"
+        | "username_or_password_invalid"
+        | "user_already_has_permissions"
+        | "user_already_has_role"
+        | "user_not_found"
+        | "file_not_image"
+        | "file_too_big"
+        | "invalid_timestamp"
+        | "email_not_verified"
+        | "missing_callback_url"
+        | "invalid_jwt_token"
+        | "expired_jwt_token"
+        | "general_jwt_error"
+        | "cannot_find_suitable_address_part"
+        | "address_part_not_unique"
+        | "user_is_not_member_of_organization"
+        | "organization_has_no_other_owner"
+        | "user_has_no_project_access"
+        | "user_is_organization_owner"
+        | "cannot_set_your_own_permissions"
+        | "user_is_organization_member"
+        | "property_not_mutable"
+        | "import_language_not_from_project"
+        | "existing_language_not_selected"
+        | "conflict_is_not_resolved"
+        | "language_already_selected"
+        | "cannot_parse_file"
+        | "could_not_resolve_property"
+        | "cannot_add_more_then_100_languages"
+        | "no_languages_provided"
+        | "language_with_base_language_tag_not_found"
+        | "language_not_from_project"
+        | "namespace_not_from_project"
+        | "cannot_delete_base_language"
+        | "key_not_from_project"
+        | "max_screenshots_exceeded"
+        | "translation_not_from_project"
+        | "can_edit_only_own_comment"
+        | "request_parse_error"
+        | "filter_by_value_state_not_valid"
+        | "import_has_expired"
+        | "tag_not_from_project"
+        | "translation_text_too_long"
+        | "invalid_recaptcha_token"
+        | "cannot_leave_owning_project"
+        | "cannot_leave_project_with_organization_role"
+        | "dont_have_direct_permissions"
+        | "tag_too_log"
+        | "too_many_uploaded_images"
+        | "one_or_more_images_not_found"
+        | "screenshot_not_of_key"
+        | "service_not_found"
+        | "too_many_requests"
+        | "translation_not_found"
+        | "out_of_credits"
+        | "key_not_found"
+        | "organization_not_found"
+        | "cannot_find_base_language"
+        | "base_language_not_found"
+        | "no_exported_result"
+        | "cannot_set_your_own_role"
+        | "only_translate_review_or_view_permission_accepts_view_languages"
+        | "oauth2_token_url_not_set"
+        | "oauth2_user_url_not_set"
+        | "email_already_invited_or_member"
+        | "price_not_found"
+        | "invoice_not_from_organization"
+        | "invoice_not_found"
+        | "plan_not_found"
+        | "plan_not_available_any_more"
+        | "no_auto_translation_method"
+        | "cannot_translate_base_language"
+        | "pat_not_found"
+        | "invalid_pat"
+        | "pat_expired"
+        | "operation_unavailable_for_account_type"
+        | "validation_email_is_not_valid"
+        | "current_password_required"
+        | "cannot_create_organization"
+        | "wrong_current_password"
+        | "wrong_param_type"
+        | "expired_super_jwt_token"
+        | "cannot_delete_your_own_account"
+        | "cannot_sort_by_this_column"
+        | "namespace_not_found"
+        | "namespace_exists"
+        | "invalid_authentication_method"
+        | "unknown_sort_property"
+        | "only_review_permission_accepts_state_change_languages"
+        | "only_translate_or_review_permission_accepts_translate_languages"
+        | "cannot_set_language_permissions_for_admin_scope"
+        | "cannot_set_view_languages_without_translations_view_scope"
+        | "cannot_set_translate_languages_without_translations_edit_scope"
+        | "cannot_set_state_change_languages_without_translations_state_edit_scope"
+        | "language_not_permitted"
+        | "scopes_has_to_be_set"
+        | "set_exactly_one_of_scopes_or_type"
+        | "translation_exists"
+        | "import_keys_error"
+        | "provide_only_one_of_screenshots_and_screenshot_uploaded_image_ids"
+        | "multiple_projects_not_supported"
+        | "plan_translation_limit_exceeded"
+        | "feature_not_enabled"
+        | "license_key_not_found"
+        | "cannot_set_view_languages_without_for_level_based_permissions"
+        | "cannot_set_different_translate_and_state_change_languages_for_level_based_permissions"
+        | "cannot_disable_your_own_account"
+        | "subscription_not_found"
+        | "invoice_does_not_have_usage"
+        | "customer_not_found"
+        | "subscription_not_active"
+        | "organization_already_subscribed"
+        | "organization_not_subscribed"
+        | "license_key_used_by_another_instance"
+        | "translation_spending_limit_exceeded"
+        | "credit_spending_limit_exceeded"
+        | "seats_spending_limit_exceeded"
+        | "this_instance_is_already_licensed"
+        | "big_meta_not_from_project"
+        | "mt_service_not_enabled"
+        | "project_not_selected"
+        | "organization_not_selected"
+        | "plan_has_subscribers"
+        | "translation_failed"
+        | "batch_job_not_found"
+        | "key_exists_in_namespace"
+        | "tag_is_blank"
+        | "execution_failed_on_management_error"
+        | "translation_api_rate_limit"
+        | "cannot_finalize_activity"
+        | "formality_not_supported_by_service"
+        | "language_not_supported_by_service"
+        | "rate_limited"
+        | "pat_access_not_allowed"
+        | "pak_access_not_allowed"
+        | "cannot_modify_disabled_translation"
+        | "azure_config_required"
+        | "s3_config_required"
+        | "content_storage_config_required"
+        | "content_storage_test_failed"
+        | "content_storage_config_invalid"
+        | "invalid_connection_string"
+        | "cannot_create_azure_storage_client"
+        | "s3_access_key_required"
+        | "azure_connection_string_required"
+        | "s3_secret_key_required"
+        | "cannot_store_file_to_content_storage"
+        | "unexpected_error_while_publishing_to_content_storage"
+        | "webhook_responded_with_non_200_status"
+        | "unexpected_error_while_executing_webhook"
+        | "content_storage_is_in_use"
+        | "cannot_set_state_for_missing_translation"
+        | "no_project_id_provided"
+        | "license_key_not_provided"
+        | "subscription_already_canceled"
+        | "user_is_subscribed_to_paid_plan"
+        | "cannot_create_free_plan_without_fixed_type"
+        | "cannot_modify_plan_free_status"
+        | "key_id_not_provided"
+        | "free_self_hosted_seat_limit_exceeded"
+        | "advanced_params_not_supported"
+        | "plural_forms_not_found_for_language"
+        | "nested_plurals_not_supported"
+        | "message_is_not_plural"
+        | "content_outside_plural_forms"
+        | "invalid_plural_form"
+        | "multiple_plurals_not_supported"
+        | "custom_values_json_too_long"
+        | "unsupported_po_message_format"
+        | "plural_forms_data_loss"
+        | "current_user_does_not_own_image"
+        | "user_cannot_view_this_organization"
+        | "user_is_not_owner_of_organization"
+        | "pak_created_for_different_project"
+        | "custom_slug_is_only_applicable_for_custom_storage"
+        | "invalid_slug_format"
+        | "batch_job_cancellation_timeout"
+        | "import_failed"
+        | "cannot_add_more_then_1000_languages"
+        | "no_data_to_import"
+        | "multiple_namespaces_mapped_to_single_file"
+        | "multiple_mappings_for_same_file_language_name"
+        | "multiple_mappings_for_null_file_language_name"
+        | "too_many_mappings_for_file"
+        | "missing_placeholder_in_template"
+        | "tag_not_found"
+        | "cannot_parse_encrypted_slack_login_data"
+        | "slack_workspace_not_found"
+        | "cannot_fetch_user_details_from_slack"
+        | "slack_missing_scope"
+        | "slack_not_connected_to_your_account"
+        | "slack_invalid_command"
+        | "slack_not_subscribed_yet"
+        | "slack_connection_failed"
+        | "tolgee_account_already_connected"
+        | "slack_not_configured"
+        | "slack_workspace_already_connected"
+        | "slack_connection_error";
+      params?: { [key: string]: unknown }[];
+    };
+    ErrorResponseBody: {
+      code: string;
+      params?: { [key: string]: unknown }[];
+    };
     UserUpdateRequestDto: {
       name: string;
       email: string;
@@ -869,10 +1136,28 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -905,24 +1190,6 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1451,8 +1718,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1532,8 +1799,16 @@ export interface components {
       filterKeyId?: number[];
       /** @description Filter key IDs not to be contained in export */
       filterKeyIdNot?: number[];
-      /** @description Filter keys tagged by */
+      /**
+       * @description Filter keys tagged by.
+       *
+       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+       */
       filterTag?: string;
+      /** @description Filter keys tagged by one of provided tags */
+      filterTagIn?: string[];
+      /** @description Filter keys not tagged by one of provided tags */
+      filterTagNotIn?: string[];
       /** @description Filter keys with prefix */
       filterKeyPrefix?: string;
       /** @description Filter translations with state. By default, all states except untranslated is exported. */
@@ -1555,6 +1830,21 @@ export interface components {
         | "APPLE_SPRINTF"
         | "RUBY_SPRINTF"
         | "ICU";
+      /**
+       * @description This is a template that defines the structure of the resulting .zip file content.
+       *
+       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+       *
+       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+       * the English translations of the `home` namespace will be stored in `home/en.json`.
+       *
+       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+       *
+       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+       * but in Android format. (e.g., en-rUS)
+       */
+      fileStructureTemplate?: string;
     };
     ContentDeliveryConfigModel: {
       /** Format: int64 */
@@ -1600,8 +1890,16 @@ export interface components {
       filterKeyId?: number[];
       /** @description Filter key IDs not to be contained in export */
       filterKeyIdNot?: number[];
-      /** @description Filter keys tagged by */
+      /**
+       * @description Filter keys tagged by.
+       *
+       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+       */
       filterTag?: string;
+      /** @description Filter keys tagged by one of provided tags */
+      filterTagIn?: string[];
+      /** @description Filter keys not tagged by one of provided tags */
+      filterTagNotIn?: string[];
       /** @description Filter keys with prefix */
       filterKeyPrefix?: string;
       /** @description Filter translations with state. By default, all states except untranslated is exported. */
@@ -1629,6 +1927,49 @@ export interface components {
        * e.g. Key hello[0] will be exported as {"hello": ["..."]}
        */
       supportArrays: boolean;
+      /**
+       * @description This is a template that defines the structure of the resulting .zip file content.
+       *
+       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+       *
+       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+       * the English translations of the `home` namespace will be stored in `home/en.json`.
+       *
+       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+       *
+       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+       * but in Android format. (e.g., en-rUS)
+       */
+      fileStructureTemplate?: string;
+    };
+    ComplexTagKeysRequest: {
+      /** @description Include keys filtered by the provided key information */
+      filterKeys?: components["schemas"]["KeyId"][];
+      /** @description Exclude keys filtered by the provided key information */
+      filterKeysNot?: components["schemas"]["KeyId"][];
+      /** @description Include keys filtered by the provided tag information. This filter supports wildcards. For example, `draft-*` will match all tags starting with `draft-`. */
+      filterTag?: string[];
+      /** @description Exclude keys filtered by the provided tag information. This filter supports wildcards. For example, `draft-*` will match all tags starting with `draft-`. */
+      filterTagNot?: string[];
+      /** @description Specified tags will be added to filtered keys */
+      tagFiltered?: string[];
+      /** @description Specified tags will be removed from filtered keys. It supports wildcards. For example, `draft-*` will remove all tags starting with `draft-`. */
+      untagFiltered?: string[];
+      /** @description Specified tags will be added to keys not filtered by any of the specified filters. */
+      tagOther?: string[];
+      /** @description Specified tags will be removed from keys not filtered by any of the specified filters. It supports wildcards. For example, `draft-*` will remove all tags starting with `draft-`. */
+      untagOther?: string[];
+    };
+    /** @description Exclude keys filtered by the provided key information */
+    KeyId: {
+      name?: string;
+      namespace?: string;
+      /**
+       * Format: int64
+       * @description If key id is provided, name and namespace are ignored.
+       */
+      id?: number;
     };
     TagKeyDto: {
       name: string;
@@ -1871,23 +2212,6 @@ export interface components {
       invitedUserName?: string;
       invitedUserEmail?: string;
     };
-    NotificationPreferencesDto: {
-      /** @description List of notification types the user does not want to receive. */
-      disabledNotifications: (
-        | "ACTIVITY_LANGUAGES_CREATED"
-        | "ACTIVITY_KEYS_CREATED"
-        | "ACTIVITY_KEYS_UPDATED"
-        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
-        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
-        | "ACTIVITY_TRANSLATIONS_UPDATED"
-        | "ACTIVITY_TRANSLATION_OUTDATED"
-        | "ACTIVITY_TRANSLATION_REVIEWED"
-        | "ACTIVITY_TRANSLATION_UNREVIEWED"
-        | "ACTIVITY_NEW_COMMENTS"
-        | "ACTIVITY_COMMENTS_MENTION"
-        | "BATCH_JOB_ERRORED"
-      )[];
-    };
     SetLicenseKeyDto: {
       licenseKey: string;
     };
@@ -1909,6 +2233,7 @@ export interface components {
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
       )[];
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -1977,8 +2302,8 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       description: string;
       username?: string;
       /** Format: int64 */
@@ -2042,6 +2367,18 @@ export interface components {
       /** Format: int64 */
       usersCount: number;
     };
+    SlackCommandDto: {
+      token?: string;
+      team_id: string;
+      channel_id: string;
+      command: string;
+      channel_name: string;
+      user_id: string;
+      user_name: string;
+      text: string;
+      trigger_id?: string;
+      team_domain: string;
+    };
     GetMySubscriptionDto: {
       licenseKey: string;
       instanceId: string;
@@ -2083,6 +2420,7 @@ export interface components {
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -2299,211 +2637,233 @@ export interface components {
     StorageTestResult: {
       success: boolean;
       message?:
-        | "UNAUTHENTICATED"
-        | "API_ACCESS_FORBIDDEN"
-        | "API_KEY_NOT_FOUND"
-        | "INVALID_API_KEY"
-        | "INVALID_PROJECT_API_KEY"
-        | "PROJECT_API_KEY_EXPIRED"
-        | "BAD_CREDENTIALS"
-        | "MFA_ENABLED"
-        | "INVALID_OTP_CODE"
-        | "MFA_NOT_ENABLED"
-        | "CAN_NOT_REVOKE_OWN_PERMISSIONS"
-        | "DATA_CORRUPTED"
-        | "INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED"
-        | "LANGUAGE_TAG_EXISTS"
-        | "LANGUAGE_NAME_EXISTS"
-        | "LANGUAGE_NOT_FOUND"
-        | "OPERATION_NOT_PERMITTED"
-        | "REGISTRATIONS_NOT_ALLOWED"
-        | "PROJECT_NOT_FOUND"
-        | "RESOURCE_NOT_FOUND"
-        | "SCOPE_NOT_FOUND"
-        | "KEY_EXISTS"
-        | "THIRD_PARTY_AUTH_ERROR_MESSAGE"
-        | "THIRD_PARTY_AUTH_NO_EMAIL"
-        | "THIRD_PARTY_AUTH_NO_SUB"
-        | "THIRD_PARTY_AUTH_UNKNOWN_ERROR"
-        | "THIRD_PARTY_UNAUTHORIZED"
-        | "THIRD_PARTY_GOOGLE_WORKSPACE_MISMATCH"
-        | "USERNAME_ALREADY_EXISTS"
-        | "USERNAME_OR_PASSWORD_INVALID"
-        | "USER_ALREADY_HAS_PERMISSIONS"
-        | "USER_ALREADY_HAS_ROLE"
-        | "USER_NOT_FOUND"
-        | "FILE_NOT_IMAGE"
-        | "FILE_TOO_BIG"
-        | "INVALID_TIMESTAMP"
-        | "EMAIL_NOT_VERIFIED"
-        | "MISSING_CALLBACK_URL"
-        | "INVALID_JWT_TOKEN"
-        | "EXPIRED_JWT_TOKEN"
-        | "GENERAL_JWT_ERROR"
-        | "CANNOT_FIND_SUITABLE_ADDRESS_PART"
-        | "ADDRESS_PART_NOT_UNIQUE"
-        | "USER_IS_NOT_MEMBER_OF_ORGANIZATION"
-        | "ORGANIZATION_HAS_NO_OTHER_OWNER"
-        | "USER_HAS_NO_PROJECT_ACCESS"
-        | "USER_IS_ORGANIZATION_OWNER"
-        | "CANNOT_SET_YOUR_OWN_PERMISSIONS"
-        | "USER_IS_ORGANIZATION_MEMBER"
-        | "PROPERTY_NOT_MUTABLE"
-        | "IMPORT_LANGUAGE_NOT_FROM_PROJECT"
-        | "EXISTING_LANGUAGE_NOT_SELECTED"
-        | "CONFLICT_IS_NOT_RESOLVED"
-        | "LANGUAGE_ALREADY_SELECTED"
-        | "CANNOT_PARSE_FILE"
-        | "COULD_NOT_RESOLVE_PROPERTY"
-        | "CANNOT_ADD_MORE_THEN_100_LANGUAGES"
-        | "NO_LANGUAGES_PROVIDED"
-        | "LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND"
-        | "LANGUAGE_NOT_FROM_PROJECT"
-        | "NAMESPACE_NOT_FROM_PROJECT"
-        | "CANNOT_DELETE_BASE_LANGUAGE"
-        | "KEY_NOT_FROM_PROJECT"
-        | "MAX_SCREENSHOTS_EXCEEDED"
-        | "TRANSLATION_NOT_FROM_PROJECT"
-        | "CAN_EDIT_ONLY_OWN_COMMENT"
-        | "REQUEST_PARSE_ERROR"
-        | "FILTER_BY_VALUE_STATE_NOT_VALID"
-        | "IMPORT_HAS_EXPIRED"
-        | "TAG_NOT_FROM_PROJECT"
-        | "TRANSLATION_TEXT_TOO_LONG"
-        | "INVALID_RECAPTCHA_TOKEN"
-        | "CANNOT_LEAVE_OWNING_PROJECT"
-        | "CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE"
-        | "DONT_HAVE_DIRECT_PERMISSIONS"
-        | "TAG_TOO_LOG"
-        | "TOO_MANY_UPLOADED_IMAGES"
-        | "ONE_OR_MORE_IMAGES_NOT_FOUND"
-        | "SCREENSHOT_NOT_OF_KEY"
-        | "SERVICE_NOT_FOUND"
-        | "TOO_MANY_REQUESTS"
-        | "TRANSLATION_NOT_FOUND"
-        | "OUT_OF_CREDITS"
-        | "KEY_NOT_FOUND"
-        | "ORGANIZATION_NOT_FOUND"
-        | "CANNOT_FIND_BASE_LANGUAGE"
-        | "BASE_LANGUAGE_NOT_FOUND"
-        | "NO_EXPORTED_RESULT"
-        | "CANNOT_SET_YOUR_OWN_ROLE"
-        | "ONLY_TRANSLATE_REVIEW_OR_VIEW_PERMISSION_ACCEPTS_VIEW_LANGUAGES"
-        | "OAUTH2_TOKEN_URL_NOT_SET"
-        | "OAUTH2_USER_URL_NOT_SET"
-        | "EMAIL_ALREADY_INVITED_OR_MEMBER"
-        | "PRICE_NOT_FOUND"
-        | "INVOICE_NOT_FROM_ORGANIZATION"
-        | "INVOICE_NOT_FOUND"
-        | "PLAN_NOT_FOUND"
-        | "PLAN_NOT_AVAILABLE_ANY_MORE"
-        | "NO_AUTO_TRANSLATION_METHOD"
-        | "CANNOT_TRANSLATE_BASE_LANGUAGE"
-        | "PAT_NOT_FOUND"
-        | "INVALID_PAT"
-        | "PAT_EXPIRED"
-        | "OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE"
-        | "VALIDATION_EMAIL_IS_NOT_VALID"
-        | "CURRENT_PASSWORD_REQUIRED"
-        | "CANNOT_CREATE_ORGANIZATION"
-        | "WRONG_CURRENT_PASSWORD"
-        | "WRONG_PARAM_TYPE"
-        | "EXPIRED_SUPER_JWT_TOKEN"
-        | "CANNOT_DELETE_YOUR_OWN_ACCOUNT"
-        | "CANNOT_SORT_BY_THIS_COLUMN"
-        | "NAMESPACE_NOT_FOUND"
-        | "NAMESPACE_EXISTS"
-        | "INVALID_AUTHENTICATION_METHOD"
-        | "UNKNOWN_SORT_PROPERTY"
-        | "ONLY_REVIEW_PERMISSION_ACCEPTS_STATE_CHANGE_LANGUAGES"
-        | "ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES"
-        | "CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE"
-        | "CANNOT_SET_VIEW_LANGUAGES_WITHOUT_TRANSLATIONS_VIEW_SCOPE"
-        | "CANNOT_SET_TRANSLATE_LANGUAGES_WITHOUT_TRANSLATIONS_EDIT_SCOPE"
-        | "CANNOT_SET_STATE_CHANGE_LANGUAGES_WITHOUT_TRANSLATIONS_STATE_EDIT_SCOPE"
-        | "LANGUAGE_NOT_PERMITTED"
-        | "SCOPES_HAS_TO_BE_SET"
-        | "SET_EXACTLY_ONE_OF_SCOPES_OR_TYPE"
-        | "TRANSLATION_EXISTS"
-        | "IMPORT_KEYS_ERROR"
-        | "PROVIDE_ONLY_ONE_OF_SCREENSHOTS_AND_SCREENSHOT_UPLOADED_IMAGE_IDS"
-        | "MULTIPLE_PROJECTS_NOT_SUPPORTED"
-        | "PLAN_TRANSLATION_LIMIT_EXCEEDED"
-        | "FEATURE_NOT_ENABLED"
-        | "LICENSE_KEY_NOT_FOUND"
-        | "CANNOT_SET_VIEW_LANGUAGES_WITHOUT_FOR_LEVEL_BASED_PERMISSIONS"
-        | "CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS"
-        | "CANNOT_DISABLE_YOUR_OWN_ACCOUNT"
-        | "SUBSCRIPTION_NOT_FOUND"
-        | "INVOICE_DOES_NOT_HAVE_USAGE"
-        | "CUSTOMER_NOT_FOUND"
-        | "SUBSCRIPTION_NOT_ACTIVE"
-        | "ORGANIZATION_ALREADY_SUBSCRIBED"
-        | "ORGANIZATION_NOT_SUBSCRIBED"
-        | "LICENSE_KEY_USED_BY_ANOTHER_INSTANCE"
-        | "TRANSLATION_SPENDING_LIMIT_EXCEEDED"
-        | "CREDIT_SPENDING_LIMIT_EXCEEDED"
-        | "SEATS_SPENDING_LIMIT_EXCEEDED"
-        | "THIS_INSTANCE_IS_ALREADY_LICENSED"
-        | "BIG_META_NOT_FROM_PROJECT"
-        | "MT_SERVICE_NOT_ENABLED"
-        | "PROJECT_NOT_SELECTED"
-        | "ORGANIZATION_NOT_SELECTED"
-        | "PLAN_HAS_SUBSCRIBERS"
-        | "TRANSLATION_FAILED"
-        | "BATCH_JOB_NOT_FOUND"
-        | "KEY_EXISTS_IN_NAMESPACE"
-        | "TAG_IS_BLANK"
-        | "EXECUTION_FAILED_ON_MANAGEMENT_ERROR"
-        | "TRANSLATION_API_RATE_LIMIT"
-        | "CANNOT_FINALIZE_ACTIVITY"
-        | "FORMALITY_NOT_SUPPORTED_BY_SERVICE"
-        | "LANGUAGE_NOT_SUPPORTED_BY_SERVICE"
-        | "RATE_LIMITED"
-        | "PAT_ACCESS_NOT_ALLOWED"
-        | "PAK_ACCESS_NOT_ALLOWED"
-        | "CANNOT_MODIFY_DISABLED_TRANSLATION"
-        | "AZURE_CONFIG_REQUIRED"
-        | "S3_CONFIG_REQUIRED"
-        | "CONTENT_STORAGE_CONFIG_REQUIRED"
-        | "CONTENT_STORAGE_TEST_FAILED"
-        | "CONTENT_STORAGE_CONFIG_INVALID"
-        | "INVALID_CONNECTION_STRING"
-        | "CANNOT_CREATE_AZURE_STORAGE_CLIENT"
-        | "S3_ACCESS_KEY_REQUIRED"
-        | "AZURE_CONNECTION_STRING_REQUIRED"
-        | "S3_SECRET_KEY_REQUIRED"
-        | "CANNOT_STORE_FILE_TO_CONTENT_STORAGE"
-        | "UNEXPECTED_ERROR_WHILE_PUBLISHING_TO_CONTENT_STORAGE"
-        | "WEBHOOK_RESPONDED_WITH_NON_200_STATUS"
-        | "UNEXPECTED_ERROR_WHILE_EXECUTING_WEBHOOK"
-        | "CONTENT_STORAGE_IS_IN_USE"
-        | "CANNOT_SET_STATE_FOR_MISSING_TRANSLATION"
-        | "NO_PROJECT_ID_PROVIDED"
-        | "LICENSE_KEY_NOT_PROVIDED"
-        | "SUBSCRIPTION_ALREADY_CANCELED"
-        | "USER_IS_SUBSCRIBED_TO_PAID_PLAN"
-        | "CANNOT_CREATE_FREE_PLAN_WITHOUT_FIXED_TYPE"
-        | "CANNOT_MODIFY_PLAN_FREE_STATUS"
-        | "KEY_ID_NOT_PROVIDED"
-        | "FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED"
-        | "ADVANCED_PARAMS_NOT_SUPPORTED"
-        | "PLURAL_FORMS_NOT_FOUND_FOR_LANGUAGE"
-        | "NESTED_PLURALS_NOT_SUPPORTED"
-        | "MESSAGE_IS_NOT_PLURAL"
-        | "CONTENT_OUTSIDE_PLURAL_FORMS"
-        | "INVALID_PLURAL_FORM"
-        | "MULTIPLE_PLURALS_NOT_SUPPORTED"
-        | "CUSTOM_VALUES_JSON_TOO_LONG"
-        | "UNSUPPORTED_PO_MESSAGE_FORMAT"
-        | "PLURAL_FORMS_DATA_LOSS"
-        | "CURRENT_USER_DOES_NOT_OWN_IMAGE"
-        | "USER_CANNOT_VIEW_THIS_ORGANIZATION"
-        | "USER_IS_NOT_OWNER_OF_ORGANIZATION"
-        | "PAK_CREATED_FOR_DIFFERENT_PROJECT"
-        | "CUSTOM_SLUG_IS_ONLY_APPLICABLE_FOR_CUSTOM_STORAGE"
-        | "INVALID_SLUG_FORMAT"
-        | "BATCH_JOB_CANCELLATION_TIMEOUT";
+        | "unauthenticated"
+        | "api_access_forbidden"
+        | "api_key_not_found"
+        | "invalid_api_key"
+        | "invalid_project_api_key"
+        | "project_api_key_expired"
+        | "bad_credentials"
+        | "mfa_enabled"
+        | "invalid_otp_code"
+        | "mfa_not_enabled"
+        | "can_not_revoke_own_permissions"
+        | "data_corrupted"
+        | "invitation_code_does_not_exist_or_expired"
+        | "language_tag_exists"
+        | "language_name_exists"
+        | "language_not_found"
+        | "operation_not_permitted"
+        | "registrations_not_allowed"
+        | "project_not_found"
+        | "resource_not_found"
+        | "scope_not_found"
+        | "key_exists"
+        | "third_party_auth_error_message"
+        | "third_party_auth_no_email"
+        | "third_party_auth_no_sub"
+        | "third_party_auth_unknown_error"
+        | "email_already_verified"
+        | "third_party_unauthorized"
+        | "third_party_google_workspace_mismatch"
+        | "username_already_exists"
+        | "username_or_password_invalid"
+        | "user_already_has_permissions"
+        | "user_already_has_role"
+        | "user_not_found"
+        | "file_not_image"
+        | "file_too_big"
+        | "invalid_timestamp"
+        | "email_not_verified"
+        | "missing_callback_url"
+        | "invalid_jwt_token"
+        | "expired_jwt_token"
+        | "general_jwt_error"
+        | "cannot_find_suitable_address_part"
+        | "address_part_not_unique"
+        | "user_is_not_member_of_organization"
+        | "organization_has_no_other_owner"
+        | "user_has_no_project_access"
+        | "user_is_organization_owner"
+        | "cannot_set_your_own_permissions"
+        | "user_is_organization_member"
+        | "property_not_mutable"
+        | "import_language_not_from_project"
+        | "existing_language_not_selected"
+        | "conflict_is_not_resolved"
+        | "language_already_selected"
+        | "cannot_parse_file"
+        | "could_not_resolve_property"
+        | "cannot_add_more_then_100_languages"
+        | "no_languages_provided"
+        | "language_with_base_language_tag_not_found"
+        | "language_not_from_project"
+        | "namespace_not_from_project"
+        | "cannot_delete_base_language"
+        | "key_not_from_project"
+        | "max_screenshots_exceeded"
+        | "translation_not_from_project"
+        | "can_edit_only_own_comment"
+        | "request_parse_error"
+        | "filter_by_value_state_not_valid"
+        | "import_has_expired"
+        | "tag_not_from_project"
+        | "translation_text_too_long"
+        | "invalid_recaptcha_token"
+        | "cannot_leave_owning_project"
+        | "cannot_leave_project_with_organization_role"
+        | "dont_have_direct_permissions"
+        | "tag_too_log"
+        | "too_many_uploaded_images"
+        | "one_or_more_images_not_found"
+        | "screenshot_not_of_key"
+        | "service_not_found"
+        | "too_many_requests"
+        | "translation_not_found"
+        | "out_of_credits"
+        | "key_not_found"
+        | "organization_not_found"
+        | "cannot_find_base_language"
+        | "base_language_not_found"
+        | "no_exported_result"
+        | "cannot_set_your_own_role"
+        | "only_translate_review_or_view_permission_accepts_view_languages"
+        | "oauth2_token_url_not_set"
+        | "oauth2_user_url_not_set"
+        | "email_already_invited_or_member"
+        | "price_not_found"
+        | "invoice_not_from_organization"
+        | "invoice_not_found"
+        | "plan_not_found"
+        | "plan_not_available_any_more"
+        | "no_auto_translation_method"
+        | "cannot_translate_base_language"
+        | "pat_not_found"
+        | "invalid_pat"
+        | "pat_expired"
+        | "operation_unavailable_for_account_type"
+        | "validation_email_is_not_valid"
+        | "current_password_required"
+        | "cannot_create_organization"
+        | "wrong_current_password"
+        | "wrong_param_type"
+        | "expired_super_jwt_token"
+        | "cannot_delete_your_own_account"
+        | "cannot_sort_by_this_column"
+        | "namespace_not_found"
+        | "namespace_exists"
+        | "invalid_authentication_method"
+        | "unknown_sort_property"
+        | "only_review_permission_accepts_state_change_languages"
+        | "only_translate_or_review_permission_accepts_translate_languages"
+        | "cannot_set_language_permissions_for_admin_scope"
+        | "cannot_set_view_languages_without_translations_view_scope"
+        | "cannot_set_translate_languages_without_translations_edit_scope"
+        | "cannot_set_state_change_languages_without_translations_state_edit_scope"
+        | "language_not_permitted"
+        | "scopes_has_to_be_set"
+        | "set_exactly_one_of_scopes_or_type"
+        | "translation_exists"
+        | "import_keys_error"
+        | "provide_only_one_of_screenshots_and_screenshot_uploaded_image_ids"
+        | "multiple_projects_not_supported"
+        | "plan_translation_limit_exceeded"
+        | "feature_not_enabled"
+        | "license_key_not_found"
+        | "cannot_set_view_languages_without_for_level_based_permissions"
+        | "cannot_set_different_translate_and_state_change_languages_for_level_based_permissions"
+        | "cannot_disable_your_own_account"
+        | "subscription_not_found"
+        | "invoice_does_not_have_usage"
+        | "customer_not_found"
+        | "subscription_not_active"
+        | "organization_already_subscribed"
+        | "organization_not_subscribed"
+        | "license_key_used_by_another_instance"
+        | "translation_spending_limit_exceeded"
+        | "credit_spending_limit_exceeded"
+        | "seats_spending_limit_exceeded"
+        | "this_instance_is_already_licensed"
+        | "big_meta_not_from_project"
+        | "mt_service_not_enabled"
+        | "project_not_selected"
+        | "organization_not_selected"
+        | "plan_has_subscribers"
+        | "translation_failed"
+        | "batch_job_not_found"
+        | "key_exists_in_namespace"
+        | "tag_is_blank"
+        | "execution_failed_on_management_error"
+        | "translation_api_rate_limit"
+        | "cannot_finalize_activity"
+        | "formality_not_supported_by_service"
+        | "language_not_supported_by_service"
+        | "rate_limited"
+        | "pat_access_not_allowed"
+        | "pak_access_not_allowed"
+        | "cannot_modify_disabled_translation"
+        | "azure_config_required"
+        | "s3_config_required"
+        | "content_storage_config_required"
+        | "content_storage_test_failed"
+        | "content_storage_config_invalid"
+        | "invalid_connection_string"
+        | "cannot_create_azure_storage_client"
+        | "s3_access_key_required"
+        | "azure_connection_string_required"
+        | "s3_secret_key_required"
+        | "cannot_store_file_to_content_storage"
+        | "unexpected_error_while_publishing_to_content_storage"
+        | "webhook_responded_with_non_200_status"
+        | "unexpected_error_while_executing_webhook"
+        | "content_storage_is_in_use"
+        | "cannot_set_state_for_missing_translation"
+        | "no_project_id_provided"
+        | "license_key_not_provided"
+        | "subscription_already_canceled"
+        | "user_is_subscribed_to_paid_plan"
+        | "cannot_create_free_plan_without_fixed_type"
+        | "cannot_modify_plan_free_status"
+        | "key_id_not_provided"
+        | "free_self_hosted_seat_limit_exceeded"
+        | "advanced_params_not_supported"
+        | "plural_forms_not_found_for_language"
+        | "nested_plurals_not_supported"
+        | "message_is_not_plural"
+        | "content_outside_plural_forms"
+        | "invalid_plural_form"
+        | "multiple_plurals_not_supported"
+        | "custom_values_json_too_long"
+        | "unsupported_po_message_format"
+        | "plural_forms_data_loss"
+        | "current_user_does_not_own_image"
+        | "user_cannot_view_this_organization"
+        | "user_is_not_owner_of_organization"
+        | "pak_created_for_different_project"
+        | "custom_slug_is_only_applicable_for_custom_storage"
+        | "invalid_slug_format"
+        | "batch_job_cancellation_timeout"
+        | "import_failed"
+        | "cannot_add_more_then_1000_languages"
+        | "no_data_to_import"
+        | "multiple_namespaces_mapped_to_single_file"
+        | "multiple_mappings_for_same_file_language_name"
+        | "multiple_mappings_for_null_file_language_name"
+        | "too_many_mappings_for_file"
+        | "missing_placeholder_in_template"
+        | "tag_not_found"
+        | "cannot_parse_encrypted_slack_login_data"
+        | "slack_workspace_not_found"
+        | "cannot_fetch_user_details_from_slack"
+        | "slack_missing_scope"
+        | "slack_not_connected_to_your_account"
+        | "slack_invalid_command"
+        | "slack_not_subscribed_yet"
+        | "slack_connection_failed"
+        | "tolgee_account_already_connected"
+        | "slack_not_configured"
+        | "slack_workspace_already_connected"
+        | "slack_connection_error";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -2600,9 +2960,111 @@ export interface components {
       keyIds: number[];
       languageIds: number[];
     };
-    ErrorResponseBody: {
-      code: string;
-      params?: { [key: string]: unknown }[];
+    /** @description Definition of mapping for each file to import. */
+    ImportFileMapping: {
+      /** @description Name of the file to import. This is the name of the file provided in `files` request part or in uploaded archive. */
+      fileName: string;
+      /** @description Namespace to import the file to. If not provided, the key will be imported without namespace. */
+      namespace?: string;
+      /**
+       * @description Format of the file. If not provided, Tolgee will try to guess the format from the file name or file contents.
+       *
+       * It is recommended to provide these values to prevent any issues with format detection.
+       */
+      format?:
+        | "JSON_ICU"
+        | "JSON_JAVA"
+        | "JSON_PHP"
+        | "JSON_RUBY"
+        | "JSON_C"
+        | "PO_PHP"
+        | "PO_C"
+        | "PO_JAVA"
+        | "PO_ICU"
+        | "PO_RUBY"
+        | "STRINGS"
+        | "STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "PROPERTIES_ICU"
+        | "PROPERTIES_JAVA"
+        | "PROPERTIES_UNKNOWN"
+        | "ANDROID_XML"
+        | "FLUTTER_ARB"
+        | "YAML_RUBY"
+        | "YAML_JAVA"
+        | "YAML_ICU"
+        | "YAML_PHP"
+        | "YAML_UNKNOWN"
+        | "XLIFF_ICU"
+        | "XLIFF_JAVA"
+        | "XLIFF_PHP"
+        | "XLIFF_RUBY";
+      /**
+       * @description The existing language tag in the Tolgee platform to which the imported language should be mapped.
+       *
+       * When null, Tolgee will try to guess the language from the file contents or file name.
+       */
+      languageTag?: string;
+    };
+    /**
+     * @description Maps the languages from imported files to languages existing in the Tolgee platform.
+     *
+     * Use this field only when your files contain multiple languages (e.g., XLIFF files).
+     *
+     * Otherwise, use the `languageTag` property of `fileMappings`.
+     *
+     * Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` element. Using this field you can map source and target values to languages stored in the Tolgee Platform.
+     */
+    LanguageMapping: {
+      /**
+       * @description The language from the imported file.
+       *
+       * For xliff files, this is the `source-language` or the `target-language` attribute value of `file` element.
+       * @example en-US
+       */
+      importLanguage: string;
+      /**
+       * @description The tag of language existing in the Tolgee platform to which the imported language should be mapped.
+       * @example en-US
+       */
+      platformLanguageTag: string;
+    };
+    SingleStepImportRequest: {
+      /**
+       * @description When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys.
+       * @example .
+       */
+      structureDelimiter?: string;
+      /**
+       * @description Whether to override existing translation data.
+       *
+       * When set to `KEEP`, existing translations will be kept.
+       *
+       * When set to `OVERRIDE`, existing translations will be overwrote.
+       *
+       * When set to `NO_FORCE`, error will be thrown on conflict.
+       */
+      forceMode: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      /**
+       * @description Maps the languages from imported files to languages existing in the Tolgee platform.
+       *
+       * Use this field only when your files contain multiple languages (e.g., XLIFF files).
+       *
+       * Otherwise, use the `languageTag` property of `fileMappings`.
+       *
+       * Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` element. Using this field you can map source and target values to languages stored in the Tolgee Platform.
+       */
+      languageMappings?: components["schemas"]["LanguageMapping"][];
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+      /** @description Definition of mapping for each file to import. */
+      fileMappings: components["schemas"]["ImportFileMapping"][];
+      /** @description Keys created by this import will be tagged with these tags. It add tags only to new keys. The keys that already exist will not be tagged. */
+      tagNewKeys: string[];
+      /** @description If yes, keys from project that were not included in import will be deleted. */
+      removeOtherKeys?: boolean;
     };
     ImportAddFilesResultModel: {
       errors: components["schemas"]["ErrorResponseBody"][];
@@ -2680,8 +3142,16 @@ export interface components {
       filterKeyId?: number[];
       /** @description Filter key IDs not to be contained in export */
       filterKeyIdNot?: number[];
-      /** @description Filter keys tagged by */
+      /**
+       * @description Filter keys tagged by.
+       *
+       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+       */
       filterTag?: string;
+      /** @description Filter keys tagged by one of provided tags */
+      filterTagIn?: string[];
+      /** @description Filter keys not tagged by one of provided tags */
+      filterTagNotIn?: string[];
       /** @description Filter keys with prefix */
       filterKeyPrefix?: string;
       /** @description Filter translations with state. By default, all states except untranslated is exported. */
@@ -2704,6 +3174,21 @@ export interface components {
         | "APPLE_SPRINTF"
         | "RUBY_SPRINTF"
         | "ICU";
+      /**
+       * @description This is a template that defines the structure of the resulting .zip file content.
+       *
+       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+       *
+       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+       * the English translations of the `home` namespace will be stored in `home/en.json`.
+       *
+       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+       *
+       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+       * but in Android format. (e.g., en-rUS)
+       */
+      fileStructureTemplate?: string;
       /**
        * @description If true, for structured formats (like JSON) arrays are supported.
        *
@@ -2797,6 +3282,9 @@ export interface components {
        */
       expiresAt?: number;
     };
+    ConnectToSlackDto: {
+      code: string;
+    };
     ImageUploadInfoDto: {
       location?: string;
     };
@@ -2831,6 +3319,8 @@ export interface components {
       password: string;
       invitationCode?: string;
       callbackUrl?: string;
+      /** @description Where did the user find us? */
+      userSource?: string;
       recaptchaToken?: string;
     };
     ResetPassword: {
@@ -2856,6 +3346,13 @@ export interface components {
       language?: string;
       /** Format: int64 */
       preferredOrganizationId?: number;
+    };
+    SlackUserInfoModel: {
+      teamName: string;
+      slackName?: string;
+      slackId: string;
+      slackRealName?: string;
+      slackAvatar: string;
     };
     HierarchyItem: {
       scope:
@@ -2904,7 +3401,8 @@ export interface components {
         | "FEATURE_CONTENT_DELIVERY_AND_WEBHOOKS"
         | "NEW_PRICING"
         | "FEATURE_AI_CUSTOMIZATION"
-        | "FEATURE_VISUAL_EDITOR";
+        | "FEATURE_VISUAL_EDITOR"
+        | "FEATURE_CLI_2";
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -2918,8 +3416,6 @@ export interface components {
       languageTag?: string;
       eeSubscription?: components["schemas"]["EeSubscriptionModel"];
       announcement?: components["schemas"]["AnnouncementDto"];
-      /** Format: int32 */
-      unreadNotifications?: number;
     };
     MtServiceDTO: {
       enabled: boolean;
@@ -2963,23 +3459,24 @@ export interface components {
         | "WEBHOOKS"
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example btforg */
+      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      /** @example btforg */
-      slug: string;
       avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
@@ -3011,6 +3508,34 @@ export interface components {
       postHogApiKey?: string;
       postHogHost?: string;
       contentDeliveryConfigured: boolean;
+      userSourceField: boolean;
+      slack: components["schemas"]["SlackDTO"];
+    };
+    SlackDTO: {
+      enabled: boolean;
+      connected: boolean;
+    };
+    CollectionModelExportFormatModel: {
+      _embedded?: {
+        exportFormats?: components["schemas"]["ExportFormatModel"][];
+      };
+    };
+    ExportFormatModel: {
+      format:
+        | "JSON"
+        | "JSON_TOLGEE"
+        | "XLIFF"
+        | "PO"
+        | "APPLE_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "FLUTTER_ARB"
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML";
+      extension: string;
+      mediaType: string;
+      defaultFileStructureTemplate: string;
     };
     DocItem: {
       name: string;
@@ -3089,9 +3614,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      baseTranslation?: string;
       translation?: string;
     };
     KeySearchSearchResultModel: {
@@ -3099,9 +3624,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      baseTranslation?: string;
       translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -3150,6 +3675,7 @@ export interface components {
       exists?: boolean;
     };
     ModifiedEntityModel: {
+      entityClass: string;
       /** Format: int64 */
       entityId: number;
       description?: { [key: string]: { [key: string]: unknown } };
@@ -3161,11 +3687,15 @@ export interface components {
       };
       exists?: boolean;
     };
-    PagedModelProjectActivityModel: {
+    PagedModelModifiedEntityModel: {
       _embedded?: {
-        activities?: components["schemas"]["ProjectActivityModel"][];
+        modifiedEntities?: components["schemas"]["ModifiedEntityModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    PropertyModification: {
+      old?: { [key: string]: unknown };
+      new?: { [key: string]: unknown };
     };
     ProjectActivityAuthorModel: {
       /** Format: int64 */
@@ -3175,2362 +3705,69 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
     };
-    ProjectActivityModel:
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        }
-      | {
-          /** Format: int64 */
-          revisionId: number;
-          /** Format: int64 */
-          timestamp: number;
-          type:
-            | "UNKNOWN"
-            | "SET_TRANSLATION_STATE"
-            | "SET_TRANSLATIONS"
-            | "DISMISS_AUTO_TRANSLATED_STATE"
-            | "SET_OUTDATED_FLAG"
-            | "TRANSLATION_COMMENT_ADD"
-            | "TRANSLATION_COMMENT_DELETE"
-            | "TRANSLATION_COMMENT_EDIT"
-            | "TRANSLATION_COMMENT_SET_STATE"
-            | "SCREENSHOT_DELETE"
-            | "SCREENSHOT_ADD"
-            | "KEY_TAGS_EDIT"
-            | "KEY_NAME_EDIT"
-            | "KEY_DELETE"
-            | "CREATE_KEY"
-            | "COMPLEX_EDIT"
-            | "IMPORT"
-            | "CREATE_LANGUAGE"
-            | "EDIT_LANGUAGE"
-            | "DELETE_LANGUAGE"
-            | "CREATE_PROJECT"
-            | "EDIT_PROJECT"
-            | "NAMESPACE_EDIT"
-            | "BATCH_PRE_TRANSLATE_BY_TM"
-            | "BATCH_MACHINE_TRANSLATE"
-            | "AUTO_TRANSLATE"
-            | "BATCH_CLEAR_TRANSLATIONS"
-            | "BATCH_COPY_TRANSLATIONS"
-            | "BATCH_SET_TRANSLATION_STATE"
-            | "BATCH_TAG_KEYS"
-            | "BATCH_UNTAG_KEYS"
-            | "BATCH_SET_KEYS_NAMESPACE"
-            | "AUTOMATION"
-            | "CONTENT_DELIVERY_CONFIG_CREATE"
-            | "CONTENT_DELIVERY_CONFIG_UPDATE"
-            | "CONTENT_DELIVERY_CONFIG_DELETE"
-            | "CONTENT_STORAGE_CREATE"
-            | "CONTENT_STORAGE_UPDATE"
-            | "CONTENT_STORAGE_DELETE"
-            | "WEBHOOK_CONFIG_CREATE"
-            | "WEBHOOK_CONFIG_UPDATE"
-            | "WEBHOOK_CONFIG_DELETE";
-          author?: components["schemas"]["ProjectActivityAuthorModel"];
-          modifiedEntities?: {
-            [key: string]: components["schemas"]["ModifiedEntityModel"][];
-          };
-          meta?: { [key: string]: { [key: string]: unknown } };
-          counts?: { [key: string]: number };
-          params?: { [key: string]: unknown };
-        };
-    PropertyModification: {
-      old?: { [key: string]: unknown };
-      new?: { [key: string]: unknown };
+    ProjectActivityModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE"
+        | "COMPLEX_TAG_OPERATION";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    PagedModelProjectActivityModel: {
+      _embedded?: {
+        activities?: components["schemas"]["ProjectActivityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelTagModel: {
       _embedded?: {
@@ -5946,10 +4183,6 @@ export interface components {
       /** Format: int64 */
       lastUsedAt?: number;
     };
-    OrganizationRequestParamsDto: {
-      filterCurrentUserOwner: boolean;
-      search?: string;
-    };
     PagedModelOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["OrganizationModel"][];
@@ -6030,6 +4263,20 @@ export interface components {
        */
       translationsLimit: number;
     };
+    CollectionModelWorkspaceModel: {
+      _embedded?: {
+        workspaces?: components["schemas"]["WorkspaceModel"][];
+      };
+    };
+    WorkspaceModel: {
+      /** Format: int64 */
+      id: number;
+      slackTeamName: string;
+      slackTeamId: string;
+    };
+    ConnectToSlackUrlModel: {
+      url: string;
+    };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
         usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
@@ -6055,44 +4302,6 @@ export interface components {
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       avatar?: components["schemas"]["Avatar"];
     };
-    SimpleModifiedEntityView: {
-      entityClass: string;
-      /** Format: int64 */
-      entityId: number;
-      exists?: boolean;
-      modifications: {
-        [key: string]: components["schemas"]["PropertyModification"];
-      };
-      description?: { [key: string]: { [key: string]: unknown } };
-      describingRelations?: {
-        [key: string]: components["schemas"]["ExistenceEntityDescription"];
-      };
-    };
-    UserNotificationModel: {
-      /** Format: int64 */
-      id: number;
-      type:
-        | "ACTIVITY_LANGUAGES_CREATED"
-        | "ACTIVITY_KEYS_CREATED"
-        | "ACTIVITY_KEYS_UPDATED"
-        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
-        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
-        | "ACTIVITY_TRANSLATIONS_UPDATED"
-        | "ACTIVITY_TRANSLATION_OUTDATED"
-        | "ACTIVITY_TRANSLATION_REVIEWED"
-        | "ACTIVITY_TRANSLATION_UNREVIEWED"
-        | "ACTIVITY_NEW_COMMENTS"
-        | "ACTIVITY_COMMENTS_MENTION"
-        | "BATCH_JOB_ERRORED";
-      project?: components["schemas"]["SimpleProjectModel"];
-      batchJob?: components["schemas"]["BatchJobModel"];
-      modifiedEntities?: components["schemas"]["SimpleModifiedEntityView"][];
-      unread: boolean;
-      /** Format: date-time */
-      markedDoneAt?: string;
-      /** Format: date-time */
-      lastUpdated: string;
-    };
     ApiKeyWithLanguagesModel: {
       /**
        * @deprecated
@@ -6101,8 +4310,8 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       description: string;
       username?: string;
       /** Format: int64 */
@@ -6137,2386 +4346,6 @@ export interface components {
       /** @description IDs of keys to delete */
       ids: number[];
     };
-    ProjectActivityUnknownModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivitySetTranslationStateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivitySetTranslationsModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityDismissAutoTranslatedStateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivitySetOutdatedFlagModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityTranslationCommentAddModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityTranslationCommentDeleteModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityTranslationCommentEditModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityTranslationCommentSetStateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityScreenshotDeleteModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityScreenshotAddModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityKeyTagsEditModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityKeyNameEditModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityKeyDeleteModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityCreateKeyModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityComplexEditModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityImportModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityCreateLanguageModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityEditLanguageModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityDeleteLanguageModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityCreateProjectModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityEditProjectModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityNamespaceEditModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchPreTranslateByTmModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchMachineTranslateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityAutoTranslateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchClearTranslationsModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchCopyTranslationsModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchSetTranslationStateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchTagKeysModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchUntagKeysModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityBatchSetKeysNamespaceModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityAutomationModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityContentDeliveryConfigCreateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityContentDeliveryConfigUpdateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityContentDeliveryConfigDeleteModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityContentStorageCreateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityContentStorageUpdateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityContentStorageDeleteModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityWebhookConfigCreateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityWebhookConfigUpdateModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    ProjectActivityWebhookConfigDeleteModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    KeyModifiedEntity: {
-      name?: {
-        old?: string;
-        new?: string;
-      };
-      pluralArgName?: {
-        old?: string;
-        new?: string;
-      };
-      namespace?: {
-        old?: {
-          entityClass?: string;
-          /** Format: int64 */
-          entityId?: number;
-          data?: {
-            name?: string;
-          };
-        };
-        new?: {
-          entityClass?: string;
-          /** Format: int64 */
-          entityId?: number;
-          data?: {
-            name?: string;
-          };
-        };
-      };
-    };
   };
 }
 
@@ -8533,25 +4362,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8568,25 +4405,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8607,25 +4452,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8642,25 +4495,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8677,25 +4538,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8717,25 +4586,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8757,25 +4634,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8797,25 +4682,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8836,25 +4729,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8878,25 +4779,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8913,25 +4822,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8948,25 +4865,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -8988,25 +4913,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9028,25 +4961,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9068,30 +5009,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_3: {
+  get_4: {
     parameters: {
       path: {
         projectId: number;
@@ -9107,25 +5056,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9146,25 +5103,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9186,30 +5151,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_4: {
+  get_5: {
     parameters: {
       path: {
         id: number;
@@ -9226,25 +5199,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9266,25 +5247,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9307,25 +5296,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9352,25 +5349,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9401,25 +5406,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9438,25 +5451,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9474,25 +5495,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9513,25 +5542,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9552,25 +5589,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9597,25 +5642,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9641,25 +5694,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9680,25 +5741,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9726,25 +5795,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9767,25 +5844,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9813,25 +5898,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9841,7 +5934,7 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  get_6: {
     parameters: {
       path: {
         id: number;
@@ -9858,25 +5951,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9898,25 +5999,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9942,25 +6051,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -9970,7 +6087,7 @@ export interface operations {
       };
     };
   };
-  get_7: {
+  get_8: {
     parameters: {
       path: {
         contentStorageId: number;
@@ -9987,25 +6104,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10027,25 +6152,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10068,30 +6201,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_8: {
+  get_9: {
     parameters: {
       path: {
         id: number;
@@ -10108,25 +6249,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10148,25 +6297,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10190,25 +6347,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10226,25 +6391,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10266,25 +6439,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10306,31 +6487,87 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
     requestBody: {
       content: {
         "application/json": components["schemas"]["AutoTranslationSettingsDto"];
+      };
+    };
+  };
+  executeComplexTagOperation: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplexTagKeysRequest"];
       };
     };
   };
@@ -10352,25 +6589,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10395,25 +6640,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10433,25 +6686,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10470,25 +6731,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10507,25 +6776,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10545,25 +6822,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10582,25 +6867,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10619,25 +6912,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10668,25 +6969,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10708,31 +7017,39 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
   /** Returns import settings for the authenticated user and the project. */
-  get_9: {
+  get_10: {
     parameters: {
       path: {
         projectId: number;
@@ -10748,25 +7065,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10788,25 +7113,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10830,25 +7163,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10871,25 +7212,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10913,30 +7262,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_13: {
+  get_14: {
     parameters: {
       path: {
         translationId: number;
@@ -10954,25 +7311,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -10995,25 +7360,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11037,25 +7410,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11079,25 +7460,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11120,25 +7509,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11192,6 +7589,10 @@ export interface operations {
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
         filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -11213,25 +7614,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11253,25 +7662,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11298,25 +7715,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11340,25 +7765,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11375,30 +7808,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_15: {
+  get_16: {
     parameters: {
       path: {
         languageId: number;
@@ -11415,25 +7856,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11455,25 +7904,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11496,25 +7953,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11536,25 +8001,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11592,25 +8065,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11631,25 +8112,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11678,25 +8167,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11717,25 +8214,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11756,25 +8261,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11784,7 +8297,7 @@ export interface operations {
       };
     };
   };
-  get_17: {
+  get_18: {
     parameters: {
       path: {
         id: number;
@@ -11800,25 +8313,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11840,25 +8361,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11881,25 +8410,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11921,25 +8458,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -11963,25 +8508,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12008,25 +8561,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12051,30 +8612,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_19: {
+  get_20: {
     parameters: {
       path: {
         id: number;
@@ -12090,25 +8659,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12129,25 +8706,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12170,25 +8755,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12206,25 +8799,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12246,25 +8847,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12290,25 +8899,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12337,217 +8954,34 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
-      };
-    };
-  };
-  getPerProjectPreferences: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["NotificationPreferencesDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  updatePerProjectPreferences: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["NotificationPreferencesDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NotificationPreferencesDto"];
-      };
-    };
-  };
-  deletePerProjectPreferences: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** No Content */
-      204: never;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getGlobalPreferences: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["NotificationPreferencesDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  updateGlobalPreferences: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["NotificationPreferencesDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NotificationPreferencesDto"];
       };
     };
   };
@@ -12562,25 +8996,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12598,25 +9040,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12633,25 +9083,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12672,25 +9130,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12712,25 +9178,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12751,25 +9225,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12792,25 +9274,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12828,25 +9318,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12865,25 +9363,72 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Resends email verification email to currently authenticated user. */
+  sendEmailVerification: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12900,25 +9445,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12939,25 +9492,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -12978,31 +9539,84 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  /** Pairs user account with slack account. */
+  userLogin: {
+    parameters: {
+      query: {
+        /** The encrypted data about the desired connection between Slack account and Tolgee account */
+        data: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
@@ -13017,25 +9631,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13052,31 +9674,203 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
     requestBody: {
       content: {
         "application/json": components["schemas"]["TelemetryReportRequest"];
+      };
+    };
+  };
+  slackCommand: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          payload?: components["schemas"]["SlackCommandDto"];
+          body?: string;
+        };
+      };
+    };
+  };
+  /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
+  onInteractivityEvent: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": string;
+      };
+    };
+  };
+  /**
+   * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
+   *
+   * Heads up! The events have to be configured via Slack App configuration in Event Subscription section.
+   */
+  fetchBotEvent: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: unknown };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": string;
       };
     };
   };
@@ -13091,25 +9885,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13130,25 +9932,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13165,25 +9975,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13200,25 +10018,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13235,25 +10061,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13274,25 +10108,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13309,25 +10151,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13344,25 +10194,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13395,25 +10253,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13430,25 +10296,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13482,25 +10356,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13521,25 +10403,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13567,25 +10457,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13607,25 +10505,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13652,25 +10558,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13693,25 +10607,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13737,25 +10659,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13789,25 +10719,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13828,25 +10766,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13869,25 +10815,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13921,25 +10875,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -13960,25 +10922,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14006,25 +10976,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14050,25 +11028,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14102,25 +11088,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14141,25 +11135,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14185,25 +11187,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14229,25 +11239,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14273,25 +11291,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14317,25 +11343,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14362,25 +11396,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14407,25 +11449,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14451,25 +11501,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14496,25 +11554,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14541,25 +11607,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14569,14 +11643,64 @@ export interface operations {
       };
     };
   };
+  /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
+  doImport: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[];
+          params: components["schemas"]["SingleStepImportRequest"];
+        };
+      };
+    };
+  };
   /** Prepares provided files to import. */
   addFiles: {
     parameters: {
       query: {
-        /** When importing structured JSONs, you can set the delimiter which will be used in names of improted keys. */
+        /** When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys. */
         structureDelimiter?: string;
-        /** If true, for structured formats (like JSON) arrays are supported. e.g. Array object like {"hello": ["item1", "item2"]} will be imported as keys hello[0] = "item1" and hello[1] = "item2". */
-        supportArrays?: boolean;
       };
       path: {
         projectId: number;
@@ -14592,25 +11716,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14635,25 +11767,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14693,8 +11833,16 @@ export interface operations {
         filterKeyId?: number[];
         /** Filter key IDs not to be contained in export */
         filterKeyIdNot?: number[];
-        /** Filter keys tagged by */
+        /**
+         * Filter keys tagged by.
+         *
+         * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+         */
         filterTag?: string;
+        /** Filter keys tagged by one of provided tags */
+        filterTagIn?: string[];
+        /** Filter keys not tagged by one of provided tags */
+        filterTagNotIn?: string[];
         /** Filter keys with prefix */
         filterKeyPrefix?: string;
         /** Filter translations with state. By default, all states except untranslated is exported. */
@@ -14728,6 +11876,21 @@ export interface operations {
           | "RUBY_SPRINTF"
           | "ICU";
         /**
+         * This is a template that defines the structure of the resulting .zip file content.
+         *
+         * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+         * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+         *
+         * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+         * the English translations of the `home` namespace will be stored in `home/en.json`.
+         *
+         * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+         *
+         * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+         * but in Android format. (e.g., en-rUS)
+         */
+        fileStructureTemplate?: string;
+        /**
          * If true, for structured formats (like JSON) arrays are supported.
          *
          * e.g. Key hello[0] will be exported as {"hello": ["..."]}
@@ -14748,25 +11911,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14788,25 +11959,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14829,25 +12008,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14883,25 +12070,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14923,25 +12118,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -14968,25 +12171,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15021,25 +12232,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15066,25 +12285,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15111,25 +12338,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15163,25 +12398,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15202,25 +12445,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15247,25 +12498,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15287,25 +12546,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15340,25 +12607,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15374,25 +12649,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15412,7 +12695,8 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        params: components["schemas"]["OrganizationRequestParamsDto"];
+        filterCurrentUserOwner?: boolean;
+        search?: string;
       };
     };
     responses: {
@@ -15425,25 +12709,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15459,25 +12751,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15487,242 +12787,55 @@ export interface operations {
       };
     };
   };
-  unmarkNotificationsAsDone: {
-    responses: {
-      /** No Content */
-      204: never;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": number[];
-      };
-    };
-  };
-  subscribeToProject: {
+  /**
+   * This endpoint allows the owner of an organization to connect a Slack workspace to their organization.
+   * Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.
+   */
+  connectWorkspace: {
     parameters: {
       path: {
-        id: number;
+        organizationId: number;
       };
     };
     responses: {
       /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  markNotificationsAsUnread: {
-    responses: {
-      /** No Content */
-      204: never;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": number[];
-      };
-    };
-  };
-  markNotificationsAsRead: {
-    responses: {
-      /** No Content */
-      204: never;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": number[];
-      };
-    };
-  };
-  markAllNotificationsAsRead: {
-    responses: {
-      /** No Content */
-      204: never;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  markNotificationsAsDone: {
-    responses: {
-      /** No Content */
-      204: never;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": number[];
-      };
-    };
-  };
-  markAllNotificationsAsDone: {
-    responses: {
-      /** No Content */
-      204: never;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
+        "application/json": components["schemas"]["ConnectToSlackDto"];
       };
     };
   };
@@ -15737,25 +12850,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15781,25 +12902,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15826,25 +12955,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15861,25 +12998,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15897,25 +13042,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15931,25 +13084,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -15971,25 +13132,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16007,25 +13176,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16042,25 +13219,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16081,25 +13266,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16121,25 +13314,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16155,25 +13356,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16194,25 +13403,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16233,25 +13450,88 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /**
+   * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
+   *
+   * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
+   *
+   * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
+   */
+  getInfo_3: {
+    parameters: {
+      query: {
+        /** The encrypted data */
+        data: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SlackUserInfoModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16296,25 +13576,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16335,31 +13623,39 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
   /** Get machine translation providers */
-  getInfo_3: {
+  getInfo_4: {
     responses: {
       /** OK */
       200: {
@@ -16374,25 +13670,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16409,31 +13713,81 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  get_2: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelExportFormatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
   /** Return server configuration properties documentation */
-  get_2: {
+  get_3: {
     responses: {
       /** OK */
       200: {
@@ -16444,25 +13798,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16493,25 +13855,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16533,25 +13903,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16580,25 +13958,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16621,25 +14007,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16661,25 +14055,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16713,25 +14115,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16752,25 +14162,139 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getModifiedEntitiesByRevision: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filters results by specific entity class */
+        filterEntityClass?: string[];
+      };
+      path: {
+        revisionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelModifiedEntityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getSingleRevision: {
+    parameters: {
+      path: {
+        revisionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["ProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16799,25 +14323,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16847,25 +14379,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16895,25 +14435,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16935,25 +14483,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -16975,25 +14531,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17030,25 +14594,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17071,25 +14643,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17108,25 +14688,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17157,25 +14745,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17205,25 +14801,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17245,25 +14849,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17285,30 +14897,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_11: {
+  get_12: {
     parameters: {
       path: {
         id: number;
@@ -17325,25 +14945,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17372,25 +15000,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17421,25 +15057,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17475,25 +15119,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17546,6 +15198,10 @@ export interface operations {
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
         filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
       };
       path: {
         projectId: number;
@@ -17561,25 +15217,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17632,6 +15296,10 @@ export interface operations {
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
         filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
       };
       path: {
         projectId: number;
@@ -17647,25 +15315,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17690,25 +15366,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17729,25 +15413,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17768,25 +15460,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17807,25 +15507,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17846,25 +15554,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17889,25 +15605,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17935,25 +15659,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -17970,25 +15702,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18005,30 +15745,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  get_18: {
+  get_19: {
     parameters: {
       path: {
         slug: string;
@@ -18044,25 +15792,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18093,25 +15849,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18142,25 +15906,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18181,25 +15953,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18221,25 +16001,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18260,25 +16048,129 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns a list of workspaces connected to the organization */
+  getConnectedWorkspaces: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelWorkspaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns URL to which user should be redirected to connect Slack workspace */
+  connectToSlack: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConnectToSlackUrlModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18309,25 +16201,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18358,25 +16258,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18407,106 +16315,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getNotifications: {
-    parameters: {
-      query: {
-        status?: ("UNREAD" | "READ" | "DONE")[];
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["UserNotificationModel"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllPreferences: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: components["schemas"]["NotificationPreferencesDto"];
-          };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18523,30 +16358,38 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
-  getInfo_4: {
+  getInfo_5: {
     responses: {
       /** OK */
       200: {
@@ -18557,31 +16400,39 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
   };
   /** Returns specific API key info */
-  get_20: {
+  get_21: {
     parameters: {
       path: {
         keyId: number;
@@ -18597,25 +16448,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18632,25 +16491,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18666,25 +16533,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18701,25 +16576,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18746,25 +16629,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18786,25 +16677,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18831,25 +16730,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18872,25 +16779,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18908,25 +16823,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18942,25 +16865,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -18987,25 +16918,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19027,25 +16966,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19063,25 +17010,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19101,25 +17056,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19138,25 +17101,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19174,25 +17145,78 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disconnects a workspace from the organization */
+  disconnectWorkspace: {
+    parameters: {
+      path: {
+        workspaceId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19209,25 +17233,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19244,25 +17276,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -19279,25 +17319,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "*/*": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };

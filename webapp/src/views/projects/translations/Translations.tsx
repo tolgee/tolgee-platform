@@ -25,6 +25,7 @@ import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
+import { Prefilter } from './prefilters/Prefilter';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -33,6 +34,7 @@ const StyledContainer = styled('div')`
 
 export const Translations = () => {
   const { setQuickStartOpen, quickStartForceFloating } = useGlobalActions();
+  const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
   const { t } = useTranslate();
@@ -148,6 +150,7 @@ export const Translations = () => {
       wrapperProps={{ pb: 0 }}
     >
       <BatchOperationsChangeIndicator />
+      {prefilter && <Prefilter prefilter={prefilter} />}
       <TranslationsHeader />
       <StyledContainer>
         {translationsEmpty ? (

@@ -169,10 +169,13 @@ interface KeyRepository : JpaRepository<Key, Long> {
     select k from Key k
     left join fetch k.keyMeta km
     left join fetch km.tags
-    where k.id in :keyIds
+    where k.id in :keyIds and k.project.id = :projectId
   """,
   )
-  fun getWithTagsByIds(keyIds: Iterable<Long>): Set<Key>
+  fun getWithTagsByIds(
+    projectId: Long,
+    keyIds: Iterable<Long>,
+  ): Set<Key>
 
   @Query(
     """
@@ -220,4 +223,17 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """,
   )
   fun getViewsByKeyIds(ids: List<Long>): List<KeyView>
+
+  @Query(
+    """
+        SELECT k
+        FROM Key k
+        JOIN k.translations t
+        WHERE k.project.id = :projectId AND t.id = :translationId
+    """,
+  )
+  fun searchKey(
+    projectId: Long,
+    translationId: Long,
+  ): Optional<Key>
 }

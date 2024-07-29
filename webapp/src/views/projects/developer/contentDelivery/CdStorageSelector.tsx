@@ -1,4 +1,4 @@
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { Field, useFormikContext } from 'formik';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -33,15 +33,19 @@ export const CustomSlug = () => {
   }
 
   return (
-    <TextField
-      name="slug"
-      label={t('content_delivery_form_custom_slug_label')}
-      helperText={t('content_delivery_form_custom_slug_helper_text')}
-      variant="standard"
-      InputLabelProps={{ shrink: true }}
-      placeholder={t('content_delivery_form_custom_slug_generated_placeholder')}
-      data-cy="content-delivery-form-custom-slug"
-    />
+    <Box pt={3}>
+      <TextField
+        name="slug"
+        label={t('content_delivery_form_custom_slug_label')}
+        helperText={t('content_delivery_form_custom_slug_helper_text')}
+        variant="standard"
+        InputLabelProps={{ shrink: true }}
+        placeholder={t(
+          'content_delivery_form_custom_slug_generated_placeholder'
+        )}
+        data-cy="content-delivery-form-custom-slug"
+      />
+    </Box>
   );
 };
 

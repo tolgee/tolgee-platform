@@ -317,7 +317,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val all = keyService.getKeysWithTagsById(keyIds)
+      val all = keyService.getKeysWithTagsById(testData.project.id, keyIds)
       all.assert.hasSize(keyIds.size)
       all.count {
         it.keyMeta?.tags?.map { it.name }?.containsAll(newTags) == true
@@ -345,7 +345,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val all = keyService.getKeysWithTagsById(keyIds)
+      val all = keyService.getKeysWithTagsById(testData.project.id, keyIds)
       all.assert.hasSize(keyIds.size)
       all.count {
         it.keyMeta?.tags?.map { it.name }?.any { tagsToRemove.contains(it) } == false &&

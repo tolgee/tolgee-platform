@@ -75,6 +75,8 @@ open class TolgeeProperties(
   var capterraTracker: String? = null,
   @DocProperty(hidden = true)
   var ga4Tag: String? = null,
+  @DocProperty(hidden = true, description = "Ask user where did they found Tolgee in SignUp form")
+  var userSourceField: Boolean = false,
   @DocProperty(hidden = true)
   var internal: InternalProperties = InternalProperties(),
   @DocProperty(
@@ -117,4 +119,5 @@ open class TolgeeProperties(
   var postHog: PostHogProperties = PostHogProperties(),
   var telemetry: TelemetryProperties = TelemetryProperties(),
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
+  var slack: SlackProperties = SlackProperties(),
 )

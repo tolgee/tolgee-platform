@@ -28,7 +28,7 @@ inline val String?.assert: AbstractStringAssert<*>
   get() = Assertions.assertThat(this)
 
 inline val Date?.assert: AbstractDateAssert<*> get() = Assertions.assertThat(this)
-inline val <reified T> Iterable<T>.assert: IterableAssert<T> get() = Assertions.assertThat(this)
+inline val <reified T> Iterable<T>?.assert: IterableAssert<T> get() = Assertions.assertThat(this)
 inline val Long.assert: AbstractLongAssert<*> get() = Assertions.assertThat(this)
 
 inline val Boolean?.assert: AbstractBooleanAssert<*>

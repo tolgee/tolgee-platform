@@ -26,12 +26,7 @@ export const RefreshButton = () => {
   }
 
   return (
-    <Box
-      gridArea="estimated-costs"
-      display="grid"
-      justifyContent="flex-end"
-      alignItems="flex-start"
-    >
+    <Box display="grid" justifyContent="flex-end" alignItems="flex-start">
       <Tooltip title={t('ee-license-refresh-tooltip')}>
         <IconButton
           onClick={onClick}

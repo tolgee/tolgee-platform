@@ -56,8 +56,13 @@ export const useApplyImportHelper = (
           query: {},
         },
         {
-          onSuccess() {
+          onSuccess(data) {
             dataHelper.refetchData();
+            const timeout = !data.find((d) => d.status === 'DONE');
+            if (timeout) {
+              message.error(<T keyName="import-timeout-message" />);
+              return;
+            }
             message.success(<T keyName="import-successful-message" />);
           },
         }

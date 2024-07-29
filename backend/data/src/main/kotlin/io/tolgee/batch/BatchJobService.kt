@@ -274,7 +274,7 @@ class BatchJobService(
 
     return batchJobRepository.getErrorMessages(needsErrorMessage)
       .groupBy { it.batchJobId }
-      .mapValues { it.value.minBy { value -> value.updatedAt }.errorMessage }
+      .mapValues { it.value.maxBy { value -> value.updatedAt }.errorMessage }
   }
 
   private fun getProgresses(jobs: Iterable<BatchJob>): Map<Long, Int> {

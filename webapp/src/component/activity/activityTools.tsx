@@ -118,7 +118,7 @@ function getFieldLanguageTag(
   }
 }
 
-const buildEntity = (
+export const buildEntity = (
   entityType: EntityEnum,
   entityData: ModifiedEntityModel,
   options: EntityOptions,
@@ -195,7 +195,7 @@ export const buildActivity = (
     result.entities.push(
       buildEntity(
         'Params',
-        { entityId: 0, modifications },
+        { entityId: 0, modifications, entityClass: 'Params' },
         entityOptions,
         selectedFields
       )
