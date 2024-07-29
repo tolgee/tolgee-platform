@@ -90,7 +90,7 @@ export const TaskFilter = ({
     method: 'get',
     query: { size: 10000, filterId: value.projects },
     options: {
-      enabled: !project,
+      enabled: !project && Boolean(value.projects?.length),
       keepPreviousData: true,
     },
   });
