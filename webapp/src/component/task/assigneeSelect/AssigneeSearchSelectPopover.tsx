@@ -8,6 +8,7 @@ import {
   styled,
   Button,
   Checkbox,
+  PopoverOrigin,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce';
@@ -20,7 +21,7 @@ import { User } from './types';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
-const USERS_SEARCH_TRESHOLD = 0;
+const USERS_SEARCH_TRESHOLD = 5;
 
 const StyledInput = styled(InputBase)`
   padding: 5px 4px 3px 16px;
@@ -59,21 +60,27 @@ function PaperComponent(props) {
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSelect: (value: User[]) => void;
+  onSelect?: (value: User[]) => void;
+  onSelectImmediate?: (value: User[]) => void;
   anchorEl: HTMLElement;
   selected: User[];
   ownedOnly?: boolean;
   project: SimpleProjectModel;
+  anchorOrigin?: PopoverOrigin;
+  transformOrigin?: PopoverOrigin;
 };
 
 export const AssigneeSearchSelectPopover: React.FC<Props> = ({
   open,
   onClose,
   onSelect,
+  onSelectImmediate,
   anchorEl,
   selected,
   ownedOnly,
   project,
+  anchorOrigin,
+  transformOrigin,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslate();
@@ -144,15 +151,22 @@ export const AssigneeSearchSelectPopover: React.FC<Props> = ({
       <Popover
         anchorEl={anchorEl}
         open={open}
-        onClose={() => onSelect(selection)}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
+        onClose={() => {
+          onSelect?.(selection);
+          onClose();
         }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
+        anchorOrigin={
+          anchorOrigin ?? {
+            vertical: 'top',
+            horizontal: 'center',
+          }
+        }
+        transformOrigin={
+          transformOrigin ?? {
+            vertical: 'top',
+            horizontal: 'center',
+          }
+        }
       >
         <StyledWrapper sx={{ minWidth: (anchorEl?.offsetWidth || 200) + 16 }}>
           <Autocomplete
@@ -188,6 +202,8 @@ export const AssigneeSearchSelectPopover: React.FC<Props> = ({
                     <Checkbox
                       checked={selected}
                       size="small"
+                      edge="start"
+                      disableRipple
                       sx={{ marginLeft: -1, marginRight: 0.5 }}
                     />
                     <AssigneeSearchSelectItem data={option} />
@@ -207,6 +223,7 @@ export const AssigneeSearchSelectPopover: React.FC<Props> = ({
               );
             }}
             onChange={(_, newValue) => {
+              onSelectImmediate?.(newValue);
               setSelection(newValue);
             }}
             renderInput={(params) => (

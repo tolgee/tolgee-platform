@@ -12,6 +12,7 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { BaseProjectView } from '../BaseProjectView';
 import { TasksHeader } from './TasksHeader';
+import { TaskFilterType } from 'tg.component/task/taskFilter/TaskFilterPopover';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -27,7 +28,7 @@ export const ProjectTasksView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [showClosed, setShowClosed] = useState(false);
-  const [filterLanguages, setFilterLanguages] = useState<number[]>([]);
+  const [filter, setFilter] = useState<TaskFilterType>({});
 
   const [detail, setDetail] = useState<TaskModel>();
 
@@ -43,8 +44,11 @@ export const ProjectTasksView = () => {
       size: 20,
       page,
       search,
+      sort: ['createdAt'],
       filterNotState: showClosed ? undefined : ['CLOSED', 'DONE'],
-      filterLanguage: filterLanguages,
+      filterAssignee: filter.assignees?.map((a) => a.id),
+      filterLanguage: filter.languages?.map((l) => l.id),
+      filterType: filter.type,
     },
     options: {
       keepPreviousData: true,
@@ -70,8 +74,8 @@ export const ProjectTasksView = () => {
         onSearchChange={setSearch}
         showClosed={showClosed}
         onShowClosedChange={setShowClosed}
-        filterLanguages={filterLanguages}
-        onFilterLanguagesChange={setFilterLanguages}
+        filter={filter}
+        onFilterChange={setFilter}
       />
       <PaginatedHateoasList
         loadable={tasksLoadable}

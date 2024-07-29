@@ -12,9 +12,9 @@ import { useDebounceCallback } from 'usehooks-ts';
 import { TextField } from 'tg.component/common/TextField';
 import { Search } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { TaskFilterType } from 'tg.component/task/taskFilter/TaskFilterPopover';
+import { TaskFilter } from 'tg.component/task/taskFilter/TaskFilter';
 import { useProject } from 'tg.hooks/useProject';
-import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -28,8 +28,8 @@ type Props = {
   onSearchChange: (value: string) => void;
   showClosed: boolean;
   onShowClosedChange: (value: boolean) => void;
-  filterLanguages: number[];
-  onFilterLanguagesChange: (value: number[]) => void;
+  filter: TaskFilterType;
+  onFilterChange: (value: TaskFilterType) => void;
 };
 
 export const TasksHeader = ({
@@ -38,25 +38,13 @@ export const TasksHeader = ({
   onSearchChange,
   showClosed,
   onShowClosedChange,
-  filterLanguages,
-  onFilterLanguagesChange,
+  filter,
+  onFilterChange,
 }: Props) => {
   const [localSearch, setLocalSearch] = useState('');
   const onDebouncedSearchChange = useDebounceCallback(onSearchChange, 500);
-  const project = useProject();
   const { t } = useTranslate();
-  const languagesLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: project.id },
-    query: {
-      page: 0,
-      size: 1000,
-      sort: ['tag'],
-    },
-  });
-
-  const languages = languagesLoadable.data?._embedded?.languages ?? [];
+  const project = useProject();
 
   return (
     <StyledContainer {...{ sx, className }}>
@@ -77,6 +65,12 @@ export const TasksHeader = ({
             ),
           }}
         />
+        <TaskFilter
+          value={filter}
+          onChange={onFilterChange}
+          sx={{ minWidth: '230px', maxWidth: '230px' }}
+          project={project}
+        />
         <FormControlLabel
           checked={showClosed}
           onChange={() => onShowClosedChange(!showClosed)}
@@ -84,20 +78,6 @@ export const TasksHeader = ({
           label={t('tasks_show_closed_label')}
         />
       </Box>
-      <LanguagesSelect
-        onChange={(tags) =>
-          onFilterLanguagesChange(
-            languages.filter((l) => tags.includes(l.tag)).map((l) => l.id)
-          )
-        }
-        value={languages
-          .filter((l) => filterLanguages.includes(l.id))
-          .map((l) => l.tag)}
-        languages={languages || []}
-        enableEmpty
-        context="tasks"
-        placeholder={t('tasks_filter_by_language')}
-      />
     </StyledContainer>
   );
 };

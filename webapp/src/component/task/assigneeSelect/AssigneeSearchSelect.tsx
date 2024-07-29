@@ -1,49 +1,19 @@
 import { useRef, useState } from 'react';
-import {
-  Box,
-  styled,
-  IconButton,
-  InputBaseComponentProps,
-  SxProps,
-} from '@mui/material';
-import { useTranslate } from '@tolgee/react';
 import { ArrowDropDown, Clear } from '@mui/icons-material';
+import { Box, styled, IconButton, SxProps } from '@mui/material';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/TextField';
 import { AssigneeSearchSelectPopover } from './AssigneeSearchSelectPopover';
 import { User } from './types';
+import { FakeInput } from 'tg.component/FakeInput';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
 const StyledClearButton = styled(IconButton)`
   margin: ${({ theme }) => theme.spacing(-1, -0.5, -1, -0.25)};
 `;
-
-const StyledFakeInput = styled('div')`
-  padding: 8.5px 14px;
-  height: 23px;
-  box-sizing: content-box;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-`;
-
-const StyledPlaceholder = styled('span')`
-  color: ${({ theme }) => theme.palette.text.secondary};
-`;
-
-const FakeInput = ({ value, ...rest }: InputBaseComponentProps) => {
-  const { t } = useTranslate();
-  return (
-    <StyledFakeInput tabIndex={0} {...(rest as any)}>
-      {value || (
-        <StyledPlaceholder>{t('assignee_placeholder')}</StyledPlaceholder>
-      )}
-    </StyledFakeInput>
-  );
-};
 
 type Props = {
   value: User[];
