@@ -34,8 +34,11 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
         shortcuts: [
           { key: 'Escape', run: () => (handleClose(true), true) },
           { key: `Mod-e`, run: () => (setState(), true) },
-          { key: 'Mod-Enter', run: () => (handleSave('EDIT_NEXT'), true) },
-          { key: 'Enter', run: () => (handleSave(), true) },
+          {
+            key: 'Mod-Enter',
+            run: () => (handleSave({ after: 'EDIT_NEXT' }), true),
+          },
+          { key: 'Enter', run: () => (handleSave({}), true) },
           {
             key: 'Mod-Insert',
             mac: 'Cmd-Shift-s',

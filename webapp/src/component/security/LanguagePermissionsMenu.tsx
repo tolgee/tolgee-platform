@@ -140,8 +140,8 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             maxWidth={400}
             renderOption={(renderProps, option) => (
               <CompactMenuItem
-                key={option.value}
                 {...renderProps}
+                key={option.value}
                 data-cy="search-select-item"
                 disabled={disabledLanguages.includes(option.value)}
               >

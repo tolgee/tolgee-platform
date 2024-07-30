@@ -396,6 +396,20 @@ export class Validation {
         validateObject
       ),
     });
+
+  static readonly CREATE_TASK_FORM = (t: TFnType) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+      languages: Yup.array(Yup.number()).min(
+        1,
+        t('validation_no_language_selected')
+      ),
+    });
+
+  static readonly UPDATE_TASK_FORM = (t: TFnType) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

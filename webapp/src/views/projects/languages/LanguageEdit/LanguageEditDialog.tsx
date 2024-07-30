@@ -41,12 +41,12 @@ export const LanguageEditDialog = () => {
   const editLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/languages/{languageId}',
     method: 'put',
-    invalidatePrefix: '/v2/project',
+    invalidatePrefix: '/v2/projects',
   });
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/languages/{languageId}',
     method: 'delete',
-    invalidatePrefix: '/v2/project',
+    invalidatePrefix: '/v2/projects',
   });
 
   const onClose = () => {

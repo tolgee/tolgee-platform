@@ -79,8 +79,8 @@ class KeyBuilder(
   fun addTranslation(
     languageTag: String,
     text: String?,
-  ) {
-    addTranslation {
+  ): TranslationBuilder {
+    return addTranslation {
       this.language = projectBuilder.getLanguageByTag(languageTag)!!.self
       this.text = text
     }

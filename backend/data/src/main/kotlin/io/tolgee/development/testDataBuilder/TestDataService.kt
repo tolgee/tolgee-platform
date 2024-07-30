@@ -225,6 +225,8 @@ class TestDataService(
     saveAutomations(builder)
     saveImportSettings(builder)
     saveBatchJobs(builder)
+    saveTasks(builder)
+    saveTaskKeys(builder)
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -471,6 +473,18 @@ class TestDataService(
       }
       entityManager.persist(it.self)
       saveChunkExecutions(it)
+    }
+  }
+
+  private fun saveTasks(builder: ProjectBuilder) {
+    builder.data.tasks.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveTaskKeys(builder: ProjectBuilder) {
+    builder.data.taskKeys.forEach {
+      entityManager.persist(it.self)
     }
   }
 

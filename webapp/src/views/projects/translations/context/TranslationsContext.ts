@@ -20,6 +20,7 @@ import {
   KeyElement,
   KeyUpdateData,
   RemoveTag,
+  SetTaskTranslationState,
   SetTranslationState,
   UpdateTranslation,
   ViewMode,
@@ -33,6 +34,7 @@ import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
 import { useWebsocketService } from './services/useWebsocketService';
 import { PrefilterType } from '../prefilters/usePrefilter';
+import { useTaskService } from './services/useTaskService';
 
 type Props = {
   projectId: number;
@@ -112,6 +114,7 @@ export const [
   });
 
   const stateService = useStateService({ translations: translationService });
+  const taskService = useTaskService({ translations: translationService });
 
   const handleTranslationsReset = () => {
     editService.clearPosition();
@@ -201,6 +204,9 @@ export const [
     },
     setTranslationState(state: SetTranslationState) {
       return stateService.changeState(state);
+    },
+    setTaskState(state: SetTaskTranslationState) {
+      return taskService.setTaskTranslationState(state);
     },
     addTag(tag: AddTag) {
       return tagsService.addTag(tag);

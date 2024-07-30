@@ -12,4 +12,5 @@ data class TranslationView(
   val commentCount: Long,
   val unresolvedCommentCount: Long,
   val outdated: Boolean,
+  val assignedTaskId: Long?,
 )

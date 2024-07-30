@@ -11,6 +11,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
@@ -114,10 +115,13 @@ class ProjectsController(
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   @OpenApiOrderExtension(3)
   fun getAll(
-    @ParameterObject pageable: Pageable,
+    @ParameterObject
+    filters: ProjectFilters,
+    @ParameterObject
+    pageable: Pageable,
     @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {
-    val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
+    val projects = projectService.findPermittedInOrganizationPaged(pageable, search, filters = filters)
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
   }
 

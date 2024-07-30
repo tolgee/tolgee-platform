@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Badge, Box, styled } from '@mui/material';
-import { Check, Comment, Edit } from '@mui/icons-material';
+import { Check, Comment, Edit, Task } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { StateInType } from 'tg.constants/translationStates';
@@ -60,6 +60,8 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
   commentsCount: number | undefined;
+  assignedTaskId: number | undefined;
+  onTaskStateChange: (done: boolean) => void;
   unresolvedCommentCount: number | undefined;
   // render last focusable button
   lastFocusable: boolean;
@@ -75,6 +77,8 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   onEdit,
   onStateChange,
   onComments,
+  assignedTaskId,
+  onTaskStateChange,
   commentsCount,
   unresolvedCommentCount,
   lastFocusable,
@@ -88,6 +92,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
+  const displayTask = typeof assignedTaskId === 'number';
 
   if (displayTransitionButtons) {
     spots.push('state');
@@ -98,10 +103,14 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   if (displayComments) {
     spots.push('comments');
   }
+  if (displayTask) {
+    spots.push('task');
+  }
 
   const inDomTransitionButtons = displayTransitionButtons && active;
   const inDomEdit = displayEdit && active;
   const inDomComments = displayComments || active || lastFocusable;
+  const inDomTask = displayTask;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
   const gridTemplateColumns = spots
@@ -165,6 +174,16 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
               <Comment fontSize="small" />
             </StyledBadge>
           )}
+        </ControlsButton>
+      )}
+      {inDomTask && (
+        <ControlsButton
+          style={{ gridArea: 'task' }}
+          onClick={() => onTaskStateChange(true)}
+          data-cy="translations-cell-task-button"
+          tooltip={<T keyName="translation_cell_task" />}
+        >
+          <Task fontSize="small" />
         </ControlsButton>
       )}
     </StyledControlsWrapper>

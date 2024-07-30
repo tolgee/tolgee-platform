@@ -1,7 +1,7 @@
 import React from 'react';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
-import { Code, ContentCopy } from '@mui/icons-material';
+import { Code, ContentCopy, Task } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateInType } from 'tg.constants/translationStates';
@@ -34,6 +34,8 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onModeToggle?: () => void;
   controlsProps?: React.ComponentProps<typeof Box>;
+  assignedTaskId?: number;
+  onTaskStateChange?: (done: boolean) => void;
 };
 
 export const ControlsEditorSmall: React.FC<ControlsProps> = ({
@@ -45,6 +47,8 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
   onModeToggle,
   onStateChange,
   controlsProps,
+  assignedTaskId,
+  onTaskStateChange,
 }) => {
   const project = useProject();
   const { t } = useTranslate();
@@ -57,6 +61,8 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
     onInsertBase &&
     !isBaseLanguage &&
     satisfiesLanguageAccess('translations.view', baseLanguage?.id);
+
+  const displayTaskButton = typeof assignedTaskId === 'number';
 
   const displayEditorMode = project.icuPlaceholders;
 
@@ -92,9 +98,20 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
             }}
             color="default"
             data-cy="translations-cell-insert-base-button"
-            tooltip={<T keyName="translations_cell_insert_base" />}
+            tooltip={t('translations_cell_insert_base')}
           >
             <ContentCopy fontSize="small" />
+          </ControlsButton>
+        )}
+
+        {displayTaskButton && onTaskStateChange && (
+          <ControlsButton
+            style={{ gridArea: 'task' }}
+            data-cy="translations-cell-task-button"
+            tooltip={t('translation_cell_task')}
+            onClick={() => onTaskStateChange(true)}
+          >
+            <Task fontSize="small" />
           </ControlsButton>
         )}
       </StyledIcons>

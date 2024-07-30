@@ -77,6 +77,22 @@ export const BatchSelect = ({ value, onChange }: Props) => {
       enabled: canViewTranslations,
     },
     {
+      id: 'task_create',
+      label: t('batch_operations_create_task'),
+      divider: true,
+      enabled: canEditKey,
+    },
+    {
+      id: 'task_add_keys',
+      label: t('batch_operations_task_add_keys'),
+      enabled: canEditKey,
+    },
+    {
+      id: 'task_remove_keys',
+      label: t('batch_operations_task_remove_keys'),
+      enabled: canEditKey,
+    },
+    {
       id: 'add_tags',
       label: t('batch_operations_add_tags'),
       divider: true,

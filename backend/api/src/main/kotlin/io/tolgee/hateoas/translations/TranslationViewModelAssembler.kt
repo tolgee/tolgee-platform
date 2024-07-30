@@ -20,6 +20,7 @@ class TranslationViewModelAssembler : RepresentationModelAssemblerSupport<Transl
       mtProvider = view.mtProvider,
       commentCount = view.commentCount,
       unresolvedCommentCount = view.unresolvedCommentCount,
+      assignedTaskId = view.assignedTaskId,
     )
   }
 }

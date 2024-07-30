@@ -16,6 +16,7 @@ import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
 import { RootView } from 'tg.views/RootView';
+import { MyTasksView } from 'tg.views/myTasks/MyTasksView';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
@@ -117,6 +118,10 @@ export const RootRouter = () => (
     <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
       <AdministrationView />
     </PrivateRoute>
+    <PrivateRoute exact path={LINKS.MY_TASKS.template}>
+      <MyTasksView />
+    </PrivateRoute>
+
     <RequirePreferredOrganization>
       <Switch>
         <PrivateRoute exact path={LINKS.ROOT.template}>

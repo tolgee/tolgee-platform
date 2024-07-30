@@ -92,7 +92,7 @@ export function SearchSelectMulti<T extends React.Key>({
   }, [items, minWidth, maxWidth]);
 
   const defaultRenderOption: RenderOption<T> = (props, option) => (
-    <CompactMenuItem key={option.value} {...props} data-cy="search-select-item">
+    <CompactMenuItem {...props} key={option.value} data-cy="search-select-item">
       <Checkbox
         size="small"
         edge="start"

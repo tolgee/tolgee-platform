@@ -11,6 +11,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.task.TaskTranslation
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -76,6 +77,9 @@ class Translation(
   var wordCount: Int? = null
 
   var characterCount: Int? = null
+
+  @OneToMany(mappedBy = "translation", orphanRemoval = true)
+  var tasks: MutableList<TaskTranslation> = mutableListOf()
 
   @ActivityLoggedProp
   @field:ColumnDefault("false")

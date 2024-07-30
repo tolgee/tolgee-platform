@@ -42,3 +42,9 @@ export const useDeleteTag = () =>
     url: '/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}',
     method: 'delete',
   });
+
+export const usePutTaskTranslation = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/tasks/{taskId}/keys/{keyId}',
+    method: 'put',
+  });

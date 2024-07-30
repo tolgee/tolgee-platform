@@ -1,4 +1,9 @@
-import { Devices, PersonOutline, Code } from '@mui/icons-material';
+import {
+  Devices,
+  PersonOutline,
+  Code,
+  AssignmentTurnedIn,
+} from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import LanguageIcon from '@mui/icons-material/Language';
 import {
@@ -65,60 +70,67 @@ export const ProjectMenu = ({ id }) => {
           quickStart={{ itemKey: 'menu_translations' }}
         />
       )}
-      <>
-        {canEditProject && (
+      <SideMenuItem
+        linkTo={LINKS.PROJECT_TASKS.build({
+          [PARAMS.PROJECT_ID]: id,
+        })}
+        icon={<AssignmentTurnedIn />}
+        text={t('project_menu_tasks')}
+        data-cy="project-menu-item-tasks"
+        matchAsPrefix
+      />
+      {canEditProject && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_EDIT.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          matchAsPrefix
+          icon={<SettingsIcon />}
+          text={t('project_menu_project_settings')}
+          data-cy="project-menu-item-settings"
+          quickStart={{ itemKey: 'menu_settings' }}
+        />
+      )}
+      {canEditLanguages && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_LANGUAGES.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          matchAsPrefix
+          icon={<LanguageIcon />}
+          text={t('project_menu_languages')}
+          data-cy="project-menu-item-languages"
+          quickStart={{
+            itemKey: 'menu_languages',
+          }}
+        />
+      )}
+      {canViewUsers && (
+        <>
           <SideMenuItem
-            linkTo={LINKS.PROJECT_EDIT.build({
+            linkTo={LINKS.PROJECT_PERMISSIONS.build({
               [PARAMS.PROJECT_ID]: id,
             })}
-            matchAsPrefix
-            icon={<SettingsIcon />}
-            text={t('project_menu_project_settings')}
-            data-cy="project-menu-item-settings"
-            quickStart={{ itemKey: 'menu_settings' }}
-          />
-        )}
-        {canEditLanguages && (
-          <SideMenuItem
-            linkTo={LINKS.PROJECT_LANGUAGES.build({
-              [PARAMS.PROJECT_ID]: id,
-            })}
-            matchAsPrefix
-            icon={<LanguageIcon />}
-            text={t('project_menu_languages')}
-            data-cy="project-menu-item-languages"
+            icon={<PersonOutline />}
+            text={t('project_menu_members')}
+            data-cy="project-menu-item-members"
             quickStart={{
-              itemKey: 'menu_languages',
+              itemKey: 'menu_members',
             }}
           />
-        )}
-        {canViewUsers && (
-          <>
-            <SideMenuItem
-              linkTo={LINKS.PROJECT_PERMISSIONS.build({
-                [PARAMS.PROJECT_ID]: id,
-              })}
-              icon={<PersonOutline />}
-              text={t('project_menu_members')}
-              data-cy="project-menu-item-members"
-              quickStart={{
-                itemKey: 'menu_members',
-              }}
-            />
-          </>
-        )}
-        {canImport && (
-          <SideMenuItem
-            linkTo={LINKS.PROJECT_IMPORT.build({
-              [PARAMS.PROJECT_ID]: id,
-            })}
-            icon={<ImportIcon />}
-            text={t('project_menu_import')}
-            data-cy="project-menu-item-import"
-            quickStart={{ itemKey: 'menu_import' }}
-          />
-        )}
-      </>
+        </>
+      )}
+      {canImport && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_IMPORT.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<ImportIcon />}
+          text={t('project_menu_import')}
+          data-cy="project-menu-item-import"
+          quickStart={{ itemKey: 'menu_import' }}
+        />
+      )}
 
       {canViewTranslations && (
         <SideMenuItem

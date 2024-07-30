@@ -1,13 +1,6 @@
 package io.tolgee.model
 
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
+import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 
 @Entity
@@ -22,10 +15,10 @@ class Invitation(
   var id: Long? = null,
   var code: @NotBlank String,
 ) : AuditModel() {
-  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL])
+  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
   var permission: Permission? = null
 
-  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL])
+  @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
   var organizationRole: OrganizationRole? = null
 
   constructor(

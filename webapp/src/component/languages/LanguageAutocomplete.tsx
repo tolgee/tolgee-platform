@@ -96,8 +96,8 @@ export const LanguageAutocomplete: FC<{
           </StyledMenuItem>
         ) : (
           <StyledMenuItem
-            key={option.languageId}
             {...props}
+            key={option.languageId}
             data-cy="languages-create-autocomplete-suggested-option"
           >
             {itemContent}

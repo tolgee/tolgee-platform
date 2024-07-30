@@ -1,4 +1,4 @@
-import { T } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 
 import {
   StateInType,
@@ -23,6 +23,7 @@ export const StateTransitionButtons: React.FC<Props> = ({
   className,
 }) => {
   const translateState = useStateTranslation();
+  const { t } = useTranslate();
 
   const nextState = state && TRANSLATION_STATES[state]?.next;
 
@@ -33,14 +34,9 @@ export const StateTransitionButtons: React.FC<Props> = ({
           data-cy="translation-state-button"
           onClick={() => onStateChange?.(nextState)}
           className={className}
-          tooltip={
-            <>
-              <T
-                keyName="translation_state_change"
-                params={{ newState: translateState(nextState) }}
-              />
-            </>
-          }
+          tooltip={t('translation_state_change', {
+            newState: translateState(nextState),
+          })}
         >
           <StateIcon state={state} fontSize="small" />
         </ControlsButton>

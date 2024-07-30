@@ -3,6 +3,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 export type PrefilterType = {
   activity?: number;
   failedJob?: number;
+  task?: number;
   clear: () => void;
 };
 
@@ -23,13 +24,19 @@ export const usePrefilter = (): PrefilterType => {
     defaultVal: undefined,
     history: true,
   });
+  const [task, setTask] = useUrlSearchState('task', {
+    defaultVal: undefined,
+    history: true,
+  });
 
   const activityId = stringToNumber(activity);
   const failedJobId = stringToNumber(failedJob);
+  const taskId = stringToNumber(task);
 
   function clear() {
     setActivity(undefined);
     setFailedJob(undefined);
+    setTask(undefined);
   }
 
   const result: PrefilterType = {
@@ -40,6 +47,8 @@ export const usePrefilter = (): PrefilterType => {
     result.activity = activityId;
   } else if (failedJobId !== undefined) {
     result.failedJob = failedJobId;
+  } else if (taskId !== undefined) {
+    result.task = taskId;
   }
 
   return result;

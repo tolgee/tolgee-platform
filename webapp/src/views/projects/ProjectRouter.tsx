@@ -19,6 +19,7 @@ import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
 import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
 import { ActivityDetailRedirect } from 'tg.component/security/ActivityDetailRedirect';
+import { ProjectTasksView } from './tasks/ProjectTasksView';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -47,6 +48,10 @@ export const ProjectRouter = () => {
 
             <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
               <TranslationsView />
+            </Route>
+
+            <Route path={LINKS.PROJECT_TASKS.template}>
+              <ProjectTasksView />
             </Route>
 
             <Route path={LINKS.PROJECT_EDIT.template}>

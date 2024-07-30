@@ -49,6 +49,7 @@ export type AfterCommand = 'EDIT_NEXT';
 
 export type ChangeValue = {
   after?: AfterCommand;
+  resolveTaskId?: number;
   onSuccess?: () => void;
 };
 
@@ -69,6 +70,12 @@ export type SetTranslationState = {
   translationId: number;
   language: string;
   state: StateInType;
+};
+
+export type SetTaskTranslationState = {
+  done: boolean;
+  taskId: number;
+  keyId: number;
 };
 
 export type ChangeScreenshotNum = {

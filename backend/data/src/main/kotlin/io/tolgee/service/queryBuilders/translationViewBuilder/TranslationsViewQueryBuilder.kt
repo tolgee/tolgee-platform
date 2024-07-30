@@ -4,6 +4,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
+import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.*
 import org.hibernate.query.NullPrecedence
@@ -19,6 +20,7 @@ class TranslationsViewQueryBuilder(
   private val sort: Sort,
   private val cursor: Map<String, CursorValue>? = null,
   private val entityManager: EntityManager,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   private fun <T> getBaseQuery(
     query: CriteriaQuery<T>,
@@ -32,6 +34,7 @@ class TranslationsViewQueryBuilder(
       params = params,
       isKeyIdsQuery = isKeyIdsQuery,
       entityManager,
+      authenticationFacade,
     )
   }
 
