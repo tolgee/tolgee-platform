@@ -58,11 +58,6 @@ const BoldSpan = styled('span')`
   font-weight: 500;
 `;
 
-const InactiveLinkSpan = styled('span')`
-  font-weight: 300;
-  color: ${({ theme }) => theme.palette.text.disabled};
-`;
-
 export const EmailNotVerifiedView = () => {
   const theme = useTheme();
   const imageSrc =
