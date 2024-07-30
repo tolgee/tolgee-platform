@@ -1,13 +1,6 @@
 import { useState } from 'react';
 import { Home } from '@mui/icons-material';
-import {
-  Box,
-  Dialog,
-  ListProps,
-  PaperProps,
-  styled,
-  Typography,
-} from '@mui/material';
+import { Dialog, ListProps, PaperProps, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { BaseView } from 'tg.component/layout/BaseView';
