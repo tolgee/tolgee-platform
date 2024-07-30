@@ -85,7 +85,7 @@ export const EmailNotVerifiedView = () => {
         onSuccess: () => {
           setDelay(10000);
           setEnabled(true);
-          reStartTimer();
+          StartTimer();
 
           messageService.success(<T keyName="verify_email_resend_message" />);
         },
@@ -96,7 +96,7 @@ export const EmailNotVerifiedView = () => {
   const [enabled, setEnabled] = useState(false);
   const [delay, setDelay] = useState(0);
 
-  const { reStartTimer, remainingTime } = useTimerCountdown({
+  const { StartTimer, remainingTime } = useTimerCountdown({
     callback: () => {
       setEnabled(false);
     },

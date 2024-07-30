@@ -27,7 +27,7 @@ export const useTimerCountdown = ({
     setRemainingTime(delay);
   };
 
-  const reStartTimer = () => {
+  const startTimer = () => {
     clearTimer();
     if (enabled) {
       setRemainingTime(delay);
@@ -47,14 +47,14 @@ export const useTimerCountdown = ({
 
   useEffect(() => {
     if (enabled) {
-      reStartTimer();
+      startTimer();
     } else {
       clearTimer();
     }
   }, [enabled]);
 
   return {
-    reStartTimer,
+    StartTimer: startTimer,
     clearTimer,
     remainingTime,
   };
