@@ -140,7 +140,12 @@ export const EmailNotVerifiedView = () => {
                 <T
                   keyName="verify_email_resend_link"
                   params={{
-                    link: <StyledLink data-cy="resend-email-button" onClick={handleResendEmail}></StyledLink>,
+                    link: (
+                      <StyledLink
+                        data-cy="resend-email-button"
+                        onClick={handleResendEmail}
+                      ></StyledLink>
+                    ),
                   }}
                 />
               )}
