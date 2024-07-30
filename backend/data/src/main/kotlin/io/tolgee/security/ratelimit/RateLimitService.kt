@@ -139,7 +139,7 @@ class RateLimitService(
     )
   }
 
-  fun getIEmailVerificationIpRateLimitPolicy(
+  fun getEmailVerificationIpRateLimitPolicy(
     request: HttpServletRequest,
     email: String?,
   ): RateLimitPolicy? {
