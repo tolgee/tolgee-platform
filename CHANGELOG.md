@@ -1,3 +1,10 @@
+## [3.70.5](https://github.com/tolgee/tolgee-platform/compare/v3.70.4...v3.70.5) (2024-07-30)
+
+
+### Bug Fixes
+
+* Soft delete language issues ([#2424](https://github.com/tolgee/tolgee-platform/issues/2424)) ([2d55a2a](https://github.com/tolgee/tolgee-platform/commit/2d55a2a7281233f0deec3323d176a94480096c84))
+
 ## [3.70.4](https://github.com/tolgee/tolgee-platform/compare/v3.70.3...v3.70.4) (2024-07-24)
 
 
