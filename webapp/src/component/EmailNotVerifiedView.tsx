@@ -78,16 +78,29 @@ export const EmailNotVerifiedView = () => {
     method: 'post',
   });
 
+  const setDelayAndStartTimer = (delay: number) => {
+    setDelay(delay);
+    setEnabled(true);
+    startTimer();
+  };
+
   const handleResendEmail = () => {
     resendEmail.mutate(
       {},
       {
         onSuccess: () => {
-          setDelay(10000);
-          setEnabled(true);
-          StartTimer();
+          setDelayAndStartTimer(30000);
 
           messageService.success(<T keyName="verify_email_resend_message" />);
+        },
+
+        onError: (err) => {
+          if (err.data?.message === 'rate_limited') {
+            const retryAfter = err.data?.retryAfter;
+            setDelayAndStartTimer(retryAfter);
+          } else {
+            err.handleError?.();
+          }
         },
       }
     );
@@ -96,7 +109,7 @@ export const EmailNotVerifiedView = () => {
   const [enabled, setEnabled] = useState(false);
   const [delay, setDelay] = useState(0);
 
-  const { StartTimer, remainingTime } = useTimerCountdown({
+  const { startTimer, remainingTime } = useTimerCountdown({
     callback: () => {
       setEnabled(false);
     },
@@ -133,7 +146,7 @@ export const EmailNotVerifiedView = () => {
                   keyName="verify_email_resend_link_retry_after"
                   params={{
                     seconds: remainingSeconds,
-                    link: <StyledLink className="disabled"></StyledLink>,
+                    link: <StyledLink className="disabled" />,
                   }}
                 />
               ) : (
@@ -142,9 +155,10 @@ export const EmailNotVerifiedView = () => {
                   params={{
                     link: (
                       <StyledLink
+                        className={resendEmail.isLoading ? 'disabled' : ''}
                         data-cy="resend-email-button"
                         onClick={handleResendEmail}
-                      ></StyledLink>
+                      />
                     ),
                   }}
                 />

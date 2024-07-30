@@ -54,7 +54,7 @@ export const useTimerCountdown = ({
   }, [enabled]);
 
   return {
-    StartTimer: startTimer,
+    startTimer: startTimer,
     clearTimer,
     remainingTime,
   };
