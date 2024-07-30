@@ -93,7 +93,7 @@ context('Sign up', () => {
       cy.wait(['@signUp']);
       cy.contains('Thank you for signing up!').should('be.visible');
 
-      cy.contains('Verify your email now');
+      cy.contains('Check your inbox');
       setProperty('recaptcha.siteKey', recaptchaSiteKey);
     });
   });
@@ -118,7 +118,7 @@ context('Sign up', () => {
     cy.wait(['@signUp']);
     cy.contains('Thank you for signing up!').should('be.visible');
 
-    cy.contains('Verify your email now');
+    cy.contains('Check your inbox');
 
     getUser(TEST_USERNAME).then((u) => {
       expect(u[0]).be.equal(TEST_USERNAME);
@@ -138,12 +138,12 @@ context('Sign up', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.contains('Thank you for signing up!').should('be.visible');
 
-    cy.contains('Verify your email now');
+    cy.contains('Check your inbox');
 
     gcy('resend-email-button').click();
     cy.contains('Your verification link has been resent.');
 
-    // Emails sent after registration are no longer valid
+    // Email sent after registration are no longer valid
     getParsedEmailVerificationByIndex(1).then((r) => {
       cy.wrap(r.fromAddress).should('contain', 'no-reply@tolgee.io');
       cy.wrap(r.toAddress).should('contain', TEST_USERNAME);
