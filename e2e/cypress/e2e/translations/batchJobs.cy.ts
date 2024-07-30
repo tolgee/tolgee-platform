@@ -106,7 +106,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     executeBatchOperation();
   });
 
-  it.only('will Machine translate', () => {
+  it('will Machine translate', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Machine translation');
     assertLanguagesSelected(['German']);
