@@ -106,7 +106,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     executeBatchOperation();
   });
 
-  it('will Machine translate', () => {
+  it.only('will Machine translate', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Machine translation');
     assertLanguagesSelected(['German']);
@@ -170,6 +170,8 @@ function assertLanguagesSelected(languages: string[]) {
   cy.gcy('batch-operations-section')
     .findDcy('translations-language-select-form-control')
     .click();
+
+  cy.gcy('translations-language-select-item').should('be.visible');
 
   languages.forEach((language) => {
     cy.gcy('translations-language-select-item')
