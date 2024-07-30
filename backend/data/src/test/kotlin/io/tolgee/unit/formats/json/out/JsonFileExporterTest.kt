@@ -214,17 +214,17 @@ class JsonFileExporterTest {
     val exporter =
       getExporter(
         translations =
-        buildExportTranslationList {
-          add(
-            languageTag = "cs-CZ",
-            keyName = "item",
-            text = "A",
-          )
-        }.translations,
+          buildExportTranslationList {
+            add(
+              languageTag = "cs-CZ",
+              keyName = "item",
+              text = "A",
+            )
+          }.translations,
         exportParams =
-        ExportParams().also {
-          it.fileStructureTemplate = "{snakeLanguageTag}/hello/{namespace}.{extension}"
-        },
+          ExportParams().also {
+            it.fileStructureTemplate = "{snakeLanguageTag}/hello/{namespace}.{extension}"
+          },
       )
 
     val files = exporter.produceFiles()
@@ -237,17 +237,17 @@ class JsonFileExporterTest {
     val exporter =
       getExporter(
         translations =
-        buildExportTranslationList {
-          add(
-            languageTag = "cs-CZ",
-            keyName = "item",
-            text = "A",
-          )
-        }.translations,
+          buildExportTranslationList {
+            add(
+              languageTag = "cs-CZ",
+              keyName = "item",
+              text = "A",
+            )
+          }.translations,
         exportParams =
-        ExportParams().also {
-          it.fileStructureTemplate = "{androidLanguageTag}/hello/{namespace}.{extension}"
-        },
+          ExportParams().also {
+            it.fileStructureTemplate = "{androidLanguageTag}/hello/{namespace}.{extension}"
+          },
       )
 
     val files = exporter.produceFiles()
