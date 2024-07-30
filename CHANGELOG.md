@@ -1,3 +1,10 @@
+## [3.70.6](https://github.com/tolgee/tolgee-platform/compare/v3.70.5...v3.70.6) (2024-07-30)
+
+
+### Bug Fixes
+
+* snake case language template placeholder ([#2423](https://github.com/tolgee/tolgee-platform/issues/2423)) ([98d1904](https://github.com/tolgee/tolgee-platform/commit/98d1904d71bd646edb7af165fe668da833b057c3))
+
 ## [3.70.5](https://github.com/tolgee/tolgee-platform/compare/v3.70.4...v3.70.5) (2024-07-30)
 
 
