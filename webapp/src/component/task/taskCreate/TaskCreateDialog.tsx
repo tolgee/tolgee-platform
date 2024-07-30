@@ -11,19 +11,24 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
+import { useState } from 'react';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { useTaskTranslation } from 'tg.translationTools/useTaskTranslation';
-import { TaskPreview } from 'tg.views/projects/translations/BatchOperations/components/TaskPreview';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+
+import { Select as FormSelect } from 'tg.component/common/form/fields/Select';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { FiltersType } from 'tg.component/translation/translationFilters/tools';
+import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
 
 import { User } from '../assigneeSelect/types';
 import { TaskDatePicker } from '../TaskDatePicker';
-import { Select } from 'tg.component/common/form/fields/Select';
-import { TextField } from 'tg.component/common/form/fields/TextField';
+import { TaskPreview } from './TaskPreview';
+import { Select } from 'tg.component/common/Select';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type ProjectModel = components['schemas']['ProjectModel'];
@@ -66,7 +71,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onFinished: () => void;
-  selection: number[];
+  selection?: number[];
   initialLanguages: number[];
   project: ProjectModel;
   allLanguages: LanguageModel[];
@@ -90,6 +95,26 @@ export const TaskCreateDialog = ({
     method: 'post',
   });
 
+  const [filters, setFilters] = useState<FiltersType>({});
+  const [languages, setLanguages] = useState(initialLanguages);
+
+  const selectedLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/translations/select-all',
+    method: 'get',
+    path: { projectId: project.id },
+    query: {
+      ...filters,
+      languages: allLanguages
+        .filter((l) => languages.includes(l.id))
+        .map((l) => l.tag),
+    },
+    options: {
+      enabled: !selection,
+    },
+  });
+
+  const selectedKeys = selection ?? selectedLoadable.data?.ids ?? [];
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg">
       <StyledMainTitle>
@@ -98,7 +123,7 @@ export const TaskCreateDialog = ({
       <StyledSubtitle>
         <T
           keyName="batch_operation_create_task_keys_subtitle"
-          params={{ value: selection.length }}
+          params={{ value: selectedKeys.length }}
         />
       </StyledSubtitle>
 
@@ -107,20 +132,19 @@ export const TaskCreateDialog = ({
           type: 'TRANSLATE' as TaskType,
           name: '',
           description: '',
-          languages: initialLanguages,
           dueDate: undefined as number | undefined,
           assignees: {} as Record<string, User[]>,
         }}
         validationSchema={Validation.CREATE_TASK_FORM(t)}
         onSubmit={async (values, actions) => {
-          const data = values.languages.map((languageId) => ({
+          const data = languages.map((languageId) => ({
             type: values.type,
             name: values.name,
             description: values.description,
             languageId: languageId,
             dueDate: values.dueDate,
             assignees: values.assignees[languageId]?.map((u) => u.id) ?? [],
-            keys: selection,
+            keys: selectedKeys,
           }));
           createTasksLoadable.mutate(
             {
@@ -134,7 +158,7 @@ export const TaskCreateDialog = ({
                 messageService.success(
                   <T
                     keyName="create_task_success_message"
-                    params={{ count: values.languages.length }}
+                    params={{ count: languages.length }}
                   />
                 );
                 onFinished();
@@ -147,7 +171,7 @@ export const TaskCreateDialog = ({
           return (
             <StyledForm onSubmit={handleSubmit}>
               <StyledTopPart>
-                <Select
+                <FormSelect
                   label={t('create_task_field_type')}
                   name="type"
                   size="small"
@@ -159,7 +183,7 @@ export const TaskCreateDialog = ({
                       {translateTaskType(v)}
                     </MenuItem>
                   ))}
-                </Select>
+                </FormSelect>
                 <TextField
                   name="name"
                   label={t('create_task_field_name')}
@@ -167,7 +191,8 @@ export const TaskCreateDialog = ({
                 />
                 <Select
                   label={t('create_task_field_languages')}
-                  name="languages"
+                  value={languages}
+                  onChange={(e) => setLanguages(e.target.value as number[])}
                   size="small"
                   fullWidth
                   multiple
@@ -184,7 +209,7 @@ export const TaskCreateDialog = ({
                     <MenuItem key={lang.id} value={lang.id} dense>
                       <Checkbox
                         sx={{ marginLeft: -0.75 }}
-                        checked={values.languages.includes(lang.id)}
+                        checked={languages.includes(lang.id)}
                         size="small"
                       />
                       <ListItemText primary={lang.name} />
@@ -204,18 +229,37 @@ export const TaskCreateDialog = ({
                 multiline
                 minRows={3}
               />
-              <Typography variant="subtitle2" sx={{ mt: 2 }}>
-                {t('create_task_tasks_and_assignees_title')}
-              </Typography>
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mt={2}
+              >
+                <Typography variant="subtitle2">
+                  {t('create_task_tasks_and_assignees_title')}
+                </Typography>
+                {!selection && (
+                  <TranslationFilters
+                    value={filters}
+                    onChange={setFilters}
+                    selectedLanguages={allLanguages.filter((l) =>
+                      languages.includes(l.id)
+                    )}
+                    placeholder={t('create_task_filter_keys_placeholder')}
+                    sx={{ minWidth: '230px' }}
+                  />
+                )}
+              </Box>
 
               {allLanguages && (
                 <Box display="grid" gap={2} mt={1}>
-                  {values.languages?.map((language) => (
+                  {languages?.map((language) => (
                     <TaskPreview
                       key={language}
                       language={allLanguages.find((l) => l.id === language)!}
                       type={values.type}
-                      keys={selection}
+                      keys={selectedKeys}
                       assigness={values.assignees[language] ?? []}
                       onUpdateAssignees={(users) => {
                         setFieldValue(`assignees[${language}]`, users);

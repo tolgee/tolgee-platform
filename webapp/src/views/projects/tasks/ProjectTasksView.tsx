@@ -14,6 +14,8 @@ import { BaseProjectView } from '../BaseProjectView';
 import { TasksHeader } from './TasksHeader';
 import { TaskFilterType } from 'tg.component/task/taskFilter/TaskFilterPopover';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { TaskCreateDialog } from 'tg.component/task/taskCreate/TaskCreateDialog';
+import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -29,6 +31,17 @@ export const ProjectTasksView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [showClosed, setShowClosed] = useState(false);
+
+  const languagesLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/languages',
+    method: 'get',
+    path: { projectId: project.id },
+    query: { size: 10000 },
+    options: {
+      keepPreviousData: true,
+    },
+  });
+
   const [assignees, setAssignees] = useUrlSearchState('assignee', {
     array: true,
   });
@@ -52,10 +65,17 @@ export const ProjectTasksView = () => {
   }
 
   const [detail, setDetail] = useState<TaskModel>();
+  const [addDialog, setAddDialog] = useState(false);
+
+  const allLanguages = languagesLoadable.data?._embedded?.languages ?? [];
 
   function handleDetailClose() {
     setDetail(undefined);
   }
+
+  const languagesPreference = projectPreferencesService.getForProject(
+    project.id
+  );
 
   const tasksLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks',
@@ -97,6 +117,7 @@ export const ProjectTasksView = () => {
         onShowClosedChange={setShowClosed}
         filter={filter}
         onFilterChange={setFilter}
+        onAddTask={() => setAddDialog(true)}
       />
       <PaginatedHateoasList
         loadable={tasksLoadable}
@@ -135,6 +156,18 @@ export const ProjectTasksView = () => {
             project={project}
           />
         </Dialog>
+      )}
+      {addDialog && (
+        <TaskCreateDialog
+          open={addDialog}
+          onClose={() => setAddDialog(false)}
+          onFinished={() => setAddDialog(false)}
+          initialLanguages={allLanguages
+            .filter((l) => !l.base && languagesPreference.includes(l.tag))
+            .map((l) => l.id)}
+          project={project}
+          allLanguages={allLanguages}
+        />
       )}
     </BaseProjectView>
   );

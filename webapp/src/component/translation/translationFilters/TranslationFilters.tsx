@@ -7,6 +7,7 @@ import {
   Tooltip,
   useTheme,
   styled,
+  SxProps,
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 
@@ -16,11 +17,6 @@ import { useAvailableFilters } from './useAvailableFilters';
 import { FilterType } from './tools';
 import { getActiveFilters } from './getActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
-
-const StyledWrapper = styled('div')`
-  display: flex;
-  align-items: center;
-`;
 
 const StyledSelect = styled(Select)`
   height: 40px;
@@ -69,12 +65,18 @@ type Props = {
   onChange: (value: FiltersType) => void;
   value: FiltersType;
   selectedLanguages: LanguageModel[];
+  placeholder?: React.ReactNode;
+  sx?: SxProps;
+  className?: string;
 };
 
 export const TranslationFilters = ({
   value,
   onChange,
   selectedLanguages,
+  placeholder,
+  sx,
+  className,
 }: Props) => {
   const { t } = useTranslate();
   const [isOpen, setIsOpen] = useState(false);
@@ -115,58 +117,53 @@ export const TranslationFilters = ({
   }
 
   return (
-    <StyledWrapper>
-      <StyledSelect
-        onOpen={() => setIsOpen(true)}
-        onClose={() => setIsOpen(false)}
-        variant="outlined"
-        value={activeFilters}
-        data-cy="translations-filter-select"
-        renderValue={(value: any) => (
-          <StyledInputContent>
-            <StyledInputText
-              style={{
-                color:
-                  value.length === 0 ? '#8b9097' : theme.palette.text.primary,
-              }}
-              variant="body2"
-            >
-              {value.length === 0 ? (
-                <T keyName="translations_filter_placeholder" />
-              ) : (
-                (value.length === 1 && getFilterName(value[0])) || (
+    <StyledSelect
+      onOpen={() => setIsOpen(true)}
+      onClose={() => setIsOpen(false)}
+      variant="outlined"
+      value={activeFilters}
+      data-cy="translations-filter-select"
+      renderValue={(value: any) => (
+        <StyledInputContent>
+          <StyledInputText
+            style={{
+              color:
+                value.length === 0 ? '#8b9097' : theme.palette.text.primary,
+            }}
+            variant="body2"
+          >
+            {value.length === 0
+              ? placeholder ?? <T keyName="translations_filter_placeholder" />
+              : (value.length === 1 && getFilterName(value[0])) || (
                   <T
                     keyName="translations_filters_text"
                     params={{ filtersNum: String(activeFilters.length) }}
                   />
-                )
-              )}
-            </StyledInputText>
-            {Boolean(activeFilters.length) && (
-              <Tooltip
-                title={<T keyName="translations_filters_heading_clear" />}
+                )}
+          </StyledInputText>
+          {Boolean(activeFilters.length) && (
+            <Tooltip title={<T keyName="translations_filters_heading_clear" />}>
+              <StyledClearButton
+                size="small"
+                onClick={stopAndPrevent(handleClearFilters)}
+                onMouseDown={stopAndPrevent()}
+                data-cy="translations-filter-clear-all"
               >
-                <StyledClearButton
-                  size="small"
-                  onClick={stopAndPrevent(handleClearFilters)}
-                  onMouseDown={stopAndPrevent()}
-                  data-cy="translations-filter-clear-all"
-                >
-                  <Clear fontSize="small" />
-                </StyledClearButton>
-              </Tooltip>
-            )}
-          </StyledInputContent>
-        )}
-        MenuProps={{
-          variant: 'menu',
-        }}
-        margin="dense"
-        displayEmpty
-        multiple
-      >
-        {filtersContent.options}
-      </StyledSelect>
-    </StyledWrapper>
+                <Clear fontSize="small" />
+              </StyledClearButton>
+            </Tooltip>
+          )}
+        </StyledInputContent>
+      )}
+      MenuProps={{
+        variant: 'menu',
+      }}
+      margin="dense"
+      displayEmpty
+      multiple
+      {...{ sx, className }}
+    >
+      {filtersContent.options}
+    </StyledSelect>
   );
 };

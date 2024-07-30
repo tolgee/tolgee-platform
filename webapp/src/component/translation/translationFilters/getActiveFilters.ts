@@ -14,7 +14,7 @@ export const getActiveFilters = (filtersObj: FiltersType) => {
         );
       }
     } else {
-      (value as unknown as string[]).forEach((filterVal) => {
+      (value as unknown as string[])?.forEach((filterVal) => {
         activeFilters.push(
           JSON.stringify({
             filter: key,

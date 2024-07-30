@@ -7,8 +7,8 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { useTranslate } from '@tolgee/react';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { Warning } from '@mui/icons-material';
-import { AssigneeSearchSelect } from 'tg.component/task/assigneeSelect/AssigneeSearchSelect';
-import { User } from 'tg.component/task/assigneeSelect/types';
+import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
+import { User } from '../assigneeSelect/types';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -55,18 +55,18 @@ export const TaskPreview = ({
   assigness,
   onUpdateAssignees,
 }: Props) => {
-  const dependencies = JSON.stringify({ type, language, keys });
   const { t } = useTranslate();
   const formatNumber = useNumberFormatter();
 
   const project = useProject();
+  const content = { keys, type, language: language.id };
   const statsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/calculate-scope',
     method: 'post',
     path: { projectId: project.id },
-    content: { 'application/json': { keys, type, language: language.id } },
+    content: { 'application/json': content },
     // @ts-ignore add dependencies to url, so react query works correctly
-    query: { hash: stringHash(dependencies) },
+    query: { hash: stringHash(JSON.stringify(content)) },
   });
 
   return (
