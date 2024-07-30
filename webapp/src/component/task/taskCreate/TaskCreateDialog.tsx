@@ -93,6 +93,7 @@ export const TaskCreateDialog = ({
   const createTasksLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/create-multiple',
     method: 'post',
+    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });
 
   const [filters, setFilters] = useState<FiltersType>({});
