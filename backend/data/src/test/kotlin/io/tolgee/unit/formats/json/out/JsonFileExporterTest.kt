@@ -193,7 +193,7 @@ class JsonFileExporterTest {
         translations =
           buildExportTranslationList {
             add(
-              languageTag = "cs",
+              languageTag = "cs-CZ",
               keyName = "item",
               text = "A",
             )
@@ -206,7 +206,53 @@ class JsonFileExporterTest {
 
     val files = exporter.produceFiles()
 
-    files["cs/hello.json"].assert.isNotNull()
+    files["cs-CZ/hello.json"].assert.isNotNull()
+  }
+
+  @Test
+  fun `honors the provided fileStructureTemplate (snakeCase)`() {
+    val exporter =
+      getExporter(
+        translations =
+        buildExportTranslationList {
+          add(
+            languageTag = "cs-CZ",
+            keyName = "item",
+            text = "A",
+          )
+        }.translations,
+        exportParams =
+        ExportParams().also {
+          it.fileStructureTemplate = "{snakeLanguageTag}/hello/{namespace}.{extension}"
+        },
+      )
+
+    val files = exporter.produceFiles()
+
+    files["cs_CZ/hello.json"].assert.isNotNull()
+  }
+
+  @Test
+  fun `honors the provided fileStructureTemplate (androidLanguageTag)`() {
+    val exporter =
+      getExporter(
+        translations =
+        buildExportTranslationList {
+          add(
+            languageTag = "cs-CZ",
+            keyName = "item",
+            text = "A",
+          )
+        }.translations,
+        exportParams =
+        ExportParams().also {
+          it.fileStructureTemplate = "{androidLanguageTag}/hello/{namespace}.{extension}"
+        },
+      )
+
+    val files = exporter.produceFiles()
+
+    files["cs-rCZ/hello.json"].assert.isNotNull()
   }
 
   private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {
