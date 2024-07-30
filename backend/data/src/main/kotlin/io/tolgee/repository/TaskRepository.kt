@@ -154,6 +154,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     value = """
       select
           tk.id as taskId,
+          tk.project.id as projectId,
           count(t.id) as totalItems,
           coalesce(sum(case when tt.done then 1 else 0 end), 0) as doneItems,
           coalesce(sum(bt.characterCount), 0) as baseCharacterCount,
@@ -164,7 +165,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
           left join tt.translation t
           left join tt.translation bt on (bt.key.id = t.key.id and bt.language.id = p.baseLanguage.id)
       where tk in :tasks
-      group by tk.id
+      group by tk.id, tk.project.id
     """,
   )
   fun getTasksScopes(tasks: Collection<Task>): List<TaskScopeView>

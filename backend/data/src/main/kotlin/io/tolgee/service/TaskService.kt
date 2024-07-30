@@ -366,7 +366,7 @@ class TaskService(
   private fun getTasksWithScope(tasks: Collection<Task>): List<TaskWithScopeView> {
     val scopes = taskRepository.getTasksScopes(tasks)
     return tasks.map { task ->
-      val scope = scopes.find { it.taskId == task.id }!!
+      val scope = scopes.find { it.taskId == task.id && it.projectId == task.project.id }!!
       TaskWithScopeView(
         project = task.project,
         id = task.id,
