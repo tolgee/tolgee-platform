@@ -53,7 +53,7 @@ class LanguageStatsService(
               val translatedOrReviewedKeys = rawLanguageStats.translatedKeys + rawLanguageStats.reviewedKeys
               val translatedOrReviewedWords = rawLanguageStats.translatedWords + rawLanguageStats.reviewedWords
               val untranslatedWords = baseWords - translatedOrReviewedWords
-              val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@tx
+              val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@forEach
               val stats =
                 languageStats.computeIfAbsent(language.id) {
                   LanguageStats(entityManager.getReference(Language::class.java, language.id))

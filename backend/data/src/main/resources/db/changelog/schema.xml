@@ -3418,4 +3418,12 @@
     <changeSet author="huglx (generated)" id="1718704326054-19">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="slack_config" constraintName="FKsgau8dxyxblao9sa16fnka0t1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1722332220500-1">
+        <dropUniqueConstraint constraintName="language_project_name" tableName="language"/>
+        <dropUniqueConstraint constraintName="language_tag_name" tableName="language"/>
+        <sql>
+            create unique index language_project_name on language (project_id, name) where deleted_at is null;
+            create unique index language_tag_name on language (project_id, tag) where deleted_at is null;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

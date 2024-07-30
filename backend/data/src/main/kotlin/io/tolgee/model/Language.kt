@@ -18,7 +18,6 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
@@ -31,16 +30,6 @@ import java.util.*
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)
 @Table(
-  uniqueConstraints = [
-    UniqueConstraint(
-      columnNames = ["project_id", "name"],
-      name = "language_project_name",
-    ),
-    UniqueConstraint(
-      columnNames = ["project_id", "tag"],
-      name = "language_tag_name",
-    ),
-  ],
   indexes = [
     Index(
       columnList = "tag",
