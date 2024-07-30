@@ -107,7 +107,7 @@ class ExportFilePathProvider(
       )
       .replacePlaceholder(
         ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-        convertBCP47ToAndroidResourceFormat(getSnakeLanguageTag(languageTag)),
+        getSnakeLanguageTag(languageTag),
       )
   }
 
