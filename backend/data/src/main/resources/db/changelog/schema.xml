@@ -3423,7 +3423,7 @@
         <dropUniqueConstraint constraintName="language_tag_name" tableName="language"/>
         <sql>
             create unique index language_project_name on language (project_id, name) where deleted_at is null;
-            create unique index language_tag_name on language (tag, name) where deleted_at is null;
+            create unique index language_tag_name on language (project_id, tag) where deleted_at is null;
         </sql>
     </changeSet>
 </databaseChangeLog>
