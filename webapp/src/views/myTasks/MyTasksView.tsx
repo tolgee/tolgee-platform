@@ -80,15 +80,13 @@ export const MyTasksView = () => {
     <DashboardPage>
       <BaseView
         windowTitle={t('my_tasks_title')}
+        title={t('tasks_view_title')}
         maxWidth={800}
         navigation={[
           [null, LINKS.ROOT.build(), <Home key={0} fontSize="small" />],
           [t('my_tasks_title'), LINKS.MY_TASKS.build()],
         ]}
       >
-        <Box sx={{ mt: '20px', mb: 2, display: 'flex' }}>
-          <Typography variant="h6">{t('my_tasks_title')}</Typography>
-        </Box>
         <MyTasksHeader
           sx={{ mb: '20px', mt: '-12px' }}
           onSearchChange={setSearch}
