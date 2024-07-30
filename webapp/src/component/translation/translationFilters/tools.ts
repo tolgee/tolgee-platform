@@ -1,4 +1,21 @@
-import { Filters } from '../context/types';
+import { components, operations } from 'tg.service/apiSchema.generated';
+
+type TranslationsQueryType =
+  operations['getTranslations']['parameters']['query'];
+
+export type LanguageModel = components['schemas']['LanguageModel'];
+
+export type FiltersType = Pick<
+  TranslationsQueryType,
+  | 'filterHasNoScreenshot'
+  | 'filterHasScreenshot'
+  | 'filterTranslatedAny'
+  | 'filterUntranslatedAny'
+  | 'filterTranslatedInLang'
+  | 'filterUntranslatedInLang'
+  | 'filterState'
+  | 'filterTag'
+>;
 
 // Filters that can have multiple values
 export const NON_EXCLUSIVE_FILTERS = [
@@ -32,7 +49,7 @@ export const findGroup = (availableFilters: GroupType[], value: string) =>
   availableFilters.find((g) => g.options?.find((o) => o.value === value));
 
 export const toggleFilter = (
-  filtersObj: Filters,
+  filtersObj: FiltersType,
   availableFilters: GroupType[],
   rawValue: string
 ) => {

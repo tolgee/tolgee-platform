@@ -10,7 +10,7 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import { Filters } from '../Filters/Filters';
+import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
 import { StickyHeader } from './StickyHeader';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
@@ -52,6 +52,11 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { setSearch, selectLanguages, changeView } = useTranslationsActions();
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
+  const allLanguages = useTranslationsSelector((c) => c.languages);
+  const filters = useTranslationsSelector((c) => c.filters);
+  const { setFilters } = useTranslationsActions();
+  const selectedLanguagesMapped =
+    allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
 
   const handleAddTranslation = () => {
     onDialogOpen();
@@ -68,7 +73,11 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             variant="outlined"
             placeholder={t('standard_search_label')}
           />
-          <Filters />
+          <TranslationFilters
+            selectedLanguages={selectedLanguagesMapped}
+            value={filters}
+            onChange={setFilters}
+          />
         </StyledSpaced>
 
         <StyledSpaced>

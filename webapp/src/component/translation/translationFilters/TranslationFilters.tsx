@@ -8,18 +8,14 @@ import {
   useTheme,
   styled,
 } from '@mui/material';
+import { useState, useEffect } from 'react';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
-import {
-  useTranslationsSelector,
-  useTranslationsActions,
-} from '../context/TranslationsContext';
+import { FiltersType, LanguageModel } from './tools';
 import { useAvailableFilters } from './useAvailableFilters';
 import { FilterType } from './tools';
-import { useActiveFilters } from './useActiveFilters';
+import { getActiveFilters } from './getActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
-import { useState } from 'react';
-import { useEffect } from 'react';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -69,10 +65,18 @@ const StyledClearButton = styled(IconButton)`
   margin: ${({ theme }) => theme.spacing(-1, -0.5, -1, -0.25)};
 `;
 
-export const Filters = () => {
+type Props = {
+  onChange: (value: FiltersType) => void;
+  value: FiltersType;
+  selectedLanguages: LanguageModel[];
+};
+
+export const TranslationFilters = ({
+  value,
+  onChange,
+  selectedLanguages,
+}: Props) => {
   const { t } = useTranslate();
-  const { setFilters } = useTranslationsActions();
-  const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -81,7 +85,7 @@ export const Filters = () => {
     }
   }, [isOpen]);
 
-  const activeFilters = useActiveFilters();
+  const activeFilters = getActiveFilters(value);
 
   const theme = useTheme();
 
@@ -92,10 +96,10 @@ export const Filters = () => {
       .map((g) => g.options?.find((o) => o.value === value))
       .filter(Boolean)[0];
 
-  const filtersContent = useFiltersContent();
+  const filtersContent = useFiltersContent(value, onChange, selectedLanguages);
 
   const handleClearFilters = (e) => {
-    setFilters({});
+    onChange({});
   };
 
   function getFilterName(value) {

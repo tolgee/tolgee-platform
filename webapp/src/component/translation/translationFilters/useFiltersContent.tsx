@@ -1,31 +1,28 @@
 import { Checkbox, ListItemText } from '@mui/material';
 
-import {
-  useTranslationsActions,
-  useTranslationsSelector,
-} from '../context/TranslationsContext';
 import { SubmenuStates } from './SubmenuStates';
 import { SubmenuMulti } from './SubmenuMulti';
 import { useAvailableFilters } from './useAvailableFilters';
 import { toggleFilter } from './tools';
-import { useActiveFilters } from './useActiveFilters';
 import {
   CompactListSubheader,
   CompactMenuItem,
 } from 'tg.component/ListComponents';
-import React from 'react';
+import { FiltersType, LanguageModel } from './tools';
+import { getActiveFilters } from './getActiveFilters';
 
-export const useFiltersContent = () => {
+export const useFiltersContent = (
+  filtersObj: FiltersType,
+  onChange: (value: FiltersType) => void,
+  selectedLanguages?: LanguageModel[]
+) => {
   const options: any[] = [];
-  const { setFilters } = useTranslationsActions();
-  const filtersObj = useTranslationsSelector((v) => v.filters);
-  const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
 
-  const activeFilters = useActiveFilters();
+  const activeFilters = getActiveFilters(filtersObj);
 
   const handleFilterToggle = (rawValue: string) => () => {
     const newFilters = toggleFilter(filtersObj, availableFilters, rawValue);
-    setFilters(newFilters);
+    onChange(newFilters);
   };
 
   const { availableFilters, refresh } = useAvailableFilters(selectedLanguages);

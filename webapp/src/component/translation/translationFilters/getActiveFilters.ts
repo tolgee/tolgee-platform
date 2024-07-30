@@ -1,9 +1,7 @@
-import { useTranslationsSelector } from '../context/TranslationsContext';
 import { NON_EXCLUSIVE_FILTERS } from './tools';
+import { FiltersType } from './tools';
 
-export const useActiveFilters = () => {
-  const filtersObj = useTranslationsSelector((v) => v.filters);
-
+export const getActiveFilters = (filtersObj: FiltersType) => {
   const activeFilters: string[] = [];
   Object.entries(filtersObj).forEach(([key, value]) => {
     if (!NON_EXCLUSIVE_FILTERS.includes(key)) {

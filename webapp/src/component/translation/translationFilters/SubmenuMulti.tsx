@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { ListItemText, Popover } from '@mui/material';
 import { ArrowRight } from '@mui/icons-material';
 
-import { OptionType } from './tools';
-import { SearchSelectMulti } from '../../../../component/searchSelect/SearchSelectMulti';
+import { SearchSelectMulti } from 'tg.component/searchSelect/SearchSelectMulti';
 import { CompactMenuItem } from 'tg.component/ListComponents';
+import { OptionType } from './tools';
 
 type Props = {
   item: OptionType;

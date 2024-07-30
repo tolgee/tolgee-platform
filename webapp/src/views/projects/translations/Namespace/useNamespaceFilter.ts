@@ -2,7 +2,10 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import { encodeFilter, toggleFilter } from '../Filters/tools';
+import {
+  encodeFilter,
+  toggleFilter,
+} from 'tg.component/translation/translationFilters/tools';
 
 export function useNamespaceFilter(namespace: string | undefined) {
   const filters = useTranslationsSelector((c) => c.filters);

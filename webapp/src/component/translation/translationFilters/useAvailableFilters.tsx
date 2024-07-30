@@ -2,12 +2,11 @@ import { useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
 import { TRANSLATION_STATES } from 'tg.constants/translationStates';
-import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { encodeFilter, GroupType } from './tools';
+import { LanguageModel } from './tools';
 
-export const useAvailableFilters = (selectedLanguages?: string[]) => {
-  const languages = useTranslationsSelector((v) => v.languages);
+export const useAvailableFilters = (selectedLanguages?: LanguageModel[]) => {
   const project = useProject();
   const { t } = useTranslate();
 
@@ -82,7 +81,7 @@ export const useAvailableFilters = (selectedLanguages?: string[]) => {
             label: t('translations_filters_something_outdated'),
             value: encodeFilter({
               filter: 'filterOutdatedLanguage',
-              value: selectedLanguages || [],
+              value: selectedLanguages?.map((l) => l.tag) || [],
             }),
           },
         ],
@@ -110,11 +109,9 @@ export const useAvailableFilters = (selectedLanguages?: string[]) => {
         name: t('translations_filters_heading_states'),
         type: 'states',
         options:
-          selectedLanguages?.map((l) => {
-            const language =
-              languages?.find((lang) => lang.tag === l)?.name || l;
+          selectedLanguages?.map((language) => {
             return {
-              label: language,
+              label: language.name,
               value: null,
               submenu: Object.entries(TRANSLATION_STATES)
                 // MACHINE_TRANSLATED is not supported yet
@@ -124,7 +121,7 @@ export const useAvailableFilters = (selectedLanguages?: string[]) => {
                     label: value.translation,
                     value: encodeFilter({
                       filter: 'filterState',
-                      value: `${l},${key}`,
+                      value: `${language.tag},${key}`,
                     }),
                   };
                 }),

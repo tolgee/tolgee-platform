@@ -3,23 +3,30 @@ import { useTranslate } from '@tolgee/react';
 import React, { useEffect } from 'react';
 import { CompactMenuItem } from 'tg.component/ListComponents';
 
-import { useTranslationsActions } from '../context/TranslationsContext';
-import { useActiveFilters } from './useActiveFilters';
+import { getActiveFilters } from './getActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
+import { FiltersType } from './tools';
 
 type Props = {
-  anchorEl: MenuProps['anchorEl'];
+  filters: FiltersType;
+  onChange: (value: FiltersType) => void;
   onClose: () => void;
+  anchorEl: MenuProps['anchorEl'];
+  filtersContent: ReturnType<typeof useFiltersContent>;
 };
 
-export const FiltersMenu: React.FC<Props> = ({ anchorEl, onClose }) => {
-  const { setFilters } = useTranslationsActions();
-  const filtersContent = useFiltersContent();
-  const activeFilters = useActiveFilters();
+export const FiltersMenu: React.FC<Props> = ({
+  anchorEl,
+  onClose,
+  onChange,
+  filtersContent,
+  filters,
+}) => {
+  const activeFilters = getActiveFilters(filters);
   const { t } = useTranslate();
 
   const handleClearFilters = () => {
-    setFilters({});
+    onChange({});
   };
 
   useEffect(() => {
