@@ -115,7 +115,8 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
         CASE WHEN u.id IS NULL THEN FALSE ELSE TRUE END as taskAssigned
      from Task t
         right join t.translations tt on tt.translation.id in :translationIds
-        left join t.assignees u on u.id = :currentUserId 
+        left join t.assignees u on u.id = :currentUserId
+     order by t.type desc
     """,
   )
   fun getByTranslationId(
