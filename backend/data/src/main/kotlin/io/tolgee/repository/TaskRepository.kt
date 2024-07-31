@@ -93,10 +93,8 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     """
      select t
      from Task t
-        left join t.assignees u
-        left join t.translations tt
-     where u.id = :userId 
-        and $TASK_SEARCH
+        right join t.assignees u on u.id = :userId
+     where $TASK_SEARCH
         and $TASK_FILTERS
     """,
   )

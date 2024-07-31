@@ -73,7 +73,7 @@ export const MyTasksView = () => {
     <DashboardPage>
       <BaseView
         windowTitle={t('my_tasks_title')}
-        title={t('tasks_view_title')}
+        title={t('my_tasks_title')}
         maxWidth={800}
         navigation={[
           [null, LINKS.ROOT.build(), <Home key={0} fontSize="small" />],
