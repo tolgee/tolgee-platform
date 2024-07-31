@@ -56,11 +56,11 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
       >
         <T keyName="translations_cell_cancel" />
       </Button>
-      {task ? (
+      {task && !task.done && task.type === 'TRANSLATE' ? (
         <>
           <ButtonGroup size="small" ref={anchorEl as any}>
             <LoadingButton
-              onClick={() => onSave?.({ resolveTaskId: task.id })}
+              onClick={() => onSave?.({})}
               color="primary"
               variant="contained"
               loading={isEditLoading}
@@ -87,7 +87,11 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
-            <MenuItem onClick={withClose(() => onSave?.({}))}>
+            <MenuItem
+              onClick={withClose(() =>
+                onSave?.({ preventTaskResolution: true })
+              )}
+            >
               <T keyName="translations_cell_save_only" />
             </MenuItem>
           </Menu>

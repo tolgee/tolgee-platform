@@ -3,8 +3,6 @@ import { useProject } from 'tg.hooks/useProject';
 
 import { SetTaskTranslationState } from '../types';
 import { useTranslationsService } from './useTranslationsService';
-import { tr } from 'date-fns/locale';
-import { Done } from '@mui/icons-material';
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
@@ -15,7 +13,7 @@ export const useTaskService = ({ translations }: Props) => {
   const project = useProject();
 
   const setTaskTranslationState = (data: SetTaskTranslationState) =>
-    putTaskTranslation.mutate(
+    putTaskTranslation.mutateAsync(
       {
         path: {
           projectId: project.id,
@@ -41,7 +39,6 @@ export const useTaskService = ({ translations }: Props) => {
               keyId: data.keyId,
               lang: translation[0],
               data: {
-                ...translation[1],
                 tasks: translation[1].tasks?.map((t) => ({
                   ...t,
                   done: data.done,

@@ -19,7 +19,7 @@ import { useProject } from 'tg.hooks/useProject';
 type LanguageModel = components['schemas']['LanguageModel'];
 
 export type SaveProps = {
-  resolveTaskId?: number;
+  preventTaskResolution?: boolean;
   after?: AfterCommand;
 };
 
@@ -87,10 +87,10 @@ export const useTranslationCell = ({
     });
   };
 
-  const handleSave = ({ after, resolveTaskId }: SaveProps) => {
+  const handleSave = ({ after, preventTaskResolution }: SaveProps) => {
     changeField({
       after,
-      resolveTaskId,
+      preventTaskResolution,
       onSuccess: () => onSaveSuccess?.(value),
     });
   };
@@ -129,6 +129,14 @@ export const useTranslationCell = ({
 
   const translation = langTag ? keyData?.translations[langTag] : undefined;
 
+  const setAssignedTaskState = (done: boolean) => {
+    setTaskState({
+      keyId: keyData.keyId,
+      taskId: translation!.tasks![0].id!,
+      done,
+    });
+  };
+
   const setState = () => {
     if (!translation) {
       return;
@@ -142,14 +150,6 @@ export const useTranslationCell = ({
         language: langTag!,
       });
     }
-  };
-
-  const setAssignedTaskState = (done: boolean) => {
-    setTaskState({
-      keyId: keyData.keyId,
-      taskId: translation!.tasks![0].id!,
-      done,
-    });
   };
 
   function setVariant(activeVariant: string | undefined) {

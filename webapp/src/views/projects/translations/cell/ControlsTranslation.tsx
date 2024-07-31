@@ -186,8 +186,8 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           color={
             task?.userAssigned
               ? task?.done
-                ? 'success'
-                : 'warning'
+                ? 'secondary'
+                : 'primary'
               : undefined
           }
         >

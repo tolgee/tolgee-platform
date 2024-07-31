@@ -116,8 +116,8 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
             color={
               task?.userAssigned
                 ? task?.done
-                  ? 'success'
-                  : 'warning'
+                  ? 'secondary'
+                  : 'primary'
                 : undefined
             }
           >

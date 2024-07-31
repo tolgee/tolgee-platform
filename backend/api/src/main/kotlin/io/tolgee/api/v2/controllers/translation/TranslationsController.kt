@@ -287,13 +287,15 @@ When null, resulting file will be a flat key-value object.
 
     data.content.forEach { key ->
       key.translations.forEach { translation ->
-        translation.value.tasks = translationsWithTasks[translation.value.id]?.map {
-          TranslationTaskView(
-            it.taskId,
-            it.taskDone,
-            it.taskAssigned,
-          )
-        }
+        translation.value.tasks =
+          translationsWithTasks[translation.value.id]?.map {
+            TranslationTaskView(
+              it.taskId,
+              it.taskDone,
+              it.taskAssigned,
+              it.taskType,
+            )
+          }
       }
     }
   }

@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class TranslationViewModelAssembler(
-  private val translationTaskViewModelAssembler: TranslationTaskViewModelAssembler
+  private val translationTaskViewModelAssembler: TranslationTaskViewModelAssembler,
 ) : RepresentationModelAssemblerSupport<TranslationView, TranslationViewModel>(
-  TranslationsController::class.java,
-  TranslationViewModel::class.java,
-) {
+    TranslationsController::class.java,
+    TranslationViewModel::class.java,
+  ) {
   override fun toModel(view: TranslationView): TranslationViewModel {
     return TranslationViewModel(
       id = view.id,

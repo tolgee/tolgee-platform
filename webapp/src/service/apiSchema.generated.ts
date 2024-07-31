@@ -1141,29 +1141,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1195,6 +1172,29 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2204,9 +2204,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -2349,16 +2349,16 @@ export interface components {
       description: string;
       /** Format: int64 */
       id: number;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       username?: string;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -4046,6 +4046,7 @@ export interface components {
       id: number;
       done: boolean;
       userAssigned: boolean;
+      type: "TRANSLATE" | "REVIEW";
     };
     /**
      * @description Translations object
@@ -4224,9 +4225,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -4350,16 +4351,16 @@ export interface components {
       description: string;
       /** Format: int64 */
       id: number;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       username?: string;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {

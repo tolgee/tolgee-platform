@@ -2,7 +2,6 @@ package io.tolgee.hateoas.translations
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.MtServiceType
-import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TranslationState
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -27,7 +26,7 @@ open class TranslationViewModel(
   @Schema(description = "Count of unresolved translation comments")
   val unresolvedCommentCount: Long,
   @Schema(description = "Tasks related to this translation")
-  val tasks: List<TranslationTaskViewModel>?
+  val tasks: List<TranslationTaskViewModel>?,
 ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean

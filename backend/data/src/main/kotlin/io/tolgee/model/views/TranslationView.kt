@@ -1,7 +1,6 @@
 package io.tolgee.model.views
 
 import io.tolgee.constants.MtServiceType
-import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TranslationState
 
 data class TranslationView(
@@ -13,5 +12,5 @@ data class TranslationView(
   val commentCount: Long,
   val unresolvedCommentCount: Long,
   val outdated: Boolean,
-  var tasks: List<TranslationTaskView>? = null
+  var tasks: List<TranslationTaskView>? = null,
 )

@@ -1,6 +1,10 @@
 package io.tolgee.model.views
-class TranslationTaskView (
+
+import io.tolgee.model.enums.TaskType
+
+class TranslationTaskView(
   val id: Long,
   val done: Boolean,
   val userAssigned: Boolean,
+  val type: TaskType,
 )

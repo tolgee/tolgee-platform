@@ -49,7 +49,7 @@ export type AfterCommand = 'EDIT_NEXT';
 
 export type ChangeValue = {
   after?: AfterCommand;
-  resolveTaskId?: number;
+  preventTaskResolution?: boolean;
   onSuccess?: () => void;
 };
 

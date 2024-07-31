@@ -100,9 +100,16 @@ export const [
 
   const viewRefs = useRefsService();
 
+  const taskService = useTaskService({ translations: translationService });
+
+  const stateService = useStateService({
+    translations: translationService,
+    taskService,
+  });
   const editService = useEditService({
     translations: translationService,
     viewRefs,
+    taskService,
   });
 
   const tagsService = useTagsService({
@@ -112,9 +119,6 @@ export const [
   const selectionService = useSelectionService({
     translations: translationService,
   });
-
-  const stateService = useStateService({ translations: translationService });
-  const taskService = useTaskService({ translations: translationService });
 
   const handleTranslationsReset = () => {
     editService.clearPosition();

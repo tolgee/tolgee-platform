@@ -6,15 +6,17 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class TranslationTaskViewModelAssembler : RepresentationModelAssemblerSupport<TranslationTaskView, TranslationTaskViewModel>(
-  TranslationsController::class.java,
-  TranslationTaskViewModel::class.java,
-) {
+class TranslationTaskViewModelAssembler :
+  RepresentationModelAssemblerSupport<TranslationTaskView, TranslationTaskViewModel>(
+    TranslationsController::class.java,
+    TranslationTaskViewModel::class.java,
+  ) {
   override fun toModel(view: TranslationTaskView): TranslationTaskViewModel {
     return TranslationTaskViewModel(
       id = view.id,
       done = view.done,
       userAssigned = view.userAssigned,
+      type = view.type,
     )
   }
 }
