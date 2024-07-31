@@ -7,9 +7,15 @@ import { T } from '@tolgee/react';
 import { TranslationMemory } from './panels/TranslationMemory/TranslationMemory';
 import { Comments, CommentsItemsCount } from './panels/Comments/Comments';
 import { History } from './panels/History/History';
-import { Message, History as HistoryIcon, Keyboard } from '@mui/icons-material';
+import {
+  Message,
+  History as HistoryIcon,
+  Keyboard,
+  Task,
+} from '@mui/icons-material';
 import { PanelConfig } from './common/types';
 import { KeyboardShortcuts } from './panels/KeyboardShortcuts/KeyboardShortcuts';
+import { Tasks } from './panels/Tasks/Tasks';
 
 export const PANELS_WHEN_INACTIVE = [
   {
@@ -47,5 +53,11 @@ export const PANELS = [
     icon: <HistoryIcon fontSize="small" />,
     name: <T keyName="translation_tools_history" />,
     component: History,
+  },
+  {
+    id: 'tasks',
+    icon: <Task fontSize="small" />,
+    name: <T keyName="translation_tools_tasks" />,
+    component: Tasks,
   },
 ] satisfies PanelConfig[];

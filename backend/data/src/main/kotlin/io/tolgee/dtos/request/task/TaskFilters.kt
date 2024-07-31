@@ -49,4 +49,9 @@ open class TaskFilters {
     description = """Filter tasks by language""",
   )
   var filterLanguage: List<Long>? = null
+
+  @field:Parameter(
+    description = """Filter tasks by translation""",
+  )
+  var filterTranslation: List<Long>? = null
 }

@@ -29,10 +29,6 @@ const val TASK_FILTERS = """
         or t.state in :#{#filters.filterState}
     )
     and (
-        :#{#filters.filterAssignee} is null
-        or u.id in :#{#filters.filterAssignee}
-    )
-    and (
         :#{#filters.filterType} is null
         or t.type in :#{#filters.filterType}
     )
@@ -56,6 +52,22 @@ const val TASK_FILTERS = """
         :#{#filters.filterLanguage} is null
         or t.language.id in :#{#filters.filterLanguage}
     )
+    and (
+        :#{#filters.filterAssignee} is null
+        or exists (
+            select 1
+            from t.assignees u
+            where u.id in :#{#filters.filterAssignee}
+        )
+    )
+    and (
+        :#{#filters.filterTranslation} is null
+        or exists (
+            select 1
+            from t.translations tt
+            where tt.translation.id in :#{#filters.filterTranslation}
+        )
+    )
 """
 
 @Repository
@@ -64,7 +76,6 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     """
      select t
      from Task t
-        left join t.assignees u
      where
         t.project.id = :projectId
         and $TASK_SEARCH
@@ -83,6 +94,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
      select t
      from Task t
         left join t.assignees u
+        left join t.translations tt
      where u.id = :userId 
         and $TASK_SEARCH
         and $TASK_FILTERS
