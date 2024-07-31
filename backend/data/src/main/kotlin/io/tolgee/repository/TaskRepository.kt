@@ -111,7 +111,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
      select 
         tt.translation.id as translationId,
         t.id as taskId,
-        t.state as taskState,
+        tt.done as taskDone,
         CASE WHEN u.id IS NULL THEN FALSE ELSE TRUE END as taskAssigned
      from Task t
         right join t.translations tt on tt.translation.id in :translationIds

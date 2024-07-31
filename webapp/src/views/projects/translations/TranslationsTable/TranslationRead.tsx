@@ -111,7 +111,7 @@ export const TranslationRead: React.FC<Props> = ({
         active={active}
         lastFocusable={lastFocusable}
         className="controls"
-        taskId={translation?.taskId}
+        tasks={translation?.tasks}
         onTaskStateChange={setAssignedTaskState}
       />
     </StyledContainer>

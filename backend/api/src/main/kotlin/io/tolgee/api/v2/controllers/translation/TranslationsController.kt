@@ -32,6 +32,7 @@ import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.model.views.TranslationTaskView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -286,11 +287,12 @@ When null, resulting file will be a flat key-value object.
 
     data.content.forEach { key ->
       key.translations.forEach { translation ->
-        val task = translationsWithTasks[translation.value.id]?.get(0)
-        if (task !== null) {
-          translation.value.taskId = task.taskId
-          translation.value.taskState = task.taskState
-          translation.value.taskAssigned = task.taskAssigned
+        translation.value.tasks = translationsWithTasks[translation.value.id]?.map {
+          TranslationTaskView(
+            it.taskId,
+            it.taskDone,
+            it.taskAssigned,
+          )
         }
       }
     }

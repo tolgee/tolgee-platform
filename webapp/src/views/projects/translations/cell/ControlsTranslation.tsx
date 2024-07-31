@@ -11,6 +11,7 @@ import { StateTransitionButtons } from './StateTransitionButtons';
 import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 
 type State = components['schemas']['TranslationViewModel']['state'];
+type TaskModel = components['schemas']['TranslationTaskViewModel'];
 
 const StyledControlsWrapper = styled(Box)`
   display: grid;
@@ -60,7 +61,7 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
   commentsCount: number | undefined;
-  taskId: number | undefined;
+  tasks: TaskModel[] | undefined;
   onTaskStateChange: (done: boolean) => void;
   unresolvedCommentCount: number | undefined;
   // render last focusable button
@@ -77,7 +78,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   onEdit,
   onStateChange,
   onComments,
-  taskId,
+  tasks,
   onTaskStateChange,
   commentsCount,
   unresolvedCommentCount,
@@ -92,7 +93,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
-  const displayTask = typeof taskId === 'number';
+  const task = tasks?.[0];
 
   if (displayTransitionButtons) {
     spots.push('state');
@@ -103,14 +104,14 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   if (displayComments) {
     spots.push('comments');
   }
-  if (displayTask) {
+  if (task) {
     spots.push('task');
   }
 
   const inDomTransitionButtons = displayTransitionButtons && active;
   const inDomEdit = displayEdit && active;
   const inDomComments = displayComments || active || lastFocusable;
-  const inDomTask = displayTask;
+  const inDomTask = Boolean(task);
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
   const gridTemplateColumns = spots
@@ -179,9 +180,16 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
       {inDomTask && (
         <ControlsButton
           style={{ gridArea: 'task' }}
-          onClick={() => onTaskStateChange(true)}
+          onClick={() => onTaskStateChange(!task?.done)}
           data-cy="translations-cell-task-button"
           tooltip={<T keyName="translation_cell_task" />}
+          color={
+            task?.userAssigned
+              ? task?.done
+                ? 'success'
+                : 'warning'
+              : undefined
+          }
         >
           <Task fontSize="small" />
         </ControlsButton>

@@ -143,14 +143,14 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
             onInsertBase={editEnabled ? handleInsertBase : undefined}
             onStateChange={setState}
             onModeToggle={editEnabled ? handleModeToggle : undefined}
-            taskId={translation?.taskId}
+            tasks={translation?.tasks}
             onTaskStateChange={setAssignedTaskState}
           />
           {editEnabled ? (
             <ControlsEditorMain
               onSave={handleSave}
               onCancel={() => handleClose(true)}
-              taskId={translation?.taskId}
+              tasks={translation?.tasks}
             />
           ) : (
             <ControlsEditorReadOnly onClose={() => handleClose(true)} />

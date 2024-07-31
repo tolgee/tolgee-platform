@@ -12,6 +12,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useProject } from 'tg.hooks/useProject';
 
 type State = components['schemas']['TranslationViewModel']['state'];
+type TaskModel = components['schemas']['TranslationTaskViewModel'];
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -34,7 +35,7 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onModeToggle?: () => void;
   controlsProps?: React.ComponentProps<typeof Box>;
-  taskId?: number;
+  tasks?: TaskModel[];
   onTaskStateChange?: (done: boolean) => void;
 };
 
@@ -47,7 +48,7 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
   onModeToggle,
   onStateChange,
   controlsProps,
-  taskId,
+  tasks,
   onTaskStateChange,
 }) => {
   const project = useProject();
@@ -62,7 +63,9 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
     !isBaseLanguage &&
     satisfiesLanguageAccess('translations.view', baseLanguage?.id);
 
-  const displayTaskButton = typeof taskId === 'number';
+  const task = tasks?.[0];
+
+  const displayTaskButton = Boolean(task);
 
   const displayEditorMode = project.icuPlaceholders;
 
@@ -109,7 +112,14 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
             style={{ gridArea: 'task' }}
             data-cy="translations-cell-task-button"
             tooltip={t('translation_cell_task')}
-            onClick={() => onTaskStateChange(true)}
+            onClick={() => onTaskStateChange(!task?.done)}
+            color={
+              task?.userAssigned
+                ? task?.done
+                  ? 'success'
+                  : 'warning'
+                : undefined
+            }
           >
             <Task fontSize="small" />
           </ControlsButton>

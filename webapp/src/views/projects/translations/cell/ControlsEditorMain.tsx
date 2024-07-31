@@ -4,9 +4,12 @@ import { Button, ButtonGroup, Menu, MenuItem, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { components } from 'tg.service/apiSchema.generated';
 
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { SaveProps } from '../useTranslationCell';
+
+type TaskModel = components['schemas']['TranslationTaskViewModel'];
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -23,18 +26,19 @@ type ControlsProps = {
   onSave?: (options: SaveProps) => void;
   onCancel?: () => void;
   className?: string;
-  taskId: number | undefined;
+  tasks: TaskModel[] | undefined;
 };
 
 export const ControlsEditorMain: React.FC<ControlsProps> = ({
   onSave,
   onCancel,
   className,
-  taskId,
+  tasks,
 }) => {
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
   const anchorEl = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
+  const task = tasks?.[0];
 
   const withClose = (callback?: () => void) => () => {
     setOpen(false);
@@ -52,11 +56,11 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
       >
         <T keyName="translations_cell_cancel" />
       </Button>
-      {typeof taskId === 'number' ? (
+      {task ? (
         <>
           <ButtonGroup size="small" ref={anchorEl as any}>
             <LoadingButton
-              onClick={() => onSave?.({ resolveTaskId: taskId })}
+              onClick={() => onSave?.({ resolveTaskId: task.id })}
               color="primary"
               variant="contained"
               loading={isEditLoading}
