@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
+import io.tolgee.api.SimpleUserAccount
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.notifications.NotificationPreferences
@@ -30,15 +31,15 @@ data class UserAccount(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
   @field:NotBlank
-  var username: String = "",
+  override var username: String = "",
   var password: String? = null,
-  var name: String = "",
+  override var name: String = "",
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   override var accountType: AccountType? = AccountType.LOCAL,
-) : AuditModel(), ModelWithAvatar, IUserAccount {
+) : AuditModel(), ModelWithAvatar, IUserAccount, SimpleUserAccount {
   @Column(name = "totp_key", columnDefinition = "bytea")
   override var totpKey: ByteArray? = null
 
@@ -115,6 +116,9 @@ data class UserAccount(
   @Where(clause = "project_id IS NULL")
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, mappedBy = "userAccount")
   private var _globalNotificationPreferences: MutableList<NotificationPreferences> = mutableListOf()
+
+  override val deleted: Boolean
+    get() = deletedAt != null
 
   constructor(
     id: Long?,

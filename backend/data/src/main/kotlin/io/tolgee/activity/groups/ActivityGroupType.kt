@@ -5,6 +5,7 @@ import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.eq
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.modification
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.notNull
+import io.tolgee.activity.groups.viewProviders.createProject.CreateProjectGroupModelProvider
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
@@ -19,10 +20,12 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.model.webhook.WebhookConfig
+import org.springframework.context.ApplicationContext
 
 enum class ActivityGroupType(
   val sourceActivityTypes: List<ActivityType>,
   val modifications: List<GroupEntityModificationDefinition<*>>,
+  val modelProviderFactory: ((ApplicationContext) -> GroupModelProvider<*>?)? = null,
 ) {
   SET_TRANSLATION_STATE(
     listOf(ActivityType.SET_TRANSLATION_STATE, ActivityType.COMPLEX_EDIT),
@@ -304,6 +307,7 @@ enum class ActivityGroupType(
         countInView = true,
       ),
     ),
+    modelProviderFactory = { ac -> CreateProjectGroupModelProvider(ac) },
   ),
 
   EDIT_PROJECT(

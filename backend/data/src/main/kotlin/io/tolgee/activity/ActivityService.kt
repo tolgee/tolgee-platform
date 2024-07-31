@@ -53,7 +53,7 @@ class ActivityService(
   }
 
   private fun persistModifiedEntities(modifiedEntities: ModifiedEntitiesType): MutableList<ActivityModifiedEntity> {
-    val list = modifiedEntities.values.flatMap { it.values }.toMutableList()
+    val list = modifiedEntities.values.flatMap { it.entries }.toMutableList()
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_modified_entity " +
         "(entity_class, entity_id, describing_data, " +
@@ -61,17 +61,19 @@ class ActivityService(
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
       list,
       100,
-    ) { ps, entity ->
-      ps.setString(1, entity.entityClass)
-      ps.setLong(2, entity.entityId)
-      ps.setObject(3, getJsonbObject(entity.describingData))
-      ps.setObject(4, getJsonbObject(entity.describingRelations))
-      ps.setObject(5, getJsonbObject(entity.modifications))
-      ps.setInt(6, RevisionType.values().indexOf(entity.revisionType))
-      ps.setLong(7, entity.activityRevision.id)
+    ) { ps, (entityInstance, modifiedEntity) ->
+      // the entity id can be null in some cases (probably when the id it's not allocated in batch)
+      val entityId = if (modifiedEntity.entityId == 0L) entityInstance.id else modifiedEntity.entityId
+      ps.setString(1, modifiedEntity.entityClass)
+      ps.setLong(2, entityId)
+      ps.setObject(3, getJsonbObject(modifiedEntity.describingData))
+      ps.setObject(4, getJsonbObject(modifiedEntity.describingRelations))
+      ps.setObject(5, getJsonbObject(modifiedEntity.modifications))
+      ps.setInt(6, RevisionType.values().indexOf(modifiedEntity.revisionType))
+      ps.setLong(7, modifiedEntity.activityRevision.id)
     }
 
-    return list
+    return list.map { it.value }.toMutableList()
   }
 
   private fun persistedDescribingRelations(activityRevision: ActivityRevision) {

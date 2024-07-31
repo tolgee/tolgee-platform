@@ -9,7 +9,11 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
+import io.tolgee.activity.groups.ActivityGroupService
+import io.tolgee.dtos.queryResults.ActivityGroupView
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.hateoas.activity.ActivityGroupModel
+import io.tolgee.hateoas.activity.ActivityGroupModelAssembler
 import io.tolgee.hateoas.activity.ModifiedEntityModel
 import io.tolgee.hateoas.activity.ModifiedEntityModelAssembler
 import io.tolgee.hateoas.activity.ProjectActivityModel
@@ -44,6 +48,9 @@ class ProjectActivityController(
   private val modificationResourcesAssembler: PagedResourcesAssembler<ModifiedEntityView>,
   private val projectActivityModelAssembler: ProjectActivityModelAssembler,
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
+  private val activityGroupService: ActivityGroupService,
+  private val groupPagedResourcesAssembler: PagedResourcesAssembler<ActivityGroupView>,
+  private val groupModelAssembler: ActivityGroupModelAssembler
   ) {
   @Operation(summary = "Get project activity")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -101,8 +108,8 @@ class ProjectActivityController(
   @AllowApiAccess
   fun getActivityGroups(
     @ParameterObject pageable: Pageable,
-  ): PagedModel<ProjectActivityModel> {
-    val views = activityService.getProjectActivity(projectId = projectHolder.project.id, pageable)
-    return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
+  ): PagedModel<ActivityGroupModel> {
+    val views = activityGroupService.getProjectActivityGroups(projectId = projectHolder.project.id, pageable)
+    return groupPagedResourcesAssembler.toModel(views, groupModelAssembler)
   }
 }

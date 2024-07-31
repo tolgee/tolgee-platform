@@ -10,8 +10,6 @@ import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
 import { useConfig } from 'tg.globalContext/helpers';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
-
-import { PrivateRoute } from './common/PrivateRoute';
 import { OrganizationBillingRedirect } from './security/OrganizationBillingRedirect';
 import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 import { HelpMenu } from './HelpMenu';

@@ -2,6 +2,7 @@ package io.tolgee.activity.groups
 
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher
 import io.tolgee.activity.groups.matchers.EqualsValueMatcher
+import io.tolgee.api.SimpleUserAccount
 import io.tolgee.dtos.queryResults.ActivityGroupView
 import org.jooq.Condition
 import org.jooq.DSLContext
@@ -19,8 +20,8 @@ import java.util.*
 class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applicationContext: ApplicationContext) {
   fun get(): PageImpl<ActivityGroupView> {
     page.forEach {
-      val counts = counts[it.id] ?: emptyMap()
-      it.counts = counts
+      it.counts = counts[it.id] ?: emptyMap()
+      it.data = dataViews[it.id]
     }
 
     return page
@@ -38,14 +39,20 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
         field("ag.type"),
         field("ag.author_id"),
         max(field("ar.timestamp")),
+        field("ua.id"),
+        field("ua.username"),
+        field("ua.name"),
+        field("ua.avatar_hash"),
+        field("ua.deleted_at").isNotNull,
       )
         .from(from)
         .leftJoin(table("activity_revision_activity_groups").`as`("arag"))
         .on(field("ag.id").eq(field("arag.activity_groups_id")))
         .leftJoin(table("activity_revision").`as`("ar"))
         .on(field("ar.id").eq(field("arag.activity_revisions_id")))
+        .leftJoin(table("user_account").`as`("ua")).on(field("ag.author_id").eq(field("ua.id")))
         .where(where)
-        .groupBy(field("ag.id"))
+        .groupBy(field("ag.id"), field("ua.id"))
         .orderBy(max(field("ar.timestamp")).desc())
         .limit(pageable.pageSize)
         .offset(pageable.offset).fetch().map {
@@ -53,6 +60,13 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
             it[0] as Long,
             ActivityGroupType.valueOf(it[1] as String),
             it[3] as Date,
+            author = object : SimpleUserAccount {
+              override val id: Long = it[4] as Long
+              override val username: String = it[5] as String
+              override val name: String = it[6] as String
+              override val avatarHash: String? = it[7] as String?
+              override val deleted: Boolean = it[8] as Boolean
+            }
           )
         }
 
@@ -60,11 +74,19 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
   }
 
   private val counts by lazy {
-    val byType = page.groupBy { it.type }
     byType.flatMap { (type, items) ->
       getCounts(type, items).map { it.key to it.value }
     }.toMap()
   }
+
+  private val dataViews by lazy {
+    byType.flatMap { (type, items) ->
+      val provider = type.modelProviderFactory?.invoke(applicationContext)
+      provider?.provide(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
+    }.toMap()
+  }
+
+  private val byType by lazy { page.groupBy { it.type } }
 
   private fun getModificationCondition(definition: GroupEntityModificationDefinition<*>): Condition {
     return field("ame.entity_class").eq(definition.entityClass.simpleName)
@@ -113,9 +135,9 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
   private fun getCounts(
     type: ActivityGroupType,
     items: List<ActivityGroupView>,
-  ): MutableMap<Long, MutableMap<String, Int>> {
+  ): MutableMap<Long, MutableMap<String, Long>> {
     val groupIds = items.map { it.id }
-    val result = mutableMapOf<Long, MutableMap<String, Int>>()
+    val result = mutableMapOf<Long, MutableMap<String, Long>>()
     type.modifications
       .filter { it.countInView }
       .forEach { definition ->
@@ -134,7 +156,7 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
             result.computeIfAbsent(it[0] as Long) {
               mutableMapOf()
             }
-          groupMap[definition.entityClass.simpleName!!] = it[1] as Int
+          groupMap[definition.entityClass.simpleName!!] = (it[1] as Int).toLong()
         }
       }
     return result

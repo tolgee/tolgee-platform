@@ -28,7 +28,7 @@ class ActivityGroupService(
     ActivityGrouper(activityRevision, modifiedEntities, applicationContext).addToGroup()
   }
 
-  fun getOrCreateCurrentActivityGroupDtos(
+  fun getOrCreateCurrentActivityGroupDto(
     type: ActivityGroupType,
     projectId: Long?,
     authorId: Long?,

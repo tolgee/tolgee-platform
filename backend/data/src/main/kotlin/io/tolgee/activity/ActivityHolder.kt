@@ -8,6 +8,7 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import jakarta.annotation.PreDestroy
 import org.springframework.context.ApplicationContext
+import java.util.IdentityHashMap
 import kotlin.reflect.KClass
 
 open class ActivityHolder(val applicationContext: ApplicationContext) {
@@ -69,4 +70,4 @@ open class ActivityHolder(val applicationContext: ApplicationContext) {
   }
 }
 
-typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>
+typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, IdentityHashMap<EntityWithId, ActivityModifiedEntity>>

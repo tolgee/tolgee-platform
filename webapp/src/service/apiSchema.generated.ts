@@ -270,6 +270,15 @@ export interface paths {
     put: operations["uploadAvatar_2"];
     delete: operations["removeAvatar_2"];
   };
+  "/v2/notifications/preferences/project/{id}": {
+    get: operations["getPerProjectPreferences"];
+    put: operations["updatePerProjectPreferences"];
+    delete: operations["deletePerProjectPreferences"];
+  };
+  "/v2/notifications/preferences/global": {
+    get: operations["getGlobalPreferences"];
+    put: operations["updateGlobalPreferences"];
+  };
   "/v2/ee-license/set-license-key": {
     put: operations["setLicenseKey"];
   };
@@ -508,6 +517,27 @@ export interface paths {
      */
     post: operations["connectWorkspace"];
   };
+  "/v2/notifications/unmark-as-done": {
+    post: operations["unmarkNotificationsAsDone"];
+  };
+  "/v2/notifications/preferences/project/{id}/subscribe": {
+    post: operations["subscribeToProject"];
+  };
+  "/v2/notifications/mark-as-unread": {
+    post: operations["markNotificationsAsUnread"];
+  };
+  "/v2/notifications/mark-as-read": {
+    post: operations["markNotificationsAsRead"];
+  };
+  "/v2/notifications/mark-as-read/all": {
+    post: operations["markAllNotificationsAsRead"];
+  };
+  "/v2/notifications/mark-as-done": {
+    post: operations["markNotificationsAsDone"];
+  };
+  "/v2/notifications/mark-as-done/all": {
+    post: operations["markAllNotificationsAsDone"];
+  };
   "/v2/image-upload": {
     post: operations["upload"];
   };
@@ -616,6 +646,10 @@ export interface paths {
   };
   "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
     get: operations["getSingleRevision"];
+  };
+  "/v2/projects/{projectId}/activity/groups": {
+    /** This endpoints returns the activity grouped by time windows so it's easier to read on the frontend. */
+    get: operations["getActivityGroups"];
   };
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
@@ -754,6 +788,12 @@ export interface paths {
   "/v2/organizations/{id}/projects": {
     /** Returns all organization projects the user has access to */
     get: operations["getAllProjects_1"];
+  };
+  "/v2/notifications": {
+    get: operations["getNotifications"];
+  };
+  "/v2/notifications/preferences": {
+    get: operations["getAllPreferences"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
@@ -1062,7 +1102,8 @@ export interface components {
         | "tolgee_account_already_connected"
         | "slack_not_configured"
         | "slack_workspace_already_connected"
-        | "slack_connection_error";
+        | "slack_connection_error"
+        | "email_verification_code_not_valid";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -1136,29 +1177,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1190,6 +1208,29 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2156,15 +2197,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2211,6 +2252,23 @@ export interface components {
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
+    };
+    NotificationPreferencesDto: {
+      /** @description List of notification types the user does not want to receive. */
+      disabledNotifications: (
+        | "ACTIVITY_LANGUAGES_CREATED"
+        | "ACTIVITY_KEYS_CREATED"
+        | "ACTIVITY_KEYS_UPDATED"
+        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
+        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
+        | "ACTIVITY_TRANSLATIONS_UPDATED"
+        | "ACTIVITY_TRANSLATION_OUTDATED"
+        | "ACTIVITY_TRANSLATION_REVIEWED"
+        | "ACTIVITY_TRANSLATION_UNREVIEWED"
+        | "ACTIVITY_NEW_COMMENTS"
+        | "ACTIVITY_COMMENTS_MENTION"
+        | "BATCH_JOB_ERRORED"
+      )[];
     };
     SetLicenseKeyDto: {
       licenseKey: string;
@@ -2302,17 +2360,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
-      description: string;
-      username?: string;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
+      projectName: string;
+      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2863,7 +2921,8 @@ export interface components {
         | "tolgee_account_already_connected"
         | "slack_not_configured"
         | "slack_workspace_already_connected"
-        | "slack_connection_error";
+        | "slack_connection_error"
+        | "email_verification_code_not_valid";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3416,6 +3475,8 @@ export interface components {
       languageTag?: string;
       eeSubscription?: components["schemas"]["EeSubscriptionModel"];
       announcement?: components["schemas"]["AnnouncementDto"];
+      /** Format: int32 */
+      unreadNotifications?: number;
     };
     MtServiceDTO: {
       enabled: boolean;
@@ -3466,7 +3527,7 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
       /** @example This is a beautiful organization full of beautiful and clever people */
@@ -3477,7 +3538,7 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3614,20 +3675,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
-      description?: string;
-      baseTranslation?: string;
       translation?: string;
+      description?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
-      description?: string;
-      baseTranslation?: string;
       translation?: string;
+      description?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3705,64 +3766,745 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
     };
-    ProjectActivityModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "HARD_DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE"
-        | "COMPLEX_TAG_OPERATION";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
+    ProjectActivityModel:
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "UNKNOWN";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SET_TRANSLATION_STATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            Translation?: {
+              entityClass?: string;
+              /** Format: int64 */
+              entityId?: number;
+              description?: { [key: string]: { [key: string]: unknown } };
+              modifications?: {
+                text?: {
+                  old?: string;
+                  new?: string;
+                };
+                state?: {
+                  old?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+                  new?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+                };
+                auto?: {
+                  old?: boolean;
+                  new?: boolean;
+                };
+                mtProvider?: {
+                  old?:
+                    | "GOOGLE"
+                    | "AWS"
+                    | "DEEPL"
+                    | "AZURE"
+                    | "BAIDU"
+                    | "TOLGEE";
+                  new?:
+                    | "GOOGLE"
+                    | "AWS"
+                    | "DEEPL"
+                    | "AZURE"
+                    | "BAIDU"
+                    | "TOLGEE";
+                };
+                outdated?: {
+                  old?: boolean;
+                  new?: boolean;
+                };
+              };
+              relations?: {
+                [
+                  key: string
+                ]: components["schemas"]["ExistenceEntityDescription"];
+              };
+              exists?: boolean;
+            };
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SET_TRANSLATIONS";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            Translation?: {
+              entityClass?: string;
+              /** Format: int64 */
+              entityId?: number;
+              description?: { [key: string]: { [key: string]: unknown } };
+              modifications?: {
+                text?: {
+                  old?: string;
+                  new?: string;
+                };
+                state?: {
+                  old?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+                  new?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+                };
+                auto?: {
+                  old?: boolean;
+                  new?: boolean;
+                };
+                mtProvider?: {
+                  old?:
+                    | "GOOGLE"
+                    | "AWS"
+                    | "DEEPL"
+                    | "AZURE"
+                    | "BAIDU"
+                    | "TOLGEE";
+                  new?:
+                    | "GOOGLE"
+                    | "AWS"
+                    | "DEEPL"
+                    | "AZURE"
+                    | "BAIDU"
+                    | "TOLGEE";
+                };
+                outdated?: {
+                  old?: boolean;
+                  new?: boolean;
+                };
+              };
+              relations?: {
+                [
+                  key: string
+                ]: components["schemas"]["ExistenceEntityDescription"];
+              };
+              exists?: boolean;
+            };
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "DISMISS_AUTO_TRANSLATED_STATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            Translation?: {
+              entityClass?: string;
+              /** Format: int64 */
+              entityId?: number;
+              description?: { [key: string]: { [key: string]: unknown } };
+              modifications?: {
+                text?: {
+                  old?: string;
+                  new?: string;
+                };
+                state?: {
+                  old?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+                  new?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+                };
+                auto?: {
+                  old?: boolean;
+                  new?: boolean;
+                };
+                mtProvider?: {
+                  old?:
+                    | "GOOGLE"
+                    | "AWS"
+                    | "DEEPL"
+                    | "AZURE"
+                    | "BAIDU"
+                    | "TOLGEE";
+                  new?:
+                    | "GOOGLE"
+                    | "AWS"
+                    | "DEEPL"
+                    | "AZURE"
+                    | "BAIDU"
+                    | "TOLGEE";
+                };
+                outdated?: {
+                  old?: boolean;
+                  new?: boolean;
+                };
+              };
+              relations?: {
+                [
+                  key: string
+                ]: components["schemas"]["ExistenceEntityDescription"];
+              };
+              exists?: boolean;
+            };
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SET_OUTDATED_FLAG";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "TRANSLATION_COMMENT_ADD";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "TRANSLATION_COMMENT_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "TRANSLATION_COMMENT_EDIT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "TRANSLATION_COMMENT_SET_STATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SCREENSHOT_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SCREENSHOT_ADD";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "KEY_TAGS_EDIT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "KEY_NAME_EDIT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "KEY_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CREATE_KEY";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: {
+            Key?: {
+              entityClass?: string;
+              /** Format: int64 */
+              entityId?: number;
+              description?: { [key: string]: { [key: string]: unknown } };
+              modifications?: {
+                name?: {
+                  old?: unknown;
+                  new?: string;
+                };
+                isPlural?: {
+                  old?: unknown;
+                  new?: boolean;
+                };
+                pluralArgName?: {
+                  old?: unknown;
+                  new?: string;
+                };
+                namespace?: {
+                  old?: unknown;
+                  new?: {
+                    entityClass: string;
+                    /** Format: int64 */
+                    entityId: number;
+                    data: {
+                      name?: string;
+                    };
+                  };
+                };
+              };
+              relations?: {
+                [
+                  key: string
+                ]: components["schemas"]["ExistenceEntityDescription"];
+              };
+              exists?: boolean;
+            };
+            KeyMeta?: {
+              entityClass?: string;
+              /** Format: int64 */
+              entityId?: number;
+              description?: { [key: string]: { [key: string]: unknown } };
+              modifications?: {
+                description?: {
+                  old?: unknown;
+                  new?: string;
+                };
+                custom?: {
+                  old?: unknown;
+                  new?: { [key: string]: { [key: string]: unknown } };
+                };
+                tags?: {
+                  old?: unknown;
+                  new?: {
+                    entityClass: string;
+                    /** Format: int64 */
+                    entityId: number;
+                    data: { [key: string]: unknown };
+                  };
+                };
+              };
+              relations?: {
+                [
+                  key: string
+                ]: components["schemas"]["ExistenceEntityDescription"];
+              };
+              exists?: boolean;
+            };
+          };
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "COMPLEX_EDIT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "IMPORT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CREATE_LANGUAGE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "EDIT_LANGUAGE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "DELETE_LANGUAGE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "HARD_DELETE_LANGUAGE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CREATE_PROJECT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "EDIT_PROJECT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "NAMESPACE_EDIT";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_PRE_TRANSLATE_BY_TM";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_MACHINE_TRANSLATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "AUTO_TRANSLATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_CLEAR_TRANSLATIONS";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_COPY_TRANSLATIONS";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_SET_TRANSLATION_STATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_TAG_KEYS";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_UNTAG_KEYS";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_SET_KEYS_NAMESPACE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "AUTOMATION";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_DELIVERY_CONFIG_CREATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_DELIVERY_CONFIG_UPDATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_DELIVERY_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_STORAGE_CREATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_STORAGE_UPDATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_STORAGE_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "WEBHOOK_CONFIG_CREATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "WEBHOOK_CONFIG_UPDATE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        }
+      | {
+          /** Format: int64 */
+          revisionId: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "COMPLEX_TAG_OPERATION";
+          author?: components["schemas"]["ProjectActivityAuthorModel"];
+          modifiedEntities?: unknown;
+          meta?: { [key: string]: { [key: string]: unknown } };
+          counts?: { [key: string]: number };
+          params?: { [key: string]: unknown };
+        };
     PagedModelProjectActivityModel: {
       _embedded?: {
         activities?: components["schemas"]["ProjectActivityModel"][];
@@ -4173,15 +4915,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4302,6 +5044,44 @@ export interface components {
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       avatar?: components["schemas"]["Avatar"];
     };
+    SimpleModifiedEntityView: {
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+      exists?: boolean;
+      modifications: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+      description?: { [key: string]: { [key: string]: unknown } };
+      describingRelations?: {
+        [key: string]: components["schemas"]["ExistenceEntityDescription"];
+      };
+    };
+    UserNotificationModel: {
+      /** Format: int64 */
+      id: number;
+      type:
+        | "ACTIVITY_LANGUAGES_CREATED"
+        | "ACTIVITY_KEYS_CREATED"
+        | "ACTIVITY_KEYS_UPDATED"
+        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
+        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
+        | "ACTIVITY_TRANSLATIONS_UPDATED"
+        | "ACTIVITY_TRANSLATION_OUTDATED"
+        | "ACTIVITY_TRANSLATION_REVIEWED"
+        | "ACTIVITY_TRANSLATION_UNREVIEWED"
+        | "ACTIVITY_NEW_COMMENTS"
+        | "ACTIVITY_COMMENTS_MENTION"
+        | "BATCH_JOB_ERRORED";
+      project?: components["schemas"]["SimpleProjectModel"];
+      batchJob?: components["schemas"]["BatchJobModel"];
+      modifiedEntities?: components["schemas"]["SimpleModifiedEntityView"][];
+      unread: boolean;
+      /** Format: date-time */
+      markedDoneAt?: string;
+      /** Format: date-time */
+      lastUpdated: string;
+    };
     ApiKeyWithLanguagesModel: {
       /**
        * @deprecated
@@ -4310,17 +5090,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
-      userFullName?: string;
-      description: string;
-      username?: string;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
+      projectName: string;
+      userFullName?: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -4345,6 +5125,698 @@ export interface components {
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
       ids: number[];
+    };
+    ProjectActivityUnknownModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "UNKNOWN";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivitySetTranslationStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_TRANSLATION_STATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        Translation?: {
+          entityClass?: string;
+          /** Format: int64 */
+          entityId?: number;
+          description?: { [key: string]: { [key: string]: unknown } };
+          modifications?: {
+            text?: {
+              old?: string;
+              new?: string;
+            };
+            state?: {
+              old?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+              new?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+            };
+            auto?: {
+              old?: boolean;
+              new?: boolean;
+            };
+            mtProvider?: {
+              old?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+              new?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+            };
+            outdated?: {
+              old?: boolean;
+              new?: boolean;
+            };
+          };
+          relations?: {
+            [key: string]: components["schemas"]["ExistenceEntityDescription"];
+          };
+          exists?: boolean;
+        };
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivitySetTranslationsModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_TRANSLATIONS";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        Translation?: {
+          entityClass?: string;
+          /** Format: int64 */
+          entityId?: number;
+          description?: { [key: string]: { [key: string]: unknown } };
+          modifications?: {
+            text?: {
+              old?: string;
+              new?: string;
+            };
+            state?: {
+              old?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+              new?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+            };
+            auto?: {
+              old?: boolean;
+              new?: boolean;
+            };
+            mtProvider?: {
+              old?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+              new?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+            };
+            outdated?: {
+              old?: boolean;
+              new?: boolean;
+            };
+          };
+          relations?: {
+            [key: string]: components["schemas"]["ExistenceEntityDescription"];
+          };
+          exists?: boolean;
+        };
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityDismissAutoTranslatedStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "DISMISS_AUTO_TRANSLATED_STATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        Translation?: {
+          entityClass?: string;
+          /** Format: int64 */
+          entityId?: number;
+          description?: { [key: string]: { [key: string]: unknown } };
+          modifications?: {
+            text?: {
+              old?: string;
+              new?: string;
+            };
+            state?: {
+              old?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+              new?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+            };
+            auto?: {
+              old?: boolean;
+              new?: boolean;
+            };
+            mtProvider?: {
+              old?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+              new?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+            };
+            outdated?: {
+              old?: boolean;
+              new?: boolean;
+            };
+          };
+          relations?: {
+            [key: string]: components["schemas"]["ExistenceEntityDescription"];
+          };
+          exists?: boolean;
+        };
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivitySetOutdatedFlagModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_OUTDATED_FLAG";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentAddModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "TRANSLATION_COMMENT_ADD";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "TRANSLATION_COMMENT_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "TRANSLATION_COMMENT_EDIT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityTranslationCommentSetStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "TRANSLATION_COMMENT_SET_STATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityScreenshotDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SCREENSHOT_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityScreenshotAddModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SCREENSHOT_ADD";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityKeyTagsEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "KEY_TAGS_EDIT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityKeyNameEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "KEY_NAME_EDIT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityKeyDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "KEY_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityCreateKeyModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CREATE_KEY";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        Key?: {
+          entityClass?: string;
+          /** Format: int64 */
+          entityId?: number;
+          description?: { [key: string]: { [key: string]: unknown } };
+          modifications?: {
+            name?: {
+              old?: unknown;
+              new?: string;
+            };
+            isPlural?: {
+              old?: unknown;
+              new?: boolean;
+            };
+            pluralArgName?: {
+              old?: unknown;
+              new?: string;
+            };
+            namespace?: {
+              old?: unknown;
+              new?: {
+                entityClass: string;
+                /** Format: int64 */
+                entityId: number;
+                data: {
+                  name?: string;
+                };
+              };
+            };
+          };
+          relations?: {
+            [key: string]: components["schemas"]["ExistenceEntityDescription"];
+          };
+          exists?: boolean;
+        };
+        KeyMeta?: {
+          entityClass?: string;
+          /** Format: int64 */
+          entityId?: number;
+          description?: { [key: string]: { [key: string]: unknown } };
+          modifications?: {
+            description?: {
+              old?: unknown;
+              new?: string;
+            };
+            custom?: {
+              old?: unknown;
+              new?: { [key: string]: { [key: string]: unknown } };
+            };
+            tags?: {
+              old?: unknown;
+              new?: {
+                entityClass: string;
+                /** Format: int64 */
+                entityId: number;
+                data: { [key: string]: unknown };
+              };
+            };
+          };
+          relations?: {
+            [key: string]: components["schemas"]["ExistenceEntityDescription"];
+          };
+          exists?: boolean;
+        };
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityComplexEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "COMPLEX_EDIT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityImportModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "IMPORT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityCreateLanguageModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CREATE_LANGUAGE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityEditLanguageModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "EDIT_LANGUAGE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityDeleteLanguageModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "DELETE_LANGUAGE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityHardDeleteLanguageModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "HARD_DELETE_LANGUAGE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityCreateProjectModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CREATE_PROJECT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityEditProjectModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "EDIT_PROJECT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityNamespaceEditModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "NAMESPACE_EDIT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchPreTranslateByTmModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_PRE_TRANSLATE_BY_TM";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchMachineTranslateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_MACHINE_TRANSLATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityAutoTranslateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "AUTO_TRANSLATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchClearTranslationsModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_CLEAR_TRANSLATIONS";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchCopyTranslationsModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_COPY_TRANSLATIONS";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchSetTranslationStateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_SET_TRANSLATION_STATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchTagKeysModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_TAG_KEYS";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchUntagKeysModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_UNTAG_KEYS";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityBatchSetKeysNamespaceModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_SET_KEYS_NAMESPACE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityAutomationModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "AUTOMATION";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentDeliveryConfigCreateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_DELIVERY_CONFIG_CREATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentDeliveryConfigUpdateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_DELIVERY_CONFIG_UPDATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentDeliveryConfigDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_DELIVERY_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentStorageCreateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_STORAGE_CREATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentStorageUpdateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_STORAGE_UPDATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityContentStorageDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_STORAGE_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityWebhookConfigCreateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "WEBHOOK_CONFIG_CREATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityWebhookConfigUpdateModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "WEBHOOK_CONFIG_UPDATE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityWebhookConfigDeleteModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
+    };
+    ProjectActivityComplexTagOperationModel: {
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "COMPLEX_TAG_OPERATION";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: unknown;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+      params?: { [key: string]: unknown };
     };
   };
 }
@@ -8985,6 +10457,237 @@ export interface operations {
       };
     };
   };
+  getPerProjectPreferences: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updatePerProjectPreferences: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationPreferencesDto"];
+      };
+    };
+  };
+  deletePerProjectPreferences: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getGlobalPreferences: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updateGlobalPreferences: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationPreferencesDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationPreferencesDto"];
+      };
+    };
+  };
   setLicenseKey: {
     responses: {
       /** OK */
@@ -12839,6 +14542,301 @@ export interface operations {
       };
     };
   };
+  unmarkNotificationsAsDone: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  subscribeToProject: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  markNotificationsAsUnread: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  markNotificationsAsRead: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  markAllNotificationsAsRead: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  markNotificationsAsDone: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
+  markAllNotificationsAsDone: {
+    responses: {
+      /** No Content */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   upload: {
     responses: {
       /** Created */
@@ -14263,6 +16261,62 @@ export interface operations {
       200: {
         content: {
           "application/hal+json": components["schemas"]["ProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** This endpoints returns the activity grouped by time windows so it's easier to read on the frontend. */
+  getActivityGroups: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
         };
       };
       /** Bad Request */
@@ -16310,6 +18364,103 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getNotifications: {
+    parameters: {
+      query: {
+        status?: ("UNREAD" | "READ" | "DONE")[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UserNotificationModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAllPreferences: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["NotificationPreferencesDto"];
+          };
         };
       };
       /** Bad Request */

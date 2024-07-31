@@ -1,6 +1,7 @@
 package io.tolgee.dtos.queryResults
 
 import io.tolgee.activity.groups.ActivityGroupType
+import io.tolgee.api.SimpleUserAccount
 
 data class ActivityGroupView(
   val id: Long,
@@ -9,5 +10,7 @@ data class ActivityGroupView(
   /**
    * Counts of items in this group by entity class name
    */
-  var counts: Map<String, Int>? = null,
+  var counts: Map<String, Long>? = null,
+  var data: Any? = null,
+  var author: SimpleUserAccount
 )

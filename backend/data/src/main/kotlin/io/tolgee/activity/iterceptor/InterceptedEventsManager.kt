@@ -31,6 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import java.util.IdentityHashMap
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
@@ -116,7 +117,11 @@ class InterceptedEventsManager(
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
-    activityModifiedEntity.revisionType = revisionType
+    activityModifiedEntity.revisionType = when {
+      // when we are replacing ADD with MOD, we want to keep ADD
+      activityModifiedEntity.revisionType == RevisionType.ADD && revisionType == RevisionType.MOD -> RevisionType.ADD
+      else -> revisionType
+    }
     activityModifiedEntity.modifications.putAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
@@ -150,9 +155,9 @@ class InterceptedEventsManager(
   ): ActivityModifiedEntity {
     val activityModifiedEntity =
       activityHolder.modifiedEntities
-        .computeIfAbsent(entity::class) { mutableMapOf() }
+        .computeIfAbsent(entity::class) { IdentityHashMap() }
         .computeIfAbsent(
-          entity.id,
+          entity
         ) {
           ActivityModifiedEntity(
             activityRevision,

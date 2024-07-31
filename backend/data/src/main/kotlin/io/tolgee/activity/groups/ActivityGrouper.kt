@@ -8,6 +8,7 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
+import java.util.IdentityHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -19,7 +20,7 @@ class ActivityGrouper(
   fun addToGroup() {
     val groupTypes = findGroupTypes()
     groupTypes.forEach {
-      val groupIdToAddTo = getActivityGroupIds(it)
+      val groupIdToAddTo = getActivityGroupId(it)
       addToGroup(groupIdToAddTo)
     }
   }
@@ -36,8 +37,8 @@ class ActivityGrouper(
       .executeUpdate()
   }
 
-  private fun getActivityGroupIds(type: ActivityGroupType): Long {
-    return activityGroupService.getOrCreateCurrentActivityGroupDtos(
+  private fun getActivityGroupId(type: ActivityGroupType): Long {
+    return activityGroupService.getOrCreateCurrentActivityGroupDto(
       type,
       activityRevision.projectId,
       activityRevision.authorId,
@@ -119,4 +120,4 @@ class ActivityGrouper(
   }
 }
 
-private typealias ModifiedEntityType = Map.Entry<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>
+private typealias ModifiedEntityType = Map.Entry<KClass<out EntityWithId>, IdentityHashMap<EntityWithId, ActivityModifiedEntity>>

@@ -7,7 +7,7 @@ import java.util.*
 interface TranslationHistoryView {
   var modifications: Map<String, PropertyModification>?
   var timestamp: Date
-  var authorName: String?
+  var authorName: String
   var authorAvatarHash: String?
   var authorEmail: String?
   var authorDeletedAt: Date?
