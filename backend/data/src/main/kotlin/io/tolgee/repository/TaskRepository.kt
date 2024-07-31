@@ -6,6 +6,7 @@ import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskId
 import io.tolgee.model.views.KeysScopeView
 import io.tolgee.model.views.TaskScopeView
+import io.tolgee.model.views.TranslationToTaskView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -104,6 +105,23 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     search: String?,
     filters: TaskFilters,
   ): Page<Task>
+
+  @Query(
+    """
+     select 
+        tt.translation.id as translationId,
+        t.id as taskId,
+        t.state as taskState,
+        CASE WHEN u.id IS NULL THEN FALSE ELSE TRUE END as taskAssigned
+     from Task t
+        right join t.translations tt on tt.translation.id in :translationIds
+        left join t.assignees u on u.id = :currentUserId 
+    """,
+  )
+  fun getByTranslationId(
+    currentUserId: Long,
+    translationIds: Collection<Long>,
+  ): List<TranslationToTaskView>
 
   @Query(
     """

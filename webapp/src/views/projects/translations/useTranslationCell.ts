@@ -147,7 +147,7 @@ export const useTranslationCell = ({
   const setAssignedTaskState = (done: boolean) => {
     setTaskState({
       keyId: keyData.keyId,
-      taskId: translation!.assignedTaskId!,
+      taskId: translation!.taskId!,
       done,
     });
   };

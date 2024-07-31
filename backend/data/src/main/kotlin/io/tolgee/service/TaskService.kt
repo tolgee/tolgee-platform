@@ -17,6 +17,7 @@ import io.tolgee.model.task.TaskTranslationId
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeysScopeView
 import io.tolgee.model.views.TaskWithScopeView
+import io.tolgee.model.views.TranslationToTaskView
 import io.tolgee.repository.TaskRepository
 import io.tolgee.repository.TaskTranslationRepository
 import io.tolgee.repository.TranslationRepository
@@ -293,6 +294,20 @@ class TaskService(
       projectEntity.baseLanguage!!.id,
       relevantKeys,
     )
+  }
+
+  fun getTranslationsWithTasks(
+    userId: Long,
+    translationIds: Collection<Long>,
+  ): Map<Long, List<TranslationToTaskView>> {
+    val data = taskRepository.getByTranslationId(userId, translationIds)
+    val result = mutableMapOf<Long, MutableList<TranslationToTaskView>>()
+    data.forEach {
+      val existing = result[it.translationId] ?: mutableListOf()
+      existing.add(it)
+      result.set(it.translationId, existing)
+    }
+    return result
   }
 
   private fun getOnlyProjectKeys(

@@ -144,7 +144,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
         onInsertBase={editEnabled ? handleInsertBase : undefined}
         onStateChange={setState}
         onModeToggle={editEnabled ? handleModeToggle : undefined}
-        assignedTaskId={translation?.assignedTaskId}
+        taskId={translation?.taskId}
         onTaskStateChange={setAssignedTaskState}
       />
       <Box onMouseDown={(e) => e.preventDefault()} className="editor">
@@ -185,7 +185,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
               className="controls-main"
               onSave={handleSave}
               onCancel={() => handleClose(true)}
-              assignedTaskId={translation?.assignedTaskId}
+              taskId={translation?.taskId}
             />
           </>
         ) : (

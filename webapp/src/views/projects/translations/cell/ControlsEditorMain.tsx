@@ -23,14 +23,14 @@ type ControlsProps = {
   onSave?: (options: SaveProps) => void;
   onCancel?: () => void;
   className?: string;
-  assignedTaskId: number | undefined;
+  taskId: number | undefined;
 };
 
 export const ControlsEditorMain: React.FC<ControlsProps> = ({
   onSave,
   onCancel,
   className,
-  assignedTaskId,
+  taskId,
 }) => {
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
   const anchorEl = useRef<HTMLElement>(null);
@@ -52,11 +52,11 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
       >
         <T keyName="translations_cell_cancel" />
       </Button>
-      {typeof assignedTaskId === 'number' ? (
+      {typeof taskId === 'number' ? (
         <>
           <ButtonGroup size="small" ref={anchorEl as any}>
             <LoadingButton
-              onClick={() => onSave?.({ resolveTaskId: assignedTaskId })}
+              onClick={() => onSave?.({ resolveTaskId: taskId })}
               color="primary"
               variant="contained"
               loading={isEditLoading}

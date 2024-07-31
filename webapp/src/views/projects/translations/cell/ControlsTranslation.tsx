@@ -60,7 +60,7 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
   commentsCount: number | undefined;
-  assignedTaskId: number | undefined;
+  taskId: number | undefined;
   onTaskStateChange: (done: boolean) => void;
   unresolvedCommentCount: number | undefined;
   // render last focusable button
@@ -77,7 +77,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   onEdit,
   onStateChange,
   onComments,
-  assignedTaskId,
+  taskId,
   onTaskStateChange,
   commentsCount,
   unresolvedCommentCount,
@@ -92,7 +92,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
-  const displayTask = typeof assignedTaskId === 'number';
+  const displayTask = typeof taskId === 'number';
 
   if (displayTransitionButtons) {
     spots.push('state');

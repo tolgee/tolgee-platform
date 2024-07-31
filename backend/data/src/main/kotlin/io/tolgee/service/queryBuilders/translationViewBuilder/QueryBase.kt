@@ -6,7 +6,6 @@ import io.tolgee.model.Language_
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
 import io.tolgee.model.Screenshot_
-import io.tolgee.model.UserAccount_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -16,9 +15,6 @@ import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.keyBigMeta.KeysDistance_
-import io.tolgee.model.task.Task
-import io.tolgee.model.task.TaskTranslation_
-import io.tolgee.model.task.Task_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
@@ -97,7 +93,6 @@ class QueryBase<T>(
 
       addNotFilteringTranslationFields(language, translation)
       addComments(translation, language)
-      addTasks(translation, language)
     }
 
     queryTranslationFiltering.apply(outdatedFieldMap)
@@ -127,39 +122,6 @@ class QueryBase<T>(
 
     val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)
     this.querySelection[language to TranslationView::unresolvedCommentCount] = unresolvedCommentsExpression
-  }
-
-  private fun addTasks(
-    translation: ListJoin<Key, Translation>,
-    language: LanguageDto,
-  ) {
-    // Create a subquery to get the minimum task ID ordered by task type
-    val taskSubquery = this.query.subquery(Long::class.java)
-    val taskRoot = taskSubquery.from(Task::class.java)
-    val taskTranslationJoin = taskRoot.join(Task_.translations)
-    val taskAssigneesJoin = taskRoot.join(Task_.assignees)
-
-    // Correlate the subquery with the main query
-    val correlatedTranslation = taskSubquery.correlate(translation)
-
-    // Set the selection and where clause for the subquery
-    taskSubquery.select(taskRoot.get(Task_.id))
-    taskSubquery.where(
-      cb.and(
-        cb.equal(
-          taskTranslationJoin.get(TaskTranslation_.translation).get(Translation_.id),
-          correlatedTranslation.get(Translation_.id),
-        ),
-        cb.equal(
-          taskAssigneesJoin.get(UserAccount_.id),
-          authenticationFacade.authenticatedUser.id,
-        ),
-      ),
-    )
-    taskSubquery.select(cb.least(taskRoot.get(Task_.id)))
-
-    // Add the task ID to the main query selection
-    this.querySelection[language to TranslationView::assignedTaskId] = taskSubquery
   }
 
   private fun addTranslationStateField(

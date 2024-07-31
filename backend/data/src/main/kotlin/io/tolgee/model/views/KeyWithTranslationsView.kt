@@ -40,8 +40,8 @@ data class KeyWithTranslationsView(
           contextPresent = data.removeFirst() as Boolean,
         )
 
-      (0 until data.size step 9).forEach { i ->
-        val language = languages[i / 9].tag
+      (0 until data.size step 8).forEach { i ->
+        val language = languages[i / 8].tag
 
         val id = data[i] as Long?
         if (id != null) {
@@ -55,7 +55,6 @@ data class KeyWithTranslationsView(
               mtProvider = data[i + 5] as MtServiceType?,
               commentCount = (data[i + 6]) as Long,
               unresolvedCommentCount = (data[i + 7]) as Long,
-              assignedTaskId = (data[i + 8]) as? Long,
             )
         }
       }

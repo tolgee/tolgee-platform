@@ -34,7 +34,7 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onModeToggle?: () => void;
   controlsProps?: React.ComponentProps<typeof Box>;
-  assignedTaskId?: number;
+  taskId?: number;
   onTaskStateChange?: (done: boolean) => void;
 };
 
@@ -47,7 +47,7 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
   onModeToggle,
   onStateChange,
   controlsProps,
-  assignedTaskId,
+  taskId,
   onTaskStateChange,
 }) => {
   const project = useProject();
@@ -62,7 +62,7 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
     !isBaseLanguage &&
     satisfiesLanguageAccess('translations.view', baseLanguage?.id);
 
-  const displayTaskButton = typeof assignedTaskId === 'number';
+  const displayTaskButton = typeof taskId === 'number';
 
   const displayEditorMode = project.icuPlaceholders;
 

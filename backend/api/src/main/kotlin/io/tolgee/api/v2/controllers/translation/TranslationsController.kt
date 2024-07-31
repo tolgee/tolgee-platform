@@ -38,6 +38,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.TaskService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.CursorUtil
@@ -100,6 +101,7 @@ class TranslationsController(
   private val activityService: ActivityService,
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
+  private val taskService: TaskService,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -253,6 +255,7 @@ When null, resulting file will be a flat key-value object.
         .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
     addScreenshotsToResponse(data)
+    addTasksToResponse(data)
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
@@ -268,6 +271,29 @@ When null, resulting file will be a flat key-value object.
     val keysWithScreenshots = screenshotService.getScreenshotsForKeys(data.map { it.keyId }.content)
 
     data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
+  }
+
+  private fun addTasksToResponse(data: Page<KeyWithTranslationsView>) {
+    val user = authenticationFacade.authenticatedUser
+    val translationIds =
+      data.content.flatMap { key ->
+        key.translations.map { translation ->
+          translation.value.id
+        }
+      }
+
+    val translationsWithTasks = taskService.getTranslationsWithTasks(user.id, translationIds)
+
+    data.content.forEach { key ->
+      key.translations.forEach { translation ->
+        val task = translationsWithTasks[translation.value.id]?.get(0)
+        if (task !== null) {
+          translation.value.taskId = task.taskId
+          translation.value.taskState = task.taskState
+          translation.value.taskAssigned = task.taskAssigned
+        }
+      }
+    }
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])

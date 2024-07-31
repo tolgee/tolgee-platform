@@ -100,7 +100,7 @@ export const TranslationRead: React.FC<Props> = ({
         onEdit={() => handleOpen()}
         onComments={() => handleOpen('comments')}
         commentsCount={translation?.commentCount}
-        assignedTaskId={translation?.assignedTaskId}
+        taskId={translation?.taskId}
         onTaskStateChange={setAssignedTaskState}
         unresolvedCommentCount={translation?.unresolvedCommentCount}
         stateChangeEnabled={canChangeState}
